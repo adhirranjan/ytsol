@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-4 Functions-I — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+  <nav class="toc">
+    <h3>Chapter M-4</h3>
+    <a class="top" href="#top">↑ Overview &amp; Standard Functions</a>
+    <a href="#l1">L-1 · Sets, Relations &amp; Functions</a>
+    <a href="#l2">L-2 · Range &amp; Standard Functions</a>
+    <a href="#l3">L-3 · Algebra of Functions &amp; Range</a>
+    <a href="#l4">L-4 · Graphs of Trig Functions</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD · JEE Mathematics · Revision Notes</p>
+      <h1>M-4 · Functions-I</h1>
+      <p>Lectures L-1 to L-4 · sets, relations, functions, domain &amp; range, standard functions and their graphs</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- STANDARD FUNCTIONS REFERENCE -->
+    <section class="lec" id="ref">
+      <div class="lec-head"><span class="lec-tag">★ MEMORIZE</span><h2>Standard Functions — Domain &amp; Range</h2></div>
+      <div class="twrap"><table>
+        <tr><th>Function</th><th>Domain</th><th>Range</th></tr>
+        <tr><td>Identity <code>f(x)=x</code></td><td>R</td><td>R</td></tr>
+        <tr><td>Constant <code>f(x)=k</code></td><td>R</td><td>{k}</td></tr>
+        <tr><td>Modulus <code>|x|</code></td><td>R</td><td>[0, ∞)</td></tr>
+        <tr><td>Signum <code>sgn(x)</code></td><td>R</td><td>{−1, 0, 1}</td></tr>
+        <tr><td>Greatest integer <code>[x]</code></td><td>R</td><td>Z (integers)</td></tr>
+        <tr><td>Fractional part <code>{x}=x−[x]</code></td><td>R</td><td>[0, 1)</td></tr>
+        <tr><td>Least integer <code>⌈x⌉</code></td><td>R</td><td>Z (integers)</td></tr>
+        <tr><td>Quadratic <code>x²</code></td><td>R</td><td>[0, ∞)</td></tr>
+        <tr><td>Cubic <code>x³</code></td><td>R</td><td>R</td></tr>
+        <tr><td>Square root <code>√x</code></td><td>[0, ∞)</td><td>[0, ∞)</td></tr>
+        <tr><td>Cube root <code>x^(1/3)</code></td><td>R</td><td>R</td></tr>
+        <tr><td>Reciprocal <code>1/x</code></td><td>R − {0}</td><td>R − {0}</td></tr>
+        <tr><td>sin x, cos x</td><td>R</td><td>[−1, 1]</td></tr>
+        <tr><td>tan x</td><td>R − {(2n+1)π/2}</td><td>R</td></tr>
+        <tr><td>cot x</td><td>R − {nπ}</td><td>R</td></tr>
+        <tr><td>sec x</td><td>R − {(2n+1)π/2}</td><td>(−∞, −1] ∪ [1, ∞)</td></tr>
+        <tr><td>cosec x</td><td>R − {nπ}</td><td>(−∞, −1] ∪ [1, ∞)</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">★ Golden rule</span>Range is always a <b>subset of the co-domain</b> (Range ⊆ B). A function needs <b>every</b> element of the domain mapped to <b>exactly one</b> image.</div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Sets, Relations &amp; Functions</h2></div>
+      <ul>
+        <li>A <b>set</b> is a well-defined collection of <b>distinct</b> objects; order is irrelevant and no element repeats. So <code>{1,2,3} = {3,2,1}</code>.</li>
+        <li>An <b>ordered pair</b> (a, b) has a fixed order: <span class="k">(a, b) ≠ (b, a)</span> unless a = b.</li>
+      </ul>
+      <div class="formula"><span class="lbl">cartesian product</span>A × B = {(a, b) : a ∈ A, b ∈ B}   ·   n(A × B) = n(A) · n(B)</div>
+      <div class="formula"><span class="lbl">triple product</span>A × B × C = {(a, b, c) : a ∈ A, b ∈ B, c ∈ C}   ·   n(A×B×C) = n(A)·n(B)·n(C)</div>
+      <h3 class="sub">Relation &amp; its inverse</h3>
+      <ul>
+        <li>A <b>relation</b> R from A to B is any subset of A × B (⇔ R ⊆ A × B).</li>
+        <li><b>Domain(R)</b> = set of first components; <b>Range(R)</b> = set of second components.</li>
+        <li>Inverse <code>R⁻¹ = {(b, a) : (a, b) ∈ R}</code>. So Dom(R) = Range(R⁻¹) and Range(R) = Dom(R⁻¹).</li>
+      </ul>
+      <div class="formula"><span class="lbl">number of relations</span>If n(A) = p and n(B) = q, number of possible relations A → B = 2^(pq)</div>
+      <h3 class="sub">Function (a special relation)</h3>
+      <ul>
+        <li>A relation f: A → B is a <b>function</b> if (i) <b>every</b> a ∈ A has an image, and (ii) that image is <b>unique</b> — no first element repeats with two different images.</li>
+        <li><b>Domain</b> = A, <b>Co-domain</b> = B, <b>Range</b> = f(A) = {f(x) : x ∈ A} ⊆ B.</li>
+      </ul>
+      <div class="call trap"><span class="h">⚠ Trap</span>A relation is <b>not always</b> a function. If one input maps to two outputs (e.g. <code>{(1,4),(1,5)}</code>), or if some domain element has <b>no</b> image, it fails.</div>
+      <div class="call tip"><span class="h">💡 Vertical line test</span>A curve is the graph of a function iff <b>no vertical line meets it more than once</b>. A sideways parabola or a circle fails (two y-values per x).</div>
+      <div class="det-block det">
+        <div class="dh">Equality of two functions</div>
+        f = g requires <b>all three</b>: (i) same domain, (ii) same co-domain, (iii) f(x) = g(x) for every common x. Two rules that simplify to the same formula are <b>not</b> equal if their domains differ — the classic trap tested below.
+      </div>
+      <h3 class="sub">Finding the domain of algebraic functions</h3>
+      <div class="twrap"><table>
+        <tr><th>Form</th><th>Condition</th></tr>
+        <tr><td>Polynomial <code>x³ + 5x + 6</code></td><td>Domain = R (all reals)</td></tr>
+        <tr><td>Fraction <code>p(x)/q(x)</code></td><td>denominator q(x) ≠ 0</td></tr>
+        <tr><td>Even root <code>√f(x)</code></td><td>f(x) ≥ 0 (radicand non-negative)</td></tr>
+        <tr><td><code>1/√f(x)</code></td><td>f(x) &gt; 0 (strictly positive)</td></tr>
+        <tr><td>Logarithm <code>ln f(x)</code></td><td>f(x) &gt; 0</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">★ Image / pre-image</span>If a = f(2), then <b>a is the image</b> of 2 and <b>2 is a pre-image</b> of a. A value can have several pre-images or none.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Let f: R − {3} → R be f(x) = (x² − 9)/(x − 3) and g: R → R be g(x) = x + 3. Is f = g?</div>
+        <div class="s">f(x) = (x − 3)(x + 3)/(x − 3) = x + 3 for all x ≠ 3, so f(x) = g(x) on the common domain.</div>
+        <div class="s">But Dom(f) = R − {3} while Dom(g) = R — the domains differ.</div>
+        <div class="ans">f ≠ g (same rule, different domains)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Let A = {−2, −1, 0, 1, 2} and f: A → Z, f(x) = x² + 5x + 6. Find (i) the range of f, (ii) the pre-image of 2.</div>
+        <div class="s">f(−2)=0, f(−1)=2, f(0)=6, f(1)=12, f(2)=20 ⇒ range = {0, 2, 6, 12, 20}.</div>
+        <div class="s">(ii) x² + 5x + 6 = 2 ⇒ x² + 5x + 4 = 0 ⇒ x = −1 or −4; but −4 ∉ A.</div>
+        <div class="ans">(i) {0, 2, 6, 12, 20}   (ii) pre-image of 2 is x = −1</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Let f: R → R be f(x) = x² + 1. Find (i) f⁻¹(−5), (ii) f⁻¹(26), (iii) f⁻¹({5, 10}).</div>
+        <div class="s">(i) x² + 1 = −5 ⇒ x² = −6, no real solution ⇒ f⁻¹(−5) = φ.</div>
+        <div class="s">(ii) x² + 1 = 26 ⇒ x² = 25 ⇒ x = ±5.</div>
+        <div class="s">(iii) x² + 1 = 10 ⇒ x = ±3; x² + 1 = 5 ⇒ x = ±2.</div>
+        <div class="ans">(i) φ   (ii) {−5, 5}   (iii) {−2, 2, −3, 3}</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Find the domain of f(x) = √(4 − x) + 1/√(x² − 1).</div>
+        <div class="s">Need 4 − x ≥ 0 <b>and</b> x² − 1 &gt; 0 (denominator strictly positive).</div>
+        <div class="s">⇒ x ≤ 4 and (x &lt; −1 or x &gt; 1).</div>
+        <div class="ans">Domain = (−∞, −1) ∪ (1, 4]</div>
+      </div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Range of Functions &amp; Standard Functions</h2></div>
+      <h3 class="sub">Finding the range — 4-step method</h3>
+      <div class="formula"><span class="lbl">range process</span>1) put y = f(x)  2) solve x = φ(y)  3) find all y giving real x in Dom(f)  4) that y-set is the range</div>
+      <div class="det-block det">
+        <div class="dh">Why the method works</div>
+        The range is exactly the set of outputs y that are <b>actually hit</b>. Inverting to x = φ(y) and then demanding x be <b>real and inside the domain</b> filters out impossible y-values (e.g. a y that would force a square root of a negative, or division by zero). What survives is the range.
+      </div>
+      <h3 class="sub">Standard functions &amp; their graphs</h3>
+      <ul>
+        <li><b>Identity</b> I(x) = x: straight line through origin at 45°; Domain = Range = R.</li>
+        <li><b>Constant</b> f(x) = k: horizontal line; Range = {k}.</li>
+        <li><b>Signum</b>: +1 (x&gt;0), 0 (x=0), −1 (x&lt;0); Range = {−1, 0, 1}.</li>
+        <li><b>Greatest integer (step / floor) [x]</b>: greatest integer ≤ x. E.g. [3.4]=3, [−4.99]=−5, [−0.2]=−1. Range = Z.</li>
+        <li><b>Modulus |x|</b>: V-shape; Range = [0, ∞).</li>
+        <li class="det"><b>Fractional part {x} = x − [x]</b>: sawtooth, Range = [0, 1). E.g. {3.25}=0.25, {−2.75}=0.25.</li>
+        <li class="det"><b>Least integer ⌈x⌉</b>: smallest integer ≥ x; ⌈3.7⌉=4, ⌈−7.2⌉=−7. Range = Z.</li>
+      </ul>
+      <div class="formula"><span class="lbl">modulus key results</span>|x| ≤ a ⇒ x ∈ [−a, a]   ·   |x| ≥ a ⇒ x ∈ (−∞,−a] ∪ [a,∞)   ·   √(x²) = |x|   ·   |x − a| &lt; b ⇒ x ∈ (a−b, a+b)</div>
+      <div class="call trap"><span class="h">⚠ Trap</span>For x &lt; 0 the greatest integer <b>rounds down</b>: [−4.001] = −5, not −4. And {−2.75} = −2.75 − (−3) = <b>0.25</b>, always in [0,1).</div>
+      <div class="call star"><span class="h">★ Bounded-trig trick</span>Since −1 ≤ cos 3x ≤ 1 ⇒ 1 ≤ 2 − cos 3x ≤ 3, any <code>1/(2 − cos 3x)</code> is squeezed into <b>[1/3, 1]</b>. Squeeze the denominator to get the range fast.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Find the range of f(x) = (x − 3)/(2 − x).</div>
+        <div class="s">Put y = (x − 3)/(2 − x) ⇒ 2y − xy = x − 3 ⇒ x(1 + y) = 2y + 3 ⇒ x = (2y + 3)/(y + 1).</div>
+        <div class="s">x is real for every y except y + 1 = 0, i.e. y = −1.</div>
+        <div class="ans">Range = R − {−1}</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Find the domain and range of f(x) = (x² − 16)/(x − 4).</div>
+        <div class="s">Not defined at x = 4 ⇒ Domain = R − {4}.</div>
+        <div class="s">y = (x−4)(x+4)/(x−4) = x + 4 for x ≠ 4 ⇒ x = y − 4; y = 8 would need x = 4 (excluded).</div>
+        <div class="ans">Domain = R − {4}, Range = R − {8}</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Find the range of f(x) = √(9 − x²).</div>
+        <div class="s">Domain: 9 − x² ≥ 0 ⇒ −3 ≤ x ≤ 3. Then y = √(9 − x²) ⇒ x² = 9 − y².</div>
+        <div class="s">Real x needs 9 − y² ≥ 0 ⇒ −3 ≤ y ≤ 3; and y = √(…) ≥ 0.</div>
+        <div class="ans">Range = [0, 3]</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Find the domain and range of f(x) = 1/(2 − cos 3x).</div>
+        <div class="s">−1 ≤ cos 3x ≤ 1 ⇒ 1 ≤ 2 − cos 3x ≤ 3, never 0 ⇒ Domain = R.</div>
+        <div class="s">Reciprocating: 1/3 ≤ 1/(2 − cos 3x) ≤ 1.</div>
+        <div class="ans">Domain = R, Range = [1/3, 1]</div>
+      </div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Algebra of Functions &amp; Range Practice</h2></div>
+      <h3 class="sub">Combining functions</h3>
+      <div class="formula"><span class="lbl">algebra of functions</span>(f ± g)(x) = f(x) ± g(x)   ·   (fg)(x) = f(x)·g(x)   ·   (f/g)(x) = f(x)/g(x),  g(x) ≠ 0</div>
+      <ul>
+        <li>Domain of f ± g and fg = <b>Dom(f) ∩ Dom(g)</b>.</li>
+        <li>Domain of f/g = Dom(f) ∩ Dom(g) <b>minus</b> the points where g(x) = 0.</li>
+        <li>Scalar multiple: (cf)(x) = c·f(x); e.g. for f(x) = x/c, (cf)(x) = x and (c²f)(x) = cx.</li>
+      </ul>
+      <div class="det-block det">
+        <div class="dh">More standard functions (graphs)</div>
+        <b>Quadratic</b> f(x) = ax² + bx + c: parabola; with vertex form a(x − h)² + k the range is [k, ∞) if a &gt; 0, else (−∞, k]. <b>Cubic</b> x³, <b>cube root</b> x^(1/3): Domain = Range = R (odd symmetry). <b>Square root</b> √x: Domain = Range = [0, ∞). <b>Reciprocal</b> 1/x: rectangular hyperbola, Domain = Range = R − {0}.
+      </div>
+      <div class="call tip"><span class="h">💡 Perfect-square trick</span>To find the range of a quadratic, complete the square. For x² + 4x + 5 = (x + 2)² + 1, the minimum is 1, so the range is [1, ∞).</div>
+      <div class="call trap"><span class="h">⚠ Trap</span>Cancelling a factor changes the domain. <code>x(x−1)(x−2)/[(x−1)(x−2)] = x</code> but only for x ≠ 1, 2 — so those images are <b>removed</b> from the range.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">Let f(x) = 1/(x + 4) and g(x) = (x + 4)³. Find (f + g)(x) and (fg)(x), with domains.</div>
+        <div class="s">Dom(f) = R − {−4}, Dom(g) = R ⇒ common domain = R − {−4}.</div>
+        <div class="s">(f + g)(x) = 1/(x+4) + (x+4)³ = [(x+4)⁴ + 1]/(x+4).</div>
+        <div class="s">(fg)(x) = (1/(x+4))·(x+4)³ = (x + 4)².</div>
+        <div class="ans">(f+g)(x) = [(x+4)⁴+1]/(x+4);  (fg)(x) = (x+4)²;  both on R − {−4}</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">If f(x) = (x − 1)/(x + 1), x ≠ −1, show that f(f(x)) = −1/x, provided x ≠ 0.</div>
+        <div class="s">f(f(x)) = [ (x−1)/(x+1) − 1 ] / [ (x−1)/(x+1) + 1 ].</div>
+        <div class="s">Numerator = (x − 1 − x − 1)/(x+1) = −2/(x+1); denominator = (x − 1 + x + 1)/(x+1) = 2x/(x+1).</div>
+        <div class="s">Ratio = −2 / 2x = −1/x, meaningful for x ≠ 0.</div>
+        <div class="ans">f(f(x)) = −1/x   (x ≠ 0)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">Find the domain and range of f(x) = 1/√(x − [x]).</div>
+        <div class="s">x − [x] = {x} satisfies 0 ≤ {x} &lt; 1, and equals 0 exactly when x ∈ Z ⇒ Domain = R − Z.</div>
+        <div class="s">On R − Z: 0 &lt; {x} &lt; 1 ⇒ 0 &lt; √{x} &lt; 1 ⇒ 1/√{x} &gt; 1.</div>
+        <div class="ans">Domain = R − Z, Range = (1, ∞)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Suggested Problem · L-3 (answer key)</span>
+        <div class="q">Find the range of f(x) = x(x − 1)(x − 2)/[(x − 1)(x − 2)].</div>
+        <div class="s">Cancel (x−1)(x−2): f(x) = x, but x ≠ 1 and x ≠ 2 (else denominator = 0).</div>
+        <div class="s">So the outputs are all reals except the images at x = 1 and x = 2, namely 1 and 2.</div>
+        <div class="ans">Range = R − {1, 2}</div>
+      </div>
+    </section>
+
+    <!-- L4 -->
+    <section class="lec" id="l4">
+      <div class="lec-head"><span class="lec-tag">L-4</span><h2>Graphs of Trigonometric Functions</h2></div>
+      <div class="twrap"><table>
+        <tr><th>Function</th><th>Domain</th><th>Range</th></tr>
+        <tr><td>y = sin x</td><td>(−∞, ∞)</td><td>[−1, 1]</td></tr>
+        <tr><td>y = cos x</td><td>(−∞, ∞)</td><td>[−1, 1]</td></tr>
+        <tr><td>y = tan x</td><td>R − (2n+1)π/2</td><td>(−∞, ∞)</td></tr>
+        <tr><td>y = cot x</td><td>R − nπ</td><td>(−∞, ∞)</td></tr>
+        <tr><td>y = sec x</td><td>R − (2n+1)π/2</td><td>(−∞, −1] ∪ [1, ∞)</td></tr>
+        <tr><td>y = cosec x</td><td>R − nπ</td><td>(−∞, −1] ∪ [1, ∞)</td></tr>
+      </table></div>
+      <h3 class="sub">Transformations of y = sin x / cos x</h3>
+      <ul>
+        <li><b>y = sin x + k</b>: shifts the graph <b>up</b> along the y-axis to the line y = k.</li>
+        <li><b>y = k sin x</b>: amplitude scales to k; range becomes <b>[−k, k]</b>.</li>
+        <li><b>y = sin(kx)</b> or sin(nx): period changes to <b>2π/k</b> (horizontal compression); sin x has period 2π.</li>
+        <li><b>y = sin(x + k)</b>: shifts the graph along the <b>x-axis</b> (to x = −k).</li>
+      </ul>
+      <div class="formula"><span class="lbl">amplitude &amp; period</span>y = k sin(nx):  amplitude = |k|,  period = 2π/n,  range = [−|k|, |k|]</div>
+      <div class="call star"><span class="h">★ Undefined points</span>tan x &amp; sec x blow up at x = (2n+1)π/2 (odd multiples of π/2). cot x &amp; cosec x blow up at x = nπ (multiples of π).</div>
+      <div class="det-block det">
+        <div class="dh">Sketching y = k sin(nx) quickly</div>
+        Draw y = sin x over [0, 2π], then (i) multiply every y-value by k to set the amplitude, and (ii) divide the x-coordinates of the zero-crossings by n to set the period. For y = 3 sin 2x the peaks are ±3 and the period is 2π/2 = π, so one full wave fits in [0, π].
+      </div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">Sketch y = 3 sin 2x — state its amplitude, maximum, minimum and period.</div>
+        <div class="s">Start from y = sin x, divide the x-coordinates of the x-axis crossings by 2, and scale the height by 3.</div>
+        <div class="s">Amplitude = 3, so max = 3 and min = −3; period = 2π/2 = π.</div>
+        <div class="ans">Amplitude 3, max 3, min −3, period π</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">Sketch y = 3 cos 2x — give its amplitude and period.</div>
+        <div class="s">Replace c by 3 and the angular factor by 2 in y = c cos(ax): the cosine wave starts at its peak (0, 3).</div>
+        <div class="s">Amplitude = 3 (range [−3, 3]); period = 2π/2 = π.</div>
+        <div class="ans">Amplitude 3, range [−3, 3], period π</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Suggested Problem · L-4 (answer key)</span>
+        <div class="q">Evaluate tan(π/4) + cot(π/4).</div>
+        <div class="s">tan(π/4) = 1 and cot(π/4) = 1.</div>
+        <div class="ans">1 + 1 = 2</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Suggested Problem · L-4 (answer key)</span>
+        <div class="q">At which value is the secant function undefined?</div>
+        <div class="s">sec x = 1/cos x is undefined where cos x = 0, i.e. at odd multiples of π/2.</div>
+        <div class="ans">x = π/2</div>
+      </div>
+    </section>
+
+    <div class="foot">ICAD · M-4 Functions-I · Revision Notes (L-1 to L-4) · Quick + Detailed views · worked examples taken from the module's Solved Examples and answer-keyed Suggested Problems.</div>
+  </div>
+</div>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

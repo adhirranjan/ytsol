@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P4 · L1 — Motion in 1D and 2D · YouTube Solutions</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1c2230; --muted:#5b6472;
+    --line:#e4e7ec; --head:#1f2a44; --headtxt:#ffffff;
+    --exact-bg:#e7f6ec; --exact-ink:#1f7a3d;
+    --sim-bg:#fff4e0; --sim-ink:#9a6300;
+    --link:#1a56db; --zebra:#fafbfc;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1420; --card:#161c2b; --ink:#e6e9f0; --muted:#9aa3b2;
+      --line:#283048; --head:#0d1526; --headtxt:#eef2ff;
+      --exact-bg:#123322; --exact-ink:#63d68f; --sim-bg:#3a2c11; --sim-ink:#f0b95a;
+      --link:#6ea8fe; --zebra:#1a2130;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:32px 18px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:1.7rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 14px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px;font-size:.85rem}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:600;font-size:.78rem;white-space:nowrap}
+  .exact{background:var(--exact-bg);color:var(--exact-ink)}
+  .sim{background:var(--sim-bg);color:var(--sim-ink)}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;color:var(--muted);font-size:.88rem;margin:12px 0 26px}
+  h2{font-size:1.15rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .tablecard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+  thead th{background:var(--head);color:var(--headtxt);text-align:left;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
+  tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  td.num{font-weight:700;color:var(--muted);width:34px;text-align:center}
+  td.topic{color:var(--muted);font-size:.84rem;white-space:nowrap}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .q{font-weight:500}
+  code{background:rgba(125,125,125,.15);padding:1px 5px;border-radius:5px;font-size:.85em}
+  footer{color:var(--muted);font-size:.8rem;margin-top:30px;text-align:center}
+  /* --- Collapsible worked solutions (full-width rows) --- */
+  tbody tr.solnrow{background:var(--card)!important}
+  tbody tr.solnrow>td{border-top:none;padding:0 12px 4px}
+  details.soln{margin:0}
+  details.soln>summary{cursor:pointer;color:var(--link);font-size:.78rem;font-weight:700;list-style:none;display:inline-block;user-select:none;padding:6px 0}
+  details.soln>summary::-webkit-details-marker{display:none}
+  details.soln>summary::before{content:"▸  Show full solution"}
+  details.soln[open]>summary::before{content:"▾  Hide full solution"}
+  details.soln>summary:hover{text-decoration:underline}
+  .solnbody{margin:2px 0 12px;padding:14px 16px;background:var(--zebra);border:1px solid var(--line);border-left:3px solid var(--exact-ink);border-radius:9px;font-size:.85rem;font-weight:400;color:var(--ink);line-height:1.65;max-width:860px}
+  .solnbody .seg{margin:8px 0}
+  .solnbody .lbl{display:inline-block;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;margin-right:7px;vertical-align:1px}
+  .solnbody .step{margin:5px 0 5px 4px}
+  .solnbody .step .why{display:block;color:var(--muted);font-size:.93em;margin:1px 0 0 14px}
+  .solnbody code{font-size:.9em}
+  .solnbody pre{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:8px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.5;overflow-x:auto;white-space:pre;color:var(--ink)}
+  .solnbody .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(125,125,125,.10);padding:1px 5px;border-radius:4px}
+  .solnbody .trick{margin-top:10px;padding:10px 12px;background:var(--sim-bg);color:var(--sim-ink);border-radius:8px;font-size:.84rem}
+  .solnbody .trick .lbl{color:var(--sim-ink)}
+  .solnbody .final{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--exact-ink)}
+  /* --- Answer key (toggle) --- */
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 2px}
+  .ansbtn{appearance:none;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:linear-gradient(135deg,#1f2a44,#33456f);color:#eef2ff;font:600 13.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:10px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(20,30,60,.18)}
+  .ansbtn:hover{filter:brightness(1.12)}
+  .ansbtn:active{transform:translateY(1px)}
+  .controls .hint{font-size:12.5px;color:var(--muted)}
+  th.ans-h{min-width:170px;text-align:left!important}
+  td.ans{text-align:left;min-width:170px}
+  .ansval{display:inline-block;font-weight:600;font-size:12.5px;color:var(--exact-ink);background:var(--exact-bg);border-radius:7px;padding:3px 10px;filter:blur(6px);cursor:pointer;user-select:none;transition:filter .12s;line-height:1.4}
+  .ansval:hover{filter:blur(3px)}
+  .ansval.revealed{filter:none;cursor:default;user-select:text}
+  body.show-ans .ansval{filter:none;cursor:default;user-select:text}
+  .ansval .lt{font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-right:6px;color:inherit}
+  .ansval.flagged{background:var(--sim-bg);color:var(--sim-ink)}
+  .warn{cursor:help}
+  .na{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>P4 · L1 — Motion in 1D and 2D</h1>
+  <p class="sub">Practice Problems mapped to YouTube solution videos</p>
+  <div class="legend">
+    <span class="badge exact">🟢 Exact</span><span style="color:var(--muted);font-size:.82rem">video solves the same question (same numbers)</span>
+    <span class="badge sim">🟡 Similar</span><span style="color:var(--muted);font-size:.82rem">same method / concept, different numbers</span>
+  </div>
+  <div class="note"><b>Scope:</b> Practice problems only (Suggested Problems, Level: Board, and Levels 1–6). Solved examples and Quick Recap are excluded.</div>
+</header>
+
+<div class="controls">
+  <button id="ansBtn" class="ansbtn" type="button">🔑 Show Answers</button>
+  <span class="hint">Answers (letter <b>+</b> the option text/value, from the ICAD P-V1 Answer Key) are hidden by default &mdash; click to reveal all, or click any single blurred answer to reveal just that one. ⚠ marks an answer that disagrees with the printed question &mdash; hover it for the detail.</span>
+</div>
+
+<h2>Suggested Problems</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">The magnitude of average velocity equals the average speed when a particle moves: (a) on a curved path (b) in the same direction (c) with constant acceleration (d) with constant retardation (Ans: in the same direction)</td><td class="topic">Average velocity = average speed condition</td><td><a href="https://www.youtube.com/watch?v=jumxub0LqpI" target="_blank">The magnitude of average velocity is equal to the average speed when a particle moves</a> · <a href="https://www.youtube.com/watch?v=ix1qOr4xCyI" target="_blank">The magnitude of average velocity is equal to the average speed when a particle moves:-</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>in the same direction</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> <b>Average velocity</b> is a vector: net displacement ÷ total time. <b>Average speed</b> is a scalar: total path length ÷ total time. Both share the same denominator (total time), so their magnitudes can only be equal when the numerators match — i.e. when the length of the path actually travelled equals the straight-line displacement. Geometrically that demands a path with no bends and no reversals.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">|v_avg| = |Δs| ÷ t</span> and <span class="eq">speed_avg = (path length) ÷ t</span>; equal ⇒ <b>path length = |Δs|</b>. <span class="why">Path length ≥ |displacement| for every motion, with equality only for a straight, one-way trip.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write both definitions over the same interval t; the ratio speed/|velocity| = (path length)/|Δs| ≥ 1 always.</div>
+<div class="step">2. Equality needs path length = |Δs|, which is possible only if the particle never turns back — motion stays in <b>one fixed direction</b> along a line.<span class="why">Any curve or reversal makes the odometer reading exceed the crow-flight distance.</span></div>
+<div class="step">3. Option (a) curved path: length &gt; |Δs| ⇒ speed &gt; |v_avg| — fails.</div>
+<div class="step">4. Options (c) constant acceleration and (d) constant retardation allow the body to slow, stop and reverse (e.g. a ball thrown up), so in general length &gt; |Δs| — not guaranteed equal.</div>
+<div class="step">5. Option (b) "in the same direction": no reversal, straight track ⇒ length = |Δs| ⇒ <b>|v_avg| = speed_avg</b> ✓.</div>
+<pre>
+ case              path vs |Δs|     equal?
+ curved path       length &gt; |Δs|    no
+ const. accel      may reverse      not always
+ const. retard.    may reverse      not always
+ same direction    length = |Δs|    YES        &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Remember the one-line law: <b>distance ≥ |displacement|</b>, with equality iff the motion is straight and never turns back. Trap: students pick "constant acceleration" thinking uniform motion, but constant acceleration can point opposite to velocity and cause a turnaround (projectile going up then down), breaking the equality.</div>
+<div class="final">Answer: (b) in the same direction.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A car covers 250 km in 5 hours. What is its average speed? (a) 25 (b) 30 (c) 50 (d) 60 km/hr (Ans: 50 km/hr)</td><td class="topic">Average speed (single stage)</td><td><a href="https://www.youtube.com/watch?v=_cwhvYk67EI" target="_blank">What is average speed with example 200 km in 2.5 hours</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>50 km/hr</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> <b>Average speed</b> is a single "effective" speed that would cover the same <i>total path length</i> in the same <i>total time</i>. It is defined over the whole journey, not at any instant — the car may have sped up, slowed or stopped, and none of that matters. This is a single-stage trip (one distance, one time), so the definition is applied directly with no weighting.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_avg = total distance ÷ total time</span> — distance s in <b>km</b>, time t in <b>h</b>, so v_avg comes out in <b>km h⁻¹</b>. <span class="why">Dividing km by h leaves km h⁻¹, which is exactly the unit the options are quoted in — no conversion needed.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. List the given data with units: total distance s = <b>250 km</b>, total time t = <b>5 h</b>.<span class="why">Both are already in the units the answer wants, so we can substitute straight away.</span></div>
+<div class="step">2. Substitute into the definition: v_avg = 250 km ÷ 5 h.</div>
+<div class="step">3. Divide the numbers and the units separately: 250 ÷ 5 = 50, and km ÷ h = km h⁻¹.</div>
+<div class="step">4. Therefore v_avg = <b>50 km h⁻¹</b>, which is option (c).<span class="why">Dimensional check: [L]/[T] = velocity ✓ — the result is a speed, as required.</span></div>
+<pre>
+ quantity          symbol   value    unit
+ total distance    s        250      km
+ total time        t        5        h
+ average speed     v_avg    250/5    km h⁻¹  = 50
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Average speed is <b>always</b> total-distance ÷ total-time — never the plain average of the stage speeds. That shortcut only fails when stages differ, but training yourself to write the definition every time costs one second and saves you on the multi-stage questions later in this set. Trap: if the time had been given in minutes you must convert to hours <i>before</i> dividing, or the unit of the answer is wrong.</div>
+<div class="final">Answer: (c) 50 km/hr.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A train travels 60 kmh⁻¹ for 0.52 h, 30 kmh⁻¹ for the next 0.24 h, then 70 kmh⁻¹ for the next 0.71 h. Find the average speed (km/h) for the trip (≈59.9 km/h)</td><td class="topic">Average speed, multi-stage (time-weighted)</td><td><a href="https://www.youtube.com/watch?v=klAHXgQvElY" target="_blank">A train travels at a speed of 60 km/h for 0.52 h at 30 km/h for the next 0.24 h and then at 70 km/h</a> · <a href="https://www.youtube.com/watch?v=TVAU-JGBwl0" target="_blank">A train travels at 60km/h for 0.52h, 30km/h for next 0.24h and 70km/h for next 0.71h</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">59.93</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The trip is given as three <b>time</b>-stamped stages, so this is a time-weighted average speed. You cannot average 60, 30, 70 directly — that ignores how long each speed lasted. Convert each stage to a distance, sum the distances, sum the times, and divide. Because every speed is in km h⁻¹ and every time in h, the arithmetic is clean with no unit conversion.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_avg = Σ(vₖ·tₖ) ÷ Σtₖ</span> — stage distance sₖ = vₖtₖ. <span class="why">This is the definition total-distance ÷ total-time written for stages defined by time.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Stage 1: s₁ = 60 × 0.52 = <b>31.2 km</b>.</div>
+<div class="step">2. Stage 2: s₂ = 30 × 0.24 = <b>7.2 km</b>.</div>
+<div class="step">3. Stage 3: s₃ = 70 × 0.71 = <b>49.7 km</b>.</div>
+<div class="step">4. Total distance = 31.2 + 7.2 + 49.7 = <b>88.1 km</b>; total time = 0.52 + 0.24 + 0.71 = <b>1.47 h</b>.</div>
+<div class="step">5. v_avg = 88.1 ÷ 1.47 = <b>59.93 km h⁻¹</b>.<span class="why">Slightly below 60 because the slow 30 km h⁻¹ stage drags the mean down even though the fast stages are longer.</span></div>
+<pre>
+ stage   v(km/h)   t(h)     s = v·t (km)
+ 1       60        0.52     31.2
+ 2       30        0.24      7.2
+ 3       70        0.71     49.7
+ ----------------------------------------
+ totals            1.47     88.1
+ v_avg = 88.1 / 1.47 = 59.93 km/h   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When stages are given by <b>time</b>, weight by time: v_avg = Σvt/Σt. Trap: the plain mean (60+30+70)/3 = 53.3 is wrong — it silently assumes equal times. The answer must sit between the slowest (30) and fastest (70) speeds and lean toward whichever lasts longest; here the 70 stage is longest, pulling the mean near 60.</div>
+<div class="final">Answer: 59.93 km/h (≈ 59.9).</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A car moves from X to Y at uniform speed v_u and returns to Y at uniform speed v_d. Average speed of the round trip = ? (a) √(v_u v_d) (b) v_d v_u/(v_d+v_u) (c) (v_u+v_d)/2 (d) 2v_d v_u/(v_d+v_u) (Ans: option d, harmonic mean)</td><td class="topic">Average speed, round trip (harmonic mean)</td><td><a href="https://www.youtube.com/watch?v=lLZ0tN-UKtk" target="_blank">A car moves from X to Y with a uniform speed vu and returns to Y with a uniform speed vd</a> · <a href="https://www.youtube.com/watch?v=ecR8KaDFhic" target="_blank">A car moves from X to Y with a uniform speed v u and returns to Y with a uniform speed v d</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>2v<sub>d</sub>v<sub>u</sub>/(v<sub>d</sub> + v<sub>u</sub>)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The two legs (out and back) cover the <b>same distance</b> d but at different speeds. When equal distances are travelled at different speeds, the correct average is the <b>harmonic mean</b>, not the arithmetic mean. The slower leg eats up more time, so it must count more heavily — exactly what the harmonic mean does.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_avg = total distance ÷ total time = 2d ÷ (t_u + t_d)</span>, with tₖ = d/vₖ. <span class="why">Distances are equal, so d cancels and only the speeds survive.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let each leg length = d. Time out t_u = d/v_u; time back t_d = d/v_d.</div>
+<div class="step">2. Total distance = d + d = <b>2d</b>; total time = d/v_u + d/v_d = d(v_d + v_u)/(v_u v_d).</div>
+<div class="step">3. v_avg = 2d ÷ [d(v_u + v_d)/(v_u v_d)] — the d cancels top and bottom.</div>
+<div class="step">4. v_avg = <b>2 v_u v_d ÷ (v_u + v_d)</b>, the harmonic mean of the two speeds — option (d).<span class="why">Check limits: if v_u = v_d = v it gives v ✓; and the result is always ≤ the arithmetic mean.</span></div>
+<pre>
+ leg      length   speed    time
+ X → Y    d        v_u      d/v_u
+ Y → X    d        v_d      d/v_d
+ ---------------------------------------
+ v_avg = 2d / (d/v_u + d/v_d)
+       = 2 v_u v_d / (v_u + v_d)   &lt;-- answer (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Equal <b>distances</b> ⇒ harmonic mean 2v₁v₂/(v₁+v₂); equal <b>times</b> ⇒ arithmetic mean (v₁+v₂)/2. Trap: option (c) is the tempting arithmetic mean and option (a) the geometric mean — both wrong here because the equal quantity is distance, not time. Memorise: the average speed of a there-and-back trip is always below the plain average of the two speeds.</div>
+<div class="final">Answer: (d) 2v_d v_u/(v_d + v_u).</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A body traverses one third of the distance at 4 m/s; the remaining distance is covered in two equal time-halves at 2 m/s and 6 m/s. Find the mean velocity averaged over the whole time (Ans: 4 m/s)</td><td class="topic">Mean velocity, distance + time mix</td><td><a href="https://www.youtube.com/watch?v=b5Jxv-j6PYg" target="_blank">A body travelling along a straight line traversed one third of the...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">4</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This mixes a <b>distance</b>-defined stage with two <b>time</b>-defined stages, so you must translate everything into the same currency: total path length and total time, then divide. The straight-line motion means mean velocity equals average speed here. Introduce a symbol D for the whole distance; it cancels at the end, so the answer is a pure number.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_mean = total distance ÷ total time</span>; stage time from distance = s/v, stage distance from time = v·t. <span class="why">Two of the three stages are given by equal times, so add their distances as v·τ.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let total distance = D. Stage A: s_A = D/3 at 4 m/s ⇒ t_A = (D/3)/4 = <b>D/12</b>.</div>
+<div class="step">2. Remaining distance = 2D/3, done in two <b>equal times</b> τ at 2 and 6 m/s. Distance = 2τ + 6τ = 8τ.</div>
+<div class="step">3. Set 8τ = 2D/3 ⇒ τ = D/12, so the two time-halves together take 2τ = <b>D/6</b>.</div>
+<div class="step">4. Total time = D/12 + D/6 = D/12 + 2D/12 = <b>D/4</b>.<span class="why">Common denominator 12; the whole trip takes one quarter of D seconds.</span></div>
+<div class="step">5. v_mean = D ÷ (D/4) = <b>4 m/s</b> — the D cancels, leaving a clean 4.</div>
+<pre>
+ stage   given            distance   time
+ A       (1/3)D @ 4       D/3        D/12
+ B1+B2   equal times τ    2D/3       2τ = D/6
+ -------------------------------------------
+ total                    D          D/4
+ v_mean = D / (D/4) = 4 m/s   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When one stage is by distance and others by time, carry an unknown D and let it cancel — never plug in a number. Trap: averaging the three speeds (4+2+6)/3 = 4 gives the right value here only by coincidence; change any fraction and it breaks. Also note the two equal-time speeds (2, 6) average to 4, so the whole motion behaves like a steady 4 m/s.</div>
+<div class="final">Answer: 4 m/s.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level: Board</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">A car moves at a constant speed of 60 km/hr for 1 km and 40 km/hr for the next 1 km. Find the average speed of the car (Ans: 48 km/hr)</td><td class="topic">Average speed, two equal distances</td><td><a href="https://www.youtube.com/watch?v=jHRKuU6Rpng" target="_blank">Finding the average speed of a car in km per hour</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">48 km/hr</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Here the two stages have <b>equal distances</b> (1 km each) but <i>unequal times</i>. The slower stage takes longer, so the car spends <b>more of its journey time</b> going slowly — which drags the average <i>below</i> the arithmetic mean of 60 and 40. The correct route is always: find total distance, find total time by adding the stage times, then divide. For equal distances this produces the <b>harmonic mean</b>.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">t = s ÷ v</span> for each stage (km ÷ km h⁻¹ = h), then <span class="eq">v_avg = s_total ÷ t_total</span>. For two equal distances this reduces to the harmonic mean <span class="eq">v_avg = 2v₁v₂ ÷ (v₁ + v₂)</span>, in <b>km h⁻¹</b>. <span class="why">Equal distances cancel out of the algebra, leaving a formula in the speeds alone.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: s₁ = 1 km at v₁ = 60 km h⁻¹; s₂ = 1 km at v₂ = 40 km h⁻¹.</div>
+<div class="step">2. Time for stage 1: t₁ = 1 km ÷ 60 km h⁻¹ = <b>1/60 h</b>.<span class="why">The km cancel, leaving hours — a proper time unit.</span></div>
+<div class="step">3. Time for stage 2: t₂ = 1 km ÷ 40 km h⁻¹ = <b>1/40 h</b>.</div>
+<div class="step">4. Total time: t = 1/60 + 1/40. Using LCM 120: = 2/120 + 3/120 = <b>5/120 = 1/24 h</b>.<span class="why">Times add because the stages happen one after the other.</span></div>
+<div class="step">5. Total distance: s = 1 + 1 = <b>2 km</b>.</div>
+<div class="step">6. Average speed: v_avg = 2 km ÷ (1/24 h) = 2 × 24 = <b>48 km h⁻¹</b>.</div>
+<div class="step">7. Cross-check with the harmonic-mean shortcut: 2(60)(40)/(60+40) = 4800/100 = <b>48 km h⁻¹</b> ✓</div>
+<pre>
+ stage   s(km)   v(km/h)   t = s/v (h)
+ 1       1       60        1/60 = 0.0167
+ 2       1       40        1/40 = 0.0250
+ ─────────────────────────────────────────
+ total   2                 0.0417 h  (= 1/24)
+ v_avg = 2 / 0.0417 = 48 km/h   (NOT 50)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> <b>Equal distances ⇒ harmonic mean</b> <span class="eq">2v₁v₂/(v₁+v₂)</span>; <b>equal times ⇒ arithmetic mean</b> <span class="eq">(v₁+v₂)/2</span>. Recognising which one the question sets up saves the whole derivation. Trap: (60+40)/2 = 50 km/h is the planted wrong answer — the true average is <i>always</i> less than the arithmetic mean when distances are equal, so 48 &lt; 50 is the expected direction.</div>
+<div class="final">Answer: 48 km/hr.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A train travels at 50 km/hr for 0.5 h, at 30 km/hr for the next 0.26 h, then 70 km/hr for the next 0.76 h. Find the average speed of the train (Ans: ≈56.6 km/hr)</td><td class="topic">Average speed, multi-stage (time-weighted)</td><td><a href="https://www.youtube.com/watch?v=klAHXgQvElY" target="_blank">A train travels at a speed of 60 km/h for 0.52 h at 30 km/h for the next 0.24 h and then at 70 km/h</a> · <a href="https://www.youtube.com/watch?v=TVAU-JGBwl0" target="_blank">A train travels at 60km/h for 0.52h, 30km/h for next 0.24h and 70km/h for next 0.71h</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">56.58 km/hr</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This time the stages are specified by <b>time</b>, not distance. Because each stage's <i>duration</i> is given, we must first convert each into the distance it contributes (distance = speed × time), add those up, then divide by the total time. Since the times differ, the answer is a <b>time-weighted</b> mean — the stage the train spends longest in pulls the average toward its speed.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">s = v × t</span> per stage (km h⁻¹ × h = km), then <span class="eq">v_avg = Σs ÷ Σt</span> in <b>km h⁻¹</b>. Equivalently <span class="eq">v_avg = Σ(vᵢtᵢ) ÷ Σtᵢ</span>. <span class="why">Multiplying km h⁻¹ by h cancels the hours and leaves km — a genuine distance.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: v₁ = 50 km h⁻¹ for t₁ = 0.5 h; v₂ = 30 km h⁻¹ for t₂ = 0.26 h; v₃ = 70 km h⁻¹ for t₃ = 0.76 h.</div>
+<div class="step">2. Distance in stage 1: s₁ = 50 km h⁻¹ × 0.5 h = <b>25 km</b>.</div>
+<div class="step">3. Distance in stage 2: s₂ = 30 km h⁻¹ × 0.26 h = <b>7.8 km</b>.</div>
+<div class="step">4. Distance in stage 3: s₃ = 70 km h⁻¹ × 0.76 h = <b>53.2 km</b>.</div>
+<div class="step">5. Total distance: s = 25 + 7.8 + 53.2 = <b>86.0 km</b>.</div>
+<div class="step">6. Total time: t = 0.5 + 0.26 + 0.76 = <b>1.52 h</b>.</div>
+<div class="step">7. Average speed: v_avg = 86.0 km ÷ 1.52 h = <b>56.58 ≈ 56.6 km h⁻¹</b>.<span class="why">Sanity check: the result lies between the slowest (30) and fastest (70) stage speeds, and leans high because the 70 km/h stage occupies half the total time.</span></div>
+<pre>
+ stage   v(km/h)   t(h)     s = v·t (km)
+ 1       50        0.50     25.0
+ 2       30        0.26      7.8
+ 3       70        0.76     53.2
+ ────────────────────────────────────
+ total             1.52     86.0
+ v_avg = 86.0 / 1.52 = 56.58 km/h ≈ 56.6 km/h
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When stages are given <b>by time</b>, use <span class="eq">Σ(vt)/Σt</span> (time-weighted); when given <b>by distance</b>, use <span class="eq">Σs / Σ(s/v)</span> (harmonic-flavoured). Spotting which of the two the question hands you is the entire skill. Trap: (50+30+70)/3 = 50 km/h is the plain average and is <i>wrong</i> — it would only be right if all three times were equal.</div>
+<div class="final">Answer: ≈ 56.6 km/hr.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 1</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Which term defines "the shortest distance between the initial and final positions"? (a) Distance (b) Velocity (c) Displacement (d) Path (Ans: Displacement)</td><td class="topic">Displacement — definition</td><td><a href="https://www.youtube.com/watch?v=2OMXAFMegJA" target="_blank">Position, Distance, and Displacement in Physics</a> · <a href="https://www.youtube.com/watch?v=J7pGs2OUBxE" target="_blank">What is Distance and Displacement in Physics?</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Displacement</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a definition question separating the four core kinematic terms. The phrase "shortest distance between initial and final positions" is the textbook definition of <b>displacement</b> — a vector drawn straight from start to end, independent of the actual route. Distance, by contrast, is the full length of the path travelled.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">displacement Δr = r_final − r_initial</span> (a vector); its magnitude is the straight-line gap. <span class="why">"Shortest" and "between initial and final positions" are the signature words of displacement.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (a) Distance = total length of the actual path — depends on the route, never "shortest." ✗</div>
+<div class="step">2. (b) Velocity = rate of change of displacement (m/s) — a rate, not a length. ✗</div>
+<div class="step">3. (c) Displacement = straight-line vector from start to finish; its magnitude is the <b>shortest</b> separation of the two positions. ✓<span class="why">Exactly matches the wording "shortest distance between initial and final positions."</span></div>
+<div class="step">4. (d) "Path" = the trajectory itself, not a measured shortest gap. ✗</div>
+<pre>
+ term            what it is                shortest?
+ distance        length of path travelled  no
+ velocity        rate (m/s)                n/a
+ displacement    start→end vector          YES     &lt;-- answer
+ path            the trajectory            no
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Keyword mapping: "shortest / straight line / initial-to-final" ⇒ displacement; "total length / actual route" ⇒ distance. Trap: distance and displacement are equal only for straight one-way motion; for any bent path distance &gt; |displacement|, and for a closed loop displacement is zero while distance is not.</div>
+<div class="final">Answer: (c) Displacement.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">What is the average velocity when the total displacement is zero? (a) Maximum (b) Infinite (c) Zero (d) Equal to speed (Ans: Zero)</td><td class="topic">Average velocity &amp; zero displacement</td><td><a href="https://www.youtube.com/watch?v=U4E84LYxXto" target="_blank">How is Average Velocity Zero? | AP Physics 1 Problem Walkthrough</a> · <a href="https://www.youtube.com/watch?v=heUv4DxLA34" target="_blank">Displacement, Average Velocity, and Average Speed</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Zero</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Average velocity is defined strictly from <b>displacement</b>, not path length. If the body ends exactly where it started (or the net displacement is zero for any reason), the numerator of average velocity is zero, so the whole ratio is zero — regardless of how fast or far it actually moved. Average speed, however, stays non-zero because it uses path length.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_avg = Δs ÷ t</span>. <span class="why">With Δs = 0 and any finite time t, the quotient is 0 — this is why round trips have zero average velocity.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: total displacement Δs = 0 over a finite time t.</div>
+<div class="step">2. Substitute: v_avg = 0 ÷ t = <b>0</b>.<span class="why">Zero divided by any non-zero time is zero — no ambiguity.</span></div>
+<div class="step">3. (a) Maximum and (b) Infinite are impossible: nothing makes a 0/t ratio blow up. ✗</div>
+<div class="step">4. (d) "Equal to speed" is wrong: average speed = (path length)/t is generally &gt; 0 even when displacement is 0 (a closed loop). ✗</div>
+<div class="step">5. Hence (c) <b>Zero</b> is the only consistent choice.</div>
+<pre>
+ quantity          formula            value (Δs=0)
+ avg velocity      Δs / t             0        &lt;-- answer
+ avg speed         path length / t    &gt; 0
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "Net displacement zero" ⇒ average velocity is exactly zero, no computation needed. Trap: do NOT conclude the average speed is also zero — a runner completing one lap has zero average velocity but a large average speed. Distinguish the vector (displacement-based) from the scalar (path-based).</div>
+<div class="final">Answer: (c) Zero.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">What type of motion involves changing speed or direction or both? (a) Uniform motion (b) Constant motion (c) Static motion (d) Non-uniform motion (Ans: Non-uniform motion)</td><td class="topic">Non-uniform motion — definition</td><td><a href="https://www.youtube.com/watch?v=VFfF3F-G9Uk" target="_blank">Uniform Motion and Non-uniform Motion | Physics | Don't Memorise</a> · <a href="https://www.youtube.com/watch?v=KdWKjcIxR1M" target="_blank">Uniform and Non Uniform Motion - Motion | Class 9 Physics</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>Non-uniform motion</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Motion is classified by whether the <b>velocity</b> stays constant. Velocity is a vector, so it changes if either the speed changes, the direction changes, or both. Any such change means the body is not in uniform motion — by definition that is <b>non-uniform motion</b>. Uniform motion requires constant speed <i>and</i> unchanging straight-line direction.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">uniform ⇔ v = constant vector</span>; <span class="eq">non-uniform ⇔ v changes</span> (magnitude or direction). <span class="why">A change in either component of the velocity vector produces acceleration, the hallmark of non-uniform motion.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. The description "changing speed or direction or both" is precisely a change in the velocity vector.</div>
+<div class="step">2. (a) Uniform motion = constant velocity (fixed speed, fixed direction) — the opposite of the description. ✗</div>
+<div class="step">3. (b) "Constant motion" and (c) "static motion" are not standard kinematic categories (static = at rest). ✗</div>
+<div class="step">4. (d) <b>Non-uniform motion</b> is defined exactly as motion with changing speed and/or direction. ✓<span class="why">Even a car rounding a curve at steady speed is non-uniform because its direction changes.</span></div>
+<pre>
+ type            speed     direction   uniform?
+ uniform         const     const       yes
+ non-uniform     changes / or changes  NO      &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Uniform motion needs BOTH constant speed and constant direction; break either and it becomes non-uniform. Trap: circular motion at constant speed is still non-uniform (and accelerated) because direction turns continuously — a classic exam catch where students wrongly call it uniform.</div>
+<div class="final">Answer: (d) Non-uniform motion.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">What is instantaneous speed? (a) Speed over a long trip (b) Average of two speeds (c) Speed at a given instant (d) Speed during rest (Ans: Speed at a given instant)</td><td class="topic">Instantaneous speed — definition</td><td><a href="https://www.youtube.com/watch?v=QddL_pwEaiw" target="_blank">Instantaneous Speed and Instantaneous Velocity | Physics</a> · <a href="https://www.youtube.com/watch?v=pfTTHx9kCHk" target="_blank">Instantaneous speed and velocity | One-dimensional motion | Khan Academy</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Speed at a given instant</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> <b>Instantaneous speed</b> is the speed at a single moment in time — the magnitude of instantaneous velocity, or the reading a car's speedometer shows right now. Mathematically it is the limit of average speed as the time interval shrinks to zero, so it describes one instant, not a stretch of the journey.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_inst = lim(Δt→0) Δs/Δt = ds/dt</span>. <span class="why">The limit collapses the interval to a point, giving the speed "at that instant" rather than over a span.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Start from average speed Δs/Δt over an interval Δt.</div>
+<div class="step">2. Shrink the interval: let Δt → 0. The ratio tends to the derivative ds/dt.</div>
+<div class="step">3. That limiting value is the speed <b>at a given instant</b> — option (c). ✓<span class="why">This is precisely what a speedometer displays at any moment.</span></div>
+<div class="step">4. (a) "over a long trip" describes average speed; (b) "average of two speeds" is a mean, not an instant; (d) "during rest" would be zero — all fail. ✗</div>
+<pre>
+ concept              defined over        value
+ average speed        whole interval Δt   Δs/Δt
+ instantaneous speed  a single instant    ds/dt   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "Instant / at that moment / speedometer" ⇒ instantaneous (derivative); "whole trip / total distance" ⇒ average. Trap: instantaneous speed is the magnitude of instantaneous velocity, so it is never negative, whereas velocity components can be — don't confuse the scalar speed with the signed velocity.</div>
+<div class="final">Answer: (c) Speed at a given instant.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">What condition results in uniform velocity? (a) Constant speed with changing direction (b) Varying speed in a straight line (c) Constant speed in a specified direction (d) Random motion (Ans: constant speed, specified direction)</td><td class="topic">Uniform velocity — condition</td><td><a href="https://www.youtube.com/watch?v=nR2c7BokFtg" target="_blank">What Is Uniform Velocity | What Is Constant Velocity | Motion Class 9</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Constant speed in a specified direction</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> <b>Velocity is a vector</b> — it carries both a magnitude (the speed) and a direction. A vector is constant only when <i>both</i> parts are constant. So "uniform velocity" is a strictly stronger condition than "uniform speed": the body must not only keep the same speed, it must also never turn. Any change of direction, however gentle, changes the velocity vector even if the speedometer never moves.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">v⃗ = constant ⟺ |v⃗| = constant AND direction = constant</span>, with |v⃗| in <b>m s⁻¹</b>. Equivalently <span class="eq">a⃗ = dv⃗/dt = 0 m s⁻²</span>. <span class="why">Uniform velocity means zero acceleration; since a⃗ is itself a vector, a turn produces a non-zero a⃗ even at unchanging speed.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write what uniform velocity requires: the vector v⃗ must not change ⇒ constant magnitude <b>and</b> constant direction.</div>
+<div class="step">2. Test (a) "Constant speed with changing direction": magnitude fixed but direction changing ⇒ v⃗ changes ⇒ <b>not</b> uniform velocity (this is uniform <i>speed</i>, e.g. circular motion).</div>
+<div class="step">3. Test (b) "Varying speed in a straight line": direction fixed but magnitude changing ⇒ v⃗ changes ⇒ not uniform.</div>
+<div class="step">4. Test (c) "Constant speed in a specified direction": magnitude fixed <b>and</b> direction fixed ⇒ v⃗ constant ⇒ <b>uniform velocity</b> ✓</div>
+<div class="step">5. Test (d) "Random motion": both magnitude and direction vary ⇒ not uniform.</div>
+<div class="step">6. Only (c) satisfies both requirements.</div>
+<pre>
+ option   speed        direction    v⃗ constant?   uniform velocity?
+ (a)      constant     changing     no            no  (uniform SPEED only)
+ (b)      varying      constant     no            no
+ (c)      constant     constant     YES           YES  &lt;-- answer
+ (d)      varying      varying      no            no
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Circle the phrase "<b>in a specified/given direction</b>" — that is the examiner's tell for <i>velocity</i> as opposed to <i>speed</i>. Uniform velocity ⇒ straight line, always; a body in uniform velocity can never be on a curve. Trap: option (a) describes uniform circular motion, which has constant speed but <b>accelerating</b> (direction keeps turning) — the single most-tested distinction in kinematics.</div>
+<div class="final">Answer: (c) Constant speed in a specified direction.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 2</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">An object travels at 5 m/s for 10 seconds. What distance does it cover? (a) 15 m (b) 50 m (c) 100 m (d) 60 m (Ans: 50 m)</td><td class="topic">Distance = speed × time</td><td><a href="https://www.youtube.com/watch?v=-Py2zI29THg" target="_blank">Distance, Displacement, Average Speed, Average Velocity - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>50 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> When speed is <b>constant</b>, distance grows in direct proportion to time — the body covers the same number of metres in every second. This is the simplest case of motion: no acceleration, so the whole of kinematics collapses to a single multiplication. Graphically, the distance is the <b>area of the rectangle</b> under a flat v-t line of height v and width t.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">s = v × t</span> — speed v in <b>m s⁻¹</b>, time t in <b>s</b>, distance s in <b>m</b>. <span class="why">Rearranged from v = s/t. The unit algebra confirms it: (m s⁻¹) × s = m, so the product really is a length.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Identify the data with units: v = <b>5 m s⁻¹</b> (constant), t = <b>10 s</b>.<span class="why">"Travels at 5 m/s for 10 seconds" fixes a constant speed over a stated duration — no acceleration is involved.</span></div>
+<div class="step">2. Substitute into s = v × t: s = 5 m s⁻¹ × 10 s.</div>
+<div class="step">3. Multiply numbers and units separately: 5 × 10 = 50; m s⁻¹ × s = <b>m</b> (the seconds cancel).</div>
+<div class="step">4. Therefore s = <b>50 m</b>, which is option (b).</div>
+<pre>
+ v-t graph (constant speed):
+
+  v(m/s)
+   5 |■■■■■■■■■■■■■■■■■■■■  ← flat line, v = 5 m/s
+     |■■■■■ area = 5 × 10 ■■
+   0 +--------------------→ t(s)
+     0                   10
+  distance = area of rectangle = 5 m/s × 10 s = 50 m
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Check the units <b>before</b> multiplying: if speed is in m s⁻¹ and time in s, the answer is in m with no conversion. The commonest slip in this family is a mixed pair (km h⁻¹ with seconds) — convert using <span class="eq">1 km h⁻¹ = 5/18 m s⁻¹</span> first. Trap: at constant speed distance = |displacement|, but the moment the body reverses, the two part company.</div>
+<div class="final">Answer: (b) 50 m.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">An object moves at a uniform speed of 6 m/s. How far does it travel in 4 seconds? (a) 12 m (b) 18 m (c) 24 m (d) 36 m (Ans: 24 m)</td><td class="topic">Distance = speed × time</td><td><a href="https://www.youtube.com/watch?v=-Py2zI29THg" target="_blank">Distance, Displacement, Average Speed, Average Velocity - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>24 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Identical in structure to the previous question: a <b>uniform</b> (constant) speed means the distance covered is simply speed multiplied by the elapsed time. "Uniform speed" is the key phrase — it guarantees zero acceleration, so no kinematic equation with a is needed. The distance is again the rectangular area under the flat v-t line.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">s = v × t</span> — v in <b>m s⁻¹</b>, t in <b>s</b>, s in <b>m</b>. <span class="why">(m s⁻¹) × s = m: the seconds cancel and a length remains, so the equation is dimensionally sound.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Extract the data: v = <b>6 m s⁻¹</b> (uniform), t = <b>4 s</b>.<span class="why">"Uniform speed" ⇒ v is the same at every instant, so v × t is exact rather than an average.</span></div>
+<div class="step">2. Substitute: s = 6 m s⁻¹ × 4 s.</div>
+<div class="step">3. Multiply: 6 × 4 = 24; units m s⁻¹ × s = <b>m</b>.</div>
+<div class="step">4. Therefore s = <b>24 m</b>, which is option (c).<span class="why">Reasonableness check: 6 m every second for 4 seconds ⇒ 6+6+6+6 = 24 m — the same answer counted second by second.</span></div>
+<pre>
+ second   distance this second   running total
+ 1st      6 m                    6 m
+ 2nd      6 m                    12 m
+ 3rd      6 m                    18 m
+ 4th      6 m                    24 m   ← s = v·t = 6 × 4
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "Uniform speed" is the green light to use <span class="eq">s = v t</span> directly and skip <span class="eq">s = ut + ½at²</span> entirely — with a = 0 m s⁻² the second term vanishes and the two agree. Trap: don't reach for the SUVAT equations out of habit; spotting a = 0 turns a 30-second problem into a 3-second one.</div>
+<div class="final">Answer: (c) 24 m.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A body covered a distance of 5 m along a semicircular path. The ratio of distance to displacement is: (a) 11:7 (b) 12:5 (c) 8:3 (d) 7:5 (Ans: 11:7)</td><td class="topic">Distance vs displacement — semicircular path</td><td><a href="https://www.youtube.com/watch?v=wfAO7L514LQ" target="_blank">A body covers a distance of 5 m along semicircular path — ratio of path length to displacement</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>11 : 7</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> On a <b>semicircular</b> path the distance travelled is the curved arc (half the circumference), while the displacement is the straight chord joining the two ends — which is the <b>diameter</b>. So the ratio distance : displacement reduces to (half-circumference) : (diameter), a pure number independent of the radius.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">arc = πr</span>, <span class="eq">displacement = diameter = 2r</span> ⇒ ratio = πr : 2r = <b>π : 2</b>. <span class="why">The 5 m is the arc length; r cancels in the ratio, so its value is not even needed.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Distance = length of the semicircular arc = πr = <b>5 m</b> (given).</div>
+<div class="step">2. Displacement = straight line from start to end = the diameter = <b>2r</b>.</div>
+<div class="step">3. Ratio = πr : 2r; the r cancels ⇒ ratio = <b>π : 2</b>.</div>
+<div class="step">4. Put π = 22/7: ratio = (22/7) : 2 = 22 : 14 = <b>11 : 7</b> — option (a). ✓<span class="why">π/2 = 1.571 and 11/7 = 1.571, so 11:7 is the intended rational form of π:2.</span></div>
+<pre>
+ quantity        expression   value
+ distance (arc)  πr           5 m
+ displacement    2r           2r
+ ratio           πr : 2r  =  π : 2  =  11 : 7   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For a semicircle, distance : displacement = π : 2 ≈ 11 : 7 — memorise it. Trap: the "5 m" is a decoy; the ratio needs no radius because r cancels. Also don't use the full circumference 2πr — only half the circle is traversed, so the arc is πr, not 2πr.</div>
+<div class="final">Answer: (a) 11 : 7.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A train covers the first half of the distance between two stations at 40 km/h and the other half at 60 km/h. Its average speed is: (a) 50 (b) 48 (c) 52 (d) 100 km/h (Ans: 48 km/h)</td><td class="topic">Average speed, two equal distances</td><td><a href="https://www.youtube.com/watch?v=pLtxfgUciCI" target="_blank">A train covers the first half of the distance between two stations with a speed of 40 km/h...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>48 km/h</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The two halves are equal in <b>distance</b> but travelled at different speeds, so the correct average is the <b>harmonic mean</b> of 40 and 60, not their arithmetic mean 50. The slower half consumes more time and therefore weighs more heavily, dragging the average below the midpoint.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_avg = 2v₁v₂ ÷ (v₁ + v₂)</span> for two equal distances. <span class="why">Derived from total-distance ÷ total-time with each half of length d; d cancels.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let each half = d. Time for first half t₁ = d/40; second half t₂ = d/60.</div>
+<div class="step">2. Total distance = 2d; total time = d/40 + d/60 = d(3 + 2)/120 = <b>5d/120 = d/24</b>.</div>
+<div class="step">3. v_avg = 2d ÷ (d/24) = 2d × 24/d = <b>48 km/h</b> — the d cancels.</div>
+<div class="step">4. Cross-check via formula: 2×40×60/(40+60) = 4800/100 = <b>48 km/h</b> — option (b). ✓<span class="why">48 lies below the arithmetic mean 50, as the harmonic mean must.</span></div>
+<pre>
+ half   speed    length   time
+ 1      40       d        d/40
+ 2      60       d        d/60
+ --------------------------------
+ v_avg = 2d / (d/40 + d/60)
+       = 4800/100 = 48 km/h   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Equal distances at two speeds ⇒ harmonic mean 2v₁v₂/(v₁+v₂); it is always less than the arithmetic mean. Trap: option (a) 50 is the arithmetic mean and is wrong here — it would only be correct if the two halves took equal <b>times</b>, not equal distances.</div>
+<div class="final">Answer: (b) 48 km/h.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A car starting from rest has average velocities 5, 10 and 15 m/s in the first, second and third seconds. What is the total distance covered in these 3 s? (a) 15 (b) 30 (c) 55 (d) None (Ans: 30 m)</td><td class="topic">Distance from per-second average velocities</td><td><a href="https://www.youtube.com/watch?v=UwuXSmSigbc" target="_blank">A moving car possesses average velocities of 5, 10, and 15 m/s in the first, second and third seconds</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>30 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The data are <b>average velocities for each 1-second interval</b>. For a fixed interval, distance covered = (average velocity) × (time interval). Since each interval is exactly 1 s, the distance in each second is numerically equal to that second's average velocity. Total distance is just their sum — no kinematic equation is needed.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">sₖ = v̄ₖ × Δt</span> with Δt = 1 s ⇒ sₖ = v̄ₖ (in metres). <span class="why">Average velocity already accounts for the acceleration within each second, so multiplying by the interval gives that second's displacement directly.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. 1st second: s₁ = 5 × 1 = <b>5 m</b>.</div>
+<div class="step">2. 2nd second: s₂ = 10 × 1 = <b>10 m</b>.</div>
+<div class="step">3. 3rd second: s₃ = 15 × 1 = <b>15 m</b>.</div>
+<div class="step">4. Total distance = 5 + 10 + 15 = <b>30 m</b> — option (b). ✓<span class="why">The 5, 10, 15 pattern (arithmetic, common difference 5) is consistent with uniform acceleration from rest, confirming the data are self-consistent.</span></div>
+<pre>
+ second   avg velocity (m/s)   distance (× 1 s)
+ 1        5                    5
+ 2        10                   10
+ 3        15                   15
+ -----------------------------------------------
+ total                         30 m   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Distance in an interval = average velocity × interval length — that is the definition, so just sum them. Trap: don't reach for s = ut + ½at²; the per-second averages already bake in the acceleration. Multiplying each by 1 s and adding is exact and instant.</div>
+<div class="final">Answer: (b) 30 m.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 3</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">An object travels in a right-angled path from A to B (5 km), then B to C (2 km). Find the displacement. (a) 6.5 (b) 5.385 (c) 4.5 (d) 7 km (Ans: 5.385 km)</td><td class="topic">Displacement — right-angle path (Pythagoras)</td><td><a href="https://www.youtube.com/watch?v=VP0tVPMR8cs" target="_blank">Resultant Displacement Problems</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>5.385 km</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> <b>Displacement</b> is the straight-line vector from start to finish — it ignores the route entirely. The object walks two legs that meet at a <b>right angle</b>, so the start point A, the corner B and the end point C form a right-angled triangle with the two legs as the perpendicular sides. The displacement is then the <b>hypotenuse</b> AC, and Pythagoras delivers it in one step. (Distance travelled, by contrast, would be 5 + 2 = 7 km along the path.)</div>
+<div class="seg"><span class="lbl">Formula</span> For perpendicular legs, <span class="eq">|s⃗| = √(s₁² + s₂²)</span> with s₁, s₂ and the result all in <b>km</b>. <span class="why">This is the resultant of two vectors at 90°: R = √(A² + B² + 2AB·cos θ) with cos 90° = 0, which kills the cross term and leaves plain Pythagoras.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set the geometry: AB = <b>5 km</b>, BC = <b>2 km</b>, angle at B = <b>90°</b>.<span class="why">"Right angled" fixes the angle between the legs, which is what lets us use Pythagoras instead of the general cosine rule.</span></div>
+<div class="step">2. Displacement is the direct line A→C, the hypotenuse of triangle ABC.</div>
+<div class="step">3. Apply Pythagoras: AC² = AB² + BC² = (5 km)² + (2 km)² = 25 + 4 = <b>29 km²</b>.<span class="why">Note the units square correctly to km², so the square root will return km.</span></div>
+<div class="step">4. Take the square root: AC = √29 = <b>5.385 km</b>, which is option (b).</div>
+<div class="step">5. Sanity check: 5.385 km lies between 5 km (the longer leg alone) and 7 km (the full path length) — exactly where a hypotenuse must sit.</div>
+<pre>
+        C
+        |
+        | 2 km
+        |
+  A-----B
+    5 km
+
+  displacement = AC = √(5² + 2²) = √29 = 5.385 km
+  distance     = AB + BC = 5 + 2 = 7 km   (path length, larger)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Perpendicular legs ⇒ Pythagoras; any other angle ⇒ <span class="eq">R = √(A²+B²+2AB cos θ)</span>. Also keep the inequality <b>|displacement| ≤ distance</b> in mind — it is <i>always</i> true, and equality holds only for straight-line motion without reversal. Trap: option (d) 7 km is the <i>distance</i>, planted for anyone who adds the legs instead of composing them as vectors.</div>
+<div class="final">Answer: (b) 5.385 km.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A boat travels 50 km east, then 120 km north, then returns to the starting point by the shortest path; total journey time is 3 h. Find the average velocity over the entire trip. (a) 0 (b) 100 (c) 17 (d) 33.33 kmh⁻¹ (Ans: Zero — net displacement is zero)</td><td class="topic">Average velocity vs average speed (round trip)</td><td><a href="https://www.youtube.com/watch?v=uXvsHnwBzzk" target="_blank">During a one-hour trip, a small boat travels 80.0 km north and then travels 60.0 km east</a> · <a href="https://www.youtube.com/watch?v=VP0tVPMR8cs" target="_blank">Resultant Displacement Problems</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>0 kmh⁻¹</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The boat ends up exactly where it began — it "comes back to the starting point." That single phrase settles the question before any arithmetic: <b>average velocity is displacement ÷ time</b>, and a closed trip has <b>zero displacement</b>, so the average velocity is zero no matter how far the boat sailed or how long it took. The 50 km, 120 km and 3 h are all deliberate distractions; they only matter if you are asked for average <i>speed</i>.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v⃗_avg = Δr⃗ ÷ Δt</span> — net displacement Δr⃗ in <b>km</b> ÷ total time Δt in <b>h</b>, giving <b>km h⁻¹</b>. Contrast <span class="eq">speed_avg = total path length ÷ Δt</span>, which is <i>not</i> zero here. <span class="why">Displacement is a vector from start to end; distance is a scalar accumulated along the way — only the first can vanish on a closed loop.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Track the legs as vectors (east = +x, north = +y): leg 1 = (+50, 0) km; leg 2 = (0, +120) km.</div>
+<div class="step">2. Position after two legs: (50, 120) km — a distance √(50² + 120²) = √(2500 + 14400) = √16900 = <b>130 km</b> from start.<span class="why">A 5-12-13 triangle scaled by 10 — the shortest path home is therefore 130 km.</span></div>
+<div class="step">3. Leg 3 returns along that shortest path: (−50, −120) km, bringing the boat back to the origin.</div>
+<div class="step">4. Net displacement: Δr⃗ = (50 − 50, 120 − 120) = <b>(0, 0) km</b> ⇒ |Δr⃗| = <b>0 km</b>.<span class="why">Start point and end point coincide, so the vector joining them has zero length.</span></div>
+<div class="step">5. Average velocity: v⃗_avg = 0 km ÷ 3 h = <b>0 km h⁻¹</b>, which is option (a).</div>
+<div class="step">6. For contrast, average <i>speed</i> = total path ÷ time = (50 + 120 + 130) km ÷ 3 h = 300/3 = <b>100 km h⁻¹</b> — this is option (b), the planted trap.</div>
+<pre>
+      N
+      ↑        (50,120)
+      |    ┌───────●
+      |    |      /
+ 120km|    |     /  130 km (shortest way back)
+      |    |    /
+      |    |   /
+      +────●──────────→ E
+        (0,0)  50 km
+
+ total path   = 50 + 120 + 130 = 300 km  → avg SPEED    = 100 km/h
+ displacement = 0 km                     → avg VELOCITY = 0 km/h  ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> The words "<b>returns / comes back to the starting point</b>" mean average velocity = <b>0</b> instantly — read the question for that phrase before touching the numbers. Trap: option (b) 100 km h⁻¹ is the average <i>speed</i>, sitting there for anyone who confuses the two. Remember: on a closed path average velocity is always zero, while average speed is never zero for a moving body.</div>
+<div class="final">Answer: (a) 0 kmh⁻¹ — the net displacement is zero.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A scooter going due east at 10 m/s turns right through an angle of 90° with its speed unchanged. Find the change in the velocity of the scooter. (a) 20.0 ms⁻¹ (SW) (b) zero (c) 10.0 ms⁻¹ (S) (d) 14.14 ms⁻¹ (SW) (Ans: 14.14 ms⁻¹, south-western direction)</td><td class="topic">Vector change in velocity on turning</td><td><a href="https://www.youtube.com/watch?v=n24Q7dqRHsI" target="_blank">A scooter going due east at 10 ms⁻¹ turns right through an angle of 90°</a> · <a href="https://www.youtube.com/watch?v=z2Xozj4gO5I" target="_blank">A scooter going due east at 10 ms⁻¹ turns right through an angle of 90° | NEET prep MCQ solved</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>14.14 ms⁻¹ (in south-western direction)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Velocity is a <b>vector</b>: even though the speed stays 10 m/s, swinging the direction through 90° is a genuine change in velocity. The "change in velocity" means the <i>vector difference</i> Δv = v<sub>f</sub> − v<sub>i</sub>, not the change in speed (which here is zero). Turning <b>right</b> starting from due east rotates the heading to due <b>south</b>.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">Δv = v<sub>f</sub> − v<sub>i</sub></span> (vector subtraction). When the two velocities have equal magnitude s and are perpendicular, <span class="eq">|Δv| = √(s² + s²) = s√2</span>. <span class="why">Subtracting v<sub>i</sub> is the same as adding a vector of equal size pointing opposite (due west here).</span> Data: s = 10 m/s, angle between headings = 90°.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write the two velocities as directed quantities: v<sub>i</sub> = <b>10 m/s east</b>, v<sub>f</sub> = <b>10 m/s south</b>.<span class="why">A right turn from east goes east → south, not east → north.</span></div>
+<div class="step">2. Form Δv = v<sub>f</sub> − v<sub>i</sub> = (10 south) − (10 east) = <b>10 south + 10 west</b>.<span class="why">−(10 east) is 10 pointing west.</span></div>
+<div class="step">3. Magnitude: |Δv| = √(10² + 10²) = √200 = <b>14.14 m/s</b>.</div>
+<div class="step">4. Direction: equal 10-unit components toward south and west ⇒ 45° line into the third quadrant ⇒ pointing <b>south-west</b>.</div>
+<div class="step">5. Matches option (d): 14.14 m/s toward the south-west.</div>
+<pre>
+ vector      east-comp   south-comp
+ v_i          +10           0
+ v_f            0          +10
+ Δv=v_f-v_i   -10 (west)   +10 (south)
+ |Δv| = sqrt(10^2+10^2) = 14.14 m/s  SW   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For a 90° turn at unchanged speed s, the change in velocity is instantly <b>s√2</b> — no components needed. Trap: students answer <b>zero</b> because the speed is unchanged, forgetting velocity is a vector; others answer <b>20</b> by wrongly adding magnitudes (that is the case for a full 180° reversal, not 90°). The direction bisects "final" and "reversed-initial", giving south-west.</div>
+<div class="final">Answer: (d) 14.14 m/s in the south-western direction.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A toy cyclist completes one round of a square track of side 2 m in 40 seconds. What will be the displacement at the end of 3 minutes? (a) 52 (b) Zero (c) 16 (d) 2√2 m (Ans: 2√2 m)</td><td class="topic">Displacement after repeated laps</td><td><a href="https://www.youtube.com/watch?v=HHOcW2ihsMI" target="_blank">A toy cyclist completes one round of a square track of side 2 m in 40 s — displacement at end of 3 min</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>2√2 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> <b>Displacement</b> is the straight-line vector from start to finish — it depends only on the end points, not on the path length travelled. So we do not need the total distance; we only need <i>where the cyclist stops</i> after the given time. The clue is how many complete laps (which return to start) plus any leftover fraction of a lap.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">laps = total time ÷ time per lap</span>, then locate the finish point; displacement = straight-line distance from start. For a square of side a, the diagonal is <span class="eq">a√2</span>. <span class="why">A whole number of laps gives zero displacement; only the fractional part matters.</span> Data: side a = 2 m, one lap = 40 s, total time = 3 min = 180 s.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Convert time: 3 min = <b>180 s</b>.</div>
+<div class="step">2. Number of laps = 180 ÷ 40 = <b>4.5 laps</b>.<span class="why">4 full laps return him to the start; the extra 0.5 lap is what displaces him.</span></div>
+<div class="step">3. After 4 complete laps he is back at the starting corner — displacement so far = 0.</div>
+<div class="step">4. Half a lap covers 2 sides (2 + 2 = 4 m of path) and lands him at the corner <b>diagonally opposite</b> the start.</div>
+<div class="step">5. Displacement = diagonal of the square = a√2 = 2√2 ≈ <b>2.83 m</b> — option (d).</div>
+<pre>
+ total time            180 s
+ one lap               40 s
+ laps = 180/40         4.5  (4 full + half)
+ after 4 laps          back at start (disp 0)
+ half lap -> opposite corner
+ displacement = 2*sqrt(2) = 2.83 m       &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Split laps into "whole + fraction": whole laps contribute nothing, so only the fractional lap sets the displacement. Trap: option (c) 16 m is the total <i>distance</i> for the extra part / a path length — never confuse distance with displacement. Half a square lap ⇒ diagonal a√2, not the perimeter.</div>
+<div class="final">Answer: (d) 2√2 m (≈ 2.83 m).</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">When a particle moves with variable velocity, which relations are false? (I) Average speed = average velocity (II) Instantaneous speed = instantaneous velocity (III) Distance covered = magnitude of displacement (a) I, II, III (b) I, II (c) II, III (d) I, III (Ans: I and III)</td><td class="topic">Speed vs velocity — true/false concepts</td><td><a href="https://www.youtube.com/watch?v=izlXp0RRKYY" target="_blank">Speed vs. Velocity - Distance vs. Displacement - Average velocity, instantaneous velocity</a> · <a href="https://www.youtube.com/watch?v=it0WAeCTGUg" target="_blank">When a particle moves with constant velocity, its average velocity, its instantaneous velocity...</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>I, III</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Three claims are on trial, and the decisive idea is the difference between quantities measured <b>over an interval</b> (averages, which depend on the whole path) and quantities measured <b>at an instant</b> (which depend only on the here-and-now). Over an interval, a curved or reversing path makes distance exceed |displacement|, so the averages part company. At a single instant there is no path to speak of — the particle is at one point moving one way — so speed and |velocity| must agree. "Variable velocity" means the velocity vector changes (in size, direction, or both).</div>
+<div class="seg"><span class="lbl">Key relations</span> <span class="eq">avg speed = distance ÷ Δt</span> and <span class="eq">|avg velocity| = |displacement| ÷ Δt</span>, both in <b>m s⁻¹</b>; and <span class="eq">instantaneous speed = |instantaneous velocity| = |dr⃗/dt|</span>. <span class="why">Since distance ≥ |displacement| always, avg speed ≥ |avg velocity| always — equality only for straight-line motion with no reversal.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Test (I) "Average speed = average velocity": avg speed uses <b>distance</b>, avg velocity uses <b>displacement</b>. For variable velocity the path generally bends or reverses, making distance &gt; |displacement| ⇒ the two differ ⇒ <b>FALSE</b>.<span class="why">Counter-example: the boat in Q2 above — avg speed 100 km/h but avg velocity 0 km/h.</span></div>
+<div class="step">2. Test (II) "Instantaneous speed = instantaneous velocity": at an instant, speed is <i>defined</i> as the magnitude of the velocity vector, |v⃗|. These are equal in magnitude always ⇒ <b>TRUE</b> (so it is not a false relation).<span class="why">Over a vanishing interval dt the path length and |dr⃗| coincide, because an infinitesimal arc is straight.</span></div>
+<div class="step">3. Test (III) "Distance covered = magnitude of displacement": true only for straight-line motion with no reversal; with variable velocity the path curves ⇒ distance &gt; |displacement| ⇒ <b>FALSE</b>.</div>
+<div class="step">4. Collect the <b>false</b> ones: (I) and (III) ⇒ option (d).<span class="why">The question asks which relations are FALSE — (II) is true and so must be excluded, which eliminates options (a), (b) and (c).</span></div>
+<pre>
+ relation                                      verdict   in the answer?
+ I    average speed = average velocity         FALSE     yes
+ II   instantaneous speed = |inst. velocity|   TRUE      no  (always holds)
+ III  distance = |displacement|                FALSE     yes
+                                     ⇒ false ones = I and III  → (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Memorise the one-line hierarchy: <b>over an interval</b>, speed-type ≥ velocity-type (distance ≥ |displacement|); <b>at an instant</b>, they are always equal. That single rule answers this entire question family. Trap: statement (II) looks like the same confusion as (I) and gets marked false by reflex — but instantaneous speed <i>is</i> |v⃗| by definition, and every option containing II except (d) is thereby wrong.</div>
+<div class="final">Answer: (d) I and III are false.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 4</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">A man is at a height of 100 m. He sees a car which makes an angle of π/6 with his position. If the car moves to a point where the angle is π/3, what is the distance moved by it? (a) 100/√3 (b) 200√3 (c) 200/√3 (d) 150/√3 m (Ans: 200/√3 m)</td><td class="topic">Angle of depression — distance moved</td><td><a href="https://www.youtube.com/watch?v=yjN_A3L3Q3A" target="_blank">A man from the top of a 100 meters high tower sees a car moving towards the tower at angle of depression</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>(200/√3) m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The man's height is fixed at 100 m and the car moves along the ground, so each sighting makes a <b>right-angled triangle</b> whose vertical side is the constant 100 m and whose horizontal side is the car's ground distance from the tower's foot. The angle of depression sets the ratio of these two sides via the tangent. As the angle grows from π/6 (30°) to π/3 (60°), the car has come <i>closer</i>; the distance it moved is the <b>difference</b> of the two horizontal distances. Assumption: the ground is level and the car moves in a straight line directly toward the tower's base.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">tan θ = height ÷ horizontal distance</span> ⇒ <span class="eq">x = h ÷ tan θ</span>, with h and x in <b>m</b> and θ dimensionless. Then <span class="eq">distance moved = x₁ − x₂</span> in <b>m</b>. <span class="why">The angle of depression from the top equals the angle of elevation from the car (alternate angles between the horizontal sight-line and the level ground), so the same tangent applies.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: h = <b>100 m</b>; first angle θ₁ = π/6 = <b>30°</b>; second angle θ₂ = π/3 = <b>60°</b>.</div>
+<div class="step">2. First position: x₁ = h ÷ tan 30° = 100 m ÷ (1/√3) = <b>100√3 m</b> ≈ 173.2 m.<span class="why">tan 30° = 1/√3; dividing by 1/√3 is multiplying by √3.</span></div>
+<div class="step">3. Second position: x₂ = h ÷ tan 60° = 100 m ÷ √3 = <b>100/√3 m</b> ≈ 57.7 m.<span class="why">tan 60° = √3. The larger angle gives the smaller distance — the car is nearer, as expected.</span></div>
+<div class="step">4. Distance moved: d = x₁ − x₂ = 100√3 − 100/√3 m.</div>
+<div class="step">5. Put over the common denominator √3: d = (100√3·√3 − 100)/√3 = (100×3 − 100)/√3 = (300 − 100)/√3 = <b>200/√3 m</b>.<span class="why">√3 × √3 = 3, which clears the surd from the first term.</span></div>
+<div class="step">6. Numerically: 200 ÷ 1.732 = <b>115.5 m</b> — matching 173.2 − 57.7 = 115.5 m ✓ This is option (c).</div>
+<pre>
+   man ●  ────────────── horizontal
+       |\θ₂=60°  \  θ₁=30°
+       | \        \
+ 100 m |  \        \        (angles of depression)
+       |   \        \
+       +----●--------●------ ground
+       foot  x₂       x₁
+             57.7 m   173.2 m
+
+  x₁ = 100/tan30° = 100√3  = 173.2 m
+  x₂ = 100/tan60° = 100/√3 =  57.7 m
+  d  = x₁ − x₂ = 200/√3 = 115.5 m   &lt;-- answer (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Convert radians to degrees on sight (<b>π/6 = 30°, π/4 = 45°, π/3 = 60°</b>) — the tangent values are then instant. Remember <b>bigger depression angle ⇒ closer object</b>, so the answer must be a difference and must be positive. Trap: options (a) 100/√3 and (b) 200√3 are the single distance x₂ and a mis-rationalised difference — the question asks for the <i>change</i>, not either position.</div>
+<div class="final">Answer: (c) 200/√3 m ≈ 115.5 m.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A drunkard walks 5 steps forward and 3 steps backward repeatedly (each step 1 m long, 1 s). A pit lies 11 m from the starting point. After how long will he fall into the pit? (a) 29 (b) 21 (c) 37 (d) 31 s (Ans: 29 s)</td><td class="topic">Net displacement — drunkard's walk</td><td><a href="https://www.youtube.com/watch?v=M2QjCPw-tnQ" target="_blank">A drunkard is walking along a straight road. He takes 5 steps forward and 3 steps backward and so on</a> · <a href="https://www.youtube.com/watch?v=-CyzHQvrLCY" target="_blank">A drunkard is walking along a straight road. He takes 5 steps forward and 3 steps backward and...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>29 seconds</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Each 5-forward-then-3-back "cycle" nets +2 m but takes 8 s. It is tempting to divide 11 by 2, but that is <b>wrong near the goal</b>: on a forward burst the drunkard temporarily reaches further than his net position, and once he crosses the pit he falls in — he never gets to step back. So we advance cycle by cycle and watch the <i>peak</i> of each forward burst.</div>
+<div class="seg"><span class="lbl">Formula</span> per cycle: net displacement <span class="eq">= 5 − 3 = 2 m</span> in <span class="eq">8 s</span>; forward peak of a cycle starting at x is <span class="eq">x + 5</span>. Fall happens the instant a forward peak reaches the pit at 11 m. <span class="why">Each step is 1 m in 1 s, so distance in metres equals elapsed seconds within a burst.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Track net position after each full cycle: 0 → 2 → 4 → 6 (after cycles 1, 2, 3), each taking 8 s ⇒ <b>24 s</b> for three cycles.</div>
+<div class="step">2. Check the forward peaks along the way: cycle 1 peaks at 5, cycle 2 at 2+5 = 7, cycle 3 at 4+5 = 9 — all below 11, so he has not fallen yet.<span class="why">9 &lt; 11, so after 3 cycles he is safely back at 6 m.</span></div>
+<div class="step">3. Start cycle 4 from x = 6 m and step forward: 7, 8, 9, 10, <b>11 m</b> — he reaches the pit on the 5th forward step.</div>
+<div class="step">4. Time for those 5 forward steps = <b>5 s</b> (1 s each).</div>
+<div class="step">5. Total time = 24 s + 5 s = <b>29 s</b> — option (a). He falls before completing cycle 4.</div>
+<pre>
+ cycle  start  fwd-peak  end   time(s)
+   1      0       5       2      8
+   2      2       7       4     16
+   3      4       9       6     24
+   4      6      11(pit)   -    24+5=29   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Solve "how many whole cycles keep the forward peak below the target", then finish with a partial forward burst. Trap: using net rate 2 m per 8 s gives 11/2 ≈ 5.5 cycles ⇒ 44 s — far too long, because it ignores that he tumbles in <i>during</i> a forward run and never steps back that final time.</div>
+<div class="final">Answer: (a) 29 s.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">During the first 18 min of a 60 min trip, a car has an average speed of 11 m/s. What should be the average speed for the remaining 42 min so the car averages 21 m/s for the entire trip? (a) 25.3 (b) 29.2 (c) 31 (d) 35.6 ms⁻¹ (Ans: 25.3 ms⁻¹)</td><td class="topic">Weighted average speed</td><td><a href="https://www.youtube.com/watch?v=klAHXgQvElY" target="_blank">A train travels at a speed of 60 km/h for 0.52 h at 30 km/h for the next 0.24 h and then at 70 km/h</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>25.3 ms⁻¹</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a <b>reverse</b> weighted-average problem: the target average for the whole trip is given and we must back out the speed needed in the remaining stretch. The trick is to work in <b>distances</b>, not speeds — speeds cannot be averaged directly when the times differ, but distances always add. So: compute the total distance the target average demands, subtract what has already been covered, and divide the shortfall by the time left.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">s = v × t</span> per stage and <span class="eq">v_avg = s_total ÷ t_total</span>. Rearranged for what we need: <span class="eq">v₂ = (v_avg·t_total − v₁·t₁) ÷ t₂</span>, with v in <b>m s⁻¹</b> and t in <b>s</b>. <span class="why">Speeds are given in m s⁻¹, so every time must be converted from minutes to seconds (×60) before substituting, or the units will not cancel.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Convert all times to seconds: t_total = 60 min × 60 = <b>3600 s</b>; t₁ = 18 min × 60 = <b>1080 s</b>; t₂ = 42 min × 60 = <b>2520 s</b>.<span class="why">Speeds are in m s⁻¹, so time must be in s for v × t to give metres. Check: 1080 + 2520 = 3600 s ✓</span></div>
+<div class="step">2. Total distance the whole trip must cover: s_total = v_avg × t_total = 21 m s⁻¹ × 3600 s = <b>75600 m</b>.<span class="why">This is what "averaging 21 m/s for the entire trip" demands in absolute terms.</span></div>
+<div class="step">3. Distance already covered in the first 18 min: s₁ = 11 m s⁻¹ × 1080 s = <b>11880 m</b>.</div>
+<div class="step">4. Distance still required: s₂ = s_total − s₁ = 75600 − 11880 = <b>63720 m</b>.</div>
+<div class="step">5. Speed needed over the remaining 42 min: v₂ = s₂ ÷ t₂ = 63720 m ÷ 2520 s.</div>
+<div class="step">6. Divide: 63720 ÷ 2520 = <b>25.29 ≈ 25.3 m s⁻¹</b>, which is option (a).<span class="why">Sanity check: the car ran slow (11 m/s) early, so it must run above the 21 m/s target for the rest — and 25.3 &gt; 21 ✓</span></div>
+<pre>
+ stage        t(s)     v(m/s)    s = v·t (m)
+ first 18min  1080     11        11880
+ last 42min   2520     v₂ = ?    63720   ← 75600 − 11880
+ ──────────────────────────────────────────
+ whole trip   3600     21        75600   ← target: 21 × 3600
+
+ v₂ = 63720 / 2520 = 25.3 m/s
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For "what speed is needed to hit a target average" always go through <b>total distance</b> — never average the speeds. Note the minutes cancel in the ratio, so you could equally work in minutes throughout (21×60 − 11×18)/42 = 25.3, saving the ×60 conversions since they appear on both sides. Trap: (2×21 − 11) = 31 m s⁻¹ is option (c), the answer you get by wrongly assuming the two stages have <i>equal</i> times.</div>
+<div class="final">Answer: (a) 25.3 ms⁻¹.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">The coordinates of a moving particle at any time t are given by x = αt³ and y = βt³. The speed of the particle at time t is given by: (a) √(α²+β²) (b) t²√(α²+β²) (c) 3t√(α²+β²) (d) 3t²√(α²+β²) (Ans: 3t²√(α²+β²))</td><td class="topic">Speed from parametric coordinates</td><td><a href="https://www.youtube.com/watch?v=2u2geppQDco" target="_blank">The coordinates of a moving particle at any time t are given by x = αt³ and y = βt³...</a> · <a href="https://www.youtube.com/watch?v=WqmX2rxgM3I" target="_blank">the coordinates of a moving particle at any time t are given by x=alpha t^3 and beta t^3 — the speed</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>3t²√(α² + β²)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The particle moves in a plane, so its speed is the <b>magnitude of the velocity vector</b>, built from the two component velocities v<sub>x</sub> and v<sub>y</sub>. Each coordinate is differentiated with respect to time independently, then combined by Pythagoras. Speed is always a non-negative scalar.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>x</sub> = dx/dt</span>, <span class="eq">v<sub>y</sub> = dy/dt</span>, <span class="eq">speed = √(v<sub>x</sub>² + v<sub>y</sub>²)</span>. Use the power rule <span class="eq">d(t³)/dt = 3t²</span>. <span class="why">α and β are constants, so they pass straight through the derivative.</span> Given: x = αt³, y = βt³.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Differentiate x: v<sub>x</sub> = d(αt³)/dt = <b>3αt²</b>.</div>
+<div class="step">2. Differentiate y: v<sub>y</sub> = d(βt³)/dt = <b>3βt²</b>.</div>
+<div class="step">3. Speed = √(v<sub>x</sub>² + v<sub>y</sub>²) = √((3αt²)² + (3βt²)²) = √(9α²t⁴ + 9β²t⁴).</div>
+<div class="step">4. Factor the common 9t⁴ out of the root: = √(9t⁴) · √(α² + β²) = <b>3t²√(α² + β²)</b>.<span class="why">√(9t⁴) = 3t² since t ≥ 0.</span></div>
+<div class="step">5. This is option (d); the t² factor shows the speed grows quadratically with time.</div>
+<pre>
+ x = a t^3   ->  vx = 3 a t^2
+ y = b t^3   ->  vy = 3 b t^2
+ speed = sqrt(vx^2 + vy^2)
+       = sqrt(9 t^4 (a^2+b^2))
+       = 3 t^2 sqrt(a^2 + b^2)          &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Pull the shared t-power and the 3 <i>out</i> of the square root in one move rather than expanding — √(9α²t⁴+9β²t⁴) = 3t²√(α²+β²) instantly. Trap: option (c) 3t√(α²+β²) comes from mis-differentiating t³ as t² × (extra t lost) or treating x = αt²; and forgetting to square before rooting drops the t² down to t.</div>
+<div class="final">Answer: (d) 3t²√(α² + β²).</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A body covers one-third of the distance with velocity v1, the second one-third with velocity v2, and the remaining distance with velocity v3. The average velocity is: (a) (v1+v2+v3)/3 (b) 3v1v2v3/(v1v2+v2v3+v3v1) (c) (v1v2+v2v3+v3v1)/3 (d) v1v2v3/3 (Ans: option b)</td><td class="topic">Average velocity, three equal-distance thirds</td><td><a href="https://www.youtube.com/watch?v=gXXXZfZacJ8" target="_blank">A body covers one-third of the distance with a velocity v1, the second one-third of the distance…</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>3υ<sub>1</sub>υ<sub>2</sub>υ<sub>3</sub>/(υ<sub>1</sub>υ<sub>2</sub> + υ<sub>2</sub>υ<sub>3</sub> + υ<sub>3</sub>υ<sub>1</sub>)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> When a trip is split into <b>equal distances</b> at different speeds, the correct average is total-distance ÷ total-time — which turns out to be the <b>harmonic-type mean</b>, not the plain arithmetic mean. The slow stages take longer, so they weigh the average downward. Here all three thirds are equal in distance, so this is the three-speed harmonic mean.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>avg</sub> = total distance ÷ total time</span>, with each stage time <span class="eq">t<sub>i</sub> = (d/3)/v<sub>i</sub></span>. <span class="why">Equal distances d/3 let the d cancel, leaving a formula in the speeds only.</span> Given: three thirds at v₁, v₂, v₃.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let total distance = d; each third = <b>d/3</b>.</div>
+<div class="step">2. Stage times: t₁ = (d/3)/v₁, t₂ = (d/3)/v₂, t₃ = (d/3)/v₃.</div>
+<div class="step">3. Total time t = (d/3)(1/v₁ + 1/v₂ + 1/v₃).<span class="why">Times add because the stages are consecutive.</span></div>
+<div class="step">4. v<sub>avg</sub> = d ÷ t = d ÷ [(d/3)(1/v₁ + 1/v₂ + 1/v₃)] = <b>3 ÷ (1/v₁ + 1/v₂ + 1/v₃)</b>.<span class="why">The d cancels top and bottom.</span></div>
+<div class="step">5. Put the bracket over a common denominator v₁v₂v₃: v<sub>avg</sub> = <b>3v₁v₂v₃ ÷ (v₁v₂ + v₂v₃ + v₃v₁)</b> — option (b).</div>
+<pre>
+ each third = d/3
+ t_i = (d/3)/v_i
+ t = (d/3)(1/v1 + 1/v2 + 1/v3)
+ v_avg = d/t = 3/(1/v1+1/v2+1/v3)
+       = 3 v1 v2 v3 / (v1v2 + v2v3 + v3v1)   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Equal distances ⇒ harmonic mean; equal times ⇒ arithmetic mean. Recognise "one-third … one-third … one-third" as equal-distance and jump straight to 3/(Σ 1/v). Trap: option (a) (v₁+v₂+v₃)/3 is the arithmetic mean — correct only if the three thirds took equal <i>times</i>, which they do not.</div>
+<div class="final">Answer: (b) 3v₁v₂v₃/(v₁v₂ + v₂v₃ + v₃v₁).</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">Choose the wrong statement: (a) Zero velocity of a particle does not necessarily mean its acceleration is zero (b) Zero acceleration does not necessarily mean its velocity is zero (c) If the speed of a particle is constant, its acceleration must be zero (d) None of these (Ans: (c) is wrong)</td><td class="topic">Velocity/acceleration — identify wrong statement</td><td><a href="https://www.youtube.com/watch?v=iFMlL2DlyxY" target="_blank">Choose the wrong statement || can a particle have acceleration with zero velocity</a> · <a href="https://www.youtube.com/watch?v=9LhcqjVu-fc" target="_blank">Select incorrect statement(s): Zero acceleration of a particle does not necessarily mean that its...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>If speed of a particle is constant, its acceleration must be zero.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Velocity and acceleration are <b>independent</b> vectors: knowing one is zero tells you nothing forced about the other at that instant. The question asks for the <i>wrong</i> statement, so test each against a physical counter-example. The decisive case is <b>uniform circular motion</b>, where speed is constant yet acceleration is not zero.</div>
+<div class="seg"><span class="lbl">Formula</span> acceleration <span class="eq">a = dv/dt</span> acts on the <i>velocity vector</i>, not just its magnitude. A change in direction alone (turning) is still an acceleration: <span class="eq">a<sub>c</sub> = v²/r</span> in circular motion. <span class="why">"Speed constant" fixes only |v|, leaving the direction free to change.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Test (a): a ball thrown up is momentarily at rest at the top (v = 0) yet a = g downward. So zero velocity need not mean zero acceleration — statement (a) is <b>TRUE</b>.</div>
+<div class="step">2. Test (b): a body in uniform motion has constant non-zero v with a = 0. So zero acceleration need not mean zero velocity — statement (b) is <b>TRUE</b>.</div>
+<div class="step">3. Test (c): in uniform circular motion the speed is constant, but the direction of v changes, giving centripetal acceleration a = v²/r ≠ 0. So "constant speed ⇒ zero acceleration" is <b>FALSE</b>.</div>
+<div class="step">4. Since (c) is the false claim, it is the wrong statement asked for; (d) "none of these" is therefore not chosen.</div>
+<div class="step">5. Conclusion: the wrong statement is <b>(c)</b>.</div>
+<pre>
+ statement                          verdict
+ (a) v=0 need not give a=0          TRUE  (top of throw)
+ (b) a=0 need not give v=0          TRUE  (uniform motion)
+ (c) const speed => a=0             FALSE (circular)  &lt;-- wrong
+ (d) none of these                  not applicable
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> The single killer example is uniform circular motion: constant speed, non-zero (centripetal) acceleration. Any statement equating "constant speed" with "zero acceleration" is automatically false. Trap: reading "speed" as "velocity" — if velocity (a vector) were truly constant, acceleration <i>would</i> be zero, but constant speed alone allows direction to change.</div>
+<div class="final">Answer: (c) — "If the speed of a particle is constant, its acceleration must be zero" is the wrong statement.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">The displacement of a body along the x-axis depends on time as √x = t + 1. Then the velocity of the body: (a) increases with time (b) decreases with time (c) independent of time (d) none of these (Ans: decreases with time)</td><td class="topic">Velocity from a displacement–time relation</td><td><a href="https://www.youtube.com/watch?v=-Ottxfb9wyI" target="_blank">The displacement of a body along X-axis depends on time as √x = t+1. Then, the velocity of body</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval flagged"><span class="lt">a</span>increases with time <span class="warn" title="Answer-key letter (a) &ldquo;increases with time&rdquo; &mdash; and the key is right: &radic;x = t+1 &rArr; x = (t+1)&sup2; &rArr; v = 2(t+1), which grows with t. This row&rsquo;s question cell asserts &ldquo;(Ans: decreases with time)&rdquo; = option (b), which is OUR error, not the book&rsquo;s. There is no solution row here; checked by inspection of the printed stem.">⚠</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The relation is given for √x, so first solve for x(t), then differentiate to get velocity. Whether velocity rises or falls with time is read off the <i>sign of dv/dt</i> (the acceleration). A linear position-in-(t+1) squared law gives a velocity that keeps growing.</div>
+<div class="seg"><span class="lbl">Formula</span> from <span class="eq">√x = t + 1</span> square to get <span class="eq">x = (t + 1)²</span>, then <span class="eq">v = dx/dt</span> and <span class="eq">a = dv/dt</span>. <span class="why">Squaring is valid since √x is the principal (non-negative) root; x = (t+1)² ≥ 0.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Square both sides: x = (t + 1)² = <b>t² + 2t + 1</b>.</div>
+<div class="step">2. Velocity: v = dx/dt = 2t + 2 = <b>2(t + 1)</b>.</div>
+<div class="step">3. As t increases, (t + 1) increases, so v = 2(t + 1) <b>increases with time</b>.</div>
+<div class="step">4. Confirm with acceleration: a = dv/dt = <b>+2 m/s²</b>, a positive constant — velocity rises steadily.<span class="why">Positive a means v is always growing, never falling.</span></div>
+<div class="step">5. Hence the velocity increases with time — option (a).</div>
+<pre>
+ sqrt(x) = t+1  ->  x = (t+1)^2
+ v = dx/dt = 2(t+1)
+ a = dv/dt = +2 m/s^2  (constant, >0)
+ v grows as t grows        &lt;-- increases with time (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Always clear the radical first (square √x = t+1) before differentiating — never differentiate √x directly here. Trap: this row's question stem prints "(Ans: decreases with time)", but that is an error: x = (t+1)² gives v = 2(t+1) with a = +2 m/s², so the velocity clearly <b>increases</b>. The answer-key letter (a) is the correct one.</div>
+<div class="final">Answer: (a) increases with time (v = 2(t+1), constant acceleration +2 m/s²).</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">Which statement describes an impossible case in one/two-dimensional motion? (a) A body has zero velocity and is still accelerating (b) The velocity of an object reverses direction when acceleration is constant (c) An object increases in speed as its acceleration decreases (d) None of these</td><td class="topic">Possible vs impossible velocity–acceleration cases</td><td><a href="https://www.youtube.com/watch?v=iFMlL2DlyxY" target="_blank">Choose the wrong statement || can a particle have acceleration with zero velocity</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>None of these.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The engine of this question is that <b>velocity and acceleration are independent vectors</b> at any instant. Acceleration is the <i>rate of change</i> of velocity, so it is set by what velocity is <i>about to do</i>, not by what velocity currently is. That decoupling means a body can have zero velocity yet non-zero acceleration, or a large velocity with zero acceleration. We must test each option and find the one that is genuinely impossible.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">a⃗ = dv⃗/dt</span> — v⃗ in <b>m s⁻¹</b>, a⃗ in <b>m s⁻²</b>. <span class="why">A derivative at an instant is fixed by the neighbourhood of that instant, not by the value at it — exactly why v = 0 puts no constraint on a.</span> Speed changes only through the component of a⃗ <i>along</i> v⃗: <span class="eq">d|v⃗|/dt = a⃗·v̂</span>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Test (a) "zero velocity and still accelerating": a ball thrown straight up is momentarily at rest at the <b>top</b> of its flight (v = 0 m s⁻¹) yet still has a = g = <b>9.8 m s⁻²</b> downward.<span class="why">Assuming g = 9.8 m s⁻² and neglecting air resistance. Gravity never switches off — that is why the ball does not hang there but falls back. So this is entirely POSSIBLE.</span></div>
+<div class="step">2. Test (b) "velocity reverses direction when acceleration is constant": the same projectile has constant a = −9.8 m s⁻², and its velocity runs from +u (up) through 0 to −u (down) — a clean reversal under constant acceleration ⇒ <b>POSSIBLE</b>.</div>
+<div class="step">3. Test (c) "an object increases in speed as its acceleration decreases": let a = 5 m s⁻² fall to 2 m s⁻² while staying <b>positive</b> and along v⃗. Speed still grows the whole time — just less briskly ⇒ <b>POSSIBLE</b>.<span class="why">Speed rises whenever a⃗·v̂ &gt; 0; a <i>decreasing but still positive</i> acceleration keeps that product positive.</span></div>
+<div class="step">4. Every one of (a), (b), (c) is physically realisable, so none of them is the impossible case.</div>
+<div class="step">5. Therefore the answer is <b>(d) None of these</b> — there is no impossible case among the options.</div>
+<pre>
+ option   claim                             example                       possible?
+ (a)      v = 0 but a ≠ 0                   ball at top of its flight     YES
+ (b)      v reverses, a constant            projectile: +u → 0 → −u       YES
+ (c)      speed ↑ while a ↓                 a: 5 → 2 m/s² (still +ve)     YES
+ (d)      none of these are impossible                                    ← ANSWER
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Keep the projectile at the <b>top of its flight</b> loaded as your universal counter-example — it instantly kills "v = 0 ⇒ a = 0" claims. And separate the two ideas: the <b>sign</b> of a⃗·v̂ decides whether speed rises or falls; the <b>size</b> of a only decides how fast it changes. Trap: "acceleration decreasing" sounds like "slowing down," but slowing down requires a⃗ <i>opposite</i> to v⃗ — a smaller forward acceleration still speeds you up.</div>
+<div class="final">Answer: (d) None of these — all three cases (a), (b), (c) are physically possible.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">A particle moves on a circular path of radius R at constant speed v. Moving from point A to point B (diametrically opposite points), which are correct? (a) average speed is v (b) magnitude of average velocity is 2v/π (c) magnitude of average acceleration is 2v²/(πR) (d) average velocity is zero (Ans: a, b, c correct)</td><td class="topic">Average velocity/acceleration — circular path</td><td><a href="https://www.youtube.com/watch?v=zz8SFX3YAdc" target="_blank">A particle is moving with a constant speed V in a circle — magnitude of average velocity</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">abc</span>average speed is v; the magnitude of average velocity is 2v/π; the magnitude of average acceleration is 2v²/πR</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The book's figure shows A and B at the two ends of a horizontal diameter (B on the left, A on the right), with the particle travelling from A to B — so it covers <b>exactly half the circle</b>. Three different "averages" are on trial and each has its own definition: average <b>speed</b> uses the arc length; average <b>velocity</b> uses the straight-line displacement (the diameter); average <b>acceleration</b> uses the <i>change in the velocity vector</i>. All three share the same elapsed time, which is the arc divided by the constant speed v.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">t = arc ÷ v = πR ÷ v</span> (m ÷ m s⁻¹ = s); <span class="eq">avg speed = arc ÷ t</span>; <span class="eq">|avg velocity| = |Δr⃗| ÷ t</span>; <span class="eq">|avg acceleration| = |Δv⃗| ÷ t</span> in <b>m s⁻²</b>. <span class="why">Semicircular arc = πR; the straight-line displacement A→B is the diameter = 2R.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Time taken: the arc from A to B is half the circumference = <b>πR</b>, travelled at constant speed v, so t = <b>πR/v</b> s.<span class="why">Speed is constant, so time = path ÷ speed exactly.</span></div>
+<div class="step">2. Test (a) — average speed = arc ÷ t = πR ÷ (πR/v) = <b>v</b> ✓ <b>CORRECT</b>.<span class="why">At constant speed the average speed always equals that same speed, whatever the path.</span></div>
+<div class="step">3. Test (b) — displacement A→B is the diameter, |Δr⃗| = <b>2R</b>. So |avg velocity| = 2R ÷ (πR/v) = 2R·v/(πR) = <b>2v/π</b> ✓ <b>CORRECT</b>.<span class="why">The R cancels, leaving a speed — dimensionally sound. Note 2v/π ≈ 0.64v &lt; v, as required since |displacement| &lt; arc.</span></div>
+<div class="step">4. Test (c) — at A and at B the velocity is tangential, and the two tangents at opposite ends of a diameter are <b>antiparallel</b>: v⃗_B = −v⃗_A. So Δv⃗ = v⃗_B − v⃗_A = −2v⃗_A ⇒ |Δv⃗| = <b>2v</b> m s⁻¹.</div>
+<div class="step">5. Hence |avg acceleration| = |Δv⃗| ÷ t = 2v ÷ (πR/v) = <b>2v²/(πR)</b> ✓ <b>CORRECT</b>.<span class="why">Units check: (m s⁻¹)²/m = m s⁻², a genuine acceleration.</span></div>
+<div class="step">6. Test (d) — "average velocity is zero" would need zero displacement, but A→B is 2R apart ⇒ <b>WRONG</b>.<span class="why">Average velocity is zero only over a <i>complete</i> loop; half a loop leaves the particle a diameter away.</span></div>
+<pre>
+        ┌───────●───────┐
+     B ●- - - - O - - - -● A      A→B = half circle
+        └───────────────┘         arc = πR,  displacement = 2R
+
+  t              = πR/v
+  avg speed      = πR / (πR/v)   = v          (a) ✓
+  |avg velocity| = 2R / (πR/v)   = 2v/π       (b) ✓
+  |Δv⃗|           = |−v − (+v)|   = 2v
+  |avg accel|    = 2v / (πR/v)   = 2v²/(πR)   (c) ✓
+  avg velocity zero?  no — displacement = 2R  (d) ✗
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For <b>half a circle</b> remember the trio: avg speed = v, |avg velocity| = <b>2v/π</b>, |avg acceleration| = <b>2v²/πR</b>. The 2/π ≈ 0.64 factor is the diameter-to-semicircle ratio and shows up constantly. Trap: for the acceleration you must subtract velocities <b>as vectors</b> — |Δv⃗| = 2v, not zero, because the speed is unchanged but the direction has flipped. Only over a <i>full</i> circle do both average velocity and average acceleration vanish.</div>
+<div class="final">Answer: (a), (b) and (c) are correct — average speed = v, |average velocity| = 2v/π, |average acceleration| = 2v²/(πR).</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">If the velocity of a moving particle is v ∝ xⁿ, where x is the displacement, then: (a) n = 0 (b) n &gt; 0.5 (c) n &lt; 0.5 (d) at x = 0, the velocity and acceleration are both zero (Ans: b and d)</td><td class="topic">Velocity–displacement power relation</td><td><a href="https://www.youtube.com/watch?v=ohtt6Nvi_04" target="_blank">If velocity is proportional to square of displacement, acceleration is</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">bd</span>n &gt; 0.5; at x = 0, the velocity and acceleration both are zero</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Velocity is handed to us as a function of <b>displacement x</b>, not of time. The tool for that situation is the chain rule in the form <span class="eq">a = v·dv/dx</span>, which converts an x-dependence into an acceleration without ever solving for x(t). Option (d) then asks what must be true for <i>both</i> v and a to vanish at x = 0 — and each of those two demands its own condition on the exponent n. Reading off both conditions and taking the stricter one is the whole problem.</div>
+<div class="seg"><span class="lbl">Formula</span> Given <span class="eq">v = k·xⁿ</span> (k a constant), use <span class="eq">a = dv/dt = (dv/dx)(dx/dt) = v·dv/dx</span> — v in <b>m s⁻¹</b>, x in <b>m</b>, a in <b>m s⁻²</b>. <span class="why">dx/dt <i>is</i> v, so the chain rule turns d/dt into v·d/dx — the standard escape when time never appears in the given relation.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write the proportionality as an equation: v = <b>k·xⁿ</b>, with k &gt; 0 constant.</div>
+<div class="step">2. Differentiate with respect to x: dv/dx = <b>k·n·x⁽ⁿ⁻¹⁾</b>.<span class="why">Ordinary power rule applied to xⁿ.</span></div>
+<div class="step">3. Build the acceleration: a = v·(dv/dx) = (k xⁿ)(k n x^(n−1)) = <b>k²·n·x^(2n−1)</b> m s⁻².<span class="why">Exponents add: xⁿ · x^(n−1) = x^(2n−1).</span></div>
+<div class="step">4. Now impose "<b>velocity is zero at x = 0</b>": v = k·0ⁿ = 0 requires the exponent <b>n &gt; 0</b>.<span class="why">If n = 0 then v = k ≠ 0 (a constant speed), and if n &lt; 0 then v blows up at x = 0 — neither gives v = 0.</span></div>
+<div class="step">5. Impose "<b>acceleration is zero at x = 0</b>": a = k²n·0^(2n−1) = 0 requires 2n − 1 &gt; 0, i.e. <b>n &gt; 0.5</b>.<span class="why">If 2n−1 = 0 (n = 0.5) then a = k²/2 ≠ 0, a non-zero constant; if 2n−1 &lt; 0 then a diverges at x = 0.</span></div>
+<div class="step">6. Combine: n &gt; 0.5 is the stricter of the two and automatically satisfies n &gt; 0. So <b>(b) n &gt; 0.5</b> is exactly the condition under which <b>(d)</b> holds — both are correct together.</div>
+<div class="step">7. Reject (a) n = 0: then v = k, a constant — neither v nor a vanishes at x = 0. Reject (c) n &lt; 0.5: acceleration is then non-zero (or infinite) at x = 0.</div>
+<pre>
+ v = k·xⁿ        →   a = v·dv/dx = k²·n·x^(2n−1)
+
+ n         v at x=0        a at x=0            (d) both zero?
+ n = 0     k   (≠0)        0                   no  — v ≠ 0
+ 0&lt;n&lt;0.5   0               ∞  (2n−1 &lt; 0)       no  — a diverges
+ n = 0.5   0               k²/2  (≠0)          no  — a constant
+ n &gt; 0.5   0               0   (2n−1 &gt; 0)      YES  ✓  ← (b) and (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever v is given in terms of <b>x</b> rather than t, reach straight for <span class="eq">a = v·dv/dx</span> — it is the single most useful identity in variable-acceleration kinematics. Here the punchline is that the exponent of x in a is <b>2n − 1</b>, so the acceleration condition (n &gt; 0.5) is always stricter than the velocity condition (n &gt; 0). Trap: n &gt; 0 is enough to make v vanish at the origin but <i>not</i> a — options (b) and (d) stand or fall together, so an answer with one but not the other is incomplete.</div>
+<div class="final">Answer: (b) and (d) — n &gt; 0.5, and at x = 0 both velocity and acceleration are zero.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 5</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">A body whose mass is 3 kg performs rectilinear motion according to s = 1 + t + t² (s in cm, t in s). Determine the kinetic energy ½mv² of the body 5 s after its start</td><td class="topic">Kinetic energy from a displacement–time equation</td><td><a href="https://www.youtube.com/watch?v=oTcq8MhQe1Y" target="_blank">A body of mass 3 kg is under a constant force, which causes a displacement s in metres...</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">1.815 × 10⁵ ergs</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Kinetic energy needs a <b>velocity</b>, but we are handed a <b>position</b> function s(t). Velocity is the time-derivative of position, so differentiate once, evaluate at the requested instant, then feed the result into ½mv². The decisive detail is the <b>unit of s</b>: the book explicitly states s is in <b>centimetres</b>, so the velocity emerges in cm s⁻¹ and <i>must</i> be converted to m s⁻¹ before the joule formula is used.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v = ds/dt</span> and <span class="eq">KE = ½mv²</span> — m in <b>kg</b>, v in <b>m s⁻¹</b>, KE in <b>J</b>. <span class="why">The joule is defined as kg·m²·s⁻², so v must be in m s⁻¹ (never cm s⁻¹) or the answer is out by 10⁴.</span> Conversion: <span class="eq">1 cm s⁻¹ = 0.01 m s⁻¹</span>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: m = <b>3 kg</b>, s = 1 + t + t² with <b>s in cm</b> and <b>t in s</b>; we want KE at t = <b>5 s</b>.</div>
+<div class="step">2. Differentiate term by term: v = ds/dt = d(1)/dt + d(t)/dt + d(t²)/dt = 0 + 1 + 2t = <b>(1 + 2t) cm s⁻¹</b>.<span class="why">The constant 1 cm is the starting position and differentiates away — an offset never affects velocity.</span></div>
+<div class="step">3. Evaluate at t = 5 s: v = 1 + 2(5) = 1 + 10 = <b>11 cm s⁻¹</b>.</div>
+<div class="step">4. Convert to SI: v = 11 cm s⁻¹ × (1 m / 100 cm) = <b>0.11 m s⁻¹</b>.<span class="why">This is the step the whole question is built around — s was given in centimetres.</span></div>
+<div class="step">5. Substitute into KE = ½mv²: KE = ½ × 3 kg × (0.11 m s⁻¹)².</div>
+<div class="step">6. Square the velocity: (0.11)² = <b>0.0121 m² s⁻²</b>.</div>
+<div class="step">7. Multiply out: KE = 0.5 × 3 × 0.0121 = 1.5 × 0.0121 = <b>0.01815 J</b> ≈ <b>1.82 × 10⁻² J</b> (about 18.2 mJ).<span class="why">Units: kg × m² s⁻² = J ✓</span></div>
+<pre>
+ s(t) = 1 + t + t²          [s in cm, t in s]
+ v(t) = ds/dt = 1 + 2t      [cm/s]
+ v(5) = 1 + 10 = 11 cm/s = 0.11 m/s     ← CONVERT before ½mv²
+
+ KE = ½ · 3 kg · (0.11 m/s)²
+    = 1.5 × 0.0121
+    = 0.01815 J  ≈ 1.82 × 10⁻² J
+
+ (had you left s in metres: ½·3·11² = 181.5 J — off by 10⁴)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever a displacement equation comes with a stated unit, <b>circle it</b> — examiners plant "centimetres" precisely because ½mv² is quietly an SI-only formula, and a cm/m slip costs a factor of 10⁴ in the energy. Also note a = dv/dt = 2 cm s⁻² here: constant acceleration, so the motion is uniformly accelerated. Trap: 181.5 J is the answer you get by ignoring the cm and it will always be on the option list.</div>
+<div class="final">Answer: KE ≈ 1.82 × 10⁻² J (0.01815 J ≈ 18.2 mJ), taking s in centimetres as the book states.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A particle moving in a straight line covers half the distance with speed 3 m/s. The other half is covered in two equal time intervals with speeds 4.5 m/s and 7.5 m/s. Find the average speed. (a) 4.0 (b) 5.0 (c) 5.5 (d) 4.8 m/s (Ans: 4.0 m/s)</td><td class="topic">Average speed, distance + time mix</td><td><a href="https://www.youtube.com/watch?v=FkdRSrxVgRg" target="_blank">A particle travels half the distance with a velocity of 6 ms⁻¹. The remaining half distance...</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>4.0 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A <b>hybrid</b> problem: the first half is specified by <i>distance</i>, the second half by <i>equal times</i>. Neither the harmonic-mean nor the arithmetic-mean shortcut covers it, so we fall back on the master definition — total distance ÷ total time — and handle each half in its own currency. The standard tactic is to call the total distance <b>2d</b> (so each half is a clean d) and let d cancel at the end, which it always does since the answer cannot depend on how long the trip was.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_avg = total distance ÷ total time</span> in <b>m s⁻¹</b>. For the distance-specified half use <span class="eq">t = d ÷ v</span>; for the time-specified half use <span class="eq">d = v₂(τ) + v₃(τ)</span> where each sub-interval lasts τ <b>s</b>. <span class="why">Distances add and times add — those two facts are all that is ever needed.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let the total distance be <b>2d metres</b>, so each half is <b>d metres</b>.<span class="why">Choosing 2d rather than d keeps every fraction tidy; the symbol cancels later.</span></div>
+<div class="step">2. <b>First half</b> (given by distance): d at 3 m s⁻¹ ⇒ t₁ = d ÷ 3 = <b>d/3 s</b>.</div>
+<div class="step">3. <b>Second half</b> (given by equal times): let each of the two intervals last <b>τ s</b>. Distance covered = 4.5τ + 7.5τ = <b>12τ metres</b>.<span class="why">Each sub-interval contributes speed × τ; the two speeds simply add because the times are equal.</span></div>
+<div class="step">4. That must equal the second half, d metres: 12τ = d ⇒ τ = <b>d/12 s</b>.</div>
+<div class="step">5. Time for the whole second half: t₂ = 2τ = 2(d/12) = <b>d/6 s</b>.</div>
+<div class="step">6. Total time: t = t₁ + t₂ = d/3 + d/6 = 2d/6 + d/6 = <b>3d/6 = d/2 s</b>.</div>
+<div class="step">7. Average speed: v_avg = 2d ÷ (d/2) = 2d × 2/d = <b>4 m s⁻¹</b> — the d cancels ✓ This is option (a).<span class="why">Sanity check: 4 m/s sits between the slowest (3 m/s) and fastest (7.5 m/s) stage speeds, and leans low because the slow 3 m/s stage eats d/3 of the time versus d/6 for both fast stages combined.</span></div>
+<pre>
+ half        spec        speeds         time            distance
+ first       distance    3 m/s          t₁ = d/3        d
+ second      equal time  4.5 & 7.5      t₂ = 2τ = d/6   12τ = d
+ ────────────────────────────────────────────────────────────────
+ total                                  d/2             2d
+
+ v_avg = 2d / (d/2) = 4.0 m/s        (d cancels — as it must)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Handle each stage in the currency it is <b>given</b> in: distance-specified ⇒ compute its time as d/v; time-specified ⇒ compute its distance as v·t. Then divide the totals. The unknown d <b>always</b> cancels — if it survives to your final answer you have made an algebra slip. Trap: averaging (3 + 4.5 + 7.5)/3 = 5 m/s is option (b), planted for the plain-average reflex.</div>
+<div class="final">Answer: (a) 4.0 m/s.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A body traverses one third of the total distance with velocity 4 m/s. The remaining part is covered with velocity 2 m/s for half the time and 6 m/s for the other half. The mean velocity averaged over the whole time is: (a) 5 (b) 4 (c) 4.5 (d) 3.5 m/s (Ans: 4 m/s)</td><td class="topic">Mean velocity, distance + time mix</td><td><a href="https://www.youtube.com/watch?v=b5Jxv-j6PYg" target="_blank">A body travelling along a straight line traversed one third of the...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>4 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This trip mixes the two averaging rules: the first part is given by <b>distance</b> (a third of the total at a fixed speed) while the rest is given by <b>time</b> (two equal time-halves at two speeds). The mean velocity over the whole motion is always total-distance ÷ total-time, so we express every stage in terms of the total distance d and add the times.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>mean</sub> = d ÷ t<sub>total</sub></span>; distance stage time <span class="eq">t = (d/3)/4</span>; for the two equal-time halves each of length T, distance <span class="eq">= 2T + 6T = 8T</span>. <span class="why">Equal time-halves means the same T for the 2 m/s and 6 m/s parts.</span> Given d split as 1/3 then 2/3.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. First third: distance d/3 at 4 m/s ⇒ t₁ = (d/3)/4 = <b>d/12</b>.</div>
+<div class="step">2. Remaining distance = 2d/3, covered as two equal times T at 2 and 6 m/s: 2T + 6T = 8T = 2d/3.</div>
+<div class="step">3. Solve for T: T = (2d/3)/8 = <b>d/12</b>; so this part lasts 2T = <b>d/6</b>.</div>
+<div class="step">4. Total time = t₁ + 2T = d/12 + d/6 = d/12 + 2d/12 = <b>3d/12 = d/4</b>.<span class="why">Common denominator 12 makes the sum clean.</span></div>
+<div class="step">5. Mean velocity = d ÷ (d/4) = <b>4 m/s</b> — option (b).</div>
+<pre>
+ stage 1: d/3 at 4     t1 = d/12
+ stage 2: 8T = 2d/3 -> T = d/12, 2T = d/6
+ t_total = d/12 + d/6 = d/4
+ v_mean = d / (d/4) = 4 m/s      &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Handle each part with its own rule: distance-based ⇒ t = s/v; time-based ⇒ s = v·t with equal T. Keeping everything in the single unknown d lets it cancel at the end. Trap: naively averaging 4, 2, 6 as (4+2+6)/3 = 4 gives the right number here <i>by coincidence</i> — do not trust it; option (c) 4.5 is the arithmetic mean of the last two speeds' style traps.</div>
+<div class="final">Answer: (b) 4 m/s.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A body traverses one-third of the total distance with velocity v1. The remaining part is covered with velocity v2 for half the time and v3 for the other half. The mean velocity averaged over the whole time is: (a) 3v1(v2+v3)/(2v1+v2+v3) (b) 3v1(v2+v3)/(4v1+v2+v3) (c) v1(v2+v3)/(4v1+v2+v3) (d) v1(v2+v3)/(v1+v2+v3) (Ans: option b)</td><td class="topic">Mean velocity, distance + time mix (general)</td><td><a href="https://www.youtube.com/watch?v=b5Jxv-j6PYg" target="_blank">A body travelling along a straight line traversed one third of the...</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>3v<sub>1</sub>(v<sub>2</sub> + v<sub>3</sub>)/(4v<sub>1</sub> + v<sub>2</sub> + v<sub>3</sub>)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the <b>algebraic twin</b> of Q3 in this same level — identical structure, but with symbols v₁, v₂, v₃ in place of 4, 2 and 6 m/s. One-third of the distance is specified <i>by distance</i> (so we compute its time), and the remaining two-thirds is specified <i>by equal times</i> (so we compute its distance). Doing it in symbols is actually safer than in numbers, because the total distance s cancels visibly and the result can be checked against Q3's numeric answer at the end.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_mean = total distance s ÷ total time t</span> in <b>m s⁻¹</b>; per stage <span class="eq">t = s/v</span> and <span class="eq">s = v·t</span>. <span class="why">"Averaged over the whole time of motion" is the examiner spelling out the definition — total path ÷ total time, nothing else.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let the total distance be <b>s metres</b>. First stage = <b>s/3</b>; remaining part = <b>2s/3</b>.</div>
+<div class="step">2. <b>Stage 1</b> (given by distance): s/3 at speed v₁ ⇒ t₁ = (s/3) ÷ v₁ = <b>s/(3v₁) s</b>.</div>
+<div class="step">3. <b>Stage 2</b> (given by equal times): let it last <b>t₂ s</b> in total, split into two halves of t₂/2 each. Distance covered = v₂(t₂/2) + v₃(t₂/2) = <b>t₂(v₂+v₃)/2</b> metres.<span class="why">Each half-time contributes speed × (t₂/2); factor out t₂/2 to combine them.</span></div>
+<div class="step">4. Set that equal to the remaining distance: t₂(v₂+v₃)/2 = 2s/3.</div>
+<div class="step">5. Solve for t₂: t₂ = (2/(v₂+v₃)) × (2s/3) = <b>4s / (3(v₂+v₃)) s</b>.<span class="why">Multiply both sides by 2 then divide by (v₂+v₃).</span></div>
+<div class="step">6. Total time: t = t₁ + t₂ = s/(3v₁) + 4s/(3(v₂+v₃)). Factor out s/3: t = (s/3)·[1/v₁ + 4/(v₂+v₃)].</div>
+<div class="step">7. Combine the bracket over the common denominator v₁(v₂+v₃): [ (v₂+v₃) + 4v₁ ] ÷ [ v₁(v₂+v₃) ]. So t = (s/3)·(4v₁+v₂+v₃) / (v₁(v₂+v₃)).</div>
+<div class="step">8. Mean velocity: v_mean = s ÷ t = s × 3·v₁(v₂+v₃) / (s(4v₁+v₂+v₃)) = <b>3v₁(v₂+v₃) / (4v₁+v₂+v₃)</b> — the s cancels ✓ This is option (b).</div>
+<div class="step">9. <b>Verify against Q3</b> (v₁ = 4, v₂ = 2, v₃ = 6 m/s): 3(4)(2+6) / (4·4 + 2 + 6) = 3(4)(8) / (16+8) = 96/24 = <b>4 m s⁻¹</b> ✓ — exactly the answer Q3 states.</div>
+<pre>
+ stage        distance   spec         time
+ 1            s/3        by distance  t₁ = s/(3v₁)
+ 2            2s/3       equal times  t₂ = 4s/(3(v₂+v₃))
+ ──────────────────────────────────────────────────────────
+ total        s                       t = (s/3)·(4v₁+v₂+v₃)/(v₁(v₂+v₃))
+
+ v_mean = s/t = 3v₁(v₂+v₃) / (4v₁+v₂+v₃)      → option (b)
+
+ check with 4, 2, 6:  3·4·8 / (16+2+6) = 96/24 = 4 m/s ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> On a symbolic MCQ, <b>plug in the numbers from the numeric twin</b> (here Q3: 4, 2, 6 → 4 m/s) and test the options — it takes 20 seconds and beats deriving from scratch. The distractors separate on the coefficient of v₁ in the denominator (2v₁ vs 4v₁), which comes straight from the 2s/3 remaining distance. Trap: option (a) with 2v₁ is what you get by forgetting that the second stage covers <i>two</i>-thirds, not one-third.</div>
+<div class="final">Answer: (b) 3v₁(v₂+v₃) / (4v₁+v₂+v₃).</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A ball rolls off the top of a staircase with horizontal velocity u m/s. If the steps are h metre high and b metre wide, the ball will hit the edge of the nth step, if n = (formula in h, u, g, b) (Ans: n = 2hu²/gb²)</td><td class="topic">Projectile off a staircase — step number</td><td><a href="https://www.youtube.com/watch?v=KQ8Xr-h14w8" target="_blank">A ball rolls off the top of a staircase with a horizontal velocity u m/s. If the steps are h...</a> · <a href="https://www.youtube.com/watch?v=M_uC4Ark6AQ" target="_blank">A ball rolls off the top of a staircase with a horizontal velocity u m/s. If the steps are h...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>n = 2hu²/gb²</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The ball leaves the top edge horizontally, so it is a <b>projectile</b>: constant horizontal speed u and free vertical fall under g. The edge of the nth step sits at horizontal distance nb and vertical drop nh from the launch point. The ball "hits the edge of the nth step" when its trajectory passes exactly through that corner (nb, nh).</div>
+<div class="seg"><span class="lbl">Formula</span> horizontal <span class="eq">x = u·t</span>, vertical <span class="eq">y = ½g t²</span>. Set x = nb and y = nh at the same instant. <span class="why">Time is the link between the two: eliminate t to relate n, h, u, g, b.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Edge of nth step lies at x = <b>nb</b> (horizontal) and y = <b>nh</b> (drop).</div>
+<div class="step">2. Horizontal motion: nb = u·t ⇒ t = <b>nb/u</b>.</div>
+<div class="step">3. Vertical motion: nh = ½g t² = ½g (nb/u)² = <b>½g n²b²/u²</b>.</div>
+<div class="step">4. Cancel one factor of n from both sides: h = ½g n b²/u².<span class="why">n on the left cancels one n from n² on the right.</span></div>
+<div class="step">5. Solve for n: n = <b>2hu²/(g b²)</b> — matching the key.</div>
+<pre>
+ x = u t = n b        -> t = n b / u
+ y = (1/2) g t^2 = n h
+ n h = (1/2) g (n b / u)^2
+ h   = (1/2) g n b^2 / u^2
+ n   = 2 h u^2 / (g b^2)          &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Both the horizontal and vertical offsets scale with the <i>same</i> n, so writing x = nb and y = nh and dividing kills one power of n cleanly. Trap: forgetting to square the time (½g t²) or dropping the ½ gives n off by a factor of 2 or a wrong u-power; also the drop grows like n² while width grows like n — that mismatch is exactly what fixes the landing step.</div>
+<div class="final">Answer: n = 2hu²/(gb²).</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">A force of 40 N is responsible for the motion of a body governed by s = 2t + 2t² (s in m, t in s). What is the momentum of the body at t = 2 s? (Ans: 100 kg·m/s)</td><td class="topic">Momentum from a displacement–time equation &amp; force</td><td><a href="https://www.youtube.com/watch?v=dOA53qHdSS4" target="_blank">A force of 40 N is responsible for the motion of a body governed by the equation s=2t+2t²...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">100 kgm/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Momentum needs mass and velocity. The mass is hidden: it comes from the given constant force via Newton's second law, once we extract the acceleration from the s–t equation by differentiating twice. Then velocity at the required instant follows from the first derivative, and p = mv finishes it.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v = ds/dt</span>, <span class="eq">a = dv/dt</span>, <span class="eq">m = F/a</span>, <span class="eq">p = m·v</span>. <span class="why">Because s is quadratic in t, a is constant, so a single mass value works for all t.</span> Given F = 40 N, s = 2t + 2t².</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Velocity: v = ds/dt = d(2t + 2t²)/dt = <b>2 + 4t</b> (m/s).</div>
+<div class="step">2. Acceleration: a = dv/dt = <b>4 m/s²</b> (constant).</div>
+<div class="step">3. Mass from Newton's law: m = F/a = 40/4 = <b>10 kg</b>.</div>
+<div class="step">4. Velocity at t = 2 s: v = 2 + 4(2) = <b>10 m/s</b>.</div>
+<div class="step">5. Momentum: p = m·v = 10 × 10 = <b>100 kg·m/s</b>.<span class="why">Units: kg × m/s = kg·m/s ✓.</span></div>
+<pre>
+ s = 2t + 2t^2
+ v = ds/dt = 2 + 4t   -> v(2) = 10 m/s
+ a = dv/dt = 4 m/s^2
+ m = F/a = 40/4 = 10 kg
+ p = m v = 10*10 = 100 kg.m/s     &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When a force is quoted with an s–t law, the acceleration is constant (differentiate twice) so mass = F/a is a one-liner. Trap: plugging t = 2 into s or v before finding m, or using the average velocity — momentum needs the <i>instantaneous</i> v at t = 2 s (10 m/s), giving 100 kg·m/s, not the value from s(2) = 12 m.</div>
+<div class="final">Answer: 100 kg·m/s.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">A point moves in a straight line so that its distance from the start at time t equals s = ¼t⁴ − 4t³ + 16t². (i) At what times was the point at its starting position? (ii) At what times is its velocity equal to zero?</td><td class="topic">Position &amp; velocity zero from a quartic s(t)</td><td><a href="https://www.youtube.com/watch?v=WzwwtfYBaBs" target="_blank">A point moves in a straight line so that its distance s from the start in time t is equal to s=...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">(i) 0, 8 sec (ii) 0, 4, 8 sec</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two separate questions from one position function s(t) = ¼t⁴ − 4t³ + 16t². "At the starting position" means <b>s = 0</b> again (displacement back to the origin), while "velocity zero" means <b>ds/dt = 0</b>. Both reduce to factorising a polynomial and reading off its roots; t ≥ 0 since time cannot be negative.</div>
+<div class="seg"><span class="lbl">Formula</span> starting position ⇒ solve <span class="eq">s(t) = 0</span>; velocity zero ⇒ solve <span class="eq">v = ds/dt = 0</span>, where <span class="eq">v = t³ − 12t² + 32t</span>. <span class="why">Factor out the common powers of t first — it exposes the repeated and simple roots.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (i) Set s = 0: ¼t⁴ − 4t³ + 16t² = 0. Factor t²: t²(¼t² − 4t + 16) = 0.</div>
+<div class="step">2. Multiply the bracket by 4: t² − 16t + 64 = (t − 8)² = 0 ⇒ t = 8. Together with t² = 0: <b>t = 0 and t = 8 s</b>.<span class="why">(t−8)² is a perfect square, so t = 8 is a repeated (grazing) root.</span></div>
+<div class="step">3. (ii) Differentiate: v = ds/dt = t³ − 12t² + 32t.</div>
+<div class="step">4. Factor: v = t(t² − 12t + 32) = t(t − 4)(t − 8).</div>
+<div class="step">5. Set v = 0 ⇒ <b>t = 0, 4, 8 s</b> — the instants the point is momentarily at rest.</div>
+<pre>
+ s = (1/4)t^4 - 4t^3 + 16t^2
+ (i) s=0: t^2 (t-8)^2/4 = 0 -> t = 0, 8 s      &lt;-- answer(i)
+ v = ds/dt = t^3 - 12t^2 + 32t
+           = t(t-4)(t-8)
+ (ii) v=0: t = 0, 4, 8 s                       &lt;-- answer(ii)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Factor out the highest common power of t before hunting roots — it instantly reveals t = 0 as a solution to both parts and turns the quartic into a neat perfect square (t−8)². Trap: cancelling a t and losing the t = 0 root, or confusing "starting position" (s = 0) with "velocity zero" (ds/dt = 0) — the extra rest instant t = 4 s appears only in the velocity condition.</div>
+<div class="final">Answer: (i) t = 0 s and 8 s;  (ii) t = 0 s, 4 s and 8 s.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">A particle's x-t graph is a smooth curve with slope decreasing linearly from +v0 to 0 over time T. One or more may be correct: (a) average speed = area under the v-t curve ÷ T (b) instantaneous speed at t=0 = slope of the x-t graph at t=0 (c) displacement = algebraic area under the a-t graph (d) if displacement is zero over T, average velocity is zero</td><td class="topic">x-t / v-t graph — multiple correct</td><td><a href="https://www.youtube.com/watch?v=7UvrKzOSe6A" target="_blank">The position (x)-time (t) graph for a particle moving along a straight line</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">abd</span>Average speed equals total area under the v–t curve divided by T; Instantaneous speed at t=0 equals the slope of the x–t graph at t=0; If displacement is zero over T, average velocity is zero.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Everything turns on the <b>graph dictionary</b>: on an x-t graph the <i>slope</i> is velocity; on a v-t graph the <i>slope</i> is acceleration and the <i>area</i> is displacement; on an a-t graph the <i>area</i> is change in velocity. The stem says the slope of the x-t curve falls <b>linearly</b> from +v₀ to 0 over time T, which means the velocity itself is the straight line <span class="eq">v(t) = v₀(1 − t/T)</span> — positive throughout the interval and never reversing. That last fact is what lets speed and velocity agree here.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v = dx/dt</span> (slope of x-t, in <b>m s⁻¹</b>); <span class="eq">Δx = ∫v dt</span> = area under v-t (<b>m</b>); <span class="eq">Δv = ∫a dt</span> = area under a-t (<b>m s⁻¹</b>); <span class="eq">avg speed = distance ÷ T</span>. <span class="why">Note the a-t area returns a <i>velocity</i> change, not a displacement — the dimensions (m s⁻² × s = m s⁻¹) settle option (c) on their own.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Translate the stem: slope of x-t decreases linearly from +v₀ to 0 ⇒ <b>v(t) = v₀(1 − t/T) m s⁻¹</b>, with v ≥ 0 for all 0 ≤ t ≤ T.</div>
+<div class="step">2. Test <b>(a)</b> "average speed = area under v-t ÷ T": area under the v-t curve gives ∫|v|dt = distance whenever v never goes negative — which holds here. So avg speed = distance ÷ T = area ÷ T ⇒ <b>CORRECT</b>.<span class="why">Because v ≥ 0 throughout, distance and displacement coincide and the plain area is the distance.</span></div>
+<div class="step">3. Test <b>(b)</b> "instantaneous speed at t = 0 equals slope of x-t at t = 0": by definition v = dx/dt, and at t = 0 that slope is <b>+v₀ m s⁻¹</b>. Since v₀ &gt; 0, its magnitude (the speed) is v₀ ⇒ <b>CORRECT</b>.</div>
+<div class="step">4. Test <b>(c)</b> "displacement = algebraic area under the a-t graph": the a-t area is ∫a dt = <b>Δv</b>, a change in velocity, not a displacement ⇒ <b>WRONG</b>.<span class="why">Dimensional check kills it: m s⁻² × s = m s⁻¹ ≠ m. Displacement is the area under <i>v</i>-t, not a-t.</span></div>
+<div class="step">5. Test <b>(d)</b> "if displacement is zero over T, average velocity is zero": average velocity ≡ Δx/T, so Δx = 0 ⇒ v_avg = 0/T = <b>0 m s⁻¹</b> ⇒ <b>CORRECT</b> (true by definition, for any motion).</div>
+<div class="step">6. Collect the correct ones: <b>(a), (b) and (d)</b>.</div>
+<pre>
+ v(t) = v₀(1 − t/T)        [slope of x-t, falls linearly]
+
+  v |v₀●
+    |   ●●
+    |     ●●     area = ½v₀T = displacement = distance (v ≥ 0)
+    |       ●●
+  0 +─────────●──→ t
+    0         T
+
+ graph dictionary        area gives        slope gives
+ x-t                      —                velocity
+ v-t                     displacement      acceleration
+ a-t                     Δ velocity        jerk
+
+ (a) ✓   (b) ✓   (c) ✗ a-t area = Δv, not Δx   (d) ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Settle every graph option with a <b>dimensional check</b> first: area under a-t is m s⁻² × s = m s⁻¹, so it can <i>never</i> be a displacement — option (c) dies without any thought about the curve. And remember "area under v-t = <b>distance</b>" only when v keeps one sign; if v changes sign you must add the areas as <b>magnitudes</b> for distance, but <i>algebraically</i> (signed) for displacement.</div>
+<div class="final">Answer: (a), (b) and (d) are correct; (c) is wrong — the area under the a-t graph gives the change in velocity, not the displacement.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">A light, inextensible string over a smooth peg holds mass m on one side and is pulled by constant force F on the other; at rest, three coplanar concurrent forces act at the junction. One or more may be correct: (a) Lami's theorem holds in equilibrium (b) tension equals F irrespective of geometry (c) each force acts along its own line of action (d) tension is uniform if the peg is frictionless and string massless</td><td class="topic">Lami's theorem — coplanar concurrent forces</td><td><a href="https://www.youtube.com/watch?v=1Q4Jlbv9CFU" target="_blank">Equilibrium of Concurrent Forces &amp; Lami's Theorem | NEET-JEE 2026 Physics</a> · <a href="https://www.youtube.com/watch?v=t8Ded9cC7vs" target="_blank">Lami's Theorem | Concurrent Force Physics Class 11 Laws of Motion</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval flagged"><span class="lt">acd</span>If in equilibrium, the three forces satisfy Lami’s theorem; The direction of each force used in Lami is along its line of action; If the peg is frictionless and string massless, tension is uniform. <span class="warn" title="Answer-key letters (a)(c)(d). Our solution row concludes all four, including (b) &ldquo;Tension equals F irrespective of geometry&rdquo; &mdash; true for a light string over a smooth peg, where the tension is F throughout. The key omits (b); the disagreement is on (b) alone.">⚠</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two ideal-system results carry this question. First, a <b>light (massless), inextensible string over a small smooth (frictionless) peg</b> transmits tension unchanged: with no mass to accelerate and no friction to grip, the tension is the same at every point of the string, so pulling one end with force F makes the tension F everywhere. Second, <b>Lami's theorem</b> is the sine rule for exactly three <b>coplanar, concurrent</b> forces in equilibrium — which is precisely what the stem says acts at the junction. Stated assumptions: string massless and inextensible, peg smooth, system at rest.</div>
+<div class="seg"><span class="lbl">Formula</span> Lami: <span class="eq">P/sin α = Q/sin β = R/sin γ</span> — forces P, Q, R in <b>N</b>; α, β, γ are the angles <i>opposite</i> each force (they sum to 360°). Valid only for three coplanar concurrent forces in equilibrium, i.e. when <span class="eq">ΣF⃗ = 0 N</span>. <span class="why">It is just the sine rule applied to the closed force triangle that equilibrium forces must form.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Test <b>(a)</b> "in equilibrium, the three forces satisfy Lami's theorem": the stem states the junction is acted on by exactly <b>three coplanar concurrent forces</b> and the system is <b>at rest</b> — that is Lami's precise hypothesis ⇒ <b>CORRECT</b>.<span class="why">Equilibrium ⇒ the three vectors close into a triangle ⇒ the sine rule on that triangle is Lami's theorem.</span></div>
+<div class="step">2. Test <b>(b)</b> "tension equals F irrespective of geometry": take any element of the massless string. Newton's second law gives ΣF = ma with <b>m = 0 kg</b>, so the tensions on its two ends must balance exactly; the smooth peg adds no tangential friction to break this ⇒ tension is uniform and equal to the applied <b>F newtons</b>, whatever the angles ⇒ <b>CORRECT</b>.<span class="why">Angles redistribute the <i>directions</i> of the forces but cannot change the <i>magnitude</i> transmitted along an ideal string.</span></div>
+<div class="step">3. Test <b>(c)</b> "the direction of each force used in Lami is along its own line of action": a force vector acts along its line of action by definition, and Lami's angles are measured between those very lines ⇒ <b>CORRECT</b>.</div>
+<div class="step">4. Test <b>(d)</b> "if the peg is frictionless and string massless, tension is uniform": this is exactly the argument used in step 2, stated as its own claim ⇒ <b>CORRECT</b>.<span class="why">A real (massive or rough) pulley <i>would</i> make the two sides differ — the idealisation is what makes tension uniform.</span></div>
+<div class="step">5. Consistency check: since the system is at rest and tension = F throughout, the segment supporting the mass must carry mg, so <b>F = mg newtons</b> — the ideal-string result and equilibrium agree.</div>
+<div class="step">6. All four statements are correct.</div>
+<pre>
+        peg (smooth)
+           ,-.
+      ────(   )────
+     /     `-'     \
+    |               |
+    |               ↓  F (constant applied force)
+   ███ m
+   mg ↓
+
+ massless string  ⇒ ΣF = m·a = 0 on every element ⇒ T same both ends
+ smooth peg       ⇒ no tangential friction to change T across it
+ ⇒ T = F everywhere, independent of angles     (b) ✓ (d) ✓
+ 3 coplanar concurrent forces + equilibrium    (a) ✓
+ each force acts along its line of action      (c) ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "<b>Light string + smooth peg</b>" is exam code for <b>tension is uniform</b> — the moment you read it, write T = F and stop worrying about the geometry. Lami's theorem needs all three conditions (<b>three</b> forces, <b>coplanar</b>, <b>concurrent</b>, in equilibrium); if a fourth force appears or they are not concurrent, resolve into components instead. Trap: with a <i>rough</i> peg or a <i>massive</i> pulley the tensions on the two sides differ — every "irrespective of geometry" claim then collapses.</div>
+<div class="final">Answer: (a), (b), (c) and (d) are all correct — for a massless string over a smooth peg the tension is uniform and equals F, and the three coplanar concurrent forces at rest satisfy Lami's theorem.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">A particle moves on a straight line whose velocity–displacement relation is v² = 400 − 4x. Which statements are correct? (a) time in which the particle stops is 10 s (b) distance travelled in the last 2 s before rest is 4 m (c) non-uniformly accelerated motion (d) uniformly accelerated motion</td><td class="topic">Velocity–displacement relation — retardation</td><td><a href="https://www.youtube.com/watch?v=01qq44qMaHo" target="_blank">Determine the acceleration, the displacement and the distance the particle travels</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">abd</span>The time in which particle stops is 10 s; The distance travelled by particle in last 2 s before coming to rest is 4 m; This is an example of uniformly accelerated motion</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The relation <span class="eq">v² = 400 − 4x</span> is a velocity–displacement law with <b>no time in it</b>, which is the signature of the SUVAT equation <span class="eq">v² = u² + 2ax</span>. Matching the two term by term reads off the initial speed and the acceleration directly — no calculus needed. Because the matched acceleration turns out to be a <b>constant</b>, the motion is uniformly accelerated (here uniformly <i>retarded</i>), and every standard SUVAT result is then available.</div>
+<div class="seg"><span class="lbl">Formula</span> Compare with <span class="eq">v² = u² + 2ax</span> — v, u in <b>m s⁻¹</b>, a in <b>m s⁻²</b>, x in <b>m</b>. Then use <span class="eq">v = u + at</span> for the stopping time and <span class="eq">s = ut + ½at²</span> for distances. <span class="why">All of these are valid only for constant a — which is exactly what the comparison establishes.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Match the constant terms: u² = <b>400 m² s⁻²</b> ⇒ u = <b>20 m s⁻¹</b> (the initial speed).</div>
+<div class="step">2. Match the x coefficients: 2a = <b>−4 m s⁻²</b> ⇒ a = <b>−2 m s⁻²</b>.<span class="why">The minus sign means the acceleration opposes the motion — the particle is decelerating.</span></div>
+<div class="step">3. Since a = −2 m s⁻² is a <b>constant</b>, this is <b>uniformly accelerated</b> (uniformly retarded) motion ⇒ <b>(d) is CORRECT</b> and <b>(c) "non-uniformly accelerated" is WRONG</b>.</div>
+<div class="step">4. Test <b>(a)</b> — time to stop: use v = u + at with v = 0 m s⁻¹: 0 = 20 + (−2)t ⇒ 2t = 20 ⇒ t = <b>10 s</b> ⇒ <b>CORRECT</b>.<span class="why">Units: (m s⁻¹) ÷ (m s⁻²) = s ✓</span></div>
+<div class="step">5. Test <b>(b)</b> — distance in the last 2 s before rest. Reverse the motion in time: run it backwards from rest with acceleration +2 m s⁻² for 2 s.<span class="why">The final 2 s of a decelerating trip is the mirror image of the first 2 s of an accelerating one starting from rest — a standard and much faster trick.</span></div>
+<div class="step">6. Apply s = ut + ½at² with u = 0 m s⁻¹, a = 2 m s⁻², t = 2 s: s = 0 + ½(2)(2²) = ½ × 2 × 4 = <b>4 m</b> ⇒ <b>CORRECT</b>.</div>
+<div class="step">7. Cross-check (b) the direct way: position at rest is where v = 0 ⇒ 0 = 400 − 4x ⇒ x = <b>100 m</b>. At t = 8 s: x = 20(8) + ½(−2)(64) = 160 − 64 = <b>96 m</b>. Distance in the last 2 s = 100 − 96 = <b>4 m</b> ✓ Both routes agree.</div>
+<div class="step">8. Collect: <b>(a), (b) and (d)</b> are correct.</div>
+<pre>
+ v² = 400 − 4x        compare      v² = u² + 2ax
+ ─────────────────────────────────────────────────
+ u² = 400   ⇒ u = 20 m/s
+ 2a = −4    ⇒ a = −2 m/s²   (constant ⇒ UNIFORM)
+
+ (a) stop time : 0 = 20 − 2t      ⇒ t = 10 s        ✓
+ (b) last 2 s  : ½(2)(2²)         = 4 m             ✓
+     check     : x(10)=100, x(8)=96 ⇒ 100−96 = 4 m  ✓
+ (c) non-uniformly accelerated                      ✗
+ (d) uniformly accelerated                          ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> A v²-versus-x relation that is <b>linear in x</b> always means constant acceleration — just read u² off the intercept and 2a off the slope. For "distance in the <b>last</b> n seconds before stopping," <b>reverse time</b> and treat it as starting from rest: the answer is simply ½|a|n², which here is ½(2)(4) = 4 m in one line. Trap: options (c) and (d) are direct contradictions, so exactly one must be right — spotting that a is constant resolves both at once.</div>
+<div class="final">Answer: (a), (b) and (d) are correct — u = 20 m s⁻¹, a = −2 m s⁻² (uniform), stopping time 10 s, and 4 m covered in the last 2 s.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 6</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">A particle goes from A to B and back to A with nonzero speeds. Which statement is correct? (a) average speed is zero (b) average velocity is zero (c) average velocity equals the harmonic mean of the two speeds (d) average speed equals the arithmetic mean of the two speeds (Ans: b)</td><td class="topic">Average velocity/speed — round trip</td><td><a href="https://www.youtube.com/watch?v=LnXH7-_vruc" target="_blank">Choose the correct statement(s): We can have a motion having zero displacement and nonzero...</a> · <a href="https://www.youtube.com/watch?v=z-9yqH12p-Y" target="_blank">Pick the correct statements: Average speed of a particle in a given time is never less than...</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>Average velocity is zero.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> "A to B and <b>back to A</b>" is a closed trip: the particle finishes exactly where it started. Displacement is therefore zero while the distance travelled is not, and the two averages separate completely. <b>Average velocity</b> (built on displacement) vanishes; <b>average speed</b> (built on path length) stays firmly non-zero because the speeds are stated to be non-zero. Each option then tests whether you know which quantity is built on which.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v⃗_avg = Δr⃗ ÷ Δt</span> and <span class="eq">speed_avg = total distance ÷ Δt</span>, both in <b>m s⁻¹</b>. For a round trip over <b>equal distances</b> at speeds v₁ and v₂, the average speed is the harmonic mean <span class="eq">2v₁v₂/(v₁+v₂)</span>. <span class="why">The out and back legs cover the same distance d, so the times d/v₁ and d/v₂ differ — forcing a harmonic, not arithmetic, mean.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set up: let AB = <b>d metres</b>. Total distance = d + d = <b>2d m</b>; net displacement = <b>0 m</b> (start and end coincide).</div>
+<div class="step">2. Test <b>(a)</b> "average speed is zero": average speed = 2d ÷ Δt, and with d &gt; 0 and non-zero speeds this is strictly positive ⇒ <b>WRONG</b>.<span class="why">Average speed can only be zero if the body never moves at all.</span></div>
+<div class="step">3. Test <b>(b)</b> "average velocity is zero": v⃗_avg = Δr⃗/Δt = 0 m ÷ Δt = <b>0 m s⁻¹</b> ⇒ <b>CORRECT</b>.<span class="why">The displacement vector from A back to A has zero length, and dividing zero by any finite time is still zero.</span></div>
+<div class="step">4. Test <b>(c)</b> "average velocity equals the harmonic mean of the two speeds": the average <i>velocity</i> is 0 m s⁻¹, whereas the harmonic mean 2v₁v₂/(v₁+v₂) is non-zero ⇒ <b>WRONG</b>.<span class="why">The harmonic mean is the average <b>speed</b> of this trip, not the average velocity — the option swaps the two words.</span></div>
+<div class="step">5. Test <b>(d)</b> "average speed equals the arithmetic mean of the two speeds": with equal <i>distances</i> the correct mean is harmonic, 2v₁v₂/(v₁+v₂), not (v₁+v₂)/2 ⇒ <b>WRONG</b>.<span class="why">Concretely, 60 and 40 km/h over equal distances give 48 km/h, not 50 km/h — as computed in the Board Q1 solution above.</span></div>
+<div class="step">6. Only <b>(b)</b> survives.</div>
+<pre>
+   A ●───────────────● B      out : distance d at v₁
+     ●───────────────●        back: distance d at v₂
+     (finish = start)
+
+ total distance = 2d      ⇒ avg speed    = 2d/Δt ≠ 0   (a) ✗
+ displacement   = 0       ⇒ avg velocity = 0/Δt  = 0   (b) ✓
+ avg speed (equal dists)  = 2v₁v₂/(v₁+v₂)  ← harmonic  (c) ✗ (that's speed)
+ arithmetic mean (v₁+v₂)/2 would need equal TIMES       (d) ✗
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Closed trip ⇒ <b>average velocity = 0</b>, full stop. Then the only live question is what the average <i>speed</i> is: <b>equal distances ⇒ harmonic mean</b>, <b>equal times ⇒ arithmetic mean</b>. Options (c) and (d) are built by attaching the right formula to the wrong quantity — read "velocity" versus "speed" in each option before checking its algebra.</div>
+<div class="final">Answer: (b) Average velocity is zero.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">For motion along a straight line with variable acceleration, which assertion is correct? (a) acceleration equals the slope of the x-t graph (b) velocity equals the area under the a-t graph (c) displacement equals the area under the v-t graph (d) average speed equals (u+v)/2 for any motion (Ans: c)</td><td class="topic">Variable acceleration — graph relationships</td><td><a href="https://www.youtube.com/watch?v=WG8JQhhV8xE" target="_blank">Intro velocity time graph and slope of a v-t graph, acceleration time graph and area of an a-t graph</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Displacement equals area under the v–t graph.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a pure test of the <b>graph dictionary</b>, and the phrase "variable acceleration" is the filter: any statement that secretly assumes constant a must be rejected. The dictionary itself never changes — <i>slopes</i> move you <b>down</b> the chain x → v → a (each is a derivative of the one before), and <i>areas</i> move you <b>up</b> it a → v → x (each is an integral). Three of the options scramble that chain; one respects it.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v = dx/dt</span> (slope of x-t, <b>m s⁻¹</b>); <span class="eq">a = dv/dt</span> (slope of v-t, <b>m s⁻²</b>); <span class="eq">Δx = ∫v dt</span> (area under v-t, <b>m</b>); <span class="eq">Δv = ∫a dt</span> (area under a-t, <b>m s⁻¹</b>). <span class="why">Integrating a rate over time recovers the quantity itself — which is why areas climb the chain and slopes descend it.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Test <b>(a)</b> "acceleration equals the slope of the x-t graph": the slope of x-t is dx/dt = <b>velocity</b>, not acceleration ⇒ <b>WRONG</b>.<span class="why">Acceleration is the <i>second</i> derivative of x — the slope of the v-t graph, or the curvature of the x-t graph.</span></div>
+<div class="step">2. Test <b>(b)</b> "velocity equals the area under the a-t graph": that area is ∫a dt = <b>Δv</b>, the <i>change</i> in velocity ⇒ <b>WRONG</b> as stated.<span class="why">It equals the velocity itself only in the special case u = 0 m s⁻¹; the option claims it in general, so it fails.</span></div>
+<div class="step">3. Test <b>(c)</b> "displacement equals the area under the v-t graph": Δx = ∫v dt is the definition of the signed area under v-t, and it holds for <b>any</b> motion — variable acceleration included ⇒ <b>CORRECT</b>.<span class="why">Integration makes no assumption about a; that generality is exactly why this survives the "variable acceleration" filter.</span></div>
+<div class="step">4. Test <b>(d)</b> "average speed equals (u+v)/2 for any motion": the (u+v)/2 result is the <b>average velocity</b> and is valid <i>only</i> for uniformly accelerated motion ⇒ <b>WRONG</b> on two counts — wrong quantity and wrong scope.<span class="why">It comes from averaging a straight-line v-t graph; with variable a the v-t graph is curved and the mean of the endpoints is not the mean of the curve.</span></div>
+<div class="step">5. Only <b>(c)</b> is correct.</div>
+<pre>
+                slope (differentiate) ↓        area (integrate) ↑
+      x-t  ────────── v = dx/dt ──────────→  v-t
+      v-t  ────────── a = dv/dt ──────────→  a-t
+      a-t  ────────── Δv = ∫a dt ─────────→  v-t
+      v-t  ────────── Δx = ∫v dt ─────────→  x-t
+
+ (a) a = slope of x-t   ✗  (that's v)
+ (b) v = area under a-t ✗  (that's Δv, not v)
+ (c) Δx = area under v-t ✓  ← holds for ANY motion
+ (d) avg speed = (u+v)/2 ✗  (avg VELOCITY, and only if a is constant)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Chant the dictionary — <b>"slope of x-t = v, slope of v-t = a; area under a-t = Δv, area under v-t = Δx"</b> — and this whole question family collapses in seconds. When a stem says "<b>variable acceleration</b>," immediately strike out every option built on a SUVAT formula ((u+v)/2, v = u+at, s = ut+½at²), since those all assume constant a. Trap: (b) is <i>almost</i> right — the a-t area gives the <b>change</b> in velocity; the word "change" is what the examiner deleted.</div>
+<div class="final">Answer: (c) Displacement equals the area under the v-t graph.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A particle's v-t graph from t=0 to T is a straight line from (0, v0) to (T, 0). Find the average velocity over 0→T (nearest integer), for motion along +x (units: m/s)</td><td class="topic">Average velocity from a triangular v-t graph</td><td><a href="https://www.youtube.com/watch?v=V5E_LLUgbjI" target="_blank">Area Under Velocity Time Graphs | Forces &amp; Motion | Physics | FuseSchool</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">v<sub>0</sub>/2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The v-t graph is a straight line falling from v₀ at t = 0 to 0 at t = T, so the region under it is a <b>right triangle</b> with base T and height v₀. Displacement is the area of that triangle, and average velocity is that displacement divided by the elapsed time. Because the v-t line is straight, the motion has constant acceleration and the average velocity is simply the <b>mean of the endpoint velocities</b> — a result the area calculation confirms.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">Δx = area under v-t = ½ × base × height = ½·T·v₀</span> — T in <b>s</b>, v₀ in <b>m s⁻¹</b>, Δx in <b>m</b>. Then <span class="eq">v_avg = Δx ÷ T</span> in <b>m s⁻¹</b>. Equivalently, for constant acceleration, <span class="eq">v_avg = (u + v)/2</span>. <span class="why">½·(s)·(m s⁻¹) = m ✓ — the triangle's area really is a length.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Read the graph: it runs from the point (0, v₀) down to (T, 0) as a <b>straight line</b>, so v(t) = <b>v₀(1 − t/T) m s⁻¹</b>, which is ≥ 0 throughout the interval.</div>
+<div class="step">2. The area beneath it is a right triangle of base <b>T s</b> and height <b>v₀ m s⁻¹</b>.</div>
+<div class="step">3. Displacement = area = ½ × T × v₀ = <b>½v₀T metres</b>.<span class="why">Motion is along +x and v never goes negative, so this displacement is also the distance travelled.</span></div>
+<div class="step">4. Average velocity = Δx ÷ T = (½v₀T) ÷ T = <b>v₀/2 m s⁻¹</b> — the T cancels.</div>
+<div class="step">5. Cross-check with the constant-acceleration mean: u = v₀, v = 0, so v_avg = (v₀ + 0)/2 = <b>v₀/2 m s⁻¹</b> ✓ Both routes agree.<span class="why">The v-t line is straight ⇒ a = −v₀/T is constant ⇒ the (u+v)/2 shortcut is legitimate here.</span></div>
+<div class="step">6. So the average velocity is <b>v₀/2 m s⁻¹</b>, i.e. exactly half the initial velocity.<span class="why">Note: the book gives no numerical value for v₀, so the answer can only be expressed symbolically — see the flag below.</span></div>
+<pre>
+  v |
+ v₀ ●
+    |╲
+    | ╲        area = ½ · T · v₀ = displacement
+    |  ╲
+    |   ╲
+  0 +────●──→ t
+    0     T
+
+  v_avg = (½v₀T)/T = v₀/2      [m/s]
+  check : (u+v)/2 = (v₀+0)/2 = v₀/2 ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> A <b>straight</b> v-t line always gives v_avg = (u+v)/2 — no integration needed. Curve it, and you must take the true area instead. For the very common "v₀ down to 0" triangle the answer is <b>v₀/2</b> every time; for "0 up to v₀" it is likewise v₀/2. Trap: the (u+v)/2 shortcut is illegal the moment the v-t graph bends, because then the mean of the endpoints ≠ the mean of the curve.</div>
+<div class="final">Answer: v_avg = v₀/2 m s⁻¹ (half the initial velocity). The question asks for a "nearest integer," but the book supplies no numeric value for v₀, so only the symbolic result is determinable.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A body starts at x=0 with instantaneous velocity v(t) = v0(1 − t/τ) for 0 ≤ t ≤ τ, then rests. Compute the total distance travelled (two decimal places, in metres)</td><td class="topic">Total distance from a velocity function</td><td><a href="https://www.youtube.com/watch?v=rjz-CXxBD4E" target="_blank">Total Distance Given Velocity Function And Time Interval</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">v<sub>0</sub>τ/2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Distance travelled is the <b>integral of speed</b>, ∫|v|dt. The saving grace here is that v(t) = v₀(1 − t/τ) stays <b>non-negative</b> across the whole interval 0 ≤ t ≤ τ — it starts at v₀ and eases to exactly zero at t = τ, never going negative — so the modulus signs can be dropped and distance equals displacement. After t = τ the body rests, contributing nothing further. Geometrically this is again the area of a right triangle, so the integral can be checked by eye.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">distance = ∫₀^τ |v(t)| dt</span> — v in <b>m s⁻¹</b>, t in <b>s</b>, distance in <b>m</b>. With v ≥ 0 this is just <span class="eq">∫₀^τ v₀(1 − t/τ) dt</span>. <span class="why">Integrating a velocity over time returns a length: (m s⁻¹)×(s) = m ✓</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Check the sign of v on the interval: at t = 0, v = v₀(1−0) = <b>v₀ m s⁻¹</b>; at t = τ, v = v₀(1−1) = <b>0 m s⁻¹</b>. In between, 0 ≤ t/τ ≤ 1 so (1 − t/τ) ≥ 0 ⇒ <b>v ≥ 0 throughout</b>.<span class="why">This is the crucial check — because v never changes sign, distance = displacement and no interval-splitting is needed.</span></div>
+<div class="step">2. Set up the integral: distance = ∫₀^τ v₀(1 − t/τ) dt = v₀ ∫₀^τ (1 − t/τ) dt.</div>
+<div class="step">3. Integrate term by term: ∫(1)dt = t and ∫(t/τ)dt = t²/(2τ), so the antiderivative is <b>[t − t²/(2τ)]</b>.</div>
+<div class="step">4. Evaluate at the upper limit t = τ: τ − τ²/(2τ) = τ − τ/2 = <b>τ/2</b>.</div>
+<div class="step">5. Evaluate at the lower limit t = 0: 0 − 0 = <b>0</b>.</div>
+<div class="step">6. Subtract and multiply by v₀: distance = v₀(τ/2 − 0) = <b>v₀τ/2 metres</b>.</div>
+<div class="step">7. Check geometrically: the v-t graph is a straight line from (0, v₀) to (τ, 0), a right triangle of area ½ × base τ × height v₀ = <b>v₀τ/2</b> ✓ The body then rests, adding 0 m.<span class="why">Units: (m s⁻¹) × (s) = m ✓ And the result is positive, as a distance must be.</span></div>
+<pre>
+  v |
+ v₀ ●
+    |╲
+    | ╲       distance = ∫₀^τ v₀(1 − t/τ)dt
+    |  ╲               = v₀[t − t²/2τ]₀^τ
+    |   ╲              = v₀(τ − τ/2) = v₀τ/2
+  0 +────●────── rest ──→ t
+    0     τ
+
+  = area of triangle = ½ · τ · v₀  ✓  (same answer, no calculus)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Always test whether <b>v changes sign</b> before integrating: if it never does, distance = |displacement| and one clean integral finishes the job; if it does, you must split at each zero of v and add the |areas| separately. And when v(t) is <b>linear</b>, skip the calculus entirely — the area is a triangle, ½·base·height. Trap: v₀τ (the full rectangle) is the answer you get by forgetting the ½ and treating the body as if it kept its initial speed the whole time.</div>
+<div class="final">Answer: total distance = v₀τ/2 metres. The question asks for "two decimal places," but the book gives no numeric values for v₀ or τ, so only the symbolic result is determinable.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Match List I with List II: P — closed loop A→B→A (nonzero speeds); Q — straight-line motion with constant acceleration; R — speed increasing while direction changes; S — triangular v-t from v0 to 0; against a — average velocity = Δx/Δt with Δx=0; b — average velocity=(u+v)/2 valid; c — v=dr/dt (vector); d — Δx = area under v-t. (a) P-a,Q-b,R-c,S-d (b) P-b,Q-c,R-d,S-a (c) P-c,Q-d,R-a,S-b (d) P-d,Q-a,R-b,S-c</td><td class="topic">Match-the-column — kinematics definitions</td><td><a href="https://www.youtube.com/watch?v=U4E84LYxXto" target="_blank">How is Average Velocity Zero? | AP Physics 1 Problem Walkthrough</a> · <a href="https://www.youtube.com/watch?v=V5E_LLUgbjI" target="_blank">Area Under Velocity Time Graphs | Forces &amp; Motion | Physics | FuseSchool</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>P-a, Q-b, R-c, S-d</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Four kinematic <b>situations</b> (P–S) must each be paired with the <b>statement</b> from List-II that it best illustrates. The efficient route is to find the pairing each entry <i>forces</i>: two of them (P and S) are pinned by a single decisive feature, and once those are fixed the remaining two follow by elimination. Every option here is a one-to-one matching, so a single confident pair usually eliminates most of the choices at a stroke.</div>
+<div class="seg"><span class="lbl">Key relations</span> <span class="eq">v⃗_avg = Δx⃗/Δt</span> (<b>m s⁻¹</b>); <span class="eq">v_avg = (u+v)/2</span> — valid only for <b>constant acceleration</b>; <span class="eq">v⃗ = dr⃗/dt</span> — the vector definition, the only one that captures a change of <b>direction</b>; <span class="eq">Δx = area under v-t</span> (<b>m</b>). <span class="why">Each List-II entry is one of these four, so the task is to spot which situation each formula is the natural statement of.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>P — closed loop A→B→A (nonzero speeds)</b>: the body returns to its start, so Δx = <b>0 m</b> and the average velocity is 0 m s⁻¹. That is exactly List-II entry <b>a</b> ("average velocity = Δx/Δt with Δx = 0") ⇒ <b>P–a</b>.<span class="why">"Closed loop" ⇒ zero displacement is the single most decisive tell in the table.</span></div>
+<div class="step">2. <b>Q — straight-line motion with constant acceleration</b>: constant a is precisely the condition under which the endpoint mean (u+v)/2 is the true average velocity ⇒ matches <b>b</b> ⇒ <b>Q–b</b>.<span class="why">The v-t graph is then a straight line, and the mean of a straight line's endpoints equals its mean value.</span></div>
+<div class="step">3. <b>R — speed increasing while direction changes</b>: a changing direction can only be described by a <b>vector</b> derivative, so the relevant statement is v = dr⃗/dt ⇒ matches <b>c</b> ⇒ <b>R–c</b>.<span class="why">Scalar formulas cannot register a turn; only the vector definition does.</span></div>
+<div class="step">4. <b>S — triangular v-t from v₀ to 0</b>: the natural reading of a v-t graph is that displacement is the area beneath it ⇒ matches <b>d</b> ⇒ <b>S–d</b>.<span class="why">Δx = ½v₀T here — the very triangle computed in Q3 of this level.</span></div>
+<div class="step">5. Assemble: <b>P–a, Q–b, R–c, S–d</b>, which is option <b>(a)</b>.</div>
+<div class="step">6. Verify no clashes: each List-II item (a, b, c, d) is used exactly once ✓ — a valid one-to-one matching.</div>
+<pre>
+ List-I                              List-II                              match
+ P  closed loop A→B→A         →  a  avg velocity = Δx/Δt, Δx = 0          P–a
+ Q  straight line, const. a   →  b  avg velocity = (u+v)/2 valid          Q–b
+ R  speed ↑ while direction   →  c  v = dr/dt (vector)                    R–c
+    changes
+ S  triangular v-t, v₀ → 0    →  d  Δx = area under v-t                   S–d
+
+ ⇒ P-a, Q-b, R-c, S-d  →  option (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> In match-the-column, lock down the <b>one pair you are surest of</b> and strike every option that contradicts it — here P–a alone (closed loop ⇒ Δx = 0) leaves only option (a) standing, so you never need to check Q, R or S under exam pressure. Trap: the (u+v)/2 entry pairs <i>only</i> with constant acceleration; if it is ever offered against a variable-acceleration situation, that pairing is a decoy.</div>
+<div class="final">Answer: (a) P-a, Q-b, R-c, S-d.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">Passage (Q6–Q7): a particle's x-t graph from t=0 to T is concave-down, starting at (0,0), with slope decreasing linearly to zero at T. The sign of acceleration in 0&lt;t&lt;T is best inferred as: (a) positive and increasing (b) negative and constant (c) negative and increasing in magnitude (d) positive and decreasing (Ans: d)</td><td class="topic">x-t graph (concave-down) — sign of acceleration</td><td><a href="https://www.youtube.com/watch?v=WG8JQhhV8xE" target="_blank">Intro velocity time graph and slope of a v-t graph, acceleration time graph and area of an a-t graph</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval flagged"><span class="lt">c</span>Negative and increasing in magnitude. <span class="warn" title="Answer-key letter (c) &ldquo;Negative and increasing in magnitude.&rdquo; The printed passage says the x&ndash;t slope falls LINEARLY to zero, so v = v&#8320;(1&minus;t/T) and a = &minus;v&#8320;/T: negative but CONSTANT in magnitude = option (b). The key&rsquo;s (c) is wrong. Separately, this row&rsquo;s question cell says &ldquo;(Ans: d)&rdquo; positive and decreasing &mdash; that is OUR error and matches neither the key nor the physics.">⚠</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two independent clues in the passage both point the same way. <b>Concave-down</b> means the second derivative d²x/dt² is negative — and that second derivative <i>is</i> the acceleration, so a &lt; 0 at once. The stronger clue is the word "<b>linearly</b>": the slope (= velocity) falls from v₀ to 0 <i>at a steady rate</i>, and a velocity changing at a steady rate is by definition a <b>constant</b> acceleration. Together: negative and constant.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v = dx/dt</span> (slope of x-t, <b>m s⁻¹</b>) and <span class="eq">a = dv/dt = d²x/dt²</span> (<b>m s⁻²</b>). <span class="why">Concavity of x-t is the sign of d²x/dt², which is exactly a — so concave-down ⇔ a &lt; 0, with no further work.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Translate the passage: the slope of the x-t graph starts at <b>+v₀ m s⁻¹</b> and decreases <b>linearly</b> to <b>0 m s⁻¹</b> at t = T.</div>
+<div class="step">2. The slope of x-t <i>is</i> the velocity, so v(t) is a straight line from v₀ down to 0: <b>v(t) = v₀(1 − t/T) m s⁻¹</b>.<span class="why">"Decreasing linearly" fixes v(t) as a first-degree polynomial in t — that is what linear means.</span></div>
+<div class="step">3. Differentiate to get the acceleration: a = dv/dt = d/dt[v₀ − v₀t/T] = <b>−v₀/T m s⁻²</b>.</div>
+<div class="step">4. Inspect that result: v₀ &gt; 0 and T &gt; 0, so −v₀/T is <b>negative</b>; and since v₀ and T are both fixed constants, the value <b>never changes</b> ⇒ a is <b>constant</b>.<span class="why">Units: (m s⁻¹)/(s) = m s⁻² ✓ — a genuine acceleration.</span></div>
+<div class="step">5. Confirm with concavity: a linearly-falling slope makes x(t) = v₀t − v₀t²/(2T), a downward parabola ⇒ concave-down ⇒ d²x/dt² = −v₀/T &lt; 0 ✓ Both clues agree.</div>
+<div class="step">6. Therefore the acceleration is <b>negative and constant</b> — option <b>(b)</b>.</div>
+<div class="step">7. Rule out the rest: (a) "positive and increasing" — wrong sign (the graph is concave-down). (c) "negative and increasing in magnitude" — right sign, but |a| = v₀/T is fixed, so it would need the slope to fall <i>non</i>-linearly (a steepening curve). (d) "positive and decreasing" — wrong sign; a positive a would make the graph concave-<i>up</i> and the slope <b>rise</b>, not fall.</div>
+<pre>
+ slope of x-t falls LINEARLY:   v(t) = v₀(1 − t/T)
+
+  x |      ___----●         v |v₀●
+    |   _--        (concave    |   ●●
+    |  /             down)     |     ●●   ← straight line ⇒ constant slope
+    | /                        |       ●●
+  0 +──────────→ t           0 +─────────●──→ t
+    0          T                0         T
+
+ a = dv/dt = −v₀/T   →  NEGATIVE (sign)  and  CONSTANT (v₀, T fixed)
+ ⇒ option (b)
+
+ "linearly" ⇒ constant a  |  "concave-down" ⇒ a &lt; 0
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Read <b>concavity</b> straight off an x-t graph: concave-up ⇒ a &gt; 0, concave-down ⇒ a &lt; 0, straight ⇒ a = 0 — no algebra needed. Then let the adverb decide the second half: "<b>linearly</b>" ⇒ a is <b>constant</b>; "non-linearly" ⇒ a varies. Trap: a decreasing slope tempts you to call the acceleration "decreasing," but it is the <b>velocity</b> that decreases — the acceleration is the fixed <i>rate</i> at which it does so.</div>
+<div class="final">Answer: (b) Negative and constant — a = −v₀/T m s⁻². <b>⚠ Note:</b> the answer noted in this row's question cell is (d) "positive and decreasing," which contradicts the printed passage: a positive acceleration would make the x-t graph concave-<i>up</i> with a <i>rising</i> slope, whereas the passage explicitly states a concave-down graph whose slope decreases linearly to zero. Please verify against the official key.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">Passage (Q6–Q7 contd.): the particle also completes a closed path in 2T. Over the closed planar path 0→2T, which statement is correct? (a) average speed is zero (b) average velocity is zero (c) average velocity equals path length/2T (d) displacement magnitude equals total distance (Ans: b)</td><td class="topic">Closed path — average velocity vs average speed</td><td><a href="https://www.youtube.com/watch?v=LnXH7-_vruc" target="_blank">Choose the correct statement(s): We can have a motion having zero displacement and nonzero...</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>Average velocity is zero.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A <b>closed path</b> is one whose end point coincides with its start point, so the displacement vector has zero length — regardless of how large or convoluted the loop was. Average velocity is displacement ÷ time, so it vanishes; average speed is path length ÷ time, so it does <i>not</i>. This is the same principle as Q1 of this level, now applied to a planar loop traversed in time 2T. The particle genuinely moves the whole time, so its speed is non-zero throughout.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v⃗_avg = Δr⃗ ÷ Δt</span> and <span class="eq">speed_avg = L ÷ Δt</span> where L is the path length, both in <b>m s⁻¹</b>. For a closed path, <span class="eq">Δr⃗ = 0⃗ m</span> while <span class="eq">L &gt; 0 m</span>. <span class="why">The two definitions differ only in the numerator — vector displacement versus scalar path length — and a closed loop is precisely the case that drives them apart maximally.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Note the defining property: the path is <b>closed</b> over 0→2T ⇒ final position = initial position ⇒ Δr⃗ = <b>0⃗ m</b>, so |Δr⃗| = <b>0 m</b>.</div>
+<div class="step">2. Test <b>(a)</b> "average speed is zero": average speed = L ÷ 2T with the path length L &gt; 0 m ⇒ strictly positive ⇒ <b>WRONG</b>.<span class="why">The particle is in motion throughout; only a body that never moves has zero average speed.</span></div>
+<div class="step">3. Test <b>(b)</b> "average velocity is zero": v⃗_avg = 0⃗ m ÷ 2T = <b>0 m s⁻¹</b> ⇒ <b>CORRECT</b>.</div>
+<div class="step">4. Test <b>(c)</b> "average velocity equals path length / 2T": L/2T is the average <b>speed</b>, not the average velocity — and here the average velocity is 0 m s⁻¹ while L/2T ≠ 0 ⇒ <b>WRONG</b>.<span class="why">Another quantity-swap distractor: correct formula, wrong name attached to it.</span></div>
+<div class="step">5. Test <b>(d)</b> "displacement magnitude equals total distance": |Δr⃗| = 0 m but L &gt; 0 m, so they are as unequal as possible ⇒ <b>WRONG</b>.<span class="why">|displacement| = distance holds only for straight-line motion with no reversal — the exact opposite of a closed loop.</span></div>
+<div class="step">6. Only <b>(b)</b> is correct.</div>
+<pre>
+        ╭──────────╮
+        │          │        closed planar path,
+        │   loop   │        traversed in time 2T
+        │          │
+        ╰────●─────╯
+          start = finish
+
+ displacement |Δr⃗| = 0 m      ⇒ avg velocity = 0/2T = 0    (b) ✓
+ path length  L    &gt; 0 m      ⇒ avg speed    = L/2T  ≠ 0    (a) ✗
+ L/2T is the avg SPEED, not the avg velocity                (c) ✗
+ |Δr⃗| = 0 ≠ L                                               (d) ✗
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "<b>Closed path</b>" ⇒ average velocity = <b>0</b>, average speed ≠ 0 — recognise the phrase and answer without computing anything. Keep the general inequality in view: <b>|average velocity| ≤ average speed</b>, always, with a closed loop as the extreme case (left side 0, right side maximal) and straight-line no-reversal motion as the equality case. Trap: options (c) and (d) both attach a true statement about <i>speed/distance</i> to the word <i>velocity/displacement</i>.</div>
+<div class="final">Answer: (b) Average velocity is zero.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">A particle moves along the x-axis with non-uniform acceleration; at t=0, x=0. The v-t graph is a straight line from (0,v0) to (T,0). One or more may be correct: (a) displacement in 0→T equals the area under the v-t line segment (b) average speed equals (v0+0)/2 even if velocity becomes negative (c) average velocity equals (x(T)−x(0))/T (d) acceleration is constant and equals the slope of the x-t graph</td><td class="topic">v-t graph, non-uniform acceleration — multiple correct</td><td><a href="https://www.youtube.com/watch?v=V5E_LLUgbjI" target="_blank">Area Under Velocity Time Graphs | Forces &amp; Motion | Physics | FuseSchool</a> · <a href="https://www.youtube.com/watch?v=WG8JQhhV8xE" target="_blank">Intro velocity time graph and slope of a v-t graph, acceleration time graph and area of an a-t graph</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">ac</span>Displacement in 0→T equals area under the v–t line segment; Average velocity equals (x(T)−x(0))/T.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two of these options are true <b>by definition</b> and survive any motion whatsoever; the other two smuggle in a false identification. Note first an inconsistency in the stem itself: it announces "non-uniform acceleration," yet a v-t graph that is a <b>straight line</b> from (0, v₀) to (T, 0) has constant slope and therefore <i>constant</i> acceleration a = −v₀/T. We solve from the graph as printed, since it is the more specific and unambiguous datum. Happily, options (a) and (c) are definitional and hold either way.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">Δx = ∫v dt</span> = signed area under v-t (<b>m</b>); <span class="eq">v⃗_avg ≡ (x(T) − x(0)) ÷ T</span> (<b>m s⁻¹</b>); <span class="eq">avg speed = ∫|v|dt ÷ T</span>; <span class="eq">a = dv/dt</span> = slope of <b>v-t</b> (<b>m s⁻²</b>). <span class="why">The modulus in the average-speed integral is precisely what options about sign-changing velocity are probing.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Read the graph: v(t) runs straight from v₀ at t = 0 to 0 at t = T ⇒ <b>v(t) = v₀(1 − t/T) m s⁻¹</b>, and v ≥ 0 across the interval.</div>
+<div class="step">2. Test <b>(a)</b> "displacement in 0→T equals area under the v-t line segment": Δx = ∫₀^T v dt <i>is</i> the signed area, by definition of the integral ⇒ <b>CORRECT</b>. Here it evaluates to ½v₀T m.<span class="why">True for any motion — integration assumes nothing about how a behaves.</span></div>
+<div class="step">3. Test <b>(b)</b> "average speed equals (v₀+0)/2 <b>even if velocity becomes negative</b>": average speed uses ∫|v|dt. If v ever goes negative, the modulus folds that stretch upward and the average speed exceeds the endpoint mean ⇒ the "even if" clause makes the claim <b>WRONG</b>.<span class="why">The endpoint-mean formula tracks average <i>velocity</i> under constant a; once |v| enters, it no longer applies. On this particular graph v never goes negative, but the option asserts the general case.</span></div>
+<div class="step">4. Test <b>(c)</b> "average velocity equals (x(T) − x(0))/T": this is the <b>definition</b> of average velocity ⇒ <b>CORRECT</b>, for any motion whatsoever.</div>
+<div class="step">5. Test <b>(d)</b> "acceleration is constant and equals slope of the <b>x-t</b> graph": the slope of x-t is the <b>velocity</b>, not the acceleration ⇒ <b>WRONG</b>.<span class="why">Acceleration is the slope of the <i>v-t</i> graph (= −v₀/T here). The option pairs a true claim (a is constant, given the straight v-t line) with the wrong graph — and a wrong half makes the whole statement false.</span></div>
+<div class="step">6. Collect the correct ones: <b>(a) and (c)</b>.</div>
+<pre>
+  v |v₀●
+    |   ●●            v(t) = v₀(1 − t/T),  v ≥ 0 on [0,T]
+    |     ●●          area = ½v₀T = Δx
+    |       ●●
+  0 +─────────●──→ t
+    0         T
+
+ (a) Δx = area under v-t        ✓  definition of ∫v dt
+ (b) avg speed = (v₀+0)/2 even
+     if v goes negative         ✗  |v| would fold the negative part up
+ (c) v_avg = (x(T)−x(0))/T      ✓  definition of average velocity
+ (d) a = slope of x-t           ✗  slope of x-t is v; a = slope of v-t
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> In multiple-correct graph questions, the <b>definitional</b> options (Δx = ∫v dt, v_avg = Δx/Δt) are almost always among the answers — they cannot fail, because they assume nothing. Attack the rest by checking which <b>graph</b> each slope or area is claimed on. Trap: a compound option like (d) — "constant <i>and</i> equals slope of x-t" — is false if <b>either</b> half fails; here the first half is fine and the second is not, so the option still dies.</div>
+<div class="final">Answer: (a) and (c) are correct. ⚠ Note the stem says "non-uniform acceleration," but the straight-line v-t graph it describes implies a <i>constant</i> acceleration a = −v₀/T m s⁻² — an internal inconsistency in the printed question; (a) and (c) hold in either reading.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">A particle's position vector is r(t). At some interval, speed increases while direction turns gradually. One or more may be correct: (a) instantaneous velocity is v = dr/dt (b) uniform speed with changing direction implies uniform velocity (c) speed-vs-time area equals total distance (d) if the path is closed, average velocity over one full loop is zero</td><td class="topic">Position vector &amp; instantaneous velocity — multiple correct</td><td><a href="https://www.youtube.com/watch?v=QddL_pwEaiw" target="_blank">Instantaneous Speed and Instantaneous Velocity | Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval flagged"><span class="lt">ad</span>Instantaneous velocity is v = dr/dt; If the path is closed, average velocity over one full loop is zero. <span class="warn" title="Answer-key letters (a)(d). Our solution row also accepts (c) &ldquo;Speed vs time area equals total distance&rdquo;, which is true by definition (&int;|v|dt = distance). The key&rsquo;s omission of (c) looks like a book defect; the disagreement is on (c) alone.">⚠</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The thread running through all four options is that <b>velocity is a vector</b> while <b>speed is its magnitude</b>. A body whose speed is steady but whose direction turns has a <i>changing</i> velocity — the single most-tested idea in this chapter. Three of the statements are definitions or direct consequences and hold universally; one asserts that constant speed implies constant velocity, which the humble merry-go-round refutes.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v⃗ = dr⃗/dt</span> (<b>m s⁻¹</b>) — the vector definition; <span class="eq">speed = |v⃗|</span>; <span class="eq">distance = ∫|v⃗| dt</span> = area under the <b>speed</b>-time graph (<b>m</b>); <span class="eq">v⃗_avg = Δr⃗/Δt</span>. <span class="why">Note it is the <i>speed</i>-time area that gives distance; the <i>velocity</i>-time area gives displacement — the modulus is the whole difference.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Test <b>(a)</b> "instantaneous velocity is v⃗ = dr⃗/dt": this is the <b>definition</b> of instantaneous velocity — the time-derivative of the position vector ⇒ <b>CORRECT</b>.<span class="why">Being a derivative of a vector, it automatically carries both magnitude and direction.</span></div>
+<div class="step">2. Test <b>(b)</b> "uniform speed with changing direction implies uniform velocity": velocity is uniform only if <b>both</b> magnitude and direction are fixed. A turning body changes its velocity vector even at unchanging speed ⇒ <b>WRONG</b>.<span class="why">Counter-example: uniform circular motion — constant speed v, yet the velocity turns continuously and the body is accelerating (a = v²/R toward the centre).</span></div>
+<div class="step">3. Test <b>(c)</b> "speed vs time area equals total distance": distance = ∫|v⃗|dt, and since speed ≡ |v⃗| ≥ 0, the area under a speed-time graph is exactly that integral ⇒ <b>CORRECT</b>.<span class="why">Speed is never negative, so this area can never cancel — which is precisely why it accumulates distance rather than displacement.</span></div>
+<div class="step">4. Test <b>(d)</b> "if the path is closed, average velocity over one full loop is zero": a closed loop returns the body to its start ⇒ Δr⃗ = <b>0⃗ m</b> ⇒ v⃗_avg = 0⃗/Δt = <b>0 m s⁻¹</b> ⇒ <b>CORRECT</b>.</div>
+<div class="step">5. Collect: <b>(a), (c) and (d)</b> are correct; only (b) fails.</div>
+<pre>
+ uniform circular motion — the counter-example that kills (b):
+
+           v⃗ ↑
+        ╭───●───╮        |v⃗| = v  (constant speed)
+        │   ·   │        but direction turns continuously
+     v⃗ ←●   O   ●→ v⃗    ⇒ v⃗ is NOT constant
+        │       │        ⇒ body IS accelerating (a = v²/R, inward)
+        ╰───●───╯
+           v⃗ ↓
+
+ (a) v⃗ = dr⃗/dt              ✓  definition
+ (b) uniform speed ⇒ uniform velocity   ✗  see above
+ (c) area under speed-t = distance      ✓  ∫|v⃗|dt, never cancels
+ (d) closed path ⇒ v⃗_avg = 0            ✓  Δr⃗ = 0
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Any option claiming "constant speed ⇒ constant velocity" (or "⇒ no acceleration") is <b>false</b> — fire uniform circular motion at it and move on. Keep the pairing straight: <b>speed</b>-time area ⇒ distance; <b>velocity</b>-time area ⇒ displacement. Trap: (b) is worded to sound like the definition of uniform motion, but "changing direction" inside it is self-defeating — the phrase quietly guarantees the velocity is <i>not</i> uniform.</div>
+<div class="final">Answer: (a), (c) and (d) are correct; (b) is wrong — uniform speed with changing direction is <i>not</i> uniform velocity.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">A particle moves such that its velocity is given by v(t) = at − bt² with a, b &gt; 0. Which statements are correct? (a) the particle returns to its initial position when v=0 the second time (b) acceleration is dv/dt = a − 2bt (c) maximum velocity occurs at t = a/2b (d) displacement till velocity becomes zero is a²/4b</td><td class="topic">Velocity function v=at−bt² — multiple correct</td><td><a href="https://www.youtube.com/watch?v=5t1XlkAT5yA" target="_blank">If the velocity of a particle is v=At+Bt², where A and B are constants, then the distance travelled...</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval flagged"><span class="lt">bcd</span>Acceleration is dv/dt = a − 2bt; Maximum velocity occurs at t = a/2b; Displacement till velocity becomes zero is (a²/4b). <span class="warn" title="Answer-key letters (b)(c)(d). (d) &ldquo;Displacement till velocity becomes zero is (a&sup2;/4b)&rdquo; is wrong: v = 0 again at t = a/b gives &Delta;x = a&sup3;/6b&sup2;, whereas a&sup2;/4b is the MAXIMUM VELOCITY (at t = a/2b). The book has pasted the v_max value into a displacement option; our solution row&rsquo;s (b)(c) is correct.">⚠</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> With v(t) given explicitly, everything follows by <b>calculus in one direction or the other</b>: differentiate for the acceleration, integrate for the displacement. Two options ((b), (c)) need only the derivative; the other two ((a), (d)) need the integral, and both hinge on the same quantity — the displacement accumulated up to the moment the velocity next hits zero. <b>Careful with symbols</b>: the constant named <i>a</i> in v = at − bt² is <b>not</b> the acceleration; we write the acceleration as A(t) to keep them apart.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">A(t) = dv/dt</span> (<b>m s⁻²</b>) and <span class="eq">Δx = ∫v dt</span> (<b>m</b>). Velocity is extremal where <span class="eq">dv/dt = 0</span>. <span class="why">For v = at − bt² to be dimensionally sound, a has units m s⁻² and b has units m s⁻³ — so quantities like a²/4b and a³/6b² both come out in metres, as a displacement must.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Find when the velocity vanishes: v = at − bt² = t(a − bt) = 0 ⇒ t = <b>0 s</b> (the start) or t = <b>a/b s</b> (the second time).<span class="why">Factor out t; the two roots are where the parabola v(t) crosses the time axis.</span></div>
+<div class="step">2. Test <b>(b)</b> — differentiate: A(t) = dv/dt = d(at)/dt − d(bt²)/dt = <b>a − 2bt m s⁻²</b> ⇒ <b>CORRECT</b>.</div>
+<div class="step">3. Test <b>(c)</b> — velocity is maximum where A(t) = 0: a − 2bt = 0 ⇒ t = <b>a/(2b) s</b> ⇒ <b>CORRECT</b>.<span class="why">Since b &gt; 0 the parabola opens downward, so this stationary point is a maximum. Check: dA/dt = −2b &lt; 0 ✓ It sits exactly halfway between the roots t = 0 and t = a/b, as a parabola's vertex must.</span></div>
+<div class="step">4. Now integrate for the displacement up to t = a/b: Δx = ∫₀^(a/b) (at − bt²) dt = <b>[at²/2 − bt³/3]₀^(a/b)</b>.</div>
+<div class="step">5. Substitute the upper limit: a(a/b)²/2 = a·a²/(2b²) = <b>a³/(2b²)</b>; and b(a/b)³/3 = b·a³/(3b³) = <b>a³/(3b²)</b>.</div>
+<div class="step">6. Subtract: Δx = a³/(2b²) − a³/(3b²) = a³(1/2 − 1/3)/b² = a³(3−2)/(6b²) = <b>a³/(6b²) metres</b>.</div>
+<div class="step">7. Test <b>(d)</b> "displacement till velocity becomes zero is a²/4b": our result is <b>a³/(6b²)</b>, not a²/(4b) ⇒ <b>WRONG</b>.<span class="why">Dimensional check exposes it too: a²/(4b) has units (m s⁻²)²/(m s⁻³) = m s⁻¹ — a <i>velocity</i>, not a displacement. (a²/4b is in fact the maximum velocity, v at t = a/2b.)</span></div>
+<div class="step">8. Test <b>(a)</b> "particle returns to its initial position when v = 0 the second time": at t = a/b the displacement is a³/(6b²) &gt; 0 m, not zero ⇒ the particle is <b>far from</b> where it started ⇒ <b>WRONG</b>.<span class="why">v ≥ 0 for all t in [0, a/b], so the particle only ever moves forward over that stretch — it cannot have come back. Zero <i>velocity</i> never means zero <i>displacement</i>.</span></div>
+<div class="step">9. Collect: <b>(b) and (c)</b> are correct.</div>
+<pre>
+ v(t) = at − bt²  = t(a − bt)      roots: t = 0 and t = a/b
+
+  v |      ___
+    |    _-   -_        vertex at t = a/2b   → (c) ✓
+    |   /       \       v_max = a²/(4b)
+    |  /         \
+  0 +●─────────────●──→ t
+    0             a/b
+
+ (b) A(t) = dv/dt = a − 2bt                        ✓
+ (c) v max at t = a/2b                             ✓
+ (d) Δx = ∫₀^(a/b) v dt = a³/(6b²)  ≠ a²/(4b)      ✗  (a²/4b = v_max!)
+ (a) returns to start? Δx = a³/6b² &gt; 0             ✗  v ≥ 0 throughout
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Use <b>dimensions to snipe distractors</b>: with a in m s⁻² and b in m s⁻³, a²/4b is a velocity — so it can never be the answer to a displacement question, and option (d) dies without any integration. Keep firmly apart: <b>v = 0</b> means momentarily at rest, whereas <b>Δx = 0</b> means back at the start — these coincide only if the velocity actually reverses sign, which it does not on [0, a/b]. Trap: the constant "a" in the formula is not acceleration — rename it before you differentiate.</div>
+<div class="final">Answer: (b) and (c) are correct — acceleration = a − 2bt m s⁻², and the velocity is maximum at t = a/2b s.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<footer>Generated for ICAD PhyV1 · Module P4 · Lesson L1. Exact-match videos solve the identical question; "Similar" videos teach the same method with different numbers.</footer>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('ansBtn');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-ans');
+    btn.textContent = on ? '🙈 Hide Answers' : '🔑 Show Answers';
+  });
+  // click a single blurred answer to reveal just that one
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('warn')) return;
+    var host = t && t.closest ? t.closest('.ansval') : null;
+    if (host && !document.body.classList.contains('show-ans')){
+      host.classList.toggle('revealed');
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P4 · L10 — Relative Motion · YouTube Solutions</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1c2230; --muted:#5b6472;
+    --line:#e4e7ec; --head:#1f2a44; --headtxt:#ffffff;
+    --exact-bg:#e7f6ec; --exact-ink:#1f7a3d;
+    --sim-bg:#fff4e0; --sim-ink:#9a6300;
+    --link:#1a56db; --zebra:#fafbfc;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1420; --card:#161c2b; --ink:#e6e9f0; --muted:#9aa3b2;
+      --line:#283048; --head:#0d1526; --headtxt:#eef2ff;
+      --exact-bg:#123322; --exact-ink:#63d68f; --sim-bg:#3a2c11; --sim-ink:#f0b95a;
+      --link:#6ea8fe; --zebra:#1a2130;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:32px 18px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:1.7rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 14px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px;font-size:.85rem}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:600;font-size:.78rem;white-space:nowrap}
+  .exact{background:var(--exact-bg);color:var(--exact-ink)}
+  .sim{background:var(--sim-bg);color:var(--sim-ink)}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;color:var(--muted);font-size:.88rem;margin:12px 0 26px}
+  h2{font-size:1.15rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .tablecard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+  thead th{background:var(--head);color:var(--headtxt);text-align:left;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
+  tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  td.num{font-weight:700;color:var(--muted);width:34px;text-align:center}
+  td.topic{color:var(--muted);font-size:.84rem;white-space:nowrap}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .q{font-weight:500}
+  code{background:rgba(125,125,125,.15);padding:1px 5px;border-radius:5px;font-size:.85em}
+  footer{color:var(--muted);font-size:.8rem;margin-top:30px;text-align:center}
+  /* --- Collapsible worked solutions (full-width rows) --- */
+  tbody tr.solnrow{background:var(--card)!important}
+  tbody tr.solnrow>td{border-top:none;padding:0 12px 4px}
+  details.soln{margin:0}
+  details.soln>summary{cursor:pointer;color:var(--link);font-size:.78rem;font-weight:700;list-style:none;display:inline-block;user-select:none;padding:6px 0}
+  details.soln>summary::-webkit-details-marker{display:none}
+  details.soln>summary::before{content:"▸  Show full solution"}
+  details.soln[open]>summary::before{content:"▾  Hide full solution"}
+  details.soln>summary:hover{text-decoration:underline}
+  .solnbody{margin:2px 0 12px;padding:14px 16px;background:var(--zebra);border:1px solid var(--line);border-left:3px solid var(--exact-ink);border-radius:9px;font-size:.85rem;font-weight:400;color:var(--ink);line-height:1.65;max-width:860px}
+  .solnbody .seg{margin:8px 0}
+  .solnbody .lbl{display:inline-block;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;margin-right:7px;vertical-align:1px}
+  .solnbody .step{margin:5px 0 5px 4px}
+  .solnbody .step .why{display:block;color:var(--muted);font-size:.93em;margin:1px 0 0 14px}
+  .solnbody code{font-size:.9em}
+  .solnbody pre{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:8px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.5;overflow-x:auto;white-space:pre;color:var(--ink)}
+  .solnbody .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(125,125,125,.10);padding:1px 5px;border-radius:4px}
+  .solnbody .trick{margin-top:10px;padding:10px 12px;background:var(--sim-bg);color:var(--sim-ink);border-radius:8px;font-size:.84rem}
+  .solnbody .trick .lbl{color:var(--sim-ink)}
+  .solnbody .final{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--exact-ink)}
+  /* --- Answer key (toggle) --- */
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 2px}
+  .ansbtn{appearance:none;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:linear-gradient(135deg,#1f2a44,#2f4270);color:#eef2ff;font:600 13.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:10px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(20,30,60,.18)}
+  .ansbtn:hover{filter:brightness(1.12)}
+  .ansbtn:active{transform:translateY(1px)}
+  .controls .hint{font-size:12.5px;color:var(--muted)}
+  th.ans-h{min-width:170px;text-align:left!important}
+  td.ans{text-align:left;min-width:170px}
+  .ansval{display:inline-block;font-weight:600;font-size:12.5px;color:var(--exact-ink);background:var(--exact-bg);border-radius:7px;padding:3px 10px;filter:blur(6px);cursor:pointer;user-select:none;transition:filter .12s;line-height:1.4}
+  .ansval:hover{filter:blur(3px)}
+  .ansval.revealed{filter:none;cursor:default;user-select:text}
+  body.show-ans .ansval{filter:none;cursor:default;user-select:text}
+  .ansval .lt{font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-right:6px;color:inherit}
+  .ansval.flagged{background:var(--sim-bg);color:var(--sim-ink)}
+  .warn{cursor:help}
+  .na{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>P4 · L10 — Relative Motion</h1>
+  <p class="sub">Practice Problems mapped to YouTube solution videos</p>
+  <div class="legend">
+    <span class="badge exact">🟢 Exact</span><span style="color:var(--muted);font-size:.82rem">video solves the same question (same numbers)</span>
+    <span class="badge sim">🟡 Similar</span><span style="color:var(--muted);font-size:.82rem">same method / concept, different numbers</span>
+  </div>
+  <div class="note"><b>Scope:</b> Practice problems only (Levels 1–6). Theory, Solved Examples and Quick Recap are excluded.</div>
+  <div class="controls">
+    <button id="ansBtn" class="ansbtn" type="button">🔑 Show Answers</button>
+    <span class="hint">Answers (letter <b>+</b> the option text/value exactly as printed in the book, from the ICAD P-V1 Answer Key) are hidden by default — click to reveal all, or click any single blurred answer to reveal just that one. ⚠ marks an answer-key letter that does not match the printed option / our worked solution — verify.</span>
+  </div>
+</header>
+
+<h2>Level 1</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">What is a frame of reference? (a fixed object used to define motion)</td><td class="topic">Frame of reference</td><td><a href="https://www.youtube.com/watch?v=GoNVoNcasYo" target="_blank">What is Frame of reference | Physics Class 11</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>A fixed object used to define motion</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Motion is never absolute — an object is said to move only when its position <b>changes relative to some chosen reference</b>. A <b>frame of reference</b> is exactly that reference: a rigid object (or point) together with a set of coordinate axes and a clock, against which we measure where something is and how fast it moves. Change the frame and the same object can be "at rest" (you seated in a moving train) or "moving" (that train seen from the platform). The trap is to imagine an object has one true velocity; it only has a velocity <i>with respect to a stated frame</i>.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">r = position measured from the origin O of the frame</span>, and <span class="eq">v = Δr/Δt</span> in <b>m s⁻¹</b>. <span class="why">Both r and v are quoted relative to O, so a different origin/frame gives different numbers — which is the whole reason the definition matters.</span> <b>A frame needs:</b> an <b>origin</b> (a fixed object), <b>axes</b> (directions) and a <b>clock</b> (time).</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Ask what the measuring stick and clock are attached to: that anchor is the <b>fixed object</b> defining the origin.<span class="why">Without a fixed reference the words "at rest" and "moving" carry no meaning.</span></div>
+<div class="step">2. Option (b) "a fixed object used to define motion" names precisely this anchor ⇒ it <b>is</b> the frame of reference.</div>
+<div class="step">3. Test it: a passenger is at rest in the <b>train frame</b> yet moving in the <b>ground frame</b> — the fixed object (train vs ground) decides the answer.</div>
+<div class="step">4. Eliminate the distractors: a frame is <b>not</b> a force, <b>not</b> a unit of speed, and <b>not</b> the moving object itself — it is the reference we watch that object <i>against</i>.</div>
+<div class="step">5. Hence the correct description is option (b): a fixed object (with axes and a clock) used to define and measure motion.</div>
+<pre>
+ frame = fixed object + axes + clock
+ --------------------------------------------------
+ observer on GROUND :  train moves at 25 m/s
+ observer on TRAIN  :  passenger at rest (0 m/s)
+ same passenger, two frames =&gt; two velocities   &lt;-- answer: motion is frame-dependent
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever a problem says "velocity of X", silently append "<b>with respect to which frame?</b>" — ground, train, belt, water. Naming the frame first kills almost every relative-motion sign error. Trap: picking "the moving object" as the frame; the frame is the <b>reference you measure from</b>, not the thing being measured.</div>
+<div class="final">Answer: (b) A fixed object used to define motion.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Relative velocity between two objects moving in the same direction with equal speeds? (zero)</td><td class="topic">Relative velocity basics</td><td><a href="https://www.youtube.com/watch?v=Qn5mvAoeh0Q" target="_blank">When will the relative velocity of two moving objects be zero?</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Zero</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Relative velocity is a <b>vector subtraction</b>: v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub> is what an observer riding on B measures for A. Here both objects travel in the <b>same direction with equal speeds</b>, so their velocity vectors are <i>identical</i> — same magnitude, same direction. Subtracting a vector from itself must give the zero vector. Physically, if two bodies keep the same velocity, the <b>gap between them never changes</b>, so from either one the other appears frozen in place.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub></span> — velocity of A relative to B, in <b>m s⁻¹</b>. <span class="why">Two velocities (m s⁻¹) subtract to a velocity (m s⁻¹) — dimensionally sound.</span> <b>Given:</b> same direction (same sign) and equal magnitude, |v<sub>A</sub>| = |v<sub>B</sub>| = v.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Take the common direction of travel as <b>positive</b>; the motion is 1-D.</div>
+<div class="step">2. Same direction, equal speed ⇒ v<sub>A</sub> = +v m s⁻¹ and v<sub>B</sub> = +v m s⁻¹ — the two velocities are equal.</div>
+<div class="step">3. Substitute: v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub> = v − v = <b>0 m s⁻¹</b>.<span class="why">Equal vectors cancel exactly, in both magnitude and direction.</span></div>
+<div class="step">4. Interpret: zero relative velocity means the separation between A and B stays <b>constant</b> in time — each sees the other as stationary.</div>
+<div class="step">5. Sanity check: v = 20 m s⁻¹ each ⇒ v<sub>AB</sub> = 20 − 20 = <b>0</b>. So option (c) Zero. <span class="why">Contrast: opposite equal speeds would give v<sub>AB</sub> = v − (−v) = 2v, not zero.</span></div>
+<pre>
+ case (same line)              v_AB = v_A - v_B     result
+ same dir, equal speed (this)  20 - 20 =  0         zero    &lt;-- answer
+ same dir, A faster            20 - 12 = +8         positive
+ opposite, equal speed         20 - (-20) = 40      large
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "Equal velocity ⇒ zero relative velocity ⇒ fixed gap" — recognise it instantly and skip the algebra. On an x–t graph the two paths are <b>parallel straight lines</b>. Trap: equal <i>speed</i> is not enough; the directions must also match. Opposite directions at equal speed give 2v, the maximum, not zero.</div>
+<div class="final">Answer: (c) Zero.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Formula for the relative position vector between points A and B? (rB − rA)</td><td class="topic">Relative position vector</td><td><a href="https://www.youtube.com/watch?v=qnuKwCawhVc" target="_blank">Relative Position Vector</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval flagged"><span class="lt">c</span>rA &#8211; rB <span class="warn" title="Answer-key letter (c) = &#39;rA &#8211; rB&#39;. But this lesson&#39;s own theory page (book p.223) prints Relative position: r(B,A) = rB &#8211; rA &#8212; that is printed option (b), which is also what this row&#39;s question cell states. The key&#39;s letter contradicts the book&#39;s own notation. Flagged from inspection of the printed stem and theory page; this row has no worked solution.">&#9888;</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The <b>relative position vector</b> of B with respect to A is the arrow drawn <i>from A to B</i>. By the triangle rule of vectors, starting at the origin O: to go O→B directly equals O→A followed by A→B, so <b>r<sub>A</sub> + r<sub>BA</sub> = r<sub>B</sub></b>, giving r<sub>BA</sub> = r<sub>B</sub> − r<sub>A</sub>. The order is the whole point: you always subtract the <b>tail</b> point's position from the <b>head</b> point's position. This same rule underlies relative velocity (differentiate it once) and relative displacement.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">r<sub>BA</sub> = r<sub>B</sub> − r<sub>A</sub></span> — position of B relative to A (vector from A to B). <span class="why">Head minus tail: the arrow points to B, so B's position vector comes first; both terms are position vectors (m), so the result is a displacement (m).</span> This is the notation printed on the lesson's own theory page.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Place both points by their position vectors from a common origin O: A at r<sub>A</sub>, B at r<sub>B</sub>.</div>
+<div class="step">2. Apply the triangle law along O→A→B: <b>r<sub>A</sub> + r<sub>BA</sub> = r<sub>B</sub></b>.<span class="why">The trip O→B must equal O→A then A→B — vectors add tip-to-tail.</span></div>
+<div class="step">3. Rearrange for the relative (A→B) vector: <b>r<sub>BA</sub> = r<sub>B</sub> − r<sub>A</sub></b>.</div>
+<div class="step">4. Fix the direction by a check: if B is farther out than A along the same line, r<sub>B</sub> − r<sub>A</sub> points <b>from A towards B</b>, exactly as required.</div>
+<div class="step">5. This is printed option <b>(b) r<sub>B</sub> − r<sub>A</sub></b>, which also matches this row's question stem and the book's theory page (r<sub>(B,A)</sub> = r<sub>B</sub> − r<sub>A</sub>). The reversed form r<sub>A</sub> − r<sub>B</sub> would be the position of A relative to B — the opposite arrow.</div>
+<pre>
+        B (r_B)
+       ^
+      /|
+ r_BA/ |  r_BA = r_B - r_A   (arrow A -&gt; B)   &lt;-- answer
+    /  |
+   A---+ (r_A)
+   |
+   O (origin)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "Relative to A" ⇒ <b>subtract A</b>: r<sub>BA</sub> = r<sub>B</sub> − r<sub>A</sub> (and likewise v<sub>BA</sub> = v<sub>B</sub> − v<sub>A</sub>). Read the subscript left-to-right as "of B, from A", and put that first letter's vector first. Trap: swapping the order gives the exact negative — the arrow flips to point A-from-B.</div>
+<div class="final">Answer: (b) r<sub>B</sub> − r<sub>A</sub>. ⚠ Printed key says (c) r<sub>A</sub> − r<sub>B</sub> — that is the reversed (B→A) arrow; see working above.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">What type of graph shows two objects moving with the same velocity? (two parallel lines)</td><td class="topic">Position-time graph, zero relative velocity</td><td><a href="https://www.youtube.com/watch?v=NKr4mNSveDM" target="_blank">Position-time graphs of two objects with equal velocities — special case of relative velocity</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>Two parallel lines</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> On a <b>position–time (x–t) graph</b> the <b>slope</b> of each line is that object's <b>velocity</b>. "Two objects moving with the same velocity" therefore means two lines with the <b>same slope</b> — and lines of equal slope are, by definition, <b>parallel</b>. They need not coincide: the objects can start at different positions (different intercepts), so the lines stay a fixed distance apart, reflecting a constant separation (zero relative velocity).</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v = slope = Δx/Δt</span> in <b>m s⁻¹</b>; equal velocity ⇒ <span class="eq">slope<sub>1</sub> = slope<sub>2</sub></span>. <span class="why">Two straight lines with identical slope never meet (unless identical) — the geometric meaning of "parallel".</span> Different x-intercepts ⇒ a constant gap between them.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Translate the physics to geometry: on an x–t graph, <b>velocity = slope</b>.</div>
+<div class="step">2. "Same velocity" for both objects ⇒ their lines have the <b>same slope</b>.</div>
+<div class="step">3. Two lines of equal slope are <b>parallel</b> ⇒ the graph is <b>two parallel lines</b> — option (b).</div>
+<div class="step">4. Confirm with relative velocity: same slope ⇒ v<sub>rel</sub> = v<sub>1</sub> − v<sub>2</sub> = 0, so the separation is constant and the lines never converge.<span class="why">Parallel lines keep a fixed perpendicular gap — the visual signature of zero relative velocity.</span></div>
+<div class="step">5. Eliminate distractors: intersecting lines ⇒ different velocities (they meet, i.e. same position at one instant); a curved line ⇒ changing velocity (acceleration). Only <b>parallel straight lines</b> encode equal, constant velocities.</div>
+<pre>
+ x(m)
+  ^        object 1  /        / object 2   (same slope = same v)
+  |                /        /
+  |              /        /
+  |            /        /     gap stays constant  =&gt; v_rel = 0
+  |          /        /
+  0+--------------------------&gt; t(s)
+    two parallel lines   &lt;-- answer (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Map x–t features one-to-one: <b>slope = velocity</b>, <b>parallel = equal velocity</b>, <b>crossing = same position (meeting)</b>, <b>curve = acceleration</b>. Trap: reading two <i>intersecting</i> lines as "same velocity" — an intersection means equal position at that instant, not equal velocity; only parallelism gives equal velocity.</div>
+<div class="final">Answer: (b) Two parallel lines.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">If object A moves faster than object B in the same direction, what is the nature of their relative velocity? (positive)</td><td class="topic">Sign of relative velocity</td><td><a href="https://www.youtube.com/watch?v=AFgNpH5RFjE" target="_blank">Relative velocity of a body moving in the same direction of another body</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval flagged"><span class="lt">c</span>Negative <span class="warn" title="Answer-key letter (c) = &#39;Negative&#39;. Our worked solution below concludes (a) Positive, because it evaluates v(AB) = vA &#8722; vB. The book&#39;s theory (p.223, Case-2: &#39;Velocity of object A is more than velocity of object B. Here relative velocity VB &#8722; VA will be negative&#39;) uses the opposite convention, so the key follows the book and OUR solution row is the one out of step with it.">&#9888;</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Relative velocity is a <b>vector subtraction</b>, and its <i>sign</i> (in 1-D) carries physical meaning: it tells you whether the gap between the two bodies is opening or closing, and in which direction. Here A and B move along the same line in the <b>same direction</b>, with A the faster one. Asking for "the nature of v<sub>AB</sub>" means: is v<sub>A</sub> − v<sub>B</sub> positive, negative, or zero? Because both velocities point the same way, they carry the same sign, and the subtraction is a plain difference of magnitudes.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub></span> — velocity of A <i>relative to</i> B, in <b>m s⁻¹</b>. <span class="why">Both terms are velocities (m s⁻¹), so the difference is also m s⁻¹ — dimensionally consistent.</span> <b>Assumption:</b> motion is along one straight line, and we take the common direction of travel as <b>positive</b>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Fix a sign convention: take the direction in which both A and B move as <b>positive</b>.<span class="why">In 1-D a sign fully specifies a vector's direction, so one axis is enough.</span></div>
+<div class="step">2. Both move the same way ⇒ v<sub>A</sub> = +|v<sub>A</sub>| m s⁻¹ and v<sub>B</sub> = +|v<sub>B</sub>| m s⁻¹ — both positive.</div>
+<div class="step">3. "A moves faster than B" is given ⇒ <b>|v<sub>A</sub>| &gt; |v<sub>B</sub>| m s⁻¹</b>.</div>
+<div class="step">4. Substitute into the formula: v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub> = |v<sub>A</sub>| − |v<sub>B</sub>| m s⁻¹.<span class="why">A bigger positive number minus a smaller positive number is positive.</span></div>
+<div class="step">5. Since |v<sub>A</sub>| &gt; |v<sub>B</sub>|, the difference is <b>&gt; 0</b> ⇒ v<sub>AB</sub> is <b>positive</b>, matching option (a).</div>
+<div class="step">6. Sanity check with numbers: v<sub>A</sub> = 20 m s⁻¹, v<sub>B</sub> = 12 m s⁻¹ ⇒ v<sub>AB</sub> = 20 − 12 = <b>+8 m s⁻¹</b> — A pulls ahead of B by 8 m every second, which is exactly what "faster" means.</div>
+<pre>
+ case (both move along +x)      v_AB = v_A - v_B    sign      meaning
+ v_A &gt; v_B   (this question)    e.g. 20 - 12 = +8   positive  A pulls ahead   ✓
+ v_A = v_B                      e.g. 15 - 15 =  0   zero      gap stays fixed
+ v_A &lt; v_B                      e.g. 10 - 18 = -8   negative  A falls behind
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For 1-D relative velocity, <b>same direction ⇒ subtract, opposite directions ⇒ add</b> the magnitudes. The sign then reads off directly: <b>positive = the gap opens in your chosen +direction</b> (A gains on B). Trap: option (b) "Zero" is only true for <i>equal</i> speeds — the word "faster" rules it out; and (c) "Negative" would need B to be the faster one, so it is just the reversed convention.</div>
+<div class="final">Answer: (a) Positive.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 2</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Train S moves north at 25 ms⁻¹; a monkey runs at 5 ms⁻¹ on the roof against the train's motion. Speed of the monkey as seen from the ground? (20 ms⁻¹ towards north)</td><td class="topic">Relative velocity, train–monkey problem</td><td><a href="https://www.youtube.com/watch?v=gw3atzHG7oo" target="_blank">A train moves north at 54 km/hr and a monkey runs on the roof</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>20ms<sup>&#8722;1</sup> (towards north)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The monkey's 5 m s⁻¹ is quoted <b>with respect to the train</b>, not the ground — it is what a passenger sitting on the train would measure. The ground observer sees the monkey carried along by the train <i>and</i> running backwards on top of it, so the two motions superpose. The bridge between the two observers is the relative-velocity addition rule; getting the signs right is the entire problem.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>MG</sub> = v<sub>MT</sub> + v<sub>TG</sub></span> — velocity of Monkey w.r.t. Ground = (velocity of Monkey w.r.t. Train) + (velocity of Train w.r.t. Ground), all in <b>m s⁻¹</b>. <span class="why">The inner subscripts (T) cancel like a chain: M→T→G gives M→G, so the units and the direction bookkeeping both work out.</span> <b>Assumption:</b> all motion is along the north–south line; take <b>north as positive</b>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set the convention: <b>north = +</b>, south = −. Motion is 1-D along this axis.</div>
+<div class="step">2. Train w.r.t. ground: it moves north at 25 m s⁻¹ ⇒ <b>v<sub>TG</sub> = +25 m s⁻¹</b>.</div>
+<div class="step">3. Monkey w.r.t. train: it runs at 5 m s⁻¹ <b>against the train's motion</b>, i.e. towards the south ⇒ <b>v<sub>MT</sub> = −5 m s⁻¹</b>.<span class="why">"Against its motion" fixes the sign as opposite to the train's — this is the step the question is really testing.</span></div>
+<div class="step">4. Add them: v<sub>MG</sub> = v<sub>MT</sub> + v<sub>TG</sub> = (−5) + (+25) = <b>+20 m s⁻¹</b>.</div>
+<div class="step">5. Read the sign: the result is <b>positive</b>, so the monkey moves at <b>20 m s⁻¹ towards the north</b> as seen from the ground — option (c).<span class="why">The train carries the monkey north faster than the monkey can run south, so it still drifts north — just more slowly than the train.</span></div>
+<pre>
+                     N (+)
+                      ^
+   train (ground)     |  +25 m/s   ────────────&gt;  north
+   monkey on roof     |   -5 m/s   &lt;────         (w.r.t. train, southward)
+                      |  -------------------------------
+   monkey (ground)    |  +20 m/s   ──────&gt;        north   ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Write every velocity with a <b>two-letter subscript</b> (v<sub>MT</sub>, v<sub>TG</sub>) and chain them so the inner letters cancel — <b>v<sub>MG</sub> = v<sub>MT</sub> + v<sub>TG</sub></b>. The arithmetic then never goes wrong. Trap: options (a)/(b) give 30 m s⁻¹ = 25 + 5, which is what you get if you <i>add</i> the speeds — that is the answer only if the monkey ran <b>with</b> the train. "Against its motion" ⇒ subtract.</div>
+<div class="final">Answer: (c) 20 m s⁻¹ (towards north).</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A child runs at 9 km/h (w.r.t. the belt) between parents 50 m apart on a belt moving at 4 km/h. Speed of the child in the direction of the belt's motion, as seen from the platform? (13 km/h)</td><td class="topic">Relative velocity, moving-belt (NCERT)</td><td><a href="https://www.youtube.com/watch?v=rmnt41wi4oM" target="_blank">On a long horizontally moving belt, a child runs to and fro (NCERT)</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>13 km/h</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The child's 9 km/h is measured <b>with respect to the belt</b>, not the platform. A platform observer sees two motions add: the belt carrying the child forward at 4 km/h, plus the child's own running on top of it. When the child runs <b>in the direction the belt moves</b>, the two velocities point the same way and simply add. The bridge is the relative-velocity chain rule; the only skill being tested is keeping the "with respect to what" straight.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>CP</sub> = v<sub>CB</sub> + v<sub>BP</sub></span> — velocity of Child w.r.t. Platform = (Child w.r.t. Belt) + (Belt w.r.t. Platform), in <b>km/h</b>. <span class="why">Inner subscript B cancels: C→B→P gives C→P, so the direction bookkeeping and units both close.</span> <b>Given:</b> v<sub>CB</sub> = 9 km/h, v<sub>BP</sub> = 4 km/h, both towards the belt's motion (same sign).</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Take the <b>belt's direction of motion as positive</b>; all motion is along this one line.</div>
+<div class="step">2. Belt w.r.t. platform: <b>v<sub>BP</sub> = +4 km/h</b>.</div>
+<div class="step">3. Child w.r.t. belt, running the <b>same way</b> as the belt: <b>v<sub>CB</sub> = +9 km/h</b>.</div>
+<div class="step">4. Add along the chain: v<sub>CP</sub> = v<sub>CB</sub> + v<sub>BP</sub> = 9 + 4 = <b>13 km/h</b>.<span class="why">Same direction ⇒ the belt's carry and the running speed reinforce, so magnitudes add.</span></div>
+<div class="step">5. So the platform sees the child move at <b>13 km/h</b> in the belt's direction — option (c).<span class="why">Running the other way would give 9 − 4 = 5 km/h; here the signs agree, so it is the sum.</span></div>
+<pre>
+ direction of belt motion = +
+ belt  w.r.t platform :  +4 km/h  ─────&gt;
+ child w.r.t belt     :  +9 km/h  ─────&gt;   (same way)
+ -----------------------------------------------
+ child w.r.t platform : 9 + 4 = 13 km/h   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Chain the two-letter subscripts (v<sub>CB</sub> + v<sub>BP</sub> = v<sub>CP</sub>) so the middle letter cancels — the arithmetic then can't go wrong. Trap: the 9 km/h is <b>w.r.t. the belt</b>; forgetting to add the belt's 4 km/h leaves the wrong 9 km/h. Same direction ⇒ add; against the belt ⇒ subtract (that is the companion 5 km/h case in NCERT).</div>
+<div class="final">Answer: (c) 13 km/h.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Same belt/child setup — time taken by the child to cover the 50 m between his parents? (20 s)</td><td class="topic">Relative velocity, moving-belt (NCERT)</td><td><a href="https://www.youtube.com/watch?v=rmnt41wi4oM" target="_blank">On a long horizontally moving belt, a child runs to and fro (NCERT)</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>20 s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A neat subtlety of this NCERT problem: the <b>parents stand still on the belt</b>, so they are carried along <i>with</i> it. The child runs at 9 km/h with respect to the belt — and the parents are also fixed to the belt. Therefore the child's speed <b>relative to the parents</b> is just his speed relative to the belt: the belt's own 4 km/h cancels out, because both the child's reference and the finish line (a parent) share it. Time to cover the 50 m gap uses this relative speed, not the platform speed.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">t = distance ÷ relative speed</span> = 50 m ÷ v<sub>Cp</sub>, in <b>s</b>. <span class="why">m ÷ (m s⁻¹) = s; the distance between the parents is measured on the belt, so pair it with the child's speed on the belt.</span> <b>Unit bridge:</b> 1 km/h = (1000 m)/(3600 s) = 5/18 m s⁻¹.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Both parents ride the belt ⇒ child's speed <b>relative to a parent</b> = child's speed relative to the belt = <b>9 km/h</b>.<span class="why">The belt's 4 km/h moves the child and both parents equally, so it cancels in their relative motion.</span></div>
+<div class="step">2. Convert to SI: 9 km/h = 9 × (5/18) = <b>2.5 m s⁻¹</b>.</div>
+<div class="step">3. The gap between the parents is <b>50 m</b> (a distance on the belt).</div>
+<div class="step">4. Time to cover it: t = 50 m ÷ 2.5 m s⁻¹ = <b>20 s</b>.</div>
+<div class="step">5. So the child takes <b>20 s</b> either way — option (c).<span class="why">Because the belt cancels, the answer is the same whether the child runs towards or away from the belt's motion; that is why the NCERT part specifies it is independent of the platform observer.</span></div>
+<pre>
+ belt speed cancels (parents ride the belt too)
+ child speed w.r.t parents = 9 km/h = 2.5 m/s
+ distance parent-to-parent = 50 m
+ t = 50 / 2.5 = 20 s      &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When both the runner's speed <b>and</b> the target are quoted on the same moving platform, work entirely <b>in the belt frame</b> — the belt's velocity drops out and the problem becomes a plain distance ÷ speed. Trap: using the platform speed 13 km/h (or 5 km/h) gives the wrong time; the 50 m is a belt distance, so pair it with the 9 km/h belt speed.</div>
+<div class="final">Answer: (c) 20 s.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">Two balls A and B are projected vertically, one upward and one downward, from a height. What is the relative acceleration between them? (zero)</td><td class="topic">Relative acceleration under gravity</td><td><a href="https://www.youtube.com/watch?v=ST7Tl58JGoc" target="_blank">Relative Velocity and Relative Acceleration — Motion in a Straight Line (Hindi)</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>0</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The question deliberately contrasts <b>velocity</b> with <b>acceleration</b>. The two balls are thrown in <i>opposite</i> directions, so their relative <b>velocity</b> is large — but once released, the only force on either ball is gravity. Free fall is famously <b>independent of mass and of initial velocity</b>: every projectile near the Earth's surface accelerates at exactly <b>g downward</b>. Since both share the identical acceleration vector, the difference of the two vanishes.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">a<sub>AB</sub> = a<sub>A</sub> − a<sub>B</sub></span> — relative acceleration of A w.r.t. B, in <b>m s⁻²</b>. <span class="why">Both terms are accelerations (m s⁻²), so their difference is m s⁻² — dimensionally consistent.</span> <b>Assumptions:</b> air resistance is neglected, and both balls are in free flight near the Earth's surface, so <span class="eq">a<sub>A</sub> = a<sub>B</sub> = g downward = 9.8 m s⁻²</span>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Take <b>downward as positive</b> and note that <i>after release</i> the only force on each ball is its weight.<span class="why">The throw sets the initial velocity, but it exerts no force once the ball has left the hand.</span></div>
+<div class="step">2. Ball A (thrown <b>upward</b>): its velocity points up, but its acceleration is <b>a<sub>A</sub> = +g = +9.8 m s⁻²</b> (downward).<span class="why">Gravity always pulls down — it decelerates A on the way up, then speeds it up coming down. The <i>acceleration</i> never changes.</span></div>
+<div class="step">3. Ball B (thrown <b>downward</b>): its acceleration is also <b>a<sub>B</sub> = +g = +9.8 m s⁻²</b> (downward).</div>
+<div class="step">4. Subtract: a<sub>AB</sub> = a<sub>A</sub> − a<sub>B</sub> = (+9.8) − (+9.8) = <b>0 m s⁻²</b>.</div>
+<div class="step">5. So the relative acceleration is <b>zero</b> — option (a).<span class="why">Physically: in B's frame, A moves in a straight line at constant relative velocity. This is exactly why "in relative motion under gravity, gravity cancels" is such a powerful shortcut.</span></div>
+<pre>
+              ^ up
+      A  o    |  thrown UP    : v_A up,   a_A = g DOWN
+              |
+      B  o    |  thrown DOWN  : v_B down, a_B = g DOWN
+              v down (+)
+
+   a_AB = a_A - a_B = g - g = 0 m/s²      (velocities differ; accelerations do NOT)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever <b>every</b> body in a problem is in free flight, the relative acceleration is <b>0</b> — so in one body's frame the other travels in a <b>straight line at constant velocity</b>. That single insight turns "two projectiles" problems (collision, minimum separation) into trivial straight-line geometry. Trap: option (b) 2g is what you get by wrongly <i>adding</i> because the <i>velocities</i> are opposite — but the accelerations both point down, so they subtract to zero.</div>
+<div class="final">Answer: (a) 0.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Position-time graph of two riders C and D — at t = 0, which statement is true about their relative position?</td><td class="topic">Reading x–t graphs, relative position</td><td><a href="https://www.youtube.com/watch?v=3sLGCWGm610" target="_blank">Relative Velocity — Kinematics, Motion in a Straight Line 08 (Class 11 Ch.4, JEE Mains)</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>Rider D is ahead of rider C</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> On a <b>position–time (x–t) graph</b>, the two features carry completely different information: the <b>intercept</b> (the value of x at t = 0) tells you <i>where</i> a body is, while the <b>slope</b> tells you <i>how fast</i> it moves. The question asks only about <b>relative position at t = 0</b>, so the slopes — however tempting — are irrelevant. You simply read off the vertical axis at t = 0 and compare heights: whoever sits higher on the x-axis is "ahead."</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">position at t = 0 → the x-intercept</span>, in <b>m</b>; and <span class="eq">v = slope = Δx/Δt</span>, in <b>m s⁻¹</b>. <span class="why">Comparing positions means comparing x-values (m) at the same instant — never comparing slopes (m s⁻¹), which is a different quantity with different units.</span> <b>Ahead</b> ⇒ larger x at that instant.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Read the figure at <b>t = 0</b> (the vertical axis) rather than anywhere else.<span class="why">"At t = 0" pins the comparison to a single instant, which on an x–t graph is a single vertical line.</span></div>
+<div class="step">2. Line <b>C</b> starts at the <b>origin</b>: at t = 0, <b>x<sub>C</sub> = 0 m</b>.</div>
+<div class="step">3. Line <b>D</b> starts at a <b>positive intercept</b> on the x-axis: at t = 0, <b>x<sub>D</sub> &gt; 0 m</b>.</div>
+<div class="step">4. Compare: x<sub>D</sub> &gt; x<sub>C</sub> = 0 m ⇒ at t = 0, <b>rider D is ahead of rider C</b> — option (b).</div>
+<div class="step">5. Guard against the distractor: C is drawn <b>steeper</b>, so C is <i>faster</i> and eventually overtakes D at the dashed intersection — but that happens at a <b>later</b> time, not at t = 0.<span class="why">Steeper slope = greater velocity (m s⁻¹), which says nothing about position (m) at the start.</span></div>
+<pre>
+   x(m)
+    ^                            C   (steep: starts at 0, catches up later)
+    |                        /
+    |                      /  .
+    |     x_D &gt; 0  o------/------------- D   (gentler slope, HEAD START)
+    |             /      .
+    |           /     intersection = where C overtakes D (t &gt; 0)
+    |         /
+   0+-------o------|------------------&gt; t(s)
+    O    x_C = 0
+         ^
+      at t = 0 :  x_D &gt; x_C   ⇒  D is ahead   ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> On an x–t graph keep two readings strictly apart: <b>intercept ⇒ position (who is ahead)</b>, <b>slope ⇒ velocity (who is faster)</b>, and <b>crossing point ⇒ the instant they meet</b>. Trap: C's steeper line makes it "look like the winner," so (a) is the popular wrong pick — but at t = 0 the race has not started, and D's head start is all that counts.</div>
+<div class="final">Answer: (b) Rider D is ahead of rider C.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 3</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">A 100 m train at 40 ms⁻¹ overtakes a 200 m train at 30 ms⁻¹. Time taken by the first train to completely pass the second? (30 s)</td><td class="topic">Overtaking, same-direction relative velocity</td><td><a href="https://www.youtube.com/watch?v=W5IiRQHYstk" target="_blank">A train 100 m long at 40 m/s overtakes another train 200 m long at 30 m/s</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>30 s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> "Overtaking / completely passing" problems are cleanest in the <b>frame of the slower train</b>: sit on the 200 m train and the 100 m train sweeps past you at the <b>relative</b> speed. For one train to <i>completely</i> pass another, the front of the faster train must go from the rear of the slower one all the way past its front — so the distance covered relative to it is the <b>sum of the two lengths</b>, not one length. Same direction ⇒ the relative speed is the <i>difference</i> of the speeds.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">t = (L<sub>1</sub> + L<sub>2</sub>) ÷ v<sub>rel</sub></span>, with <span class="eq">v<sub>rel</sub> = v<sub>1</sub> − v<sub>2</sub></span> for the <b>same</b> direction, giving <b>s</b>. <span class="why">m ÷ (m s⁻¹) = s; both engine <i>and</i> tail must clear, so the two lengths add.</span> <b>Given:</b> L<sub>1</sub> = 100 m, L<sub>2</sub> = 200 m, v<sub>1</sub> = 40 m s⁻¹, v<sub>2</sub> = 30 m s⁻¹.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Same direction ⇒ relative speed v<sub>rel</sub> = v<sub>1</sub> − v<sub>2</sub> = 40 − 30 = <b>10 m s⁻¹</b>.<span class="why">In the slow train's frame the fast train creeps up at only 10 m s⁻¹.</span></div>
+<div class="step">2. Distance to be swept for a complete pass = L<sub>1</sub> + L<sub>2</sub> = 100 + 200 = <b>300 m</b>.<span class="why">Front of train 1 starts level with rear of train 2 and must end level with its front — that is both lengths.</span></div>
+<div class="step">3. Apply t = (L<sub>1</sub> + L<sub>2</sub>) ÷ v<sub>rel</sub> = 300 m ÷ 10 m s⁻¹ = <b>30 s</b>.</div>
+<div class="step">4. Reasonableness: at a closing speed of only 10 m s⁻¹, clearing 300 m taking 30 s is sensible — option (a).</div>
+<div class="step">5. Guard: using v<sub>rel</sub> = 70 m s⁻¹ (adding the speeds, as if opposite) would give ≈ 4.3 s — wrong, because both move the same way.</div>
+<pre>
+ same direction  =&gt;  v_rel = 40 - 30 = 10 m/s
+ pass distance   =&gt;  100 + 200 = 300 m
+ t = 300 / 10 = 30 s      &lt;-- answer
+
+  [==100==]40 ─&gt;                  rear-to-front of the 200 m train
+        [======200======]30 ─&gt;
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Two rules end every train problem: (i) <b>man/pole ⇒ one length; train/platform ⇒ sum of lengths</b>; (ii) <b>same direction ⇒ subtract speeds, opposite ⇒ add</b>. Trap: dropping the 200 m (using only 100 m ÷ 10 = 10 s) — the tail of the long train must also clear, so both lengths count.</div>
+<div class="final">Answer: (a) 30 s.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Two cars move in the same direction at 30 km/h, separated by 5 km. Speed of a car coming the opposite way that meets both cars at a 4-minute interval? (45 km/h)</td><td class="topic">Relative velocity, opposite direction</td><td><a href="https://www.youtube.com/watch?v=9171Vc0ldXw" target="_blank">Two cars moving in the same direction at 30 km/hr separated by 5 km</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>45 km/h</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A car comes the <b>opposite</b> way and meets the two same-direction cars 4 minutes apart. Sit in the frame of the two cars: they are 5 km apart and (in their own frame) stationary, while the oncoming car approaches at the <b>closing speed</b> v + 30. In the 4-minute gap between the two meetings, that closing motion must eat up the entire <b>5 km</b> separation. Setting "gap ÷ closing speed = 4 min" gives one equation in the unknown speed v.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>rel</sub> = v + 30 km/h</span> (opposite directions add), and <span class="eq">gap = v<sub>rel</sub> × t</span>. <span class="why">Relative to the two cars, the oncoming car covers the 5 km inter-car distance in the meeting interval; km = (km/h)(h) checks out.</span> <b>Given:</b> gap = 5 km, t = 4 min = 4/60 = 1/15 h.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Work in the two cars' frame: they sit 5 km apart, and the oncoming car closes on them at <b>v<sub>rel</sub> = v + 30 km/h</b>.<span class="why">Opposite directions ⇒ speeds add to the closing speed.</span></div>
+<div class="step">2. Between meeting car 1 and car 2, the oncoming car must traverse the whole <b>5 km</b> gap (relative to the cars).</div>
+<div class="step">3. Convert the interval: t = 4 min = <b>1/15 h</b>.</div>
+<div class="step">4. Write gap = v<sub>rel</sub> × t: 5 = (v + 30) × (1/15) ⇒ v + 30 = 5 × 15 = <b>75 km/h</b>.</div>
+<div class="step">5. Solve: v = 75 − 30 = <b>45 km/h</b> — option (c).<span class="why">Check: closing speed 75 km/h covers 5 km in 5/75 h = 1/15 h = 4 min. ✓</span></div>
+<pre>
+ in the cars' frame: two cars 5 km apart, oncoming car closes at (v+30)
+ 5 km = (v+30) x (4/60 h)  =&gt;  v+30 = 5 x 15 = 75  =&gt;  v = 45 km/h   &lt;-- answer
+
+  car1 30─&gt;      car2 30─&gt;        (5 km apart)
+        &lt;─ v   oncoming car meets them 4 min apart
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "Meets A, then B, a time t later" ⇒ the oncoming car clears the <b>A–B gap</b> at the <b>closing speed</b> in that t: gap = (v + 30)t. Trap: using only v (or the 30 km/h) as the closing speed — opposite directions <b>add</b>, so it is v + 30, and forgetting the +30 gives v = 75 instead of 45.</div>
+<div class="final">Answer: (c) 45 km/h.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A 100 m train at 15 ms⁻¹ overtakes a man running on the platform in the same direction in 10 s. How long would it take to cross him if he ran in the opposite direction instead? (5 s)</td><td class="topic">Overtaking a person, same vs opposite direction</td><td><a href="https://www.youtube.com/watch?v=HkfHwJ72HQo" target="_blank">Speed of train relative to a running man — a 125 m train passes a man running</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>5 s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> "Crossing" problems are cleanest in the <b>frame of the man</b>: sit on the man and the train sweeps past you at the <b>relative</b> speed, and the length it must sweep is just the train's own length (the man is a point, contributing no length). The problem is a two-stage one — the first sentence is not the question, it is the <b>data</b> that lets you find the man's unknown speed. Once you have it, you re-run the same formula with the relative speed reversed.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">t = L ÷ v<sub>rel</sub></span> — time to cross = train length L (m) ÷ relative speed (m s⁻¹), giving <b>s</b>. <span class="why">m ÷ (m s⁻¹) = s, so the units confirm the set-up.</span> With <span class="eq">v<sub>rel</sub> = v<sub>train</sub> − v<sub>man</sub></span> for the <b>same</b> direction and <span class="eq">v<sub>rel</sub> = v<sub>train</sub> + v<sub>man</sub></span> for <b>opposite</b> directions. <b>Assumption:</b> the man is a point object, so only the train's 100 m must pass him; both speeds are constant.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>Stage 1 — same direction (given data).</b> Use t = L ÷ v<sub>rel</sub> rearranged: v<sub>rel</sub> = L ÷ t = 100 m ÷ 10 s = <b>10 m s⁻¹</b>.<span class="why">In the man's frame the whole 100 m of train slides past him in 10 s.</span></div>
+<div class="step">2. Same direction ⇒ v<sub>rel</sub> = v<sub>train</sub> − v<sub>man</sub>. Substitute: 10 m s⁻¹ = 15 m s⁻¹ − v<sub>man</sub>.</div>
+<div class="step">3. Solve for the man's speed: v<sub>man</sub> = 15 − 10 = <b>5 m s⁻¹</b>.<span class="why">This is the hidden unknown the first sentence exists to give us.</span></div>
+<div class="step">4. <b>Stage 2 — opposite direction (the question).</b> Now the speeds add: v<sub>rel</sub>′ = v<sub>train</sub> + v<sub>man</sub> = 15 + 5 = <b>20 m s⁻¹</b>.<span class="why">Running <i>into</i> the train, the man meets it faster, so the closing speed doubles from 10 to 20 m s⁻¹.</span></div>
+<div class="step">5. Apply the crossing formula again: t′ = L ÷ v<sub>rel</sub>′ = 100 m ÷ 20 m s⁻¹ = <b>5 s</b>.</div>
+<div class="step">6. Check it is reasonable: the relative speed doubled (10 → 20 m s⁻¹), so the time must <b>halve</b> (10 s → 5 s). ✓ Option (b).</div>
+<pre>
+ stage        directions    v_rel                       t = L / v_rel
+ given (1)    same          15 - v_man = 100/10 = 10    10 s   ⇒ v_man = 5 m/s
+ asked (2)    opposite      15 + 5     = 20 m/s         100/20 = 5 s   ✓
+
+   same dir :   train 15 ──&gt;      man 5 ──&gt;      closing at 10 m/s
+   opp  dir :   train 15 ──&gt;   &lt;── man 5         closing at 20 m/s
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For "train crosses a <b>man/pole</b>" use <b>only the train's length</b>; for "train crosses a <b>platform/another train</b>" use the <b>sum of the two lengths</b>. And since L is fixed, <b>t ∝ 1/v<sub>rel</sub></b> — here v<sub>rel</sub> goes 10 → 20 m s⁻¹, so just halve 10 s to get 5 s without re-dividing. Trap: option (a) 7 s tempts those who forget to first extract v<sub>man</sub> = 5 m s⁻¹ from the given 10 s.</div>
+<div class="final">Answer: (b) 5 s.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A bus moves at 10 ms⁻¹; a scooterist 1 km behind wants to overtake it in 100 s. What velocity should the scooterist maintain? (20 ms⁻¹)</td><td class="topic">Overtaking, relative velocity</td><td><a href="https://www.youtube.com/watch?v=1jex3z8PMQo" target="_blank">A bus is moving with a velocity 10 m/s; a scooterist wishes to overtake the bus in 100 s</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>20 ms<sup>&#8722;1</sup></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> To "overtake" a bus that is 1 km ahead, the scooterist must <b>close that 1 km gap</b> and draw level within 100 s. In the bus's frame the bus is at rest and the scooterist approaches at the <b>relative</b> speed v − 10 (same direction). That closing speed, acting for 100 s, has to cover exactly the 1000 m head-start. So the relative speed is fixed by gap ÷ time, and the required actual speed follows by adding back the bus's speed.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>rel</sub> = gap ÷ t</span> and <span class="eq">v<sub>rel</sub> = v<sub>scooter</sub> − v<sub>bus</sub></span> (same direction), speeds in <b>m s⁻¹</b>. <span class="why">m ÷ s = m s⁻¹; same direction ⇒ subtract, so the closing speed is the difference.</span> <b>Given:</b> gap = 1 km = 1000 m, t = 100 s, v<sub>bus</sub> = 10 m s⁻¹.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Convert the head-start: 1 km = <b>1000 m</b>, the distance to be made up.</div>
+<div class="step">2. Required closing (relative) speed: v<sub>rel</sub> = gap ÷ t = 1000 m ÷ 100 s = <b>10 m s⁻¹</b>.<span class="why">In the bus frame the scooterist must gain 1000 m in 100 s, i.e. 10 m every second.</span></div>
+<div class="step">3. Same direction ⇒ v<sub>rel</sub> = v<sub>scooter</sub> − v<sub>bus</sub> ⇒ 10 = v<sub>scooter</sub> − 10.</div>
+<div class="step">4. Solve: v<sub>scooter</sub> = 10 + 10 = <b>20 m s⁻¹</b> — option (d).</div>
+<div class="step">5. Check: at 20 m s⁻¹ the scooter travels 2000 m in 100 s while the bus travels 1000 m; 2000 − 1000 = 1000 m gained = the gap. ✓<span class="why">Both cover ground; only the 1000 m difference matters for catching up.</span></div>
+<pre>
+ gap = 1000 m,  t = 100 s
+ v_rel = 1000 / 100 = 10 m/s      (scooter - bus)
+ v_scooter = 10 + 10 = 20 m/s     &lt;-- answer
+
+ scooter ─&gt; 20        bus ─&gt; 10        (1 km apart, same direction)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For catch-up in the same direction, only the <b>relative</b> speed does the work: v<sub>rel</sub> = head-start ÷ time, then add the leader's speed. Trap: reading v<sub>rel</sub> = 10 m s⁻¹ as the final answer (option for the closing speed) instead of adding the bus's 10 m s⁻¹ — the scooter must actually move at 20 m s⁻¹.</div>
+<div class="final">Answer: (d) 20 m s⁻¹.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Position-time graph for two trains on parallel tracks — which statement about their velocities (relative to time tB) is true?</td><td class="topic">Reading x–t graphs of relative motion</td><td><a href="https://www.youtube.com/watch?v=tiTg7FP55v8" target="_blank">The graph shows position as a function of time for two trains on parallel tracks</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Both trains have the same velocity at some time before t<sub>B</sub>.</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> On a <b>position–time graph</b> the <b>slope at any instant is the velocity</b>. Two trains have "the same velocity" at the moment their curves are <b>momentarily parallel</b> — equal slope. The classic figure shows one train's curve steeper at first and the other steeper later, so somewhere <b>before t<sub>B</sub></b> their slopes must cross over and be equal at one instant. The question tests reading slopes off a graph rather than reading heights (positions).</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v = slope of x–t = dx/dt</span> in <b>m s⁻¹</b>; equal velocity ⇔ <span class="eq">equal slope (tangents parallel)</span>. <span class="why">If one curve's slope starts larger and ends smaller than the other's, by continuity the two slopes are equal somewhere in between — an intermediate-value argument.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Translate the options: "same velocity" ⇒ the two x–t curves have the <b>same slope</b> at that instant.</div>
+<div class="step">2. Near t = 0 one train's curve rises more steeply (greater slope ⇒ greater velocity) than the other's.</div>
+<div class="step">3. Approaching t<sub>B</sub> the steepness order <b>reverses</b> — the initially slower train is now the steeper one.<span class="why">The curves swap which is faster, so their slopes must have been equal at some crossover.</span></div>
+<div class="step">4. By continuity, if slope A &gt; slope B early and slope A &lt; slope B later, there is an instant <b>before t<sub>B</sub></b> where slope A = slope B ⇒ equal velocities.</div>
+<div class="step">5. That is exactly statement (c): "both trains have the same velocity at some time before t<sub>B</sub>." The other options confuse equal <i>position</i> (curves crossing) with equal <i>velocity</i> (slopes equal).</div>
+<pre>
+ x(m)
+  ^        train A          , train B
+  |        (steep early)  ,'  (steep late)
+  |               \     ,'
+  |                \  ,'   &lt;-- here slopes are EQUAL  =&gt; same velocity
+  |               ,'\
+  |             ,'   \
+  0+----------|--------|----------&gt; t
+             t*       t_B      (t* &lt; t_B : equal velocity)   &lt;-- answer (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> On x–t graphs keep two readings apart: <b>where the curves cross ⇒ same position (they meet)</b>; <b>where the tangents are parallel ⇒ same velocity</b>. Trap: options that call the crossing point "same velocity" — a crossing means equal x, not equal slope. Equal velocity is the parallel-tangent instant, which here lies before t<sub>B</sub>.</div>
+<div class="final">Answer: (c) Both trains have the same velocity at some time before t<sub>B</sub>.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 4</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Inclined planes OA (30°) and OB (60°) meet at O. A particle is projected from P with u = 10√3 m/s perpendicular to OA and strikes OB perpendicularly at Q (g = 10 m/s²). (i) Time of flight P→Q (ii) Speed at which it strikes OB (iii) Height h of P above the ground</td><td class="topic">Projectile motion between two inclined planes</td><td><a href="https://www.youtube.com/watch?v=UtX2nXvIA2w" target="_blank">Two inclined planes OA and OB at 30° and 60°; particle strikes OB perpendicularly</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">(i) <span class="lt">b</span>2s &#183; (ii) <span class="lt">a</span>10 m/s &#183; (iii) <span class="lt">c</span>5 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Because OA (30°) and OB (60°) differ by exactly 90°, the two inclines are <b>mutually perpendicular</b>. The slick method is to use axes <b>along OA (x)</b> and <b>perpendicular to OA (y)</b>, then resolve gravity into those two axes. Launched perpendicular to OA, the particle starts with velocity purely along y. "Strikes OB perpendicularly" — since OB ⊥ OA, hitting OB at right angles means the velocity there is <b>along OA</b>, i.e. the y-velocity has fallen to <b>zero</b>. That single condition fixes the time; everything else follows.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>y</sub> = u<sub>y</sub> + a<sub>y</sub>t</span>, <span class="eq">v<sub>x</sub> = a<sub>x</sub>t</span>; gravity resolved: <span class="eq">a<sub>x</sub> = −g sin30° = −5</span>, <span class="eq">a<sub>y</sub> = −g cos30° = −5√3</span> m s⁻². <span class="why">Along-incline component uses sin θ, perpendicular uses cos θ; here θ = 30° (angle of OA).</span> <b>Given:</b> u = 10√3 m s⁻¹ along +y (u<sub>x</sub> = 0), g = 10 m s⁻².</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>(i) Time.</b> Perpendicular hit on OB ⇒ velocity ∥ OA ⇒ <b>v<sub>y</sub> = 0</b> at Q. So 0 = u<sub>y</sub> + a<sub>y</sub>t = 10√3 − 5√3·t ⇒ t = 10√3 ÷ 5√3 = <b>2 s</b>.<span class="why">The perpendicular launch speed is killed by the perpendicular gravity component in 2 s.</span></div>
+<div class="step">2. <b>(ii) Striking speed.</b> At Q, v<sub>y</sub> = 0, so the whole speed is v<sub>x</sub> = a<sub>x</sub>t = (−5)(2) = <b>−10 m s⁻¹</b>.</div>
+<div class="step">3. Speed = |v<sub>x</sub>| = <b>10 m s⁻¹</b> (directed along OA into OB, i.e. perpendicular to OB). ✓<span class="why">Only the along-OA motion survives, so the impact speed is exactly this component.</span></div>
+<div class="step">4. <b>(iii) Height of P.</b> P lies on OA at distance d from O. Matching the landing point to OB (using OA ⊥ OB and the displacements x = ½a<sub>x</sub>t² = −10 m, y = u<sub>y</sub>t + ½a<sub>y</sub>t² = 10√3 m) gives <b>d = 10 m</b> along OA.</div>
+<div class="step">5. Height above the ground through O: h = d·sin30° = 10 × 0.5 = <b>5 m</b>.<span class="why">OA rises at 30°, so a point 10 m up the incline sits 10 sin30° = 5 m above O.</span></div>
+<pre>
+ axes: x along OA, y perpendicular to OA (OA at 30 deg)
+ a_x = -g sin30 = -5      u_x = 0
+ a_y = -g cos30 = -5√3    u_y = +10√3
+ hit OB perpendicular =&gt; v_y = 0 :  t = 10√3 / 5√3 = 2 s       &lt;-- (i)
+ v_x = a_x t = -5(2) = -10  =&gt; speed = 10 m/s                  &lt;-- (ii)
+ P is d = 10 m up OA  =&gt; h = d sin30 = 5 m                     &lt;-- (iii)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When two inclines meet at 90° and a particle is thrown ⊥ to one and lands ⊥ to the other, tilt the axes onto the first incline: launch is pure-y, "lands ⊥ to OB" means <b>v<sub>y</sub> = 0</b>, so t = u ÷ (g cos θ) drops out in one line. Trap: using horizontal/vertical axes forces messy simultaneous equations; the incline axes make it a one-step v = u + at.</div>
+<div class="final">Answer: (i) (b) 2 s · (ii) (a) 10 m/s · (iii) (c) 5 m.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Body A is thrown up and reaches max height h; body B is dropped from height h at the same instant and does not rebound. Which v(A relative to B) vs time graph is correct (upward positive)?</td><td class="topic">Relative-velocity graph, one body thrown up / one dropped</td><td><a href="https://www.youtube.com/watch?v=HJRbF5iIEl8" target="_blank">Body A thrown up to height h; body B dropped from h — velocity of A relative to B vs time</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>[graph option (c) &#8212; the four options are figures, no printed text]</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> While both bodies are in free flight, they share the <b>same acceleration g downward</b>, so their <b>relative velocity is constant</b> — the graph must be a <b>horizontal line</b> at first. The twist is the timing: body A (thrown up to height h) reaches its top exactly when body B (dropped from h) hits the ground, both at t = √(2h/g). After B lands and stops, it no longer accelerates, so from then on v<sub>AB</sub> = v<sub>A</sub> alone, which is falling — the graph <b>bends into a downward-sloping line</b>. That two-piece shape is option (c).</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub></span> (upward +), with u<sub>A</sub> = +√(2gh), v<sub>A</sub> = u<sub>A</sub> − gt, v<sub>B</sub> = −gt until landing, then v<sub>B</sub> = 0. <span class="why">Both in flight ⇒ v<sub>AB</sub> = (u<sub>A</sub> − gt) − (−gt) = u<sub>A</sub>, independent of t — a constant.</span> <b>Key times:</b> A reaches top at t = u<sub>A</sub>/g = √(2h/g); B lands at t = √(2h/g) — the same instant, T.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Phase 1 (0 &lt; t &lt; T, both falling under g): v<sub>AB</sub> = (u<sub>A</sub> − gt) − (−gt) = <b>u<sub>A</sub> = +√(2gh)</b>, a positive <b>constant</b> ⇒ horizontal line above the axis.<span class="why">Equal accelerations cancel, so the gt terms vanish and only the launch speed remains.</span></div>
+<div class="step">2. Find T: B falls h ⇒ h = ½gT² ⇒ T = √(2h/g). A reaches top when v<sub>A</sub> = 0 ⇒ t = u<sub>A</sub>/g = √(2gh)/g = √(2h/g) = <b>T</b> — the same instant.</div>
+<div class="step">3. At t = T both momentarily have v = 0; B then rests on the ground (does not rebound) ⇒ <b>v<sub>B</sub> = 0</b> thereafter.</div>
+<div class="step">4. Phase 2 (t &gt; T): v<sub>AB</sub> = v<sub>A</sub> − 0 = v<sub>A</sub> = −g(t − T), a straight line sloping <b>downward</b> (A now falls back) crossing into negative values.<span class="why">With B stopped, the shared-gravity cancellation ends, so A's own falling velocity shows up.</span></div>
+<div class="step">5. Graph = <b>constant positive segment, then a straight line of slope −g</b> from t = T. Among the figures this is option <b>(c)</b>.</div>
+<pre>
+ v_AB
+  ^  +√(2gh) |________            &lt;-- constant while BOTH in free fall
+  |          |        \
+  0 +--------|---------\----------&gt; t
+  |          T          \         (t &gt; T: slope = -g, B at rest)
+  |                      \
+  answer: flat-then-down  =&gt; option (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Two bodies both in free fall ⇒ relative velocity is <b>constant</b> (flat graph) until one of them <b>stops or lands</b>; only then does the line bend. Trap: options showing a line sloping the whole time assume B keeps accelerating — but "does not rebound" freezes v<sub>B</sub> at 0, breaking the cancellation exactly at t = T.</div>
+<div class="final">Answer: (c) the flat-then-downward graph (constant +√(2gh), then slope −g after t = √(2h/g)).</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Trains of length 100 m and 125 m move towards each other at 10 m/s each, with accelerations 0.3 m/s² and 0.2 m/s². Time taken to pass each other? (10 s)</td><td class="topic">Relative motion with acceleration, opposite direction</td><td><a href="https://www.youtube.com/watch?v=n2JizNXFxqs" target="_blank">Two trains of length 100 m and 125 m moving in opposite directions with acceleration</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>10 s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two trains approach head-on, each speeding up. Solve it in the <b>relative frame</b>: pin one train and let the other carry the <i>combined</i> motion. Opposite directions ⇒ <b>velocities add</b> and, since both accelerate towards each other, <b>accelerations add</b> too. To completely pass, the relative displacement must equal the <b>sum of the lengths</b> (100 + 125 = 225 m). Then it is a single s = ut + ½at² in the relative variables.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">s = u<sub>rel</sub>t + ½a<sub>rel</sub>t²</span>, with <span class="eq">u<sub>rel</sub> = 10 + 10 = 20 m s⁻¹</span> and <span class="eq">a<sub>rel</sub> = 0.3 + 0.2 = 0.5 m s⁻²</span>. <span class="why">Opposite motions add for both velocity and acceleration; s is the total length to clear.</span> <b>Given:</b> s = 100 + 125 = 225 m.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Opposite directions ⇒ relative initial velocity u<sub>rel</sub> = 10 + 10 = <b>20 m s⁻¹</b>.</div>
+<div class="step">2. Both accelerate towards each other ⇒ relative acceleration a<sub>rel</sub> = 0.3 + 0.2 = <b>0.5 m s⁻²</b>.<span class="why">Each train's acceleration increases the closing rate, so they add just like the speeds.</span></div>
+<div class="step">3. Distance to pass = sum of lengths = 100 + 125 = <b>225 m</b>.</div>
+<div class="step">4. Substitute: 225 = 20t + ½(0.5)t² = 20t + 0.25t² ⇒ <b>0.25t² + 20t − 225 = 0</b>.</div>
+<div class="step">5. Multiply by 4: t² + 80t − 900 = 0 ⇒ t = [−80 + √(6400 + 3600)]/2 = (−80 + 100)/2 = <b>10 s</b> (reject the negative root) — option (b).<span class="why">√10000 = 100 makes the discriminant clean, confirming 10 s.</span></div>
+<pre>
+ opposite dir: u_rel = 10+10 = 20 m/s,  a_rel = 0.3+0.2 = 0.5 m/s²
+ pass distance = 100 + 125 = 225 m
+ 225 = 20t + 0.25t²  =&gt;  t² + 80t - 900 = 0
+ t = (-80 + √10000)/2 = (-80 + 100)/2 = 10 s      &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Reduce a two-body accelerating problem to <b>one</b> equation in relative variables: opposite ⇒ add u and add a; pass distance ⇒ sum of lengths. Trap: forgetting to include the acceleration term (using 225 ÷ 20 = 11.25 s) or adding only the velocities — both trains' accelerations must be summed into a<sub>rel</sub> = 0.5 m s⁻².</div>
+<div class="final">Answer: (b) 10 s.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A ball is thrown at speed v from level ground such that the area under its trajectory is maximum. If the angle of projection is π/k, find k.</td><td class="topic">Projectile motion, optimisation (area under trajectory)</td><td><a href="https://www.youtube.com/watch?v=cu_YZFINPN0" target="_blank">Projectile Motion — Maximum Range Angle (Physics \&amp; Calculus)</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is an <b>optimisation</b> problem, but not the familiar "maximum range" one — it asks for the maximum <b>area enclosed under the trajectory</b>. Area depends on the parabola's <i>range</i> (its width, R) <b>and</b> its <i>maximum height</i> (H) together. Raising θ grows H but shrinks R past 45°, so the product has its own distinct optimum — and it turns out to be <b>60°</b>, not 45°. The key simplification is a geometric fact: the area under any parabolic arch is exactly <b>two-thirds</b> of its bounding rectangle.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">A = (2/3)·R·H</span> — area (m²) under a parabolic arch of base R (m) and height H (m). <span class="why">Archimedes' result: a parabolic segment fills 2/3 of the rectangle R × H that encloses it. m × m = m², so A is an area.</span> With <span class="eq">R = v² sin2θ / g</span> (m) and <span class="eq">H = v² sin²θ / (2g)</span> (m). <b>Assumptions:</b> no air resistance; launch and landing on the same level ground; g is uniform.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write the two standard projectile results for speed v at angle θ:<span class="why">R = v²sin2θ/g and H = v²sin²θ/(2g); both carry units (m s⁻¹)² ÷ (m s⁻²) = m. ✓</span></div>
+<div class="step">2. Express R with the double-angle identity so both terms share the same variables: R = v²(2 sinθ cosθ)/g = <b>2v² sinθ cosθ / g</b> (m).</div>
+<div class="step">3. Substitute into the arch formula:<span class="why">A = (2/3) × R × H = (2/3) × [2v² sinθcosθ/g] × [v² sin²θ/(2g)].</span></div>
+<div class="step">4. Simplify — the 2 and the 1/2 cancel: <b>A = (2/3)·(v⁴/g²)·sin³θ·cosθ</b> (m²).<span class="why">Units: (m s⁻¹)⁴ ÷ (m s⁻²)² = m⁴s⁻⁴ ÷ m²s⁻⁴ = m². ✓ Dimensionally an area.</span></div>
+<div class="step">5. v and g are <b>fixed</b>, so maximising A means maximising only <b>f(θ) = sin³θ·cosθ</b>.</div>
+<div class="step">6. Differentiate and set to zero: df/dθ = 3sin²θ·cos²θ − sin⁴θ = 0.<span class="why">Product rule on sin³θ·cosθ: 3sin²θcosθ·cosθ + sin³θ·(−sinθ).</span></div>
+<div class="step">7. Factor out sin²θ (nonzero for 0 &lt; θ &lt; 90°): sin²θ(3cos²θ − sin²θ) = 0 ⇒ <b>3cos²θ = sin²θ</b>.</div>
+<div class="step">8. Divide both sides by cos²θ: <b>tan²θ = 3</b> ⇒ tanθ = √3 ⇒ <b>θ = 60°</b>.</div>
+<div class="step">9. Convert to the required form: 60° = <b>π/3</b> rad. Matching θ = π/k gives <b>k = 3</b>.</div>
+<pre>
+  A(θ) ∝ f(θ) = sin³θ·cosθ        (v, g fixed)
+
+     θ        sin³θ      cosθ      f(θ) = sin³θ·cosθ
+    30°       0.1250     0.8660        0.1083
+    45°       0.3536     0.7071        0.2500     &lt;-- max RANGE angle, NOT max area
+    60°       0.6495     0.5000        0.3248     &lt;-- MAXIMUM  ✓
+    75°       0.9014     0.2588        0.2333
+   -----------------------------------------------
+   exact:  df/dθ = 0  ⇒  tan²θ = 3  ⇒  θ = 60° = π/3   ⇒  k = 3   ✓
+
+   f(60°) = 0.3248  &gt;  f(45°) = 0.2500   ⇒  60°, not 45°, maximises the AREA
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Memorise the family of projectile optima — they are <i>different</i> angles: <b>max range ⇒ 45°</b>; <b>max area under the path ⇒ 60°</b> (tan²θ = 3); <b>max displacement magnitude ⇒ 45°</b>. Also bank Archimedes' <b>A = (2/3)RH</b> for any parabolic arch — it saves the whole ∫y dx integration. Trap: reflexively answering 45° (giving k = 4) — that maximises R alone, but area needs R·H, and the extra height wins out at 60°.</div>
+<div class="final">Answer: k = 3 (θ = π/3 = 60°).</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Balls A and B are thrown with speeds u and u/2, covering the same horizontal range. If B's angle is 15°, find A's angle of projection. (½ sin⁻¹(1/8))</td><td class="topic">Equal range, different speeds/angles</td><td><a href="https://www.youtube.com/watch?v=Q3aPpFspHEw" target="_blank">Two balls A and B thrown with speeds u and u/2 cover the same horizontal range</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>1/2 sin<sup>&#8722;1</sup>(1/8)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The horizontal range of a projectile is fixed by <b>both</b> launch speed and angle through R = u²sin2θ/g. Two balls with <i>different</i> speeds can still share a range if the slower one is thrown at a more efficient angle. Here A is twice as fast as B, and range scales with the <b>square</b> of speed, so A carries a 4× advantage in u² — A must use a much <i>flatter</i> (smaller) angle to bring that advantage back down to B's range.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">R = u²·sin2θ / g</span> <span class="why">range on level ground; sin2θ peaks at θ = 45°.</span> Data: u<sub>A</sub> = u, θ<sub>A</sub> = ? ; u<sub>B</sub> = u/2, θ<sub>B</sub> = 15°. Impose R<sub>A</sub> = R<sub>B</sub>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write both ranges: R<sub>A</sub> = u²·sin2θ<sub>A</sub>/g and R<sub>B</sub> = (u/2)²·sin(2×15°)/g = (u²/4)·sin30°/g.</div>
+<div class="step">2. Equal range ⇒ u²·sin2θ<sub>A</sub>/g = (u²/4)·sin30°/g; cancel the shared u²/g.<span class="why">g and the common u² drop out — the answer is independent of the actual launch speed.</span></div>
+<div class="step">3. So sin2θ<sub>A</sub> = ¼ × sin30° = ¼ × ½ = <b>1/8</b>.</div>
+<div class="step">4. Invert: 2θ<sub>A</sub> = sin⁻¹(1/8) ⇒ θ<sub>A</sub> = <b>½ sin⁻¹(1/8)</b> ≈ ½(7.18°) ≈ <b>3.6°</b>.<span class="why">A very flat throw — exactly what the 4× speed-squared edge demands.</span></div>
+<div class="step">5. Note sin⁻¹(1/8) also admits 180° − 7.18° = 172.8°, giving the steep partner θ<sub>A</sub> ≈ 86.4° with the same range; the flat root is the intended one.</div>
+<pre>
+ ball  speed   angle          sin(2theta)   R proportional to u^2 sin2theta
+ B     u/2     15deg          sin30=0.5     (u^2/4)(0.5) = u^2/8
+ A     u       (1/2)sin^-1(1/8) 1/8         u^2 (1/8)   = u^2/8   &lt;-- equal
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Cancel g and the shared u² at once — equal-range problems always collapse to matching the u²sin2θ products. Trap: forgetting the speed is <b>squared</b>. Writing sin2θ<sub>A</sub> = ½·sin30° gives 1/4; the (u/2)² factor is 1/4, so the true value is ⅛. Every sin2θ also hides a steep complementary angle.</div>
+<div class="final">Answer: (b) θ<sub>A</sub> = ½ sin⁻¹(1/8) ≈ 3.6°.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">Two cars close by 8 m every second travelling in opposite directions, and by 0.8 m every second travelling in the same direction. Find their speeds. (4.4 ms⁻¹ and 3.6 ms⁻¹)</td><td class="topic">Relative speed, simultaneous equations</td><td><a href="https://www.youtube.com/watch?v=fufddSe7uQk" target="_blank">Two cars get closer by 8 m/s opposite and 0.8 m/s same direction — find speeds</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>4.4ms<sup>&#8722;1</sup> and 3.6ms<sup>&#8722;1</sup></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> "Get closer by X metres every second" is a plain statement of <b>relative speed</b> — the rate at which the gap shrinks. Two unknown speeds need two independent facts, and the problem hands you exactly two: one for <b>opposite</b> motion and one for <b>same-direction</b> motion. Opposite directions make the relative speed the <i>sum</i>; the same direction makes it the <i>difference</i>. That gives a clean pair of simultaneous equations.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>rel,opp</sub> = v₁ + v₂</span> and <span class="eq">v<sub>rel,same</sub> = v₁ − v₂</span> (m s⁻¹). <span class="why">In 1-D, opposite directions carry opposite signs so magnitudes add; same direction, they subtract.</span> Data: v₁ + v₂ = 8, v₁ − v₂ = 0.8, with v₁ &gt; v₂.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Opposite directions: they close 8 m each second ⇒ <b>v₁ + v₂ = 8 m s⁻¹</b>.</div>
+<div class="step">2. Same direction: the gap closes 0.8 m each second ⇒ <b>v₁ − v₂ = 0.8 m s⁻¹</b>.<span class="why">The faster car reels the slower one in at their speed difference.</span></div>
+<div class="step">3. Add the two equations: (v₁ + v₂) + (v₁ − v₂) = 8 + 0.8 ⇒ 2v₁ = 8.8 ⇒ <b>v₁ = 4.4 m s⁻¹</b>.</div>
+<div class="step">4. Back-substitute: v₂ = 8 − v₁ = 8 − 4.4 = <b>3.6 m s⁻¹</b>.</div>
+<div class="step">5. Check: sum 4.4 + 3.6 = 8 ✓ and difference 4.4 − 3.6 = 0.8 ✓ — both conditions satisfied.</div>
+<pre>
+ case          relation        value
+ opposite      v1 + v2  =  8.0 m/s
+ same dir      v1 - v2  =  0.8 m/s
+ add  ->       2 v1     =  8.8  -> v1 = 4.4 m/s   &lt;-- faster car
+ subtract ->              v2 = 3.6 m/s   &lt;-- slower car
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Read "closer by … per second" straight as a relative-speed value — no need for positions or times. Add the two relative speeds to get 2v₁, subtract to get 2v₂. Trap: pairing the numbers the wrong way (using 8 for same-direction) gives an impossible negative or a mismatched pair — the <b>larger</b> closing rate is always the opposite-direction case.</div>
+<div class="final">Answer: (b) 4.4 m s⁻¹ and 3.6 m s⁻¹.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">Cars A and B travel in the same direction with VA &gt; VB. When A is a distance s behind B, A brakes with retardation a. Condition so there is no collision? (s ≥ (VA−VB)²/2a)</td><td class="topic">No-collision condition, relative deceleration</td><td><a href="https://www.youtube.com/watch?v=KoEqA3j0dCw" target="_blank">Two cars A and B travelling in the same direction with velocities VA and VB — no-collision condition</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>s &#8805; (V<sub>A</sub> &#8722; V<sub>B</sub>)&#178;/2a</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Collision is easiest to judge in B's <b>reference frame</b>: sit on B and watch A. Relative to B, A starts a distance s away, approaches at relative speed (V<sub>A</sub> − V<sub>B</sub>), and — since only A brakes while B keeps constant velocity — decelerates at the full retardation a. A "just misses" B when this relative approach is killed off exactly as the relative displacement reaches s. Any larger s is safe.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v² = u² − 2a·d</span> applied to relative motion: <span class="eq">u<sub>rel</sub> = V<sub>A</sub> − V<sub>B</sub></span>, a<sub>rel</sub> = a. <span class="why">B has zero acceleration, so the relative deceleration equals A's own retardation a.</span> No collision ⇒ relative velocity hits 0 within the gap s.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In B's frame, A's initial approach speed is u<sub>rel</sub> = <b>V<sub>A</sub> − V<sub>B</sub></b> (positive, since V<sub>A</sub> &gt; V<sub>B</sub>).</div>
+<div class="step">2. Relative deceleration = a (only A brakes). A stops relative to B (v<sub>rel</sub> = 0) after covering relative distance d.</div>
+<div class="step">3. Use v² = u² − 2a·d with v<sub>rel</sub> = 0: 0 = (V<sub>A</sub> − V<sub>B</sub>)² − 2a·d ⇒ <b>d = (V<sub>A</sub> − V<sub>B</sub>)² / 2a</b>.<span class="why">d is the maximum ground A gains on B before their speeds match.</span></div>
+<div class="step">4. No collision requires this closing distance to fit inside the initial gap: <b>d ≤ s</b>.</div>
+<div class="step">5. Therefore the safe condition is <b>s ≥ (V<sub>A</sub> − V<sub>B</sub>)² / 2a</b>. Equality is the "just avoids touching" limit.</div>
+<pre>
+ in B's frame:  u_rel = VA - VB ,  decel = a ,  v_rel -> 0
+ gap closed  d = (VA - VB)^2 / (2a)
+ safe if     s >= (VA - VB)^2 / (2a)      &lt;-- no collision
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Shift to the frame of the un-braking car: the problem becomes one body decelerating to rest, and v² = u² − 2as gives the stopping gap in one line. Trap: using V<sub>A</sub> alone (not V<sub>A</sub> − V<sub>B</sub>) — B is still rolling forward, so only the <b>relative</b> speed must be shed. Using V<sub>A</sub> overestimates the danger.</div>
+<div class="final">Answer: (c) s ≥ (V<sub>A</sub> − V<sub>B</sub>)² / 2a.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">A boy throws balls at 1 s intervals; the first ball returns to his hand just as he is about to throw the fifth. (i) Time each ball spends in the air (ii) Speed with which each ball is thrown (iii) Maximum height attained by each ball</td><td class="topic">Vertical projectile, juggling-interval problem</td><td><a href="https://www.youtube.com/watch?v=3JBHGkCScx8" target="_blank">A juggler throws balls into the air, one whenever the previous reaches its highest point</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">4 s, 20m/s, 20 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The physics here is ordinary vertical projectile motion; the <b>real difficulty is the counting</b>. The whole problem hinges on converting "when he is about to throw the <b>fifth</b>, the <b>first</b> comes back" into a time interval. Balls are thrown at 1 s spacing, so the throws happen at t = 0, 1, 2, 3, 4 s. Ball 1 is thrown at t = 0 and returns exactly when ball 5 is due — at t = 4 s. So its total flight time is <b>4 intervals, not 5</b> — the classic off-by-one trap.</div>
+<div class="seg"><span class="lbl">Formula</span> Time of flight <span class="eq">T = 2u/g</span> (s), and maximum height <span class="eq">H = u²/(2g)</span> (m), for launch speed u (m s⁻¹) straight up. <span class="why">T comes from the ball returning to y = 0 in y = ut − ½gt²; H from v² = u² − 2gH with v = 0 at the top. Units: (m s⁻¹)/(m s⁻²) = s ✓, and (m s⁻¹)²/(m s⁻²) = m ✓.</span> <b>Assumptions:</b> no air resistance; each ball is caught at the same height it was thrown from; <b>g = 10 m s⁻²</b>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>(i) Lay the throws on a timeline</b> at 1 s spacing: ball 1 at t = 0 s, ball 2 at t = 1 s, ball 3 at t = 2 s, ball 4 at t = 3 s, ball 5 at t = <b>4 s</b>.<span class="why">The n-th ball is thrown at t = (n − 1) × 1 s — 5 throws span only 4 gaps.</span></div>
+<div class="step">2. Ball 1 returns to his hand at the instant ball 5 is about to be thrown, i.e. at t = 4 s. It was thrown at t = 0 s.</div>
+<div class="step">3. So the <b>time of flight T = 4 s − 0 s = 4 s</b>. <b>(i) answered.</b></div>
+<div class="step">4. <b>(ii) Find the launch speed</b> from T = 2u/g. Rearrange: u = gT/2.</div>
+<div class="step">5. Substitute: u = (10 m s⁻² × 4 s) ÷ 2 = 40 ÷ 2 = <b>20 m s⁻¹</b>. <b>(ii) answered.</b><span class="why">Units: m s⁻² × s = m s⁻¹ ✓ — a speed, as required.</span></div>
+<div class="step">6. <b>(iii) Find the maximum height</b> using H = u²/(2g).</div>
+<div class="step">7. Substitute: H = (20 m s⁻¹)² ÷ (2 × 10 m s⁻²) = 400 ÷ 20 = <b>20 m</b>. <b>(iii) answered.</b><span class="why">Units: m² s⁻² ÷ m s⁻² = m ✓ — a length.</span></div>
+<div class="step">8. Cross-check with the halves: time up = T/2 = 2 s, and H = u(T/2) − ½g(T/2)² = 20(2) − ½(10)(4) = 40 − 20 = <b>20 m</b>. ✓ Consistent.</div>
+<pre>
+  t(s):   0     1     2     3     4
+          |     |     |     |     |
+  throw:  1     2     3     4     5      &lt;-- 5 throws, only 4 gaps of 1 s
+          |&lt;--------------------&gt;|
+          ball 1 in the air for T = 4 s  (NOT 5 s)
+
+  T = 2u/g   ⇒  u = gT/2 = 10×4/2 = 20 m/s
+  H = u²/2g  =  20²/(2×10) = 400/20 = 20 m
+  (up 2 s, down 2 s — symmetric)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> In every "balls thrown at fixed intervals" problem, count <b>gaps, not throws</b>: n throws at interval τ span <b>(n − 1)τ</b>. Here 5 throws × 1 s ⇒ T = 4 s, not 5 s. Then the chain <b>T → u = gT/2 → H = u²/2g</b> answers all three parts in one sweep. Trap: writing T = 5 s gives u = 25 m s⁻¹ and H = 31.25 m — every part wrong from one miscount.</div>
+<div class="final">Answer: (i) T = 4 s · (ii) u = 20 m s⁻¹ · (iii) H = 20 m.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">A swimmer (speed 5 km/h) crosses a 10 km wide river (flow 3 km/h) aiming to land exactly opposite. Mark the correct statement(s) about the heading angle and crossing time.</td><td class="topic">River-swimmer problem, reaching directly opposite bank</td><td><a href="https://www.youtube.com/watch?v=51rN9E5fLJU" target="_blank">A person reaches a point directly opposite on the other bank of a flowing river while swimming</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">ac</span>Swimmer is headed at 127&#176; with river flow direction &#183; Time taken by swimmer to cross the river is 2.5 h</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> To land <b>exactly opposite</b>, the swimmer must have <b>zero net drift along the river</b>. His 5 km h⁻¹ is measured <i>with respect to the water</i>, so the ground sees his swim velocity plus the 3 km h⁻¹ current. He must therefore aim <b>upstream</b> at just the angle whose along-stream component cancels the current. Whatever is left over — the perpendicular component — is the only part that actually carries him across, and it is <i>less</i> than 5 km h⁻¹. This is a multiple-correct question, so each option needs its own verdict.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>SG</sub> = v<sub>SW</sub> + v<sub>WG</sub></span> (swimmer w.r.t. ground = swimmer w.r.t. water + water w.r.t. ground), in <b>km h⁻¹</b>. Landing opposite ⇒ <span class="eq">v<sub>SW</sub>cosθ + v<sub>R</sub> = 0</span> (along-stream, km h⁻¹) and crossing time <span class="eq">t = d ÷ (v<sub>SW</sub> sinθ)</span> (h). <span class="why">km ÷ (km h⁻¹) = h ✓.</span> <b>Assumptions:</b> uniform current; θ is measured from the <b>river-flow direction</b> (as the options state); take flow along +x, the far bank along +y.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set axes: current along <b>+x</b> at v<sub>R</sub> = 3 km h⁻¹; the far bank is d = 10 km away along <b>+y</b>.</div>
+<div class="step">2. Resolve the swim velocity (5 km h⁻¹ at angle θ to the flow): along-stream = <b>5cosθ</b>, across = <b>5sinθ</b> (km h⁻¹).</div>
+<div class="step">3. <b>Zero-drift condition</b> — the along-stream ground velocity must vanish: 5cosθ + 3 = 0.<span class="why">If any x-component survived, he would be carried downstream and miss the opposite point.</span></div>
+<div class="step">4. Solve: cosθ = −3/5 = <b>−0.6</b> ⇒ <b>θ = 127°</b> with the flow direction.<span class="why">cos127° = −0.6 ✓. The angle exceeds 90°, i.e. he heads partly <b>upstream</b> — exactly as expected. This makes (a) correct and (b) wrong.</span></div>
+<div class="step">5. <b>Find the useful (crossing) component:</b> sinθ = sin127° = <b>+0.8</b> ⇒ across-velocity = 5 × 0.8 = <b>4 km h⁻¹</b>.<span class="why">The 3-4-5 triangle: of his 5 km h⁻¹, exactly 3 is "spent" fighting the current, leaving 4 to cross. √(5² − 3²) = 4 ✓.</span></div>
+<div class="step">6. <b>Crossing time:</b> t = d ÷ 4 km h⁻¹ = 10 km ÷ 4 km h⁻¹ = <b>2.5 h</b>.<span class="why">Units: km ÷ km h⁻¹ = h ✓. This makes (c) correct and (d) wrong.</span></div>
+<div class="step">7. Verify the drift is truly zero: ground x-velocity = 5cos127° + 3 = (−3) + 3 = <b>0 km h⁻¹</b> ✓ — he lands directly opposite.</div>
+<pre>
+        far bank  (10 km)
+   ─────────────────────────────
+            ^  net v = 4 km/h  (straight across, no drift)
+            |
+      5 ↖   |        swim (w.r.t. water) = 5 km/h at θ = 127° to flow
+        ↖   |          x-comp: 5cos127° = -3  (upstream)
+          ↖ |          y-comp: 5sin127° = +4  (across)
+   ─────────o────────&gt;  current v_R = +3 km/h
+            A
+   x: -3 + 3 = 0  ✓ zero drift        t = 10 / 4 = 2.5 h
+   (3-4-5 triangle: 3 cancels the flow, 4 does the crossing)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For "land directly opposite," the useful speed is always <b>√(v<sub>swim</sub>² − v<sub>river</sub>²)</b> — here √(25 − 9) = 4 km h⁻¹ — so <b>t = d/√(v² − v<sub>R</sub>²)</b> in one line, no angle needed. Two traps: (1) read the angle's <b>reference line</b> — 127° from the <i>flow</i> is the same heading as 37° from the <i>bank</i>, which is why (b) is planted; (2) using t = 10/5 = 2 h (option d) ignores that 3 of his 5 km h⁻¹ is consumed cancelling the current. Note this requires v<sub>swim</sub> &gt; v<sub>river</sub>, else landing opposite is impossible.</div>
+<div class="final">Answer: (a) and (c) — headed at 127° to the river flow; crossing time 2.5 h.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">Two particles start from A and B (√10 ms⁻¹ at 45°, separation 5√5 m, √5 ms⁻¹ downward, as shown). Mark the correct statement(s) about their minimum separation and whether they collide.</td><td class="topic">Minimum separation between two particles (multiple correct)</td><td><a href="https://www.youtube.com/watch?v=AZ-lsGdHYfE" target="_blank">Minimum distance between two particles in relative motion</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">ab</span>the minimum separation between two particles is achieved in time 1 s &#183; the minimum separation is 10 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Both particles move at <b>constant velocity</b>, so their relative velocity is constant too — meaning in B's frame, A travels along a <b>perfectly straight line</b>. The minimum separation is then a pure geometry question: the <b>perpendicular distance</b> from B to that straight line. This also settles the collision options at a glance — they collide only if that perpendicular distance is <b>zero</b>, i.e. only if the relative velocity points exactly along the initial separation.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub></span> (m s⁻¹) and <span class="eq">d<sub>min</sub> = d₀·sinα</span> (m), where d₀ is the initial separation (m) and α is the angle between v<sub>AB</sub> and the initial separation line. The instant of closest approach is <span class="eq">t<sub>min</sub> = d₀·cosα ÷ |v<sub>AB</sub>|</span> (s). <span class="why">m ÷ (m s⁻¹) = s ✓. d₀cosα is the along-track distance to the foot of the perpendicular.</span> <b>Assumptions:</b> constant velocities (no gravity/acceleration); particles are points. From the figure: A at the origin with √10 m s⁻¹ at <b>45°</b>, B at <b>5√5 m</b> along +x with <b>√5 m s⁻¹ downward</b>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set coordinates from the figure: <b>A = (0, 0) m</b>, <b>B = (5√5, 0) m</b>, so the initial separation is d₀ = <b>5√5 m ≈ 11.18 m</b> along +x.</div>
+<div class="step">2. Resolve A's velocity (√10 m s⁻¹ at 45°): v<sub>A</sub> = (√10·cos45°, √10·sin45°) = <b>(√5, √5) m s⁻¹</b>.<span class="why">√10 × (1/√2) = √(10/2) = √5 ≈ 2.236 m s⁻¹ in each component.</span></div>
+<div class="step">3. B's velocity is √5 m s⁻¹ straight <b>down</b>: v<sub>B</sub> = <b>(0, −√5) m s⁻¹</b>.</div>
+<div class="step">4. Relative velocity of A w.r.t. B: v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub> = (√5 − 0, √5 − (−√5)) = <b>(√5, 2√5) m s⁻¹</b>.</div>
+<div class="step">5. Its magnitude: |v<sub>AB</sub>| = √(5 + 20) = √25 = <b>5 m s⁻¹</b>.<span class="why">Nicely exact — a strong sign the set-up is right.</span></div>
+<div class="step">6. Find α, the angle of v<sub>AB</sub> from the +x axis (the line AB): tanα = 2√5 ÷ √5 = <b>2</b>.<span class="why">So sinα = 2/√5 and cosα = 1/√5 (a 1-2-√5 right triangle).</span></div>
+<div class="step">7. <b>Minimum separation</b> = perpendicular distance = d₀·sinα = 5√5 × (2/√5) = <b>10 m</b>.<span class="why">The √5 cancels exactly. Confirms option (b).</span></div>
+<div class="step">8. <b>Time of closest approach</b> = d₀·cosα ÷ |v<sub>AB</sub>| = [5√5 × (1/√5)] ÷ 5 = 5 ÷ 5 = <b>1 s</b>.<span class="why">Units: m ÷ (m s⁻¹) = s ✓. Confirms option (a).</span></div>
+<div class="step">9. <b>Collision test:</b> d<sub>min</sub> = 10 m ≠ 0 m, so they <b>never</b> touch ⇒ (c) "may collide" and (d) "must collide" are both <b>wrong</b>.</div>
+<div class="step">10. Verify by direct separation at t = 1 s: A = (√5, √5) = (2.236, 2.236) m; B = (5√5, −√5) = (11.180, −2.236) m. Δ = (8.944, −4.472) m ⇒ |Δ| = √(80 + 20) = √100 = <b>10 m</b> ✓ — matches step 7.</div>
+<pre>
+   In B's frame, A moves in a STRAIGHT line at v_AB = (√5, 2√5), |v_AB| = 5 m/s
+
+        A' path (relative)
+             /
+            /  α: tanα = 2  ⇒ sinα = 2/√5, cosα = 1/√5
+           /
+     A ●--/------------------------● B
+        &lt;------ d₀ = 5√5 m ------&gt;
+
+   d_min = d₀ sinα = 5√5 × 2/√5 = 10 m       ≠ 0  ⇒ NO collision
+   t_min = d₀ cosα / |v_AB| = (5√5 × 1/√5)/5 = 5/5 = 1 s
+
+   check at t = 1 s:  A=(2.236, 2.236)   B=(11.180, -2.236)
+                      Δ = (8.944, -4.472) ⇒ |Δ| = √100 = 10 m  ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Constant velocities ⇒ in one particle's frame the other flies <b>dead straight</b>, so <b>d<sub>min</sub> = perpendicular distance from the origin to that line</b> — never solve d(t) and differentiate. Collision ⇔ <b>v<sub>AB</sub> is antiparallel to the initial separation vector</b> (d<sub>min</sub> = 0). Trap: (c) "may collide" tempts you into hedging, but d<sub>min</sub> = 10 m is a definite non-zero number — the geometry leaves no room for "may."</div>
+<div class="final">Answer: (a) and (b) — minimum separation of 10 m, reached at t = 1 s; they do not collide.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 5</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Particles A, B, C sit at the vertices of an equilateral triangle of side d, each moving at constant speed v — A always toward B, B toward C, C toward A. When do they meet? (2d/3v)</td><td class="topic">Pursuit-curve problem, equilateral triangle</td><td><a href="https://www.youtube.com/watch?v=0cnJev0Ids0" target="_blank">Three particles A, B and C at the vertices of an equilateral triangle, each moving with constant speed v</a> · <a href="https://www.youtube.com/watch?v=F6SzbLcwvNQ" target="_blank">HC Verma Solved Example 20 — Rest and Motion</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">2d/(3&#965;)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the classic <b>pursuit-curve</b> (or "mice/bugs") problem. By symmetry the three particles always form a smaller equilateral triangle that <i>rotates and shrinks</i> toward the centroid, each tracing an identical spiral. The elegant trick: don't chase the geometry of the spiral — just track how fast the <b>separation of one pair</b> collapses, using the component of each velocity along the line joining them.</div>
+<div class="seg"><span class="lbl">Formula</span> rate of approach of a pair = (component of each particle's velocity along their joining line). <span class="eq">v<sub>close</sub> = v + v·cos60°</span>. <span class="why">A heads straight at B (full v along AB); B moves toward C, whose velocity makes the 60° interior angle with BA.</span> Constant closing speed ⇒ time = d ÷ v<sub>close</sub>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Focus on pair A→B, separation d. A moves <b>directly at B</b>, so all of A's speed v shortens AB: contributes +v.</div>
+<div class="step">2. B moves toward C. The interior angle ∠ABC = 60°, so B's velocity makes 60° with the line BA. Its component <i>toward</i> A is v·cos60° = v/2, also shortening AB.<span class="why">B's sideways drift does not change AB to first order; only the along-line component counts.</span></div>
+<div class="step">3. Closing speed of the gap: v<sub>close</sub> = v + v·cos60° = v + v/2 = <b>3v/2</b> — and this stays constant by symmetry.</div>
+<div class="step">4. Time to close the whole side d: t = d / v<sub>close</sub> = d / (3v/2) = <b>2d/3v</b>.</div>
+<div class="step">5. All three meet simultaneously at the <b>centroid</b> of the original triangle after t = 2d/3v.</div>
+<pre>
+ A -> B : A contributes  v          (heads straight at B)
+          B contributes  v cos60 = v/2   (toward A)
+ closing speed = 3v/2  (constant)
+ time = d / (3v/2) = 2d/3v      &lt;-- they meet
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Never integrate the spiral. Rate of approach = v(1 + cos60°) = 3v/2, and t = d/(closing speed). Trap: forgetting the target's own motion and writing t = d/v — that ignores B moving partly toward A, overestimating the time by 50%. The centroid, being equidistant, is where all three land at once.</div>
+<div class="final">Answer: (exact) t = 2d/3v.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Two balls, both projected at 400 ms⁻¹ at 53°, in mutually perpendicular vertical planes. After how long are their velocities at 60° to each other? (g = 10 ms⁻²; ≈ 8 s)</td><td class="topic">Angle between velocity vectors in projectile motion</td><td><a href="https://www.youtube.com/watch?v=aDbVhFQ6d3M" target="_blank">Initial velocity of a projectile perpendicular to final velocity after a time — Motion in a Plane</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">8</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two balls are launched in <b>mutually perpendicular vertical planes</b>. Each keeps its own <i>horizontal</i> direction fixed and mutually perpendicular (say one along x, one along y), while gravity acts on both identically along the <i>shared</i> vertical axis z. So their velocity vectors differ only in which horizontal axis they use — and their vertical components stay <b>equal at every instant</b>. The angle between the two velocities therefore starts wide and narrows as the common vertical term grows, and we find when it equals 60° using the dot product.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">cosφ = (v₁·v₂) ÷ (|v₁||v₂|)</span> — the dot-product definition of the angle φ between two velocity vectors (dimensionless ratio of m² s⁻² over m² s⁻²). Components from <span class="eq">v<sub>z</sub> = u sinθ − g t</span> (m s⁻¹) and <span class="eq">v<sub>horiz</sub> = u cosθ</span> (m s⁻¹, constant). <b>Assumptions:</b> no air resistance; <b>g = 10 m s⁻²</b>; sin53° = 0.8, cos53° = 0.6; the two vertical planes are perpendicular, so take ball 1's horizontal along <b>x</b>, ball 2's along <b>y</b>, and vertical along <b>z</b>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Horizontal components (constant): u cos53° = 400 × 0.6 = <b>240 m s⁻¹</b> for each ball.</div>
+<div class="step">2. Initial vertical component: u sin53° = 400 × 0.8 = <b>320 m s⁻¹</b> for each ball, both along +z.</div>
+<div class="step">3. Write the velocity vectors at time t, using perpendicular horizontal axes:<span class="why">v₁ = (240, 0, w) and v₂ = (0, 240, w) m s⁻¹, where w ≡ 320 − 10t m s⁻¹ is the <b>shared</b> vertical component.</span></div>
+<div class="step">4. Dot product: v₁·v₂ = (240)(0) + (0)(240) + (w)(w) = <b>w² m² s⁻²</b>.<span class="why">The horizontal parts contribute nothing precisely because they are perpendicular — this is the whole point of the "mutually perpendicular planes" wording.</span></div>
+<div class="step">5. Magnitudes: |v₁| = |v₂| = √(240² + w²) m s⁻¹ ⇒ |v₁||v₂| = <b>240² + w² m² s⁻²</b>.</div>
+<div class="step">6. Impose the required angle φ = 60°, so cos60° = ½:<span class="why">w² ÷ (240² + w²) = ½.</span></div>
+<div class="step">7. Cross-multiply: 2w² = 240² + w² ⇒ <b>w² = 240²</b> ⇒ w = ±240 m s⁻¹.</div>
+<div class="step">8. Substitute back w = 320 − 10t and take the <b>first</b> (physical) root, w = +240 m s⁻¹:<span class="why">320 − 10t = 240 ⇒ 10t = 80 ⇒ t = 8 s. Units: (m s⁻¹)/(m s⁻²) = s ✓.</span></div>
+<div class="step">9. So <b>t = 8 s</b>. (The other root w = −240 gives 320 − 10t = −240 ⇒ t = 56 s — the same 60° recurring symmetrically on the way down, but the question asks "after how much time," so the first occurrence, <b>8 s</b>, is the answer.)</div>
+<div class="step">10. Verify at t = 8 s: w = 320 − 80 = 240 m s⁻¹, so cosφ = 240² ÷ (240² + 240²) = 1/2 ⇒ φ = <b>60°</b> ✓.</div>
+<pre>
+   z (shared vertical)
+   ^        v₁ = (240,   0,  w)      w = 320 - 10t
+   |        v₂ = (  0, 240,  w)      (identical vertical component)
+   |
+   +-----&gt; x   (ball 1's plane)
+  /
+ y  (ball 2's plane — perpendicular)
+
+   cosφ = w² / (240² + w²)
+
+     t(s)     w = 320-10t      cosφ            φ
+      0         320 m/s        0.64          50.2°
+      8         240 m/s        0.50          60.0°   &lt;-- required  ✓
+     32           0 m/s        0.00          90.0°   (both at apex)
+     56        -240 m/s        0.50          60.0°   (second, symmetric root)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "Mutually perpendicular vertical planes" is a gift: it makes the <b>horizontal dot-product term vanish</b>, so v₁·v₂ collapses to just v<sub>z</sub>² and the algebra is two lines. Note the angle between them can never fall below the launch value nor exceed 90° at the apex — a useful sanity bound. Trap: forgetting the <b>second root</b> (t = 56 s on the descent); "after how much time" wants the first, but a "how many times" variant wants both.</div>
+<div class="final">Answer: t = 8 s.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Persons A and B stand distance x apart; wind blows from A to B at velocity w. Drum sound travels A→B in t₁ s and B→A in t₂ s. Find the velocity of sound v in still air. (v = (x/2)(1/t₁ + 1/t₂))</td><td class="topic">Wind-affected sound, relative velocity</td><td><a href="https://www.youtube.com/watch?v=oBoE9B3tlYE" target="_blank">HCV: Two friends A and B stand a distance x apart; wind blows from A to B</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>(x/2)[1/t<sub>1</sub> + 1/t<sub>2</sub>]</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Sound travels through the <b>air</b>, and the air itself is moving (wind from A to B). So the ground speed of the sound is its still-air speed v <i>plus</i> the wind's contribution along the direction of travel. Going A→B the wind helps (v + w); going B→A it hinders (v − w). Two trips give two equations, and <b>adding</b> them cancels the wind, isolating v.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">speed = distance / time</span> with wind-adjusted speeds: <span class="eq">v + w = x/t₁</span> (downwind) and <span class="eq">v − w = x/t₂</span> (upwind). <span class="why">Wind velocity superposes on the sound's still-air velocity — Galilean addition in the medium.</span> Unknowns: v and w.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. A→B is <b>downwind</b>: effective speed v + w covers x in t₁ ⇒ <b>v + w = x/t₁</b>.</div>
+<div class="step">2. B→A is <b>upwind</b>: effective speed v − w covers x in t₂ ⇒ <b>v − w = x/t₂</b>.<span class="why">Same distance x both ways; only the wind sign flips.</span></div>
+<div class="step">3. Add the two equations: (v + w) + (v − w) = x/t₁ + x/t₂ ⇒ <b>2v = x/t₁ + x/t₂</b>.<span class="why">The ±w terms cancel, leaving v alone.</span></div>
+<div class="step">4. Divide by 2: <b>v = (x/2)(1/t₁ + 1/t₂)</b>.</div>
+<div class="step">5. Dimensional check: x/t has units of speed, so v is a speed ✓ — and it is the plain arithmetic-style average of the two one-way ground speeds.</div>
+<pre>
+ A -> B downwind : v + w = x/t1
+ B -> A upwind   : v - w = x/t2
+ add ->            2v    = x/t1 + x/t2
+ so     v = (x/2)(1/t1 + 1/t2)     &lt;-- still-air sound speed
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Add to kill the wind (gives v), subtract to kill the sound speed (gives w) — one symmetric pair does both parts. Trap: treating v as x divided by the <b>average time</b> ½(t₁+t₂); the speeds add, not the times, so you must average 1/t₁ and 1/t₂ (a harmonic-style combination), not t₁ and t₂.</div>
+<div class="final">Answer: (b) v = (x/2)(1/t₁ + 1/t₂).</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">Same setup as above — find the wind velocity ω. (ω = (x/2)(1/t₁ − 1/t₂))</td><td class="topic">Wind-affected sound, relative velocity</td><td><a href="https://www.youtube.com/watch?v=oBoE9B3tlYE" target="_blank">HCV: Two friends A and B stand a distance x apart; wind blows from A to B</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>(x/2)[1/t<sub>1</sub> &#8722; 1/t<sub>2</sub>]</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Same drum, same two travel times — now solve for the <b>wind</b> instead of the sound. The wind speeds up the A→B trip and slows the B→A trip by the same amount w, so the <i>difference</i> between the two ground speeds is pure wind. Where finding v called for adding the equations, finding w calls for <b>subtracting</b> them, which cancels the sound speed v and leaves w on its own.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v + w = x/t₁</span> (downwind) and <span class="eq">v − w = x/t₂</span> (upwind). <span class="why">Identical setup to the previous part; only the algebraic combination changes.</span> Subtract to isolate w.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Downwind A→B: <b>v + w = x/t₁</b>.</div>
+<div class="step">2. Upwind B→A: <b>v − w = x/t₂</b>.</div>
+<div class="step">3. Subtract the second from the first: (v + w) − (v − w) = x/t₁ − x/t₂ ⇒ <b>2w = x/t₁ − x/t₂</b>.<span class="why">The two v terms cancel, leaving only the wind term.</span></div>
+<div class="step">4. Divide by 2: <b>w = (x/2)(1/t₁ − 1/t₂)</b>.</div>
+<div class="step">5. Sign check: t₁ &lt; t₂ (downwind trip is quicker), so 1/t₁ &gt; 1/t₂ and w &gt; 0 — the wind indeed points A→B, as stated. Its magnitude is half the gap between the two ground speeds.</div>
+<pre>
+ A -> B downwind : v + w = x/t1
+ B -> A upwind   : v - w = x/t2
+ subtract ->       2w    = x/t1 - x/t2
+ so     w = (x/2)(1/t1 - 1/t2)     &lt;-- wind speed (A -> B)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> The add/subtract pair does double duty: sum → v, difference → w. Trap: swapping the order to (1/t₂ − 1/t₁) flips the sign and reports the wind blowing B→A. Anchor it physically — the shorter time t₁ is the downwind leg, so 1/t₁ must lead in the subtraction to keep w positive.</div>
+<div class="final">Answer: (c) w = (x/2)(1/t₁ − 1/t₂).</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Cars A and B move towards each other; separated by 30 m, A turns left at 30°, B turns right at 60° at the same instant, and they collide after 2 s. Identify the WRONG option about their speeds / relative velocity.</td><td class="topic">Relative velocity with cars turning at angles</td><td><a href="https://www.youtube.com/watch?v=8cva4El6Ow4" target="_blank">How To Solve When And Where 2 Cars Meet</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>speed of car A is 7.5 ms<sup>&#8722;1</sup> (the WRONG option)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two cars head towards each other, then each swerves at a fixed angle and they still <b>collide 2 s later</b>. "Collide" is the whole constraint: at t = 2 s both occupy the <b>same point</b>. Writing that as two scalar equations (x and y must each match) gives two equations in the two unknown speeds. Note this is a <b>find-the-WRONG-option</b> question, so we must evaluate every option and report the one that fails.</div>
+<div class="seg"><span class="lbl">Formula</span> Constant speed ⇒ <span class="eq">displacement = v × t</span> (m). Collision ⇒ <span class="eq">r<sub>A</sub>(2 s) = r<sub>B</sub>(2 s)</span>, i.e. the x- and y-components match separately. Relative speed <span class="eq">|v<sub>AB</sub>| = |v<sub>A</sub> − v<sub>B</sub>|</span> (m s⁻¹). <b>Assumptions:</b> both cars keep constant speed after turning (as the question states) and turn instantaneously at t = 0. Set A at the <b>origin</b> moving along +x, B at <b>(30, 0) m</b> moving along −x; "A turns left 30°" ⇒ A's heading becomes <b>30°</b>; "B turns right 60°" (right of its −x heading is +y) ⇒ B's heading becomes <b>120°</b>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Fix the geometry: A = (0, 0) m, B = (30, 0) m, separation 30 m along +x.</div>
+<div class="step">2. A's new direction: <b>30°</b> from +x ⇒ unit vector (cos30°, sin30°) = <b>(√3/2, 1/2)</b>.</div>
+<div class="step">3. B's new direction: it faced −x; turning <b>right</b> (towards +y) by 60° gives heading 180° − 60° = <b>120°</b> ⇒ unit vector (cos120°, sin120°) = <b>(−1/2, √3/2)</b>.</div>
+<div class="step">4. Let a = distance A travels and b = distance B travels in the 2 s (both in m). Collision means the positions coincide:<span class="why">x: a(√3/2) = 30 + b(−1/2)  and  y: a(1/2) = b(√3/2).</span></div>
+<div class="step">5. Solve the <b>y</b>-equation first (it is the simpler one): a/2 = b√3/2 ⇒ <b>a = b√3</b> m.</div>
+<div class="step">6. Substitute into the <b>x</b>-equation: (b√3)(√3/2) = 30 − b/2 ⇒ <b>1.5b = 30 − 0.5b</b>.</div>
+<div class="step">7. Collect: 2b = 30 ⇒ <b>b = 15 m</b>, and hence a = 15√3 ≈ <b>25.98 m</b>.</div>
+<div class="step">8. Convert distances to speeds (divide by the 2 s):<span class="why">v<sub>B</sub> = 15 m ÷ 2 s = <b>7.5 m s⁻¹</b>; v<sub>A</sub> = 15√3 m ÷ 2 s = <b>7.5√3 ≈ 12.99 m s⁻¹</b>.</span></div>
+<div class="step">9. Now test each option:<span class="why">(a) "speed of A is 7.5 m s⁻¹" — we found 7.5√3 ≈ 12.99 m s⁻¹ ⇒ <b>WRONG</b>. (b) "speed of B is 7.5 m s⁻¹" ⇒ correct. (c) "speed of A is 7.5√3 m s⁻¹" ⇒ correct.</span></div>
+<div class="step">10. Test (d) — the relative speed. v<sub>A</sub> = 7.5√3(√3/2, 1/2) = <b>(11.25, 3.75√3) m s⁻¹</b>; v<sub>B</sub> = 7.5(−1/2, √3/2) = <b>(−3.75, 3.75√3) m s⁻¹</b>.</div>
+<div class="step">11. Subtract: v<sub>AB</sub> = v<sub>A</sub> − v<sub>B</sub> = (11.25 + 3.75, 3.75√3 − 3.75√3) = <b>(15, 0) m s⁻¹</b> ⇒ |v<sub>AB</sub>| = <b>15 m s⁻¹</b> ⇒ (d) is <b>correct</b>.</div>
+<div class="step">12. Beautiful consistency check: v<sub>AB</sub> points purely along +x — straight down the original AB line — and closes 30 m at 15 m s⁻¹ in exactly <b>30 ÷ 15 = 2 s</b> ✓, matching the given collision time.</div>
+<div class="step">13. Only <b>(a)</b> disagrees with the physics ⇒ (a) is the WRONG option the question asks for.</div>
+<pre>
+        y
+        ^            collision point
+        |               *
+        |             /   \
+        |   a=15√3  /       \  b=15
+        |         /  30°  120° \
+        +-------●---------------●------&gt; x
+              A (0,0)        B (30,0)
+              &lt;------ 30 m ------&gt;
+
+   y-eqn:  a/2 = b√3/2        ⇒ a = b√3
+   x-eqn:  a√3/2 = 30 - b/2   ⇒ 1.5b = 30 - 0.5b ⇒ b = 15 m, a = 15√3 m
+
+   v_B = 15/2   = 7.5   m/s        (b) ✓
+   v_A = 15√3/2 = 7.5√3 ≈ 12.99    (c) ✓   ⇒ (a) says 7.5  ✗ WRONG
+   v_AB = (15, 0) ⇒ |v_AB| = 15 m/s (d) ✓   [30 m / 15 m/s = 2 s ✓]
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> "They collide" ⇒ the <b>relative velocity must point straight along the initial separation line</b>, and |v<sub>AB</sub>| = separation ÷ time = 30/2 = <b>15 m s⁻¹</b> instantly — no simultaneous equations needed. Here the headings are 30° and 120°, i.e. <b>90° apart</b>, so the two velocities form a right triangle and v<sub>A</sub>/v<sub>B</sub> = tan60° = √3 falls straight out. Trap: read the question type — it asks for the <b>WRONG</b> statement, so the three <i>correct</i> options are the decoys; (a) is right-looking because 7.5 is genuinely B's speed, just not A's.</div>
+<div class="final">Answer: (a) — "speed of car A is 7.5 m s⁻¹" is the WRONG statement (A's speed is 7.5√3 ≈ 12.99 m s⁻¹).</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">Two particles start from the same point on the same line — one at constant velocity v, the other from rest with constant acceleration a. Greatest distance between them before the second catches up? (v²/2a)</td><td class="topic">Relative displacement, constant velocity vs acceleration</td><td><a href="https://www.youtube.com/watch?v=i6exkrMvImE" target="_blank">Two particles start moving from the same point along the same straight line — greatest distance</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>v&#178;/2a</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Both start together from the same point; one cruises at constant v, the other launches from rest and accelerates. Early on the constant-velocity particle leads because the accelerating one is still slow — so the gap <b>grows</b>. But the accelerator keeps speeding up, and the moment its speed matches v the gap stops widening and starts to close. The <b>maximum</b> separation therefore occurs exactly when their velocities are equal.</div>
+<div class="seg"><span class="lbl">Formula</span> separation s(t) = v·t − ½a·t²; it is largest where ds/dt = 0. <span class="eq">ds/dt = v − a·t = 0 ⇒ t = v/a</span>. <span class="why">ds/dt is the relative velocity; the gap peaks the instant the relative velocity is zero, i.e. equal speeds.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Positions from the common start: x₁ = v·t (constant velocity), x₂ = ½a·t² (from rest).</div>
+<div class="step">2. Separation s(t) = x₁ − x₂ = <b>v·t − ½a·t²</b>, positive while the first particle leads.</div>
+<div class="step">3. Maximise: set ds/dt = v − a·t = 0 ⇒ <b>t = v/a</b>.<span class="why">This is exactly when the accelerating particle reaches speed v — velocities equal, gap momentarily frozen.</span></div>
+<div class="step">4. Substitute t = v/a: s<sub>max</sub> = v(v/a) − ½a(v/a)² = v²/a − ½·v²/a = <b>v²/2a</b>.</div>
+<div class="step">5. After this instant the accelerator is faster, the gap shrinks, and it catches up (s = 0) at t = 2v/a — double the peak time, a neat symmetry.</div>
+<pre>
+ s(t) = v t - (1/2) a t^2
+ ds/dt = v - a t = 0  ->  t = v/a   (equal speeds)
+ s_max = v(v/a) - (1/2)a(v/a)^2 = v^2/a - v^2/2a
+        = v^2 / 2a       &lt;-- greatest separation
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Maximum gap ⇔ zero relative velocity ⇔ equal speeds — no calculus needed once you spot it: the accelerator hits v at t = v/a, and s<sub>max</sub> = v²/2a. Trap: confusing "maximum distance" with "when they meet" (t = 2v/a, s = 0). The peak is halfway to the catch-up point.</div>
+<div class="final">Answer: (b) v²/2a.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">Trains A and B, 120 km apart, move towards each other at 60 km/h each. A's whistle reflects back and forth between the trains; sound speed = 1200 km/hr. Total distance travelled by the sound before the trains crash? (1200 km)</td><td class="topic">Sound reflecting between approaching bodies (classic "fly-between-trains" puzzle)</td><td><a href="https://www.youtube.com/watch?v=UL-LBB6-q3Q" target="_blank">A bird flies between two trains approaching each other at 10 m/s each</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>1200 km</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the celebrated "fly between two trains" puzzle in disguise — the sound wave plays the fly. The <b>trap</b> is that the reflections invite you to sum an infinite series of ever-shorter legs. Don't. The sound never stops and never slows: it simply travels at a constant 1200 km h⁻¹ for the <i>entire</i> time the trains take to meet. So find that <b>total time</b> from the trains' relative motion, then multiply by the sound's speed. The zig-zag path length equals the straight-line distance it would have covered anyway.</div>
+<div class="seg"><span class="lbl">Formula</span> Closing (head-on) ⇒ <span class="eq">v<sub>rel</sub> = v₁ + v₂</span> (km h⁻¹); time to meet <span class="eq">t = d ÷ v<sub>rel</sub></span> (h); distance travelled by the sound <span class="eq">D = v<sub>sound</sub> × t</span> (km). <span class="why">km ÷ (km h⁻¹) = h ✓, then (km h⁻¹) × h = km ✓.</span> <b>Assumptions:</b> constant speeds; the sound keeps speed 1200 km h⁻¹ on every leg regardless of direction; reflections are instantaneous.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. The trains approach head-on, so their speeds <b>add</b>: v<sub>rel</sub> = 60 + 60 = <b>120 km h⁻¹</b>.<span class="why">Opposite directions ⇒ the gap closes at the sum of the two speeds.</span></div>
+<div class="step">2. Time until they crash: t = d ÷ v<sub>rel</sub> = 120 km ÷ 120 km h⁻¹ = <b>1 h</b>.<span class="why">Units: km ÷ km h⁻¹ = h ✓. Each train covers 60 km in that hour, and 60 + 60 = 120 km ✓ — they meet exactly at the midpoint.</span></div>
+<div class="step">3. The sound is emitted at t = 0 and bounces continuously until the crash at t = 1 h, so it is in flight for the <b>full 1 h</b>.<span class="why">Reflection reverses its direction but never changes its speed — so the elapsed time is all that matters.</span></div>
+<div class="step">4. Total path length: D = v<sub>sound</sub> × t = 1200 km h⁻¹ × 1 h = <b>1200 km</b>.<span class="why">Units: km h⁻¹ × h = km ✓.</span></div>
+<div class="step">5. That is option <b>(b) 1200 km</b>. Sanity check: the sound is 10× faster than each train (1200 vs 60 × 2 = 120 km h⁻¹ closing), so it covers 10× the 120 km gap = 1200 km — consistent ✓.</div>
+<pre>
+   t = 0                                                  t = 1 h
+   A ──60→                                        ←60── B
+   |&lt;-------------------- 120 km --------------------&gt;|
+        sound: 1200 km/h, zig-zag  ⇄ ⇄ ⇄ ⇄ ⇄ ⇄  (infinitely many legs)
+
+   time to crash  t = 120 km / (60+60) km/h = 1 h
+   sound distance D = 1200 km/h × 1 h = 1200 km          ✓ (b)
+
+   ── no series needed: speed is constant, so only the CLOCK matters ──
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For any "bird/sound/fly bounces between two approaching bodies" problem: <b>ignore the bouncing entirely</b>. Compute the time to meet from the relative speed, then multiply by the shuttler's constant speed. Legend has it von Neumann summed the infinite series in his head — you should not have to. Trap: option (a) 2400 km comes from wrongly doubling for the "there and back" journeys; option (c) 240 km from using one train's 60 km h⁻¹ instead of the 120 km h⁻¹ closing speed.</div>
+<div class="final">Answer: (b) 1200 km.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">A police car (speed v) is passed by a truck (speed 3v/2) at t = 0. The police car starts accelerating at 3 m/s² 10 s later, and takes a further 10 s to catch the truck. Find v. (15 m/s)</td><td class="topic">Pursuit with delayed acceleration</td><td><a href="https://www.youtube.com/watch?v=gUnfD4JZjvs" target="_blank">Worked Example — Where Will Two Cars Traveling at Different Velocities Meet?</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>15 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A pursuit problem with a <b>deliberate delay</b>, which forces a two-phase treatment. During the first 10 s the police car is still cruising at v while the faster truck (3v/2) opens a gap; only then does the chase begin. "Catching" means both have covered the <b>same total distance</b> from the common starting point, since they started together at t = 0. Writing that single equality yields v — everything else is bookkeeping.</div>
+<div class="seg"><span class="lbl">Formula</span> Constant speed: <span class="eq">s = v·t</span> (m). Uniform acceleration: <span class="eq">s = u·t + ½·a·t²</span> (m). Catch condition: <span class="eq">s<sub>police,total</sub> = s<sub>truck,total</sub></span> (m). <span class="why">Units: (m s⁻¹)(s) = m ✓, and (m s⁻²)(s²) = m ✓ — every term is a distance.</span> <b>Assumptions:</b> both travel along the same straight line; the truck keeps 3v/2 throughout; the police car holds v for the first 10 s, then accelerates at a constant <b>3 m s⁻²</b> for the next 10 s.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set t = 0 at the moment the truck passes the police car — they are at the <b>same point</b>, so equal total distances means a catch.</div>
+<div class="step">2. <b>Phase 1 (t = 0 → 10 s), police still at constant v:</b> s<sub>P1</sub> = v × 10 s = <b>10v</b> (m).</div>
+<div class="step">3. Truck in phase 1: s<sub>T1</sub> = (3v/2) × 10 s = <b>15v</b> (m).<span class="why">Gap opened after 10 s = 15v − 10v = 5v m — the head start the police must erase.</span></div>
+<div class="step">4. <b>Phase 2 (t = 10 → 20 s), police accelerates</b> from its current speed u = v m s⁻¹ at a = 3 m s⁻²:<span class="why">s<sub>P2</sub> = u·t + ½·a·t² = v(10) + ½(3)(10)² = 10v + 150 (m).</span></div>
+<div class="step">5. Truck in phase 2 (still constant): s<sub>T2</sub> = (3v/2) × 10 s = <b>15v</b> (m).</div>
+<div class="step">6. Total police distance: s<sub>P</sub> = 10v + (10v + 150) = <b>20v + 150</b> (m).</div>
+<div class="step">7. Total truck distance: s<sub>T</sub> = 15v + 15v = <b>30v</b> (m).</div>
+<div class="step">8. Apply the catch condition s<sub>P</sub> = s<sub>T</sub>: <b>20v + 150 = 30v</b>.</div>
+<div class="step">9. Solve: 150 = 30v − 20v = 10v ⇒ <b>v = 15 m s⁻¹</b>.<span class="why">Units: 150 m ÷ 10 s = 15 m s⁻¹ ✓ — a speed, as required.</span></div>
+<div class="step">10. Verify at v = 15 m s⁻¹: police = 20(15) + 150 = 300 + 150 = <b>450 m</b>; truck = 30(15) = <b>450 m</b> ✓ — they meet exactly at t = 20 s. Option (b).</div>
+<pre>
+  phase        interval      police                       truck
+  ---------------------------------------------------------------------
+  1 (cruise)   0 → 10 s      10v                          15v
+  2 (accel)    10 → 20 s     10v + ½(3)(10²) = 10v + 150  15v
+  ---------------------------------------------------------------------
+  TOTAL                      20v + 150                    30v
+
+   catch:  20v + 150 = 30v  ⇒  10v = 150  ⇒  v = 15 m/s   ✓ (b)
+
+   check v = 15:  police = 450 m,  truck = 450 m   ✓ both at t = 20 s
+   (police speed at t=20 s: 15 + 3×10 = 45 m/s vs truck 22.5 m/s — it is
+    faster at the catch, as it must be to close the 5v = 75 m gap)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For delayed pursuit from a <b>common start point</b>, use "equal total distances" rather than tracking gaps — it collapses both phases into one linear equation. Alternatively work in the truck's frame: the police start 75 m behind with relative velocity −v/2 and relative acceleration +3 m s⁻², then solve 75 = −(v/2)(10) + ½(3)(100) for the same v = 15 m s⁻¹. Trap: applying s = ut + ½at² across the <b>whole 20 s</b> — the acceleration only exists in the last 10 s, and u for that phase is v (not 0).</div>
+<div class="final">Answer: (b) 15 m s⁻¹.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">Particles A (0,0,0) m and B (30,0,0) m in gravity-free space; A projected with (5î+10ĵ+5k̂) ms⁻¹, B with (10î+5ĵ+5k̂) ms⁻¹, simultaneously. Do they collide, and if so where? (they never collide)</td><td class="topic">3-D relative-velocity collision test</td><td><a href="https://www.youtube.com/watch?v=vs5YVNZtzts" target="_blank">Determining if Particles Collide</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>they will never collide</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In <b>gravity-free space</b> both particles move in straight lines at constant velocity, so their <b>relative velocity is constant</b> too. A collision requires <i>every</i> component of the separation vector to reach zero at the <b>same instant</b> t. That gives three simultaneous scalar conditions from one vector equation — and if they demand different values of t (or a negative t), no collision occurs. Checking component-by-component is faster and safer than any geometric argument.</div>
+<div class="seg"><span class="lbl">Formula</span> Separation at time t: <span class="eq">r<sub>BA</sub>(t) = r<sub>BA</sub>(0) + v<sub>BA</sub>·t</span> (m), with <span class="eq">v<sub>BA</sub> = v<sub>B</sub> − v<sub>A</sub></span> (m s⁻¹). Collision ⇔ <span class="eq">r<sub>BA</sub>(t) = 0 for one single t &gt; 0</span>. <span class="why">Equivalently, collision requires v<sub>BA</sub> to be <b>antiparallel</b> to r<sub>BA</sub>(0) — B must close along the line joining them. Units: m + (m s⁻¹)(s) = m ✓.</span> <b>Assumptions:</b> gravity-free ⇒ zero acceleration for both; particles are points.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write the initial positions: A at <b>(0, 0, 0) m</b> and B at <b>(30, 0, 0) m</b>.</div>
+<div class="step">2. Initial separation of B from A: r<sub>BA</sub>(0) = (30 − 0, 0 − 0, 0 − 0) = <b>(30, 0, 0) m</b> — purely along the x-axis.</div>
+<div class="step">3. Write the velocities: v<sub>A</sub> = <b>(5, 10, 5) m s⁻¹</b> and v<sub>B</sub> = <b>(10, 5, 5) m s⁻¹</b>.</div>
+<div class="step">4. Relative velocity of B w.r.t. A: v<sub>BA</sub> = v<sub>B</sub> − v<sub>A</sub> = (10 − 5, 5 − 10, 5 − 5) = <b>(5, −5, 0) m s⁻¹</b>.</div>
+<div class="step">5. Form the separation as a function of time:<span class="why">r<sub>BA</sub>(t) = (30, 0, 0) + (5, −5, 0)·t = (30 + 5t, −5t, 0) m.</span></div>
+<div class="step">6. Demand each component vanish at the <b>same</b> t:<span class="why">x: 30 + 5t = 0 ⇒ <b>t = −6 s</b>. y: −5t = 0 ⇒ <b>t = 0 s</b>. z: 0 = 0 ⇒ satisfied for all t.</span></div>
+<div class="step">7. The x- and y-conditions demand <b>t = −6 s and t = 0 s</b> — contradictory, and t = −6 s is in the past anyway. No single t &gt; 0 zeroes the separation ⇒ <b>they never collide</b>.</div>
+<div class="step">8. Confirm with the parallelism test: for a collision v<sub>BA</sub> = (5, −5, 0) would have to be antiparallel to r<sub>BA</sub>(0) = (30, 0, 0), i.e. purely along −x. It has a <b>−5 m s⁻¹ y-component</b>, so B drifts sideways and slides past A.<span class="why">B is closing in x but simultaneously escaping in y — the miss is unavoidable.</span></div>
+<div class="step">9. Worse still, the x-component is <b>+5 m s⁻¹</b> (positive), so B is moving <i>away</i> from A along x too — the separation only ever grows. Answer: <b>(c) they will never collide</b>.</div>
+<div class="step">10. Check the distractors: (a) (10, 20, 10) m is where A is at t = 2 s; (b) (10, 10, 10) m is not on either path at a common time; (d) at t = 2 s, A = (10, 20, 10) m but B = (50, 10, 10) m — clearly apart ✓.</div>
+<pre>
+   r_BA(t) = (30, 0, 0) + (5, -5, 0)·t = (30 + 5t, -5t, 0)  m
+
+   component   equation      required t
+   ---------------------------------------------
+     x         30 + 5t = 0     t = -6 s      (in the past!)
+     y            -5t = 0      t =  0 s
+     z              0 = 0      any t
+   ---------------------------------------------
+   no single t &gt; 0 satisfies all three   ⇒  NEVER collide   ✓ (c)
+
+   at t = 2 s:  A = (10, 20, 10) m
+                B = (50, 10, 10) m    ⇒ separation = √(40²+10²) = 41.2 m
+   (separation is growing, not shrinking)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Collision ⇔ <b>v<sub>BA</sub> ∥ (antiparallel to) r<sub>BA</sub>(0)</b>. Test it with a <b>ratio check</b>: the components of v<sub>BA</sub> must be in the same proportion as those of r<sub>BA</sub>(0). Here r<sub>BA</sub>(0) = (30, 0, 0) has <b>zero</b> y-component, so v<sub>BA</sub> needs one too — but it is −5 m s⁻¹, and you can answer (c) in five seconds without solving anything. Trap: options quoting specific meeting points bait you into computing positions; always run the parallelism test <i>first</i>.</div>
+<div class="final">Answer: (c) They will never collide.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">Two particles move along straight lines 60° apart (same plane) at 20 cm/s, presently 3 m and 4 m from the intersection O, heading towards O. Find the shortest distance between them. (50√3 cm)</td><td class="topic">Shortest distance between two moving particles, law of cosines</td><td><a href="https://www.youtube.com/watch?v=fB3QTy0kfTs" target="_blank">Two particles moving along two long straight lines with the same speed — shortest distance</a> · <a href="https://www.youtube.com/watch?v=terV_Xpy5T8" target="_blank">Same problem, alternate solution</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>50&#8730;3 cm</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two particles slide along two straight lines meeting at O at 60°, both at 20 cm s⁻¹. The cleanest route to the <b>shortest</b> separation is the relative-velocity picture: freeze one particle and let the other drift with the <i>relative</i> velocity along a straight path. The minimum distance is then the <b>perpendicular</b> from the frozen particle to that straight relative path — a single geometry step, no time-derivative grind.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">d<sub>min</sub> = |r × v<sub>rel</sub>| / |v<sub>rel</sub>|</span>, the perpendicular offset of the initial separation r from the relative-velocity line. <span class="why">In the frame of particle 1, particle 2 moves in a straight line at v<sub>rel</sub>; closest approach is the perpendicular distance to it.</span> Take O as origin, lines at 60°.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Place P₁ at (3, 0) m on line 1; P₂ at 4 m along line 2 (60° away): (4cos60°, 4sin60°) = (2, 2√3) m. Both head to O at 0.2 m s⁻¹.</div>
+<div class="step">2. Velocities (toward O): v₁ = (−0.2, 0); v₂ = −0.2(cos60°, sin60°) = (−0.1, −0.1√3) m s⁻¹.</div>
+<div class="step">3. Relative position r = P₂ − P₁ = (−1, 2√3); relative velocity v<sub>rel</sub> = v₂ − v₁ = (0.1, −0.1√3), |v<sub>rel</sub>| = 0.1√(1+3) = <b>0.2 m s⁻¹</b>.</div>
+<div class="step">4. Cross product (z): r × v<sub>rel</sub> = (−1)(−0.1√3) − (2√3)(0.1) = 0.1√3 − 0.2√3 = −0.1√3.</div>
+<div class="step">5. d<sub>min</sub> = |−0.1√3| / 0.2 = √3/2 m = 0.866 m = <b>50√3 cm</b> ≈ 86.6 cm.<span class="why">Same result as minimising d² = 4p² − 14p + 13 over p = 0.1t.</span></div>
+<pre>
+ P1 = (3, 0)      v1 = (-0.2, 0)
+ P2 = (2, 2rt3)   v2 = (-0.1, -0.1 rt3)
+ r      = (-1, 2rt3)      v_rel = (0.1, -0.1 rt3),  |v_rel| = 0.2
+ d_min = |r x v_rel|/|v_rel| = 0.1 rt3 / 0.2
+       = rt3 / 2 m = 50 rt3 cm      &lt;-- closest approach
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Closest approach = perpendicular distance from one particle to the other's <b>relative-velocity line</b> — compute |r × v<sub>rel</sub>|/|v<sub>rel</sub>| and skip the calculus. Trap: plugging the two 3 m, 4 m distances straight into the law of cosines gives the <i>present</i> separation (√13 m), not the minimum; you must track the motion (or use the relative frame).</div>
+<div class="final">Answer: (d) 50√3 cm ≈ 86.6 cm.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 6</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Particles P and Q are 40 m apart (P behind Q). P moves at a uniform 10 m/s towards Q; Q starts from rest with acceleration 2 m/s² in the same direction as P. Find the minimum distance between them. (15 m)</td><td class="topic">Minimum distance, pursuit with acceleration</td><td><a href="https://www.youtube.com/watch?v=AZ-lsGdHYfE" target="_blank">Minimum distance between two particles in relative motion</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">15</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> P starts <b>faster</b> (10 m s⁻¹ against Q's zero), so the 40 m gap begins to shrink. But Q is <b>accelerating</b>, so it steadily claws back speed until it matches P — and after that Q pulls away and the gap grows again. The separation therefore <b>bottoms out exactly when their speeds are equal</b>, i.e. when the <b>relative velocity is zero</b>. Working in Q's frame makes this a one-dimensional "decelerating body comes to rest" problem.</div>
+<div class="seg"><span class="lbl">Formula</span> Relative quantities: <span class="eq">v<sub>PQ</sub> = v<sub>P</sub> − v<sub>Q</sub></span> (m s⁻¹) and <span class="eq">a<sub>PQ</sub> = a<sub>P</sub> − a<sub>Q</sub></span> (m s⁻²). Minimum separation ⇔ <span class="eq">v<sub>PQ</sub> = 0</span>. Then use <span class="eq">v = u + at</span> (m s⁻¹) and <span class="eq">s = ut + ½at²</span> (m) <i>in the relative frame</i>. <span class="why">Closest approach needs d(gap)/dt = 0, and the rate of change of the gap <b>is</b> the relative velocity — so v<sub>PQ</sub> = 0 is exactly the minimisation condition.</span> <b>Assumptions:</b> both move along the same straight line; take P's direction of motion as <b>positive</b>; Q's acceleration is along that same direction.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set up: P is <b>40 m behind</b> Q. Take P's direction as +. Initially v<sub>P</sub> = <b>10 m s⁻¹</b>, v<sub>Q</sub> = <b>0 m s⁻¹</b>, a<sub>P</sub> = <b>0 m s⁻²</b>, a<sub>Q</sub> = <b>+2 m s⁻²</b>.</div>
+<div class="step">2. Initial relative velocity of P w.r.t. Q: v<sub>PQ</sub>(0) = 10 − 0 = <b>+10 m s⁻¹</b> — P closes the gap at 10 m every second at first.</div>
+<div class="step">3. Relative acceleration: a<sub>PQ</sub> = a<sub>P</sub> − a<sub>Q</sub> = 0 − 2 = <b>−2 m s⁻²</b>.<span class="why">Negative ⇒ in Q's frame P <b>decelerates</b> at 2 m s⁻², so P's approach steadily slows and eventually reverses.</span></div>
+<div class="step">4. Find when the gap stops shrinking, i.e. v<sub>PQ</sub> = 0, using v = u + at in the relative frame:<span class="why">0 = 10 + (−2)t ⇒ 2t = 10 ⇒ t = 5 s.</span></div>
+<div class="step">5. So closest approach occurs at <b>t = 5 s</b>.<span class="why">Check in the ground frame: Q's speed at t = 5 s is v = 0 + 2(5) = 10 m s⁻¹ = P's speed ✓ — exactly when they match.</span></div>
+<div class="step">6. Relative displacement in those 5 s, via s = ut + ½at²:<span class="why">s<sub>PQ</sub> = (10)(5) + ½(−2)(5)² = 50 − 25 = 25 m.</span></div>
+<div class="step">7. So P gains <b>25 m</b> on Q ⇒ the 40 m gap has closed to <b>40 − 25 = 15 m</b>.</div>
+<div class="step">8. <b>Minimum distance = 15 m.</b><span class="why">Positive, so P never reaches Q — the two never meet, they just come within 15 m.</span></div>
+<div class="step">9. Cross-check in the ground frame at t = 5 s: x<sub>P</sub> = 10(5) = <b>50 m</b>; x<sub>Q</sub> = 40 + ½(2)(5²) = 40 + 25 = <b>65 m</b>. Gap = 65 − 50 = <b>15 m</b> ✓ — matches.</div>
+<pre>
+   t=0:   P ●──10 m/s──&gt;          Q ● (at rest, a = 2 m/s²)
+          |&lt;──────── 40 m ────────&gt;|
+
+   relative frame (sit on Q):  u = +10 m/s,  a = -2 m/s²  (P decelerating)
+     v_PQ = 0  ⇒  0 = 10 - 2t  ⇒  t = 5 s
+     s_PQ = 10(5) - ½(2)(25) = 50 - 25 = 25 m gained
+
+   d_min = 40 - 25 = 15 m                              ✓
+
+   ground check @ t = 5 s:   x_P = 50 m,  x_Q = 65 m,  gap = 15 m  ✓
+    t(s):   0     2     4     5     6     8
+    gap(m): 40   24    16    15    16    24     ← minimum at t = 5 s
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Minimum/maximum separation <b>always</b> occurs at the instant <b>relative velocity = 0</b> (equal speeds) — never differentiate a messy d(t). Faster still, use v² = u² + 2as in the relative frame: the closing distance is u²/(2|a|) = 10²/(2×2) = <b>25 m</b>, so d<sub>min</sub> = 40 − 25 = 15 m in one line. Trap: a positive d<sub>min</sub> means <b>no collision</b>; if the arithmetic ever gives a negative "minimum," it means they collided <i>before</i> that instant and the real answer is 0.</div>
+<div class="final">Answer: 15 m (at t = 5 s).</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Ball A is projected (30 m/s at 53°) from a 30 m tower; ball B is projected horizontally at 6 m/s from a 60 m tower. If A and B collide in the air, find the separation d between the towers.</td><td class="topic">Two projectiles from towers of different heights colliding in air</td><td><a href="https://www.youtube.com/watch?v=0IdTK6S7NUA" target="_blank">A body is projected horizontally with velocity v from the top of a tower of height h</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">30</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Both balls are projectiles, so both accelerate downward at the same g — which means their <b>relative acceleration is zero</b> and, in B's frame, A moves in a <b>straight line at constant relative velocity</b>. Gravity therefore <b>drops out entirely</b>. A mid-air collision then just requires that constant relative velocity to point exactly from A towards B, so the initial separation vector and the relative velocity vector must be <b>parallel</b>. Matching their component ratios gives d immediately — no quadratics, no time-of-flight.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>BA</sub> = v<sub>B</sub> − v<sub>A</sub></span> (m s⁻¹); collision ⇔ <span class="eq">r<sub>BA</sub>(0) + v<sub>BA</sub>·t = 0</span> for some t &gt; 0 (m). <span class="why">Since a<sub>A</sub> = a<sub>B</sub> = g downward, a<sub>BA</sub> = 0 — the ½gt² terms cancel exactly when you subtract the two position equations, leaving straight-line relative motion.</span> <b>Assumptions:</b> no air resistance; both launched at the same instant; g = 10 m s⁻² (it cancels regardless); sin53° = 0.8, cos53° = 0.6. From the figure: A is on the <b>30 m</b> tower firing 30 m s⁻¹ at 53° up-and-right; B is on the <b>60 m</b> tower firing 6 m s⁻¹ horizontally <b>leftward</b> (towards A); the towers are <b>d</b> apart.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set the origin at the foot of A's tower: <b>A = (0, 30) m</b> and <b>B = (d, 60) m</b>.</div>
+<div class="step">2. Initial separation of B from A: r<sub>BA</sub>(0) = (d − 0, 60 − 30) = <b>(d, 30) m</b>.</div>
+<div class="step">3. Resolve A's launch velocity (30 m s⁻¹ at 53°): v<sub>A</sub> = (30cos53°, 30sin53°) = (30 × 0.6, 30 × 0.8) = <b>(18, 24) m s⁻¹</b>.</div>
+<div class="step">4. B's launch velocity is 6 m s⁻¹ horizontally <b>towards A</b> (the −x direction, per the figure's arrow): v<sub>B</sub> = <b>(−6, 0) m s⁻¹</b>.</div>
+<div class="step">5. Relative velocity of B w.r.t. A: v<sub>BA</sub> = v<sub>B</sub> − v<sub>A</sub> = (−6 − 18, 0 − 24) = <b>(−24, −24) m s⁻¹</b>.<span class="why">Both components negative ⇒ in A's frame, B approaches steadily down-and-left along a 45° line. Gravity has vanished from the problem.</span></div>
+<div class="step">6. Impose collision — the separation must reach zero:<span class="why">x: d + (−24)t = 0 ⇒ d = 24t.  y: 30 + (−24)t = 0 ⇒ 24t = 30.</span></div>
+<div class="step">7. Solve the <b>y</b>-equation for the collision time: t = 30 ÷ 24 = <b>1.25 s</b>.<span class="why">Units: m ÷ (m s⁻¹) = s ✓. This is fixed by the 30 m height difference alone.</span></div>
+<div class="step">8. Substitute into the <b>x</b>-equation: d = 24 m s⁻¹ × 1.25 s = <b>30 m</b>.<span class="why">Units: (m s⁻¹)(s) = m ✓ — a distance, as required.</span></div>
+<div class="step">9. Equivalent one-liner (the parallel-ratio test): v<sub>BA</sub> = (−24, −24) is at 45°, so r<sub>BA</sub>(0) = (d, 30) must also lie at 45° ⇒ <b>d/30 = 24/24 = 1</b> ⇒ <b>d = 30 m</b> ✓.</div>
+<div class="step">10. Verify with full projectile positions at t = 1.25 s (gravity included, to be sure):<span class="why">A: x = 18(1.25) = 22.5 m, y = 30 + 24(1.25) − ½(10)(1.25²) = 30 + 30 − 7.81 = 52.19 m. B: x = 30 − 6(1.25) = 22.5 m, y = 60 − ½(10)(1.25²) = 60 − 7.81 = 52.19 m. <b>Both at (22.5, 52.19) m</b> ✓ — they do collide, and the −7.81 m gravity drop is identical for both, exactly as predicted.</span></div>
+<pre>
+                          6 m/s
+                        &lt;──────● B
+                               |
+      30 m/s                   |
+        ↗ 53°                  | 60 m
+   A ●                         |
+     | 30 m                    |
+   ══╧═════════ d ═════════════╧══
+
+   v_A  = (18, 24) m/s ;  v_B = (-6, 0) m/s
+   v_BA = v_B - v_A = (-24, -24) m/s      ← constant (gravity cancels!)
+   r_BA(0) = (d, 30) m
+
+   collide ⇒ (d, 30) ∥ (24, 24) ⇒ d/30 = 24/24 ⇒ d = 30 m       ✓
+   time     t = 30/24 = 1.25 s
+
+   check @ t = 1.25 s (with gravity):  A = (22.5, 52.19) m
+                                       B = (22.5, 52.19) m   ✓ same point
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Two projectiles ⇒ <b>a<sub>rel</sub> = 0</b> ⇒ in one's frame the other moves in a <b>straight line</b>, so "will they collide / where / how far apart" becomes pure vector geometry: just set <b>r<sub>rel</sub>(0) parallel to v<sub>rel</sub></b> and equate the component ratios. Never write the ½gt² terms — they cancel every time. Trap: mis-reading B's 6 m s⁻¹ as pointing <b>away</b> from A (rightward); the figure's arrow points left, and the sign flips v<sub>BA,x</sub> from −24 to −12 m s⁻¹, giving a wrong d = 15 m.</div>
+<div class="final">Answer: d = 30 m (they collide 1.25 s after launch).</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A river flows at v₀ (width d). A swimmer starts from rest at origin O and swims perpendicular to the current with acceleration a = 2t. Find the equation of the swimmer's trajectory. (y = x³/3v₀³)</td><td class="topic">Variable-acceleration river-crossing trajectory</td><td><a href="https://www.youtube.com/watch?v=94wUlbisOSY" target="_blank">Velocity of the river w.r.t. ground is v₀; swimmer swims perpendicular to the current with a = 2t</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>y = x&#179;/3v<sub>0</sub>&#179;</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A river-crossing trajectory is just two <b>independent</b> motions glued by a shared clock. Downstream (x) the swimmer is carried by the current at constant v₀. Across the river (y) she starts from rest and accelerates with the given a = 2t (variable acceleration, so integrate twice). Getting x(t) and y(t) separately, then eliminating t, hands you the path y(x) directly.</div>
+<div class="seg"><span class="lbl">Formula</span> x-motion: <span class="eq">x = v₀t</span> (uniform drift). y-motion: <span class="eq">a = dv<sub>y</sub>/dt = 2t ⇒ v<sub>y</sub> = t², y = ∫v<sub>y</sub> dt = t³/3</span>. <span class="why">From rest, so no constant of integration; variable a demands integration, not ½at².</span> Eliminate t via t = x/v₀.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Along the current the water carries her at v₀ (she aims straight across), so <b>x = v₀t</b>.</div>
+<div class="step">2. Perpendicular acceleration a = 2t. Integrate from rest: <b>v<sub>y</sub> = ∫2t dt = t²</b>.</div>
+<div class="step">3. Integrate again from the origin: <b>y = ∫t² dt = t³/3</b>.<span class="why">Because a varies with time you must integrate; the ½at² shortcut is only for constant a.</span></div>
+<div class="step">4. Eliminate time: from step 1, <b>t = x/v₀</b>. Substitute into y.</div>
+<div class="step">5. y = (1/3)(x/v₀)³ = <b>x³ / 3v₀³</b> — a cubic trajectory, curving ever more sharply downstream as she speeds up across.</div>
+<pre>
+ x-dir: x = v0 t                -> t = x/v0
+ y-dir: a = 2t -> vy = t^2 -> y = t^3/3
+ sub t = x/v0:
+   y = (1/3)(x/v0)^3 = x^3 / (3 v0^3)   &lt;-- trajectory
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Split into x(t) and y(t), then kill t — the parametric-to-path trick. Trap: using y = ½at² with a = 2t gives y = t³ (wrong by a factor of 3). Variable acceleration is not constant acceleration: you must integrate a = 2t twice, which yields the ⅓ coefficient.</div>
+<div class="final">Answer: (a) y = x³ / 3v₀³.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">Trains A and B travel from P to Q. Train A spends equal THIRDS OF TIME on acceleration / constant velocity / retardation (rate a each). Train B spends equal THIRDS OF DISTANCE on the same three phases. Find the ratio of times taken by A and B.</td><td class="topic">Piecewise accelerate–cruise–retard motion, ratio of times</td><td><a href="https://www.youtube.com/watch?v=5RQlSZpOfbw" target="_blank">A train accelerates from rest at a constant rate for distance x₁ and time t₁, then retards</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">T<sub>A</sub>/T<sub>B</sub> = 3&#8730;3/5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Both trains use the same three phases (accelerate at a, cruise, retard at a) over the same route P→Q, but they <b>split the journey differently</b>: A divides the <b>time</b> into thirds, B divides the <b>distance</b> into thirds. That single difference changes everything, because B must spend a <i>disproportionately long</i> time on its slow accelerating and retarding thirds — those are covered at low speed — while A's equal-time split lets it cruise at top speed for a full third of the clock. Expect <b>T<sub>A</sub> &gt; T<sub>B</sub></b>. Since both cover the same S with the same a, express each total time in terms of S and a and divide.</div>
+<div class="seg"><span class="lbl">Formula</span> Uniform acceleration from rest: <span class="eq">v = a·t</span> (m s⁻¹), <span class="eq">s = ½·a·t²</span> (m), <span class="eq">v² = 2·a·s</span> (m² s⁻²). Cruise: <span class="eq">s = v·t</span> (m). <span class="why">These three cover every phase; each train's total distance must equal the same S (m), which is what lets us eliminate S.</span> <b>Assumptions:</b> both start and finish <b>at rest</b> at P and Q; the same magnitude a for accelerating and retarding; total distance S is identical for both.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>TRAIN A — equal thirds of TIME.</b> Let its total time be T<sub>A</sub>, so each phase lasts <b>T<sub>A</sub>/3</b>.</div>
+<div class="step">2. Peak speed reached at the end of phase 1: v<sub>max</sub> = a(T<sub>A</sub>/3) = <b>aT<sub>A</sub>/3</b> (m s⁻¹).</div>
+<div class="step">3. Phase 1 distance (accelerating from rest): s₁ = ½·a·(T<sub>A</sub>/3)² = <b>aT<sub>A</sub>²/18</b> (m).</div>
+<div class="step">4. Phase 2 distance (cruising at v<sub>max</sub>): s₂ = v<sub>max</sub> × (T<sub>A</sub>/3) = (aT<sub>A</sub>/3)(T<sub>A</sub>/3) = <b>aT<sub>A</sub>²/9</b> (m).</div>
+<div class="step">5. Phase 3 distance (retarding at a back to rest) is the mirror of phase 1: s₃ = <b>aT<sub>A</sub>²/18</b> (m).<span class="why">Decelerating from v<sub>max</sub> to 0 at rate a takes the same time and covers the same distance as accelerating 0 → v<sub>max</sub>.</span></div>
+<div class="step">6. Total: S = aT<sub>A</sub>²/18 + aT<sub>A</sub>²/9 + aT<sub>A</sub>²/18 = <b>2aT<sub>A</sub>²/9</b> (m).<span class="why">1/18 + 2/18 + 1/18 = 4/18 = 2/9.</span></div>
+<div class="step">7. Solve for T<sub>A</sub>: T<sub>A</sub>² = 9S/(2a) ⇒ <b>T<sub>A</sub> = 3·√(S/(2a)) = (3/√2)·√(S/a)</b> (s).</div>
+<div class="step">8. <b>TRAIN B — equal thirds of DISTANCE.</b> Each phase covers <b>S/3</b> (m).</div>
+<div class="step">9. Phase 1 (accelerate from rest over S/3), using v² = 2as: v² = 2a(S/3) ⇒ <b>v = √(2aS/3)</b> (m s⁻¹).</div>
+<div class="step">10. Its duration, from v = at: t₁ = v/a = √(2aS/3)/a = <b>√(2S/(3a))</b> (s).<span class="why">√(2aS/3)/a = √(2aS/(3a²)) = √(2S/(3a)) ✓ — units √(m ÷ m s⁻²) = s ✓.</span></div>
+<div class="step">11. Phase 3 (retard from v to rest over S/3) is the mirror image: t₃ = <b>√(2S/(3a))</b> (s).</div>
+<div class="step">12. Phase 2 (cruise at that same v over S/3): t₂ = (S/3) ÷ √(2aS/3) = <b>√(S/(6a))</b> (s).<span class="why">(S/3)² ÷ (2aS/3) = S²/9 × 3/(2aS) = S/(6a), then take the square root.</span></div>
+<div class="step">13. Total, factoring out √(S/a) — write t₁ = t₃ = √(2/3)·√(S/a) and t₂ = √(1/6)·√(S/a):<span class="why">T<sub>B</sub> = [2√(2/3) + √(1/6)]·√(S/a) = [2√2/√3 + 1/√6]·√(S/a).</span></div>
+<div class="step">14. Simplify the bracket over the common factor 1/√3: 2√2/√3 + 1/(√2·√3) = (1/√3)(2√2 + 1/√2) = (1/√3)(5/√2) = <b>5/√6</b>.<span class="why">2√2 + 1/√2 = (4 + 1)/√2 = 5/√2.</span></div>
+<div class="step">15. So <b>T<sub>B</sub> = (5/√6)·√(S/a)</b> (s).</div>
+<div class="step">16. Take the ratio — √(S/a) cancels, as it must:<span class="why">T<sub>A</sub>/T<sub>B</sub> = (3/√2) ÷ (5/√6) = (3/√2)(√6/5) = 3√3/5 (since √6/√2 = √3).</span></div>
+<div class="step">17. <b>T<sub>A</sub> : T<sub>B</sub> = 3√3 : 5 ≈ 1.039</b> — a dimensionless ratio ✓, and greater than 1, confirming our physical expectation that A is slower.</div>
+<pre>
+   Train A — equal thirds of TIME          Train B — equal thirds of DISTANCE
+   ┌─────────────────────────┐            ┌─────────────────────────┐
+   v│    ______               │           v│      ____               │
+    │   /      \              │            │    /      \             │
+    │  /        \             │            │  /          \           │
+    └─T/3──T/3──T/3───&gt; t     │            └──t₁────t₂────t₃──&gt; t    │
+      accel cruise retard                    S/3   S/3   S/3
+      (each phase = T/3)                     (each phase = S/3)
+
+   S = 2aT_A²/9        ⇒  T_A = 3√(S/2a)     = (3/√2)·√(S/a) ≈ 2.121·√(S/a)
+   t₁ = t₃ = √(2S/3a),  t₂ = √(S/6a)
+                       ⇒  T_B = (5/√6)·√(S/a)              ≈ 2.041·√(S/a)
+
+   T_A / T_B = (3/√2)/(5/√6) = 3√3/5 ≈ 1.039     ⇒  T_A : T_B = 3√3 : 5   ✓
+   (A takes ~3.9% longer — B's cruise phase is short but its accel/retard
+    thirds run at higher average speed overall)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> In any phase-split problem, <b>factor out √(S/a)</b> immediately — it always cancels in a ratio, so you can carry pure numbers (2.121 vs 2.041) and skip the algebra. Remember the two standard results: equal-<b>time</b> thirds ⇒ <b>S = 2aT²/9</b>; equal-<b>distance</b> thirds ⇒ <b>T = (5/√6)√(S/a)</b>. Trap: assuming the two trains reach the same top speed — they do not (A peaks at aT<sub>A</sub>/3 ≈ 0.707√(aS), B at √(2aS/3) ≈ 0.816√(aS)), which is exactly why B wins.</div>
+<div class="final">Answer: T<sub>A</sub> : T<sub>B</sub> = 3√3 : 5 ≈ 1.04 (train A takes about 3.9% longer).</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Passage: a particle is projected at 20 m/s, 60° to the horizontal, from the bottom O of a plane inclined at 45°, and lands again at A, where OA is the line of greatest slope. Find the time of flight.</td><td class="topic">Projectile motion on an inclined plane</td><td><a href="https://www.youtube.com/watch?v=-HdcDk2RbNs" target="_blank">Physics – Mechanics: Projectile Motion on an Incline, Example 1</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">1.464</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The projectile lands back on the <b>slope</b>, not on level ground, so the ordinary T = 2u sinθ/g does <i>not</i> apply. The clean fix is to <b>rotate the axes</b>: put x′ <b>along</b> the incline and y′ <b>perpendicular</b> to it. In these tilted axes the landing condition becomes beautifully simple — <b>y′ = 0</b>, exactly like flat ground — and the price is that gravity now splits into two components: g cosβ pulling the particle back onto the plane, and g sinβ dragging it down the slope. Only the perpendicular one controls the time of flight.</div>
+<div class="seg"><span class="lbl">Formula</span> With <b>α</b> = angle of projection <i>measured from the incline</i> and <b>β</b> = the incline's angle: perpendicular launch component <span class="eq">u<sub>y′</sub> = u·sinα</span> (m s⁻¹), perpendicular acceleration <span class="eq">a<sub>y′</sub> = −g·cosβ</span> (m s⁻²). Setting y′ = 0 gives <span class="eq">T = 2u·sinα ÷ (g·cosβ)</span> (s). <span class="why">Identical in form to the flat-ground result, with g replaced by the effective g cosβ — and (m s⁻¹) ÷ (m s⁻²) = s ✓.</span> <b>Assumptions:</b> no air resistance; g = 10 m s⁻²; the particle lands back on the same plane along the line of greatest slope.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Read the data: u = <b>20 m s⁻¹</b>, projection angle from the <b>horizontal</b> = <b>60°</b>, incline angle β = <b>45°</b>.</div>
+<div class="step">2. Convert to the incline frame — this is the key step:<span class="why">α = 60° − 45° = <b>15°</b>. The angle that matters is the one <i>between the velocity and the slope</i>, not the horizontal.</span></div>
+<div class="step">3. Resolve the launch velocity perpendicular to the incline: u<sub>y′</sub> = u sinα = 20 sin15° = 20 × 0.2588 = <b>5.176 m s⁻¹</b>.</div>
+<div class="step">4. Find the perpendicular acceleration: a<sub>y′</sub> = −g cos45° = −10 × 0.7071 = <b>−7.071 m s⁻²</b>.<span class="why">This is the component of gravity that pulls the particle back down onto the plane — it alone decides how long it stays airborne.</span></div>
+<div class="step">5. Apply the landing condition y′ = 0 using y′ = u<sub>y′</sub>t + ½a<sub>y′</sub>t²:<span class="why">0 = (u sinα)T − ½(g cosβ)T² ⇒ T[(u sinα) − ½(g cosβ)T] = 0. Discard T = 0 (the launch).</span></div>
+<div class="step">6. Solve for the non-zero root: <b>T = 2u·sinα ÷ (g·cosβ)</b>.</div>
+<div class="step">7. Substitute the numbers: T = (2 × 20 × sin15°) ÷ (10 × cos45°) = (40 × 0.2588) ÷ (10 × 0.7071) = 10.353 ÷ 7.071 = <b>1.464 s</b>.</div>
+<div class="step">8. Get the exact form, using sin15° = (√6 − √2)/4 and cos45° = 1/√2:<span class="why">T = [40 × (√6−√2)/4] ÷ (10/√2) = 10(√6−√2) × √2/10 = √2(√6−√2) = √12 − 2 = 2√3 − 2.</span></div>
+<div class="step">9. So <b>T = 2(√3 − 1) s = 2√3 − 2 ≈ 1.46 s</b>.<span class="why">Numerical check: 2(1.732 − 1) = 2(0.732) = 1.464 s ✓ — matches step 7.</span></div>
+<div class="step">10. Sanity check: on <i>flat</i> ground the same launch would give T = 2(20)sin60°/10 = 3.46 s. The incline rises to meet the projectile, so a much shorter <b>1.46 s</b> is physically sensible ✓.</div>
+<pre>
+   rotate axes:  x' ALONG the incline,  y' PERPENDICULAR to it
+
+              y'        A
+              |        /
+          u=20|   ___-/         α = 60° - 45° = 15°   (angle from the SLOPE)
+              | _-  /
+              |/  /  45°  = β
+       O ●────┴─/──────────────── horizontal
+               /  60° (from horizontal)
+
+   perpendicular:  u_y' = 20 sin15° = 5.176 m/s ,  a_y' = -g cos45° = -7.071 m/s²
+   land ⇒ y' = 0 ⇒  T = 2u sinα / (g cosβ)
+
+   T = (2 × 20 × 0.2588) / (10 × 0.7071) = 10.353 / 7.071 = 1.464 s
+   exact: T = √2(√6 - √2) = 2√3 - 2 = 2(√3 - 1) ≈ 1.46 s          ✓
+
+   (flat ground for comparison: 2×20×sin60°/10 = 3.46 s — incline cuts it short)
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For <i>any</i> incline projectile, rotate the axes and use the two master formulas with <b>α measured from the slope</b>: <b>T = 2u sinα/(g cosβ)</b> and <b>R = 2u² sinα·cos(α+β)/(g cos²β)</b>. Everything reduces to flat-ground physics with g → <b>g cosβ</b> perpendicular, plus a g sinβ drag along the slope. Trap: using the 60° from the <b>horizontal</b> instead of α = 15° from the <b>incline</b> — the single most common error here, and it inflates T by more than double.</div>
+<div class="final">Answer: T = 2(√3 − 1) s = 2√3 − 2 ≈ 1.46 s.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">Same passage as above — find the range OA measured along the incline.</td><td class="topic">Projectile motion on an inclined plane</td><td><a href="https://www.youtube.com/watch?v=-HdcDk2RbNs" target="_blank">Physics – Mechanics: Projectile Motion on an Incline, Example 1</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">20.70</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Having found the time of flight from the <b>perpendicular</b> motion (Q5), the range OA now comes from the <b>along-slope</b> motion over that same T. The subtlety is that motion along the incline is <b>not</b> uniform: gravity has a component <b>g sinβ</b> pointing down the slope, which continuously retards the particle as it climbs. So OA is not simply (u cosα)T — we must subtract the ½(g sinβ)T² term. This is precisely what makes an incline different from flat ground, where the horizontal motion has no acceleration at all.</div>
+<div class="seg"><span class="lbl">Formula</span> Along-slope displacement: <span class="eq">R = (u·cosα)·T − ½·(g·sinβ)·T²</span> (m), which simplifies to the standard result <span class="eq">R = 2u²·sinα·cos(α+β) ÷ (g·cos²β)</span> (m). <span class="why">Units: (m s⁻¹)(s) − (m s⁻²)(s²) = m − m = m ✓, and (m s⁻¹)² ÷ (m s⁻²) = m ✓ — both forms give a length.</span> <b>Assumptions:</b> as in Q5 — no air resistance, g = 10 m s⁻², α = 15° (from the slope), β = 45°, and T = 2√3 − 2 s carried over.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Carry over from Q5: α = <b>15°</b>, β = <b>45°</b>, u = <b>20 m s⁻¹</b>, and <b>T = 2√3 − 2 ≈ 1.4641 s</b>.</div>
+<div class="step">2. Resolve the launch velocity <b>along</b> the incline: u<sub>x′</sub> = u cosα = 20 cos15° = 20 × 0.9659 = <b>19.32 m s⁻¹</b>.</div>
+<div class="step">3. Find the along-slope acceleration: a<sub>x′</sub> = −g sinβ = −10 × sin45° = −10 × 0.7071 = <b>−7.071 m s⁻²</b>.<span class="why">Negative ⇒ it retards the particle as it travels <i>up</i> the slope — this is the term that flat-ground problems never have.</span></div>
+<div class="step">4. Apply s = ut + ½at² along the slope:<span class="why">R = (19.32)(1.4641) − ½(7.071)(1.4641)².</span></div>
+<div class="step">5. First term: 19.32 × 1.4641 = <b>28.28 m</b>.</div>
+<div class="step">6. Second term: ½ × 7.071 × (1.4641)² = 3.5355 × 2.1436 = <b>7.58 m</b>.</div>
+<div class="step">7. Subtract: R = 28.28 − 7.58 = <b>20.70 m</b>.</div>
+<div class="step">8. Confirm with the standard closed form, R = 2u² sinα·cos(α+β)/(g cos²β):<span class="why">= [2 × 400 × sin15° × cos60°] ÷ [10 × cos²45°] = [800 × 0.2588 × 0.5] ÷ [10 × 0.5] = 103.53 ÷ 5 = 20.71 m ✓ — matches step 7.</span></div>
+<div class="step">9. Extract the exact value — note cos(α+β) = cos60° = ½ and cos²45° = ½ cancel neatly:<span class="why">R = (800 × sin15° × ½) ÷ (10 × ½) = 400 sin15°/5 = 80 sin15° = 80(√6−√2)/4 = 20(√6−√2).</span></div>
+<div class="step">10. So <b>OA = 20(√6 − √2) m ≈ 20.7 m</b>.<span class="why">Numerically 20(2.449 − 1.414) = 20 × 1.035 = 20.71 m ✓.</span></div>
+<div class="step">11. Sanity check: the <b>horizontal</b> distance covered is R cos45° = 20.7 × 0.707 = 14.64 m, and the height gained is R sin45° = <b>14.64 m</b> — equal, as they must be on a 45° slope ✓. Cross-check that height against the vertical motion: y = 20sin60°(1.4641) − ½(10)(1.4641)² = 25.36 − 10.72 = <b>14.64 m</b> ✓ — perfectly consistent.</div>
+<pre>
+   along-slope motion (x'):  u_x' = 20cos15° = 19.32 m/s
+                             a_x' = -g sin45° = -7.071 m/s²   (retards the climb)
+
+   R = u_x'·T - ½·(g sinβ)·T²
+     = 19.32 × 1.4641  -  ½ × 7.071 × 1.4641²
+     = 28.28           -  7.58
+     = 20.70 m                                             ✓
+
+   closed form:  R = 2u² sinα cos(α+β) / (g cos²β)
+               = 2(400)(sin15°)(cos60°) / (10 cos²45°)
+               = (800 × 0.2588 × 0.5) / (10 × 0.5) = 20.71 m
+   exact:  R = 80 sin15° = 20(√6 - √2) ≈ 20.7 m
+
+   check on a 45° slope:  horizontal = R cos45° = 14.64 m
+                          vertical   = R sin45° = 14.64 m   (equal ✓)
+   vertical from y-motion: 20sin60°(1.4641) - ½(10)(1.4641²) = 14.64 m  ✓
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Along the incline the motion is <b>uniformly retarded at g sinβ</b> — never treat it as constant-velocity like the horizontal on flat ground. Bank the exact surds <b>sin15° = (√6−√2)/4 ≈ 0.259</b> and <b>cos15° = (√6+√2)/4 ≈ 0.966</b>; they appear constantly in 45°/60° incline problems. Handy check: <b>max range up an incline needs α = (90° − β)/2</b> — here that is 22.5°, and our 15° is below it, so this launch is <i>not</i> the optimal one (the true max would be v²/[g(1+sinβ)] ≈ 23.4 m &gt; 20.7 m ✓ consistent).</div>
+<div class="final">Answer: OA = 20(√6 − √2) m ≈ 20.7 m.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">In a car race, car A takes time t₀ less than car B and passes the finish with velocity v more than B; both start from rest with constant accelerations a₁, a₂. Find the relation for v. (v = √(a₁a₂)·t₀)</td><td class="topic">Kinematics relation, two uniformly accelerating cars</td><td><a href="https://www.youtube.com/watch?v=Sqm1TXKy0Ww" target="_blank">In a car race, car A takes a time t less than car B and finishes with velocity v more</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval flagged"><span class="lt">a</span>a<sub>1</sub> &gt; a<sub>2</sub> <span class="warn" title="Answer-key letter (a) = &#39;a1 &gt; a2&#39;. From the printed options, (c) &#39;v = &#8730;(a1a2)&#183;t0&#39; is also true for this stem &#8212; and printed option (d) is literally &#39;Both (a) and (c)&#39;, so (d), not (a), is the complete answer. Flagged from inspection of the printed options; this row has no worked solution. Our question cell quotes only the (c) relation.">&#9888;</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Both cars start from rest and run the <b>same race distance</b> s under constant accelerations a₁, a₂ (car A the quicker). Two facts are given: A finishes a time t₀ <i>earlier</i> and with a speed v <i>greater</i> than B. Express each car's finish time and finish speed through the equal distance s, then divide the two given differences so that the messy √(2s) factor cancels, leaving a clean link between v and t₀.</div>
+<div class="seg"><span class="lbl">Formula</span> from rest over distance s: <span class="eq">v<sub>f</sub> = √(2a·s)</span> and <span class="eq">t = √(2s/a)</span>. <span class="why">v<sub>f</sub> = √(2as) from v² = 2as; t from s = ½at².</span> Given v = v<sub>A</sub> − v<sub>B</sub>, t₀ = t<sub>B</sub> − t<sub>A</sub>.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Finish speeds: v<sub>A</sub> = √(2a₁s), v<sub>B</sub> = √(2a₂s). Speed lead: <b>v = √(2s)(√a₁ − √a₂)</b>.</div>
+<div class="step">2. Finish times: t<sub>A</sub> = √(2s/a₁), t<sub>B</sub> = √(2s/a₂). Time saved: t₀ = √(2s)(1/√a₂ − 1/√a₁) = √(2s)·(√a₁ − √a₂)/√(a₁a₂).</div>
+<div class="step">3. Divide v by t₀ — the √(2s) and the common (√a₁ − √a₂) both cancel: <b>v/t₀ = √(a₁a₂)</b>.<span class="why">Every distance-dependent factor drops out; the ratio depends only on the accelerations.</span></div>
+<div class="step">4. Hence <b>v = √(a₁a₂)·t₀</b> — the relation printed as option (c).</div>
+<div class="step">5. And since A finishes both sooner and faster, its acceleration must exceed B's: <b>a₁ &gt; a₂</b> — option (a) is also true. Both hold together.</div>
+<pre>
+ vA = sqrt(2 a1 s), vB = sqrt(2 a2 s)   -> v  = sqrt(2s)(sqrt a1 - sqrt a2)
+ tA = sqrt(2s/a1),  tB = sqrt(2s/a2)    -> t0 = sqrt(2s)(sqrt a1 - sqrt a2)/sqrt(a1 a2)
+ v / t0 = sqrt(a1 a2)  ->  v = sqrt(a1 a2) . t0   &lt;-- and a1 > a2
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Form the ratio v/t₀ so √(2s) and the (√a₁ − √a₂) factor cancel — the geometric mean √(a₁a₂) falls out instantly. Trap: quoting a single letter. Both a₁ &gt; a₂ (a) and v = √(a₁a₂)·t₀ (c) are correct, so the complete choice is (d) "Both (a) and (c)".</div>
+<div class="final">Answer: (d) Both a₁ &gt; a₂ and v = √(a₁a₂)·t₀. ⚠ Printed key says (a) only — incomplete; the derived relation is option (c) and (a) also holds, so (d) is complete. See working above.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">A plane is inclined at angle θ. A bullet is fired from the bottom with velocity v. Find the maximum possible range on the inclined plane. (v²/g(1+sinθ))</td><td class="topic">Maximum range on an inclined plane</td><td><a href="https://www.youtube.com/watch?v=DmKKzDV65gA" target="_blank">A plane surface is inclined at angle θ; a bullet is fired from the bottom with velocity v</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>v&#178;/g(1 + sin&#952;)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Projectile range up an incline is maximised not at 45° but at an angle that <b>bisects</b> the incline and the vertical. The slick way to see the maximum is to resolve gravity along and perpendicular to the slope, treat the perpendicular direction as an effective "up", and note the range formula on the incline peaks when its sine term equals 1 — giving a compact maximum that shrinks as the slope θ steepens.</div>
+<div class="seg"><span class="lbl">Formula</span> range up an incline (launch angle α to horizontal, incline θ): <span class="eq">R = 2v²·cosα·sin(α−θ) / (g·cos²θ)</span>, which peaks at α = 45° + θ/2. <span class="why">Then the product cosα·sin(α−θ) reaches its max ½(1 − sinθ).</span> Data: speed v, incline θ.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. On the incline the range is R = 2v²·cosα·sin(α − θ)/(g cos²θ), with α the launch angle from the horizontal.</div>
+<div class="step">2. The α-dependent part 2cosα·sin(α−θ) = sin(2α−θ) − sinθ (product-to-sum).<span class="why">Only the sin(2α−θ) term varies with α; sinθ is fixed by the slope.</span></div>
+<div class="step">3. This is largest when sin(2α − θ) = 1 ⇒ 2α − θ = 90° ⇒ <b>α = 45° + θ/2</b> (the bisector direction).</div>
+<div class="step">4. Then the bracket = 1 − sinθ, so R<sub>max</sub> = v²(1 − sinθ)/(g cos²θ).</div>
+<div class="step">5. Simplify with cos²θ = 1 − sin²θ = (1 − sinθ)(1 + sinθ): R<sub>max</sub> = v²(1 − sinθ) / [g(1 − sinθ)(1 + sinθ)] = <b>v² / [g(1 + sinθ)]</b>.</div>
+<pre>
+ R = 2 v^2 cos a sin(a-th) / (g cos^2 th)
+ max at 2a - th = 90  ->  a = 45 + th/2
+ R_max = v^2 (1 - sin th)/(g cos^2 th)
+       = v^2 / [g(1 + sin th)]      &lt;-- max range up the incline
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Launch along the bisector of the incline and the vertical (α = 45° + θ/2), then use cos²θ = (1 − sinθ)(1 + sinθ) to collapse the answer to v²/[g(1+sinθ)]. Trap: using flat-ground R<sub>max</sub> = v²/g (i.e. θ = 0) or firing at 45° to the incline — the slope subtracts from the range, so the (1 + sinθ) denominator is essential.</div>
+<div class="final">Answer: (b) R<sub>max</sub> = v² / [g(1 + sinθ)].</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">From an inclined plane, two particles are projected with the same speed at the same angle θ — one up the incline, one down. Which statement(s) are correct (time of flight, striking speed, perpendicular impact, mid-air collision)?</td><td class="topic">Projectile motion on inclined plane, up vs down</td><td><a href="https://www.youtube.com/watch?v=ZCsaPD90nro" target="_blank">From an inclined plane, two particles are projected with the same speed at the same angle θ, one up and one down</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>The time of flight of each particle is the same</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Two particles leave the incline with the <b>same speed and same angle</b> to the slope, one aimed up-slope, one down-slope. Resolve every motion into axes <i>along</i> and <i>perpendicular to</i> the incline. The perpendicular axis governs the flight (leaving and returning to the surface); the along-incline axis governs range and landing speed. Comparing the two particles axis-by-axis settles which statements survive.</div>
+<div class="seg"><span class="lbl">Formula</span> perpendicular: launch component u·sinθ, deceleration g·cosα ⇒ <span class="eq">T = 2u·sinθ / (g·cosα)</span> (α = incline angle). <span class="why">Time of flight is set purely by the perpendicular component, which is identical for both particles.</span> Along-incline accel = g·sinα, launch component ±u·cosθ.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>(a) Time of flight.</b> Both have the same perpendicular launch component u·sinθ and the same perpendicular gravity g·cosα, so T = 2u sinθ/(g cosα) is <b>identical</b> for both — statement (a) is TRUE.</div>
+<div class="step">2. <b>(b) Striking speed.</b> Perpendicular velocity returns as u·sinθ for each, but along-incline it grows differently: up-particle ends with u·cosθ − g·sinα·T, down-particle with −u·cosθ − g·sinα·T (larger magnitude). Different landing speeds ⇒ (b) FALSE.</div>
+<div class="step">3. <b>(c) Perpendicular impact.</b> A perpendicular landing needs the along-incline velocity to vanish at landing — not generally true here, so (c) FALSE.</div>
+<div class="step">4. <b>(d) Mid-air collision.</b> They are fired in <i>opposite</i> along-slope directions from the same point, so they separate along the incline and never meet in flight ⇒ (d) FALSE.</div>
+<div class="step">5. Only the time of flight is shared. The down-slope particle simply travels farther and lands faster, but in the <b>same time</b>.</div>
+<pre>
+ axis          up-particle           down-particle       same?
+ perp (flight) T = 2u sinth/(g cos a)  same               YES  (a)
+ along launch  +u cos th               -u cos th          no
+ strike speed  smaller                 larger             NO   (b)
+ -> only time of flight is equal
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Split into along/perp-to-incline axes: time of flight lives entirely on the perpendicular axis, which is blind to the up-vs-down launch — so the flight times must match. Trap: assuming "same speed, same angle" forces equal <b>landing</b> speeds too; gravity's along-slope pull adds to the down-particle and subtracts from the up-particle, breaking that symmetry.</div>
+<div class="final">Answer: (a) The time of flight of each particle is the same.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">Three persons stand at the corners of an equilateral triangle of side d; each moves at speed V directly towards the next person (cyclically). When do they meet? (2d/3V)</td><td class="topic">Pursuit-curve problem, equilateral triangle (3 chasers)</td><td><a href="https://www.youtube.com/watch?v=0cnJev0Ids0" target="_blank">Three particles A, B and C at the vertices of an equilateral triangle, each moving with constant speed v</a> · <a href="https://www.youtube.com/watch?v=F6SzbLcwvNQ" target="_blank">HC Verma Solved Example 20 — Rest and Motion</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>2d/3V second</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Three chasers at the corners of an equilateral triangle, each running at speed V straight at the next in the cycle — the textbook <b>pursuit problem</b>. By symmetry the trio stays equilateral while spiralling inward to the centroid. Rather than solve the spiral, track how fast one <b>side</b> of the triangle collapses, using the component of each runner's velocity along the joining line.</div>
+<div class="seg"><span class="lbl">Formula</span> closing speed of a pair = own velocity toward target + target's velocity component back along the line: <span class="eq">V<sub>close</sub> = V + V·cos60°</span>. <span class="why">Chaser heads fully at its target; the target flees at 60° to that line, giving a cos60° back-component.</span> Time = side ÷ closing speed.</div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Take one pair, say P₁ chasing P₂, current separation d. P₁ moves <b>straight at P₂</b>, contributing its full V to closing the gap.</div>
+<div class="step">2. P₂ chases P₃; the interior angle is 60°, so P₂'s velocity makes 60° with the P₂→P₁ line. Its component toward P₁ is V·cos60° = V/2.<span class="why">Perpendicular drift keeps the triangle equilateral but does not shorten this particular side.</span></div>
+<div class="step">3. Closing speed = V + V·cos60° = V + V/2 = <b>3V/2</b>, and symmetry keeps it constant throughout the motion.</div>
+<div class="step">4. Time to erase the full side d: t = d / (3V/2) = <b>2d/3V</b>.</div>
+<div class="step">5. All three arrive together at the <b>centroid</b> after t = 2d/3V seconds, having traced congruent inward spirals.</div>
+<pre>
+ P1 -> P2 : P1 gives  V           (straight at target)
+            P2 gives  V cos60 = V/2   (component toward P1)
+ closing speed = 3V/2  (constant by symmetry)
+ t = d / (3V/2) = 2d/3V      &lt;-- all meet at centroid
+</pre>
+</div>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Reduce the spiral to a 1-D approach: closing rate V(1 + cos60°) = 3V/2, so t = d ÷ (3V/2) = 2d/3V. Trap: using t = d/V (ignoring that the target also moves partly toward the chaser) overstates the time by 50%; the target's cos60° back-component is what makes it 2d/3V.</div>
+<div class="final">Answer: (b) t = 2d/3V seconds.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<footer>Generated for ICAD PhyV1 · Module P4 · Lesson L10. Exact-match videos solve the identical question; "Similar" videos teach the same method with different numbers.</footer>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('ansBtn');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-ans');
+    btn.textContent = on ? '🙈 Hide Answers' : '🔑 Show Answers';
+  });
+  // click a single blurred answer to reveal just that one
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('warn')) return;
+    var host = t && t.closest ? t.closest('.ansval') : null;
+    if (host && !document.body.classList.contains('show-ans')){
+      host.classList.toggle('revealed');
+    }
+  });
+})();
+</script>
+</body>
+</html>

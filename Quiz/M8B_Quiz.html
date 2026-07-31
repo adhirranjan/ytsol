@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-8B Geometric Progressions — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>M-8B · Geometric Progressions</h1>
+    <p id="heroSub">Lectures L-1 to L-3 + Strong Box · 62 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">62 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · M-8B Geometric Progressions · mastery quiz built from lectures L-1 to L-3 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   M-8B GEOMETRIC PROGRESSIONS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · What is a G.P. &amp; the n<sup>th</sup> Term",
+   desc:"common ratio, T<sub>n</sub> = ar<sup>n−1</sup>, term from the end, dividing two terms to kill a, compound interest, the product identity P² = (ab)<sup>n</sup>"},
+  {key:"L-2", name:"L-2 · Sums — Finite, Selected Terms &amp; to Infinity",
+   desc:"S<sub>n</sub> and the r = 1 exception, selecting terms by product, the r + 1/r substitution, S<sub>∞</sub> = a/(1−r) and when it exists"},
+  {key:"L-3", name:"L-3 · Properties of a G.P.",
+   desc:"what survives scaling/reciprocating and what shifting destroys, combining two G.P.s, the log bridge to A.P., equidistant products, geometric means"},
+  {key:"SB",  name:"Strong Box · Previous Year Questions",
+   desc:"JEE Main 2023–2026 — equidistant products turning sum+product into a quadratic, the r + 1/r collapse, and rejecting the illegal root"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (16) ---------------- */
+{id:1, lec:"L-1", blk:"What is a G.P.", topic:"The defining test",
+ q:"A sequence a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, … is a geometric progression if and only if",
+ opts:[
+  "a<sub>2</sub>/a<sub>1</sub> = a<sub>3</sub>/a<sub>2</sub> = a<sub>4</sub>/a<sub>3</sub> = … is constant and non-zero",
+  "a<sub>2</sub> − a<sub>1</sub> = a<sub>3</sub> − a<sub>2</sub> = a<sub>4</sub> − a<sub>3</sub> = … is constant",
+  "1/a<sub>2</sub> − 1/a<sub>1</sub> = 1/a<sub>3</sub> − 1/a<sub>2</sub> = … is constant",
+  "a<sub>1</sub>a<sub>2</sub> = a<sub>2</sub>a<sub>3</sub> = a<sub>3</sub>a<sub>4</sub> = … is constant"],
+ ans:0,
+ why:[
+  "Correct. Each term is the previous one times a fixed non-zero number r — so it is the <b>ratio</b> of consecutive terms that must be constant.",
+  "That is the test for an <b>A.P.</b> — constant difference, not constant ratio.",
+  "That is the test for an <b>H.P.</b> — the reciprocals form an A.P.",
+  "A constant product of neighbours is not a progression test at all: 2, 3, 2, 3, … satisfies it and is nothing."],
+ sol:"<b>a<sub>k</sub>/a<sub>k−1</sub> = r</b>, the same for every k, with r ≠ 0. Everything from M-8A carries over with <b>+ replaced by ×</b>: difference → ratio."},
+
+{id:2, lec:"L-1", blk:"What is a G.P.", topic:"Spotting a G.P.",
+ q:"Which of the following is a geometric progression?",
+ opts:[
+  "1/4, −1/2, 1, −2, …",
+  "1, 3, 6, 10, 15, …",
+  "2, 4, 6, 8, 10, …",
+  "1, 1/2, 1/3, 1/4, …"],
+ ans:0,
+ why:[
+  "Correct. (−1/2) ÷ (1/4) = −2, 1 ÷ (−1/2) = −2, (−2) ÷ 1 = −2 — a constant ratio of −2, which is why the signs alternate.",
+  "These are the triangular numbers; the gaps are 2, 3, 4, 5 and the ratios 3, 2, 5/3, 3/2 — neither constant.",
+  "An <b>A.P.</b> with d = 2. Its ratios 2, 3/2, 4/3 are not constant.",
+  "An <b>H.P.</b> — the reciprocals 1, 2, 3, 4 form an A.P., so the sequence itself is harmonic, not geometric."],
+ sol:"Divide each term by the one before it and check the answer never changes. Here every ratio is <b>−2</b>, so a = 1/4 and r = −2."},
+
+{id:3, lec:"L-1", blk:"The n-th term", topic:"The general term",
+ q:"The n<sup>th</sup> term of a G.P. with first term a and common ratio r is",
+ opts:["a·r<sup>n−1</sup>","a·r<sup>n</sup>","a + (n − 1)r","a·r<sup>n+1</sup>"],
+ ans:0,
+ why:[
+  "Correct. The first term has been multiplied by r <b>zero</b> times, so the n<sup>th</sup> has been multiplied n − 1 times — the power is always one less than the position.",
+  "Off by one: at n = 1 this gives ar, but the first term is a.",
+  "This is the <b>A.P.</b> formula with r standing in for d. A G.P. multiplies, it does not add.",
+  "Off by two: at n = 1 this gives ar²."],
+ sol:"a<sub>1</sub> = a, a<sub>2</sub> = ar, a<sub>3</sub> = ar² ⇒ <b>a<sub>n</sub> = a·r<sup>n−1</sup></b>."},
+
+{id:4, lec:"L-1", blk:"The n-th term", topic:"Negative common ratio and parity",
+ q:"Find the 9<sup>th</sup> term of the progression 1/4, −1/2, 1, −2, …",
+ opts:["64","−64","−32","256"],
+ ans:0,
+ why:[
+  "Correct. a = 1/4, r = −2, so a<sub>9</sub> = (1/4)(−2)<sup>8</sup>. The exponent 8 is <b>even</b>, so (−2)<sup>8</sup> = 256 and the answer is 256/4 = 64.",
+  "The sign has been taken from r rather than from the parity of the exponent. n − 1 = 8 is even, so the term is positive.",
+  "This is a<sub>8</sub> = (1/4)(−2)<sup>7</sup> = −128/4 — an off-by-one in the exponent, which also flips the sign.",
+  "This is (−2)<sup>8</sup> with the first term a = 1/4 never applied."],
+ sol:"a = 1/4, r = −2. a<sub>9</sub> = a·r<sup>8</sup> = (1/4)(256) = <b>64</b>. Always check whether n − 1 is odd or even before computing — that parity, not the sign of r, decides the sign of the term."},
+
+{id:5, lec:"L-1", blk:"The n-th term", topic:"Locating a given value in a G.P.",
+ q:"Which term of the G.P. 2, 1, 1/2, 1/4, … is 1/128?",
+ opts:["the 9<sup>th</sup>","the 8<sup>th</sup>","the 7<sup>th</sup>","the 10<sup>th</sup>"],
+ ans:0,
+ why:[
+  "Correct. 2(1/2)<sup>n−1</sup> = 1/128 ⇒ (1/2)<sup>n−1</sup> = 1/256 = (1/2)<sup>8</sup> ⇒ n − 1 = 8 ⇒ n = 9.",
+  "This reads the exponent 8 as the position. The exponent is n − 1, so the position is one more.",
+  "The 7<sup>th</sup> term is 2(1/2)<sup>6</sup> = 1/32.",
+  "The 10<sup>th</sup> term is 2(1/2)<sup>9</sup> = 1/256."],
+ sol:"a = 2, r = 1/2. Set ar<sup>n−1</sup> = 1/128: (1/2)<sup>n−1</sup> = 1/256 = (1/2)<sup>8</sup>. Equal bases ⇒ equal exponents ⇒ n − 1 = 8, so it is the <b>9<sup>th</sup></b> term."},
+
+{id:6, lec:"L-1", blk:"The n-th term", topic:"Dividing two terms to find r",
+ q:"The 4<sup>th</sup>, 7<sup>th</sup> and last terms of a G.P. are 10, 80 and 2560. Its first term is",
+ opts:["5/4","5/2","4/5","10"],
+ ans:0,
+ why:[
+  "Correct. ar³ = 10 and ar⁶ = 80, so dividing gives r³ = 8 ⇒ r = 2; then 8a = 10 ⇒ a = 5/4.",
+  "This would need 8a = 20. Substituting a = 5/2 gives a 4<sup>th</sup> term of 20, not 10.",
+  "The reciprocal of the answer — a = 10/8, not 8/10.",
+  "10 is the 4<sup>th</sup> term, not the first."],
+ sol:"Divide the two given terms to kill a: ar⁶/ar³ = 80/10 ⇒ r³ = 8 ⇒ <b>r = 2</b>. Back-substituting, a(2)³ = 10 ⇒ <b>a = 5/4</b>. Never solve for a first."},
+
+{id:7, lec:"L-1", blk:"The n-th term", topic:"Counting the terms of a G.P.",
+ q:"For that same G.P. (4<sup>th</sup>, 7<sup>th</sup> and last terms 10, 80 and 2560), the number of terms is",
+ opts:["12","11","13","10"],
+ ans:0,
+ why:[
+  "Correct. (5/4)·2<sup>n−1</sup> = 2560 ⇒ 2<sup>n−1</sup> = 2048 = 2<sup>11</sup> ⇒ n = 12.",
+  "This reads the exponent 11 as the number of terms. The exponent is n − 1.",
+  "One too many: (5/4)·2<sup>12</sup> = 5120.",
+  "(5/4)·2⁹ = 640, well short of 2560."],
+ sol:"With a = 5/4 and r = 2: (5/4)2<sup>n−1</sup> = 2560 ⇒ 2<sup>n−1</sup> = 2560 × 4/5 = 2048 = 2<sup>11</sup> ⇒ n − 1 = 11 ⇒ <b>n = 12</b>."},
+
+{id:8, lec:"L-1", blk:"Term from the end", topic:"The from-the-end formula",
+ q:"For a finite G.P. with last term ℓ and common ratio r, the m<sup>th</sup> term counted <b>from the end</b> is",
+ opts:["ℓ·(1/r)<sup>m−1</sup>","ℓ·r<sup>m−1</sup>","ℓ·(1/r)<sup>m</sup>","a·r<sup>m−1</sup>"],
+ ans:0,
+ why:[
+  "Correct. Treat ℓ as a new first term and walk backwards; reversing direction turns the ratio r into 1/r.",
+  "This walks <b>forwards</b> from the last term, off the end of the G.P.",
+  "Off by one: the last term is the 1<sup>st</sup> from the end and has taken zero backward steps, so the exponent is m − 1.",
+  "That is the m<sup>th</sup> term from the <b>start</b>."],
+ sol:"<b>a<sub>m</sub>(from end) = ℓ·(1/r)<sup>m−1</sup></b>. As with an A.P., you never need to know how many terms there are."},
+
+{id:9, lec:"L-1", blk:"Term from the end", topic:"Counting back from the last term",
+ q:"Find the 4<sup>th</sup> term from the end of the G.P. 3, 6, 12, 24, …, 3072.",
+ opts:["384","768","192","24"],
+ ans:0,
+ why:[
+  "Correct. r = 2 and ℓ = 3072, so the 4<sup>th</sup> from the end is 3072 × (1/2)³ = 3072/8 = 384.",
+  "This uses (1/2)² — only two backward steps. The 4<sup>th</sup> from the end takes three.",
+  "This uses (1/2)⁴ — one step too many.",
+  "This is the 4<sup>th</sup> term from the <b>start</b>: 3 × 2³ = 24."],
+ sol:"a = 3, r = 2, ℓ = 3072. 4<sup>th</sup> from the end = ℓ(1/r)³ = 3072/8 = <b>384</b>."},
+
+{id:10, lec:"L-1", blk:"Term from the end", topic:"From the end with fractional terms",
+ q:"Find the 5<sup>th</sup> term from the end of the G.P. 2/27, 2/9, 2/3, …, 162.",
+ opts:["2","6","2/3","54"],
+ ans:0,
+ why:[
+  "Correct. r = (2/9) ÷ (2/27) = 3 and ℓ = 162, so the 5<sup>th</sup> from the end is 162 × (1/3)⁴ = 162/81 = 2.",
+  "This uses (1/3)³ = 162/27 — one backward step too few.",
+  "This uses (1/3)⁵ = 162/243 — one step too many.",
+  "This is 162/3, i.e. only a single step back (the 2<sup>nd</sup> term from the end)."],
+ sol:"a = 2/27, r = 3, ℓ = 162. 5<sup>th</sup> from the end = 162(1/3)⁴ = 162/81 = <b>2</b>."},
+
+{id:11, lec:"L-1", blk:"The n-th term", topic:"The divide-two-terms move",
+ q:"In a G.P., the ratio a<sub>7</sub>/a<sub>4</sub> equals",
+ opts:["r³","r⁴","3r","r<sup>7/4</sup>"],
+ ans:0,
+ why:[
+  "Correct. ar⁶/ar³ = r³ — the first term cancels and the exponent is the <b>difference of the indices</b>, 7 − 4 = 3.",
+  "Off by one: the exponents are 6 and 3, not 7 and 4.",
+  "That would be the A.P. analogue (a<sub>7</sub> − a<sub>4</sub> = 3d). In a G.P. you divide, not subtract.",
+  "Exponents subtract when dividing powers; they do not divide."],
+ sol:"a<sub>m</sub>/a<sub>n</sub> = r<sup>m−n</sup>. So <b>a<sub>7</sub>/a<sub>4</sub> = r³</b>. Dividing two given terms kills a instantly — this single move opens almost every G.P. question."},
+
+{id:12, lec:"L-1", blk:"Applications", topic:"Compound interest as a G.P.",
+ q:"What will Rs. 500 amount to in 10 years in a bank paying 10% annual interest compounded annually?",
+ opts:["500 × (1.1)<sup>10</sup>","500 × (1.1)<sup>11</sup>","500 × 10 × 1.1","500 × (1 + 10)<sup>10</sup>"],
+ ans:0,
+ why:[
+  "Correct. Each year multiplies the amount by (1 + R/100) = 1.1, so after 10 years the factor has been applied 10 times: 500(1.1)<sup>10</sup> ≈ Rs. 1296.87.",
+  "The amount after 10 years is the <b>11<sup>th</sup> term</b> of the sequence 500, 500(1.1), … — but the exponent is still 10, because the first term carries r<sup>0</sup>.",
+  "This is simple interest logic, not compounding. Compounding multiplies repeatedly.",
+  "The rate must be divided by 100: the factor is 1 + 10/100 = 1.1, not 1 + 10 = 11."],
+ sol:"The yearly amounts form a <b>G.P. with ratio (1 + R/100)</b>. After 10 years: P(1 + R/100)<sup>10</sup> = <b>500(1.1)<sup>10</sup></b> ≈ Rs. 1296.87."},
+
+{id:13, lec:"L-1", blk:"Applications", topic:"Product of the first n terms",
+ q:"If the first and n<sup>th</sup> terms of a G.P. are a and b, and P is the product of all n terms, then",
+ opts:["P² = (ab)<sup>n</sup>","P = (ab)<sup>n</sup>","P² = (a + b)<sup>n</sup>","P² = ab<sup>n</sup>"],
+ ans:0,
+ why:[
+  "Correct. P = a<sup>n</sup>r<sup>n(n−1)/2</sup>, and substituting r = (b/a)<sup>1/(n−1)</sup> gives P = (ab)<sup>n/2</sup>, so P² = (ab)<sup>n</sup>.",
+  "P itself is (ab)<sup>n/2</sup> — the square root of this. Check with 1, 2, 4 (a = 1, b = 4, n = 3): P = 8, and (ab)³ = 64 ≠ 8.",
+  "A G.P. produces products, not sums, of the two end terms. Same check: (a + b)³ = 125 ≠ 64.",
+  "Both ends must be raised to the same power. Same check: ab³ = 64 — right by coincidence here, but try 1, 3, 9: P = 27, P² = 729 = (1×9)³ ✓ whereas ab³ = 729 ✓ … now try a = 2: 2, 6, 18 gives P = 216, P² = 46656 = (2×18)³ ✓ but ab³ = 2 × 5832 = 11664 ✗."],
+ sol:"P = a·(ar)···(ar<sup>n−1</sup>) = a<sup>n</sup>r<sup>n(n−1)/2</sup>. With r<sup>n−1</sup> = b/a this becomes a<sup>n</sup>(b/a)<sup>n/2</sup> = (ab)<sup>n/2</sup>, hence <b>P² = (ab)<sup>n</sup></b>. It is the multiplicative twin of the A.P.'s S<sub>n</sub> = (n/2)(a + ℓ)."},
+
+{id:14, lec:"L-1", blk:"What is a G.P.", topic:"Effect of a negative ratio",
+ q:"If the common ratio of a G.P. is negative, then",
+ opts:[
+  "its terms alternate in sign",
+  "all of its terms are negative",
+  "it is necessarily decreasing",
+  "it cannot be a valid G.P."],
+ ans:0,
+ why:[
+  "Correct. Multiplying by a negative number flips the sign each step, so odd- and even-positioned terms have opposite signs — as in 1/4, −1/2, 1, −2, …",
+  "Only the terms whose position gives an odd power of r are negative; the rest are positive.",
+  "The magnitudes grow whenever |r| > 1. In 1/4, −1/2, 1, −2, … the terms get larger in size while flipping sign.",
+  "r may be any non-zero real, negative included."],
+ sol:"A negative r makes the signs <b>alternate</b>. What decides the sign of a<sub>n</sub> is the parity of the exponent n − 1, not the sign of r on its own."},
+
+{id:15, lec:"L-1", blk:"What is a G.P.", topic:"Permitted values of the common ratio",
+ q:"In a geometric progression, the common ratio r may be",
+ opts:[
+  "any non-zero real number",
+  "any real number, including 0",
+  "only a positive number",
+  "only a number with |r| &lt; 1"],
+ ans:0,
+ why:[
+  "Correct. r may be negative, fractional or greater than 1 — the only forbidden value is 0.",
+  "r = 0 would make every term after the first zero, and then the ratio a<sub>3</sub>/a<sub>2</sub> reads 0/0, which is undefined. That is why the definition says <b>non-zero</b>.",
+  "1/4, −1/2, 1, −2, … has r = −2 and is a perfectly good G.P.",
+  "|r| &lt; 1 is the condition for the <b>infinite sum</b> to exist — a completely separate question from whether the G.P. exists. 3, 6, 12, 24 has r = 2."],
+ sol:"r ∈ ℝ, <b>r ≠ 0</b>. Do not confuse this with |r| &lt; 1, which is only about the convergence of S<sub>∞</sub>."},
+
+{id:16, lec:"L-1", blk:"The n-th term", topic:"Recovering a G.P. from two terms",
+ q:"In a G.P., a<sub>3</sub> = 4 and a<sub>6</sub> = 32. Then",
+ opts:["a = 1 and r = 2","a = 2 and r = 2","a = 4 and r = 2","a = 1 and r = 8"],
+ ans:0,
+ why:[
+  "Correct. a<sub>6</sub>/a<sub>3</sub> = r³ = 8 ⇒ r = 2, then ar² = 4 ⇒ 4a = 4 ⇒ a = 1. The G.P. is 1, 2, 4, 8, 16, 32 ✓",
+  "r = 2 is right, but with a = 2 the third term would be 8, not 4.",
+  "4 is the <b>third</b> term, not the first.",
+  "r³ = 8 gives r = 2, not 8. Cube-rooting was skipped."],
+ sol:"Divide to kill a: a<sub>6</sub>/a<sub>3</sub> = r<sup>3</sup> = 32/4 = 8 ⇒ <b>r = 2</b>. Then ar² = 4 ⇒ <b>a = 1</b>."},
+
+/* ---------------- L-2 (24) ---------------- */
+{id:17, lec:"L-2", blk:"Sum of n terms", topic:"The sum formula",
+ q:"For a G.P. with r ≠ 1, the sum of the first n terms is",
+ opts:[
+  "a(r<sup>n</sup> − 1)/(r − 1)",
+  "a(r<sup>n−1</sup> − 1)/(r − 1)",
+  "(n/2)[2a + (n − 1)r]",
+  "a(1 − r)<sup>n</sup>/(1 − r)"],
+ ans:0,
+ why:[
+  "Correct — equivalently a(1 − r<sup>n</sup>)/(1 − r), the same expression with numerator and denominator both negated. Check n = 1: a(r − 1)/(r − 1) = a ✓",
+  "The exponent must be n, not n − 1. Check n = 1: this gives 0.",
+  "That is the <b>A.P.</b> sum formula with r written in place of d.",
+  "The power applies to r alone, not to the whole bracket (1 − r). Check n = 2 on 1, 2: the true sum is 3, but this gives (1 − 2)²/(1 − 2) = −1."],
+ sol:"Multiply-and-subtract: S − rS = a − ar<sup>n</sup> ⇒ <b>S<sub>n</sub> = a(1 − r<sup>n</sup>)/(1 − r) = a(r<sup>n</sup> − 1)/(r − 1)</b>. Use whichever form keeps the arithmetic positive; the only real restriction is r ≠ 1."},
+
+{id:18, lec:"L-2", blk:"Sum of n terms", topic:"The r = 1 exception",
+ q:"If a G.P. has common ratio r = 1, then the sum of its first n terms is",
+ opts:["na","a","0","a/(1 − r)"],
+ ans:0,
+ why:[
+  "Correct. Every term equals a, so n of them add to na.",
+  "That is a single term, not the sum of n of them.",
+  "The standard formula reads 0/0 at r = 1, but the sum itself is certainly not zero.",
+  "This divides by 1 − r = 0. Never push the formula through at r = 1 — switch to na."],
+ sol:"At r = 1 the sum formula is <b>0/0 and unusable</b>. Every term is a, so <b>S<sub>n</sub> = na</b>. If a question's algebra produces r = 1, this is the branch you need."},
+
+{id:19, lec:"L-2", blk:"Sum of n terms", topic:"Direct sum computation",
+ q:"Find the sum of 7 terms of the G.P. 3, 6, 12, …",
+ opts:["381","384","189","765"],
+ ans:0,
+ why:[
+  "Correct. a = 3, r = 2, so S<sub>7</sub> = 3(2<sup>7</sup> − 1)/(2 − 1) = 3(127) = 381.",
+  "This is 3 × 2<sup>7</sup> — the “− 1” in the numerator was dropped. (It also happens to be the 8<sup>th</sup> term.)",
+  "This is the sum of <b>6</b> terms: 3(2⁶ − 1) = 189.",
+  "This is the sum of <b>8</b> terms: 3(2⁸ − 1) = 765."],
+ sol:"a = 3, r = 2, n = 7. S<sub>7</sub> = 3(2<sup>7</sup> − 1)/1 = 3 × 127 = <b>381</b>."},
+
+{id:20, lec:"L-2", blk:"Sum of n terms", topic:"Sum with a fractional ratio",
+ q:"Find the sum of 10 terms of the G.P. 1, 1/2, 1/4, 1/8, …",
+ opts:["1023/512","1023/1024","2","511/256"],
+ ans:0,
+ why:[
+  "Correct. S<sub>10</sub> = [1 − (1/2)<sup>10</sup>]/(1 − 1/2) = 2(1023/1024) = 1023/512.",
+  "This is the numerator 1 − (1/2)<sup>10</sup> on its own; the division by (1 − r) = 1/2 was skipped.",
+  "That is the sum to <b>infinity</b>, a/(1 − r) = 1/(1/2) = 2. The 10-term sum is slightly less.",
+  "That is the sum of <b>9</b> terms: 2(1 − 1/512) = 511/256."],
+ sol:"a = 1, r = 1/2, n = 10. S<sub>10</sub> = (1 − 2<sup>−10</sup>)/(1/2) = 2(1 − 1/1024) = <b>1023/512</b> — just under the infinite sum of 2, as it must be."},
+
+{id:21, lec:"L-2", blk:"Sum of n terms", topic:"Solving for the number of terms",
+ q:"How many terms of the geometric series 1 + 4 + 16 + 64 + … make the sum 5461?",
+ opts:["7","6","8","5"],
+ ans:0,
+ why:[
+  "Correct. (4<sup>n</sup> − 1)/3 = 5461 ⇒ 4<sup>n</sup> = 16384 = 4<sup>7</sup> ⇒ n = 7.",
+  "Six terms give (4⁶ − 1)/3 = 1365.",
+  "Eight terms give (4⁸ − 1)/3 = 21845.",
+  "Five terms give (4⁵ − 1)/3 = 341."],
+ sol:"a = 1, r = 4. (4<sup>n</sup> − 1)/(4 − 1) = 5461 ⇒ 4<sup>n</sup> − 1 = 16383 ⇒ 4<sup>n</sup> = 16384 = 4<sup>7</sup> ⇒ <b>n = 7</b>."},
+
+{id:22, lec:"L-2", blk:"Mixed series", topic:"Splitting a sum into a G.P. and an A.P.",
+ q:"The sum to n terms of the sequence a<sub>n</sub> = 2<sup>n</sup> + 3n is",
+ opts:[
+  "2(2<sup>n</sup> − 1) + 3n(n + 1)/2",
+  "2<sup>n+1</sup> + 3n(n + 1)/2",
+  "2(2<sup>n</sup> − 1) + 3n",
+  "(2<sup>n</sup> − 1) + 3n(n + 1)/2"],
+ ans:0,
+ why:[
+  "Correct. Σ2<sup>k</sup> = 2(2<sup>n</sup> − 1) is a G.P. with a = r = 2, and Σ3k = 3n(n + 1)/2 is an A.P. Check n = 1: 2 + 3 = 5 = a<sub>1</sub> ✓",
+  "The geometric part is 2<sup>n+1</sup> − 2, not 2<sup>n+1</sup> — it overshoots by 2. Check n = 1: 4 + 3 = 7 ≠ 5.",
+  "The arithmetic part is Σ3k, not 3n. Check n = 2: this gives 6 + 6 = 12, but a<sub>1</sub> + a<sub>2</sub> = 5 + 10 = 15.",
+  "The geometric part starts at 2, not 1, so its sum is 2(2<sup>n</sup> − 1). Check n = 1: 1 + 3 = 4 ≠ 5."],
+ sol:"Split the sequence into the two families it is built from. Σ<sub>k=1..n</sub>2<sup>k</sup> = 2(2<sup>n</sup> − 1) and 3Σk = 3n(n + 1)/2, so <b>S<sub>n</sub> = 2(2<sup>n</sup> − 1) + 3n(n + 1)/2</b>."},
+
+{id:23, lec:"L-2", blk:"Mixed series", topic:"The repeating-digit series",
+ q:"The sum of 0.7 + 0.77 + 0.777 + … to n terms is",
+ opts:[
+  "(7/81)(9n − 1 + 10<sup>−n</sup>)",
+  "(7/9)(n − 1)",
+  "(7/81)(9n + 1 − 10<sup>−n</sup>)",
+  "7n/9"],
+ ans:0,
+ why:[
+  "Correct. Check n = 1: (7/81)(9 − 1 + 0.1) = (7/81)(8.1) = 0.7 ✓",
+  "Check n = 1: this gives 0, but the first term is 0.7.",
+  "The signs on the last two entries are swapped. Check n = 1: (7/81)(9 + 1 − 0.1) = (7/81)(9.9) ≈ 0.856 ≠ 0.7.",
+  "This treats every term as 0.7. Check n = 2: it gives 1.4, but 0.7 + 0.77 = 1.47."],
+ sol:"Pull out 7 and multiply-and-divide by 9: sum = (7/9)Σ(1 − 10<sup>−k</sup>) = (7/9)[n − (1/9)(1 − 10<sup>−n</sup>)] = <b>(7/81)(9n − 1 + 10<sup>−n</sup>)</b>."},
+
+{id:24, lec:"L-2", blk:"Sum to infinity", topic:"When the infinite sum exists",
+ q:"The sum of an infinite G.P. exists if and only if",
+ opts:["|r| &lt; 1","|r| ≤ 1","r &gt; 0","|r| &gt; 1"],
+ ans:0,
+ why:[
+  "Correct. Only then does r<sup>n</sup> → 0, so S<sub>n</sub> = a(1 − r<sup>n</sup>)/(1 − r) settles at a/(1 − r).",
+  "The endpoints fail: at r = 1 the sum is na → ∞, and at r = −1 the partial sums oscillate between a and 0 without settling.",
+  "The sign of r is irrelevant — what matters is its size. r = −1/2 converges; r = 3 does not.",
+  "That is exactly the divergent case: the terms grow without bound."],
+ sol:"<b>−1 &lt; r &lt; 1.</b> When a question yields two candidate ratios (say 2/3 and 3/2), this condition is what rejects one of them — skipping the check is the standard way to lose the mark."},
+
+{id:25, lec:"L-2", blk:"Sum to infinity", topic:"The infinite sum formula",
+ q:"For an infinite G.P. with |r| &lt; 1, the sum is",
+ opts:["a/(1 − r)","a/(1 + r)","a(1 − r)","ar/(1 − r)"],
+ ans:0,
+ why:[
+  "Correct — it is a(1 − r<sup>n</sup>)/(1 − r) with r<sup>n</sup> → 0. Check on 1, 1/2, 1/4, …: 1/(1/2) = 2 ✓",
+  "Same check: 1/(3/2) = 2/3, but the series 1 + 1/2 + 1/4 + … clearly exceeds 1.",
+  "Same check: 1 × 1/2 = 1/2, smaller than the first term alone.",
+  "This is the sum from the <b>second</b> term onwards; the first term a has been left out."],
+ sol:"<b>S<sub>∞</sub> = a/(1 − r)</b> for |r| &lt; 1."},
+
+{id:26, lec:"L-2", blk:"Sum to infinity", topic:"Infinite sum with a negative ratio",
+ q:"Find the sum to infinity of the G.P. −5/4, 5/16, −5/64, …",
+ opts:["−1","1","−5/4","−5/3"],
+ ans:0,
+ why:[
+  "Correct. a = −5/4 and r = (5/16) ÷ (−5/4) = −1/4, and |r| &lt; 1, so S = (−5/4)/(1 + 1/4) = (−5/4)/(5/4) = −1.",
+  "The sign of a carries through — the series is dominated by its negative first term.",
+  "That is the first term, not the sum. The later terms move the total up from −1.25 to −1.",
+  "This uses r = +1/4, giving (−5/4)/(3/4). The ratio here is <b>negative</b>."],
+ sol:"a = −5/4, r = −1/4 ⇒ 1 − r = 5/4 ⇒ S = (−5/4)/(5/4) = <b>−1</b>."},
+
+{id:27, lec:"L-2", blk:"Sum to infinity", topic:"Recurring decimals",
+ q:"Expressed as a rational number, 0.555… equals",
+ opts:["5/9","1/2","5/99","55/100"],
+ ans:0,
+ why:[
+  "Correct. 5/10 + 5/100 + 5/1000 + … is a G.P. with a = 5/10 and r = 1/10, so the sum is (5/10)/(9/10) = 5/9 = 0.555… ✓",
+  "1/2 = 0.5 exactly, not 0.555…",
+  "5/99 = 0.0505…, which is the value of the <b>two-digit</b> recurring pattern 0.05̄.",
+  "55/100 = 0.55 terminates after two digits."],
+ sol:"0.5̄ = Σ 5/10<sup>k</sup>, a G.P. with a = r = … precisely a = 5/10, r = 1/10 ⇒ S = (5/10)/(1 − 1/10) = <b>5/9</b>."},
+
+{id:28, lec:"L-2", blk:"Sum to infinity", topic:"Infinite exponent towers",
+ q:"The value of 6<sup>1/2</sup> × 6<sup>1/4</sup> × 6<sup>1/8</sup> × … to infinity is",
+ opts:["6","6<sup>1/2</sup>","36","1"],
+ ans:0,
+ why:[
+  "Correct. Same base multiplied ⇒ add the exponents. 1/2 + 1/4 + 1/8 + … is a G.P. with a = r = 1/2, summing to 1, so the product is 6<sup>1</sup> = 6.",
+  "That is just the first factor; the infinitely many others push the exponent from 1/2 up to 1.",
+  "This would need the exponents to total 2, but they total exactly 1.",
+  "6<sup>0</sup> = 1 would need the exponents to vanish."],
+ sol:"The exponents form an infinite G.P.: (1/2)/(1 − 1/2) = 1. So the product is <b>6<sup>1</sup> = 6</b>."},
+
+{id:29, lec:"L-2", blk:"Sum to infinity", topic:"Two interleaved G.P.s",
+ q:"Find the sum to infinity of 1/2 + 1/3² + 1/2³ + 1/3⁴ + 1/2⁵ + 1/3⁶ + …",
+ opts:["19/24","2/3","1/8","5/6"],
+ ans:0,
+ why:[
+  "Correct. The odd positions 1/2 + 1/2³ + 1/2⁵ + … have a = 1/2, r = 1/4 and sum to 2/3; the even positions 1/3² + 1/3⁴ + … have a = 1/9, r = 1/9 and sum to 1/8. Total 2/3 + 1/8 = 19/24.",
+  "That is only the odd-positioned (powers-of-2) series; the powers-of-3 terms were dropped.",
+  "That is only the even-positioned (powers-of-3) series.",
+  "Not produced by either grouping; 2/3 + 1/8 = 16/24 + 3/24 = 19/24."],
+ sol:"This is <b>two interleaved G.P.s</b> — separate them by parity of position. Series I: (1/2)/(1 − 1/4) = 2/3. Series II: (1/9)/(1 − 1/9) = 1/8. Total = <b>19/24</b>."},
+
+{id:30, lec:"L-2", blk:"Sum to infinity", topic:"Infinite sum plus sum of cubes",
+ q:"The sum of an infinite G.P. is 57 and the sum of the cubes of its terms is 9747. Its first term is",
+ opts:["19","38/3","57","3/2"],
+ ans:0,
+ why:[
+  "Correct. Dividing the cube of a/(1 − r) = 57 by a³/(1 − r³) = 9747 gives (1 + r + r²)/(1 − r)² = 19 ⇒ 6r² − 13r + 6 = 0 ⇒ r = 2/3 (rejecting 3/2), so a = 57(1/3) = 19.",
+  "That is the <b>second</b> term, 19 × 2/3.",
+  "57 is the sum of the whole series, not its first term.",
+  "3/2 is the <b>rejected root</b> for r — an infinite G.P. needs |r| &lt; 1, so 3/2 is impossible. It is also a ratio, not a first term."],
+ sol:"a/(1 − r) = 57 and a³/(1 − r³) = 9747. Cubing the first and dividing: (1 − r³)/(1 − r)³ = (1 + r + r²)/(1 − r)² = 57³/9747 = 19 ⇒ 18r² − 39r + 18 = 0 ⇒ r = 2/3 or 3/2; <b>reject 3/2</b>. Then a = 57(1 − 2/3) = <b>19</b>."},
+
+{id:31, lec:"L-2", blk:"Sum to infinity", topic:"A trigonometric G.P.",
+ q:"For 0 &lt; θ &lt; π/2, the value of Σ<sub>n=0..∞</sub> cos<sup>2n</sup>θ is",
+ opts:["cosec²θ","sec²θ","cos²θ","1/(1 + cos²θ)"],
+ ans:0,
+ why:[
+  "Correct. It is a G.P. with first term 1 and ratio cos²θ, so the sum is 1/(1 − cos²θ) = 1/sin²θ = cosec²θ.",
+  "sec²θ = 1/cos²θ would arise from Σsin<sup>2n</sup>θ, not from this one. The ratio being cos²θ leaves sin²θ in the denominator.",
+  "That is the common ratio, not the sum.",
+  "The denominator of S<sub>∞</sub> is 1 − r, not 1 + r."],
+ sol:"a = 1, r = cos²θ (and 0 &lt; cos²θ &lt; 1 on this interval, so it converges). S = 1/(1 − cos²θ) = 1/sin²θ = <b>cosec²θ</b>."},
+
+{id:32, lec:"L-2", blk:"Selecting terms", topic:"Symmetric choice of three terms",
+ q:"When a question gives you the <b>product</b> of three unknown numbers in G.P., the best way to write them is",
+ opts:["a/r, a, ar","a − d, a, a + d","a, ar, ar²","a/r³, a/r, ar"],
+ ans:0,
+ why:[
+  "Correct. Their product is a³ — the r cancels completely, so the product condition fixes a in one line.",
+  "That is the symmetric choice for an <b>A.P.</b>, designed so the <i>sum</i> collapses.",
+  "A perfectly valid G.P., but the product is a³r³, which still involves r. You gain nothing and end up solving simultaneously.",
+  "These are three terms lifted from the four-term layout; they are not centred on a, so the product is a³/r³."],
+ sol:"Centre on a: <b>a/r, a, ar</b>, product = a³. It is the exact mirror of the A.P.'s a − d, a, a + d with sum 3a — <b>sum becomes product</b>."},
+
+{id:33, lec:"L-2", blk:"Selecting terms", topic:"Symmetric choice of four terms",
+ q:"Four numbers in G.P. are taken as a/r³, a/r, ar, ar³. The ratio between adjacent terms is",
+ opts:["r²","r","r³","r⁴"],
+ ans:0,
+ why:[
+  "Correct. (a/r) ÷ (a/r³) = r², and ar ÷ (a/r) = r² as well — the spacing is deliberately r² so that no square roots appear.",
+  "Reading “r” off the symbols is the classic mistake, exactly as reading “d” off the A.P.'s four-term layout is.",
+  "r³ is the total spread from a/r³ to a/r… no — the full spread from first to last is r⁶, i.e. three steps of r².",
+  "The layout was chosen precisely to avoid this; a single step is r²."],
+ sol:"<b>Odd</b> count → a genuine middle term a and ratio r. <b>Even</b> count → no middle term and the adjacent ratio is <b>r²</b> — mirroring the A.P.'s common difference of 2d."},
+
+{id:34, lec:"L-2", blk:"Selecting terms", topic:"Why the symmetric layout works",
+ q:"The product of the three terms a/r, a, ar is",
+ opts:["a³","a³r³","3a","a³r"],
+ ans:0,
+ why:[
+  "Correct. (a/r)(a)(ar) = a³ · (1/r)(r) = a³ — the r's cancel, which is the whole point of the layout.",
+  "That is the product of a, ar, ar² — the un-centred choice.",
+  "3a is the <b>sum</b> of the corresponding A.P. layout, not a product.",
+  "One factor of r survives only if the terms are not symmetric; here they are."],
+ sol:"Product = a³. This is the multiplicative twin of “a − d, a, a + d has sum 3a”."},
+
+{id:35, lec:"L-2", blk:"Selecting terms", topic:"Sum and product of three terms",
+ q:"The sum of three numbers in G.P. is 38 and their product is 1728. The numbers are",
+ opts:["8, 12, 18","6, 12, 20","2, 12, 24","9, 12, 17"],
+ ans:0,
+ why:[
+  "Correct. a³ = 1728 ⇒ a = 12; then 12(1/r + 1 + r) = 38 ⇒ 6r² − 13r + 6 = 0 ⇒ r = 3/2 or 2/3, giving 8, 12, 18 (or the same three reversed). Check: 12² = 144 = 8 × 18 ✓",
+  "The sum is 38 ✓ but the product is 1440, and 12² = 144 ≠ 6 × 20 = 120, so it is not a G.P.",
+  "The sum is 38 ✓ but the product is 576, and 144 ≠ 2 × 24 = 48.",
+  "The sum is 38 ✓ but the product is 1836, and 144 ≠ 9 × 17 = 153."],
+ sol:"Take a/r, a, ar. Product a³ = 1728 ⇒ <b>a = 12</b>. Sum: 12(1 + r + r²)/r = 38 ⇒ 6r² − 13r + 6 = 0 ⇒ (3r − 2)(2r − 3) = 0 ⇒ r = 3/2 or 2/3. Numbers: <b>8, 12, 18</b>."},
+
+{id:36, lec:"L-2", blk:"Selecting terms", topic:"Sum and product of four terms",
+ q:"Four numbers in G.P. have sum 85 and product 4096. The numbers are",
+ opts:["1, 4, 16, 64","2, 8, 32, 128","1, 5, 25, 125","4, 8, 16, 32"],
+ ans:0,
+ why:[
+  "Correct. a⁴ = 4096 ⇒ a = 8 for the layout a/r³, a/r, ar, ar³; the sum condition gives r + 1/r = 5/2 ⇒ r = 2 or 1/2, producing 1, 4, 16, 64. Check: sum 85 ✓, product 4096 ✓",
+  "A genuine G.P. (r = 4), but its sum is 170 and its product is 65536.",
+  "A genuine G.P. (r = 5), but its sum is 156 and its product is 15625.",
+  "A genuine G.P. (r = 2), but its sum is 60 and its product is 16384."],
+ sol:"Take a/r³, a/r, ar, ar³. Product a⁴ = 4096 ⇒ a = 8. Sum: 8(r³ + 1/r³) + 8(r + 1/r) = 85; with x = r + 1/r this is 8x³ − 16x − 85 = 0 ⇒ (2x − 5)(4x² + 10x + 17) = 0 ⇒ x = 5/2 (the quadratic has no real roots) ⇒ r = 2 or 1/2. Numbers: <b>1, 4, 16, 64</b>."},
+
+{id:37, lec:"L-2", blk:"Selecting terms", topic:"The r + 1/r substitution",
+ q:"If x = r + 1/r, then r³ + 1/r³ equals",
+ opts:["x³ − 3x","x³ + 3x","x³","x³ − 3"],
+ ans:0,
+ why:[
+  "Correct. (r + 1/r)³ = r³ + 1/r³ + 3(r + 1/r), so r³ + 1/r³ = x³ − 3x. Check r = 2: x = 5/2 and r³ + 1/r³ = 8.125, while x³ − 3x = 15.625 − 7.5 = 8.125 ✓",
+  "The sign is wrong — the 3(r + 1/r) term must be <b>subtracted</b> back off. Same check: 15.625 + 7.5 = 23.125 ✗",
+  "This ignores the cross terms of the cube entirely. Same check: 15.625 ✗",
+  "The correction is 3x, not 3 — it carries a factor of x. Same check: 12.625 ✗"],
+ sol:"Cubing x = r + 1/r gives x³ = r³ + 3r + 3/r + 1/r³ = (r³ + 1/r³) + 3x, hence <b>r³ + 1/r³ = x³ − 3x</b>. This substitution turns the four-term sum condition from a quartic in r into a cubic in x."},
+
+{id:38, lec:"L-2", blk:"Sum of n terms", topic:"Using equidistant products to find n",
+ q:"In an increasing G.P., the sum of the first and last terms is 66, the product of the second and second-last terms is 128, and the sum of all the terms is 126. The number of terms is",
+ opts:["6","5","7","8"],
+ ans:0,
+ why:[
+  "Correct. Equidistant products give a·ar<sup>n−1</sup> = 128; with a + ar<sup>n−1</sup> = 66 the two ends are the roots of t² − 66t + 128 = 0, i.e. 2 and 64. Increasing ⇒ a = 2, and the sum condition then gives r = 2 with 2<sup>n−1</sup> = 32 ⇒ n = 6. The G.P. is 2, 4, 8, 16, 32, 64.",
+  "Five terms starting at 2 with r = 2 sum to 62, not 126, and end at 32, so the ends would sum to 34.",
+  "Seven terms would end at 128, making the ends sum to 130.",
+  "Eight terms sum to 510."],
+ sol:"a<sub>2</sub>a<sub>n−1</sub> = a<sub>1</sub>a<sub>n</sub> = 128 and a<sub>1</sub> + a<sub>n</sub> = 66 ⇒ a² − 66a + 128 = 0 ⇒ a = 2 or 64; increasing rules out 64. Then 126 = 2(r<sup>n</sup> − 1)/(r − 1) with r<sup>n−1</sup> = 32 gives 32r − 1 = 63(r − 1) ⇒ r = 2, so 2<sup>n−1</sup> = 32 ⇒ <b>n = 6</b>."},
+
+{id:39, lec:"L-2", blk:"Sum of n terms", topic:"The S<sub>n</sub>, S<sub>2n</sub>, S<sub>3n</sub> identity",
+ q:"If S<sub>n</sub>, S<sub>2n</sub>, S<sub>3n</sub> are the sums of n, 2n and 3n terms of a G.P., then",
+ opts:[
+  "S<sub>n</sub>(S<sub>3n</sub> − S<sub>2n</sub>) = (S<sub>2n</sub> − S<sub>n</sub>)²",
+  "S<sub>n</sub> + S<sub>2n</sub> = S<sub>3n</sub>",
+  "S<sub>n</sub>·S<sub>2n</sub> = S<sub>3n</sub>²",
+  "S<sub>2n</sub> = 2S<sub>n</sub>"],
+ ans:0,
+ why:[
+  "Correct. With k = a/(r − 1), both sides equal k²r<sup>2n</sup>(r<sup>n</sup> − 1)². Check on 1, 2, 4, 8, 16, 32 with n = 2: S<sub>2</sub> = 3, S<sub>4</sub> = 15, S<sub>6</sub> = 63; LHS = 3(63 − 15) = 144 and RHS = 12² = 144 ✓",
+  "Same check: 3 + 15 = 18 ≠ 63.",
+  "Same check: 3 × 15 = 45 ≠ 63² = 3969.",
+  "Same check: 15 ≠ 6. Sums of a G.P. do not double when the count doubles."],
+ sol:"Write k = a/(r − 1), so S<sub>m</sub> = k(r<sup>m</sup> − 1). Then LHS = k²(r<sup>n</sup> − 1)r<sup>2n</sup>(r<sup>n</sup> − 1) and RHS = [k r<sup>n</sup>(r<sup>n</sup> − 1)]² — identical. <b>S<sub>n</sub>(S<sub>3n</sub> − S<sub>2n</sub>) = (S<sub>2n</sub> − S<sub>n</sub>)²</b>."},
+
+{id:40, lec:"L-2", blk:"Sum of n terms", topic:"Blocks of a G.P.",
+ q:"For a G.P., the three quantities S<sub>n</sub>, S<sub>2n</sub> − S<sub>n</sub>, S<sub>3n</sub> − S<sub>2n</sub> are themselves in",
+ opts:["G.P.","A.P.","H.P.","no progression"],
+ ans:0,
+ why:[
+  "Correct — each successive block of n terms is the previous block multiplied by r<sup>n</sup>. Check on 1, 2, 4, 8, 16, 32 with n = 2: the blocks are 3, 12, 48 — a G.P. with ratio 4 = r² ✓",
+  "Same check: 3, 12, 48 has gaps 9 and 36, not equal.",
+  "Same check: the reciprocals 1/3, 1/12, 1/48 have gaps −1/4 and −1/16, not equal.",
+  "It is a genuine G.P., which is exactly what the identity in the previous question expresses."],
+ sol:"The second block of n terms is the first block times r<sup>n</sup>, and the third is the second times r<sup>n</sup>. So the blocks form a <b>G.P. with ratio r<sup>n</sup></b> — and “middle² = product of the outers” is precisely S<sub>n</sub>(S<sub>3n</sub> − S<sub>2n</sub>) = (S<sub>2n</sub> − S<sub>n</sub>)²."},
+
+/* ---------------- L-3 (14) ---------------- */
+{id:41, lec:"L-3", blk:"What survives, what breaks", topic:"Scaling a G.P.",
+ q:"If every term of a G.P. is multiplied by a non-zero constant K, the result is",
+ opts:[
+  "a G.P. with the same common ratio",
+  "a G.P. with common ratio rK",
+  "an A.P.",
+  "generally not a progression"],
+ ans:0,
+ why:[
+  "Correct. (Ka<sub>i+1</sub>)/(Ka<sub>i</sub>) = a<sub>i+1</sub>/a<sub>i</sub> = r — the K cancels in every ratio.",
+  "This is the <b>A.P.</b> behaviour (scaling multiplies d by K). In a G.P. it is <i>shifting</i> that breaks things and scaling that is harmless — the exact opposite.",
+  "Multiplying a G.P. by a constant keeps it geometric, not arithmetic.",
+  "Scaling is one of the safest operations on a G.P."],
+ sol:"<b>Property 1:</b> a<sub>i</sub>K and a<sub>i</sub>/K are still G.P.s with <b>r unchanged</b>. Note the contrast with M-8A, where scaling changes d and shifting does not."},
+
+{id:42, lec:"L-3", blk:"What survives, what breaks", topic:"Shifting a G.P.",
+ q:"If the same constant K is added to every term of a G.P., the result is",
+ opts:[
+  "generally not a G.P.",
+  "a G.P. with the same common ratio",
+  "a G.P. with common ratio r + K",
+  "an A.P."],
+ ans:0,
+ why:[
+  "Correct. 2, 4, 8 is a G.P., but adding 1 gives 3, 5, 9 with ratios 5/3 and 9/5 — not constant. This is the exact opposite of an A.P., where shifting is harmless.",
+  "The ratio is destroyed, not preserved: (a<sub>i+1</sub> + K)/(a<sub>i</sub> + K) depends on i.",
+  "Ratios are not shifted by additive constants at all. The counterexample 3, 5, 9 settles it.",
+  "3, 5, 9 has gaps 2 and 4, so it is not an A.P. either."],
+ sol:"<b>a<sub>i</sub> ± K is NOT a G.P.</b> — this is the one property that breaks, and options built on it are always wrong. Adding is what an A.P. tolerates; multiplying is what a G.P. tolerates."},
+
+{id:43, lec:"L-3", blk:"What survives, what breaks", topic:"Reciprocating a G.P.",
+ q:"The reciprocals of the terms of a G.P. form",
+ opts:[
+  "a G.P. with common ratio 1/r",
+  "an A.P.",
+  "an H.P.",
+  "no progression at all"],
+ ans:0,
+ why:[
+  "Correct. If the G.P. is a, ar, ar², … the reciprocals are 1/a, 1/(ar), 1/(ar²), … — a G.P. with ratio 1/r.",
+  "That is what happens when you reciprocate an <b>H.P.</b>, not a G.P.",
+  "This is the trap. Only the A.P. ↔ H.P. pair swaps under reciprocation; a G.P. maps to a G.P. So “the reciprocals form a G.P.” never signals an H.P.",
+  "It is a perfectly good G.P. — check 2, 4, 8 → 1/2, 1/4, 1/8 with ratio 1/2."],
+ sol:"Reciprocation maps <b>G.P. → G.P. (ratio 1/r)</b>, and A.P. ↔ H.P. Also a<sub>i</sub><sup>k</sup> stays a G.P., with ratio r<sup>k</sup>."},
+
+{id:44, lec:"L-3", blk:"Combining G.P.s", topic:"Term-by-term product",
+ q:"If {a<sub>i</sub>} and {b<sub>i</sub>} are both G.P.s, then {a<sub>i</sub>b<sub>i</sub>} is",
+ opts:["a G.P.","an A.P.","generally not a progression","an H.P."],
+ ans:0,
+ why:[
+  "Correct. The ratios simply multiply: (a<sub>i+1</sub>b<sub>i+1</sub>)/(a<sub>i</sub>b<sub>i</sub>) = r<sub>a</sub>r<sub>b</sub>, a constant. The same holds for {a<sub>i</sub>/b<sub>i</sub>} with ratio r<sub>a</sub>/r<sub>b</sub>.",
+  "Multiplying two multiplicative patterns stays multiplicative.",
+  "It is always a G.P. — note the contrast with an A.P., where it is the <b>sum</b> that is safe and the product that breaks.",
+  "No reciprocation is involved."],
+ sol:"<b>Property 2:</b> {a<sub>i</sub>b<sub>i</sub>} and {a<sub>i</sub>/b<sub>i</sub>} are G.P.s. Mirror-image of M-8A, where {a<sub>i</sub> ± b<sub>i</sub>} was the safe combination."},
+
+{id:45, lec:"L-3", blk:"Combining G.P.s", topic:"Term-by-term sum",
+ q:"If {a<sub>i</sub>} and {b<sub>i</sub>} are both G.P.s, then {a<sub>i</sub> + b<sub>i</sub>} is",
+ opts:[
+  "generally not a G.P., unless the two have the same common ratio",
+  "always a G.P.",
+  "always an A.P.",
+  "always an H.P."],
+ ans:0,
+ why:[
+  "Correct. Take 1, 2, 4 (r = 2) and 1, 3, 9 (r = 3): the sums 2, 5, 13 have ratios 2.5 and 2.6. But if both ratios are r, the sum is (a<sub>1</sub> + b<sub>1</sub>)r<sup>i−1</sup> — still a G.P.",
+  "The counterexample 2, 5, 13 rules this out.",
+  "2, 5, 13 has gaps 3 and 8 — not an A.P. either.",
+  "Its reciprocals 1/2, 1/5, 1/13 have gaps −3/10 and −8/65 — not an A.P., so not an H.P."],
+ sol:"Sums of G.P.s break the pattern <b>unless the ratios agree</b>, in which case r factors out. Products always survive; sums generally do not — the mirror image of the A.P. rules."},
+
+{id:46, lec:"L-3", blk:"The log bridge", topic:"G.P. to A.P. via logarithms",
+ q:"For positive terms, a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, … are in G.P. if and only if",
+ opts:[
+  "log a<sub>1</sub>, log a<sub>2</sub>, log a<sub>3</sub>, … are in A.P.",
+  "log a<sub>1</sub>, log a<sub>2</sub>, log a<sub>3</sub>, … are in G.P.",
+  "log a<sub>1</sub>, log a<sub>2</sub>, log a<sub>3</sub>, … are in H.P.",
+  "there is no relation between the two"],
+ ans:0,
+ why:[
+  "Correct. log(ar<sup>n−1</sup>) = log a + (n − 1)log r — an A.P. with first term log a and common difference log r. Multiplication becomes addition.",
+  "Taking logs turns the multiplicative structure into an additive one, so the result is arithmetic, not geometric. Check 1, 10, 100: the logs are 0, 1, 2 — an A.P., not a G.P.",
+  "H.P.s come from reciprocating an A.P.; logs do not produce them here.",
+  "The relation is exact and both ways — it is the main bridge between M-8A and M-8B."],
+ sol:"<b>Property 3:</b> G.P. of positive terms ⇔ A.P. of their logarithms. Any G.P. statement converts to an A.P. statement by taking logs, and back by exponentiating."},
+
+{id:47, lec:"L-3", blk:"The log bridge", topic:"Logs of powers",
+ q:"If a, b, c &gt; 0 are in G.P., then log a<sup>n</sup>, log b<sup>n</sup>, log c<sup>n</sup> are in",
+ opts:["A.P.","G.P.","H.P.","no progression"],
+ ans:0,
+ why:[
+  "Correct. b² = ac ⇒ b<sup>2n</sup> = a<sup>n</sup>c<sup>n</sup> ⇒ 2 log b<sup>n</sup> = log a<sup>n</sup> + log c<sup>n</sup>, which is exactly the A.P. condition.",
+  "Check on 1, 10, 100 with n = 2: the logs are 0, 4, 8 — an A.P. with d = 4, and certainly not a G.P. (a G.P. cannot start at 0).",
+  "Same check: 0, 4, 8 reciprocated is undefined at the first term.",
+  "It is a genuine A.P.; raising to the n<sup>th</sup> power just scales the common difference to n log r."],
+ sol:"Raising the G.P. condition b² = ac to the n<sup>th</sup> power and taking logs gives <b>2 log b<sup>n</sup> = log a<sup>n</sup> + log c<sup>n</sup></b> — the A.P. condition."},
+
+{id:48, lec:"L-3", blk:"Equidistant terms", topic:"Equidistant products",
+ q:"In a finite G.P. a<sub>1</sub>, a<sub>2</sub>, …, a<sub>n</sub>, which quantity is constant?",
+ opts:[
+  "a<sub>1</sub>a<sub>n</sub> = a<sub>2</sub>a<sub>n−1</sub> = a<sub>3</sub>a<sub>n−2</sub> = …",
+  "a<sub>1</sub> + a<sub>n</sub> = a<sub>2</sub> + a<sub>n−1</sub> = …",
+  "a<sub>1</sub>/a<sub>n</sub> = a<sub>2</sub>/a<sub>n−1</sub> = …",
+  "a<sub>1</sub>a<sub>n</sub> = a<sub>2</sub> + a<sub>n−1</sub>"],
+ ans:0,
+ why:[
+  "Correct. a<sub>i</sub>a<sub>j</sub> = a²r<sup>i+j−2</sup> depends only on i + j, so any two pairs with the same index sum give the same product. Check on 1, 2, 4, 8: 1 × 8 = 2 × 4 = 8 ✓",
+  "That is the <b>A.P.</b> property (equidistant terms have a constant sum). Same check: 1 + 8 = 9 but 2 + 4 = 6.",
+  "Same check: 1/8 versus 2/4 = 1/2 — not equal.",
+  "Mixing a product with a sum. Same check: 8 ≠ 6."],
+ sol:"<b>Property 4:</b> a<sub>1</sub>a<sub>n</sub> = a<sub>2</sub>a<sub>n−1</sub> = … — the multiplicative twin of “equidistant terms sum to a constant”. Half of the Strong Box is this one line."},
+
+{id:49, lec:"L-3", blk:"Equidistant terms", topic:"Every term is a geometric mean",
+ q:"For a G.P. and any valid k, the term a<sub>r</sub> equals",
+ opts:[
+  "√(a<sub>r−k</sub> · a<sub>r+k</sub>)",
+  "(a<sub>r−k</sub> + a<sub>r+k</sub>)/2",
+  "2a<sub>r−k</sub>a<sub>r+k</sub>/(a<sub>r−k</sub> + a<sub>r+k</sub>)",
+  "a<sub>r−k</sub> · a<sub>r+k</sub>"],
+ ans:0,
+ why:[
+  "Correct. a<sub>r−k</sub>a<sub>r+k</sub> = (a<sub>r</sub>/r<sup>k</sup>)(a<sub>r</sub>r<sup>k</sup>) = a<sub>r</sub>², so a<sub>r</sub> is their geometric mean. Check on 1, 2, 4: 2 = √(1 × 4) ✓",
+  "That is the <b>A.P.</b> version — the arithmetic mean. Same check: (1 + 4)/2 = 2.5 ≠ 2.",
+  "That is the <b>H.P.</b> version — the harmonic mean. Same check: 8/5 = 1.6 ≠ 2.",
+  "The square root is missing. Same check: 1 × 4 = 4 ≠ 2."],
+ sol:"<b>Property 5:</b> a<sub>r</sub>² = a<sub>r−k</sub>a<sub>r+k</sub>, i.e. every term is the <b>geometric mean</b> of any two neighbours equally spaced around it. For three terms this is the familiar b² = ac."},
+
+{id:50, lec:"L-3", blk:"Equidistant terms", topic:"The three-term G.P. condition",
+ q:"Three non-zero numbers a, b, c are in G.P. if and only if",
+ opts:["b² = ac","2b = a + c","b = 2ac/(a + c)","b = a + c"],
+ ans:0,
+ why:[
+  "Correct. b/a = c/b rearranges to b² = ac — b is the geometric mean of a and c.",
+  "That is the <b>A.P.</b> condition (arithmetic mean).",
+  "That is the <b>H.P.</b> condition (harmonic mean).",
+  "Not a progression condition at all."],
+ sol:"a, b, c in G.P. ⇔ <b>b² = ac</b>. The three tests side by side: 2b = a + c (A.P.), b² = ac (G.P.), b = 2ac/(a + c) (H.P.)."},
+
+{id:51, lec:"L-3", blk:"Mixed A.P./G.P. problems", topic:"An exponent identity",
+ q:"If a, b, c are in A.P. and x, y, z are in G.P., then x<sup>b−c</sup>·y<sup>c−a</sup>·z<sup>a−b</sup> equals",
+ opts:["1","0","xyz","abc"],
+ ans:0,
+ why:[
+  "Correct. Substituting y = √(xz) makes the exponent of x equal to (b − c) + (c − a)/2 = [2b − (a + c)]/2 = 0 by the A.P. condition, and likewise for z. So the whole product is x⁰z⁰ = 1.",
+  "A product of powers of positive numbers is never 0 — and the exponents vanishing gives 1, not 0.",
+  "The exponents cancel completely, leaving no x, y or z behind.",
+  "a, b, c appear only in the exponents; they cannot survive into the value."],
+ sol:"G.P. ⇒ y² = xz ⇒ y = (xz)<sup>1/2</sup>. The x-exponent becomes (b − c) + (c − a)/2 = [2b − a − c]/2, which is 0 because 2b = a + c. The z-exponent vanishes the same way. Answer: <b>1</b>."},
+
+{id:52, lec:"L-3", blk:"Mixed A.P./G.P. problems", topic:"Sums of powers of a G.P.",
+ q:"If a, b, c, d are in G.P., then a<sup>n</sup> + b<sup>n</sup>, b<sup>n</sup> + c<sup>n</sup>, c<sup>n</sup> + d<sup>n</sup> are in",
+ opts:[
+  "G.P. with common ratio r<sup>n</sup>",
+  "A.P.",
+  "H.P.",
+  "no progression"],
+ ans:0,
+ why:[
+  "Correct. With b = ar, c = ar², d = ar³ the three expressions are a<sup>n</sup>(1 + r<sup>n</sup>) times 1, r<sup>n</sup> and r<sup>2n</sup>. Check on 1, 2, 4, 8 with n = 1: 3, 6, 12 — a G.P. with ratio 2 ✓",
+  "Same check: 3, 6, 12 has gaps 3 and 6, not equal.",
+  "Same check: the reciprocals 1/3, 1/6, 1/12 have gaps −1/6 and −1/12, not equal.",
+  "It is a genuine G.P., equivalently (b<sup>n</sup> + c<sup>n</sup>)² = (a<sup>n</sup> + b<sup>n</sup>)(c<sup>n</sup> + d<sup>n</sup>)."],
+ sol:"a<sup>n</sup> + b<sup>n</sup> = a<sup>n</sup>(1 + r<sup>n</sup>), b<sup>n</sup> + c<sup>n</sup> = a<sup>n</sup>r<sup>n</sup>(1 + r<sup>n</sup>), c<sup>n</sup> + d<sup>n</sup> = a<sup>n</sup>r<sup>2n</sup>(1 + r<sup>n</sup>) — the same quantity times 1, r<sup>n</sup>, r<sup>2n</sup>. So they are in <b>G.P. with ratio r<sup>n</sup></b>."},
+
+{id:53, lec:"L-3", blk:"Mixed A.P./G.P. problems", topic:"A four-term identity",
+ q:"If a, b, c, d are in G.P., then (b − c)² + (c − a)² + (d − b)² equals",
+ opts:["(a − d)²","(a + d)²","a − d","0"],
+ ans:0,
+ why:[
+  "Correct. Substituting b = ar, c = ar², d = ar³ and expanding gives a²(r⁶ − 2r³ + 1) = a²(1 − r³)² = (a − ar³)². Check on 1, 2, 4, 8: 4 + 9 + 36 = 49 = (1 − 8)² ✓",
+  "Same check: (1 + 8)² = 81 ≠ 49.",
+  "The left side is a sum of squares and is non-negative; a − d = −7 here.",
+  "The left side is zero only if all four terms coincide. Same check: it is 49."],
+ sol:"With b = ar, c = ar², d = ar³ the left side collapses to a²(1 − r³)² = <b>(a − d)²</b>. Sanity check on 1, 2, 4, 8: 4 + 9 + 36 = 49 = 7² ✓"},
+
+{id:54, lec:"L-3", blk:"Mixed A.P./G.P. problems", topic:"An A.P. turned into a G.P.",
+ q:"Three numbers whose sum is 15 are in A.P. Adding 1, 4 and 19 to them respectively makes them a G.P. The numbers are",
+ opts:[
+  "2, 5, 8  or  26, 5, −16",
+  "2, 5, 8 only",
+  "2, 5, 8  or  25, 5, −16",
+  "3, 5, 7  or  26, 5, −16"],
+ ans:0,
+ why:[
+  "Correct. With a − d, 5, 5 + d the G.P. condition 9² = (6 − d)(24 + d) gives d² + 18d − 63 = 0 ⇒ d = 3 or −21. d = 3 → 2, 5, 8 (becoming 3, 9, 27 ✓); d = −21 → 26, 5, −16 (becoming 27, 9, 3 ✓).",
+  "The second root d = −21 is perfectly valid — it produces the same G.P. reversed. Discarding it loses half the answer.",
+  "⚠ This matches the ICAD module's printed answer line, which is a <b>misprint</b>. With a = 5 and d = −21 the first term is 5 − (−21) = <b>26</b>, not 25 — and only 26 makes the sum 15 (26 + 5 − 16 = 15 ✓, while 25 + 5 − 16 = 14 ✗). The d = −21 root itself is right; only the final arithmetic slipped.",
+  "3, 5, 7 sums to 15 and is an A.P., but adding 1, 4, 19 gives 4, 9, 26, and 9² = 81 ≠ 4 × 26 = 104 — not a G.P."],
+ sol:"Take a − d, a, a + d with 3a = 15 ⇒ a = 5. After adding: 6 − d, 9, 24 + d. G.P. ⇒ 81 = (6 − d)(24 + d) ⇒ d² + 18d − 63 = 0 ⇒ (d + 21)(d − 3) = 0. Both roots are legitimate: <b>2, 5, 8 or 26, 5, −16</b>."},
+
+/* ---------------- Strong Box (8) ---------------- */
+{id:55, lec:"SB", blk:"JEE Main 2026 (28 Jan Shift-1)", topic:"The range of the sum of three G.P. terms",
+ q:"In a G.P. the product of the first three terms is 27, and the set of all possible values of the sum of the first three terms is ℝ − (a, b). Then a² + b² equals",
+ opts:["90","45","36","18"],
+ ans:0,
+ why:[
+  "Correct. A³ = 27 ⇒ A = 3, so the sum is 3 + 3(r + 1/r). Since r + 1/r never lies strictly between −2 and 2, the sum misses the open interval (3 − 6, 3 + 6) = (−3, 9), giving a² + b² = 9 + 81 = 90.",
+  "Would need the interval to be (−3, 6) or similar; the endpoints are fixed at −3 and 9 by r + 1/r = ∓2.",
+  "Would need a = 0 and b = 6, but a G.P. sum of 0 is attainable only if r + 1/r = −1, which is impossible.",
+  "Would need a² + b² = 18, e.g. a = b = 3 — but the excluded interval is not degenerate."],
+ sol:"Take A/r, A, Ar. Product A³ = 27 ⇒ A = 3, and the sum is 3(1/r + 1 + r) = 3 + 3(r + 1/r). For real r ≠ 0, <b>r + 1/r ∈ (−∞, −2] ∪ [2, ∞)</b>, so the sum lies in (−∞, −3] ∪ [9, ∞) and the missing interval is (−3, 9). Hence a = −3, b = 9 and a² + b² = <b>90</b>."},
+
+{id:56, lec:"SB", blk:"JEE Main 2025 (22 Jan Shift-1)", topic:"Equidistant products turning into a quadratic",
+ q:"Let a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, … be a G.P. of increasing positive terms with a<sub>1</sub>a<sub>5</sub> = 28 and a<sub>2</sub> + a<sub>4</sub> = 29. Then a<sub>6</sub> equals",
+ opts:["784","628","812","526"],
+ ans:0,
+ why:[
+  "Correct. a<sub>2</sub>a<sub>4</sub> = a<sub>1</sub>a<sub>5</sub> = 28, so a<sub>2</sub> and a<sub>4</sub> are the roots of t² − 29t + 28 = 0, i.e. 1 and 28. Increasing ⇒ a<sub>2</sub> = 1, a<sub>4</sub> = 28, so r² = 28 and a<sub>6</sub> = a<sub>4</sub>r² = 28 × 28 = 784.",
+  "This would require r² = 628/28 ≈ 22.4, but the equidistant-product step pins r² at exactly 28.",
+  "This is 28 × 29 — multiplying a<sub>4</sub> by the given <b>sum</b> 29 instead of by the ratio r² = 28.",
+  "This would require r² = 526/28 ≈ 18.8. Only 784 = 28² is consistent with a<sub>2</sub> = 1, a<sub>4</sub> = 28."],
+ sol:"Because 1 + 5 = 2 + 4, the equidistant-product property gives a<sub>2</sub>a<sub>4</sub> = a<sub>1</sub>a<sub>5</sub> = 28. With a<sub>2</sub> + a<sub>4</sub> = 29 they are the roots of t² − 29t + 28 = 0 ⇒ 1 and 28; increasing forces a<sub>2</sub> = 1. Then r² = a<sub>4</sub>/a<sub>2</sub> = 28 and a<sub>6</sub> = a<sub>4</sub>r² = <b>784</b>."},
+
+{id:57, lec:"SB", blk:"JEE Main 2024 (30 Jan Shift-2)", topic:"Matching terms of two G.P.s",
+ q:"a and b are distinct positive reals. The 11<sup>th</sup> term of a G.P. with first term a and third term b equals the p<sup>th</sup> term of another G.P. with first term a and fifth term b. Then p is",
+ opts:["21","20","25","24"],
+ ans:0,
+ why:[
+  "Correct. r<sub>1</sub>² = b/a so the 11<sup>th</sup> term is a(b/a)⁵; r<sub>2</sub>⁴ = b/a so the p<sup>th</sup> term is a(b/a)<sup>(p−1)/4</sup>. Equating exponents: 5 = (p − 1)/4 ⇒ p = 21.",
+  "20 is p − 1, the number of steps — the position is one more.",
+  "Would need (p − 1)/4 = 6, i.e. the 13<sup>th</sup> term of the first G.P.",
+  "Would need (p − 1)/4 = 23/4, which is not the integer 5."],
+ sol:"G.P. 1: ar<sub>1</sub>² = b ⇒ 11<sup>th</sup> term = a(r<sub>1</sub>²)⁵ = a(b/a)⁵. G.P. 2: ar<sub>2</sub>⁴ = b ⇒ p<sup>th</sup> term = a(b/a)<sup>(p−1)/4</sup>. Since a ≠ b, equate the exponents of (b/a): (p − 1)/4 = 5 ⇒ <b>p = 21</b>."},
+
+{id:58, lec:"SB", blk:"JEE Main 2024 (1 Feb Shift-1)", topic:"An A.P. and a G.P. in one question",
+ q:"Let 3, a, b, c be in A.P. and 3, a − 1, b + 1, c + 9 be in G.P. Then the arithmetic mean of a, b, c is",
+ opts:["11","4","−1","13"],
+ ans:0,
+ why:[
+  "Correct. Writing a = 3 + d etc., the G.P. is 3, 2 + d, 4 + 2d, 12 + 3d, and (2 + d)² = 3(4 + 2d) gives d = 4 or −2; d = −2 makes a G.P. term zero and is rejected. So a, b, c = 7, 11, 15 and their mean is 33/3 = 11.",
+  "4 is the value of d, not the mean.",
+  "This comes from keeping the rejected root d = −2 (giving a, b, c = 1, −1, −3 with mean −1). But d = −2 makes the second G.P. term 2 + d = 0, which no G.P. permits.",
+  "13 is b + 2, not the mean of the three."],
+ sol:"A.P.: a = 3 + d, b = 3 + 2d, c = 3 + 3d. The G.P. is then 3, 2 + d, 4 + 2d, 12 + 3d, and (2 + d)² = 3(4 + 2d) ⇒ d² − 2d − 8 = 0 ⇒ d = 4 or −2. <b>Reject d = −2</b> — it makes a G.P. term zero. With d = 4: a, b, c = 7, 11, 15 (G.P. 3, 6, 12, 24 ✓) and the A.M. is <b>11</b>."},
+
+{id:59, lec:"SB", blk:"JEE Main 2023 (10 Apr Shift-1)", topic:"Integer G.P. from a sum of squares",
+ q:"The first term a and common ratio r of a G.P. are positive integers. If the sum of the squares of the first three terms is 33033, then the sum of those three terms is",
+ opts:["231","241","210","220"],
+ ans:0,
+ why:[
+  "Correct. a²(1 + r² + r⁴) = 33033 = 3 × 7 × 11² × 13; the only usable square factor is 11², so a = 11 and 1 + r² + r⁴ = 273 ⇒ r² = 16 ⇒ r = 4. Terms 11, 44, 176 sum to 231.",
+  "Ten more than the answer — an arithmetic slip in adding 11 + 44 + 176, which is 231.",
+  "The sum is a(1 + r + r²) = 11 × 21; reaching 210 would need 11 × 19.09, so no integer r produces it.",
+  "This is 11 × 20, i.e. it assumes 1 + r + r² = 20. With r = 4 the bracket is 1 + 4 + 16 = 21, giving 231."],
+ sol:"a²(1 + r² + r⁴) = 33033 = 3 × 7 × 11² × 13. For a to be an integer, a² must be a square factor — only 11² qualifies. Then 1 + r² + r⁴ = 273 ⇒ r⁴ + r² − 272 = 0 ⇒ r² = 16 ⇒ <b>r = 4</b>. Terms: 11, 44, 176 (check 121 + 1936 + 30976 = 33033 ✓), sum = <b>231</b>."},
+
+{id:60, lec:"SB", blk:"JEE Main 2023 (31 Jan Shift-1)", topic:"Sum of all possible common ratios",
+ q:"The sum and product of four positive consecutive terms of a G.P. are 126 and 1296. The sum of the common ratios of all such G.P.s is",
+ opts:["7","9/2","3","14"],
+ ans:0,
+ why:[
+  "Correct. The substitution s = √r + 1/√r turns the conditions into s³ − 2s = 21 ⇒ s = 3 ⇒ r + 1/r = 7 ⇒ r² − 7r + 1 = 0, and the two ratios are its roots, summing to 7 by Vieta.",
+  "9/2 would be the sum if r + 1/r were 9/2; the cubic pins it at 7.",
+  "3 is the value of s = √r + 1/√r, not of the sum of the ratios.",
+  "Double counting — the quadratic r² − 7r + 1 = 0 has exactly two roots, summing to 7."],
+ sol:"With terms a, ar, ar², ar³: product a⁴r⁶ = 1296 ⇒ a²r³ = 36; sum a(1 + r)(1 + r²) = 126. Substituting a = 6/r<sup>3/2</sup> and putting s = √r + 1/√r gives <b>s³ − 2s = 21</b>, whose only real root is s = 3. Squaring, r + 1/r = 7, so the ratios are the roots of r² − 7r + 1 = 0 and their sum is <b>7</b>."},
+
+{id:61, lec:"SB", blk:"The recurring tool", topic:"The range of r + 1/r",
+ q:"For a real r ≠ 0, the expression r + 1/r takes exactly the values",
+ opts:[
+  "(−∞, −2] ∪ [2, ∞)",
+  "[−2, 2]",
+  "all real numbers",
+  "[2, ∞) only"],
+ ans:0,
+ why:[
+  "Correct. For r > 0, AM–GM gives r + 1/r ≥ 2 with equality at r = 1; for r &lt; 0 the same argument on −r gives r + 1/r ≤ −2. The open interval (−2, 2) is unreachable.",
+  "This is exactly backwards — (−2, 2) is the one stretch the expression <b>cannot</b> reach.",
+  "It can never take the value 0, or 1, or any value strictly between −2 and 2.",
+  "Negative r gives values ≤ −2, so the negative branch is real too — r = −1 gives −2."],
+ sol:"r + 1/r = 2 requires r = 1 and is the minimum for positive r (AM–GM); by symmetry the maximum for negative r is −2. Range: <b>(−∞, −2] ∪ [2, ∞)</b>. This is what fixes the excluded interval in the 2026 question."},
+
+{id:62, lec:"SB", blk:"Pattern of the Strong Box", topic:"Which root to reject",
+ q:"When a question mixes a G.P. with an A.P. and the algebra produces two roots, which root must be discarded?",
+ opts:[
+  "any root that makes a term of the G.P. zero, or that breaks a stated condition such as “increasing” or |r| &lt; 1",
+  "the larger root, always",
+  "the negative root, always",
+  "neither — both roots are always valid"],
+ ans:0,
+ why:[
+  "Correct. A G.P. cannot contain a zero term (the ratio would be undefined), and stated conditions — increasing, positive, infinite-sum — eliminate the rest. In the 2024 A.P./G.P. question d = −2 makes a term zero; in the sum-of-cubes question r = 3/2 breaks |r| &lt; 1.",
+  "Size is irrelevant. In the sum-and-product question both r = 3/2 and r = 2/3 are kept — they give the same numbers reversed.",
+  "Negative ratios are perfectly legal: 1/4, −1/2, 1, −2, … is a G.P.",
+  "Both roots are often valid (the reversed-order case), but not always — the rejections above are real and are usually where the marks sit."],
+ sol:"Reject a root only for a concrete reason: it makes a G.P. term <b>zero</b>, it contradicts a stated <b>monotonicity</b> or positivity, or it breaks <b>|r| &lt; 1</b> when an infinite sum is involved. Otherwise keep both — they usually just reverse the order."}
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter M-8B mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

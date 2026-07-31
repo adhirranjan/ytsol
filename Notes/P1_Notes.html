@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-1 Basic Mathematical Tools-I — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+  <nav class="toc">
+    <h3>Chapter P-1</h3>
+    <a class="top" href="#top">↑ Overview &amp; Key Values</a>
+    <a href="#l1">L-1 · Trigonometric Ratios</a>
+    <a href="#l2">L-2 · Coordinate Geometry</a>
+    <a href="#l3">L-3 · Conics &amp; Binomial</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD · JEE Physics · Revision Notes</p>
+      <h1>P-1 · Basic Mathematical Tools-I</h1>
+      <p>Lectures L-1 to L-3 · trigonometry, coordinate geometry, straight lines, conics, Pascal's triangle &amp; binomial approximation</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- MEMORIZE -->
+    <section class="lec" id="constants">
+      <div class="lec-head"><span class="lec-tag">★ MEMORIZE</span><h2>Standard Values &amp; Key Formulas</h2></div>
+      <h3 class="sub">Standard trigonometric values</h3>
+      <div class="twrap"><table>
+        <tr><th>Degree</th><th>0</th><th>30</th><th>37</th><th>45</th><th>53</th><th>60</th><th>90</th><th>120</th><th>135</th><th>180</th></tr>
+        <tr><td>Radian</td><td>0</td><td>π/6</td><td>37π/180</td><td>π/4</td><td>53π/180</td><td>π/3</td><td>π/2</td><td>2π/3</td><td>3π/4</td><td>π</td></tr>
+        <tr><td>sin θ</td><td>0</td><td>1/2</td><td>3/5</td><td>1/√2</td><td>4/5</td><td>√3/2</td><td>1</td><td>√3/2</td><td>1/√2</td><td>0</td></tr>
+        <tr><td>cos θ</td><td>1</td><td>√3/2</td><td>4/5</td><td>1/√2</td><td>3/5</td><td>1/2</td><td>0</td><td>−1/2</td><td>−1/√2</td><td>−1</td></tr>
+        <tr><td>tan θ</td><td>0</td><td>1/√3</td><td>3/4</td><td>1</td><td>4/3</td><td>√3</td><td>∞</td><td>−√3</td><td>−1</td><td>0</td></tr>
+      </table></div>
+      <div class="formula"><span class="lbl">degree ↔ radian</span>π radians = 180°   ·   deg→rad × π/180   ·   rad→deg × 180/π   ·   1 rad ≈ 57°</div>
+      <h3 class="sub">Coordinate geometry &amp; conics</h3>
+      <div class="twrap"><table>
+        <tr><th>Tool</th><th>Formula</th></tr>
+        <tr><td>Distance (2D)</td><td>d = √[(x₂−x₁)² + (y₂−y₁)²]</td></tr>
+        <tr><td>Distance (3D)</td><td>d = √[(x₂−x₁)² + (y₂−y₁)² + (z₂−z₁)²]</td></tr>
+        <tr><td>Section (m:n)</td><td>x = (mx₂+nx₁)/(m+n),  y = (my₂+ny₁)/(m+n)</td></tr>
+        <tr><td>Mid-point</td><td>( (x₁+x₂)/2 , (y₁+y₂)/2 )</td></tr>
+        <tr><td>Centroid</td><td>( (x₁+x₂+x₃)/3 , (y₁+y₂+y₃)/3 )</td></tr>
+        <tr><td>Slope</td><td>m = tan θ = (y₂−y₁)/(x₂−x₁)</td></tr>
+        <tr><td>Circle</td><td>x² + y² = R²  ·  Area = πR²  ·  Circumference = 2πR</td></tr>
+        <tr><td>Ellipse</td><td>x²/a² + y²/b² = 1  ·  Area = πab  ·  Circumference ≈ π√[2(a²+b²)]</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">★ Small-angle binomial</span>For |x| ≪ 1:  (1 + x)<sup>n</sup> ≈ 1 + nx — the single most-used physics approximation.</div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Basic Trigonometric Ratios</h2></div>
+      <ul>
+        <li>An <b>angle</b> is formed by two rays (sides) sharing a common end point (vertex); it measures the change in direction.</li>
+        <li>Radian measure: <span class="k">θ = arc length / radius = AB/r</span>. If r = 1, then θ = arc length AB.</li>
+        <li>An angle is in <b>standard position</b> if its vertex is at the origin and its initial ray lies along the <b>positive x-axis</b>. Counter-clockwise = positive; clockwise = negative.</li>
+      </ul>
+      <div class="formula"><span class="lbl">radian ↔ degree</span>π radians = 180°   ⇒   1° = π/180 rad (≈ 0.02 rad)   ·   1 rad ≈ 57°</div>
+      <h3 class="sub">Six trigonometric ratios (right triangle)</h3>
+      <div class="formula"><span class="lbl">T-ratios</span>sin θ = P/H   cos θ = B/H   tan θ = P/B
+cosec θ = H/P = 1/sin θ   sec θ = H/B = 1/cos θ   cot θ = B/P = 1/tan θ</div>
+      <div class="call star"><span class="h">★ CAST rule</span>Positive ratios by quadrant: <b>I</b> All · <b>II</b> only sin &amp; cosec · <b>III</b> only tan &amp; cot · <b>IV</b> only cos &amp; sec.</div>
+      <h3 class="sub">Angles greater than 90° &amp; negative angles</h3>
+      <ul>
+        <li>For (nπ ± θ): the function stays the <b>same</b>; sign from CAST.</li>
+        <li>For [(2n+1)·π/2 ± θ]: the function changes to its <b>complementary</b> (sin↔cos, tan↔cot, sec↔cosec); sign from CAST.</li>
+        <li>Negative angles: <span class="k">sin(−θ) = −sin θ</span>, cos(−θ) = cos θ, tan(−θ) = −tan θ.</li>
+      </ul>
+      <div class="det-block det">
+        <div class="dh">How to reduce any angle</div>
+        <b>Step 1:</b> find the quadrant of the angle. <b>Step 2:</b> write it as nπ ± θ (function unchanged) or (2n+1)π/2 ± θ (function becomes co-function). <b>Step 3:</b> attach the sign from CAST for that quadrant. Example: sin 150° = sin(180° − 30°) = +sin 30° = ½; cos 120° = cos(180° − 60°) = −cos 60° = −½.
+      </div>
+      <h3 class="sub">General trigonometric formulae</h3>
+      <div class="formula"><span class="lbl">identities</span>sin²θ + cos²θ = 1   ·   1 + tan²θ = sec²θ   ·   1 + cot²θ = cosec²θ</div>
+      <div class="formula"><span class="lbl">addition</span>cos(A+B) = cosA cosB − sinA sinB
+sin(A+B) = sinA cosB + cosA sinB
+tan(A+B) = (tanA + tanB)/(1 − tanA tanB)</div>
+      <div class="formula"><span class="lbl">double / half angle</span>sin2θ = 2 sinθ cosθ   ·   cos2θ = cos²θ − sin²θ = 2cos²θ − 1 = 1 − 2sin²θ
+cos²θ = (1 + cos2θ)/2   ·   sin²θ = (1 − cos2θ)/2</div>
+      <div class="formula"><span class="lbl">sine &amp; cosine rule</span>sinα/a = sinβ/b = sinγ/c   ·   c² = a² + b² − 2ab cosθ</div>
+      <div class="formula"><span class="lbl">max / min</span>−1 ≤ sinθ ≤ 1   ·   −1 ≤ cosθ ≤ 1   ·   −√(a²+b²) ≤ a cosθ + b sinθ ≤ √(a²+b²)</div>
+      <div class="formula"><span class="lbl">series expansion</span>sin x = x − x³/3! + x⁵/5! − …   ·   cos x = 1 − x²/2! + x⁴/4! − …</div>
+      <div class="call tip"><span class="h">💡 Tip</span>The range of <b>a cosθ + b sinθ</b> is ±√(a²+b²) — memorize it for "maximum/minimum value" MCQs.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Convert (i) 45° to radians, (ii) π/6 rad to degrees.</div>
+        <div class="s">(i) 45 × π/180 = π/4 rad.</div>
+        <div class="s">(ii) (π/6) × 180/π = 30°.</div>
+        <div class="ans">(i) π/4 rad   (ii) 30°</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">A circular arc is of length π cm on a circle of radius 6 cm. Find the angle it subtends at the centre in radian and degree.</div>
+        <div class="s">θ = s/r = (π cm)/(6 cm) = π/6 rad.</div>
+        <div class="s">π/6 rad × 180/π = 30°.</div>
+        <div class="ans">π/6 rad = 30°</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Find the six trigonometric ratios for a right triangle with perpendicular = 4, base = 3, hypotenuse = 5.</div>
+        <div class="s">sin θ = P/H = 4/5;  cos θ = B/H = 3/5;  tan θ = P/B = 4/3.</div>
+        <div class="s">cosec θ = 5/4;  sec θ = 5/3;  cot θ = 3/4.</div>
+        <div class="ans">sin = 4/5, cos = 3/5, tan = 4/3, cosec = 5/4, sec = 5/3, cot = 3/4</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Find the value of: (i) sin30° + cos60° (ii) tan45° − tan37° (iii) sin390° (iv) cos120° (v) tan135° (vi) sin(−150°).</div>
+        <div class="s">(i) ½ + ½ = 1. (ii) 1 − ¾ = ¼. (iii) sin(360° + 30°) = sin30° = ½.</div>
+        <div class="s">(iv) cos(180° − 60°) = −cos60° = −½. (v) tan(180° − 45°) = −tan45° = −1. (vi) −sin150° = −sin30° = −½.</div>
+        <div class="ans">(i) 1  (ii) ¼  (iii) ½  (iv) −½  (v) −1  (vi) −½</div>
+      </div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Cartesian Coordinates, Slope &amp; Straight Lines</h2></div>
+      <ul>
+        <li>A point's address is (x, y): <b>x</b> = signed distance from the y-axis, <b>y</b> = signed distance from the x-axis.</li>
+        <li>Axes split the plane into four <b>quadrants</b>, numbered I–IV going <b>anti-clockwise</b>. Signs: I (+,+), II (−,+), III (−,−), IV (+,−).</li>
+      </ul>
+      <div class="formula"><span class="lbl">distance</span>2D:  d = √[(x₂−x₁)² + (y₂−y₁)²]
+3D:  d = √[(x₂−x₁)² + (y₂−y₁)² + (z₂−z₁)²]</div>
+      <h3 class="sub">Section, mid-point &amp; centroid</h3>
+      <div class="formula"><span class="lbl">section (ratio m:n)</span>x = (mx₂ + nx₁)/(m+n)   ·   y = (my₂ + ny₁)/(m+n)</div>
+      <div class="formula"><span class="lbl">mid-point (1:1) &amp; centroid</span>M = ( (x₁+x₂)/2 , (y₁+y₂)/2 )   ·   G = ( (x₁+x₂+x₃)/3 , (y₁+y₂+y₃)/3 )</div>
+      <div class="det-block det">
+        <div class="dh">Mid-point is section with m = n = 1</div>
+        The mid-point simply divides AB in ratio 1:1, so putting m = n = 1 into the section formula gives ( (x₁+x₂)/2 , (y₁+y₂)/2 ). The centroid is the intersection of the three medians and averages all three vertices — a fact used constantly for "find the third vertex" problems.
+      </div>
+      <h3 class="sub">Slope of a straight line</h3>
+      <div class="formula"><span class="lbl">slope m</span>m = tan θ   (θ = angle with +x-axis)   ·   two-point form:  m = (y₂−y₁)/(x₂−x₁)</div>
+      <ul>
+        <li>m &gt; 0 → angle acute; m &lt; 0 → angle obtuse; m = 0 → line parallel to x-axis; m = ∞ → line ⟂ x-axis (vertical).</li>
+      </ul>
+      <div class="call trap"><span class="h">⚠ Trap</span>A line <b>parallel to the x-axis</b> has slope <b>0</b>; a <b>vertical</b> line has slope <b>∞ / not defined</b> — do not swap them.</div>
+      <h3 class="sub">Equations of a straight line</h3>
+      <div class="formula"><span class="lbl">four standard forms</span>Point-slope:  (y − y₁) = m(x − x₁)
+Two-point:  (y − y₁)/(x − x₁) = (y₂ − y₁)/(x₂ − x₁)
+Slope-intercept:  y = mx + c
+Intercept:  x/a + y/b = 1</div>
+      <div class="call tip"><span class="h">💡 Tip</span>From <b>ax + by = c</b>, solve for y to read off slope and y-intercept: e.g. 3x + 4y = 5 ⇒ y = −(3/4)x + 5/4, so m = −3/4, c = 5/4.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Calculate the distance between (i) (2, 3) &amp; (3, 4), and (ii) (−1, 0, 2) &amp; (2, 3, 5).</div>
+        <div class="s">(i) d = √[(3−2)² + (4−3)²] = √(1 + 1) = √2.</div>
+        <div class="s">(ii) d = √[(2−(−1))² + (3−0)² + (5−2)²] = √(9 + 9 + 9) = 3√3.</div>
+        <div class="ans">(i) √2   (ii) 3√3</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Find the coordinates of point P that divides the segment joining A(2, 3) and B(3, 7) in the ratio 3 : 2.</div>
+        <div class="s">x = (3×3 + 2×2)/(3+2) = 13/5;  y = (3×7 + 2×3)/(3+2) = 27/5.</div>
+        <div class="ans">P(13/5, 27/5)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">The origin is the centroid of a triangle whose two vertices are A(2, 3) and B(3, 4). Find the third vertex C.</div>
+        <div class="s">G = ( (2 + 3 + x_C)/3 , (3 + 4 + y_C)/3 ) = (0, 0).</div>
+        <div class="s">(2 + 3 + x_C)/3 = 0 ⇒ x_C = −5;  (3 + 4 + y_C)/3 = 0 ⇒ y_C = −7.</div>
+        <div class="ans">C(−5, −7)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Find the equation of the straight line passing through (−1, 3) and (3, −1).</div>
+        <div class="s">Two-point form: (y − 3)/(x − (−1)) = (−1 − 3)/(3 − (−1)) = −4/4 = −1.</div>
+        <div class="s">y − 3 = −(x + 1) ⇒ y − 3 = −x − 1.</div>
+        <div class="ans">y = −x + 2</div>
+      </div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Circle, Parabola, Ellipse, Pascal's Triangle &amp; Binomial</h2></div>
+      <h3 class="sub">Circle</h3>
+      <div class="formula"><span class="lbl">circle</span>Centre (0,0):  x² + y² = R²   ·   Centre (h,k):  (x−h)² + (y−k)² = R²
+Area = πR²   ·   Circumference = 2πR</div>
+      <h3 class="sub">Parabola</h3>
+      <ul><li>A <b>parabola</b> is the locus of a point equidistant from a fixed <b>focus</b> and a fixed line (the <b>directrix</b>): PS = PM.</li></ul>
+      <div class="twrap"><table>
+        <tr><th>Equation</th><th>Opens</th><th>Focus</th><th>Directrix</th><th>Axis</th></tr>
+        <tr><td>y² = 4ax</td><td>right</td><td>(a, 0)</td><td>x = −a</td><td>y = 0</td></tr>
+        <tr><td>y² = −4ax</td><td>left</td><td>(−a, 0)</td><td>x = a</td><td>y = 0</td></tr>
+        <tr><td>x² = 4ay</td><td>up</td><td>(0, a)</td><td>y = −a</td><td>x = 0</td></tr>
+        <tr><td>x² = −4ay</td><td>down</td><td>(0, −a)</td><td>y = a</td><td>x = 0</td></tr>
+      </table></div>
+      <div class="formula"><span class="lbl">parabola with vertex (h,k)</span>(y−k)² = ±4a(x−h)   (right/left)   ·   (x−h)² = ±4a(y−k)   (up/down)</div>
+      <h3 class="sub">Ellipse</h3>
+      <ul><li>Sum of distances from the two foci is constant: <b>F₁P + F₂P = constant = 2a</b>. Major axis = 2a, minor axis = 2b.</li></ul>
+      <div class="formula"><span class="lbl">ellipse</span>x²/a² + y²/b² = 1   ·   Area = πab   ·   Circumference ≈ π√[2(a²+b²)]</div>
+      <div class="call star"><span class="h">★ a = b ⇒ circle</span>A circle is the special case of an ellipse with equal semi-axes (a = b = R).</div>
+      <h3 class="sub">Pascal's triangle &amp; binomial expansion</h3>
+      <div class="formula"><span class="lbl">Pascal rows give (a+b)ⁿ coefficients</span>(a+b)⁴ = a⁴ + 4a³b + 6a²b² + 4ab³ + b⁴   (coeffs 1 4 6 4 1)</div>
+      <div class="formula"><span class="lbl">binomial series (|x| &lt; 1)</span>(1+x)ⁿ = 1 + nx + n(n−1)x²/2! + n(n−1)(n−2)x³/3! + …
+For |x| ≪ 1:  (1+x)ⁿ ≈ 1 + nx</div>
+      <div class="det-block det">
+        <div class="dh">Why (1+x)ⁿ ≈ 1 + nx is everywhere in physics</div>
+        When x is tiny, x², x³, … are negligible, so only the first two terms of the binomial series survive. This linearises awkward roots and reciprocals — e.g. √11 = √(9+2) = 3√(1 + 2/9) ≈ 3(1 + ½·2/9) = 3(1 + 1/9) ≈ 3.34. To use it you must first factor out so the bracket reads (1 + small).
+      </div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">A circle is centred at (0, 0) and passes through (2, 3). Find its radius, area and circumference.</div>
+        <div class="s">Radius = distance from centre to a point = √[(2−0)² + (3−0)²] = √13.</div>
+        <div class="s">Area = πR² = π(√13)² = 13π;  Circumference = 2πR = 2√13 π.</div>
+        <div class="ans">R = √13, Area = 13π, Circumference = 2√13 π</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">Generate the equation of an upward-open parabola with vertex (3, 4) passing through (4, 7).</div>
+        <div class="s">(x−h)² = 4a(y−k) with (h,k) = (3,4): (x−3)² = 4a(y−4).</div>
+        <div class="s">Put (4,7): (4−3)² = 4a(7−4) ⇒ 1 = 12a ⇒ a = 1/12.</div>
+        <div class="ans">(x − 3)² = (1/3)(y − 4)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">Find the coordinates of the vertex of the parabola y = (x² + 4)/3.</div>
+        <div class="s">3y = x² + 4 ⇒ x² = 3y − 4 = 3(y − 4/3).</div>
+        <div class="s">Compare with (x−h)² = 4a(y−k): h = 0, k = 4/3.</div>
+        <div class="ans">Vertex (0, 4/3)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">For an ellipse with a = 3 and b = 1 centred at the origin, write its equation and find its area and circumference.</div>
+        <div class="s">Equation: x²/a² + y²/b² = 1 ⇒ x²/9 + y²/1 = 1.</div>
+        <div class="s">Area = πab = π(3)(1) = 3π.  Circumference = π√[2(a²+b²)] = π√[2(9+1)] = √20 π.</div>
+        <div class="ans">x²/9 + y² = 1;  Area = 3π;  Circumference = √20 π</div>
+      </div>
+      <div class="call trap det"><span class="h">⚠ Book typo</span>The module prints the ellipse area (Example-10) as "πab = π(3)(1) = √20π". Since π(3)(1) = <b>3π</b>, the correct area is <b>3π</b> — the √20π value belongs to the <b>circumference</b>, not the area.</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">Find the approximate value of √11 using the binomial approximation (2 terms).</div>
+        <div class="s">√11 = √(9 + 2) = 3√(1 + 2/9) = 3(1 + 2/9)^(1/2).</div>
+        <div class="s">≈ 3(1 + ½·2/9) = 3(1 + 1/9) = 3 × 10/9.</div>
+        <div class="ans">≈ 3.34</div>
+      </div>
+    </section>
+
+    <div class="foot">ICAD · P-1 Basic Mathematical Tools-I · Revision Notes (L-1 to L-3) · Quick + Detailed views · worked examples taken from the module's Solved Examples.</div>
+  </div>
+</div>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

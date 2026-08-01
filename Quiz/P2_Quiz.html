@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-2 Basic Mathematical Tools-II (Calculus) — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Physics · Chapter Mastery Quiz</p>
+    <h1>P-2 · Basic Mathematical Tools-II</h1>
+    <p id="heroSub">Lectures L-1 to L-6 · 68 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter. L-1 and L-2 build differentiation, L-3 and L-4 apply it, L-5 and L-6 do the same for integration — so the six lectures pair up naturally, two at a time.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">68 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-2 Basic Mathematical Tools-II (Calculus) · mastery quiz built from lectures L-1 to L-6 (theory + solved examples) · every answer re-derived and numerically checked, not transcribed · this chapter has no Strong Box, and no errors were found in the module's worked examples.</div>
+</div>
+
+<script>
+/* ============================================================
+   P-2 BASIC MATHEMATICAL TOOLS-II (CALCULUS) — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Basic Graphs &amp; Meaning of the Derivative",
+   desc:"the four graphs to recognise, &Delta; vs d notation, the limit definition of f&prime;(x), secant &rarr; tangent, and dy/dx as the slope of the tangent"},
+  {key:"L-2", name:"L-2 · Rules for Differentiation",
+   desc:"power, constant-multiple and sum rules, the product and quotient rules with their sign traps, the chain rule, and the second derivative as acceleration"},
+  {key:"L-3", name:"L-3 · Application — Rate of Change",
+   desc:"v = dx/dt, a = dv/dt, F = dp/dt, I = dq/dt and the rest; differentiating the relation first and substituting the instant last"},
+  {key:"L-4", name:"L-4 · Maxima &amp; Minima",
+   desc:"stationary points from dy/dx = 0, the second-derivative test and why it works, horizontal tangents, and related-rate maxima problems"},
+  {key:"L-5", name:"L-5 · Antiderivatives &amp; Indefinite Integrals",
+   desc:"&int;x&#8319; dx and the n = &minus;1 exception, the sin/cos/exponential standards, term-by-term integration, substitution, and why there is only one + C"},
+  {key:"L-6", name:"L-6 · Definite Integration",
+   desc:"the fundamental theorem g(b) &minus; g(a), area as a sum of thin strips, and the average-value formula applied to SHM energy and alternating current"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (12) ---------------- */
+{id:1, lec:"L-1", blk:"Basic graphs", topic:"The graph of y = 1/x",
+ q:"The graph of y = 1/x is a rectangular hyperbola lying in",
+ opts:[
+  "the first and third quadrants",
+  "the second and fourth quadrants",
+  "the first and second quadrants",
+  "all four quadrants"],
+ ans:0,
+ why:[
+  "Correct. x and y always share a sign, since their product is +1 — positive x gives positive y, negative x gives negative y.",
+  "That would be y = −1/x, where the product xy = −1.",
+  "The second quadrant needs x negative and y positive, which would make xy negative.",
+  "The curve never crosses either axis, so it cannot enter all four quadrants."],
+ sol:"<b>y = 1/x ⇒ xy = 1</b>, so x and y always carry the same sign: quadrants <b>I and III</b>. The axes are asymptotes — the curve approaches but never touches them."},
+
+{id:2, lec:"L-1", blk:"Basic graphs", topic:"Recognising the parabola",
+ q:"The graph of y = x² is",
+ opts:[
+  "an upward parabola symmetric about the y-axis",
+  "an upward parabola symmetric about the x-axis",
+  "a straight line through the origin",
+  "an S-shaped curve through the origin"],
+ ans:0,
+ why:[
+  "Correct. Replacing x by −x leaves y unchanged, so the curve is a mirror image across the y-axis, and y is never negative.",
+  "Symmetry about the x-axis would require the curve to have two y-values for one x, which no function can.",
+  "y = x is the straight line; squaring makes the graph curve.",
+  "The S-shape belongs to y = x³, which does take negative values."],
+ sol:"The four graphs to recognise on sight: <b>y = x</b> line · <b>y = x²</b> upward parabola, symmetric about the y-axis · <b>y = x³</b> S-shaped cubic · <b>y = 1/x</b> rectangular hyperbola in quadrants I and III."},
+
+{id:3, lec:"L-1", blk:"Notation", topic:"Δ versus d",
+ q:"In calculus notation, the difference between Δy and dy is that",
+ opts:[
+  "Δy is a finite change while dy is an infinitesimally small change",
+  "Δy is small while dy is large",
+  "they mean exactly the same thing",
+  "Δy applies to time and dy to distance"],
+ ans:0,
+ why:[
+  "Correct. Δ marks a measurable, finite difference y₂ − y₁; d marks the limiting case as that difference shrinks toward zero.",
+  "It is the other way round in magnitude: dy is the vanishingly small one.",
+  "They differ precisely in the limit; a ratio Δy/Δx is a secant slope while dy/dx is a tangent slope.",
+  "Neither symbol is tied to a particular physical quantity; both apply to any variable."],
+ sol:"<b>Δy = y₂ − y₁</b> is a finite difference. <b>dy</b> is infinitesimal. The derivative is what the ratio becomes in the limit: <b>dy/dx = lim<sub>Δx→0</sub> Δy/Δx</b>."},
+
+{id:4, lec:"L-1", blk:"Definition", topic:"The limit definition",
+ q:"The derivative f′(x) is defined as",
+ opts:[
+  "lim<sub>Δx→0</sub> [f(x + Δx) − f(x)] / Δx",
+  "[f(x + Δx) − f(x)] / Δx with Δx fixed",
+  "lim<sub>Δx→0</sub> [f(x + Δx) − f(x)]",
+  "lim<sub>Δx→0</sub> Δx / [f(x + Δx) − f(x)]"],
+ ans:0,
+ why:[
+  "Correct — the ratio of the change in f to the change in x, in the limit as the interval shrinks to nothing.",
+  "With Δx fixed this is the <b>average</b> rate of change, the slope of a secant rather than a tangent.",
+  "Without dividing by Δx this limit is simply zero for any continuous function, carrying no information.",
+  "This is the reciprocal; it would be infinite wherever the true derivative is zero."],
+ sol:"<b>f′(x) = dy/dx = lim<sub>Δx→0</sub> [f(x+Δx) − f(x)]/Δx.</b> Geometrically, the secant through two nearby points becomes the tangent at one point."},
+
+{id:5, lec:"L-1", blk:"Geometric meaning", topic:"What dy/dx measures",
+ q:"At a point on a curve, dy/dx equals",
+ opts:[
+  "the slope of the tangent at that point",
+  "the slope of the secant through that point and the origin",
+  "the y-value at that point",
+  "the area under the curve up to that point"],
+ ans:0,
+ why:[
+  "Correct — this is the geometric meaning of the derivative, and the basis of reading slopes off every physics graph.",
+  "A secant slope is the <b>average</b> rate of change over an interval; the derivative is the instantaneous one.",
+  "The y-value is the function's height, not its steepness. A curve can be high and flat, or low and steep.",
+  "Area under a curve is given by the <b>integral</b>, the inverse operation."],
+ sol:"<b>dy/dx at a point = slope of the tangent there.</b> On a displacement–time graph that slope is the velocity; on a velocity–time graph it is the acceleration."},
+
+{id:6, lec:"L-1", blk:"Geometric meaning", topic:"Secant versus tangent",
+ q:"A line that cuts a curve at two points is a",
+ opts:[
+  "secant, and its slope gives the average rate of change",
+  "tangent, and its slope gives the average rate of change",
+  "secant, and its slope gives the instantaneous rate of change",
+  "tangent, and its slope gives the instantaneous rate of change"],
+ ans:0,
+ why:[
+  "Correct. Two points define an interval, and Δy/Δx across that interval is the average rate of change.",
+  "A tangent <b>touches</b> at one point rather than cutting at two.",
+  "The instantaneous rate needs the limit as the two points merge — that is what turns the secant into a tangent.",
+  "The tangent does give the instantaneous rate, but it touches at one point, not two."],
+ sol:"<b>Secant</b> — two points, slope = Δy/Δx = average rate. <b>Tangent</b> — one point, slope = dy/dx = instantaneous rate. As Δx → 0 the secant rotates into the tangent."},
+
+{id:7, lec:"L-1", blk:"Power rule", topic:"Evaluating a derivative at a point",
+ q:"If y = x⁵, the value of dy/dx at x = 2 is",
+ opts:["80","32","10","16"],
+ ans:0,
+ why:[
+  "Correct. dy/dx = 5x⁴, and at x = 2 that is 5 × 16 = 80.",
+  "32 is 2⁵, the value of <b>y</b> itself rather than of its derivative.",
+  "10 comes from 5 × 2, treating the derivative as 5x rather than 5x⁴.",
+  "16 is 2⁴, the derivative without its factor of 5."],
+ sol:"Differentiate <b>first</b>, substitute <b>after</b>: dy/dx = 5x⁴ ⇒ at x = 2, <b>5(16) = 80</b>. Substituting before differentiating turns the function into a constant, whose derivative is 0."},
+
+{id:8, lec:"L-1", blk:"Power rule", topic:"Fractional powers",
+ q:"If s = ∛t, then ds/dt is",
+ opts:[
+  "(1/3) t<sup>−2/3</sup>",
+  "3 t<sup>2/3</sup>",
+  "(1/3) t<sup>−1/3</sup>",
+  "(1/3) t<sup>2/3</sup>"],
+ ans:0,
+ why:[
+  "Correct. Write s = t^(1/3); the power rule gives (1/3)t^(1/3 − 1) = (1/3)t^(−2/3).",
+  "This inverts the fraction and raises the power instead of lowering it.",
+  "The new exponent must be 1/3 − 1 = −2/3, not −1/3.",
+  "The exponent should be reduced by 1, so a positive 2/3 is the wrong sign."],
+ sol:"<b>Convert every root to a fractional power first.</b> ∛t = t^(1/3), and d/dt(tⁿ) = n·t^(n−1) gives <b>(1/3)t^(−2/3)</b>. The rule works for any real n — fractional, negative, or both."},
+
+{id:9, lec:"L-1", blk:"Slope", topic:"Angle of a tangent",
+ q:"At a point on a curve dy = 0.4 and dx = 0.2. The angle the tangent makes with the x-axis is about",
+ opts:["63.4°","26.6°","2°","45°"],
+ ans:0,
+ why:[
+  "Correct. tan θ = dy/dx = 0.4/0.2 = 2, and tan⁻¹(2) ≈ 63.4°.",
+  "26.6° is tan⁻¹(0.5), from inverting the ratio to dx/dy.",
+  "2 is the slope itself, not an angle in degrees.",
+  "45° would require a slope of exactly 1, i.e. dy = dx."],
+ sol:"<b>slope = tan θ = dy/dx = 2</b> ⇒ θ = tan⁻¹ 2 ≈ <b>63.4°</b>. A slope above 1 always means an angle above 45°, which is a quick sanity check."},
+
+{id:10, lec:"L-1", blk:"Power rule", topic:"Term-by-term differentiation",
+ q:"If y = √x + x<sup>3/2</sup> + x⁵, then dy/dx is",
+ opts:[
+  "1/(2√x) + (3/2)√x + 5x⁴",
+  "2√x + (2/5)x<sup>5/2</sup> + x⁶/6",
+  "1/(2√x) + (2/3)√x + 5x⁴",
+  "√x + (3/2)x<sup>1/2</sup> + 5x⁴"],
+ ans:0,
+ why:[
+  "Correct. Each term uses the power rule: (1/2)x^(−1/2) = 1/(2√x), (3/2)x^(1/2) = (3/2)√x, and 5x⁴.",
+  "These are the <b>integrals</b> of the three terms, not their derivatives — the exponents have gone up instead of down.",
+  "The middle coefficient is wrong: differentiating x^(3/2) brings down 3/2, not 2/3.",
+  "The first term is undifferentiated; √x differentiates to 1/(2√x), not to itself."],
+ sol:"A sum differentiates term by term. <b>d/dx(x^(1/2)) = ½x^(−1/2) = 1/(2√x)</b> · <b>d/dx(x^(3/2)) = (3/2)x^(1/2)</b> · <b>d/dx(x⁵) = 5x⁴</b>."},
+
+{id:11, lec:"L-1", blk:"Notation", topic:"The dot notation",
+ q:"In physics the notation ẏ (“y dot”) conventionally means",
+ opts:["dy/dt, the derivative with respect to time","dy/dx","d²y/dx²","the average value of y"],
+ ans:0,
+ why:[
+  "Correct — the overdot is reserved for time derivatives, so ẋ is velocity and ẍ is acceleration.",
+  "A derivative with respect to x is written y′ or dy/dx; the dot specifically signals time.",
+  "A second derivative would carry two dots, ÿ.",
+  "Averages are written with angle brackets ⟨y⟩ or a bar, not a dot."],
+ sol:"Notations for the same thing: <b>y′, dy/dx, df/dx, D<sub>x</sub>f</b>; and <b>ẏ = dy/dt</b> specifically for time. Newton's dot is still standard in mechanics."},
+
+{id:12, lec:"L-1", blk:"Slope", topic:"Sign of the slope",
+ q:"If the tangent to a curve at a point makes an obtuse angle with the positive x-axis, then at that point",
+ opts:[
+  "dy/dx is negative",
+  "dy/dx is positive",
+  "dy/dx is zero",
+  "dy/dx is undefined"],
+ ans:0,
+ why:[
+  "Correct. An obtuse angle lies in the second quadrant where the tangent function is negative, so the slope is negative and y falls as x rises.",
+  "A positive slope corresponds to an acute angle.",
+  "Zero slope means a horizontal tangent, i.e. an angle of 0°.",
+  "The slope is undefined only for a vertical tangent, at exactly 90°."],
+ sol:"<b>Acute angle → tan θ &gt; 0 → dy/dx &gt; 0 (rising). Obtuse angle → tan θ &lt; 0 → dy/dx &lt; 0 (falling).</b>"},
+
+/* ---------------- L-2 (12) ---------------- */
+{id:13, lec:"L-2", blk:"Basic rules", topic:"Derivative of a constant",
+ q:"For any constant c, d/dx(c) equals",
+ opts:["0","c","1","cx"],
+ ans:0,
+ why:[
+  "Correct. A constant function is a horizontal line, whose slope is zero everywhere.",
+  "Returning c would mean the function grows, but a constant by definition does not change.",
+  "1 is the derivative of x, not of a constant.",
+  "cx is the <b>integral</b> of c, the inverse operation."],
+ sol:"<b>d/dx(c) = 0.</b> This is exactly why indefinite integrals carry an arbitrary <b>+ C</b> — any constant added to an antiderivative differentiates away."},
+
+{id:14, lec:"L-2", blk:"Product rule", topic:"Statement of the product rule",
+ q:"For y = uv, the derivative dy/dx equals",
+ opts:[
+  "u·v′ + v·u′",
+  "u′·v′",
+  "u·v′ − v·u′",
+  "(u′ + v′)/2"],
+ ans:0,
+ why:[
+  "Correct — each factor takes a turn being differentiated while the other is held, and the two contributions add.",
+  "The derivative of a product is <b>not</b> the product of the derivatives. Test with u = v = x: the true answer is 2x, while u′v′ = 1.",
+  "The minus sign belongs to the <b>quotient</b> rule, not the product rule.",
+  "Averaging the derivatives has no basis and fails the u = v = x test."],
+ sol:"<b>(uv)′ = u·v′ + v·u′.</b> Symmetric in u and v, and both terms are positive. Reach for it whenever two x-dependent factors are multiplied."},
+
+{id:15, lec:"L-2", blk:"Product rule", topic:"Why the naive rule fails",
+ q:"Applying the (incorrect) rule “derivative of a product = product of derivatives” to y = x·x gives 1, but the true answer is",
+ opts:["2x","x²","x","2"],
+ ans:0,
+ why:[
+  "Correct. x·x = x², whose derivative is 2x — and the product rule confirms it: x(1) + x(1) = 2x.",
+  "x² is the function itself, not its derivative.",
+  "x would be the derivative of x²/2, not of x².",
+  "2 is the <b>second</b> derivative of x²."],
+ sol:"This one-line test settles the question forever: <b>d/dx(x·x) = 2x, not 1</b>. Use <b>(uv)′ = u·v′ + v·u′</b>, which here gives x(1) + x(1) = 2x ✓"},
+
+{id:16, lec:"L-2", blk:"Quotient rule", topic:"Order of terms in the quotient rule",
+ q:"For y = u/v, the derivative is",
+ opts:[
+  "(v·u′ − u·v′)/v²",
+  "(u·v′ − v·u′)/v²",
+  "(v·u′ + u·v′)/v²",
+  "u′/v′"],
+ ans:0,
+ why:[
+  "Correct — the denominator's own derivative comes <b>second</b>, carrying the minus sign, and the whole thing sits over v².",
+  "⚠ This is the reversed order, and it gives exactly the negative of the right answer — the most common slip in this rule.",
+  "A plus sign here would be the product rule's pattern; the quotient rule genuinely subtracts.",
+  "A quotient of derivatives is no more valid than a product of them."],
+ sol:"<b>(u/v)′ = (v·u′ − u·v′)/v²</b> — “bottom times derivative of top, minus top times derivative of bottom, all over bottom squared.” The order matters: reversing it flips the sign."},
+
+{id:17, lec:"L-2", blk:"Product rule", topic:"Numerical product rule",
+ q:"For y = uv with u(2) = 3, u′(2) = −4, v(2) = 1 and v′(2) = 2, the value of y′(2) is",
+ opts:["2","10","−8","6"],
+ ans:0,
+ why:[
+  "Correct. y′ = u·v′ + v·u′ = (3)(2) + (1)(−4) = 6 − 4 = 2.",
+  "10 would come from (3)(2) + (1)(4), dropping the minus sign on u′.",
+  "−8 multiplies the derivatives together, u′v′ = (−4)(2), which is not the rule.",
+  "6 is only the first term, u·v′; the second term has been omitted."],
+ sol:"<b>y′ = u·v′ + v·u′</b> = (3)(2) + (1)(−4) = 6 − 4 = <b>2</b>. Note the cross-pairing: each function multiplies the <b>other's</b> derivative."},
+
+{id:18, lec:"L-2", blk:"Quotient rule", topic:"Applying the quotient rule",
+ q:"For y = (x² − 1)/(x² + 1), the derivative dy/dx is",
+ opts:[
+  "4x/(x² + 1)²",
+  "2x/(x² + 1)²",
+  "4x/(x² + 1)",
+  "−4x/(x² + 1)²"],
+ ans:0,
+ why:[
+  "Correct. The numerator is (x²+1)(2x) − (x²−1)(2x) = 2x[(x²+1) − (x²−1)] = 2x(2) = 4x.",
+  "2x would follow from taking the bracket difference as 1 rather than 2.",
+  "The denominator must be <b>squared</b>; that is part of the quotient rule.",
+  "The sign is wrong: since x²+1 exceeds x²−1, the bracket difference is positive."],
+ sol:"u = x²−1, v = x²+1, u′ = v′ = 2x. <b>(v·u′ − u·v′)/v² = 2x[(x²+1) − (x²−1)]/(x²+1)² = 4x/(x²+1)².</b> Factoring out the common 2x before expanding saves the whole algebra."},
+
+{id:19, lec:"L-2", blk:"Chain rule", topic:"Statement of the chain rule",
+ q:"If y is a function of u and u is a function of x, then dy/dx equals",
+ opts:[
+  "(dy/du)·(du/dx)",
+  "(dy/du) + (du/dx)",
+  "(dy/du)/(du/dx)",
+  "(du/dy)·(dx/du)"],
+ ans:0,
+ why:[
+  "Correct — the rates multiply, and the du formally cancels, which is the easiest way to remember it.",
+  "Adding rates would not preserve the units of dy/dx.",
+  "Dividing leaves du² in the denominator, so nothing cancels.",
+  "Both factors are inverted, giving dx/dy rather than dy/dx."],
+ sol:"<b>dy/dx = (dy/du)(du/dx)</b> — differentiate the outside, then multiply by the derivative of the inside. The power-chain special case is <b>d/dx(uⁿ) = n·u^(n−1)·(du/dx)</b>."},
+
+{id:20, lec:"L-2", blk:"Chain rule", topic:"Nested chain rule",
+ q:"The derivative of g(t) = tan(5 − sin 2t) is",
+ opts:[
+  "−2 cos 2t · sec²(5 − sin 2t)",
+  "sec²(5 − sin 2t)",
+  "−cos 2t · sec²(5 − sin 2t)",
+  "2 cos 2t · sec²(5 − sin 2t)"],
+ ans:0,
+ why:[
+  "Correct. The outside derivative is sec² of the bracket, and the inside derivative of (5 − sin 2t) is −2 cos 2t.",
+  "This stops after the outside derivative, forgetting to multiply by the inside one.",
+  "The factor of 2 from differentiating sin 2t is missing.",
+  "The sign is wrong: the bracket has −sin 2t, so its derivative is negative."],
+ sol:"Chain rule applied <b>twice</b>: d/dt tan(f) = sec²(f)·f′, and f = 5 − sin 2t gives f′ = −cos(2t)·2 = −2 cos 2t. Result: <b>−2 cos 2t · sec²(5 − sin 2t)</b>."},
+
+{id:21, lec:"L-2", blk:"Standard derivatives", topic:"Derivative of tan x",
+ q:"d/dx(tan x) equals",
+ opts:["sec²x","−cosec²x","sec x·tan x","cot x"],
+ ans:0,
+ why:[
+  "Correct. Applying the quotient rule to sin x / cos x gives 1/cos²x = sec²x.",
+  "−cosec²x is the derivative of <b>cot</b> x — note the minus, which every “co-” function carries.",
+  "sec x·tan x is the derivative of sec x.",
+  "cot x is a function in its own right, not the derivative of tan x."],
+ sol:"<b>(tan x)′ = sec²x · (cot x)′ = −cosec²x · (sec x)′ = sec x tan x · (cosec x)′ = −cosec x cot x.</b> Every co-function derivative carries a <b>minus sign</b> — a reliable memory hook."},
+
+{id:22, lec:"L-2", blk:"Standard derivatives", topic:"Derivatives of cos, ln and e",
+ q:"Which of these is <b>incorrect</b>?",
+ opts:[
+  "d/dx(ln x) = x",
+  "d/dx(cos x) = −sin x",
+  "d/dx(eˣ) = eˣ",
+  "d/dx(sin x) = cos x"],
+ ans:0,
+ why:[
+  "Correct — this is the false one. d/dx(ln x) = <b>1/x</b>, not x. The logarithm grows ever more slowly, so its slope must shrink.",
+  "This is right; cosine falls where sine is positive, hence the minus sign.",
+  "This is right, and it is the defining property of e — the exponential is its own derivative.",
+  "This is right, the companion of the cosine rule with no minus sign."],
+ sol:"<b>(sin x)′ = cos x · (cos x)′ = −sin x · (eˣ)′ = eˣ · (ln x)′ = 1/x.</b> The last is the source of ∫(1/x)dx = ln|x| + C, the exception to the power rule."},
+
+{id:23, lec:"L-2", blk:"Chain rule", topic:"Differentiating in degrees",
+ q:"d/dx sin(x°), with x measured in degrees, equals",
+ opts:[
+  "(π/180)·cos(x°)",
+  "cos(x°)",
+  "(180/π)·cos(x°)",
+  "(π/180)·sin(x°)"],
+ ans:0,
+ why:[
+  "Correct. Converting to radians first, sin(x°) = sin(πx/180), and the chain rule brings out the factor π/180.",
+  "This is the answer for x in radians. Calculus formulas assume radians throughout.",
+  "180/π is the reciprocal factor, which converts radians to degrees rather than the other way round.",
+  "The outside derivative of sine is cosine, not sine."],
+ sol:"⚠ <b>All calculus formulas assume radians.</b> sin(x°) = sin(πx/180), so the chain rule gives <b>(π/180)cos(x°)</b>. Forgetting this is why a calculator in degree mode silently ruins a derivative."},
+
+{id:24, lec:"L-2", blk:"Second derivative", topic:"Acceleration from position",
+ q:"A particle moves with s = t³ − 6t² + 9t (metres, seconds). Its acceleration at t = 4 s is",
+ opts:["12 m/s²","9 m/s²","33 m/s²","4 m/s²"],
+ ans:0,
+ why:[
+  "Correct. v = 3t² − 12t + 9 and a = 6t − 12, so a(4) = 24 − 12 = 12 m/s².",
+  "9 m/s² would follow from differentiating only once and substituting, but that gives velocity, not acceleration.",
+  "33 = 6(4) + 9 comes from differentiating 3t² − 12t + 9 into 6t + 9 — the constant 9 should have vanished.",
+  "4 is simply the time value, not an acceleration."],
+ sol:"Differentiate <b>twice</b>: v = ds/dt = 3t² − 12t + 9, then a = dv/dt = d²s/dt² = 6t − 12. At t = 4: <b>a = 12 m/s²</b>."},
+
+/* ---------------- L-3 (10) ---------------- */
+{id:25, lec:"L-3", blk:"Rates in physics", topic:"Velocity as a derivative",
+ q:"Velocity is defined as",
+ opts:["dx/dt","dv/dt","x/t always","dt/dx"],
+ ans:0,
+ why:[
+  "Correct — the instantaneous rate of change of position with respect to time.",
+  "dv/dt is <b>acceleration</b>, the rate of change of velocity.",
+  "x/t is the average velocity, and it equals the instantaneous value only for uniform motion.",
+  "dt/dx is the reciprocal and has units of s/m, which is not a velocity."],
+ sol:"The rate family: <b>v = dx/dt · a = dv/dt · F = dp/dt · τ = dL/dt · P = dW/dt · I = dq/dt.</b> Each is “how fast this quantity changes”, and each is a derivative."},
+
+{id:26, lec:"L-3", blk:"Rates in physics", topic:"Force as a rate",
+ q:"In its most general form, Newton's second law states that force equals",
+ opts:["dp/dt","dv/dt","dW/dt","dL/dt"],
+ ans:0,
+ why:[
+  "Correct — the rate of change of momentum, which reduces to ma only when the mass is constant.",
+  "dv/dt is acceleration; force is mass times that, so the mass factor is missing.",
+  "dW/dt is <b>power</b>, the rate of doing work.",
+  "dL/dt is <b>torque</b>, the rotational analogue of force."],
+ sol:"<b>F = dp/dt.</b> With constant m this becomes m·dv/dt = ma, but the momentum form also handles rockets and other variable-mass systems."},
+
+{id:27, lec:"L-3", blk:"Rates in physics", topic:"Current as a rate",
+ q:"Electric current I is",
+ opts:["dq/dt","dW/dt","q·t","dq/dx"],
+ ans:0,
+ why:[
+  "Correct — the rate at which charge flows past a point.",
+  "dW/dt is power, measured in watts rather than amperes.",
+  "A product of charge and time has units of coulomb-seconds, not amperes.",
+  "A derivative with respect to position gives charge per unit length, not a current."],
+ sol:"<b>I = dq/dt</b>, so conversely <b>q = ∫I dt</b>. Every “rate” quantity in physics pairs with an integral in exactly this way."},
+
+{id:28, lec:"L-3", blk:"Rate of change", topic:"Area of a circle with diameter",
+ q:"For a circle of area A = (π/4)D², the rate dA/dD at D = 10 m is",
+ opts:["5π m","10π m","25π m","π/2 m"],
+ ans:0,
+ why:[
+  "Correct. dA/dD = (π/4)(2D) = πD/2, which at D = 10 gives 5π ≈ 15.7.",
+  "10π would follow from dA/dD = πD, forgetting the factor of ½.",
+  "25π is the area of the circle at D = 10, not the rate of change.",
+  "π/2 is the coefficient of D in the derivative, without D substituted."],
+ sol:"<b>dA/dD = (π/4)·2D = πD/2</b>, and at D = 10 that is <b>5π</b>. Differentiate first, substitute last — always."},
+
+{id:29, lec:"L-3", blk:"Free fall", topic:"Distance fallen from rest",
+ q:"A body falls from rest with s = 4.9t² metres. The distance fallen in the first 2 s is",
+ opts:["19.6 m","9.8 m","4.9 m","39.2 m"],
+ ans:0,
+ why:[
+  "Correct. s(2) = 4.9 × 4 = 19.6 m.",
+  "9.8 m would follow from s = 4.9t rather than 4.9t².",
+  "4.9 m is the distance fallen in the first second.",
+  "39.2 m is twice the answer, from using t² = 8."],
+ sol:"<b>s = ½gt² = 4.9t²</b>, so s(2) = 4.9(4) = <b>19.6 m</b>. Note that the distance goes as t², so doubling the time quadruples the fall."},
+
+{id:30, lec:"L-3", blk:"Free fall", topic:"Velocity in free fall",
+ q:"For the same fall (s = 4.9t²), the velocity at t = 2 s is",
+ opts:["19.6 m/s","9.8 m/s","4.9 m/s","39.2 m/s"],
+ ans:0,
+ why:[
+  "Correct. v = ds/dt = 9.8t, so v(2) = 19.6 m/s.",
+  "9.8 m/s is the velocity after 1 s, and is also the numerical value of g.",
+  "4.9 is the coefficient in the position equation, not a velocity.",
+  "39.2 would follow from v = 19.6t, double the correct expression."],
+ sol:"<b>v = ds/dt = 9.8t</b> ⇒ v(2) = <b>19.6 m/s</b>. Curiously the distance fallen in 2 s is also 19.6 — a numerical coincidence of this particular instant, not a rule."},
+
+{id:31, lec:"L-3", blk:"Free fall", topic:"Acceleration in free fall",
+ q:"For s = 4.9t², the acceleration is",
+ opts:[
+  "9.8 m/s², constant at all times",
+  "9.8t m/s², increasing with time",
+  "4.9 m/s², constant",
+  "zero, since the body starts from rest"],
+ ans:0,
+ why:[
+  "Correct. a = d²s/dt² = 9.8, with no t remaining — free fall has constant acceleration.",
+  "9.8t is the <b>velocity</b>; differentiating once more removes the t.",
+  "4.9 is half of g, the coefficient in the position equation.",
+  "Starting from rest fixes the initial <b>velocity</b> at zero, not the acceleration — otherwise the body would never move."],
+ sol:"Differentiate twice: s = 4.9t² → v = 9.8t → <b>a = 9.8 m/s², constant</b>. The signature of constant acceleration is a position that is quadratic in t."},
+
+{id:32, lec:"L-3", blk:"Method", topic:"When to substitute the instant",
+ q:"In a rate-of-change problem, the given instant (such as “when D = 10”) should be substituted",
+ opts:[
+  "after differentiating the relation",
+  "before differentiating the relation",
+  "at whichever stage is more convenient",
+  "into the second derivative only"],
+ ans:0,
+ why:[
+  "Correct. The relation must be differentiated as a general function first; only then does substituting the instant give the rate at that instant.",
+  "⚠ Substituting first turns the relation into a <b>constant</b>, whose derivative is zero — the answer collapses to 0 every time.",
+  "The two orders give genuinely different answers, so it is not a matter of convenience.",
+  "The second derivative is a separate quantity and does not affect when to substitute."],
+ sol:"<b>Differentiate, then substitute.</b> If you put D = 10 into A = (π/4)D² first, you get the constant 25π, and d/dD(25π) = 0 — plainly wrong."},
+
+{id:33, lec:"L-3", blk:"Rates in physics", topic:"Power as a rate",
+ q:"Power is the rate of change of",
+ opts:["work with respect to time","force with respect to time","momentum with respect to time","work with respect to distance"],
+ ans:0,
+ why:[
+  "Correct. P = dW/dt, measured in joules per second, i.e. watts.",
+  "The rate of change of force has no standard name and is not power.",
+  "dp/dt is force, not power.",
+  "dW/dx is force, since work is force times distance."],
+ sol:"<b>P = dW/dt.</b> Note the neighbouring relation <b>F = dW/dx</b> — the same quantity W differentiated with respect to a different variable gives a completely different physical quantity."},
+
+{id:34, lec:"L-3", blk:"Rates in physics", topic:"Torque as a rate",
+ q:"Torque τ is the rate of change of",
+ opts:["angular momentum","linear momentum","angular velocity","moment of inertia"],
+ ans:0,
+ why:[
+  "Correct. τ = dL/dt, the exact rotational analogue of F = dp/dt.",
+  "The rate of change of linear momentum is force, not torque.",
+  "The rate of change of angular velocity is angular <b>acceleration</b>; torque is I times that.",
+  "Moment of inertia is a property of the body's mass distribution, and is usually constant."],
+ sol:"<b>τ = dL/dt</b>, mirroring <b>F = dp/dt</b>. The whole rotational toolkit is built by this substitution: x → θ, v → ω, m → I, F → τ, p → L."},
+
+/* ---------------- L-4 (11) ---------------- */
+{id:35, lec:"L-4", blk:"Stationary points", topic:"Condition for an extremum",
+ q:"At a maximum or a minimum of a smooth curve,",
+ opts:[
+  "dy/dx = 0",
+  "d²y/dx² = 0",
+  "y = 0",
+  "dy/dx is undefined"],
+ ans:0,
+ why:[
+  "Correct. The tangent is horizontal at a turning point, so the slope vanishes — this defines a stationary point.",
+  "A vanishing second derivative signals a possible point of <b>inflection</b>, not an extremum.",
+  "The function's value at an extremum can be anything at all; it need not be zero.",
+  "An undefined derivative means a cusp or a vertical tangent, not a smooth turning point."],
+ sol:"<b>dy/dx = 0</b> locates the stationary point; the <b>second derivative</b> then classifies it. Both steps are needed."},
+
+{id:36, lec:"L-4", blk:"Second-derivative test", topic:"Condition for a maximum",
+ q:"A stationary point of y = f(x) is a <b>maximum</b> if",
+ opts:[
+  "d²y/dx² &lt; 0 there",
+  "d²y/dx² &gt; 0 there",
+  "d²y/dx² = 0 there",
+  "dy/dx &gt; 0 there"],
+ ans:0,
+ why:[
+  "Correct. Approaching a maximum the slope goes positive → 0 → negative, so it is <b>decreasing</b>, which means a negative second derivative.",
+  "A positive second derivative means the slope is increasing, which is the signature of a <b>minimum</b>.",
+  "A zero second derivative is inconclusive and needs a further test.",
+  "At any stationary point dy/dx is zero, so it cannot also be positive."],
+ sol:"<b>Max: dy/dx = 0 and d²y/dx² &lt; 0. Min: dy/dx = 0 and d²y/dx² &gt; 0.</b> Memory hook: a maximum is a frown (curving down, negative), a minimum is a smile (curving up, positive)."},
+
+{id:37, lec:"L-4", blk:"Second-derivative test", topic:"Why the test works",
+ q:"The second-derivative test works because near a minimum the slope",
+ opts:[
+  "goes from negative to zero to positive, so it is increasing",
+  "goes from positive to zero to negative, so it is decreasing",
+  "stays constant",
+  "is always positive"],
+ ans:0,
+ why:[
+  "Correct. An increasing slope is precisely what d²y/dx² &gt; 0 means, which is why that is the test for a minimum.",
+  "That pattern describes a <b>maximum</b>, where the slope decreases through zero.",
+  "A constant slope would make the graph a straight line, with no turning point at all.",
+  "The slope is negative on the way down to a minimum; it is only positive afterwards."],
+ sol:"The second derivative is <b>the rate of change of the slope</b>. Rising slope (−, 0, +) ⇒ d²y/dx² &gt; 0 ⇒ minimum. Falling slope (+, 0, −) ⇒ d²y/dx² &lt; 0 ⇒ maximum."},
+
+{id:38, lec:"L-4", blk:"Traps", topic:"What dy/dx = 0 alone tells you",
+ q:"Finding that dy/dx = 0 at some point tells you",
+ opts:[
+  "only that the point is stationary — it could be a maximum, a minimum or an inflection",
+  "that the point is definitely a maximum",
+  "that the point is definitely a minimum",
+  "that the function is constant there"],
+ ans:0,
+ why:[
+  "Correct. All three possibilities produce a horizontal tangent, so a further test is always required.",
+  "Nothing in dy/dx = 0 distinguishes a peak from a valley.",
+  "The same objection applies in reverse.",
+  "y = x³ has dy/dx = 0 at the origin yet is not constant anywhere — it is a point of inflection."],
+ sol:"⚠ <b>dy/dx = 0 only locates the point.</b> Check the sign of d²y/dx², or let the physics of the situation decide. The classic counterexample is y = x³ at x = 0, where both derivatives vanish and the point is neither a max nor a min."},
+
+{id:39, lec:"L-4", blk:"Worked minima", topic:"Minimum of a quadratic",
+ q:"The minimum value of y = 1 + x² − 2x is",
+ opts:["0, at x = 1","1, at x = 0","−1, at x = 1","2, at x = 1"],
+ ans:0,
+ why:[
+  "Correct. dy/dx = 2x − 2 = 0 gives x = 1, and y(1) = 1 + 1 − 2 = 0. Since d²y/dx² = 2 &gt; 0, it is a minimum.",
+  "y(0) = 1, but x = 0 is not a stationary point — the derivative there is −2.",
+  "−1 is not attainable: the expression is (x − 1)², which is never negative.",
+  "2 is the value at x = 0 or x = 2, both of which lie above the minimum."],
+ sol:"dy/dx = 2x − 2 = 0 ⇒ <b>x = 1</b>; d²y/dx² = 2 &gt; 0 ⇒ minimum; <b>y<sub>min</sub> = 0</b>. Confirm by completing the square: y = (x − 1)², which is obviously least at x = 1."},
+
+{id:40, lec:"L-4", blk:"Horizontal tangents", topic:"Finding all stationary points",
+ q:"The curve y = x⁴ − 2x² + 2 has horizontal tangents at",
+ opts:[
+  "x = 0, 1 and −1",
+  "x = 0 only",
+  "x = 1 and −1 only",
+  "x = 2 and −2"],
+ ans:0,
+ why:[
+  "Correct. dy/dx = 4x³ − 4x = 4x(x² − 1) = 0 gives all three roots.",
+  "This keeps only the factor x and discards x² − 1 = 0.",
+  "This discards the root x = 0, which comes from the factor 4x.",
+  "x = ±2 are not roots: 4(2)³ − 4(2) = 32 − 8 = 24 ≠ 0."],
+ sol:"Factor rather than expand: dy/dx = 4x³ − 4x = <b>4x(x−1)(x+1)</b> = 0 ⇒ <b>x = 0, 1, −1</b>, with points (0, 2), (1, 1) and (−1, 1). A quartic can have up to three stationary points."},
+
+{id:41, lec:"L-4", blk:"Worked maxima", topic:"Maximum of a downward parabola",
+ q:"The maximum value of y = 4x − x² is",
+ opts:["4, at x = 2","2, at x = 2","4, at x = 4","0, at x = 0"],
+ ans:0,
+ why:[
+  "Correct. dy/dx = 4 − 2x = 0 gives x = 2, and y(2) = 8 − 4 = 4. Since d²y/dx² = −2 &lt; 0, it is a maximum.",
+  "2 is the value of x at the turning point, not the value of y there.",
+  "x = 4 is where the curve returns to zero, not where it peaks.",
+  "y(0) = 0 is a root of the curve, not its highest point."],
+ sol:"dy/dx = 4 − 2x = 0 ⇒ <b>x = 2</b>; d²y/dx² = −2 &lt; 0 ⇒ maximum; <b>y<sub>max</sub> = 4</b>. The negative x² coefficient guarantees a downward parabola, so a maximum was expected."},
+
+{id:42, lec:"L-4", blk:"Related rates", topic:"The rising balloon",
+ q:"A balloon rises vertically, tracked from a point 500 ft away. When the elevation angle is π/4 and increasing at 0.14 rad/min, the balloon is rising at",
+ opts:["140 ft/min","70 ft/min","280 ft/min","500 ft/min"],
+ ans:0,
+ why:[
+  "Correct. y = 500 tan θ, so dy/dt = 500 sec²θ·dθ/dt = 500(2)(0.14) = 140 ft/min.",
+  "70 ft/min omits the sec²θ factor, treating sec²(π/4) as 1 rather than 2.",
+  "280 uses sec²θ = 4, but sec(π/4) = √2, so its square is 2, not 4.",
+  "500 is the horizontal distance in feet, not a rate."],
+ sol:"Set up the relation, then differentiate: <b>y = 500 tan θ ⇒ dy/dt = 500 sec²θ · dθ/dt.</b> At θ = π/4, sec²θ = (√2)² = <b>2</b>, giving 500 × 2 × 0.14 = <b>140 ft/min</b>."},
+
+{id:43, lec:"L-4", blk:"Related rates", topic:"Filling a cylinder",
+ q:"Water pours at a volume rate Q into a cylindrical vessel of radius r. The water level rises at",
+ opts:["Q/(πr²)","Qπr²","Q/(2πr)","Q/r"],
+ ans:0,
+ why:[
+  "Correct. V = πr²h, so dV/dt = πr²·dh/dt, and setting dV/dt = Q gives dh/dt = Q/(πr²).",
+  "Multiplying would make a wider vessel fill faster, which is backwards.",
+  "2πr is the circumference; the level depends on the cross-sectional <b>area</b>.",
+  "Dividing by r alone gets the units wrong and misses the π and the square."],
+ sol:"<b>V = πr²h</b> with r constant ⇒ dV/dt = πr²(dh/dt) ⇒ <b>dh/dt = Q/(πr²)</b>. Sensible: a wider vessel fills more slowly, and the r² makes that effect strong."},
+
+{id:44, lec:"L-4", blk:"Second-derivative test", topic:"When the test can be skipped",
+ q:"The second-derivative test may reasonably be skipped when",
+ opts:[
+  "the physical situation already makes clear whether the quantity is a maximum or a minimum",
+  "the first derivative is zero",
+  "the function is a polynomial",
+  "the stationary point is at the origin"],
+ ans:0,
+ why:[
+  "Correct. If you are minimising a length or maximising a range, the context settles which it must be, and the algebra only confirms it.",
+  "A vanishing first derivative is the condition for a stationary point in the first place, and says nothing about its type.",
+  "Polynomials have maxima and minima just like any other function.",
+  "The location of the point is irrelevant to whether it is a peak or a valley."],
+ sol:"<b>dy/dx = 0</b> is never optional. The <b>classification</b> can come either from d²y/dx² or from physical reasoning — but one of the two is always needed."},
+
+{id:45, lec:"L-4", blk:"Second-derivative test", topic:"Reading a second derivative",
+ q:"For y = x³ − 3x, the point x = 1 is",
+ opts:[
+  "a minimum, since d²y/dx² = 6 &gt; 0 there",
+  "a maximum, since d²y/dx² = 6 &gt; 0 there",
+  "a maximum, since dy/dx = 0 there",
+  "a point of inflection"],
+ ans:0,
+ why:[
+  "Correct. dy/dx = 3x² − 3 vanishes at x = ±1, and d²y/dx² = 6x is +6 at x = 1, so that root is a minimum.",
+  "A positive second derivative means a minimum, not a maximum — the two are being read backwards.",
+  "dy/dx = 0 only makes it stationary; the classification needs the second derivative. In fact x = −1 is the maximum here.",
+  "An inflection would need d²y/dx² = 0, which happens at x = 0, not at x = 1."],
+ sol:"dy/dx = 3x² − 3 = 0 ⇒ x = ±1. d²y/dx² = 6x, so <b>x = 1 gives +6 (minimum)</b> and <b>x = −1 gives −6 (maximum)</b>. A cubic with two stationary points always has one of each."},
+
+/* ---------------- L-5 (12) ---------------- */
+{id:46, lec:"L-5", blk:"Definition", topic:"What an antiderivative is",
+ q:"F(x) is an antiderivative of f(x) if",
+ opts:["F′(x) = f(x)","f′(x) = F(x)","F(x) = f(x)","F(x)·f(x) = 1"],
+ ans:0,
+ why:[
+  "Correct — differentiating F must return f, which is exactly what makes integration the reverse of differentiation.",
+  "This has the roles swapped; it would make f the antiderivative of F.",
+  "Equality would mean the function is its own antiderivative, true only for eˣ (up to a constant).",
+  "A product of 1 describes reciprocals, an unrelated relationship."],
+ sol:"<b>F′(x) = f(x) ⇔ ∫f(x)dx = F(x) + C.</b> Every integral can be checked by differentiating the answer — the fastest verification there is."},
+
+{id:47, lec:"L-5", blk:"The constant", topic:"Why + C appears",
+ q:"Indefinite integrals carry an arbitrary constant + C because",
+ opts:[
+  "the derivative of any constant is zero, so infinitely many functions share the same derivative",
+  "integration is only approximate",
+  "the constant makes the units correct",
+  "it accounts for rounding error"],
+ ans:0,
+ why:[
+  "Correct. x², x² + 1 and x² − π all differentiate to 2x, so the antiderivative of 2x must be the whole family x² + C.",
+  "Integration is exact; the constant reflects genuine non-uniqueness, not imprecision.",
+  "C carries the same units as the integral, but that is a consequence rather than the reason.",
+  "Rounding has nothing to do with it; C is present even in perfectly exact symbolic work."],
+ sol:"Since <b>d/dx(constant) = 0</b>, antiderivatives are unique only up to an additive constant. In physics that constant is fixed by an <b>initial condition</b> — the position at t = 0, say."},
+
+{id:48, lec:"L-5", blk:"The constant", topic:"How many constants",
+ q:"When ∫(x² − 2x + 5)dx is done term by term, the number of arbitrary constants in the final answer is",
+ opts:["one","three","two","none"],
+ ans:0,
+ why:[
+  "Correct. The separate constants C₁, C₂ and C₃ are themselves arbitrary, so their sum is a single arbitrary constant C.",
+  "Writing three constants is not wrong, but they collapse into one and carrying them separately is pointless.",
+  "Two is neither the term count nor the simplified total.",
+  "An indefinite integral always carries a constant; only a <b>definite</b> integral does not."],
+ sol:"<b>∫(x² − 2x + 5)dx = x³/3 − x² + 5x + C</b> — a single C. The sum of several arbitrary constants is just one arbitrary constant."},
+
+{id:49, lec:"L-5", blk:"Power rule", topic:"The integration power rule",
+ q:"For n ≠ −1, ∫xⁿ dx equals",
+ opts:[
+  "x<sup>n+1</sup>/(n+1) + C",
+  "n·x<sup>n−1</sup> + C",
+  "x<sup>n−1</sup>/(n−1) + C",
+  "xⁿ/n + C"],
+ ans:0,
+ why:[
+  "Correct — raise the power by one and divide by the new power, the exact reverse of differentiating.",
+  "That is the <b>derivative</b> of xⁿ; integration moves the exponent the other way.",
+  "The exponent must increase, not decrease.",
+  "The divisor must be the <b>new</b> exponent n+1, not the old one."],
+ sol:"<b>∫xⁿ dx = x^(n+1)/(n+1) + C.</b> Check by differentiating: (n+1)x^n/(n+1) = xⁿ ✓ The division by (n+1) is exactly why n = −1 has to be excluded."},
+
+{id:50, lec:"L-5", blk:"Power rule", topic:"The n = −1 exception",
+ q:"∫(1/x) dx equals",
+ opts:["ln|x| + C","x⁰/0 + C","x²/2 + C","1/x² + C"],
+ ans:0,
+ why:[
+  "Correct. The power rule would divide by n+1 = 0, so this case needs the logarithm instead.",
+  "This is what the power rule formally produces — division by zero, which is undefined.",
+  "x²/2 is the integral of x, not of 1/x.",
+  "1/x² is closer to the <b>derivative</b> of 1/x, which is −1/x²."],
+ sol:"⚠ <b>The power rule fails at n = −1.</b> Instead <b>∫x⁻¹dx = ln|x| + C</b> — the modulus matters, since 1/x is defined for negative x too."},
+
+{id:51, lec:"L-5", blk:"Standard integrals", topic:"Integrating a power",
+ q:"∫x⁵ dx equals",
+ opts:["x⁶/6 + C","5x⁴ + C","x⁶ + C","x⁴/4 + C"],
+ ans:0,
+ why:[
+  "Correct. Raise 5 to 6 and divide by 6.",
+  "5x⁴ is the <b>derivative</b> of x⁵, moving the exponent the wrong way.",
+  "The division by the new exponent has been omitted.",
+  "This lowers the exponent instead of raising it."],
+ sol:"<b>∫x⁵dx = x⁶/6 + C.</b> Verify by differentiating: 6x⁵/6 = x⁵ ✓"},
+
+{id:52, lec:"L-5", blk:"Standard integrals", topic:"Integrating a reciprocal root",
+ q:"∫(1/√x) dx equals",
+ opts:["2√x + C","√x/2 + C","−1/(2x<sup>3/2</sup>) + C","ln√x + C"],
+ ans:0,
+ why:[
+  "Correct. 1/√x = x^(−1/2), which integrates to x^(1/2)/(1/2) = 2√x.",
+  "This divides by 2 instead of multiplying, inverting the 1/2 in the wrong direction.",
+  "This is the <b>derivative</b> of 1/√x, not its integral.",
+  "The logarithm is only for n = −1, and here n = −1/2."],
+ sol:"Convert to a power first: <b>∫x^(−1/2)dx = x^(1/2)/(1/2) = 2√x + C.</b> Dividing by ½ means multiplying by 2 — a step often fumbled."},
+
+{id:53, lec:"L-5", blk:"Trigonometric integrals", topic:"Integrating sin 2x",
+ q:"∫sin 2x dx equals",
+ opts:[
+  "−cos 2x / 2 + C",
+  "−cos 2x + C",
+  "−2 cos 2x + C",
+  "cos 2x / 2 + C"],
+ ans:0,
+ why:[
+  "Correct. ∫sin(Ax+B)dx = −cos(Ax+B)/A, and here A = 2.",
+  "This omits the division by A = 2; differentiating it back gives 2 sin 2x, not sin 2x.",
+  "This multiplies by 2 instead of dividing by it.",
+  "The sign is wrong: the integral of sine is <b>minus</b> cosine."],
+ sol:"<b>∫sin(Ax+B)dx = −cos(Ax+B)/A + C</b> and <b>∫cos(kx)dx = sin(kx)/k + C.</b> The inner coefficient always appears in the <b>denominator</b> — the reverse of the chain rule, which puts it in the numerator."},
+
+{id:54, lec:"L-5", blk:"Trigonometric integrals", topic:"Integrating cos(x/2)",
+ q:"∫cos(x/2) dx equals",
+ opts:[
+  "2 sin(x/2) + C",
+  "sin(x/2)/2 + C",
+  "sin(x/2) + C",
+  "−2 sin(x/2) + C"],
+ ans:0,
+ why:[
+  "Correct. With k = ½, dividing by k means multiplying by 2.",
+  "This divides by 2 again instead of dividing by ½.",
+  "This omits the coefficient entirely; differentiating it gives ½cos(x/2).",
+  "The sign is wrong: the integral of cosine is <b>plus</b> sine."],
+ sol:"<b>∫cos(kx)dx = sin(kx)/k + C</b> with k = ½ gives sin(x/2)/(½) = <b>2 sin(x/2) + C</b>. A fractional inner coefficient makes the answer <b>larger</b>, which is worth pausing over."},
+
+{id:55, lec:"L-5", blk:"Term by term", topic:"Integrating a polynomial",
+ q:"∫(x² − 2x + 5) dx equals",
+ opts:[
+  "x³/3 − x² + 5x + C",
+  "x³/3 − 2x² + 5x + C",
+  "2x − 2 + C",
+  "x³ − x² + 5x + C"],
+ ans:0,
+ why:[
+  "Correct. Each term integrates separately: x³/3, then −2x²/2 = −x², then 5x.",
+  "The middle term is wrong: ∫2x dx = x², not 2x².",
+  "This is the <b>derivative</b> of the integrand, not its integral.",
+  "The first term needs dividing by 3."],
+ sol:"Integrate term by term: <b>x³/3 − x² + 5x + C</b>. Check by differentiating: x² − 2x + 5 ✓"},
+
+{id:56, lec:"L-5", blk:"Substitution", topic:"Integration by substitution",
+ q:"∫3x/(1 + 9x²) dx equals",
+ opts:[
+  "(1/6) ln|1 + 9x²| + C",
+  "(1/3) ln|1 + 9x²| + C",
+  "3 ln|1 + 9x²| + C",
+  "(1/18) ln|1 + 9x²| + C"],
+ ans:0,
+ why:[
+  "Correct. With u = 1 + 9x², du = 18x dx, so 3x dx = du/6 and the integral becomes (1/6)∫du/u.",
+  "1/3 would follow if du were 9x dx; the derivative of 9x² is 18x.",
+  "This multiplies by 3 instead of dividing, getting the substitution factor upside down.",
+  "1/18 forgets that the numerator already supplies a factor of 3."],
+ sol:"Substitute <b>u = 1 + 9x²</b> ⇒ du = 18x dx ⇒ <b>3x dx = du/6</b>. Then (1/6)∫(1/u)du = <b>(1/6)ln|1 + 9x²| + C</b>. Look for a numerator that is proportional to the denominator's derivative — that is the signal for this substitution."},
+
+{id:57, lec:"L-5", blk:"Substitution", topic:"Substitution with a root",
+ q:"∫√(1 + y²)·2y dy equals",
+ opts:[
+  "(2/3)(1 + y²)<sup>3/2</sup> + C",
+  "(3/2)(1 + y²)<sup>3/2</sup> + C",
+  "(1 + y²)<sup>3/2</sup> + C",
+  "(2/3)(1 + y²)<sup>1/2</sup> + C"],
+ ans:0,
+ why:[
+  "Correct. With u = 1 + y², du = 2y dy, so the integral is ∫u^(1/2)du = u^(3/2)/(3/2) = (2/3)u^(3/2).",
+  "3/2 is the new exponent, and the coefficient is its <b>reciprocal</b>.",
+  "The division by 3/2 has been skipped entirely.",
+  "The exponent should rise to 3/2 on integration, not stay at 1/2."],
+ sol:"<b>u = 1 + y²</b> ⇒ du = 2y dy, which the integrand supplies exactly. ∫u^(1/2)du = u^(3/2)/(3/2) = <b>(2/3)(1+y²)^(3/2) + C</b>."},
+
+/* ---------------- L-6 (11) ---------------- */
+{id:58, lec:"L-6", blk:"Fundamental theorem", topic:"Evaluating a definite integral",
+ q:"If g′(x) = f(x), then ∫<sub>a</sub><sup>b</sup> f(x) dx equals",
+ opts:["g(b) − g(a)","g(a) − g(b)","g(b) + g(a)","g(b − a)"],
+ ans:0,
+ why:[
+  "Correct — evaluate the antiderivative at the upper limit and subtract its value at the lower limit.",
+  "This is the negative of the answer; the limits have been reversed.",
+  "The two values are subtracted, not added; adding would double-count the antiderivative's baseline.",
+  "The function is evaluated at each limit separately, not at their difference."],
+ sol:"<b>∫<sub>a</sub><sup>b</sup>f(x)dx = [g(x)]<sub>a</sub><sup>b</sup> = g(b) − g(a)</b> — the fundamental theorem of calculus. Upper minus lower, always."},
+
+{id:59, lec:"L-6", blk:"Fundamental theorem", topic:"Why no constant appears",
+ q:"A definite integral carries no “+ C” because",
+ opts:[
+  "the constant cancels when the two limits are subtracted",
+  "the constant is always zero",
+  "definite integrals are approximations",
+  "the constant is absorbed into the limits"],
+ ans:0,
+ why:[
+  "Correct. [g(b) + C] − [g(a) + C] = g(b) − g(a), and C drops out whatever its value.",
+  "C is arbitrary, not zero; it simply has no effect on the difference.",
+  "Definite integrals are exact numbers, not approximations.",
+  "The limits are values of x and have nothing to absorb."],
+ sol:"<b>A definite integral is a number; an indefinite one is a family of functions.</b> The arbitrary constant cancels in the subtraction, which is why the answer is unambiguous."},
+
+{id:60, lec:"L-6", blk:"Area", topic:"Geometric meaning",
+ q:"For f(x) ≥ 0 on [a, b], the definite integral ∫<sub>a</sub><sup>b</sup> f(x) dx gives",
+ opts:[
+  "the area between the curve and the x-axis over [a, b]",
+  "the slope of the curve at x = b",
+  "the length of the curve from a to b",
+  "the average value of f over [a, b]"],
+ ans:0,
+ why:[
+  "Correct. Summing thin strips of area f(x)dx from a to b builds up the whole region.",
+  "Slope is the <b>derivative</b>, the inverse operation.",
+  "Arc length needs a different integral, ∫√(1 + (f′)²)dx.",
+  "The average value is this integral <b>divided by</b> the interval width (b − a)."],
+ sol:"Each strip has area <b>dA = f(x)dx</b>; the integral sums them. This is the geometric picture behind “area under a v–t graph = displacement” and every other such result in physics."},
+
+{id:61, lec:"L-6", blk:"Calculations", topic:"Integral of a constant",
+ q:"∫<sub>−1</sub><sup>4</sup> 3 dx equals",
+ opts:["15","12","3","5"],
+ ans:0,
+ why:[
+  "Correct. 3[x]<sub>−1</sub><sup>4</sup> = 3(4 − (−1)) = 3 × 5 = 15.",
+  "12 uses 3 × 4, forgetting that the lower limit is −1 and not 0.",
+  "3 is the integrand, not the integral.",
+  "5 is the width of the interval; it still has to be multiplied by the height 3."],
+ sol:"<b>∫<sub>a</sub><sup>b</sup>k dx = k(b − a)</b> — geometrically the area of a rectangle. Here 3 × 5 = <b>15</b>. ⚠ Subtracting a negative lower limit <b>adds</b>; that is the whole trap."},
+
+{id:62, lec:"L-6", blk:"Calculations", topic:"A definite trigonometric integral",
+ q:"∫<sub>0</sub><sup>π/2</sup> sin x dx equals",
+ opts:["1","0","−1","π/2"],
+ ans:0,
+ why:[
+  "Correct. [−cos x]<sub>0</sub><sup>π/2</sup> = −cos(π/2) + cos 0 = 0 + 1 = 1.",
+  "0 would follow from dropping the cos 0 = 1 term at the lower limit.",
+  "−1 has the subtraction the wrong way round.",
+  "π/2 is the upper limit, not the value of the integral."],
+ sol:"[−cos x]<sub>0</sub><sup>π/2</sup> = (−cos π/2) − (−cos 0) = 0 + 1 = <b>1</b>. Sanity check: sin x is positive on this interval, so a positive area was expected."},
+
+{id:63, lec:"L-6", blk:"Area", topic:"Area under a straight line",
+ q:"The area under the curve y = x from x = 0 to x = a is",
+ opts:["a²/2","a²","2a","a"],
+ ans:0,
+ why:[
+  "Correct. ∫<sub>0</sub><sup>a</sup>x dx = [x²/2]<sub>0</sub><sup>a</sup> = a²/2 — which is also the area of a triangle with base a and height a.",
+  "a² is the area of the whole square, twice the triangle.",
+  "2a has the wrong dimensions for an area under a linear graph.",
+  "a is the base length, not the area."],
+ sol:"<b>∫<sub>0</sub><sup>a</sup>x dx = a²/2.</b> Cross-check geometrically: the region is a right triangle with base a and height a, so ½ × a × a ✓ Whenever the graph is a straight line, geometry checks the calculus."},
+
+{id:64, lec:"L-6", blk:"Calculations", topic:"Integrating a square",
+ q:"∫<sub>0</sub><sup>2</sup> x² dx equals",
+ opts:["8/3","4","8","2/3"],
+ ans:0,
+ why:[
+  "Correct. [x³/3]<sub>0</sub><sup>2</sup> = 8/3 ≈ 2.67.",
+  "4 is the value of x² at x = 2, not the area beneath the curve.",
+  "8 forgets to divide by the new exponent 3.",
+  "2/3 uses x³/3 with x = 2 as if 2³ were 2."],
+ sol:"<b>[x³/3]<sub>0</sub><sup>2</sup> = 8/3 − 0 = 8/3.</b> Sanity check: the curve stays below y = 4 over a width of 2, so the area must be under 8 — and 2.67 duly is."},
+
+{id:65, lec:"L-6", blk:"Average value", topic:"The average-value formula",
+ q:"The average value of f(x) over the interval [x₁, x₂] is",
+ opts:[
+  "(∫<sub>x₁</sub><sup>x₂</sup> f dx) / (∫<sub>x₁</sub><sup>x₂</sup> dx)",
+  "∫<sub>x₁</sub><sup>x₂</sup> f dx",
+  "[f(x₁) + f(x₂)]/2",
+  "(∫<sub>x₁</sub><sup>x₂</sup> dx) / (∫<sub>x₁</sub><sup>x₂</sup> f dx)"],
+ ans:0,
+ why:[
+  "Correct — total divided by the range over which it is spread, since the denominator evaluates to (x₂ − x₁).",
+  "The bare integral is the total, not the average; it still has to be divided by the interval width.",
+  "Averaging the two endpoint values is exact only for a straight line and wrong for any curve.",
+  "This is the reciprocal of the correct expression."],
+ sol:"<b>⟨f⟩ = (∫f dx)/(∫dx) = (1/(x₂−x₁))∫<sub>x₁</sub><sup>x₂</sup>f dx.</b> Writing the denominator as an integral rather than as (x₂ − x₁) makes the pattern easier to reuse when the variable of integration changes."},
+
+{id:66, lec:"L-6", blk:"Average value", topic:"Average kinetic energy in SHM",
+ q:"For SHM the kinetic energy is K = ½mω²(a² − x²). Its average value from x = 0 to x = a is",
+ opts:[
+  "(1/3) mω²a²",
+  "(1/2) mω²a²",
+  "(1/6) mω²a²",
+  "(2/3) mω²a²"],
+ ans:0,
+ why:[
+  "Correct. ∫<sub>0</sub><sup>a</sup>(a² − x²)dx = a³ − a³/3 = 2a³/3, so ⟨K⟩ = ½mω²(2a³/3)/a = mω²a²/3.",
+  "½mω²a² is the <b>maximum</b> kinetic energy, at x = 0; the average must be smaller.",
+  "1/6 halves the correct answer, from forgetting to divide by a at the end.",
+  "2/3 keeps the 2a³/3 factor but drops the ½ from the energy expression."],
+ sol:"Numerator: ½mω²[a²x − x³/3]<sub>0</sub><sup>a</sup> = ½mω²(2a³/3) = mω²a³/3. Denominator: ∫<sub>0</sub><sup>a</sup>dx = a. <b>⟨K⟩ = mω²a²/3</b> — two-thirds of the maximum value ½mω²a²."},
+
+{id:67, lec:"L-6", blk:"Average value", topic:"Average of an alternating current",
+ q:"The average value of I = I₀ sin ωt over the interval [0, π/ω] is",
+ opts:["2I₀/π","I₀/2","I₀/√2","zero"],
+ ans:0,
+ why:[
+  "Correct. The integral is 2I₀/ω and the interval width is π/ω, so the average is 2I₀/π ≈ 0.637 I₀.",
+  "I₀/2 would be the average of a triangular waveform, not a sinusoidal half-cycle.",
+  "I₀/√2 ≈ 0.707 I₀ is the <b>rms</b> value, a different average taken over the square.",
+  "The average is zero over a <b>full</b> cycle, where the negative half cancels the positive — but this interval is only half a cycle."],
+ sol:"∫<sub>0</sub><sup>π/ω</sup>I₀ sin ωt dt = (I₀/ω)[−cos ωt] = (I₀/ω)(1 + 1) = 2I₀/ω. Divide by π/ω: <b>I<sub>av</sub> = 2I₀/π ≈ 0.637 I₀</b>. ⚠ Compare with I<sub>rms</sub> = I₀/√2 ≈ 0.707 I₀ — two different averages of the same current."},
+
+{id:68, lec:"L-6", blk:"Area", topic:"Area as a sum of strips",
+ q:"In deriving the area under a curve, the area of one thin strip of width dx at position x is",
+ opts:["f(x) dx","f(x)/dx","f′(x) dx","dx"],
+ ans:0,
+ why:[
+  "Correct — a rectangle of height f(x) and width dx, whose area is the product of the two.",
+  "Dividing by dx would give a slope-like quantity, not an area.",
+  "The strip's height is the function value, not its derivative.",
+  "dx alone is the width; it must be multiplied by the height."],
+ sol:"<b>dA = f(x)dx</b>, and summing all strips gives <b>A = ∫<sub>a</sub><sup>b</sup>f(x)dx</b>. This “build it from strips” picture is the standard route to moments of inertia, centres of mass and electric fields."}
+
+];
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter P-2 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

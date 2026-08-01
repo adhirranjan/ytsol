@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-1 Basic Mathematical Tools-I — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Physics · Chapter Mastery Quiz</p>
+    <h1>P-1 · Basic Mathematical Tools-I</h1>
+    <p id="heroSub">Lectures L-1 to L-3 · 44 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter. This is the shortest chapter in the set: three lectures of pure mathematical toolkit, all of it machinery that every later Physics chapter leans on.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">44 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-1 Basic Mathematical Tools-I · mastery quiz built from lectures L-1 to L-3 (theory + solved examples) · every answer re-derived and numerically checked, not transcribed · this chapter has no Strong Box · ⚠ one question corrects a misplaced value in the module itself (Q37).</div>
+</div>
+
+<script>
+/* ============================================================
+   P-1 BASIC MATHEMATICAL TOOLS-I — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Basic Trigonometric Ratios",
+   desc:"radian &harr; degree and &theta; = s/r, the six ratios, the physics 37&deg;/53&deg; triangle, CAST and angle reduction, the identity / addition / double-angle set, sine &amp; cosine rules, and the &plusmn;&radic;(a&sup2;+b&sup2;) range"},
+  {key:"L-2", name:"L-2 · Cartesian Coordinates, Slope &amp; Straight Lines",
+   desc:"quadrant signs, 2D and 3D distance, section / mid-point / centroid, slope as tan&theta;, and the four standard forms of a straight line"},
+  {key:"L-3", name:"L-3 · Conics, Pascal's Triangle &amp; the Binomial",
+   desc:"circle and ellipse equations with their areas, the four parabola orientations and their foci, vertex form, and (1+x)&#8319; &asymp; 1 + nx &mdash; the workhorse approximation of all physics"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (14) ---------------- */
+{id:1, lec:"L-1", blk:"Radian measure", topic:"Definition of the radian",
+ q:"The angle θ subtended at the centre of a circle by an arc of length s on a circle of radius r is",
+ opts:["s/r radians","sr radians","r/s radians","s/2πr radians"],
+ ans:0,
+ why:[
+  "Correct. The radian is defined so that one radian is the angle for which the arc equals the radius, giving θ = s/r.",
+  "A product of two lengths has units of area, not of angle.",
+  "This is the reciprocal, which would make a long arc subtend a small angle.",
+  "s/2πr is the <b>fraction</b> of the full circle; multiplying it by 2π gives the angle in radians."],
+ sol:"<b>θ = s/r</b> — a ratio of two lengths, which is why the radian is dimensionless. On a unit circle (r = 1) the angle and the arc length are numerically equal."},
+
+{id:2, lec:"L-1", blk:"Radian measure", topic:"Converting degrees to radians",
+ q:"45° expressed in radians is",
+ opts:["π/4","π/2","π/3","45π"],
+ ans:0,
+ why:[
+  "Correct. 45 × π/180 = π/4, since 45° is one-eighth of a full turn and 2π/8 = π/4.",
+  "π/2 is 90°, twice the angle given.",
+  "π/3 is 60°, which comes from 60 × π/180 = π/3 — a different angle entirely.",
+  "Multiplying by π without dividing by 180 gives a number about 141 radians — some 22 full turns."],
+ sol:"<b>degree → radian: × π/180. radian → degree: × 180/π.</b> So 45° = π/4 rad, and 1 rad ≈ 57°."},
+
+{id:3, lec:"L-1", blk:"Radian measure", topic:"Angle from an arc",
+ q:"An arc of length π cm lies on a circle of radius 6 cm. The angle it subtends at the centre is",
+ opts:["30°","60°","6°","180°"],
+ ans:0,
+ why:[
+  "Correct. θ = s/r = π/6 rad, and π/6 × 180/π = 30°.",
+  "60° is π/3 rad, which would need an arc of 2π cm.",
+  "6° confuses the radius with an angle in degrees.",
+  "180° is π radians, which would need an arc of 6π cm — the whole semicircle."],
+ sol:"θ = s/r = π/6 <b>rad</b>, then × 180/π = <b>30°</b>. ⚠ θ = s/r always returns radians; convert at the end if degrees are wanted."},
+
+{id:4, lec:"L-1", blk:"The six ratios", topic:"Ratios of a 3-4-5 triangle",
+ q:"In a right triangle with perpendicular 4, base 3 and hypotenuse 5, the value of tan θ is",
+ opts:["4/3","3/4","4/5","5/3"],
+ ans:0,
+ why:[
+  "Correct. tan θ = P/B = 4/3, the only ratio of the six that avoids the hypotenuse.",
+  "3/4 is cot θ, the reciprocal — this is what you get by writing base over perpendicular.",
+  "4/5 is sin θ, perpendicular over hypotenuse.",
+  "5/3 is sec θ, hypotenuse over base."],
+ sol:"For P = 4, B = 3, H = 5: <b>sin 4/5 · cos 3/5 · tan 4/3 · cosec 5/4 · sec 5/3 · cot 3/4</b>. This is the 53° angle of the physics-standard 37–53 triangle."},
+
+{id:5, lec:"L-1", blk:"Standard values", topic:"The 37° values",
+ q:"In physics problems, sin 37° and cos 37° are taken as",
+ opts:["3/5 and 4/5","4/5 and 3/5","3/4 and 4/3","1/2 and √3/2"],
+ ans:0,
+ why:[
+  "Correct. 37° is the smaller acute angle of the 3-4-5 triangle, so the side opposite it is 3 and the adjacent side is 4.",
+  "These are the values for <b>53°</b>, the other acute angle — the two are complementary, so their sines and cosines swap.",
+  "3/4 is tan 37° and 4/3 is tan 53°; neither is a sine or cosine, and both exceed the range in the second case.",
+  "1/2 and √3/2 belong to 30°."],
+ sol:"<b>37°: sin 3/5, cos 4/5, tan 3/4. 53°: sin 4/5, cos 3/5, tan 4/3.</b> They are complementary (37 + 53 = 90), so sin 37 = cos 53. These crop up constantly in inclined-plane and projectile questions."},
+
+{id:6, lec:"L-1", blk:"CAST", topic:"Signs by quadrant",
+ q:"In the second quadrant, which trigonometric ratios are positive?",
+ opts:["sin and cosec only","all six","tan and cot only","cos and sec only"],
+ ans:0,
+ why:[
+  "Correct. In quadrant II the y-coordinate is positive and x is negative, so only the sine and its reciprocal survive with a positive sign.",
+  "All six are positive only in the <b>first</b> quadrant.",
+  "tan and cot are the positive pair in the <b>third</b> quadrant, where x and y are both negative and their ratio is positive.",
+  "cos and sec are positive in the <b>fourth</b> quadrant."],
+ sol:"<b>CAST</b>, read anticlockwise from quadrant IV: <b>C</b>os (IV) · <b>A</b>ll (I) · <b>S</b>in (II) · <b>T</b>an (III). Only the named function and its reciprocal are positive in each."},
+
+{id:7, lec:"L-1", blk:"Reduction", topic:"The nπ ± θ rule",
+ q:"For an angle of the form (nπ ± θ), the trigonometric function",
+ opts:[
+  "stays the same, with the sign given by CAST",
+  "changes to its co-function, with the sign given by CAST",
+  "stays the same and is always positive",
+  "changes to its reciprocal"],
+ ans:0,
+ why:[
+  "Correct. Multiples of π land back on the x-axis, so the function is unchanged and only the quadrant sign matters.",
+  "The co-function switch happens for <b>odd multiples of π/2</b>, i.e. (2n+1)π/2 ± θ.",
+  "The sign genuinely depends on the quadrant: cos(180° − 60°) = −½, not +½.",
+  "Reciprocals never enter angle-reduction; the choice is only between the same function and its co-function."],
+ sol:"<b>nπ ± θ → function unchanged. (2n+1)π/2 ± θ → function becomes its co-function</b> (sin↔cos, tan↔cot, sec↔cosec). In both cases attach the sign from CAST. The tell is whether the reference axis is horizontal or vertical."},
+
+{id:8, lec:"L-1", blk:"Reduction", topic:"Evaluating cos 120°",
+ q:"The value of cos 120° is",
+ opts:["−1/2","1/2","−√3/2","√3/2"],
+ ans:0,
+ why:[
+  "Correct. cos 120° = cos(180° − 60°) = −cos 60° = −½, since cosine is negative in quadrant II.",
+  "+½ is cos 60°; the negative sign from the second quadrant has been dropped.",
+  "−√3/2 is cos 150°, using 30° as the reference angle instead of 60°.",
+  "√3/2 is cos 30°, which sits in the first quadrant."],
+ sol:"120° = 180° − 60°, so the function stays cosine and CAST makes it negative in quadrant II: <b>cos 120° = −cos 60° = −½</b>."},
+
+{id:9, lec:"L-1", blk:"Reduction", topic:"Evaluating tan 135° and sin(−150°)",
+ q:"The values of tan 135° and sin(−150°) are respectively",
+ opts:["−1 and −1/2","1 and 1/2","−1 and 1/2","1 and −1/2"],
+ ans:0,
+ why:[
+  "Correct. tan 135° = tan(180° − 45°) = −tan 45° = −1, and sin(−150°) = −sin 150° = −sin 30° = −½.",
+  "Both signs have been dropped; tangent is negative in quadrant II and sine is odd.",
+  "The tangent is right but sin(−150°) must be negative, since sin(−θ) = −sin θ.",
+  "tan 135° is negative — quadrant II makes tangent negative."],
+ sol:"tan 135° = tan(180° − 45°) = <b>−1</b> (tan is negative in II). sin(−150°) = −sin 150° = −sin(180° − 30°) = −sin 30° = <b>−½</b>. Remember <b>sin and tan are odd</b>, cos is even."},
+
+{id:10, lec:"L-1", blk:"Identities", topic:"The Pythagorean identities",
+ q:"The expression 1 + tan²θ equals",
+ opts:["sec²θ","cosec²θ","cot²θ","sin²θ"],
+ ans:0,
+ why:[
+  "Correct. Divide sin²θ + cos²θ = 1 through by cos²θ to get tan²θ + 1 = sec²θ.",
+  "cosec²θ pairs with cot²θ: 1 + cot²θ = cosec²θ, obtained by dividing by sin²θ instead.",
+  "Test θ = 60°: 1 + 3 = 4, but cot²60° = 1/3.",
+  "The left side is at least 1, while sin²θ never exceeds 1."],
+ sol:"The three identities: <b>sin²θ + cos²θ = 1 · 1 + tan²θ = sec²θ · 1 + cot²θ = cosec²θ.</b> The last two come from dividing the first by cos²θ and by sin²θ."},
+
+{id:11, lec:"L-1", blk:"Addition formulae", topic:"Expanding cos(A + B)",
+ q:"cos(A + B) equals",
+ opts:[
+  "cos A cos B − sin A sin B",
+  "cos A cos B + sin A sin B",
+  "sin A cos B + cos A sin B",
+  "cos A cos B − sin A cos B"],
+ ans:0,
+ why:[
+  "Correct — the cosine expansion carries the <b>opposite</b> sign to the one inside the bracket, which is the sign trap of the whole family.",
+  "That is cos(A − B); the sign flip is exactly what distinguishes the two.",
+  "That is sin(A + B), which mixes the functions rather than pairing like with like.",
+  "The second term must be sin A sin B; mixing a sine with a cosine here is dimensionally wrong for the identity."],
+ sol:"<b>cos(A ± B) = cos A cos B ∓ sin A sin B</b> — sign flips. <b>sin(A ± B) = sin A cos B ± cos A sin B</b> — sign stays. Check with A = B = 45°: cos 90° = ½ − ½ = 0 ✓"},
+
+{id:12, lec:"L-1", blk:"Double angle", topic:"The three forms of cos 2θ",
+ q:"Which expression does <b>not</b> equal cos 2θ?",
+ opts:[
+  "2 sin²θ − 1",
+  "cos²θ − sin²θ",
+  "2 cos²θ − 1",
+  "1 − 2 sin²θ"],
+ ans:0,
+ why:[
+  "Correct — this is the odd one out. It equals <b>−cos 2θ</b>: the signs of the correct form 1 − 2sin²θ have been reversed.",
+  "This is the basic form, straight from cos(θ + θ) = cos²θ − sin²θ.",
+  "This follows by substituting sin²θ = 1 − cos²θ into the basic form.",
+  "This follows by substituting cos²θ = 1 − sin²θ instead."],
+ sol:"<b>cos 2θ = cos²θ − sin²θ = 2cos²θ − 1 = 1 − 2sin²θ.</b> Rearranged, these give the half-angle forms <b>cos²θ = (1 + cos 2θ)/2</b> and <b>sin²θ = (1 − cos 2θ)/2</b>, which are what turn an oscillating square into something integrable."},
+
+{id:13, lec:"L-1", blk:"Max/min", topic:"Range of a cos θ + b sin θ",
+ q:"The maximum value of 3 cos θ + 4 sin θ is",
+ opts:["5","7","3","√7"],
+ ans:0,
+ why:[
+  "Correct. The maximum of a cos θ + b sin θ is √(a² + b²) = √(9 + 16) = 5.",
+  "7 is a + b, which would require cos θ and sin θ to both equal 1 — impossible, since they satisfy sin²θ + cos²θ = 1.",
+  "3 is the coefficient of the cosine term alone.",
+  "√7 misreads the formula as √(a + b) rather than √(a² + b²)."],
+ sol:"<b>−√(a² + b²) ≤ a cos θ + b sin θ ≤ +√(a² + b²).</b> Here √(3² + 4²) = <b>5</b>. The 3-4-5 triangle again — worth spotting instantly."},
+
+{id:14, lec:"L-1", blk:"Sine &amp; cosine rules", topic:"The cosine rule",
+ q:"For a triangle with sides a, b and c, where θ is the angle between a and b, the cosine rule states",
+ opts:[
+  "c² = a² + b² − 2ab cos θ",
+  "c² = a² + b² + 2ab cos θ",
+  "c² = a² + b² − 2ab sin θ",
+  "c = a + b − 2ab cos θ"],
+ ans:0,
+ why:[
+  "Correct. It generalises Pythagoras: at θ = 90° the cosine vanishes and it reduces to c² = a² + b².",
+  "The plus sign would make c larger than the Pythagorean value for an acute θ, whereas it should be smaller.",
+  "The rule uses the <b>cosine</b> of the included angle; a sine here would fail the θ = 90° check.",
+  "Every term must be a squared length for the dimensions to match."],
+ sol:"<b>c² = a² + b² − 2ab cos θ.</b> Check θ = 90°: cos 90° = 0 gives Pythagoras. Check θ = 0°: c² = (a − b)², as the sides fold flat. The companion sine rule is <b>sin α/a = sin β/b = sin γ/c</b>."},
+
+/* ---------------- L-2 (14) ---------------- */
+{id:15, lec:"L-2", blk:"Quadrants", topic:"Signs in the quadrants",
+ q:"A point with coordinates (−3, 5) lies in",
+ opts:["quadrant II","quadrant I","quadrant III","quadrant IV"],
+ ans:0,
+ why:[
+  "Correct. A negative x with a positive y is the (−, +) signature of the second quadrant.",
+  "Quadrant I is (+, +); this point has a negative x.",
+  "Quadrant III is (−, −), so both coordinates would have to be negative.",
+  "Quadrant IV is (+, −), which reverses both signs of this point."],
+ sol:"Quadrants are numbered <b>anticlockwise</b> from the top right: <b>I (+,+) · II (−,+) · III (−,−) · IV (+,−).</b>"},
+
+{id:16, lec:"L-2", blk:"Distance", topic:"Distance in two dimensions",
+ q:"The distance between the points (2, 3) and (3, 4) is",
+ opts:["√2","2","√13","1"],
+ ans:0,
+ why:[
+  "Correct. d = √[(3−2)² + (4−3)²] = √(1 + 1) = √2.",
+  "2 adds the two differences instead of adding their squares and taking the root.",
+  "√13 would come from √(2² + 3²), using the coordinates themselves rather than their differences.",
+  "1 is a single coordinate difference; both must be combined."],
+ sol:"<b>d = √[(x₂−x₁)² + (y₂−y₁)²] = √(1 + 1) = √2.</b> Always take <b>differences</b> first — using the raw coordinates is the standard slip."},
+
+{id:17, lec:"L-2", blk:"Distance", topic:"Distance in three dimensions",
+ q:"The distance between (−1, 0, 2) and (2, 3, 5) is",
+ opts:["3√3","√27 − 1","9","3"],
+ ans:0,
+ why:[
+  "Correct. The differences are 3, 3 and 3, so d = √(9 + 9 + 9) = √27 = 3√3 ≈ 5.20.",
+  "√27 is the answer, and subtracting 1 from it has no basis in the formula.",
+  "9 is the sum of the squares before taking the square root — that step is not optional.",
+  "3 is one of the coordinate differences, not the resultant distance."],
+ sol:"<b>d = √[(Δx)² + (Δy)² + (Δz)²].</b> Here Δ = (3, 3, 3), so d = √27 = <b>3√3</b>. The 3D formula is the 2D one with a third square added — nothing else changes."},
+
+{id:18, lec:"L-2", blk:"Section formula", topic:"Dividing a segment in a given ratio",
+ q:"The point P dividing the join of A(2, 3) and B(3, 7) in the ratio 3 : 2 is",
+ opts:["(13/5, 27/5)","(12/5, 23/5)","(5/2, 5)","(13/2, 27/2)"],
+ ans:0,
+ why:[
+  "Correct. x = (3×3 + 2×2)/5 = 13/5 and y = (3×7 + 2×3)/5 = 27/5.",
+  "This applies the ratio the wrong way round, pairing m with the first point instead of the second.",
+  "(5/2, 5) is the <b>mid-point</b>, which is the ratio 1 : 1, not 3 : 2.",
+  "This divides by 2 rather than by (m + n) = 5."],
+ sol:"<b>x = (mx₂ + nx₁)/(m+n), y = (my₂ + ny₁)/(m+n).</b> ⚠ Note the cross-pairing: m goes with the <b>second</b> point. Here (13/5, 27/5) = (2.6, 5.4), which duly lies nearer B — a good sanity check, since 3 : 2 favours B."},
+
+{id:19, lec:"L-2", blk:"Mid-point", topic:"Mid-point as a special case",
+ q:"The mid-point formula is the section formula with",
+ opts:["m = n = 1","m = 1, n = 0","m + n = 0","m = 2, n = 1"],
+ ans:0,
+ why:[
+  "Correct. Equal weights put the point exactly halfway, giving ((x₁+x₂)/2, (y₁+y₂)/2).",
+  "m = 1, n = 0 collapses the formula onto the second point itself.",
+  "m + n = 0 makes the denominator zero, which is undefined.",
+  "2 : 1 puts the point two-thirds of the way along, not halfway."],
+ sol:"Mid-point is the <b>1 : 1</b> section: <b>M = ((x₁+x₂)/2, (y₁+y₂)/2).</b> The centroid extends the same idea to three points: <b>G = ((x₁+x₂+x₃)/3, (y₁+y₂+y₃)/3).</b>"},
+
+{id:20, lec:"L-2", blk:"Centroid", topic:"Finding a missing vertex",
+ q:"The origin is the centroid of a triangle with vertices A(2, 3), B(3, 4) and C. The coordinates of C are",
+ opts:["(−5, −7)","(5, 7)","(−5/3, −7/3)","(−1, −1)"],
+ ans:0,
+ why:[
+  "Correct. (2 + 3 + x)/3 = 0 gives x = −5, and (3 + 4 + y)/3 = 0 gives y = −7.",
+  "The signs are reversed; C must lie opposite the other two vertices to pull the centroid back to the origin.",
+  "This divides by 3 a second time, but the division has already been undone.",
+  "(−1, −1) would put the centroid at (4/3, 2), not at the origin."],
+ sol:"Set each centroid coordinate to zero: the three x-values must sum to 0, so x<sub>C</sub> = −(2 + 3) = <b>−5</b>, and likewise y<sub>C</sub> = −(3 + 4) = <b>−7</b>. Whenever a centroid is given, the shortcut is that <b>the coordinates sum to 3G</b>."},
+
+{id:21, lec:"L-2", blk:"Slope", topic:"Slope as a tangent",
+ q:"The slope m of a straight line making an angle θ with the positive x-axis is",
+ opts:["tan θ","sin θ","cos θ","cot θ"],
+ ans:0,
+ why:[
+  "Correct. Slope is rise over run, which for the angle θ is exactly the tangent.",
+  "sin θ is bounded by 1, but a slope can be arbitrarily large as the line approaches vertical.",
+  "cos θ is likewise bounded, and it would give a slope of 1 for a horizontal line rather than 0.",
+  "cot θ is the reciprocal, and it would be infinite for a horizontal line instead of zero."],
+ sol:"<b>m = tan θ = (y₂−y₁)/(x₂−x₁).</b> Check: θ = 0 gives m = 0 (horizontal); θ = 90° gives m = ∞ (vertical); θ = 45° gives m = 1."},
+
+{id:22, lec:"L-2", blk:"Slope", topic:"Slope of a vertical line",
+ q:"Which statement is correct?",
+ opts:[
+  "A line parallel to the x-axis has slope 0; a vertical line has undefined slope",
+  "A line parallel to the x-axis has undefined slope; a vertical line has slope 0",
+  "Both have slope 0",
+  "Both have undefined slope"],
+ ans:0,
+ why:[
+  "Correct. Horizontal means no rise, so m = 0; vertical means no run, so the quotient Δy/Δx divides by zero and is undefined.",
+  "⚠ This is the classic swap. Picture the line: a flat line clearly climbs at zero rate.",
+  "A vertical line does not have slope 0; it climbs infinitely fast.",
+  "A horizontal line has a perfectly well-defined slope of 0."],
+ sol:"<b>Horizontal: m = tan 0° = 0. Vertical: m = tan 90° = ∞ (undefined).</b> When in doubt, sketch it — a flat road has zero gradient."},
+
+{id:23, lec:"L-2", blk:"Slope", topic:"Sign of the slope",
+ q:"A line has slope m = −2. The angle it makes with the positive x-axis is",
+ opts:["obtuse","acute","zero","90°"],
+ ans:0,
+ why:[
+  "Correct. tan θ is negative only in the second quadrant for 0° ≤ θ &lt; 180°, so θ lies between 90° and 180°.",
+  "An acute angle gives a positive tangent, hence a positive slope.",
+  "Zero would give m = 0, and the line would be horizontal.",
+  "At 90° the slope is undefined rather than −2."],
+ sol:"<b>m &gt; 0 → acute · m &lt; 0 → obtuse · m = 0 → horizontal · m undefined → vertical.</b> A negative slope means the line falls as x increases."},
+
+{id:24, lec:"L-2", blk:"Line equations", topic:"The point-slope form",
+ q:"The equation of a line through (x₁, y₁) with slope m is",
+ opts:[
+  "(y − y₁) = m(x − x₁)",
+  "(y + y₁) = m(x + x₁)",
+  "(y − y₁) = m(x + x₁)",
+  "y = mx₁ + x"],
+ ans:0,
+ why:[
+  "Correct — it says the slope between any point (x, y) on the line and the fixed point is always m.",
+  "Both signs are wrong; substituting (x₁, y₁) should make each bracket vanish, and here neither does.",
+  "The x-bracket has the wrong sign, so the given point does not satisfy the equation.",
+  "This mixes the roles of the variable and the constant entirely."],
+ sol:"<b>(y − y₁) = m(x − x₁).</b> Test it: putting x = x₁ gives y = y₁, so the line passes through the point as required. The other three forms: two-point, slope-intercept y = mx + c, and intercept x/a + y/b = 1."},
+
+{id:25, lec:"L-2", blk:"Line equations", topic:"Line through two points",
+ q:"The equation of the line through (−1, 3) and (3, −1) is",
+ opts:["y = −x + 2","y = x + 4","y = −x − 2","y = x − 2"],
+ ans:0,
+ why:[
+  "Correct. The slope is (−1 − 3)/(3 + 1) = −1, and y − 3 = −(x + 1) gives y = −x + 2.",
+  "A positive slope is impossible here — y falls as x rises, so the slope must be negative.",
+  "The slope is right but the intercept is wrong; check by substituting (−1, 3), which gives −1 ≠ 3.",
+  "Both the slope sign and the intercept are wrong."],
+ sol:"m = (−1 − 3)/(3 − (−1)) = −4/4 = <b>−1</b>. Then y − 3 = −1(x + 1) ⇒ <b>y = −x + 2</b>. Verify with the other point: −(3) + 2 = −1 ✓ Always substitute both points back."},
+
+{id:26, lec:"L-2", blk:"Line equations", topic:"Reading slope and intercept",
+ q:"For the line 3x + 4y = 5, the slope and y-intercept are",
+ opts:["−3/4 and 5/4","3/4 and 5/4","−4/3 and 5","3 and 4"],
+ ans:0,
+ why:[
+  "Correct. Solving for y gives y = −(3/4)x + 5/4, so m = −3/4 and c = 5/4.",
+  "The sign is wrong: moving 3x across the equals sign makes it negative.",
+  "−4/3 inverts the coefficients; the slope is −(coefficient of x)/(coefficient of y).",
+  "3 and 4 are the raw coefficients, which are not the slope and intercept until the equation is rearranged."],
+ sol:"Rearrange to <b>y = mx + c</b>: 4y = −3x + 5 ⇒ y = −(3/4)x + 5/4. So <b>m = −3/4, c = 5/4</b>. In general ax + by = c has slope <b>−a/b</b>."},
+
+{id:27, lec:"L-2", blk:"Line equations", topic:"The intercept form",
+ q:"A line meets the x-axis at (4, 0) and the y-axis at (0, 3). Its equation is",
+ opts:["x/4 + y/3 = 1","x/3 + y/4 = 1","4x + 3y = 1","x/4 − y/3 = 1"],
+ ans:0,
+ why:[
+  "Correct. The intercept form x/a + y/b = 1 takes a = 4 and b = 3 directly.",
+  "The intercepts have been swapped; substituting (4, 0) here gives 4/3 ≠ 1.",
+  "This uses the intercepts as coefficients rather than as denominators; (4, 0) gives 16, not 1.",
+  "A minus sign would put the y-intercept at (0, −3)."],
+ sol:"<b>x/a + y/b = 1</b> where a and b are the x- and y-intercepts. Here <b>x/4 + y/3 = 1</b>, equivalently 3x + 4y = 12. Check both intercepts by substitution."},
+
+{id:28, lec:"L-2", blk:"Distance", topic:"Distance from the origin",
+ q:"The distance of the point (5, 12) from the origin is",
+ opts:["13","17","√17","7"],
+ ans:0,
+ why:[
+  "Correct. √(25 + 144) = √169 = 13 — the 5-12-13 Pythagorean triple.",
+  "17 adds the coordinates instead of combining them as squares.",
+  "√17 adds the coordinates before taking the root, rather than adding their squares.",
+  "7 is the difference of the coordinates, which has no geometric meaning here."],
+ sol:"From the origin the formula reduces to <b>d = √(x² + y²)</b> = √(25 + 144) = <b>13</b>. Worth memorizing the triples 3-4-5, 5-12-13 and 8-15-17 — they turn up constantly."},
+
+/* ---------------- L-3 (14) ---------------- */
+{id:29, lec:"L-3", blk:"Circle", topic:"Equation of a circle",
+ q:"The equation of a circle of radius R centred at (h, k) is",
+ opts:[
+  "(x − h)² + (y − k)² = R²",
+  "(x + h)² + (y + k)² = R²",
+  "(x − h)² + (y − k)² = R",
+  "x² + y² = R² + h² + k²"],
+ ans:0,
+ why:[
+  "Correct — it states that every point on the circle is at distance R from the centre, which is the distance formula squared.",
+  "The signs are wrong; substituting the centre (h, k) should give 0 on the left, and here it gives 4h² + 4k².",
+  "The right side must be R², since the left side is a sum of squared lengths.",
+  "This is not a circle centred at (h, k) at all; it is one centred at the origin with a different radius."],
+ sol:"<b>(x − h)² + (y − k)² = R²</b>, reducing to <b>x² + y² = R²</b> at the origin. <b>Area = πR², circumference = 2πR.</b>"},
+
+{id:30, lec:"L-3", blk:"Circle", topic:"Circle through a given point",
+ q:"A circle centred at the origin passes through (2, 3). Its area is",
+ opts:["13π","√13 π","26π","169π"],
+ ans:0,
+ why:[
+  "Correct. R = √(4 + 9) = √13, so the area is πR² = 13π.",
+  "√13 π is the radius times π, which matches neither the area nor the circumference.",
+  "26π is 2πR² — this is the circumference formula applied to R² by mistake.",
+  "169π squares 13 a second time; R² is already 13."],
+ sol:"R = √(2² + 3²) = √13 ⇒ <b>Area = πR² = 13π</b> and circumference = 2πR = 2√13 π. Since R² appears directly in the area, there is no need to simplify the square root at all."},
+
+{id:31, lec:"L-3", blk:"Parabola", topic:"Definition of a parabola",
+ q:"A parabola is the locus of a point that is",
+ opts:[
+  "equidistant from a fixed point and a fixed line",
+  "equidistant from two fixed points",
+  "at a constant distance from a fixed point",
+  "such that the sum of its distances from two fixed points is constant"],
+ ans:0,
+ why:[
+  "Correct — the fixed point is the <b>focus</b> and the fixed line is the <b>directrix</b>, and the defining condition is PS = PM.",
+  "Equidistance from two points gives the perpendicular bisector, a straight line.",
+  "A constant distance from one fixed point defines a <b>circle</b>.",
+  "A constant <b>sum</b> of distances from two fixed points defines an <b>ellipse</b>."],
+ sol:"<b>Parabola:</b> distance to focus = distance to directrix. <b>Circle:</b> constant distance to a centre. <b>Ellipse:</b> constant sum of distances to two foci. Three conics, three one-line definitions."},
+
+{id:32, lec:"L-3", blk:"Parabola", topic:"Focus of y² = 4ax",
+ q:"For the parabola y² = 12x, the focus is at",
+ opts:["(3, 0)","(12, 0)","(0, 3)","(−3, 0)"],
+ ans:0,
+ why:[
+  "Correct. Comparing with y² = 4ax gives 4a = 12, so a = 3 and the focus is (a, 0) = (3, 0).",
+  "12 is the coefficient 4a, not a itself — the division by 4 has been skipped.",
+  "(0, 3) would be the focus of x² = 12y, a parabola opening upward instead of rightward.",
+  "(−3, 0) is the focus of y² = −12x, which opens to the left."],
+ sol:"<b>y² = 4ax opens right, focus (a, 0), directrix x = −a.</b> Here 4a = 12 ⇒ a = 3 ⇒ focus <b>(3, 0)</b>, directrix x = −3. The rule of thumb: <b>y² means it opens along x; x² means along y</b>, and the sign says which way."},
+
+{id:33, lec:"L-3", blk:"Parabola", topic:"Which way it opens",
+ q:"The parabola x² = −4ay (with a &gt; 0) opens",
+ opts:["downward","upward","to the left","to the right"],
+ ans:0,
+ why:[
+  "Correct. The squared variable is x, so the axis is vertical, and the minus sign sends it downward.",
+  "x² = +4ay opens upward; the sign here is negative.",
+  "Opening left or right requires <b>y</b> to be the squared variable.",
+  "y² = 4ax is the rightward-opening form."],
+ sol:"<b>Squared variable → the axis. Sign → the direction.</b> y² = 4ax right · y² = −4ax left · x² = 4ay up · <b>x² = −4ay down</b>."},
+
+{id:34, lec:"L-3", blk:"Parabola", topic:"Vertex form",
+ q:"An upward-opening parabola has vertex (3, 4) and passes through (4, 7). Its equation is",
+ opts:[
+  "(x − 3)² = (1/3)(y − 4)",
+  "(x − 3)² = 3(y − 4)",
+  "(y − 4)² = (1/3)(x − 3)",
+  "(x + 3)² = (1/3)(y + 4)"],
+ ans:0,
+ why:[
+  "Correct. From (x−3)² = 4a(y−4) and the point (4, 7): 1 = 4a(3), so 4a = 1/3.",
+  "This inverts the constant; substituting (4, 7) gives 1 on the left and 9 on the right.",
+  "This has y squared, which would make the parabola open sideways rather than upward.",
+  "The signs inside the brackets are wrong, putting the vertex at (−3, −4)."],
+ sol:"Upward-opening with vertex (h, k): <b>(x − h)² = 4a(y − k)</b>. Substituting (4, 7): (1)² = 4a(3) ⇒ 4a = 1/3 ⇒ <b>(x − 3)² = (1/3)(y − 4)</b>."},
+
+{id:35, lec:"L-3", blk:"Parabola", topic:"Reading off a vertex",
+ q:"The vertex of the parabola y = (x² + 4)/3 is",
+ opts:["(0, 4/3)","(0, 4)","(4/3, 0)","(0, 3)"],
+ ans:0,
+ why:[
+  "Correct. Rearranging gives x² = 3y − 4 = 3(y − 4/3), so h = 0 and k = 4/3.",
+  "(0, 4) forgets to divide by 3 when solving for y at x = 0.",
+  "The coordinates are swapped; this parabola is symmetric about x = 0, so the vertex must have x = 0.",
+  "3 is the coefficient, not the y-value at the vertex."],
+ sol:"Rearrange into <b>(x − h)² = 4a(y − k)</b>: 3y = x² + 4 ⇒ x² = 3(y − 4/3) ⇒ vertex <b>(0, 4/3)</b>. Quick check: at x = 0, y = 4/3 ✓"},
+
+{id:36, lec:"L-3", blk:"Ellipse", topic:"Definition of an ellipse",
+ q:"For any point P on an ellipse with foci F₁ and F₂,",
+ opts:[
+  "F₁P + F₂P is constant and equals the major axis 2a",
+  "F₁P − F₂P is constant",
+  "F₁P × F₂P is constant",
+  "F₁P = F₂P always"],
+ ans:0,
+ why:[
+  "Correct — a constant sum of focal distances, equal to the full major axis length 2a.",
+  "A constant <b>difference</b> of focal distances defines a hyperbola, not an ellipse.",
+  "A constant product defines a Cassini oval, which is not one of the standard conics.",
+  "Equality holds only at the two ends of the minor axis, not everywhere on the curve."],
+ sol:"<b>F₁P + F₂P = 2a</b> — the string-and-two-pins construction. Major axis 2a, minor axis 2b, and the curve is <b>x²/a² + y²/b² = 1</b>."},
+
+{id:37, lec:"L-3", blk:"Ellipse", topic:"Area of an ellipse",
+ q:"An ellipse has a = 3 and b = 1. Its area is",
+ opts:["3π","√20 π","9π","π"],
+ ans:0,
+ why:[
+  "Correct. Area = πab = π(3)(1) = 3π.",
+  "⚠ This is the value <b>printed in the module</b> against “Area”, and it is misplaced: √20 π = π√[2(a²+b²)] is the ellipse's <b>circumference</b>, not its area. The module's own line reads “πab = π(3)(1)”, which is plainly 3π.",
+  "9π is πa², the area of a circle of radius 3 — correct only if b were also 3.",
+  "π is πb², the area of a circle of radius 1."],
+ sol:"<b>Area of an ellipse = πab</b> = π(3)(1) = <b>3π</b>. The circumference is a different formula, <b>≈ π√[2(a²+b²)]</b> = π√20. Sanity check: setting a = b = R gives πR² and 2πR, the circle results ✓"},
+
+{id:38, lec:"L-3", blk:"Ellipse", topic:"When an ellipse becomes a circle",
+ q:"An ellipse x²/a² + y²/b² = 1 reduces to a circle when",
+ opts:["a = b","a = 2b","b = 0","a + b = 1"],
+ ans:0,
+ why:[
+  "Correct. With a = b = R the equation becomes x² + y² = R², and the two foci merge at the centre.",
+  "a = 2b gives an ellipse twice as long as it is wide — still an ellipse.",
+  "b = 0 collapses the ellipse into a line segment, not a circle.",
+  "A sum condition on the semi-axes does not force them to be equal."],
+ sol:"<b>a = b = R ⇒ circle.</b> The area πab becomes πR² and the circumference π√[2(2R²)] becomes 2πR, both reducing correctly — a good way to check any ellipse formula you half-remember."},
+
+{id:39, lec:"L-3", blk:"Binomial", topic:"Pascal's triangle coefficients",
+ q:"The coefficients in the expansion of (a + b)⁴ are",
+ opts:["1, 4, 6, 4, 1","1, 3, 3, 1","1, 4, 4, 1","1, 5, 10, 10, 5, 1"],
+ ans:0,
+ why:[
+  "Correct — the fifth row of Pascal's triangle, with five terms for the fourth power.",
+  "1, 3, 3, 1 is the row for (a + b)³.",
+  "This has the right number of terms but a wrong middle; the central coefficient of the fourth row is 6, not 4.",
+  "1, 5, 10, 10, 5, 1 is the row for (a + b)⁵."],
+ sol:"<b>(a+b)⁴ = a⁴ + 4a³b + 6a²b² + 4ab³ + b⁴.</b> Each Pascal row starts and ends in 1, is symmetric, and each interior entry is the sum of the two above it. A power n gives <b>n + 1</b> terms."},
+
+{id:40, lec:"L-3", blk:"Binomial", topic:"The small-x approximation",
+ q:"For |x| ≪ 1, the binomial approximation gives (1 + x)ⁿ ≈",
+ opts:["1 + nx","1 + x","n + x","1 + nx + n(n−1)x²/2"],
+ ans:0,
+ why:[
+  "Correct. Only the first two terms of the binomial series survive, since x², x³, … are negligible when x is tiny.",
+  "1 + x drops the exponent, so it would give the same answer for a square root as for a tenth power.",
+  "n + x has the wrong constant term; at x = 0 the expression must equal 1, not n.",
+  "This keeps the x² term, which is more accuracy than the approximation calls for — correct but not the standard two-term form."],
+ sol:"<b>(1 + x)ⁿ ≈ 1 + nx for |x| ≪ 1.</b> The single most-used approximation in physics — it linearises roots, reciprocals and relativistic factors alike. ⚠ First factor the expression so the bracket genuinely reads <b>(1 + something small)</b>."},
+
+{id:41, lec:"L-3", blk:"Binomial", topic:"Applying the approximation",
+ q:"Using the binomial approximation, (1.002)⁵ is about",
+ opts:["1.010","1.002","1.01002","1.5"],
+ ans:0,
+ why:[
+  "Correct. With x = 0.002 and n = 5, (1 + x)⁵ ≈ 1 + 5(0.002) = 1.010.",
+  "1.002 is the base itself, as if the exponent were 1.",
+  "This adds the exponent onto the base in the wrong decimal place.",
+  "1.5 would need x to be around 0.1, fifty times larger than it is."],
+ sol:"<b>(1 + x)ⁿ ≈ 1 + nx</b> with n = 5, x = 0.002 gives <b>1.010</b>. The exact value is 1.010040…, so the two-term form is good to four decimal places — which is why the approximation is so heavily used."},
+
+{id:42, lec:"L-3", blk:"Binomial", topic:"Approximating a square root",
+ q:"Using √11 = 3√(1 + 2/9) and the two-term binomial approximation, √11 is about",
+ opts:["10/3","√13","3","11/3"],
+ ans:0,
+ why:[
+  "Correct. 3(1 + 2/9)^½ ≈ 3(1 + 1/9) = 3 × 10/9 = 10/3 ≈ 3.33, against the true value 3.3166.",
+  "√13 is a different number entirely, about 3.606.",
+  "3 is the leading factor before the correction term is applied.",
+  "11/3 ≈ 3.67 would follow from using n = 1 rather than n = ½ for a square root."],
+ sol:"Factor out the perfect square first: √11 = √(9 + 2) = 3√(1 + 2/9). Then with <b>n = ½</b>: 3(1 + ½ × 2/9) = 3(1 + 1/9) = <b>10/3 ≈ 3.33</b>. ⚠ The exponent for a square root is ½ — forgetting it doubles the correction."},
+
+{id:43, lec:"L-3", blk:"Binomial", topic:"Approximating a reciprocal",
+ q:"For small x, the expression 1/(1 + x) is approximately",
+ opts:["1 − x","1 + x","1 − x²","x − 1"],
+ ans:0,
+ why:[
+  "Correct. Writing it as (1 + x)⁻¹ and applying 1 + nx with n = −1 gives 1 − x.",
+  "1 + x would be the approximation for (1 + x)¹, not for its reciprocal — a reciprocal must move the opposite way.",
+  "The correction is first order in x; an x² term is exactly what the approximation discards.",
+  "At x = 0 this gives −1, whereas 1/(1 + 0) = 1."],
+ sol:"<b>(1 + x)⁻¹ ≈ 1 − x.</b> The exponent may be negative or fractional — that generality is what makes the rule so useful. Check at x = 0.01: 1/1.01 = 0.9901 against 0.99 ✓"},
+
+{id:44, lec:"L-3", blk:"Circle", topic:"Circumference and area together",
+ q:"A circle has area 16π. Its circumference is",
+ opts:["8π","16π","4π","32π"],
+ ans:0,
+ why:[
+  "Correct. πR² = 16π gives R = 4, so the circumference is 2πR = 8π.",
+  "16π is the area, not the circumference; the two are equal in value only when R = 2.",
+  "4π would correspond to R = 2, whose area is 4π rather than 16π.",
+  "32π uses R = 16, forgetting to take the square root."],
+ sol:"Work back through the radius: πR² = 16π ⇒ R² = 16 ⇒ <b>R = 4</b> ⇒ C = 2πR = <b>8π</b>. Any area-to-perimeter question routes through R; never try to convert directly."}
+
+];
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter P-1 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

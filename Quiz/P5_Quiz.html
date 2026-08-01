@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-5 Force Systems — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Physics · Chapter Mastery Quiz</p>
+    <h1>P-5 · Force Systems</h1>
+    <p id="heroSub">Lectures L-1 to L-3 · 45 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter. The three lectures build on each other: FBDs in L-1, then the specific forces in L-2, then putting them in balance in L-3 — so taking them in order pays off here.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">45 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-5 Force Systems · mastery quiz built from lectures L-1 to L-3 (theory + solved examples) · every answer re-derived and numerically checked, not transcribed · this chapter has no Strong Box · ⚠ one question corrects an exponent error in the module itself (Q10).</div>
+</div>
+
+<script>
+/* ============================================================
+   P-5 FORCE SYSTEMS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Force, Free-Body Diagrams &amp; Gravitation",
+   desc:"what a force is, contact vs long-range, the rules for drawing an FBD, W = mg, and F = Gm&#8321;m&#8322;/r&sup2; with the equal-and-opposite pair that follows from it"},
+  {key:"L-2", name:"L-2 · Normal Force, Tension &amp; Pulleys",
+   desc:"the normal as a push perpendicular to the surface, stacked blocks, tension in a massless string, the Atwood results a = (m&#8322;&minus;m&#8321;)g/(m&#8321;+m&#8322;) and T = 2m&#8321;m&#8322;g/(m&#8321;+m&#8322;), and the 2T force on the pulley"},
+  {key:"L-3", name:"L-3 · Equilibrium &amp; Lami's Theorem",
+   desc:"&Sigma;F&#8339; = &Sigma;F&#8342; = &Sigma;&tau; = 0, torque as F&middot;d, the triangle of forces, Lami's theorem and the three concurrent forces it needs, and resolving on an incline"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (15) ---------------- */
+{id:1, lec:"L-1", blk:"What a force is", topic:"The SI unit of force",
+ q:"One newton is the force that gives",
+ opts:[
+  "a mass of 1 kg an acceleration of 1 m s⁻²",
+  "a mass of 1 kg a velocity of 1 m s⁻¹",
+  "a mass of 1 g an acceleration of 1 m s⁻²",
+  "a mass of 1 kg a weight of 1 kg"],
+ ans:0,
+ why:[
+  "Correct. From F = ma, 1 N = 1 kg·m·s⁻² — force is tied to <b>acceleration</b>, not to speed.",
+  "A force applied for longer produces a larger velocity, so no single velocity can define the unit.",
+  "Using grams gives the dyne, the cgs unit: 1 dyne = 10⁻⁵ N.",
+  "Weight is itself a force measured in newtons; kilograms measure mass."],
+ sol:"<b>1 N = 1 kg·m·s⁻².</b> Force causes acceleration, and the same force on a heavier body produces proportionally less of it."},
+
+{id:2, lec:"L-1", blk:"What a force is", topic:"Contact versus long-range forces",
+ q:"Which of these is a <b>non-contact</b> (long-range) force?",
+ opts:["Gravitational attraction","Normal reaction","Tension in a rope","Friction"],
+ ans:0,
+ why:[
+  "Correct. Gravity acts across empty space — the Earth pulls the Moon with nothing in between.",
+  "The normal force exists only where two surfaces actually touch.",
+  "Tension requires a physical rope connecting the two bodies.",
+  "Friction acts along a contact surface and vanishes the moment the surfaces separate."],
+ sol:"<b>Contact:</b> normal, tension, friction, applied push. <b>Non-contact:</b> gravitational, electrostatic, magnetic. Only the second group can act through a vacuum."},
+
+{id:3, lec:"L-1", blk:"Free-body diagrams", topic:"What belongs in an FBD",
+ q:"A free-body diagram of a block shows",
+ opts:[
+  "only the external forces acting on the block",
+  "all forces acting on the block and all forces the block exerts on others",
+  "only the forces the block exerts on its surroundings",
+  "the forces on the block plus its velocity and acceleration vectors"],
+ ans:0,
+ why:[
+  "Correct. The body is imagined “freed” from its surroundings, and every external interaction is replaced by a force arrow acting <b>on</b> it.",
+  "Including the reaction forces the block exerts on others would double-count Newton's third-law pairs and make the net force come out zero always.",
+  "Those forces act on <b>other</b> bodies and belong in <b>their</b> free-body diagrams.",
+  "Velocity and acceleration are results of the forces, not forces themselves — mixing them in is a common source of confusion."],
+ sol:"An FBD carries <b>forces on the body only</b>. The reaction half of each third-law pair acts on a different body and never appears in the same diagram. Arrow <b>length</b> indicates magnitude, and every arrow needs a named source."},
+
+{id:4, lec:"L-1", blk:"Free-body diagrams", topic:"Direction of the normal force",
+ q:"The normal force exerted by a surface on a body is always",
+ opts:[
+  "perpendicular to the surface and directed as a push",
+  "perpendicular to the surface and directed as a pull",
+  "parallel to the surface, opposing motion",
+  "vertically upward, whatever the surface orientation"],
+ ans:0,
+ why:[
+  "Correct. “Normal” means perpendicular, and a surface can only push outward — it has nothing to grip with.",
+  "Ordinary surfaces cannot pull. A pull would require glue or suction, which is a different force altogether.",
+  "That describes <b>friction</b>, which acts along the surface, not across it.",
+  "On an inclined plane the normal is perpendicular to the incline, so it is tilted, not vertical — this is the single most common FBD error."],
+ sol:"<b>Normal = perpendicular to the contact surface, always a push.</b> On an incline of angle θ it makes angle θ with the vertical, so N = mg cos θ, not mg."},
+
+{id:5, lec:"L-1", blk:"Weight", topic:"Weight of a body",
+ q:"A body of mass 60 kg has a weight on Earth of (g = 9.8 m s⁻²)",
+ opts:["588 N","60 N","6.12 N","588 kg"],
+ ans:0,
+ why:[
+  "Correct. W = mg = 60 × 9.8 = 588 N.",
+  "60 is the mass in kilograms; multiplying by g is what converts it into a force.",
+  "6.12 divides by g instead of multiplying — that is the mass a 60 N weight would correspond to.",
+  "The magnitude is right but weight is a <b>force</b> and must be quoted in newtons, not kilograms."],
+ sol:"<b>W = mg = 588 N.</b> ⚠ Mass is in kilograms and never changes; weight is a force in newtons and depends on where you are."},
+
+{id:6, lec:"L-1", blk:"Gravitation", topic:"Newton's law of gravitation",
+ q:"The gravitational force between two point masses varies as",
+ opts:[
+  "m₁m₂/r²",
+  "m₁m₂/r",
+  "(m₁ + m₂)/r²",
+  "m₁m₂ r²"],
+ ans:0,
+ why:[
+  "Correct. F = Gm₁m₂/r² — proportional to the <b>product</b> of the masses and inversely to the <b>square</b> of the separation.",
+  "A 1/r dependence would make gravity fall off far too slowly and would not reproduce Kepler's laws.",
+  "The masses multiply rather than add, which is why doubling both masses quadruples the force.",
+  "This grows with distance, so distant bodies would attract more strongly than nearby ones."],
+ sol:"<b>F = G·m₁m₂/r², G = 6.67 × 10⁻¹¹ N·m²·kg⁻².</b> Take r between the <b>centres</b> of the bodies. Double the separation and the force falls to a quarter."},
+
+{id:7, lec:"L-1", blk:"Gravitation", topic:"The Cavendish calculation",
+ q:"Two spheres of mass 0.0100 kg and 0.500 kg have their centres 0.0500 m apart. The gravitational force on each is",
+ opts:["1.33 × 10⁻¹⁰ N","1.33 × 10⁻¹² N","6.67 × 10⁻¹¹ N","2.67 × 10⁻¹⁰ N"],
+ ans:0,
+ why:[
+  "Correct. F = (6.67 × 10⁻¹¹)(0.01)(0.5)/(0.05)² = (6.67 × 10⁻¹¹)(2) = 1.334 × 10⁻¹⁰ N.",
+  "This is a hundred times too small, from squaring 0.05 incorrectly as 0.0025 × 100.",
+  "6.67 × 10⁻¹¹ is G itself, before the masses and distance are applied.",
+  "2.67 × 10⁻¹⁰ doubles the answer, as if only one of the two 0.05 factors had been squared."],
+ sol:"F = G m₁m₂/r² = (6.67 × 10⁻¹¹)(0.01 × 0.5)/(0.0025) = <b>1.33 × 10⁻¹⁰ N</b>. The same magnitude acts on <b>both</b> spheres, in opposite directions — Newton's third law."},
+
+{id:8, lec:"L-1", blk:"Gravitation", topic:"Same force, different accelerations",
+ q:"Two particles of mass 1.0 kg and 2.0 kg are 50 cm apart and attract each other gravitationally. Their initial accelerations are",
+ opts:[
+  "in the ratio 2 : 1, the lighter one accelerating more",
+  "equal, since the forces are equal",
+  "in the ratio 1 : 2, the heavier one accelerating more",
+  "in the ratio 4 : 1"],
+ ans:0,
+ why:[
+  "Correct. The force on each is the same 5.34 × 10⁻¹⁰ N, so a = F/m makes the 1 kg particle accelerate twice as fast as the 2 kg one.",
+  "The <b>forces</b> are equal by Newton's third law, but acceleration is force divided by mass, and the masses differ.",
+  "This has it backwards — a larger mass resists acceleration more, so it accelerates less.",
+  "4 : 1 would follow from a mass-squared dependence, which does not appear in a = F/m."],
+ sol:"F = G(1)(2)/(0.5)² = <b>5.34 × 10⁻¹⁰ N on each</b>. Then a₁ = F/1 = 5.34 × 10⁻¹⁰ and a₂ = F/2 = 2.67 × 10⁻¹⁰ m s⁻². <b>Equal forces, unequal accelerations</b> — the same reason you fall toward the Earth and it does not visibly fall toward you."},
+
+{id:9, lec:"L-1", blk:"Gravitation", topic:"Newton's third law and gravity",
+ q:"The Earth pulls an apple with force F. The apple pulls the Earth with force",
+ opts:[
+  "F, in the opposite direction",
+  "a force much smaller than F",
+  "a force much larger than F",
+  "zero, since the apple has no gravitational field"],
+ ans:0,
+ why:[
+  "Correct. Gravitation is symmetric in the two masses, so the pair of forces is equal and opposite — exactly Newton's third law.",
+  "The formula Gm₁m₂/r² is unchanged if the labels are swapped, so neither force can be the smaller one.",
+  "By the same symmetry it cannot be larger either.",
+  "Every mass produces a gravitational field, however small the mass."],
+ sol:"<b>Equal and opposite always.</b> What differs is the <b>effect</b>: the apple's acceleration is g, while the Earth's is F/M<sub>E</sub> — utterly negligible because M<sub>E</sub> is so vast."},
+
+{id:10, lec:"L-1", blk:"Gravitation", topic:"Electric versus gravitational force",
+ q:"For two protons, the ratio of the electric repulsion to the gravitational attraction is about",
+ opts:["1.2 × 10³⁶","1.2 × 10⁹","1.2 × 10¹⁸","1"],
+ ans:0,
+ why:[
+  "Correct. kq²/(Gm<sub>p</sub>²) = (9 × 10⁹)(1.6 × 10⁻¹⁹)²/[(6.67 × 10⁻¹¹)(1.67 × 10⁻²⁷)²] ≈ 1.24 × 10³⁶.",
+  "⚠ This is the value <b>printed in the module</b>, and its exponent is wrong. The coefficient 1.23 is right, but working the arithmetic through gives 10³⁶, not 10⁹ — this is the famous “gravity is ~10³⁶ times weaker” result.",
+  "10¹⁸ is roughly the square root of the true ratio and appears in no step of the calculation.",
+  "A ratio of 1 would make the two forces comparable, which would give matter a completely different structure."],
+ sol:"Both forces go as 1/r², so <b>r cancels</b> and the ratio is a pure constant: F<sub>e</sub>/F<sub>g</sub> = kq²/(Gm<sub>p</sub>²) ≈ <b>1.24 × 10³⁶</b>. Gravity dominates on astronomical scales only because large bodies are electrically <b>neutral</b>, while gravity never cancels."},
+
+{id:11, lec:"L-1", blk:"Gravitation", topic:"Effect of doubling the separation",
+ q:"If the distance between two masses is doubled, the gravitational force between them becomes",
+ opts:["one quarter","one half","double","four times"],
+ ans:0,
+ why:[
+  "Correct. F ∝ 1/r², so r → 2r sends F → F/4.",
+  "One half would follow from a 1/r law, not an inverse-square one.",
+  "Force must <b>decrease</b> with separation, not increase.",
+  "Four times inverts the relationship entirely."],
+ sol:"<b>Inverse square:</b> F ∝ 1/r². Triple the distance and the force drops to a ninth; halve it and the force quadruples."},
+
+{id:12, lec:"L-1", blk:"Gravitation", topic:"Value of G",
+ q:"The universal gravitational constant G has the value",
+ opts:[
+  "6.67 × 10⁻¹¹ N·m²·kg⁻²",
+  "9.8 N·kg⁻¹",
+  "6.67 × 10⁻¹¹ N",
+  "9 × 10⁹ N·m²·C⁻²"],
+ ans:0,
+ why:[
+  "Correct. Its tiny magnitude is exactly why gravity is negligible between everyday objects.",
+  "9.8 is <b>g</b>, the acceleration due to gravity at the Earth's surface — a local value, not a universal constant.",
+  "The magnitude is right but G is not a force; its units include m² and kg⁻² so that Gm₁m₂/r² comes out in newtons.",
+  "9 × 10⁹ is Coulomb's constant k, the electrostatic counterpart."],
+ sol:"<b>G = 6.67 × 10⁻¹¹ N·m²·kg⁻²</b> — universal, the same everywhere. ⚠ Do not confuse it with <b>g = 9.8 m s⁻²</b>, which varies with location and altitude."},
+
+{id:13, lec:"L-1", blk:"Free-body diagrams", topic:"Reading arrow lengths",
+ q:"In a free-body diagram, the length of each force arrow represents",
+ opts:[
+  "the magnitude of that force",
+  "the distance over which the force acts",
+  "the time for which the force acts",
+  "the acceleration the force produces"],
+ ans:0,
+ why:[
+  "Correct — the arrows are drawn to scale, so a longer arrow means a bigger force and a balanced diagram shows equal opposing lengths.",
+  "An FBD is not a map; the arrows show force vectors, not displacements.",
+  "Duration is not represented in an FBD at all.",
+  "Acceleration is the <b>result</b> of the net force and is not drawn as one of the force arrows."],
+ sol:"Arrow <b>direction</b> = the direction of the force; arrow <b>length</b> = its magnitude. Drawing to scale makes it visually obvious whether the body is in equilibrium."},
+
+{id:14, lec:"L-1", blk:"Weight", topic:"Mass versus weight",
+ q:"An astronaut is taken from Earth to the Moon. Which statement is correct?",
+ opts:[
+  "Mass stays the same, weight decreases",
+  "Both mass and weight stay the same",
+  "Mass decreases, weight stays the same",
+  "Both mass and weight decrease"],
+ ans:0,
+ why:[
+  "Correct. Mass is the amount of matter and is unchanged; weight is mg, and the Moon's g is about one-sixth of Earth's.",
+  "Weight must change, since g on the Moon differs from g on Earth.",
+  "Mass is not location-dependent; it is the same quantity everywhere in the universe.",
+  "Mass does not decrease — only the weight does."],
+ sol:"<b>Mass</b> (kg) is intrinsic and constant. <b>Weight</b> (N) is the gravitational force mg and scales with the local g. On the Moon the astronaut weighs about a sixth as much but is exactly as hard to accelerate horizontally."},
+
+{id:15, lec:"L-1", blk:"Gravitation", topic:"Where the mass acts",
+ q:"When applying F = Gm₁m₂/r² to two spheres, the distance r is measured",
+ opts:[
+  "between their centres",
+  "between their nearest surfaces",
+  "between their farthest surfaces",
+  "from the centre of one to the surface of the other"],
+ ans:0,
+ why:[
+  "Correct. A uniform sphere attracts as if all its mass were concentrated at its centre, so the centre-to-centre separation is the one that enters the formula.",
+  "Surface-to-surface separation would give the wrong answer for large spheres, and would even be zero for touching bodies.",
+  "This overstates the separation by the sum of both diameters.",
+  "A mixed measurement is inconsistent — either both are centres or the formula does not apply."],
+ sol:"<b>r is centre-to-centre.</b> This is why the Earth's surface gravity uses the Earth's <b>radius</b>: you stand one radius away from the centre, not zero distance from the surface."},
+
+/* ---------------- L-2 (15) ---------------- */
+{id:16, lec:"L-2", blk:"Normal force", topic:"Normal on a sphere",
+ q:"A sphere rests on a flat surface. The normal reaction on it",
+ opts:[
+  "passes through the centre of the sphere",
+  "is tangential to the sphere at the contact point",
+  "acts at the sphere's topmost point",
+  "acts horizontally through the contact point"],
+ ans:0,
+ why:[
+  "Correct. The sphere's surface is tangential at the contact point, so the perpendicular to it is a radius — and every radius passes through the centre.",
+  "The normal is perpendicular to the surface, which is the opposite of tangential.",
+  "Contact forces act at the point of <b>contact</b>, which is at the bottom, not the top.",
+  "On a horizontal floor the normal is vertical; horizontal would be the direction of friction."],
+ sol:"For a sphere, <b>every</b> normal reaction is along a radius and so passes through the centre. That is why a sphere on an incline still has its normal aimed at the centre, just tilted."},
+
+{id:17, lec:"L-2", blk:"Normal force", topic:"Stacked blocks",
+ q:"Blocks A (top), B (middle) and C (bottom) of weights w<sub>A</sub>, w<sub>B</sub>, w<sub>C</sub> are stacked on the ground. The normal force from the ground on C is",
+ opts:[
+  "w_A + w_B + w_C",
+  "w_C",
+  "w_B + w_C",
+  "w_A"],
+ ans:0,
+ why:[
+  "Correct. The ground must support the entire stack, so it carries the total weight of all three blocks.",
+  "w<sub>C</sub> alone would leave A and B unsupported, and they would fall.",
+  "This omits block A, which also presses down through the stack.",
+  "w<sub>A</sub> is the normal force on the <b>top</b> surface of B, not the one from the ground."],
+ sol:"<b>Each surface carries everything above it.</b> Under A: w<sub>A</sub>. Under B: w<sub>A</sub> + w<sub>B</sub>. Under C: <b>w<sub>A</sub> + w<sub>B</sub> + w<sub>C</sub></b>. Draw the FBD of each block separately and the pattern is immediate."},
+
+{id:18, lec:"L-2", blk:"Normal force", topic:"Horizontal push does not change the vertical normal",
+ q:"A 10 kg sphere rests on the ground while a man pushes it <b>horizontally</b>. The normal reaction from the ground is (g = 9.8 m s⁻²)",
+ opts:["98 N","0 N","greater than 98 N","less than 98 N"],
+ ans:0,
+ why:[
+  "Correct. The vertical equation reads N = mg = 98 N; a purely horizontal push contributes nothing to it.",
+  "The ground still supports the sphere's weight, so the normal cannot vanish.",
+  "A horizontal force has no downward component, so it cannot press the sphere harder into the ground.",
+  "Nor can it lift the sphere; only a force with an upward component would reduce N."],
+ sol:"Resolve <b>vertically</b>: N − mg = 0 ⇒ <b>N = 98 N</b>. ⚠ N equals mg only when the surface is horizontal and no other vertical force acts — a push at an <b>angle</b> would change it."},
+
+{id:19, lec:"L-2", blk:"Tension", topic:"Direction of tension",
+ q:"The tension in a string attached to a block always",
+ opts:[
+  "pulls the block along the string, away from it",
+  "pushes the block along the string",
+  "acts perpendicular to the string",
+  "acts vertically downward"],
+ ans:0,
+ why:[
+  "Correct. A string can only pull; it goes slack the instant you try to push with it.",
+  "Pushing requires a rigid rod. This is exactly what distinguishes a string from a strut.",
+  "Tension is directed <b>along</b> the string, never across it.",
+  "The direction depends on how the string is oriented, and only happens to be downward in special cases."],
+ sol:"<b>Tension pulls, along the string, away from the body.</b> Whenever a calculation returns a negative tension, the string would have to push — the physical answer is that it has gone slack."},
+
+{id:20, lec:"L-2", blk:"Tension", topic:"When tension is uniform",
+ q:"The tension is the same at every point of a string when the string is",
+ opts:[
+  "massless and passes over a frictionless pulley",
+  "heavy and passes over a frictionless pulley",
+  "massless and passes over a rough pulley",
+  "heavy and passes over a rough pulley"],
+ ans:0,
+ why:[
+  "Correct. With no mass to accelerate and no friction to resist, no net force is needed on any segment, so the tension cannot change along it.",
+  "A heavy string needs a tension difference across each segment just to support and accelerate that segment's own weight.",
+  "A rough pulley exerts friction on the string, so the tensions on the two sides differ.",
+  "Both defects are present here, so the tension varies for two separate reasons."],
+ sol:"<b>Massless + frictionless ⇒ one tension throughout.</b> Break either condition and the tension varies from point to point. Almost every textbook pulley problem quietly assumes both."},
+
+{id:21, lec:"L-2", blk:"Tension", topic:"Two blocks hanging in series",
+ q:"A 2 kg block hangs by a string from a 5 kg block, which hangs from the ceiling. The tension in the <b>upper</b> string is (g = 9.8 m s⁻²)",
+ opts:["68.6 N","49 N","19.6 N","117.6 N"],
+ ans:0,
+ why:[
+  "Correct. The upper string supports both blocks: T = (5 + 2)(9.8) = 68.6 N.",
+  "49 N is the weight of the 5 kg block alone, ignoring the 2 kg hanging beneath it.",
+  "19.6 N is the weight of the 2 kg block, which is the tension in the <b>lower</b> string.",
+  "117.6 N adds the two weights and then adds the 5 kg weight again."],
+ sol:"Cut the system at each string. The <b>lower</b> string carries only the 2 kg block: T₂ = 19.6 N. The <b>upper</b> string carries everything below it: <b>T₁ = 7 × 9.8 = 68.6 N</b>. Note T₁ = T₂ + w₅, as the FBD of the 5 kg block requires."},
+
+{id:22, lec:"L-2", blk:"Tension", topic:"Accelerating a hanging pair",
+ q:"A 4 kg block and a 2 kg block hang one below the other from a light string and the whole assembly is pulled vertically upward by F = 120 N. The acceleration is (g = 10 m s⁻²)",
+ opts:["10 m s⁻²","20 m s⁻²","30 m s⁻²","0"],
+ ans:0,
+ why:[
+  "Correct. a = (F − total weight)/total mass = (120 − 60)/6 = 10 m s⁻².",
+  "20 m s⁻² is F/(total mass) with the weight not subtracted; gravity still pulls down while the assembly rises.",
+  "30 m s⁻² would follow from dividing 120 by 4 kg alone, ignoring the lower block.",
+  "The applied force exceeds the total weight of 60 N, so the assembly must accelerate."],
+ sol:"Treat the pair as one 6 kg body: <b>a = (120 − 6 × 10)/6 = 60/6 = 10 m s⁻².</b> Always net the applied force against the weight before dividing by the mass."},
+
+{id:23, lec:"L-2", blk:"Tension", topic:"Tension inside the accelerating pair",
+ q:"For that same assembly (4 kg above 2 kg, F = 120 N upward, a = 10 m s⁻²), the tension in the connecting string is",
+ opts:["40 N","20 N","60 N","120 N"],
+ ans:0,
+ why:[
+  "Correct. For the lower 2 kg block, T − mg = ma gives T = m(g + a) = 2(10 + 10) = 40 N.",
+  "20 N is the lower block's weight alone, which would be the tension only if the acceleration were zero.",
+  "60 N is the total weight of both blocks, not the tension between them.",
+  "120 N is the applied force at the top, which is the tension in the <b>upper</b> string."],
+ sol:"Isolate the <b>lower</b> block, since only the tension and its weight act on it: <b>T = m(g + a) = 2 × 20 = 40 N.</b> Choosing the block with fewest forces is always the fastest route."},
+
+{id:24, lec:"L-2", blk:"Pulleys", topic:"Atwood acceleration",
+ q:"Masses of 3 kg and 5 kg hang from a light string over a smooth pulley. The acceleration of the system is (g = 10 m s⁻²)",
+ opts:["2.5 m s⁻²","10 m s⁻²","1.25 m s⁻²","6.25 m s⁻²"],
+ ans:0,
+ why:[
+  "Correct. a = (m₂ − m₁)g/(m₁ + m₂) = (2)(10)/8 = 2.5 m s⁻².",
+  "10 m s⁻² is g itself, which would apply only if one side were empty.",
+  "1.25 halves the answer, from dividing by 16 instead of 8.",
+  "6.25 divides the difference by the difference rather than by the total mass."],
+ sol:"<b>a = (m₂ − m₁)g/(m₁ + m₂).</b> The <b>difference</b> in weights drives the motion, while the <b>total</b> mass resists it. Here (5 − 3)(10)/8 = <b>2.5 m s⁻²</b> — much less than g, as it must be."},
+
+{id:25, lec:"L-2", blk:"Pulleys", topic:"Atwood tension",
+ q:"For the same 3 kg and 5 kg Atwood machine, the tension in the string is",
+ opts:["37.5 N","30 N","50 N","80 N"],
+ ans:0,
+ why:[
+  "Correct. T = 2m₁m₂g/(m₁ + m₂) = 2(3)(5)(10)/8 = 300/8 = 37.5 N.",
+  "30 N is the weight of the 3 kg block; the tension must exceed it, since that block accelerates upward.",
+  "50 N is the weight of the 5 kg block; the tension must be less than it, since that block accelerates downward.",
+  "80 N is the combined weight, which the string never carries in a moving Atwood machine."],
+ sol:"<b>T = 2m₁m₂g/(m₁+m₂) = 37.5 N.</b> Sanity check: it lies strictly <b>between</b> the two weights, 30 N and 50 N — always true for a moving Atwood machine. Verify with the 3 kg block: T − 30 = 3(2.5) ✓"},
+
+{id:26, lec:"L-2", blk:"Pulleys", topic:"Force on the pulley",
+ q:"For a light, smooth pulley with a string tension T on both sides hanging vertically, the force on the pulley's hinge is",
+ opts:["2T","T","T/2","4T"],
+ ans:0,
+ why:[
+  "Correct. Both string segments pull downward on the pulley with T each, and they add to 2T.",
+  "T would be the force from a single segment; there are two.",
+  "T/2 would apply if the tension were somehow shared, but each side pulls with the full T.",
+  "4T double-counts each segment."],
+ sol:"<b>Hinge force = 2T</b> for vertical segments. ⚠ For the 3-5 kg machine above, 2T = 75 N, which is <b>less</b> than the total weight of 80 N — because the system is accelerating, the pulley carries less than the static load."},
+
+{id:27, lec:"L-2", blk:"Pulleys", topic:"Equal masses on a pulley",
+ q:"Equal masses m hang from both sides of a light smooth pulley. The thrust on the pulley is",
+ opts:["2mg","mg","zero","4mg"],
+ ans:0,
+ why:[
+  "Correct. With equal masses the system is static, so T = mg on each side and the hinge carries 2T = 2mg.",
+  "mg is the pull from one side only.",
+  "The pulley certainly bears a load — remove it and both masses fall.",
+  "4mg double-counts both segments."],
+ sol:"Equal masses ⇒ a = 0 ⇒ T = mg ⇒ <b>thrust = 2T = 2mg</b>, exactly the total weight, as it must be for a system in equilibrium."},
+
+{id:28, lec:"L-2", blk:"Pulleys", topic:"A three-block pulley system",
+ q:"Over a smooth pulley, a 2 kg block hangs on the left; on the right a 4 kg block sits above a 6 kg block. The acceleration is (g = 10 m s⁻²)",
+ opts:["20/3 m s⁻²","10 m s⁻²","8/12 m s⁻²","5 m s⁻²"],
+ ans:0,
+ why:[
+  "Correct. The net driving force is (10 − 2)(10) = 80 N over a total mass of 12 kg, so a = 80/12 = 20/3 ≈ 6.67 m s⁻².",
+  "10 m s⁻² is g, which no connected system with mass on both sides can reach.",
+  "8/12 forgets to multiply the mass difference by g.",
+  "5 m s⁻² would need a net force of 60 N, not 80 N."],
+ sol:"Right side 4 + 6 = 10 kg, left side 2 kg. <b>a = (10 − 2)g/(10 + 2) = 80/12 = 20/3 m s⁻².</b> Treat all connected blocks as one body first; only then isolate individuals for the tensions."},
+
+{id:29, lec:"L-2", blk:"Pulleys", topic:"Tension between two stacked hanging blocks",
+ q:"In that system (a = 20/3 m s⁻²), the tension in the string between the 4 kg and 6 kg blocks is",
+ opts:["20 N","40 N","60 N","100/3 N"],
+ ans:0,
+ why:[
+  "Correct. The 6 kg block is falling: 60 − T = 6a = 40, so T = 20 N.",
+  "40 N is the value of 6a, the net force on the 6 kg block, not the tension.",
+  "60 N is the weight of the 6 kg block, which is the tension only if the acceleration were zero.",
+  "100/3 N is the tension in the string above the 2 kg block, on the other side of the pulley."],
+ sol:"Isolate the 6 kg block, on which only its weight and T act: <b>60 − T = 6(20/3) = 40 ⇒ T = 20 N.</b> The tension is well below the weight because the block is accelerating downward."},
+
+{id:30, lec:"L-2", blk:"Tension", topic:"Pulling a string directly",
+ q:"A force of 25 N is applied directly to the free end of a light string. The tension in the string is",
+ opts:["25 N","12.5 N","50 N","zero"],
+ ans:0,
+ why:[
+  "Correct. A massless string transmits the applied force unchanged, so the tension equals it exactly.",
+  "12.5 N would apply if the force were somehow shared between two segments, which it is not.",
+  "50 N double-counts the applied force; the third-law reaction acts on the puller, not on the string.",
+  "A taut string being pulled is by definition under tension."],
+ sol:"<b>Force applied to a string ⇒ tension = applied force</b>, provided the string is massless. This is what makes a string a faithful force-transmitter around pulleys."},
+
+/* ---------------- L-3 (15) ---------------- */
+{id:31, lec:"L-3", blk:"Equilibrium", topic:"Conditions for equilibrium",
+ q:"A rigid body is in complete equilibrium when",
+ opts:[
+  "the net force and the net torque are both zero",
+  "the net force is zero",
+  "the net torque is zero",
+  "the body is at rest"],
+ ans:0,
+ why:[
+  "Correct. Zero net force prevents translation and zero net torque prevents rotation — both are needed.",
+  "Zero net force alone permits a <b>couple</b>, which spins the body without moving its centre of mass.",
+  "Zero net torque alone permits the whole body to accelerate bodily in a straight line.",
+  "A body moving at constant velocity is in equilibrium too; being at rest is sufficient but not necessary."],
+ sol:"<b>ΣF<sub>x</sub> = 0, ΣF<sub>y</sub> = 0, Στ = 0.</b> Equilibrium means no acceleration, translational or rotational — not necessarily no motion."},
+
+{id:32, lec:"L-3", blk:"Equilibrium", topic:"Torque",
+ q:"The torque of a force about an axis equals the force multiplied by",
+ opts:[
+  "the perpendicular distance from the axis to the force's line of action",
+  "the distance from the axis to the point of application",
+  "the time for which the force acts",
+  "the sine of the force's magnitude"],
+ ans:0,
+ why:[
+  "Correct — it is the <b>perpendicular</b> distance, the moment arm, that matters, which is why a force aimed straight at the axis produces no torque.",
+  "The straight-line distance to the application point overstates the torque unless the force is already perpendicular to it.",
+  "Force × time is impulse, a different quantity entirely.",
+  "A sine can only be taken of an angle, never of a magnitude."],
+ sol:"<b>τ = F·d</b>, with d the perpendicular distance from the axis to the line of action — equivalently τ = Fr sin θ. Pushing a door at its hinge gives d = 0 and no torque, however hard you push."},
+
+{id:33, lec:"L-3", blk:"Equilibrium", topic:"Choice of axis",
+ q:"For a body in equilibrium, the net torque is zero about",
+ opts:[
+  "any axis you choose",
+  "the centre of mass only",
+  "an axis through the point of application of the largest force",
+  "a vertical axis only"],
+ ans:0,
+ why:[
+  "Correct — and this is genuinely useful: choosing an axis through an unknown force makes that unknown drop out of the equation.",
+  "The centre of mass is often convenient but carries no special status once the net force is already zero.",
+  "There is nothing special about the largest force; any point works.",
+  "The orientation of the axis is unrestricted."],
+ sol:"If ΣF = 0 and Στ = 0 about one axis, then Στ = 0 about <b>every</b> axis. Exploit it: take moments about a point where an unknown force acts, and that unknown vanishes from the equation."},
+
+{id:34, lec:"L-3", blk:"Lami's theorem", topic:"Statement of the theorem",
+ q:"Lami's theorem states that for three forces keeping a particle in equilibrium,",
+ opts:[
+  "each force is proportional to the sine of the angle between the other two",
+  "each force is proportional to the sine of the angle it makes with the vertical",
+  "each force is proportional to the cosine of the angle between the other two",
+  "the three forces are equal in magnitude"],
+ ans:0,
+ why:[
+  "Correct. F<sub>a</sub>/sin α = F<sub>b</sub>/sin β = F<sub>c</sub>/sin γ, where each Greek angle is measured between the <b>other two</b> forces.",
+  "The vertical has no special role; the theorem is purely about the angles between the forces themselves.",
+  "It is a law of <b>sines</b>, inherited from the triangle of forces — cosines belong to the cosine rule.",
+  "The three forces are equal only in the special case where all three angles are 120°."],
+ sol:"<b>F<sub>a</sub>/sin α = F<sub>b</sub>/sin β = F<sub>c</sub>/sin γ</b>, with α + β + γ = 360°. ⚠ The angle paired with each force is the one <b>opposite</b> it, i.e. between the other two."},
+
+{id:35, lec:"L-3", blk:"Lami's theorem", topic:"When it applies",
+ q:"Lami's theorem can be applied only when the forces are",
+ opts:[
+  "exactly three, coplanar, concurrent and in equilibrium",
+  "any number, coplanar and in equilibrium",
+  "exactly three and mutually perpendicular",
+  "exactly three, whether or not the body is in equilibrium"],
+ ans:0,
+ why:[
+  "Correct — all four conditions are needed, since the proof relies on the three vectors closing into a triangle.",
+  "With four or more forces there is no triangle of forces, and the theorem fails.",
+  "Perpendicularity is not required; the theorem handles any angles at all.",
+  "Equilibrium is essential — without it the vectors do not close and the sine relation does not hold."],
+ sol:"Needed: <b>exactly three · coplanar · concurrent · in equilibrium</b>. For four or more forces, fall back on <b>ΣF<sub>x</sub> = 0 and ΣF<sub>y</sub> = 0</b>, which always work."},
+
+{id:36, lec:"L-3", blk:"Lami's theorem", topic:"Sum of the angles",
+ q:"In Lami's theorem, the three angles α, β and γ satisfy",
+ opts:["α + β + γ = 360°","α + β + γ = 180°","α + β + γ = 90°","α = β = γ always"],
+ ans:0,
+ why:[
+  "Correct. The three angles are measured around the common point of concurrency, so they close a full turn.",
+  "180° is the angle sum of a <b>triangle's interior</b> angles; the Lami angles are the physical angles between the arrows, which are their supplements.",
+  "90° is far too small for three angles around a point.",
+  "They are all equal only in the symmetric 120° case, not in general."],
+ sol:"The angles are measured <b>around the point</b> where the forces meet, so they total <b>360°</b>. Each is the supplement of the corresponding interior angle of the triangle of forces, and sin(180° − θ) = sin θ is exactly why the two formulations agree."},
+
+{id:37, lec:"L-3", blk:"Lami's theorem", topic:"Why the theorem works",
+ q:"Lami's theorem follows from the law of sines because three equilibrium forces drawn tail-to-head",
+ opts:[
+  "close into a triangle, since their vector sum is zero",
+  "always form a right-angled triangle",
+  "lie along a single straight line",
+  "form an equilateral triangle"],
+ ans:0,
+ why:[
+  "Correct. A zero resultant means the head of the last vector meets the tail of the first, producing a closed triangle of forces — and the law of sines then applies.",
+  "The triangle is right-angled only in special cases; the derivation needs no such restriction.",
+  "Collinear forces are explicitly excluded, since three non-collinear forces are required.",
+  "Equilateral would mean all three forces are equal, which is only the 120° special case."],
+ sol:"Zero resultant ⇒ the vectors <b>close into a triangle</b> ⇒ a/sin A = b/sin B = c/sin C. Each interior angle A is the supplement of the physical angle α, and since <b>sin(180° − α) = sin α</b>, the law of sines becomes Lami's theorem unchanged."},
+
+{id:38, lec:"L-3", blk:"Lami's theorem", topic:"The symmetric case",
+ q:"Three forces keep a particle in equilibrium with 120° between each adjacent pair. If one force is 10 N, the other two are",
+ opts:["10 N each","5 N each","20 N each","10 N and 20 N"],
+ ans:0,
+ why:[
+  "Correct. All three angles equal 120°, so all three sines are equal and Lami's theorem forces all three magnitudes to be equal.",
+  "5 N each would leave a net force, since three unequal vectors at 120° cannot cancel this way.",
+  "20 N each likewise fails to balance the 10 N force.",
+  "Unequal magnitudes require unequal angles; here the symmetry is exact."],
+ sol:"F₁/sin 120° = F₂/sin 120° = F₃/sin 120° ⇒ <b>all three are equal, 10 N</b>. Symmetric angles ⇒ symmetric magnitudes, a useful shortcut worth recognising on sight."},
+
+{id:39, lec:"L-3", blk:"Incline", topic:"Horizontal force on an incline",
+ q:"A 2 kg block rests on a smooth 37° incline. The <b>horizontal</b> force needed to hold it in equilibrium is (g = 10 m s⁻², tan 37° = 3/4)",
+ opts:["15 N","12 N","16 N","20 N"],
+ ans:0,
+ why:[
+  "Correct. F = mg tan θ = (2)(10)(3/4) = 15 N.",
+  "12 N is mg sin 37° = 20 × 0.6, which is the force needed <b>along</b> the incline, not horizontally.",
+  "16 N is mg cos 37° = 20 × 0.8, the normal component of the weight.",
+  "20 N is the full weight, which would be needed only for a vertical wall."],
+ sol:"With only N, mg and a horizontal F, resolving gives <b>F = mg tan θ = 15 N</b>. ⚠ Distinguish this from a force applied <b>along</b> the incline, which is mg sin θ = 12 N — the horizontal one is always the larger."},
+
+{id:40, lec:"L-3", blk:"Lami's theorem", topic:"Tension in the slanted string",
+ q:"A 2 kg block hangs held by string 1 at 37° above the horizontal and a horizontal string 2. The tension T₁ in string 1 is (g = 10 m s⁻²)",
+ opts:["100/3 N","20 N","80/3 N","12 N"],
+ ans:0,
+ why:[
+  "Correct. Vertical balance gives T₁ sin 37° = mg, so T₁ = 20/0.6 = 100/3 ≈ 33.3 N.",
+  "20 N is the block's weight, which the slanted string would carry only if it were vertical.",
+  "80/3 N is T₂, the tension in the <b>horizontal</b> string.",
+  "12 N is 20 sin 37°, which multiplies where it should divide."],
+ sol:"Only string 1 has a vertical component, so it alone supports the weight: <b>T₁ = mg/sin 37° = 20/(3/5) = 100/3 ≈ 33.3 N</b>. A slanted string always carries <b>more</b> than the weight it holds."},
+
+{id:41, lec:"L-3", blk:"Lami's theorem", topic:"Tension in the horizontal string",
+ q:"For the same setup, the tension T₂ in the horizontal string is",
+ opts:["80/3 N","100/3 N","20 N","16 N"],
+ ans:0,
+ why:[
+  "Correct. Horizontal balance gives T₂ = T₁ cos 37° = (100/3)(4/5) = 80/3 ≈ 26.7 N.",
+  "100/3 N is T₁, the tension in the slanted string, which must be the larger of the two.",
+  "20 N is the weight, and no horizontal string carries the weight.",
+  "16 N is 20 cos 37°, which uses the weight in place of T₁."],
+ sol:"Horizontally, <b>T₂ = T₁ cos 37° = 80/3 ≈ 26.7 N</b>, equivalently mg/tan 37° = 20/(3/4). Check the ratio: T₂/T₁ = cos 37° = 0.8 ✓"},
+
+{id:42, lec:"L-3", blk:"Lami's theorem", topic:"A block on two ropes",
+ q:"A 30 kg block hangs from a point held by rope CA at 45° and rope CB at 30° to the horizontal. Using Lami's theorem with W = 294 N, the tension T<sub>AC</sub> is about",
+ opts:["264 N","215 N","294 N","147 N"],
+ ans:0,
+ why:[
+  "Correct. T<sub>AC</sub> = 294 sin 120°/sin 105° = 294 × 0.866/0.966 ≈ 264 N.",
+  "215 N is T<sub>BC</sub>, the tension in the <b>other</b> rope, which uses sin 135° in the numerator.",
+  "294 N is the weight itself; neither rope carries exactly the weight when both are slanted.",
+  "147 N is half the weight, which would only be right if the two ropes were symmetric and vertical."],
+ sol:"Angles opposite each force: 120° opposite T<sub>AC</sub>, 135° opposite T<sub>BC</sub>, 105° opposite W. Then <b>T<sub>AC</sub>/sin 120° = T<sub>BC</sub>/sin 135° = 294/sin 105°</b>, giving T<sub>AC</sub> ≈ <b>264 N</b> and T<sub>BC</sub> ≈ 215 N. Check with components: 264 sin 45° + 215 sin 30° = 294 ✓"},
+
+{id:43, lec:"L-3", blk:"Lami's theorem", topic:"Naming the theorem",
+ q:"The relation F<sub>a</sub>/sin α = F<sub>b</sub>/sin β = F<sub>c</sub>/sin γ for three concurrent forces in equilibrium is known as",
+ opts:["Lami's theorem","Pythagoras' theorem","Mendeleev's theorem","Newton's third law"],
+ ans:0,
+ why:[
+  "Correct — named after Bernard Lamy, and it is the standard shortcut for three-force equilibrium problems.",
+  "Pythagoras relates the sides of a <b>right</b> triangle and involves no sines at all.",
+  "Mendeleev was a chemist, known for the periodic table; the name appears in force questions purely as a decoy.",
+  "Newton's third law concerns action–reaction pairs on <b>different</b> bodies, not three forces on one."],
+ sol:"<b>Lami's theorem.</b> The decoy names in multiple-choice questions are usually Pythagoras and Mendeleev — recognise the sine structure and the three-concurrent-force condition, and the identification is immediate."},
+
+{id:44, lec:"L-3", blk:"Equilibrium", topic:"Resolving in two directions",
+ q:"When a body in equilibrium is acted on by five forces at various angles, the reliable method is to",
+ opts:[
+  "resolve all forces along two perpendicular directions and set each sum to zero",
+  "apply Lami's theorem to any three of them",
+  "add the magnitudes and set the total to zero",
+  "take the largest force and ignore the rest"],
+ ans:0,
+ why:[
+  "Correct. Resolving into components works for any number of forces at any angles, and gives two independent equations.",
+  "Lami's needs <b>exactly three</b> forces; picking three arbitrary ones out of five discards the rest and gives a wrong answer.",
+  "Magnitudes are always positive and can never sum to zero; forces must be added as <b>vectors</b>.",
+  "Every force contributes; discarding any of them breaks the balance."],
+ sol:"<b>ΣF<sub>x</sub> = 0 and ΣF<sub>y</sub> = 0</b> is the universal method. Lami's is a convenient shortcut available only in the three-force case; when in doubt, resolve."},
+
+{id:45, lec:"L-3", blk:"Equilibrium", topic:"Equilibrium and motion",
+ q:"A crate slides across a floor at a constant velocity of 2 m s⁻¹. The crate is",
+ opts:[
+  "in equilibrium, since its acceleration is zero",
+  "not in equilibrium, since it is moving",
+  "not in equilibrium, since friction acts on it",
+  "in equilibrium only if the floor is frictionless"],
+ ans:0,
+ why:[
+  "Correct. Equilibrium means zero acceleration, and constant velocity — including a non-zero one — satisfies that exactly.",
+  "Motion at constant velocity is entirely compatible with equilibrium; it is Newton's first law.",
+  "Friction is present, but the applied force must be balancing it exactly for the velocity to stay constant.",
+  "On a frictionless floor no applied force would be needed, but equilibrium holds here too — the forces simply cancel."],
+ sol:"<b>Equilibrium ⇔ zero acceleration</b>, not zero velocity. Static equilibrium (at rest) and dynamic equilibrium (constant velocity) obey exactly the same equations ΣF = 0."}
+
+];
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter P-5 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

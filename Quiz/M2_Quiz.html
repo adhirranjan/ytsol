@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-2 Sets — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>M-2 · Sets</h1>
+    <p id="heroSub">Lectures L-1 to L-3 + Strong Box · 66 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter. The Strong Box questions are JEE Main 2022–2026 and lean on counting, so leave L-1 in if you pick it.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">66 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · M-2 Sets · mastery quiz built from lectures L-1 to L-3 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   M-2 SETS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Sets, Types &amp; Subsets",
+   desc:"well-defined collections, roster &amp; set-builder form, cardinality, empty / singleton / finite sets, equal vs equivalent, subsets, power sets and the 2&#8319; count"},
+  {key:"L-2", name:"L-2 · Intervals, Venn Diagrams &amp; Set Operations",
+   desc:"open / closed / half-open intervals, union &amp; intersection, difference, symmetric difference, complement, De Morgan's laws, distributive law"},
+  {key:"L-3", name:"L-3 · Algebra of Sets &amp; Counting",
+   desc:"idempotent / identity / associative / complement laws, n(A&#8746;B), difference and symmetric-difference counts, the three-set formula, exactly-one and exactly-two"},
+  {key:"SB",  name:"Strong Box · Previous Year Questions",
+   desc:"JEE Main 2022&ndash;2026 &mdash; counting subsets under a condition, 2&#7504; &minus; 2&#8319; = 56, modulus sets as intervals, and coprime sums by inclusion&ndash;exclusion"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (20) ---------------- */
+{id:1, lec:"L-1", blk:"What is a set", topic:"Well-defined collections",
+ q:"Which of the following is a <b>well-defined set</b>?",
+ opts:[
+  "The collection of all prime numbers less than 20",
+  "The collection of all good cricket players",
+  "The collection of all tall boys in a class",
+  "The collection of all difficult problems in this book"],
+ ans:0,
+ why:[
+  "Correct. Given any object you can decide beyond doubt whether it belongs — 17 is in, 18 is not. That is exactly what “well-defined” demands.",
+  "“Good” is a matter of opinion. Two people would disagree on membership, so this is not a set.",
+  "“Tall” has no agreed threshold — is 5′9″ tall? Without a rule there is no set.",
+  "“Difficult” is subjective in the same way. Vague adjectives never define sets."],
+ sol:"A set is a <b>well-defined collection of distinct objects</b>. “Well-defined” means membership can be settled with certainty. Subjective words — good, tall, rich, difficult, beautiful — always fail this test."},
+
+{id:2, lec:"L-1", blk:"What is a set", topic:"Roster form and distinctness",
+ q:"In roster form, the set of letters of the word <b>SCHOOL</b> is",
+ opts:["{S, C, H, O, L}","{S, C, H, O, O, L}","{S, C, H, L}","{SCHOOL}"],
+ ans:0,
+ why:[
+  "Correct. The word has six letters but only five <b>distinct</b> ones, since O appears twice and is written once.",
+  "An element is never repeated in a set. Listing O twice adds nothing — {S,C,H,O,O,L} and {S,C,H,O,L} are the same set, but the second is the correct way to write it.",
+  "This drops O entirely. Repeated elements are written <b>once</b>, not zero times.",
+  "This is a singleton whose only element is the word “SCHOOL” itself, not a set of its letters."],
+ sol:"Roster (tabular) form lists the elements between braces, each written <b>once</b>: <b>{S, C, H, O, L}</b>. Order is irrelevant too — {L, O, H, C, S} is the same set."},
+
+{id:3, lec:"L-1", blk:"What is a set", topic:"Cardinality with repeated letters",
+ q:"If A is the set of letters of the word <b>MATHEMATICS</b>, then n(A) is",
+ opts:["8","11","9","10"],
+ ans:0,
+ why:[
+  "Correct. The distinct letters are M, A, T, H, E, I, C, S — eight of them. M, A and T each appear twice and count once.",
+  "11 is the number of <b>letters in the word</b>, not the number of distinct letters.",
+  "9 would mean only two letters repeat; in fact three do (M, A, T).",
+  "10 counts only one repetition."],
+ sol:"MATHEMATICS has 11 letters, but M, A and T each occur twice. Distinct letters: <b>{M, A, T, H, E, I, C, S}</b>, so n(A) = <b>8</b>."},
+
+{id:4, lec:"L-1", blk:"What is a set", topic:"Set-builder notation",
+ q:"In set-builder notation {x : P(x)}, the symbol “:” (or “|”) reads",
+ opts:["such that","belongs to","for all","implies"],
+ ans:0,
+ why:[
+  "Correct. {x : x is even} reads “the set of all x <b>such that</b> x is even”.",
+  "“Belongs to” is the symbol ∈, which appears inside the condition, not as the separator.",
+  "“For all” is ∀, a quantifier — a different symbol with a different job.",
+  "“Implies” is the arrow ⇒, which links whole statements rather than separating a variable from its condition."],
+ sol:"{x <b>:</b> x has property P} = “the set of all x <b>such that</b> x has property P”. Either “:” or “|” may be used."},
+
+{id:5, lec:"L-1", blk:"Types of set", topic:"Identifying the empty set",
+ q:"Which of the following is the <b>empty set</b>?",
+ opts:[
+  "{x : x is a prime number between 24 and 28}",
+  "{0}",
+  "{φ}",
+  "{x : x is an even prime number}"],
+ ans:0,
+ why:[
+  "Correct. The numbers strictly between 24 and 28 are 25, 26 and 27 — none is prime, so the collection has no elements.",
+  "This is a <b>singleton</b>: it contains one element, the number 0. A set containing zero is not the same as a set containing nothing.",
+  "This is also a singleton — its single element is the empty set φ. Note n({φ}) = 1, whereas n(φ) = 0.",
+  "This is {2} — 2 is the one and only even prime."],
+ sol:"The empty (null, void) set φ has <b>no</b> elements, so n(φ) = 0. ⚠ Distinguish φ from {0} and from {φ}, both of which are singletons."},
+
+{id:6, lec:"L-1", blk:"Types of set", topic:"Cardinality of the empty set",
+ q:"The value of n(φ) is",
+ opts:["0","1","φ","undefined"],
+ ans:0,
+ why:[
+  "Correct — the empty set has no elements, so its cardinal number is zero.",
+  "1 is n({φ}), the cardinality of the set <i>containing</i> the empty set.",
+  "n(A) is always a <b>number</b>, never a set.",
+  "It is perfectly well defined; counting nothing gives 0."],
+ sol:"<b>n(φ) = 0</b>, while n({φ}) = 1. The cardinal number counts distinct elements."},
+
+{id:7, lec:"L-1", blk:"Types of set", topic:"Equal versus equivalent",
+ q:"Two sets A and B are called <b>equivalent</b> when",
+ opts:[
+  "n(A) = n(B)",
+  "they have exactly the same elements",
+  "A ⊆ B",
+  "A ∩ B = φ"],
+ ans:0,
+ why:[
+  "Correct — equivalence is purely about the <b>count</b>. {1, 2, 3} and {a, b, c} are equivalent without sharing a single element.",
+  "That is the definition of <b>equal</b> sets. Equal ⇒ equivalent, but not conversely.",
+  "A ⊆ B is containment, which does not force the counts to match.",
+  "Disjointness says the sets share nothing — unrelated to whether they are the same size."],
+ sol:"<b>Equivalent:</b> n(A) = n(B). <b>Equal:</b> identical elements. Equal sets are always equivalent; equivalent sets need not be equal."},
+
+{id:8, lec:"L-1", blk:"Types of set", topic:"Singleton sets",
+ q:"A set containing exactly one element is called",
+ opts:["a singleton set","a null set","an equivalent set","a universal set"],
+ ans:0,
+ why:[
+  "Correct. {5}, {φ} and {0} are all singletons.",
+  "A null (empty) set contains <b>no</b> elements.",
+  "“Equivalent” describes a relation between two sets, not the size of one.",
+  "The universal set U is the set containing all objects under discussion in a given context."],
+ sol:"<b>Singleton</b> = exactly one element. Related terms: null/empty (none), non-empty (at least one), finite, infinite."},
+
+{id:9, lec:"L-1", blk:"Subsets and power sets", topic:"Counting subsets",
+ q:"A set has n elements. The total number of its subsets is",
+ opts:["2<sup>n</sup>","2<sup>n</sup> − 1","n²","n!"],
+ ans:0,
+ why:[
+  "Correct. Each element is independently either in or out, giving 2 choices per element and 2ⁿ subsets in all.",
+  "That is the number of <b>proper</b> subsets — 2ⁿ with the set itself removed.",
+  "n² counts ordered pairs, not subsets. For n = 3 it gives 9, but there are 8 subsets.",
+  "n! counts arrangements. For n = 3 it gives 6, not 8."],
+ sol:"<b>Subsets = 2<sup>n</sup></b>, proper subsets = 2ⁿ − 1, and |P(A)| = 2ⁿ."},
+
+{id:10, lec:"L-1", blk:"Subsets and power sets", topic:"Counting proper subsets",
+ q:"A set has n elements. The number of its <b>proper</b> subsets is",
+ opts:["2<sup>n</sup> − 1","2<sup>n</sup>","2<sup>n</sup> − 2","n − 1"],
+ ans:0,
+ why:[
+  "Correct. A proper subset is any subset other than the set itself, so we remove exactly one from the 2ⁿ total.",
+  "That counts all subsets, including the improper one (the set itself).",
+  "This removes two subsets. Only the set itself is improper — the empty set <b>is</b> a proper subset (when the set is non-empty).",
+  "n − 1 bears no relation to the count; for n = 3 there are 7 proper subsets, not 2."],
+ sol:"<b>Proper subsets = 2<sup>n</sup> − 1.</b> A ⊂ B (proper) means A ⊆ B and A ≠ B, so only B itself is excluded."},
+
+{id:11, lec:"L-1", blk:"Subsets and power sets", topic:"Subsets of a three-element set",
+ q:"The total number of subsets of {a, b, c} is",
+ opts:["8","6","7","3"],
+ ans:0,
+ why:[
+  "Correct: 2³ = 8, namely φ, {a}, {b}, {c}, {a,b}, {a,c}, {b,c} and {a,b,c}.",
+  "6 = 3! counts arrangements of the three letters, not subsets.",
+  "7 is the number of <b>proper</b> subsets, i.e. 2³ − 1. The question asks for all subsets.",
+  "3 counts only the singletons."],
+ sol:"2<sup>n</sup> with n = 3 gives <b>8</b> subsets."},
+
+{id:12, lec:"L-1", blk:"Subsets and power sets", topic:"Subsets of the empty set",
+ q:"The total number of subsets of φ is",
+ opts:["1","0","2","undefined"],
+ ans:0,
+ why:[
+  "Correct: 2<sup>0</sup> = 1. The single subset is φ itself — every set is a subset of itself.",
+  "0 would say φ has no subsets at all, but φ ⊆ φ is always true.",
+  "There is only one candidate subset available, since there are no elements to choose from.",
+  "The formula 2ⁿ applies perfectly well at n = 0."],
+ sol:"n(φ) = 0, so the number of subsets is 2<sup>0</sup> = <b>1</b> — the empty set is its own only subset."},
+
+{id:13, lec:"L-1", blk:"Subsets and power sets", topic:"The power set of the empty set",
+ q:"The power set P(φ) is",
+ opts:[
+  "{φ}, a set with one element",
+  "φ, a set with no elements",
+  "{0}, a set containing zero",
+  "undefined"],
+ ans:0,
+ why:[
+  "Correct. P(φ) collects all subsets of φ, and there is exactly one — φ itself. So P(φ) = {φ} and n[P(φ)] = 1 = 2<sup>0</sup> ✓",
+  "This confuses the power set with the set it is built from. P(φ) is non-empty because φ has a subset.",
+  "0 is a number, not a subset of φ. The single element of P(φ) is the empty set, not zero.",
+  "It is entirely well defined."],
+ sol:"P(A) is the set whose <b>elements are the subsets</b> of A. Since φ ⊆ φ, we get <b>P(φ) = {φ}</b>, with 2<sup>0</sup> = 1 element."},
+
+{id:14, lec:"L-1", blk:"Subsets and power sets", topic:"Why the count is 2ⁿ",
+ q:"The number of subsets of an n-element set is 2<sup>n</sup> because",
+ opts:[
+  "each element is independently either in or out of the subset, giving 2 choices per element",
+  "the elements can be arranged in 2<sup>n</sup> different orders",
+  "each subset must contain exactly 2 elements",
+  "there are n ways to fill each of 2 positions"],
+ ans:0,
+ why:[
+  "Correct. Two independent choices repeated n times give 2 × 2 × … = 2ⁿ. Removing the improper subset leaves 2ⁿ − 1 proper ones.",
+  "Arrangements are counted by n!, and in any case order is irrelevant inside a set.",
+  "Subsets may have any size from 0 to n. The two-element subsets alone number n(n−1)/2.",
+  "That describes n², a different count entirely."],
+ sol:"Build a subset by walking the n elements and saying <b>in</b> or <b>out</b> at each — 2 choices, n times, so <b>2<sup>n</sup></b> subsets."},
+
+{id:15, lec:"L-1", blk:"Subsets and power sets", topic:"Solving a power-set equation",
+ q:"For finite sets A and B, n[P(A)] = n[P(B)] + 15. Then",
+ opts:[
+  "n(A) = 4 and n(B) = 0",
+  "n(A) = 4 and n(B) = 1",
+  "n(A) = 15 and n(B) = 0",
+  "n(A) = 5 and n(B) = 1"],
+ ans:0,
+ why:[
+  "Correct. The equation is 2<sup>a</sup> = 2<sup>b</sup> + 15, and 16 = 1 + 15 works: a = 4, b = 0.",
+  "2⁴ − 2¹ = 16 − 2 = 14, not 15.",
+  "2¹⁵ − 2⁰ = 32767, far too large. The 15 is the <b>difference</b>, not a cardinality.",
+  "2⁵ − 2¹ = 32 − 2 = 30, not 15."],
+ sol:"n[P(A)] = 2<sup>n(A)</sup>, so 2<sup>a</sup> − 2<sup>b</sup> = 15. Since 15 is odd, 2<sup>b</sup> must be 1 (b = 0), giving 2<sup>a</sup> = 16 and <b>a = 4, b = 0</b>."},
+
+{id:16, lec:"L-1", blk:"Subsets and power sets", topic:"The 2ᵐ − 2ⁿ = 56 equation",
+ q:"Two finite sets have m and n elements. The total number of subsets of the first is 56 more than that of the second. Then",
+ opts:[
+  "m = 6, n = 3",
+  "m = 7, n = 4",
+  "m = 6, n = 4",
+  "m = 8, n = 3"],
+ ans:0,
+ why:[
+  "Correct: 2<sup>6</sup> − 2<sup>3</sup> = 64 − 8 = 56 ✓",
+  "2⁷ − 2⁴ = 128 − 16 = 112, twice too big.",
+  "2⁶ − 2⁴ = 64 − 16 = 48.",
+  "2⁸ − 2³ = 256 − 8 = 248."],
+ sol:"2<sup>m</sup> − 2<sup>n</sup> = 56. Factor out: 2<sup>n</sup>(2<sup>m−n</sup> − 1) = 56 = 8 × 7, so 2<sup>n</sup> = 8 and 2<sup>m−n</sup> − 1 = 7 ⇒ <b>n = 3, m = 6</b>. This exact equation reappears in the Strong Box."},
+
+{id:17, lec:"L-1", blk:"Subsets and power sets", topic:"The empty set as a subset",
+ q:"Which statement is TRUE?",
+ opts:[
+  "φ is a subset of every set",
+  "φ is an element of every set",
+  "φ has no subsets",
+  "φ = {φ}"],
+ ans:0,
+ why:[
+  "Correct. The condition “x ∈ φ ⇒ x ∈ A” holds vacuously, since φ has no elements to test.",
+  "Being a <b>subset</b> and being an <b>element</b> are different. φ ⊆ {1,2} is true, but φ ∈ {1,2} is false.",
+  "φ ⊆ φ, so it has exactly one subset — itself.",
+  "φ has no elements while {φ} has one, so they cannot be equal."],
+ sol:"<b>φ ⊆ A for every set A</b>, and every set is a subset of the universal set U. Keep ⊆ and ∈ distinct."},
+
+{id:18, lec:"L-1", blk:"Subsets and power sets", topic:"Transitivity of inclusion",
+ q:"If A ⊂ B and B ⊂ C, then",
+ opts:["A ⊂ C","C ⊂ A","A = C","nothing can be concluded"],
+ ans:0,
+ why:[
+  "Correct. Take any x ∈ A; then x ∈ B because A ⊂ B, and hence x ∈ C because B ⊂ C. So every element of A lies in C.",
+  "The containment runs the other way — C is the largest of the three.",
+  "Proper containment at each step makes A strictly smaller than C, so they cannot be equal.",
+  "The conclusion follows immediately by chasing an arbitrary element through both inclusions."],
+ sol:"Inclusion is <b>transitive</b>. x ∈ A ⇒ x ∈ B ⇒ x ∈ C, so <b>A ⊂ C</b>."},
+
+{id:19, lec:"L-1", blk:"Subsets and power sets", topic:"Two-way containment",
+ q:"If A ⊆ B and B ⊆ A, then",
+ opts:["A = B","A ⊂ B","A ∩ B = φ","n(A) &gt; n(B)"],
+ ans:0,
+ why:[
+  "Correct. Every element of A lies in B and every element of B lies in A, so the two sets have exactly the same elements.",
+  "⊂ (proper) would require A ≠ B, which is precisely what two-way containment rules out.",
+  "In fact A ∩ B = A = B, which is empty only in the trivial case A = B = φ.",
+  "The counts must be equal, since the sets are equal."],
+ sol:"<b>A ⊆ B and B ⊆ A ⇒ A = B.</b> This “prove containment both ways” pattern is the standard route to any set equality."},
+
+{id:20, lec:"L-1", blk:"Subsets and power sets", topic:"Improper subset",
+ q:"The <b>improper</b> subset of a set A is",
+ opts:["A itself","φ","any subset with n(A) − 1 elements","the power set of A"],
+ ans:0,
+ why:[
+  "Correct. Every set is a subset of itself, and that one subset is called improper — which is why the proper count is 2ⁿ − 1.",
+  "φ is a genuine <b>proper</b> subset of any non-empty set.",
+  "Subsets of that size are proper, since they differ from A.",
+  "P(A) is generally not a subset of A at all — it is a set of sets."],
+ sol:"<b>Improper subset = A itself</b> (A ⊆ A but not A ⊂ A). Removing it from the 2ⁿ subsets leaves 2ⁿ − 1 proper subsets."},
+
+/* ---------------- L-2 (20) ---------------- */
+{id:21, lec:"L-2", blk:"Intervals", topic:"Open interval notation",
+ q:"The set {x : a &lt; x &lt; b} is written in interval form as",
+ opts:["(a, b)","[a, b]","[a, b)","(a, b]"],
+ ans:0,
+ why:[
+  "Correct — both inequalities are strict, so both endpoints are excluded and both brackets are round.",
+  "Square brackets on both sides mean a ≤ x ≤ b, including both endpoints.",
+  "[a, b) includes a but excludes b, i.e. a ≤ x &lt; b.",
+  "(a, b] excludes a but includes b, i.e. a &lt; x ≤ b."],
+ sol:"<b>Round bracket ⇒ endpoint excluded, square bracket ⇒ endpoint included.</b> Strict inequalities on both sides give the open interval <b>(a, b)</b>."},
+
+{id:22, lec:"L-2", blk:"Intervals", topic:"Reading the brackets",
+ q:"In interval notation, a <b>square</b> bracket indicates that the endpoint is",
+ opts:["included","excluded","infinite","negative"],
+ ans:0,
+ why:[
+  "Correct. [2, 5] contains both 2 and 5; (2, 5) contains neither.",
+  "That is what the round bracket does.",
+  "Infinity is never an endpoint that can be reached, which is exactly why it always takes a round bracket.",
+  "Brackets carry no information about sign."],
+ sol:"<b>Square = in, round = out.</b> So [a, b) means a ≤ x &lt; b."},
+
+{id:23, lec:"L-2", blk:"Intervals", topic:"Bracketing infinity",
+ q:"In an interval, the symbol ∞ always takes",
+ opts:["a round bracket","a square bracket","either bracket","no bracket at all"],
+ ans:0,
+ why:[
+  "Correct. ∞ is not a real number, so it can never be attained — it must always be excluded, as in (3, ∞) or (−∞, 0].",
+  "A square bracket would claim ∞ is a member of the set, which is impossible.",
+  "The choice is forced, not free.",
+  "Every interval endpoint carries a bracket."],
+ sol:"Write <b>(−∞, a]</b> or <b>[a, ∞)</b> — the infinite end is always round, because infinity is not a number that can belong to the set."},
+
+{id:24, lec:"L-2", blk:"Intervals", topic:"Half-open intervals",
+ q:"The interval [a, b) in set-builder form is",
+ opts:[
+  "{x : a ≤ x &lt; b}",
+  "{x : a &lt; x ≤ b}",
+  "{x : a ≤ x ≤ b}",
+  "{x : a &lt; x &lt; b}"],
+ ans:0,
+ why:[
+  "Correct — the square bracket at a makes it ≤, the round bracket at b makes it strict.",
+  "This is (a, b], the mirror image with the brackets swapped.",
+  "This is the closed interval [a, b].",
+  "This is the open interval (a, b)."],
+ sol:"[a, b) = <b>{x : a ≤ x &lt; b}</b> — a is in, b is out."},
+
+{id:25, lec:"L-2", blk:"Union and intersection", topic:"Definition of union",
+ q:"A ∪ B is defined as",
+ opts:[
+  "{x : x ∈ A <b>or</b> x ∈ B}",
+  "{x : x ∈ A <b>and</b> x ∈ B}",
+  "{x : x ∈ A and x ∉ B}",
+  "{x : x ∉ A and x ∉ B}"],
+ ans:0,
+ why:[
+  "Correct. Union is the “or” operation; elements common to both are listed once.",
+  "That is the <b>intersection</b>, the “and” operation.",
+  "That is the difference A − B.",
+  "That is (A ∪ B)′, the complement of the union."],
+ sol:"<b>Union = OR, intersection = AND.</b> A ∪ B collects everything in either set, each element written once."},
+
+{id:26, lec:"L-2", blk:"Union and intersection", topic:"Definition of intersection",
+ q:"A ∩ B is defined as",
+ opts:[
+  "{x : x ∈ A <b>and</b> x ∈ B}",
+  "{x : x ∈ A <b>or</b> x ∈ B}",
+  "{x : x ∈ A and x ∉ B}",
+  "{x : x ∈ B and x ∉ A}"],
+ ans:0,
+ why:[
+  "Correct — intersection keeps only what the two sets have in common.",
+  "That is the union A ∪ B, which keeps everything in either set rather than only what they share.",
+  "That is the difference A − B — the part of A lying outside B.",
+  "That is the difference B − A — the part of B lying outside A."],
+ sol:"<b>A ∩ B = {x : x ∈ A and x ∈ B}</b>, the common part. If it is empty the sets are disjoint."},
+
+{id:27, lec:"L-2", blk:"Union and intersection", topic:"Computing a union",
+ q:"If A = {1, 2, 3, 4, 5} and B = {2, 4, 6, 8}, then A ∪ B is",
+ opts:[
+  "{1, 2, 3, 4, 5, 6, 8}",
+  "{1, 2, 2, 3, 4, 4, 5, 6, 8}",
+  "{2, 4}",
+  "{1, 3, 5}"],
+ ans:0,
+ why:[
+  "Correct. Everything from either set, with the common elements 2 and 4 written once each — seven elements in all.",
+  "The shared elements 2 and 4 have been listed twice. Elements are never repeated in a set.",
+  "That is A ∩ B, the common part only, rather than everything in either set.",
+  "That is A − B, the part of A outside B — it drops 2, 4, 6 and 8 altogether."],
+ sol:"A ∪ B = <b>{1, 2, 3, 4, 5, 6, 8}</b>. Note n(A ∪ B) = 7 = 5 + 4 − 2 ✓, matching n(A) + n(B) − n(A ∩ B)."},
+
+{id:28, lec:"L-2", blk:"Union and intersection", topic:"Computing an intersection",
+ q:"If A = {1, 2, 3, 4, 5} and B = {2, 4, 6, 8}, then A ∩ B is",
+ opts:["{2, 4}","{1, 3, 5}","{6, 8}","{1, 2, 3, 4, 5, 6, 8}"],
+ ans:0,
+ why:[
+  "Correct — 2 and 4 are the only elements appearing in both sets.",
+  "That is A − B, the elements of A lying outside B.",
+  "That is B − A, the elements of B lying outside A — neither 6 nor 8 belongs to A.",
+  "That is A ∪ B, which keeps everything in either set rather than only the shared part."],
+ sol:"Keep only what appears in <b>both</b> lists: 2 and 4 are in A and also in B, while 1, 3, 5 are in A alone and 6, 8 in B alone. So A ∩ B = <b>{2, 4}</b>."},
+
+{id:29, lec:"L-2", blk:"Difference", topic:"Set difference",
+ q:"If A = {1, 2, 3, 4, 5, 6} and B = {2, 4, 6, 8}, then A − B is",
+ opts:["{1, 3, 5}","{8}","{1, 3, 5, 8}","{2, 4, 6}"],
+ ans:0,
+ why:[
+  "Correct. A − B keeps the elements of A that are not in B: 2, 4 and 6 are removed, leaving 1, 3, 5.",
+  "That is B − A — the elements of B not in A.",
+  "That is the symmetric difference A Δ B, which combines both one-sided differences.",
+  "That is A ∩ B, the part that gets removed."],
+ sol:"A − B = {x : x ∈ A and x ∉ B} = <b>{1, 3, 5}</b>."},
+
+{id:30, lec:"L-2", blk:"Difference", topic:"Difference is not symmetric",
+ q:"For the same sets A = {1, 2, 3, 4, 5, 6} and B = {2, 4, 6, 8}, B − A is",
+ opts:["{8}","{1, 3, 5}","φ","{2, 4, 6}"],
+ ans:0,
+ why:[
+  "Correct — 8 is the only element of B that does not lie in A. Compare with A − B = {1, 3, 5}: the two differences are quite different.",
+  "That is A − B. Difference is <b>not</b> commutative.",
+  "B − A is empty only when B ⊆ A, which fails here because 8 ∉ A.",
+  "That is A ∩ B, the shared part — exactly the elements that B − A removes."],
+ sol:"B − A = <b>{8}</b>, while A − B = {1, 3, 5}. ⚠ <b>A − B ≠ B − A</b> in general."},
+
+{id:31, lec:"L-2", blk:"Difference", topic:"Symmetric difference — definition",
+ q:"The symmetric difference A Δ B is defined as",
+ opts:[
+  "(A − B) ∪ (B − A)",
+  "(A − B) ∩ (B − A)",
+  "A ∪ B",
+  "(A ∪ B) ∩ (A ∩ B)"],
+ ans:0,
+ why:[
+  "Correct — everything in exactly one of the two sets: what A has that B lacks, together with what B has that A lacks.",
+  "The two differences are always disjoint, so their intersection is always φ.",
+  "The union also keeps the common part, which A Δ B deliberately excludes.",
+  "This simplifies to A ∩ B, the exact opposite of what A Δ B keeps."],
+ sol:"<b>A Δ B = (A − B) ∪ (B − A)</b> — the elements in one set or the other but <i>not both</i>."},
+
+{id:32, lec:"L-2", blk:"Difference", topic:"Computing a symmetric difference",
+ q:"If P = {1, 2, 3} and Q = {2, 3, 4}, then P Δ Q is",
+ opts:["{1, 4}","{2, 3}","{1, 2, 3, 4}","φ"],
+ ans:0,
+ why:[
+  "Correct. P − Q = {1} and Q − P = {4}, so their union is {1, 4}.",
+  "That is P ∩ Q — precisely the part that the symmetric difference throws away.",
+  "That is P ∪ Q, which keeps the common elements 2 and 3 as well.",
+  "It would be empty only if P = Q."],
+ sol:"P − Q = {1}, Q − P = {4} ⇒ P Δ Q = <b>{1, 4}</b>. Check the count: n(P) + n(Q) − 2n(P ∩ Q) = 3 + 3 − 4 = 2 ✓"},
+
+{id:33, lec:"L-2", blk:"Complement", topic:"Definition of the complement",
+ q:"The complement A′ of a set A relative to the universal set U is",
+ opts:["U − A","A − U","A ∪ U","φ"],
+ ans:0,
+ why:[
+  "Correct — everything in U that is not in A.",
+  "A − U = φ, since every element of A already lies in U.",
+  "A ∪ U = U, since A ⊆ U.",
+  "A′ is empty only in the special case A = U."],
+ sol:"<b>A′ = U − A</b> = {x ∈ U : x ∉ A}."},
+
+{id:34, lec:"L-2", blk:"Complement", topic:"Double complement",
+ q:"For any set A, (A′)′ equals",
+ opts:["A","A′","U","φ"],
+ ans:0,
+ why:[
+  "Correct. Excluding A and then excluding that leaves A again — complementing twice returns you to the start.",
+  "That would mean complementing changes nothing the second time, which is false unless A = A′ (impossible).",
+  "U is the complement of φ, not the double complement of a general A.",
+  "φ is the complement of U."],
+ sol:"<b>(A′)′ = A.</b> Also φ′ = U, U′ = φ, A ∪ A′ = U and A ∩ A′ = φ."},
+
+{id:35, lec:"L-2", blk:"Complement", topic:"Complements of φ and U",
+ q:"In a universal set U, the complements φ′ and U′ are respectively",
+ opts:["U and φ","φ and U","U and U","φ and φ"],
+ ans:0,
+ why:[
+  "Correct. Everything outside the empty set is all of U; everything outside U is nothing.",
+  "The two have been swapped.",
+  "U′ cannot be U — no element of U lies outside U.",
+  "φ′ cannot be φ, since U itself is non-empty in any meaningful context."],
+ sol:"<b>φ′ = U</b> and <b>U′ = φ</b>."},
+
+{id:36, lec:"L-2", blk:"De Morgan", topic:"Complement of a union",
+ q:"By De Morgan's law, (A ∪ B)′ equals",
+ opts:["A′ ∩ B′","A′ ∪ B′","A ∩ B","A′ − B′"],
+ ans:0,
+ why:[
+  "Correct. Being outside “A or B” means being outside A <b>and</b> outside B — the operation flips as it passes through the complement.",
+  "The ∪ must become ∩. Keeping the union is the classic slip.",
+  "Complementing is not the same as swapping the operation while dropping the primes.",
+  "A difference of complements is a different set entirely."],
+ sol:"<b>(A ∪ B)′ = A′ ∩ B′</b> and <b>(A ∩ B)′ = A′ ∪ B′</b> — complement the parts and <b>flip the operation</b>."},
+
+{id:37, lec:"L-2", blk:"De Morgan", topic:"Complement of an intersection",
+ q:"By De Morgan's law, (A ∩ B)′ equals",
+ opts:["A′ ∪ B′","A′ ∩ B′","A ∪ B","(A − B)′"],
+ ans:0,
+ why:[
+  "Correct. Failing to be in <b>both</b> means missing at least one, i.e. being outside A or outside B.",
+  "The ∩ must become ∪ under complementation.",
+  "This drops the complements altogether.",
+  "A − B is a different set, and so is its complement."],
+ sol:"<b>(A ∩ B)′ = A′ ∪ B′.</b> Both De Morgan laws follow one rule: complement each set and swap ∪ ↔ ∩."},
+
+{id:38, lec:"L-2", blk:"De Morgan", topic:"Verifying De Morgan numerically",
+ q:"Let U = {1, 2, 3, 4, 5, 6}, A = {2, 3} and B = {3, 4, 5}. Then (A ∪ B)′ is",
+ opts:["{1, 6}","{1, 2, 6}","{1, 4, 5, 6}","{6}"],
+ ans:0,
+ why:[
+  "Correct. A ∪ B = {2, 3, 4, 5}, so its complement in U is {1, 6}. Check via De Morgan: A′ ∩ B′ = {1,4,5,6} ∩ {1,2,6} = {1, 6} ✓",
+  "That is B′, not the complement of the union.",
+  "That is A′ = U − {2, 3}, the complement of A alone rather than of the union.",
+  "1 has been dropped — it lies in neither A nor B, so it belongs in the complement."],
+ sol:"A ∪ B = {2, 3, 4, 5} ⇒ (A ∪ B)′ = <b>{1, 6}</b>, which agrees with A′ ∩ B′ ✓"},
+
+{id:39, lec:"L-2", blk:"Distributive law", topic:"Intersection over union",
+ q:"For any sets A, B, C, the expression A ∩ (B ∪ C) equals",
+ opts:[
+  "(A ∩ B) ∪ (A ∩ C)",
+  "(A ∪ B) ∩ (A ∪ C)",
+  "(A ∩ B) ∩ (A ∩ C)",
+  "A ∩ B ∩ C"],
+ ans:0,
+ why:[
+  "Correct — ∩ distributes over ∪ exactly as multiplication distributes over addition. Check with A = {2,3,4,5,6}, B = {1,3,5}, C = {2,4,5}: both sides give {2,3,4,5} ✓",
+  "That is the <b>other</b> distributive law, and it equals A ∪ (B ∩ C), not A ∩ (B ∪ C).",
+  "Same test: this gives {3,5} ∩ {2,4,5} = {5}, not {2,3,4,5}.",
+  "Same test: {2,3,4,5,6} ∩ {1,3,5} ∩ {2,4,5} = {5}."],
+ sol:"<b>A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)</b>, and dually <b>A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)</b>."},
+
+{id:40, lec:"L-2", blk:"Venn diagrams", topic:"Disjoint sets",
+ q:"Two sets A and B are <b>disjoint</b> when",
+ opts:["A ∩ B = φ","A ∪ B = φ","A = B","A ⊆ B"],
+ ans:0,
+ why:[
+  "Correct — they share no element, so in a Venn diagram their circles do not overlap.",
+  "An empty <b>union</b> would force both sets to be empty, which is far stronger.",
+  "Equal non-empty sets overlap completely — the opposite of disjoint.",
+  "A ⊆ B means A sits entirely inside B, so they overlap (unless A is empty)."],
+ sol:"<b>Disjoint ⇔ A ∩ B = φ</b>, and then n(A ∪ B) = n(A) + n(B) with no correction term."},
+
+/* ---------------- L-3 (18) ---------------- */
+{id:41, lec:"L-3", blk:"Algebra of sets", topic:"Identity laws",
+ q:"The expressions A ∪ φ and A ∩ U are respectively equal to",
+ opts:["A and A","φ and U","A and U","φ and A"],
+ ans:0,
+ why:[
+  "Correct. Adding nothing changes nothing, and intersecting with everything changes nothing — φ and U are the identity elements for ∪ and ∩.",
+  "These are the <b>domination</b> results the other way round: A ∩ φ = φ and A ∪ U = U.",
+  "A ∩ U = A, not U, because A ⊆ U.",
+  "Both have been mixed up with the domination laws."],
+ sol:"<b>Identity:</b> A ∪ φ = A and A ∩ U = A. <b>Domination:</b> A ∪ U = U and A ∩ φ = φ."},
+
+{id:42, lec:"L-3", blk:"Algebra of sets", topic:"Idempotent laws",
+ q:"The expressions A ∪ A and A ∩ A are respectively equal to",
+ opts:["A and A","U and φ","φ and A","A and U"],
+ ans:0,
+ why:[
+  "Correct. Combining a set with itself — by either operation — gives nothing new, since sets have no repeated elements.",
+  "These are the complement laws: A ∪ A′ = U and A ∩ A′ = φ. Note the prime.",
+  "A ∪ A is A, not φ — combining a set with itself can never empty it.",
+  "A ∩ A is A, not U — intersecting a set with itself cannot enlarge it to the whole universal set."],
+ sol:"<b>Idempotent:</b> A ∪ A = A and A ∩ A = A. Contrast with the complement laws, which involve A′."},
+
+{id:43, lec:"L-3", blk:"Algebra of sets", topic:"Complement laws",
+ q:"The expressions A ∪ A′ and A ∩ A′ are respectively equal to",
+ opts:["U and φ","φ and U","A and A′","U and U"],
+ ans:0,
+ why:[
+  "Correct. Every element of U is either in A or outside it, so the union is all of U; and nothing can be both in and out, so the intersection is empty.",
+  "The two have been swapped.",
+  "These are the idempotent results, which need A ∪ A rather than A ∪ A′.",
+  "A ∩ A′ cannot be U — no element lies in a set and its complement at once."],
+ sol:"<b>A ∪ A′ = U</b> and <b>A ∩ A′ = φ</b>. Together with (A′)′ = A these are the complement laws."},
+
+{id:44, lec:"L-3", blk:"Counting", topic:"The two-set counting formula",
+ q:"For any two finite sets, n(A ∪ B) equals",
+ opts:[
+  "n(A) + n(B) − n(A ∩ B)",
+  "n(A) + n(B)",
+  "n(A) + n(B) + n(A ∩ B)",
+  "n(A) − n(B)"],
+ ans:0,
+ why:[
+  "Correct. Adding the two counts double-counts the overlap once, so it must be subtracted back off.",
+  "This is right only when the sets are <b>disjoint</b>; otherwise the common elements are counted twice.",
+  "Adding the overlap makes the double-counting worse, not better.",
+  "A difference of counts is not a union."],
+ sol:"<b>n(A ∪ B) = n(A) + n(B) − n(A ∩ B)</b> — the inclusion–exclusion principle for two sets."},
+
+{id:45, lec:"L-3", blk:"Counting", topic:"Disjoint sets",
+ q:"If A and B are disjoint finite sets, then n(A ∪ B) equals",
+ opts:["n(A) + n(B)","n(A) × n(B)","n(A) − n(B)","max{n(A), n(B)}"],
+ ans:0,
+ why:[
+  "Correct. With n(A ∩ B) = 0 the correction term vanishes and the counts simply add.",
+  "A product counts ordered pairs — that is the size of the Cartesian product A × B, not the union.",
+  "Subtraction has no role here; both sets contribute all of their elements.",
+  "The union contains <b>both</b> sets, so it is at least as large as their total, not just the larger one."],
+ sol:"Disjoint means n(A ∩ B) = 0, so <b>n(A ∪ B) = n(A) + n(B)</b>."},
+
+{id:46, lec:"L-3", blk:"Counting", topic:"Counting a difference",
+ q:"For finite sets, n(A − B) equals",
+ opts:[
+  "n(A) − n(A ∩ B)",
+  "n(A) − n(B)",
+  "n(A) + n(B) − n(A ∩ B)",
+  "n(B) − n(A ∩ B)"],
+ ans:0,
+ why:[
+  "Correct. From A you remove exactly those elements that also lie in B — that is the overlap, not the whole of B.",
+  "This over-subtracts whenever B contains elements outside A. Test A = {1,2}, B = {2,3}: the true answer is 1, but this gives 0.",
+  "That is n(A ∪ B), the count of everything in either set — far larger than the part of A outside B.",
+  "That is n(B − A), the other one-sided difference. Remember A − B ≠ B − A."],
+ sol:"<b>n(A − B) = n(A) − n(A ∩ B)</b>. Only the shared part is taken away."},
+
+{id:47, lec:"L-3", blk:"Counting", topic:"Counting a symmetric difference",
+ q:"For finite sets, n(A Δ B) equals",
+ opts:[
+  "n(A) + n(B) − 2n(A ∩ B)",
+  "n(A) + n(B) − n(A ∩ B)",
+  "n(A) + n(B)",
+  "n(A) − n(B)"],
+ ans:0,
+ why:[
+  "Correct. A Δ B = (A − B) ∪ (B − A), whose counts are n(A) − n(A∩B) and n(B) − n(A∩B); adding them removes the overlap <b>twice</b>.",
+  "That is n(A ∪ B), which still keeps the common elements.",
+  "This ignores the overlap entirely.",
+  "A difference of counts is not the symmetric difference."],
+ sol:"<b>n(A Δ B) = n(A) + n(B) − 2n(A ∩ B)</b> = n(A ∪ B) − n(A ∩ B). The factor <b>2</b> is what distinguishes it from the union count."},
+
+{id:48, lec:"L-3", blk:"Counting", topic:"The three-set formula",
+ q:"For three finite sets, n(A ∪ B ∪ C) equals",
+ opts:[
+  "n(A)+n(B)+n(C) − n(A∩B) − n(B∩C) − n(C∩A) + n(A∩B∩C)",
+  "n(A)+n(B)+n(C) − n(A∩B) − n(B∩C) − n(C∩A) − n(A∩B∩C)",
+  "n(A)+n(B)+n(C) + n(A∩B) + n(B∩C) + n(C∩A) − n(A∩B∩C)",
+  "n(A)+n(B)+n(C) − n(A∩B∩C)"],
+ ans:0,
+ why:[
+  "Correct. Subtracting the three pairwise overlaps removes the triple overlap three times when it had only been added three times, so it must be <b>added back once</b>.",
+  "The sign on the triple term is wrong. Test with three identical singletons {1}: the true count is 1, and this gives 3 − 3 − 1 = −1, impossible.",
+  "The pairwise terms must be subtracted, not added. Same test: 3 + 3 − 1 = 5.",
+  "This ignores the pairwise overlaps. Same test: 3 − 1 = 2, not 1."],
+ sol:"<b>n(A∪B∪C) = Σn(single) − Σn(pairs) + n(A∩B∩C)</b> — inclusion–exclusion, alternating signs."},
+
+{id:49, lec:"L-3", blk:"Counting", topic:"The “neither” count",
+ q:"The number of elements of the universal set lying in <b>neither</b> A nor B is",
+ opts:[
+  "n(U) − n(A ∪ B)",
+  "n(U) − n(A) − n(B)",
+  "n(A ∪ B)",
+  "n(U) − n(A ∩ B)"],
+ ans:0,
+ why:[
+  "Correct. “Neither” is A′ ∩ B′ = (A ∪ B)′ by De Morgan, so its count is everything minus those in at least one set.",
+  "This subtracts the overlap twice. It is correct only when A and B are disjoint.",
+  "That counts those in <b>at least one</b> set — the exact opposite group.",
+  "This is n((A ∩ B)′) = n(A′ ∪ B′), the count of those missing from at least one set."],
+ sol:"Neither = n(A′ ∩ B′) = n((A ∪ B)′) = <b>n(U) − n(A ∪ B)</b>. ⚠ You always need n(U) for a “neither” question."},
+
+{id:50, lec:"L-3", blk:"Counting", topic:"Finding the overlap",
+ q:"X and Y are sets with n(X ∪ Y) = 50, n(X) = 28 and n(Y) = 32. Then n(X ∩ Y) is",
+ opts:["10","110","6","18"],
+ ans:0,
+ why:[
+  "Correct. Rearranging the union formula: n(X ∩ Y) = 28 + 32 − 50 = 10.",
+  "This adds all three numbers instead of subtracting the union.",
+  "This would make n(X ∪ Y) = 54, contradicting the given 50.",
+  "This would make n(X ∪ Y) = 42."],
+ sol:"n(X ∪ Y) = n(X) + n(Y) − n(X ∩ Y) ⇒ n(X ∩ Y) = 28 + 32 − 50 = <b>10</b>."},
+
+{id:51, lec:"L-3", blk:"Counting", topic:"A survey with “neither”",
+ q:"In a survey of 400 students, 100 take apple juice, 150 take orange juice and 75 take both. How many take neither?",
+ opts:["225","175","150","250"],
+ ans:0,
+ why:[
+  "Correct. n(A ∪ B) = 100 + 150 − 75 = 175, so those taking neither number 400 − 175 = 225.",
+  "175 is the number who take <b>at least one</b> juice — the complement of what was asked.",
+  "This subtracts without adding back the double-counted 75: 400 − 100 − 150 = 150. The overlap must be restored.",
+  "This would correspond to n(A ∪ B) = 150, i.e. forgetting to subtract the overlap at all."],
+ sol:"n(A ∪ B) = 100 + 150 − 75 = 175. Neither = n(U) − n(A ∪ B) = 400 − 175 = <b>225</b>."},
+
+{id:52, lec:"L-3", blk:"Counting", topic:"Least possible overlap",
+ q:"In a survey of 1000 consumers, 720 like product A and 450 like product B. The <b>least</b> number who must like both is",
+ opts:["170","270","450","0"],
+ ans:0,
+ why:[
+  "Correct. n(A ∩ B) = 720 + 450 − n(A ∪ B) = 1170 − n(A ∪ B), and n(A ∪ B) can be at most 1000, so the overlap is at least 170.",
+  "This uses n(A ∪ B) = 900 for no reason; the union is capped by the universal set at 1000.",
+  "450 is the <b>largest</b> the overlap could be (if every B-liker also liked A), not the smallest.",
+  "Zero overlap would need 1170 distinct consumers, but only 1000 exist. This is exactly the pigeonhole squeeze the question tests."],
+ sol:"n(A ∩ B) = n(A) + n(B) − n(A ∪ B) = 1170 − n(A ∪ B). The overlap is smallest when the union is largest, and n(A ∪ B) ≤ n(U) = 1000 ⇒ n(A ∩ B) ≥ <b>170</b>."},
+
+{id:53, lec:"L-3", blk:"Counting", topic:"Exactly two of three sets",
+ q:"For three sets, the number of elements belonging to <b>exactly two</b> of them is",
+ opts:[
+  "n(A∩B) + n(B∩C) + n(C∩A) − 3n(A∩B∩C)",
+  "n(A∩B) + n(B∩C) + n(C∩A) − 2n(A∩B∩C)",
+  "n(A∩B) + n(B∩C) + n(C∩A) − n(A∩B∩C)",
+  "n(A∩B) + n(B∩C) + n(C∩A) + 3n(A∩B∩C)"],
+ ans:0,
+ why:[
+  "Correct. Each pairwise intersection still contains the triple-overlap elements, and there are three such pairs, so the triple region must be removed <b>three</b> times to leave only the “exactly two” regions.",
+  "Removing it twice leaves one copy of the triple region still counted, which belongs to “exactly three”, not “exactly two”.",
+  "Removing it once leaves two copies over-counted.",
+  "Adding makes the over-count worse."],
+ sol:"<b>Exactly two = Σn(pairs) − 3n(A∩B∩C).</b> Each pairwise term includes the centre region once, so all three copies must go."},
+
+{id:54, lec:"L-3", blk:"Counting", topic:"Exactly one of three sets",
+ q:"For three sets, the number of elements belonging to <b>exactly one</b> of them is",
+ opts:[
+  "n(A)+n(B)+n(C) − 2[n(A∩B)+n(B∩C)+n(C∩A)] + 3n(A∩B∩C)",
+  "n(A)+n(B)+n(C) − [n(A∩B)+n(B∩C)+n(C∩A)] + n(A∩B∩C)",
+  "n(A)+n(B)+n(C) − 2[n(A∩B)+n(B∩C)+n(C∩A)] − 3n(A∩B∩C)",
+  "n(A)+n(B)+n(C) − 3[n(A∩B)+n(B∩C)+n(C∩A)]"],
+ ans:0,
+ why:[
+  "Correct. Each “exactly two” region sits in two of the single-set counts and must be stripped twice; the centre sits in all three and, after being removed six times by the pairwise terms, needs three added back.",
+  "That expression is n(A ∪ B ∪ C) — everyone in at least one set, not those in exactly one.",
+  "The sign on the triple term is wrong; too much has been removed.",
+  "The coefficient on the pairwise terms is 2, not 3."],
+ sol:"<b>Exactly one = Σn(single) − 2Σn(pairs) + 3n(A∩B∩C).</b> Sanity check with three identical sets of size 1: 3 − 6 + 3 = 0 ✓ (no element lies in exactly one of them)."},
+
+{id:55, lec:"L-3", blk:"Counting", topic:"Counting a union of complements",
+ q:"For finite sets in a universal set U, n(A′ ∪ B′) equals",
+ opts:[
+  "n(U) − n(A ∩ B)",
+  "n(U) − n(A ∪ B)",
+  "n(A′) + n(B′)",
+  "n(U) − n(A) − n(B)"],
+ ans:0,
+ why:[
+  "Correct. By De Morgan, A′ ∪ B′ = (A ∩ B)′, so the count is everything minus the overlap.",
+  "That is n(A′ ∩ B′), the “neither” count — the other De Morgan pairing.",
+  "This double-counts everything lying outside both sets.",
+  "This subtracts the overlap twice over."],
+ sol:"A′ ∪ B′ = (A ∩ B)′ ⇒ <b>n(A′ ∪ B′) = n(U) − n(A ∩ B)</b>."},
+
+{id:56, lec:"L-3", blk:"Set identities", topic:"When union equals intersection",
+ q:"If A ∪ B = A ∩ B, then",
+ opts:["A = B","A ⊂ B","A ∩ B = φ","A = φ"],
+ ans:0,
+ why:[
+  "Correct. Any a ∈ A lies in A ∪ B = A ∩ B and so lies in B, giving A ⊆ B; the same argument the other way gives B ⊆ A.",
+  "Proper containment would make the union strictly larger than the intersection.",
+  "If both were empty the sets would be empty too — a special case, not the general conclusion.",
+  "A = B is forced, but neither has to be empty. A = B = {1, 2} satisfies the condition."],
+ sol:"Chase an arbitrary element both ways: A ⊆ B and B ⊆ A, hence <b>A = B</b>."},
+
+{id:57, lec:"L-3", blk:"Set identities", topic:"When the union collapses",
+ q:"If A ∪ B = B, then",
+ opts:["A ⊆ B","B ⊆ A","A = B","A ∩ B = φ"],
+ ans:0,
+ why:[
+  "Correct. Any a ∈ A lies in A ∪ B = B, so every element of A is already in B and A adds nothing new.",
+  "The containment runs the other way — B is the larger set here.",
+  "Equality is possible but not forced: A = {1}, B = {1, 2} satisfies A ∪ B = B without A = B.",
+  "Quite the opposite — A sits entirely inside B, so they overlap fully (unless A is empty)."],
+ sol:"<b>A ∪ B = B ⇔ A ⊆ B.</b> Adding a subset to its superset changes nothing."},
+
+{id:58, lec:"L-3", blk:"Set identities", topic:"When the intersection collapses",
+ q:"If A ∩ B = A, then",
+ opts:["A ⊆ B","B ⊆ A","A = B","A ∪ B = φ"],
+ ans:0,
+ why:[
+  "Correct. A ∩ B is always a subset of B, so if it equals A then A ⊆ B.",
+  "The containment runs the other way. Test A = {1}, B = {1, 2}: A ∩ B = {1} = A ✓, but B ⊄ A.",
+  "Equality is possible but not forced, as the same test shows.",
+  "The union is B, which is empty only in the trivial case."],
+ sol:"<b>A ∩ B = A ⇔ A ⊆ B</b> — the same statement as A ∪ B = B, written the other way round."},
+
+/* ---------------- Strong Box (8) ---------------- */
+{id:59, lec:"SB", blk:"JEE Main 2024 (27 Jan Shift 2)", topic:"2ᵐ − 2ⁿ = 56 with a distance",
+ q:"Sets A and B have m and n elements. The total number of subsets of A is 56 more than that of B. The distance of the point P(m, n) from Q(−2, −3) is",
+ opts:["10","6","4","8"],
+ ans:0,
+ why:[
+  "Correct. 2<sup>m</sup> − 2<sup>n</sup> = 56 gives m = 6, n = 3, and PQ = √[(6+2)² + (3+3)²] = √(64 + 36) = 10.",
+  "6 is the value of m, not the distance.",
+  "This would need the horizontal and vertical gaps to be much smaller; they are 8 and 6.",
+  "8 is the horizontal gap alone; the vertical gap of 6 must also be included."],
+ sol:"2<sup>n</sup>(2<sup>m−n</sup> − 1) = 56 = 8 × 7 ⇒ n = 3, m = 6. Then PQ = √[(6 − (−2))² + (3 − (−3))²] = √(8² + 6²) = <b>10</b> — a 6-8-10 triangle."},
+
+{id:60, lec:"SB", blk:"JEE Main 2026 (21 Jan Shift 1)", topic:"Counting subsets with an even product",
+ q:"Let S be the set of the first 11 natural numbers. The number of subsets B ⊆ S with n(B) ≥ 2 whose elements have an <b>even</b> product is",
+ opts:["1979","2036","57","1024"],
+ ans:0,
+ why:[
+  "Correct. Subsets with at least 2 elements number 2<sup>11</sup> − 1 − 11 = 2036; those with an odd product are the ≥2-element subsets of the six odd numbers, numbering 2<sup>6</sup> − 1 − 6 = 57. So 2036 − 57 = 1979.",
+  "2036 counts <b>all</b> subsets with n(B) ≥ 2, without filtering for an even product.",
+  "57 is the number of odd-product subsets — the group being removed, not the answer.",
+  "1024 = 2<sup>10</sup> does not arise from this count at all."],
+ sol:"A product is even ⇔ the subset contains at least one even number. Count the complement: with 5 evens and <b>6 odds</b> in {1,…,11}, the odd-product subsets of size ≥ 2 number 2⁶ − 1 − 6 = 57. Answer = (2¹¹ − 1 − 11) − 57 = 2036 − 57 = <b>1979</b>."},
+
+{id:61, lec:"SB", blk:"JEE Main 2026 (21 Jan Shift 2)", topic:"Modulus conditions as intervals",
+ q:"Let A = {x : |x² − 10| ≤ 6} and B = {x : |x − 2| &gt; 1}. Which statement is TRUE?",
+ opts:[
+  "B − A = (−∞, −4) ∪ (−2, 1) ∪ (4, ∞)",
+  "A ∩ B = [−4, −2] ∪ [3, 4]",
+  "A ∪ B = [−∞, 1] ∪ (2, ∞)",
+  "A − B = [2, 3)"],
+ ans:0,
+ why:[
+  "Correct. A = [−4,−2] ∪ [2,4] and B = (−∞,1) ∪ (3,∞); removing A from B leaves exactly these three pieces.",
+  "The right-hand piece is wrong: 3 ∉ B because |3 − 2| = 1 is not <b>greater</b> than 1. The correct intersection is [−4,−2] ∪ (3, 4].",
+  "Two errors: ∞ can never take a square bracket, and the right-hand piece is [2, ∞), since 2 ∈ A.",
+  "3 does lie in A − B (it is in A, and not in B), so the interval must be closed: A − B = [2, 3]."],
+ sol:"|x² − 10| ≤ 6 ⇒ 4 ≤ x² ≤ 16 ⇒ 2 ≤ |x| ≤ 4 ⇒ A = <b>[−4,−2] ∪ [2,4]</b>. |x − 2| &gt; 1 ⇒ x &lt; 1 or x &gt; 3 ⇒ B = <b>(−∞,1) ∪ (3,∞)</b>. Then B − A = (−∞,−4) ∪ (−2,1) ∪ (4,∞) ✓"},
+
+{id:62, lec:"SB", blk:"JEE Main 2022 (26 June Shift 1)", topic:"Sum of numbers coprime to 24",
+ q:"The sum of all elements of {α ∈ {1, 2, …, 100} : HCF(α, 24) = 1} is",
+ opts:["1633","5050","2500","833"],
+ ans:0,
+ why:[
+  "Correct. Since 24 = 2³ × 3, we need α divisible by neither 2 nor 3. Inclusion–exclusion: 5050 − 2550 − 1683 + 816 = 1633.",
+  "5050 is the sum of <b>all</b> of 1 to 100, with no coprimality filter applied.",
+  "Not produced by any step of the calculation.",
+  "This omits adding back the multiples of 6, which were subtracted twice."],
+ sol:"24 = 2³·3, so exclude multiples of 2 and of 3. Σ(1..100) = 5050; multiples of 2 sum to 2550; of 3 sum to 1683; of 6 sum to 816. Answer = 5050 − 2550 − 1683 + <b>816</b> = <b>1633</b>."},
+
+{id:63, lec:"SB", blk:"JEE Main 2025 (24 Jan Shift 2)", topic:"Coprime filter on the even numbers",
+ q:"Let A = {n ∈ ℕ : HCF(n, 45) = 1} and B = {2k : k ∈ {1, 2, …, 100}}. The sum of all elements of A ∩ B is",
+ opts:["5264","10100","4634","6734"],
+ ans:0,
+ why:[
+  "Correct. A ∩ B is the even numbers up to 200 divisible by neither 3 nor 5: 10100 − 3366 − 2100 + 630 = 5264.",
+  "10100 is the sum of all the even numbers from 2 to 200, before the coprimality filter.",
+  "This forgets to add back the multiples of 30, which were subtracted twice by the 3-filter and the 5-filter.",
+  "This removes only the multiples of 3, leaving the multiples of 5 in place."],
+ sol:"45 = 3²·5, so from the evens 2…200 remove those divisible by 3 or 5. Total 10100; evens divisible by 3 sum to 3366; by 5 sum to 2100; by 15 sum to 630. Answer = 10100 − 3366 − 2100 + 630 = <b>5264</b>."},
+
+{id:64, lec:"SB", blk:"JEE Main 2022 (28 Jul Shift 2)", topic:"Subsets meeting a given set",
+ q:"Let A = {1, 2, 3, 4, 5, 6, 7} and B = {3, 6, 7, 9}. The number of subsets C ⊆ A with C ∩ B ≠ φ is",
+ opts:["112","16","128","120"],
+ ans:0,
+ why:[
+  "Correct. Count the complement: subsets of A missing every element of B are the subsets of A − B = {1,2,4,5}, numbering 2<sup>4</sup> = 16. So 2<sup>7</sup> − 16 = 112.",
+  "16 counts the subsets that <b>fail</b> the condition — the group being subtracted.",
+  "128 = 2<sup>7</sup> is every subset of A, including those disjoint from B.",
+  "This subtracts 8 instead of 16, as if A − B had only three elements. It has four: 9 ∉ A, so only 3, 6, 7 are removed from A."],
+ sol:"Only 3, 6, 7 of B lie in A, so A − B = {1, 2, 4, 5} with 4 elements. Subsets meeting B = 2<sup>7</sup> − 2<sup>4</sup> = 128 − 16 = <b>112</b>. ⚠ Note 9 ∈ B but 9 ∉ A — it plays no part."},
+
+{id:65, lec:"SB", blk:"The recurring technique", topic:"Counting subsets that meet a set",
+ q:"Let A have n elements and let B be a subset of A with k elements. The number of subsets of A that have at least one element in common with B is",
+ opts:[
+  "2<sup>n</sup> − 2<sup>n−k</sup>",
+  "2<sup>k</sup>",
+  "2<sup>n</sup> − 2<sup>k</sup>",
+  "2<sup>n−k</sup>"],
+ ans:0,
+ why:[
+  "Correct. Subsets <b>missing</b> B entirely are exactly the subsets of the remaining n − k elements, so subtract 2<sup>n−k</sup> from the total 2<sup>n</sup>.",
+  "2<sup>k</sup> counts the subsets of B itself, a different collection.",
+  "The exponent on the subtracted term must be n − k, the number of elements <i>outside</i> B.",
+  "2<sup>n−k</sup> counts precisely the subsets that <b>fail</b> the condition."],
+ sol:"<b>Count the complement.</b> Subsets disjoint from B = subsets of A − B = 2<sup>n−k</sup>, so the answer is <b>2<sup>n</sup> − 2<sup>n−k</sup></b>. With n = 7, k = 3 this gives 128 − 16 = 112, matching the 2022 question."},
+
+{id:66, lec:"SB", blk:"The recurring technique", topic:"Coprime sums by inclusion–exclusion",
+ q:"Several Strong Box questions ask for the sum of the numbers in {1, …, N} that are coprime to a given m. The standard method is to",
+ opts:[
+  "subtract the sums of the multiples of each prime factor of m, then add back the sums of the multiples of their products",
+  "list every number from 1 to N and add the qualifying ones one by one",
+  "divide the total sum by m",
+  "add up only the prime numbers not exceeding N"],
+ ans:0,
+ why:[
+  "Correct — inclusion–exclusion applied to sums rather than counts. Only the <b>distinct prime factors</b> of m matter, which is why 24 = 2³·3 behaves exactly like 6.",
+  "Correct in principle but unusable under exam conditions, and it is what the technique exists to avoid.",
+  "Coprimality is not a proportional property; dividing gives no meaningful answer.",
+  "Being coprime to m is quite different from being prime — 25 is coprime to 24 but is not prime."],
+ sol:"Take the <b>distinct prime factors</b> of m, subtract the sum of the multiples of each, add back the sum of the multiples of each pairwise product, and so on. For m = 24 (primes 2, 3) over 1…100: 5050 − 2550 − 1683 + 816 = 1633."}
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter M-2 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-7 Friction — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Physics · Chapter Mastery Quiz</p>
+    <h1>P-7 · Friction</h1>
+    <p id="heroSub">Lectures L-1 to L-4 + Strong Box · 64 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter. Friction is short but trap-dense: most marks are lost on N = mg cos θ, on writing f = μN when motion is not impending, and on assuming friction always opposes the body's motion.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">64 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-7 Friction · lectures L-1 to L-4 + Strong Box, matching the module's own index (L-1 to L-4 + Strong Box, 244 questions) · every answer re-derived and numerically checked · ⚠ <b>Source note:</b> this chapter's lecture PDFs are absent from the module folder — only the index image is present — so the content follows the standard JEE Friction syllabus rather than quoted ICAD material. The unit structure is the module's own; the worked problems are not.</div>
+</div>
+
+<script>
+/* ============================================================
+   P-7 FRICTION — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Nature, Origin &amp; Types of Friction",
+   desc:"why friction exists at all, static friction as a self-adjusting force 0 &le; f&#8347; &le; &mu;&#8347;N, limiting vs kinetic, why &mu;&#8347; &gt; &mu;&#8342;, and the applied-force vs friction graph"},
+  {key:"L-2", name:"L-2 · Laws of Friction · &mu; · Angles",
+   desc:"f = &mu;N, independence of apparent contact area and of sliding speed, &mu; as a pure number, and the identity &mu;&#8347; = tan&lambda; = tan&theta;&#7523;"},
+  {key:"L-3", name:"L-3 · Friction on an Inclined Plane",
+   desc:"N = mg cos&theta; (not mg), the tan&theta; &gt; &mu;&#8347; sliding test, a = g(sin&theta; &minus; &mu;&#8342;cos&theta;), and the force needed to hold or push a block along the slope"},
+  {key:"L-4", name:"L-4 · Minimum Pull, Stacked Blocks &amp; Rolling",
+   desc:"why pulling at the angle of friction beats pushing, F&#8344;&#8339;&#8345; = &mu;mg/&radic;(1+&mu;&sup2;), when the upper block of a stack slips, and why rolling friction is so much smaller"},
+  {key:"SB",  name:"Strong Box · High-Yield Traps &amp; Quick Recall",
+   desc:"friction that drives rather than resists, stopping distance and its independence of mass, work done by static friction in rolling, and the standard two-incline timing problem"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (14) ---------------- */
+{id:1, lec:"L-1", blk:"Origin", topic:"Fundamental nature of friction",
+ q:"The fundamental origin of the force of friction is",
+ opts:["electromagnetic","gravitational","nuclear","a fifth fundamental force"],
+ ans:0,
+ why:[
+  "Correct. Friction arises from the interatomic bonds forming and shearing at the microscopic high spots where two surfaces truly touch, and all such bonding is electromagnetic.",
+  "Gravity acts between masses at a distance and is far too weak at atomic scales to account for contact forces.",
+  "Nuclear forces act only over distances of about 10⁻¹⁵ m, which is inside a nucleus — vastly shorter than the gap between two surfaces.",
+  "Friction is not a fundamental force at all; it is a macroscopic effect of the electromagnetic interaction."],
+ sol:"Surfaces that look smooth are microscopically rough. Real contact happens only at tiny <b>asperities</b> that cold-weld together, and friction is the force resisting the shearing of those micro-welds. Like the normal reaction and tension, it is <b>electromagnetic</b> in origin."},
+
+{id:2, lec:"L-1", blk:"Nature", topic:"Direction of the friction force",
+ q:"Friction acts",
+ opts:[
+  "tangential to the surface of contact",
+  "perpendicular to the surface of contact",
+  "always vertically downward",
+  "always opposite to the body's velocity"],
+ ans:0,
+ why:[
+  "Correct. Friction is the tangential component of the contact force; the normal reaction N is its perpendicular partner, and together they form the total contact force.",
+  "The perpendicular component is the <b>normal reaction</b>, a different force entirely.",
+  "Friction follows the surface, whatever its orientation — on a vertical wall it acts vertically, on a ceiling horizontally.",
+  "⚠ Friction opposes the <b>tendency of relative motion</b>, not the body's own velocity. On a car's driving wheels it acts <b>forward</b>."],
+ sol:"The contact force splits into <b>N (perpendicular)</b> and <b>f (tangential)</b>. Their resultant makes an angle with the normal whose tangent is f/N — which is where the angle of friction comes from."},
+
+{id:3, lec:"L-1", blk:"Static friction", topic:"The self-adjusting range",
+ q:"For a body at rest on a rough surface, the static friction force f<sub>s</sub> satisfies",
+ opts:["0 ≤ f<sub>s</sub> ≤ μ<sub>s</sub>N","f<sub>s</sub> = μ<sub>s</sub>N always","f<sub>s</sub> ≥ μ<sub>s</sub>N","f<sub>s</sub> = μ<sub>k</sub>N always"],
+ ans:0,
+ why:[
+  "Correct. Static friction is <b>self-adjusting</b>: it takes exactly the value needed to prevent sliding, up to a ceiling of μ<sub>s</sub>N.",
+  "μ<sub>s</sub>N is only the <b>maximum</b>. A block with no horizontal push on it has zero friction, not μ<sub>s</sub>N.",
+  "Exceeding μ<sub>s</sub>N is impossible — that is precisely the point at which the surfaces give way and sliding begins.",
+  "μ<sub>k</sub>N applies only once the body is actually <b>sliding</b>."],
+ sol:"<b>0 ≤ f<sub>s</sub> ≤ μ<sub>s</sub>N.</b> Static friction is a <b>response</b>, not a fixed value — it matches whatever is applied until it runs out of capacity."},
+
+{id:4, lec:"L-1", blk:"Static friction", topic:"The self-adjusting trap",
+ q:"A block can withstand a maximum static friction of 30 N. A horizontal push of 10 N is applied and the block does not move. The friction force on it is",
+ opts:["10 N","30 N","20 N","0 N"],
+ ans:0,
+ why:[
+  "Correct. The block is in equilibrium, so friction must exactly balance the 10 N push. It supplies 10 N and holds 20 N in reserve.",
+  "⚠ This is the classic error. 30 N is the <b>capacity</b>, not the actual force — if friction were 30 N the block would accelerate backwards at 20 N net.",
+  "20 N is the unused reserve, not the force acting.",
+  "Zero friction would leave the 10 N push unbalanced and the block would accelerate."],
+ sol:"Apply Newton's first law: at rest, <b>friction = applied force = 10 N</b>. Only when the applied force reaches 30 N does friction hit its ceiling and the block break free. <b>Never write f = μ<sub>s</sub>N unless motion is impending.</b>"},
+
+{id:5, lec:"L-1", blk:"Limiting friction", topic:"Definition of limiting friction",
+ q:"Limiting friction is",
+ opts:[
+  "the maximum value static friction can reach, just as motion begins",
+  "the friction acting once a body is sliding",
+  "the smallest friction force a surface can exert",
+  "the friction acting on a rolling body"],
+ ans:0,
+ why:[
+  "Correct. It is the peak of the static range, reached at the instant sliding is about to start, and equals μ<sub>s</sub>N.",
+  "That is <b>kinetic</b> friction, μ<sub>k</sub>N, which is smaller than the limiting value.",
+  "The smallest static friction is zero, when nothing is pushing the body.",
+  "Rolling friction is a separate and much smaller effect."],
+ sol:"<b>f<sub>s,max</sub> = μ<sub>s</sub>N</b> — the top of the self-adjusting range. Past it the surfaces lose grip, friction drops to μ<sub>k</sub>N, and the body jerks forward."},
+
+{id:6, lec:"L-1", blk:"Kinetic friction", topic:"Why the block jerks forward",
+ q:"A heavy crate suddenly jerks forward the moment it starts to move. This happens because",
+ opts:[
+  "kinetic friction is less than limiting friction, so the net force jumps up",
+  "the applied force suddenly increases",
+  "the normal reaction suddenly decreases",
+  "the crate's mass effectively decreases once it moves"],
+ ans:0,
+ why:[
+  "Correct. Friction drops abruptly from μ<sub>s</sub>N to μ<sub>k</sub>N while the push is unchanged, so the surplus force appears as a sudden acceleration.",
+  "The person is pushing just as hard as an instant earlier; nothing changes on the applied side.",
+  "The normal reaction is still mg for a horizontal push — it does not change at the moment of breaking free.",
+  "Mass is invariant; it does not depend on whether a body is moving."],
+ sol:"<b>μ<sub>s</sub> &gt; μ<sub>k</sub>.</b> At rest the asperities have time to settle into stronger micro-welds; once sliding, the surfaces skate over the asperity tips and the welds are weaker. Same reason it is harder to <b>start</b> pushing furniture than to <b>keep</b> it moving."},
+
+{id:7, lec:"L-1", blk:"The friction graph", topic:"Shape of the f-versus-P graph",
+ q:"As the applied horizontal force P on a stationary block is increased from zero, a graph of friction f against P looks like",
+ opts:[
+  "a 45° straight line rising to a peak, then a small drop to a horizontal line",
+  "a horizontal line throughout",
+  "a 45° straight line rising indefinitely",
+  "a curve rising steadily with no peak"],
+ ans:0,
+ why:[
+  "Correct. In the static region f = P exactly, giving the 45° line; at the peak (P = μ<sub>s</sub>N) motion begins, friction falls to μ<sub>k</sub>N and stays constant.",
+  "A horizontal line would mean friction is the same whether or not anything is pushing — but with P = 0 the friction is zero.",
+  "Friction cannot rise forever; it is capped at μ<sub>s</sub>N.",
+  "The graph has a distinct <b>discontinuity</b> at the breakaway point, which is its most characteristic feature."],
+ sol:"<b>45° line (f = P, static) → peak at μ<sub>s</sub>N (limiting) → small drop → flat line at μ<sub>k</sub>N (kinetic).</b> The size of the drop is exactly the μ<sub>s</sub> − μ<sub>k</sub> gap."},
+
+{id:8, lec:"L-1", blk:"Calculations", topic:"Friction below the limit",
+ q:"A 5 kg block rests on a floor with μ<sub>s</sub> = 0.4 and μ<sub>k</sub> = 0.3. A horizontal push of 12 N is applied. The friction force is (g = 10)",
+ opts:["12 N","20 N","15 N","8 N"],
+ ans:0,
+ why:[
+  "Correct. Limiting friction is 0.4 × 50 = 20 N, and 12 N is below that, so the block stays put and friction matches the push exactly.",
+  "20 N is the limiting friction — the maximum available, not the amount actually called upon.",
+  "15 N is μ<sub>k</sub>N, which would apply only if the block were sliding.",
+  "8 N is the unused margin, 20 − 12."],
+ sol:"N = mg = 50 N ⇒ f<sub>s,max</sub> = 0.4 × 50 = <b>20 N</b>. Since 12 N &lt; 20 N the block does not move, so <b>f = 12 N</b>. Always compare the push with the limit <b>first</b>."},
+
+{id:9, lec:"L-1", blk:"Calculations", topic:"Friction above the limit",
+ q:"For the same 5 kg block (μ<sub>s</sub> = 0.4, μ<sub>k</sub> = 0.3), the push is raised to 25 N. The friction force is now (g = 10)",
+ opts:["15 N","25 N","20 N","10 N"],
+ ans:0,
+ why:[
+  "Correct. 25 N exceeds the 20 N limit, so the block slides and kinetic friction takes over: 0.3 × 50 = 15 N.",
+  "25 N would only equal the friction if the block were still in equilibrium, but it has broken free and is accelerating.",
+  "20 N is the limiting static value, which is exceeded and no longer applies once sliding starts.",
+  "10 N is the net force on the block (25 − 15), not the friction itself."],
+ sol:"Push 25 N &gt; limit 20 N ⇒ sliding ⇒ <b>f = μ<sub>k</sub>N = 0.3 × 50 = 15 N</b>. Note friction has <b>fallen</b> from its 20 N peak even though the push went up."},
+
+{id:10, lec:"L-1", blk:"Calculations", topic:"Acceleration once sliding",
+ q:"The same 5 kg block under a 25 N push (μ<sub>k</sub> = 0.3, g = 10) accelerates at",
+ opts:["2 m s⁻²","5 m s⁻²","3 m s⁻²","1 m s⁻²"],
+ ans:0,
+ why:[
+  "Correct. Net force = 25 − 15 = 10 N, so a = 10/5 = 2 m s⁻².",
+  "5 m s⁻² ignores friction entirely and just divides the 25 N push by the mass.",
+  "3 m s⁻² would follow from subtracting 10 N of friction rather than 15 N.",
+  "1 m s⁻² halves the correct answer without justification."],
+ sol:"<b>F<sub>net</sub> = applied − kinetic friction = 25 − 15 = 10 N</b>, so a = F/m = 10/5 = <b>2 m s⁻²</b>. Once sliding, always use μ<sub>k</sub>."},
+
+{id:11, lec:"L-1", blk:"Calculations", topic:"Block pressed against a vertical wall",
+ q:"A 2 kg book is pressed against a vertical wall by a horizontal force of 30 N, with μ<sub>s</sub> = 0.5 between book and wall. Does it slide down? (g = 10)",
+ opts:[
+  "Yes — the required 20 N exceeds the 15 N friction limit",
+  "No — friction supplies 20 N, which is within its limit",
+  "No — the normal reaction is mg = 20 N, giving ample friction",
+  "Yes — friction acts downward here, adding to the weight"],
+ ans:0,
+ why:[
+  "Correct. Here N is the applied 30 N, so f<sub>max</sub> = 0.5 × 30 = 15 N, but the weight needing support is 20 N. Friction falls short and the book slides.",
+  "Friction cannot supply 20 N; its ceiling on this surface is 15 N.",
+  "⚠ On a vertical wall the normal reaction is the <b>horizontal applied force</b>, not mg. The weight acts along the wall, not into it.",
+  "Friction opposes the tendency to slide <b>down</b>, so it acts <b>upward</b> — it helps hold the book, it does not add to the weight."],
+ sol:"On a vertical wall, <b>N = applied horizontal force = 30 N</b> ⇒ f<sub>max</sub> = 0.5 × 30 = <b>15 N</b> acting up. Weight = 20 N &gt; 15 N, so it <b>slides</b>. To hold it you would need N ≥ mg/μ = 40 N."},
+
+{id:12, lec:"L-1", blk:"Direction", topic:"Friction that drives a body forward",
+ q:"When a car accelerates forward, the friction on its driving wheels from the road acts",
+ opts:[
+  "forward, and is what propels the car",
+  "backward, opposing the car's motion",
+  "downward, into the road",
+  "there is no friction if the wheels roll without slipping"],
+ ans:0,
+ why:[
+  "Correct. The tyre pushes <b>backward</b> on the road, so by Newton's third law the road pushes <b>forward</b> on the tyre — the external force that accelerates the car.",
+  "⚠ The classic misconception. Friction opposes the <b>tendency of relative sliding</b> at the contact patch, which is backward, so the force on the tyre is forward.",
+  "That direction describes the normal reaction, which acts perpendicular to the road.",
+  "Rolling without slipping still involves <b>static</b> friction, and it is precisely that friction which drives the car."],
+ sol:"⚠ <b>Friction opposes relative motion at the contact point, not the motion of the body.</b> The driving wheel's surface tends to slip backward, so friction acts forward. Without friction a car could not accelerate at all — as anyone who has spun their wheels on ice knows."},
+
+{id:13, lec:"L-1", blk:"Types", topic:"Ordering the three coefficients",
+ q:"The correct order of the coefficients of friction is",
+ opts:[
+  "μ<sub>s</sub> &gt; μ<sub>k</sub> &gt; μ<sub>rolling</sub>",
+  "μ<sub>k</sub> &gt; μ<sub>s</sub> &gt; μ<sub>rolling</sub>",
+  "μ<sub>rolling</sub> &gt; μ<sub>k</sub> &gt; μ<sub>s</sub>",
+  "μ<sub>s</sub> = μ<sub>k</sub> &gt; μ<sub>rolling</sub>"],
+ ans:0,
+ why:[
+  "Correct — hardest to start, easier to keep sliding, easiest of all to roll.",
+  "If kinetic exceeded static, a body would be harder to keep moving than to start, and nothing would ever jerk forward on breaking free.",
+  "This reverses the whole order; rolling is by far the smallest, which is the entire point of the wheel.",
+  "The two are measurably different, and their difference is what produces the drop in the friction graph."],
+ sol:"<b>μ<sub>s</sub> &gt; μ<sub>k</sub> &gt; μ<sub>rolling</sub>.</b> Rolling friction is smaller by orders of magnitude because there is <b>no sliding</b> at the contact point — only a small deformation of the surfaces resists motion."},
+
+{id:14, lec:"L-1", blk:"Nature", topic:"The total contact force",
+ q:"The total contact force exerted by a surface on a body is",
+ opts:[
+  "the resultant of the normal reaction and the friction force",
+  "the normal reaction alone",
+  "the friction force alone",
+  "always equal to the body's weight"],
+ ans:0,
+ why:[
+  "Correct. N and f are the perpendicular and tangential components of one single force, and the contact force is their vector sum √(N² + f²).",
+  "N is only the perpendicular component; the surface also grips the body tangentially.",
+  "f is only the tangential component and does not include the support the surface provides.",
+  "That happens to hold for a body resting on a horizontal surface with no push, but fails on an incline or whenever friction acts."],
+ sol:"<b>Contact force = √(N² + f²)</b>, tilted from the normal by the angle tan⁻¹(f/N). At the verge of sliding f = μ<sub>s</sub>N and that tilt is exactly the <b>angle of friction λ</b>."},
+
+/* ---------------- L-2 (13) ---------------- */
+{id:15, lec:"L-2", blk:"Laws", topic:"Dependence on the normal reaction",
+ q:"Limiting friction between two given surfaces is proportional to",
+ opts:[
+  "the normal reaction N",
+  "the apparent area of contact",
+  "the mass of the body, whatever the surface orientation",
+  "the relative speed of the surfaces"],
+ ans:0,
+ why:[
+  "Correct. f = μN — pressing harder squashes the asperities flatter, increasing the <b>real</b> microscopic contact area and hence the friction.",
+  "Friction is famously <b>independent</b> of the apparent contact area: a brick dragged on its face or its edge needs the same force.",
+  "Mass only sets N on a horizontal surface. On an incline N = mg cosθ, and against a wall N is the applied push.",
+  "Kinetic friction is essentially independent of sliding speed."],
+ sol:"<b>f = μN.</b> The three laws: friction ∝ N, independent of <b>apparent area</b>, and (for kinetic) independent of <b>speed</b>. μ depends only on the nature of the two surfaces."},
+
+{id:16, lec:"L-2", blk:"Laws", topic:"Independence of contact area",
+ q:"A rectangular brick is dragged across a floor first on its large face and then on its narrow edge. The force needed to keep it sliding is",
+ opts:[
+  "the same in both cases",
+  "greater on the large face",
+  "greater on the narrow edge",
+  "greater on the face whose area is closer to the brick's cross-section"],
+ ans:0,
+ why:[
+  "Correct. f = μ<sub>k</sub>N, and N = mg either way, so the apparent contact area drops out entirely.",
+  "A larger face spreads the same weight over more area, lowering the pressure — so each asperity is squashed less and the totals cancel exactly.",
+  "The narrow edge has higher pressure but fewer contact points; again the product is unchanged.",
+  "No such rule exists; the shape of the face is irrelevant to the friction force."],
+ sol:"Friction depends on the <b>real</b> microscopic contact area, not the apparent one, and the real area is set by N alone. Hence <b>f ∝ N, never ∝ apparent area</b> — one of the most counter-intuitive results in mechanics."},
+
+{id:17, lec:"L-2", blk:"Coefficient", topic:"Units of μ",
+ q:"The coefficient of friction μ has",
+ opts:[
+  "no units and no dimensions",
+  "units of newtons",
+  "units of newtons per square metre",
+  "the dimensions of force per unit mass"],
+ ans:0,
+ why:[
+  "Correct. μ = f/N is a ratio of two forces, so all units cancel and it is a pure number.",
+  "Newtons would apply to f itself, not to the ratio of two forces.",
+  "N m⁻² is pressure, which involves an area that does not appear in the definition of μ.",
+  "Force per unit mass has the dimensions of acceleration, unrelated to a force ratio."],
+ sol:"<b>μ = f/N</b> — dimensionless. Typical values run from about 0.1 to 1, but μ <b>can exceed 1</b>: rubber on rough concrete reaches around 1.5."},
+
+{id:18, lec:"L-2", blk:"Coefficient", topic:"Can μ exceed 1?",
+ q:"Which statement about the coefficient of friction is correct?",
+ opts:[
+  "μ can exceed 1 for some surface pairs, such as rubber on rough concrete",
+  "μ can never exceed 1",
+  "μ is always less than 0.5",
+  "μ is a property of a single surface, not of a pair"],
+ ans:0,
+ why:[
+  "Correct. Nothing in f = μN caps the ratio at 1; a value above 1 simply means friction can exceed the normal reaction.",
+  "There is no physical principle forcing μ ≤ 1 — the misconception comes from most everyday values happening to be below 1.",
+  "Even ordinary surface pairs such as wood on wood exceed 0.5.",
+  "μ always refers to <b>two</b> surfaces in contact; steel on steel and steel on ice are quite different values."],
+ sol:"μ is a property of the <b>pair</b> of surfaces, and it is unbounded above. Values over 1 mean the tangential grip can exceed the perpendicular push — perfectly possible when strong micro-welds form."},
+
+{id:19, lec:"L-2", blk:"Angle of friction", topic:"Definition of λ",
+ q:"The angle of friction λ is defined by",
+ opts:["tan λ = μ<sub>s</sub>","sin λ = μ<sub>s</sub>","cos λ = μ<sub>s</sub>","λ = μ<sub>s</sub>"],
+ ans:0,
+ why:[
+  "Correct. λ is the angle the total contact force makes with the normal when motion just impends, and tan λ = f<sub>s,max</sub>/N = μ<sub>s</sub>.",
+  "A sine would cap μ at 1, but μ has no such ceiling.",
+  "A cosine would make μ = 1 when λ = 0, i.e. maximum friction for a perfectly normal contact force — the opposite of the truth.",
+  "λ is an angle and μ is a pure number; they are equal in value only by coincidence for particular units, never in general."],
+ sol:"<b>tan λ = μ<sub>s</sub>.</b> Geometrically: resolve the contact force into N (along the normal) and f<sub>s,max</sub> (along the surface); the resultant is tilted from the normal by λ, and the tangent of that tilt is f/N = μ<sub>s</sub>."},
+
+{id:20, lec:"L-2", blk:"Angle of repose", topic:"Definition of θ_r",
+ q:"The angle of repose is",
+ opts:[
+  "the maximum incline angle at which a block just stays at rest",
+  "the angle at which a block slides down at constant speed",
+  "the angle between the normal reaction and the vertical",
+  "the minimum incline angle at which a block can rest"],
+ ans:0,
+ why:[
+  "Correct. Tilt the plank past θ<sub>r</sub> and the block lets go; at exactly θ<sub>r</sub> it is on the verge of sliding.",
+  "Constant-speed sliding involves μ<sub>k</sub> and defines a different, slightly smaller angle.",
+  "That angle is just the incline angle θ itself, which is a geometric fact rather than a friction property.",
+  "A block rests happily at <b>any</b> angle below θ<sub>r</sub>, including zero, so there is no minimum."],
+ sol:"<b>tan θ<sub>r</sub> = μ<sub>s</sub>.</b> Derivation: at the verge, mg sinθ = μ<sub>s</sub>(mg cosθ), and the mg cancels — which is why the angle of repose is <b>independent of mass</b>."},
+
+{id:21, lec:"L-2", blk:"Angles", topic:"Relating λ and θ_r",
+ q:"For a given pair of surfaces, the angle of friction λ and the angle of repose θ<sub>r</sub> are related by",
+ opts:["λ = θ<sub>r</sub>","λ = 2θ<sub>r</sub>","λ = 90° − θ<sub>r</sub>","λ = θ<sub>r</sub>/2"],
+ ans:0,
+ why:[
+  "Correct. Both satisfy tan(angle) = μ<sub>s</sub>, so they are numerically the same angle even though they are defined by quite different experiments.",
+  "Doubling has no basis; both tangents equal the same μ<sub>s</sub>.",
+  "Complementary angles would mean tan λ = cot θ<sub>r</sub> = 1/μ<sub>s</sub>, the reciprocal of the truth.",
+  "Halving likewise contradicts tan λ = tan θ<sub>r</sub>."],
+ sol:"<b>μ<sub>s</sub> = tan λ = tan θ<sub>r</sub> ⇒ λ = θ<sub>r</sub>.</b> Three quantities, one number. This is why simply tilting a plank until the block slips <b>measures μ<sub>s</sub> directly</b>."},
+
+{id:22, lec:"L-2", blk:"Calculations", topic:"μ from a tilting plank",
+ q:"A block just begins to slide when a plank is tilted to 30°. The coefficient of static friction is",
+ opts:["1/√3 ≈ 0.577","√3 ≈ 1.732","1/2","√3/2 ≈ 0.866"],
+ ans:0,
+ why:[
+  "Correct. μ<sub>s</sub> = tan θ<sub>r</sub> = tan 30° = 1/√3 ≈ 0.577.",
+  "√3 is tan 60°, which would be the answer if the plank had tipped at 60°.",
+  "1/2 is sin 30°; the relation uses the <b>tangent</b>, not the sine.",
+  "√3/2 is cos 30°, again the wrong ratio."],
+ sol:"The tipping angle <b>is</b> the angle of repose, so <b>μ<sub>s</sub> = tan 30° = 1/√3 ≈ 0.577</b>. Note the mass and the block's size never enter."},
+
+{id:23, lec:"L-2", blk:"Calculations", topic:"Force to move a block from λ",
+ q:"The angle of friction between a 4 kg block and a horizontal surface is 45°. The horizontal force that will just make it move is (g = 10)",
+ opts:["40 N","20 N","40√2 N","28.3 N"],
+ ans:0,
+ why:[
+  "Correct. μ<sub>s</sub> = tan 45° = 1, and N = mg = 40 N, so F = μ<sub>s</sub>N = 40 N.",
+  "20 N would correspond to μ = 0.5, not to a 45° angle of friction.",
+  "40√2 ≈ 56.6 N is the magnitude of the total contact force at the verge of sliding, not the horizontal push needed.",
+  "28.3 N is 40/√2, which would follow from using sin 45° instead of tan 45°."],
+ sol:"tan λ = μ<sub>s</sub> ⇒ μ<sub>s</sub> = tan 45° = <b>1</b>. Then F = μ<sub>s</sub>N = 1 × 40 = <b>40 N</b>. A λ of 45° is the special case where friction can match the full normal reaction."},
+
+{id:24, lec:"L-2", blk:"Calculations", topic:"λ from a given μ",
+ q:"A surface has μ<sub>s</sub> = 0.75. The angle of friction and the steepest incline on which a block will still rest are",
+ opts:[
+  "both about 36.9°",
+  "36.9° and 53.1° respectively",
+  "both about 48.6°",
+  "0.75 rad and 36.9° respectively"],
+ ans:0,
+ why:[
+  "Correct. tan⁻¹(0.75) ≈ 36.9°, and since θ<sub>r</sub> = λ the same angle answers both parts.",
+  "53.1° is the complement of 36.9°; the angle of repose equals the angle of friction, it does not complement it.",
+  "48.6° would correspond to μ ≈ 1.13, not 0.75.",
+  "μ is a pure number, not an angle in radians — the two are entirely different quantities."],
+ sol:"tan λ = 0.75 ⇒ λ ≈ <b>36.9°</b> (the 3-4-5 triangle again, since tan 36.9° = 3/4), and <b>θ<sub>r</sub> = λ ≈ 36.9°</b>."},
+
+{id:25, lec:"L-2", blk:"Laws", topic:"Kinetic friction and speed",
+ q:"Doubling the speed at which a block slides across a rough floor changes the kinetic friction",
+ opts:[
+  "hardly at all — kinetic friction is nearly independent of speed",
+  "by doubling it",
+  "by halving it",
+  "by quadrupling it"],
+ ans:0,
+ why:[
+  "Correct. Over ordinary speed ranges f<sub>k</sub> = μ<sub>k</sub>N holds with μ<sub>k</sub> essentially constant, so speed drops out.",
+  "Proportionality to speed describes <b>viscous drag</b> in a fluid, not dry friction between solids.",
+  "Nothing makes friction fall with speed in this regime.",
+  "A square-law dependence describes <b>air resistance</b> at high speed, again a different phenomenon."],
+ sol:"Dry friction is <b>speed-independent</b>, which is what distinguishes it from fluid drag. It is also why a sliding block decelerates <b>uniformly</b> — a constant force gives constant acceleration."},
+
+{id:26, lec:"L-2", blk:"Coefficient", topic:"What μ depends on",
+ q:"The coefficient of friction between two bodies depends on",
+ opts:[
+  "the nature of both surfaces in contact",
+  "the mass of the upper body only",
+  "the apparent contact area",
+  "the normal reaction between them"],
+ ans:0,
+ why:[
+  "Correct. μ is a property of the <b>pair</b> — materials, roughness, cleanliness, lubrication.",
+  "Mass affects the normal reaction and hence the friction <b>force</b>, but not the coefficient itself.",
+  "Contact area affects neither μ nor f, as the brick experiment shows.",
+  "N determines f through f = μN, but μ is the constant of proportionality and does not itself vary with N."],
+ sol:"<b>μ = property of the surface pair. f = μN = the force that results.</b> Changing the load changes f but leaves μ alone — that is exactly what makes μ useful."},
+
+{id:27, lec:"L-2", blk:"Angle of friction", topic:"Contact force at the verge of sliding",
+ q:"When a block is on the verge of sliding, the total contact force from the surface makes an angle with the normal equal to",
+ opts:["λ, where tan λ = μ<sub>s</sub>","zero","90°","θ, the incline angle, always"],
+ ans:0,
+ why:[
+  "Correct — that is precisely the definition of the angle of friction, and it is the maximum tilt the contact force can achieve.",
+  "A zero angle means no friction at all, which happens only on a perfectly smooth surface.",
+  "90° would mean the contact force lies entirely along the surface with no normal component, so the body would not be supported.",
+  "The contact force tilts to λ at the verge of sliding regardless of the geometry; on an incline at the angle of repose the two happen to coincide, but that is a special case."],
+ sol:"The contact force can tilt from the normal by <b>at most λ = tan⁻¹μ<sub>s</sub></b>. This defines the <b>cone of friction</b>: any applied force whose line lies inside the cone can never move the block, however large it is."},
+
+/* ---------------- L-3 (14) ---------------- */
+{id:28, lec:"L-3", blk:"Setting up", topic:"Normal reaction on an incline",
+ q:"For a block of mass m resting on an incline of angle θ, the normal reaction is",
+ opts:["mg cos θ","mg","mg sin θ","mg tan θ"],
+ ans:0,
+ why:[
+  "Correct. Only the component of weight perpendicular to the surface presses into it, and that component is mg cos θ.",
+  "⚠ mg is the answer for a <b>horizontal</b> surface. Forgetting the cos θ is the single most common friction-problem error.",
+  "mg sin θ is the component <b>along</b> the slope — the driving force that tries to slide the block down.",
+  "mg tan θ is not a component of the weight at all."],
+ sol:"Resolve the weight: <b>mg cos θ into the slope, mg sin θ along it.</b> So <b>N = mg cos θ</b> and the friction limit is <b>μ<sub>s</sub> mg cos θ</b>. Check θ = 0: N = mg ✓; θ = 90°: N = 0 ✓"},
+
+{id:29, lec:"L-3", blk:"Sliding condition", topic:"Will the block slide?",
+ q:"A block on an incline of angle θ will start to slide down when",
+ opts:["tan θ &gt; μ<sub>s</sub>","tan θ &lt; μ<sub>s</sub>","sin θ &gt; μ<sub>s</sub>","θ &gt; μ<sub>s</sub>"],
+ ans:0,
+ why:[
+  "Correct. Sliding starts when mg sin θ exceeds μ<sub>s</sub> mg cos θ, and dividing through gives tan θ &gt; μ<sub>s</sub>.",
+  "This is the condition for the block to <b>stay</b> at rest.",
+  "The mg cancels only if <b>both</b> components are kept, which turns the ratio into a tangent, not a sine.",
+  "An angle cannot be compared directly with a dimensionless number; the tangent is what makes the comparison meaningful."],
+ sol:"At the verge: mg sin θ = μ<sub>s</sub> mg cos θ ⇒ <b>tan θ = μ<sub>s</sub></b>. Beyond that angle the driving component wins. Note the <b>mass cancels</b> — a heavy block is no more likely to slide than a light one."},
+
+{id:30, lec:"L-3", blk:"Acceleration", topic:"Sliding down a rough incline",
+ q:"A block sliding down a rough incline of angle θ has acceleration",
+ opts:[
+  "g(sin θ − μ<sub>k</sub> cos θ)",
+  "g(sin θ + μ<sub>k</sub> cos θ)",
+  "g(cos θ − μ<sub>k</sub> sin θ)",
+  "g sin θ"],
+ ans:0,
+ why:[
+  "Correct. The driving component g sin θ is opposed by the kinetic friction term μ<sub>k</sub>g cos θ acting up the slope.",
+  "A plus sign would make friction <b>speed the block up</b>, which no resistive force does.",
+  "The sine and cosine have been swapped; g cos θ is the direction pressing into the surface, not along it.",
+  "g sin θ is the <b>frictionless</b> result — correct only when μ<sub>k</sub> = 0."],
+ sol:"<b>a = g(sin θ − μ<sub>k</sub> cos θ).</b> Mass cancels, so all blocks slide alike. Setting a = 0 recovers tan θ = μ<sub>k</sub>, the angle for constant-speed descent."},
+
+{id:31, lec:"L-3", blk:"Calculations", topic:"Acceleration on a 37° incline",
+ q:"A block slides down a 37° incline with μ<sub>k</sub> = 0.25. Its acceleration is (sin 37° = 0.6, cos 37° = 0.8, g = 10)",
+ opts:["4 m s⁻²","6 m s⁻²","8 m s⁻²","2 m s⁻²"],
+ ans:0,
+ why:[
+  "Correct. a = 10(0.6 − 0.25 × 0.8) = 10(0.6 − 0.2) = 4 m s⁻².",
+  "6 m s⁻² is g sin θ, the frictionless value — the friction term has been dropped.",
+  "8 m s⁻² is g cos θ, which is not an acceleration along the slope at all.",
+  "2 m s⁻² would follow from subtracting 0.4 rather than 0.2 in the bracket."],
+ sol:"a = g(sin θ − μ<sub>k</sub> cos θ) = 10(0.6 − 0.2) = <b>4 m s⁻²</b>. Sanity check: it must be less than the frictionless 6 m s⁻² but positive, since tan 37° = 0.75 &gt; 0.25 ✓"},
+
+{id:32, lec:"L-3", blk:"Frictionless case", topic:"The smooth incline",
+ q:"On a perfectly smooth incline of angle θ, a released block accelerates at",
+ opts:["g sin θ","g","g cos θ","g tan θ"],
+ ans:0,
+ why:[
+  "Correct. With no friction the only unbalanced force is the mg sin θ component, giving a = g sin θ.",
+  "g is the free-fall value, reached only when θ = 90° and the incline is vertical.",
+  "g cos θ corresponds to the direction pressing into the surface, where the block does not move.",
+  "g tan θ exceeds g for θ &gt; 45°, which is impossible for a block on a slope under gravity alone."],
+ sol:"<b>a = g sin θ</b> — the μ<sub>k</sub> = 0 case of the general formula. Check θ = 0: a = 0 ✓; θ = 90°: a = g ✓"},
+
+{id:33, lec:"L-3", blk:"Direction of friction", topic:"Which way friction acts",
+ q:"A block is being pushed <b>up</b> a rough incline. The friction force on it acts",
+ opts:[
+  "down the incline",
+  "up the incline",
+  "horizontally",
+  "perpendicular to the incline"],
+ ans:0,
+ why:[
+  "Correct. The block tends to move up, so friction opposes that tendency and acts down the slope — alongside the mg sin θ component, making the push harder.",
+  "Friction acts up the slope when the block tends to slide <b>down</b>, which is the opposite situation.",
+  "Friction is always tangential to the surface, so on an incline it points along the slope, not horizontally.",
+  "Perpendicular to the surface is the direction of the <b>normal reaction</b>."],
+ sol:"⚠ <b>Friction opposes the tendency of relative motion.</b> Pushing up ⇒ friction acts down (F = mg sin θ + μ mg cos θ). About to slide down ⇒ friction acts up (F = mg sin θ − μ mg cos θ). <b>Flip the sign of the μ term accordingly.</b>"},
+
+{id:34, lec:"L-3", blk:"Applied force", topic:"Force to just push a block up",
+ q:"The force applied parallel to an incline that will just start a block moving <b>up</b> is",
+ opts:[
+  "mg sin θ + μ<sub>s</sub> mg cos θ",
+  "mg sin θ − μ<sub>s</sub> mg cos θ",
+  "μ<sub>s</sub> mg cos θ",
+  "mg sin θ"],
+ ans:0,
+ why:[
+  "Correct. The push must overcome both the weight component down the slope <b>and</b> friction, which acts down when the block tends to move up.",
+  "The minus sign belongs to the case of <b>preventing</b> a block from sliding down, where friction helps you.",
+  "This overcomes friction alone and ignores the weight component entirely.",
+  "This overcomes the weight component alone and ignores friction."],
+ sol:"<b>Push up: F = mg sin θ + μ<sub>s</sub> mg cos θ</b> (friction opposes, acting down). <b>Hold from sliding down: F = mg sin θ − μ<sub>s</sub> mg cos θ</b> (friction helps, acting up). The two differ only in the sign of the μ term — and by twice the friction in magnitude."},
+
+{id:35, lec:"L-3", blk:"Calculations", topic:"Minimum force to prevent sliding",
+ q:"A 4 kg block is on a 30° incline with μ<sub>s</sub> = 0.2. The minimum force parallel to the incline needed to stop it sliding down is (g = 10, cos 30° = 0.866)",
+ opts:["≈ 13.1 N","≈ 26.9 N","20 N","≈ 6.9 N"],
+ ans:0,
+ why:[
+  "Correct. F = mg sin θ − μ<sub>s</sub> mg cos θ = 20 − 6.93 = 13.07 N; friction acts up the slope and does part of the work for you.",
+  "26.9 N adds the friction term instead of subtracting it — that is the force needed to push the block <b>up</b>.",
+  "20 N is mg sin θ alone, which would be right only on a frictionless incline.",
+  "6.9 N is the friction term μ<sub>s</sub> mg cos θ by itself."],
+ sol:"mg sin θ = 40 × 0.5 = 20 N; μ<sub>s</sub> mg cos θ = 0.2 × 40 × 0.866 = 6.93 N. Since the block tends to slide down, friction acts <b>up</b> and helps: <b>F = 20 − 6.93 ≈ 13.1 N</b>."},
+
+{id:36, lec:"L-3", blk:"Calculations", topic:"Testing whether a block slides",
+ q:"A 10 kg block sits on a 30° incline with μ<sub>s</sub> = 0.5 (g = 10, tan 30° ≈ 0.577). The block",
+ opts:[
+  "slides, because tan 30° = 0.577 exceeds μ<sub>s</sub> = 0.5",
+  "stays at rest, with friction equal to 43.3 N",
+  "stays at rest, with friction equal to 50 N",
+  "slides, because mg sin θ = 50 N exceeds mg = 100 N"],
+ ans:0,
+ why:[
+  "Correct. The driving force mg sin θ = 50 N exceeds the friction limit μ<sub>s</sub> mg cos θ = 43.3 N, and the tan θ &gt; μ<sub>s</sub> test says the same thing more quickly.",
+  "43.3 N is the friction <b>limit</b>, and it is not enough — needing more than the limit is exactly what makes the block slide.",
+  "Friction cannot reach 50 N here; its ceiling on this incline is 43.3 N.",
+  "The reasoning is nonsense: mg sin θ is a component of mg and can never exceed it."],
+ sol:"Two equivalent tests. <b>Quick:</b> tan 30° = 0.577 &gt; 0.5 ⇒ slides. <b>Full:</b> driving 50 N vs limit 0.5 × 100 × 0.866 = 43.3 N ⇒ slides. ⚠ Once it <b>is</b> sliding, the friction acting is μ<sub>k</sub> mg cos θ, which needs μ<sub>k</sub> — the 43.3 N figure is the value only at the <b>instant</b> motion impends."},
+
+{id:37, lec:"L-3", blk:"Which μ to use", topic:"Static or kinetic?",
+ q:"For a question asking “what force will just start the block moving?”, you should use",
+ opts:[
+  "μ<sub>s</sub>, because motion is only impending",
+  "μ<sub>k</sub>, because the block is about to move",
+  "the average of μ<sub>s</sub> and μ<sub>k</sub>",
+  "either, since the two are equal"],
+ ans:0,
+ why:[
+  "Correct. “Just starts” means the body is still at rest at the limiting condition, so the static coefficient governs.",
+  "μ<sub>k</sub> applies once sliding has actually begun; “about to move” is still the static regime.",
+  "There is no averaging rule; the two coefficients govern different regimes.",
+  "μ<sub>s</sub> &gt; μ<sub>k</sub>, and their difference is exactly what produces the jerk on breaking free."],
+ sol:"⚠ <b>μ<sub>s</sub> for “just about to move / stays at rest”. μ<sub>k</sub> for “already sliding / find the acceleration”.</b> Mixing them is the classic error in this chapter."},
+
+{id:38, lec:"L-3", blk:"Mass independence", topic:"Does mass matter?",
+ q:"Two blocks of masses 2 kg and 8 kg, of the same material, are released from rest on the same rough incline. They",
+ opts:[
+  "have the same acceleration",
+  "accelerate in the ratio 1 : 4, with the heavier one faster",
+  "accelerate in the ratio 4 : 1, with the lighter one faster",
+  "cannot both slide unless the incline is very steep"],
+ ans:0,
+ why:[
+  "Correct. a = g(sin θ − μ<sub>k</sub> cos θ) contains no mass at all, so both blocks slide identically.",
+  "The heavier block feels more gravity but also more friction, and the two scale together and cancel exactly.",
+  "Nothing gives the lighter block an advantage; mass cancels completely.",
+  "Whether a block slides is set by tan θ vs μ<sub>s</sub>, which is also mass-independent — so either both slide or neither does."],
+ sol:"Both mg sin θ and μ mg cos θ are proportional to m, so <b>m cancels</b>: <b>a = g(sin θ − μ<sub>k</sub> cos θ)</b>. Same for the sliding test tan θ &gt; μ<sub>s</sub>. Mass matters for the <b>forces</b>, never for the acceleration or the sliding condition."},
+
+{id:39, lec:"L-3", blk:"Acceleration", topic:"Constant-speed descent",
+ q:"A block slides down a rough incline at constant velocity. This tells you that",
+ opts:["tan θ = μ<sub>k</sub>","tan θ = μ<sub>s</sub>","sin θ = μ<sub>k</sub>","μ<sub>k</sub> = 0"],
+ ans:0,
+ why:[
+  "Correct. Constant velocity means zero acceleration, so g(sin θ − μ<sub>k</sub> cos θ) = 0, giving tan θ = μ<sub>k</sub>.",
+  "μ<sub>s</sub> governs whether motion <b>starts</b>; here the block is already sliding, so the kinetic coefficient applies.",
+  "Dividing mg sin θ by mg cos θ produces a tangent, not a sine.",
+  "A frictionless incline would make the block accelerate at g sin θ, not move at constant speed."],
+ sol:"Set a = 0 in <b>a = g(sin θ − μ<sub>k</sub> cos θ)</b> ⇒ <b>tan θ = μ<sub>k</sub></b>. This is the kinetic analogue of the angle of repose, and it gives a neat way to measure μ<sub>k</sub> experimentally."},
+
+{id:40, lec:"L-3", blk:"Setting up", topic:"Limiting friction on an incline",
+ q:"The maximum friction available to a block of mass m on an incline of angle θ is",
+ opts:["μ<sub>s</sub> mg cos θ","μ<sub>s</sub> mg","μ<sub>s</sub> mg sin θ","mg cos θ"],
+ ans:0,
+ why:[
+  "Correct. Friction is μ<sub>s</sub>N and on an incline N = mg cos θ, so the two combine to μ<sub>s</sub> mg cos θ.",
+  "μ<sub>s</sub>mg uses the horizontal-surface value of N and overestimates the friction on any incline.",
+  "mg sin θ is the driving component along the slope, not the normal reaction.",
+  "mg cos θ is N itself; multiplying by μ<sub>s</sub> is what turns it into a friction force."],
+ sol:"<b>f<sub>max</sub> = μ<sub>s</sub>N = μ<sub>s</sub> mg cos θ.</b> As the incline steepens, cos θ falls, so the available friction <b>decreases</b> just as the driving force mg sin θ increases — which is why every block eventually slides."},
+
+{id:41, lec:"L-3", blk:"Applied force", topic:"Comparing the two incline forces",
+ q:"For a block on an incline, the force needed to just push it up exceeds the force needed to just hold it from sliding down by",
+ opts:[
+  "2μ<sub>s</sub> mg cos θ",
+  "μ<sub>s</sub> mg cos θ",
+  "2mg sin θ",
+  "mg cos θ"],
+ ans:0,
+ why:[
+  "Correct. The two forces are mg sin θ ± μ<sub>s</sub> mg cos θ, so their difference is twice the friction term.",
+  "One friction term is the amount by which each force differs from mg sin θ, not the gap between them.",
+  "The mg sin θ terms are identical in both cases and cancel in the difference.",
+  "This omits μ<sub>s</sub> and so is not a friction force at all."],
+ sol:"Push up: mg sin θ <b>+</b> μ<sub>s</sub> mg cos θ. Hold: mg sin θ <b>−</b> μ<sub>s</sub> mg cos θ. Difference = <b>2μ<sub>s</sub> mg cos θ</b>. Friction works against you in one case and for you in the other, so it counts twice."},
+
+/* ---------------- L-4 (13) ---------------- */
+{id:42, lec:"L-4", blk:"Minimum pull", topic:"Why pulling at an angle helps",
+ q:"Pulling a block at an angle θ above the horizontal, rather than horizontally, can require less force because",
+ opts:[
+  "the vertical component reduces the normal reaction, and so reduces friction",
+  "the vertical component adds to the horizontal component",
+  "gravity acts less strongly on a tilted force",
+  "the block's mass is effectively reduced"],
+ ans:0,
+ why:[
+  "Correct. N = mg − F sin θ, so friction μN falls. The cost is that only F cos θ now drives the block, and the optimum trades these off.",
+  "Perpendicular components never add; only the horizontal component drives the block forward.",
+  "Gravity is unaffected by how you choose to pull — mg is unchanged.",
+  "Mass is invariant. It is the <b>normal reaction</b> that falls, not the mass."],
+ sol:"Pulling upward at θ gives <b>N = mg − F sin θ</b>, so friction to overcome is μ(mg − F sin θ). Balancing at the verge: <b>F = μmg/(cos θ + μ sin θ)</b>. Pushing <b>down</b> at an angle does the opposite — it increases N and makes matters worse."},
+
+{id:43, lec:"L-4", blk:"Minimum pull", topic:"The optimum angle",
+ q:"The force needed to just move a block on a horizontal surface is least when the pull is applied at an angle above the horizontal equal to",
+ opts:[
+  "the angle of friction λ = tan⁻¹μ",
+  "45° always",
+  "90° (straight up)",
+  "0° (horizontal)"],
+ ans:0,
+ why:[
+  "Correct. Minimising F = μmg/(cos θ + μ sin θ) means maximising the denominator, which happens at tan θ = μ, i.e. θ = λ.",
+  "45° is optimal only in the special case μ = 1; for other surfaces the best angle differs.",
+  "Pulling straight up supplies no horizontal force at all, so the block would never move sideways — it would simply lift off at F = mg.",
+  "Horizontal pulling is the F = μmg case, which the tilted pull always beats."],
+ sol:"Maximise cos θ + μ sin θ ⇒ <b>tan θ = μ = tan λ</b> ⇒ <b>θ = λ</b>. Substituting back gives the denominator √(1 + μ²) and hence <b>F<sub>min</sub> = μmg/√(1 + μ²)</b>. Pull a load at the angle of friction, never horizontally."},
+
+{id:44, lec:"L-4", blk:"Minimum pull", topic:"The minimum-force formula",
+ q:"The least force required to just move a block of mass m on a rough horizontal surface is",
+ opts:[
+  "μmg/√(1 + μ²)",
+  "μmg",
+  "μmg√(1 + μ²)",
+  "mg/√(1 + μ²)"],
+ ans:0,
+ why:[
+  "Correct — the value of μmg/(cos θ + μ sin θ) at the optimal angle, where the denominator reaches its maximum √(1 + μ²).",
+  "μmg is the force needed for a <b>horizontal</b> pull, which is always larger since √(1 + μ²) &gt; 1.",
+  "Multiplying rather than dividing makes the force <b>larger</b> than the horizontal case, defeating the purpose.",
+  "Dropping the μ leaves a quantity comparable to the weight, far too large for a friction-limited force."],
+ sol:"<b>F<sub>min</sub> = μmg/√(1 + μ²)</b> at θ = λ. Compare with μmg for a horizontal pull: the saving factor is 1/√(1 + μ²), so for μ = 0.5 you save about 11 %."},
+
+{id:45, lec:"L-4", blk:"Calculations", topic:"Minimum force on a 10 kg block",
+ q:"A 10 kg block sits on a floor with μ = 0.5. The minimum force needed to just move it is (g = 10)",
+ opts:["≈ 44.7 N","50 N","≈ 55.9 N","100 N"],
+ ans:0,
+ why:[
+  "Correct. F<sub>min</sub> = (0.5 × 100)/√1.25 = 50/1.118 ≈ 44.7 N, applied at tan⁻¹(0.5) ≈ 26.6° above the horizontal.",
+  "50 N is μmg, the force for a <b>horizontal</b> pull — the very thing the optimal angle improves on.",
+  "55.9 N is 50 × √1.25, obtained by multiplying instead of dividing; the minimum can never exceed the horizontal value.",
+  "100 N is the block's weight, unrelated to the pull required."],
+ sol:"F<sub>min</sub> = μmg/√(1 + μ²) = 50/√1.25 = <b>44.7 N</b> at <b>26.6°</b> above horizontal. Sanity check: it must come out <b>below</b> the 50 N horizontal value ✓"},
+
+{id:46, lec:"L-4", blk:"Pushing versus pulling", topic:"Pushing down at an angle",
+ q:"A block is pushed with a force directed at an angle <b>below</b> the horizontal. Compared with a horizontal push of the same magnitude, the friction to be overcome is",
+ opts:[
+  "greater, because the normal reaction increases",
+  "smaller, because the normal reaction decreases",
+  "unchanged, since friction does not depend on direction",
+  "zero, because the block is pressed into the surface"],
+ ans:0,
+ why:[
+  "Correct. N = mg + F sin θ now, so friction μN rises — and the useful horizontal component F cos θ has shrunk as well. Pushing downward is the worst of both worlds.",
+  "That describes pulling <b>upward</b> at an angle, which lifts some of the load off the surface.",
+  "Friction depends on N, and N very much depends on the direction of the applied force.",
+  "Pressing harder increases friction; it certainly does not remove it."],
+ sol:"<b>Pull up at an angle: N = mg − F sin θ (friction falls). Push down at an angle: N = mg + F sin θ (friction rises).</b> This is why a suitcase is easier to pull by its handle than to shove downward-and-forward."},
+
+{id:47, lec:"L-4", blk:"Stacked blocks", topic:"When the upper block slips",
+ q:"Block A rests on block B, which is pushed along a smooth floor. The upper block A is accelerated by",
+ opts:[
+  "the friction between A and B",
+  "the applied force acting directly on A",
+  "its own weight",
+  "the normal reaction from B"],
+ ans:0,
+ why:[
+  "Correct. Nothing else touches A horizontally, so friction from B is the only force that can accelerate it — and if it cannot supply enough, A slips.",
+  "The applied force acts on <b>B</b>; A feels it only indirectly, through friction.",
+  "Weight acts vertically and cannot produce horizontal acceleration.",
+  "The normal reaction is also vertical and merely supports A."],
+ sol:"For the stack to move together, friction must supply A's share: f = m<sub>A</sub>a. Since f ≤ μm<sub>A</sub>g, the greatest common acceleration is <b>a<sub>max</sub> = μg</b> — independent of A's mass."},
+
+{id:48, lec:"L-4", blk:"Stacked blocks", topic:"Maximum common acceleration",
+ q:"Two stacked blocks move together, with coefficient μ between them. The maximum acceleration they can share without the upper one slipping is",
+ opts:["μg","μg(m₁ + m₂)/m₁","g","μm₁g"],
+ ans:0,
+ why:[
+  "Correct. The available friction is μm₁g and it must produce m₁a, so a ≤ μg and the mass cancels.",
+  "Introducing the mass ratio is unnecessary; the condition involves only the upper block.",
+  "g would need μ = 1 exactly, which is a special case rather than the general result.",
+  "μm₁g is a <b>force</b>, not an acceleration — dividing by m₁ is what makes it one."],
+ sol:"For the upper block: f = m₁a ≤ μm₁g ⇒ <b>a<sub>max</sub> = μg</b>. Then the greatest applied force on the pair is <b>F<sub>max</sub> = (m₁ + m₂)μg</b>."},
+
+{id:49, lec:"L-4", blk:"Calculations", topic:"A two-block stack",
+ q:"Block A (2 kg) rests on block B (3 kg) on a smooth floor, with μ = 0.4 between A and B. The maximum horizontal force on B for the two to move together is (g = 10)",
+ opts:["20 N","8 N","12 N","50 N"],
+ ans:0,
+ why:[
+  "Correct. a<sub>max</sub> = μg = 4 m s⁻², so F = (2 + 3) × 4 = 20 N.",
+  "8 N is the maximum friction on A alone, which accelerates only the 2 kg block, not the pair.",
+  "12 N would accelerate the 3 kg block alone at 4 m s⁻², leaving A unaccounted for.",
+  "50 N is the total weight of the two blocks, unrelated to the sliding limit."],
+ sol:"Max friction on A = 0.4 × 2 × 10 = 8 N ⇒ <b>a<sub>max</sub> = 8/2 = 4 m s⁻²</b>. For the pair: <b>F = (m<sub>A</sub> + m<sub>B</sub>)a = 5 × 4 = 20 N</b>. Beyond this, B accelerates faster than friction can drag A along and the top block slides back."},
+
+{id:50, lec:"L-4", blk:"Rolling friction", topic:"Why rolling friction is small",
+ q:"Rolling friction is far smaller than sliding friction because",
+ opts:[
+  "the contact point of a rolling body does not slide, so only a small surface deformation resists motion",
+  "a rolling body has a smaller contact area",
+  "rolling bodies are always lighter",
+  "the normal reaction vanishes for a rolling body"],
+ ans:0,
+ why:[
+  "Correct. With no relative sliding at the contact point, there are no micro-welds to shear; the resistance comes only from the slight deformation of wheel and surface.",
+  "Contact area does not determine friction — the same law that makes sliding friction area-independent applies here.",
+  "Mass is irrelevant to the comparison; the same body rolls more easily than it slides.",
+  "The normal reaction still supports the full weight; nothing about rolling removes it."],
+ sol:"<b>μ<sub>rolling</sub> ≪ μ<sub>k</sub></b> because rolling <b>replaces sliding</b> at the contact. This is the entire reason for wheels, rollers and ball bearings — they convert a shearing contact into a rolling one."},
+
+{id:51, lec:"L-4", blk:"Calculations", topic:"μ from constant-velocity motion",
+ q:"A horizontal force of 60 N pushes a 12 kg block across a floor at constant velocity. The coefficient of kinetic friction is (g = 10)",
+ opts:["0.5","0.6","5","0.05"],
+ ans:0,
+ why:[
+  "Correct. Constant velocity means zero net force, so 60 = μ<sub>k</sub> × 120, giving μ<sub>k</sub> = 0.5.",
+  "0.6 would follow from taking N as 100 N instead of the correct 120 N.",
+  "5 divides in the wrong direction; μ is N over f rather than f over N here.",
+  "0.05 is out by a factor of ten."],
+ sol:"<b>Constant velocity ⇒ applied force = kinetic friction.</b> N = mg = 120 N, so μ<sub>k</sub> = 60/120 = <b>0.5</b>. The phrase “constant velocity” is always the signal that the forces balance exactly."},
+
+{id:52, lec:"L-4", blk:"Minimum pull", topic:"Comparing horizontal and optimal pulls",
+ q:"For μ = 1, the ratio of the minimum pulling force to the force needed for a horizontal pull is",
+ opts:["1/√2","1/2","√2","1"],
+ ans:0,
+ why:[
+  "Correct. F<sub>min</sub>/F<sub>horizontal</sub> = [μmg/√(1+μ²)]/(μmg) = 1/√(1+μ²) = 1/√2 for μ = 1.",
+  "1/2 would require √(1 + μ²) = 2, i.e. μ = √3.",
+  "√2 exceeds 1, but the optimal pull must always be <b>smaller</b> than the horizontal one.",
+  "A ratio of 1 would mean tilting the pull gains nothing, which is true only when μ = 0."],
+ sol:"The saving factor is always <b>1/√(1 + μ²)</b>. For μ = 1 that is <b>1/√2 ≈ 0.71</b>, a 29 % saving, with the pull applied at λ = 45°. The rougher the surface, the more tilting the pull is worth."},
+
+{id:53, lec:"L-4", blk:"Stacked blocks", topic:"Friction direction in a stack",
+ q:"In a two-block stack accelerating together to the right, the friction on the <b>upper</b> block from the lower one acts",
+ opts:[
+  "to the right, in the direction of the acceleration",
+  "to the left, opposing the motion",
+  "downward",
+  "there is no friction if they move together"],
+ ans:0,
+ why:[
+  "Correct. The upper block needs a rightward net force to accelerate, and friction is the only horizontal force acting on it.",
+  "⚠ Friction opposes the <b>tendency of relative sliding</b>. The upper block tends to lag behind, i.e. to slide backward relative to the lower one, so friction pushes it forward.",
+  "Friction acts tangentially, and here the contact surface is horizontal, so friction is horizontal.",
+  "Moving together is precisely what <b>requires</b> friction; without it the lower block would slide out from under the upper one."],
+ sol:"⚠ Another case where friction <b>drives</b> rather than resists. The upper block tends to slip backward relative to the lower, so friction on it points <b>forward</b> — exactly like the friction that accelerates a car."},
+
+{id:54, lec:"L-4", blk:"Rolling friction", topic:"Practical use of rolling",
+ q:"Ball bearings are used in machinery mainly to",
+ opts:[
+  "replace sliding contact with rolling contact, greatly reducing friction",
+  "increase the normal reaction between moving parts",
+  "increase the contact area and so spread the load",
+  "eliminate friction entirely"],
+ ans:0,
+ why:[
+  "Correct. Since μ<sub>rolling</sub> ≪ μ<sub>k</sub>, converting a sliding joint into a rolling one cuts the resisting force dramatically.",
+  "A larger normal reaction would <b>increase</b> friction, the opposite of what is wanted.",
+  "Friction is independent of apparent contact area, so spreading the load would achieve nothing.",
+  "Friction is reduced, not eliminated — rolling resistance is small but never zero."],
+ sol:"<b>μ<sub>s</sub> &gt; μ<sub>k</sub> &gt; μ<sub>rolling</sub>.</b> Bearings, wheels and rollers all exploit the last inequality: the same load moves with a small fraction of the resisting force once sliding is replaced by rolling."},
+
+/* ---------------- Strong Box (10) ---------------- */
+{id:55, lec:"SB", blk:"Stopping distance", topic:"Distance travelled before stopping",
+ q:"A 5 kg block moving at 10 m s⁻¹ on a rough floor (μ<sub>k</sub> = 0.4) comes to rest after travelling (g = 10)",
+ opts:["12.5 m","25 m","5 m","10 m"],
+ ans:0,
+ why:[
+  "Correct. Deceleration a = μ<sub>k</sub>g = 4 m s⁻², and v² = u² − 2as gives 0 = 100 − 8s, so s = 12.5 m.",
+  "25 m would follow from a deceleration of 2 m s⁻², i.e. from halving μ<sub>k</sub>g.",
+  "5 m corresponds to a deceleration of 10 m s⁻², which would need μ<sub>k</sub> = 1.",
+  "10 m is the initial speed's numerical value, not a distance."],
+ sol:"a = μ<sub>k</sub>g = <b>4 m s⁻²</b>; then <b>s = v²/(2μ<sub>k</sub>g) = 100/8 = 12.5 m</b>. Note the <b>mass never appears</b> — worth checking, since the 5 kg is deliberately given as a distractor."},
+
+{id:56, lec:"SB", blk:"Stopping distance", topic:"Does mass affect stopping distance?",
+ q:"Two blocks of different masses, of the same material, slide across the same floor with the same initial speed. Their stopping distances are",
+ opts:[
+  "equal",
+  "greater for the heavier block",
+  "greater for the lighter block",
+  "in the ratio of their masses"],
+ ans:0,
+ why:[
+  "Correct. The deceleration is μ<sub>k</sub>g and the stopping distance v²/(2μ<sub>k</sub>g) — neither contains the mass.",
+  "The heavier block has more kinetic energy to dissipate, but also proportionally more friction, and the two cancel exactly.",
+  "Nothing favours the lighter block either; mass cancels in both directions.",
+  "A mass-ratio dependence would contradict the mass-free formula."],
+ sol:"Friction is μmg and mass is m, so a = μg and <b>s = v²/(2μg)</b> — <b>mass-independent</b>. The same cancellation that makes acceleration on an incline mass-free. This is why a loaded and an empty truck have similar braking distances in ideal conditions."},
+
+{id:57, lec:"SB", blk:"Two-incline timing", topic:"Comparing rough and smooth descents",
+ q:"A body takes twice as long to slide down a rough 45° incline as down a smooth incline of the same angle and length. The coefficient of kinetic friction is",
+ opts:["0.75","0.5","0.25","0.9"],
+ ans:0,
+ why:[
+  "Correct. Since s = ½at² with s fixed, doubling the time quarters the acceleration; at 45° that gives 1/(1 − μ) = 4, so μ = 0.75.",
+  "0.5 would give an acceleration ratio of 2, corresponding to a time ratio of √2 rather than 2.",
+  "0.25 gives a ratio of 4/3, far short of the required 4.",
+  "0.9 gives a ratio of 10, meaning the rough descent would take √10 ≈ 3.2 times as long."],
+ sol:"Same s: <b>a ∝ 1/t²</b>, so t₂ = 2t₁ ⇒ a₁ = 4a₂. At 45°, sin = cos, so g sin45°/[g(sin45° − μcos45°)] = 1/(1 − μ) = 4 ⇒ 1 − μ = ¼ ⇒ <b>μ = 0.75</b>. The 45° choice is what makes the trig collapse so neatly."},
+
+{id:58, lec:"SB", blk:"Work done", topic:"Work by static friction in rolling",
+ q:"For a wheel rolling without slipping, the work done by the static friction at the contact point is",
+ opts:[
+  "zero, because the contact point is instantaneously at rest",
+  "negative, since friction opposes motion",
+  "positive, since friction drives the wheel",
+  "equal to the wheel's kinetic energy"],
+ ans:0,
+ why:[
+  "Correct. Work needs a displacement of the point where the force acts, and in rolling without slipping that point has zero instantaneous velocity.",
+  "Negative work would mean mechanical energy is being dissipated, which is exactly what rolling without slipping avoids.",
+  "Static friction can change the <b>distribution</b> between translational and rotational energy, but it adds no net energy to the system.",
+  "The kinetic energy comes from whatever drives the wheel, not from the friction force itself."],
+ sol:"<b>Rolling without slipping ⇒ the contact point is instantaneously at rest ⇒ static friction does no net work.</b> This is why rolling is so efficient: unlike kinetic friction, it does not convert mechanical energy into heat."},
+
+{id:59, lec:"SB", blk:"Direction", topic:"Friction opposing tendency, not motion",
+ q:"Which statement best describes what friction opposes?",
+ opts:[
+  "the tendency of relative motion between the surfaces in contact",
+  "the velocity of the body it acts on, always",
+  "the applied force, always",
+  "the body's weight"],
+ ans:0,
+ why:[
+  "Correct. This single sentence explains every apparent exception — the car's driving wheel, the upper block of an accelerating stack, a passenger on an accelerating bus floor.",
+  "⚠ The most common misconception. On a car's driving wheel friction acts <b>forward</b>, in the same direction as the velocity.",
+  "For a block in equilibrium friction does balance the applied force, but not when the applied force acts on some <b>other</b> body in the system.",
+  "Weight is vertical and is balanced by the normal reaction, not by friction."],
+ sol:"<b>Friction opposes relative sliding at the contact surface</b>, not the body's own motion. When the surface tends to slip backward under the body, friction pushes the body forward — and that is what makes walking, driving and accelerating a stack possible."},
+
+{id:60, lec:"SB", blk:"The incline trap", topic:"The most common friction error",
+ q:"The most frequent mistake in inclined-plane friction problems is",
+ opts:[
+  "using N = mg instead of N = mg cos θ",
+  "using N = mg cos θ instead of N = mg",
+  "forgetting that friction is a vector",
+  "assuming μ is dimensionless"],
+ ans:0,
+ why:[
+  "Correct. On an incline only the perpendicular component of weight presses into the surface, and dropping the cos θ overestimates every friction force in the problem.",
+  "mg cos θ is the <b>correct</b> expression on an incline; using it is not a mistake.",
+  "Friction being a vector is standard and rarely the source of error once its direction is settled by the tendency of motion.",
+  "μ genuinely is dimensionless, so assuming so is correct."],
+ sol:"⚠ <b>On an incline, N = mg cos θ, not mg.</b> Every downstream quantity — limiting friction, acceleration, the force to hold the block — inherits this factor. It is the single most common error in the chapter."},
+
+{id:61, lec:"SB", blk:"Quick recall", topic:"The three equal numbers",
+ q:"Which three quantities are numerically equal for a given pair of surfaces?",
+ opts:[
+  "μ<sub>s</sub>, tan(angle of friction) and tan(angle of repose)",
+  "μ<sub>s</sub>, the angle of friction and the angle of repose",
+  "μ<sub>s</sub>, μ<sub>k</sub> and μ<sub>rolling</sub>",
+  "μ<sub>s</sub>, sin(angle of friction) and sin(angle of repose)"],
+ ans:0,
+ why:[
+  "Correct. All three reduce to the same number, which is why tilting a plank until the block slips measures μ<sub>s</sub> directly.",
+  "The two <b>angles</b> are equal to each other, but neither equals μ<sub>s</sub> — it is their <b>tangents</b> that do.",
+  "These three are in strictly decreasing order, not equal.",
+  "The relation involves tangents, not sines; a sine would cap μ at 1."],
+ sol:"<b>μ<sub>s</sub> = tan λ = tan θ<sub>r</sub></b>, and therefore <b>λ = θ<sub>r</sub></b>. Two statements worth keeping distinct: the coefficients equal the <b>tangents</b>, and the two angles equal <b>each other</b>."},
+
+{id:62, lec:"SB", blk:"Quick recall", topic:"Fast checks",
+ q:"Which of these quick results is <b>incorrect</b>?",
+ opts:[
+  "Minimum pull on a flat surface = μmg√(1 + μ²)",
+  "Frictionless incline: a = g sin θ",
+  "Block just at rest on an incline: tan θ = μ<sub>s</sub>",
+  "Stopping distance on the flat: s = v²/(2μ<sub>k</sub>g)"],
+ ans:0,
+ why:[
+  "Correct — this is the faulty one. The formula divides by √(1 + μ²); multiplying would make the “minimum” larger than the plain horizontal pull μmg, which is absurd.",
+  "This is right: with μ = 0 the general formula g(sin θ − μ<sub>k</sub>cos θ) reduces to g sin θ.",
+  "This is right — it is the definition of the angle of repose.",
+  "This is right: with a = μ<sub>k</sub>g, v² = 2as rearranges to exactly this."],
+ sol:"<b>F<sub>min</sub> = μmg/√(1 + μ²)</b> — divide, never multiply. Sanity test on any such formula: the optimal pull must come out <b>smaller</b> than the horizontal pull μmg."},
+
+{id:63, lec:"SB", blk:"Stopping distance", topic:"Effect of doubling the speed",
+ q:"If the initial speed of a sliding block is doubled, its stopping distance on the same surface becomes",
+ opts:["four times as great","twice as great","the same","half as great"],
+ ans:0,
+ why:[
+  "Correct. s = v²/(2μ<sub>k</sub>g) is proportional to v², so doubling the speed quadruples the distance.",
+  "A linear relation would apply to stopping <b>time</b>, t = v/(μ<sub>k</sub>g), not to distance.",
+  "The distance clearly depends on the speed; only the deceleration is speed-independent.",
+  "Faster motion always requires a longer distance to stop, never a shorter one."],
+ sol:"<b>s ∝ v².</b> Double the speed and you need <b>four</b> times the distance — the reason speed limits matter so much more than intuition suggests. Note that <b>stopping time</b> only doubles."},
+
+{id:64, lec:"SB", blk:"Quick recall", topic:"Friction between a body and a supporting surface at rest",
+ q:"A block rests on a horizontal rough table with no horizontal force applied. The friction acting on it is",
+ opts:[
+  "zero",
+  "μ<sub>s</sub>mg",
+  "mg",
+  "μ<sub>k</sub>mg"],
+ ans:0,
+ why:[
+  "Correct. There is no tendency of relative motion, so the self-adjusting static friction takes the value zero.",
+  "μ<sub>s</sub>mg is the friction the surface <b>could</b> supply, not what it does supply.",
+  "mg is the weight, which is balanced by the normal reaction — a vertical force, not friction.",
+  "μ<sub>k</sub>mg applies only when the block is sliding, and here it is at rest with nothing pushing it."],
+ sol:"<b>0 ≤ f<sub>s</sub> ≤ μ<sub>s</sub>N</b>, and with no applied force f<sub>s</sub> = <b>0</b>. Static friction is a <b>response to a tendency</b>; with no tendency, there is no force."}
+
+];
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter P-7 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

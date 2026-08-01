@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-8A Arithmetic Progressions — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>M-8A · Arithmetic Progressions</h1>
+    <p id="heroSub">Lectures L-1 to L-3 + Strong Box · 58 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">58 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · M-8A Arithmetic Progressions · mastery quiz built from lectures L-1 to L-3 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   M-8A ARITHMETIC PROGRESSIONS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Sequence, Series & the n<sup>th</sup> Term",
+   desc:"sequence vs series vs progression, T<sub>n</sub> = a + (n−1)d, n<sup>th</sup> term from the end, counting terms"},
+  {key:"L-2", name:"L-2 · Sum of n Terms & Selecting Terms",
+   desc:"S<sub>n</sub> in all three forms, a<sub>n</sub> = S<sub>n</sub> − S<sub>n−1</sub>, the S<sub>n</sub>-quadratic shortcut, symmetric terms, arithmetic means, standard sums"},
+  {key:"L-3", name:"L-3 · Properties of an A.P.",
+   desc:"shifting & scaling, combining two A.P.s, equidistant ends, every term a mid-point, the add-then-divide manoeuvre"},
+  {key:"SB",  name:"Strong Box · Previous Year Questions",
+   desc:"JEE Main 2022–2026 and JEE Advanced 2022 — two linear equations in a and d, and quadratics in n"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (18) ---------------- */
+{id:1, lec:"L-1", blk:"Sequence, series, progression", topic:"Sequence vs series",
+ q:"What is the difference between a sequence and a series?",
+ opts:[
+  "A sequence is an ordered list of terms; a series is what you get by adding those terms.",
+  "A series is an ordered list of terms; a sequence is their sum.",
+  "They are two names for the same object.",
+  "A sequence must be infinite; a series must be finite."],
+ ans:0,
+ why:[
+  "Correct. a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, … is the sequence; a<sub>1</sub> + a<sub>2</sub> + a<sub>3</sub> + … is the series built from it.",
+  "The two are the wrong way round — it is the <b>series</b> that involves addition.",
+  "They are different objects. You can have the same sequence with or without summing it, and the sum S<sub>n</sub> is a different quantity from the term a<sub>n</sub>.",
+  "Both can be finite or infinite. The list 2, 4, 6, 8 is a finite sequence and 2 + 4 + 6 + 8 is a finite series."],
+ sol:"<b>Sequence</b> = ordered list (its members are the <i>terms</i>, and how many there are is its <i>length</i>). <b>Series</b> = the sum of those terms. <b>Progression</b> = a sequence whose terms follow a definite pattern, so an n<sup>th</sup>-term formula exists."},
+
+{id:2, lec:"L-1", blk:"Sequence, series, progression", topic:"Definition of a progression",
+ q:"A progression differs from a general sequence in that",
+ opts:[
+  "its terms follow a definite pattern, so a formula for the n<sup>th</sup> term exists",
+  "it must be finite",
+  "it must be increasing",
+  "all of its terms must be integers"],
+ ans:0,
+ why:[
+  "Correct. That formula is the whole point: substitute n = 50 and the 50<sup>th</sup> term drops out without walking up from the previous one.",
+  "A progression may be infinite — 2, 4, 6, 8, … is an infinite A.P.",
+  "Decreasing progressions are perfectly normal: 7, 2, −3, −8, … is an A.P. with d = −5.",
+  "1/2, 3/2, 5/2, 7/2, … is an A.P. of non-integers."],
+ sol:"Every progression is a sequence, but not every sequence is a progression. The three progressions studied are the <b>A.P., G.P. and H.P.</b>"},
+
+{id:3, lec:"L-1", blk:"Sequence, series, progression", topic:"Disproving that a sequence is an A.P.",
+ q:"Which of the following is <b>not</b> an arithmetic progression?",
+ opts:[
+  "3, −3, −9, −15, −21, …",
+  "−7, −2, 3, 8, 13, …",
+  "1/2, 3/2, 5/2, 7/2, 9/2, …",
+  "5, 5, 7, 7, 9, 9, 11, 11, …"],
+ ans:3,
+ why:[
+  "Every gap is −6, so it is an A.P. with a = 3 and d = −6. A negative common difference is still a common difference.",
+  "Every gap is +5, so it is an A.P. with a = −7 and d = 5.",
+  "Every gap is 1, so it is an A.P. with a = 1/2 and d = 1. Fractional terms are fine.",
+  "Correct. The gaps run 0, 2, 0, 2, 0, 2, 0 — not constant. It looks orderly, but orderliness is not the test."],
+ sol:"The test is t<sub>k</sub> − t<sub>k−1</sub> = d for <b>every</b> k. One matching pair of gaps proves nothing — check several. In 5, 5, 7, 7, … the differences alternate 0 and 2, so it is not an A.P."},
+
+{id:4, lec:"L-1", blk:"Sequence, series, progression", topic:"Generating terms from an explicit formula",
+ q:"The sequence whose n<sup>th</sup> term is 2<sup>n</sup>/n begins",
+ opts:["2, 2, 8/3, 4, …","2, 4, 8, 16, …","1, 2, 8/3, 4, …","2, 2, 3, 4, …"],
+ ans:0,
+ why:[
+  "Correct. t<sub>1</sub> = 2/1 = 2, t<sub>2</sub> = 4/2 = 2, t<sub>3</sub> = 8/3, t<sub>4</sub> = 16/4 = 4. Note the gaps are 0, 2/3, 4/3 — this is <b>not</b> an A.P.",
+  "This is 2<sup>n</sup> with the division by n forgotten.",
+  "t<sub>1</sub> = 2<sup>1</sup>/1 = 2, not 1. Only the first term has been miscomputed.",
+  "t<sub>3</sub> = 8/3 ≈ 2.67, which is not 3. The fraction does not simplify."],
+ sol:"Substitute n = 1, 2, 3, 4 into t<sub>n</sub> = 2<sup>n</sup>/n: <b>2, 2, 8/3, 4, …</b> A formula for t<sub>n</sub> does not make the sequence an A.P."},
+
+{id:5, lec:"L-1", blk:"Sequence, series, progression", topic:"Generating terms from a recursion",
+ q:"A sequence is defined by a<sub>1</sub> = 2 and a<sub>n+1</sub> = (2a<sub>n</sub> + 3)/(a<sub>n</sub> + 2). Its first three terms are",
+ opts:["2, 7/4, 26/15","1, 7/4, 26/15","2, 4/7, 15/26","2, 7/4, 13/2"],
+ ans:0,
+ why:[
+  "Correct. a<sub>1</sub> = 2 is given; a<sub>2</sub> = (4 + 3)/(2 + 2) = 7/4; a<sub>3</sub> = (7/2 + 3)/(7/4 + 2) = (13/2)(4/15) = 26/15.",
+  "⚠ This is exactly what the ICAD module's printed answer line says — and it is a <b>misprint</b>. The first term is <i>given</i> as a<sub>1</sub> = 2, and it is 2 that the recursion needs in order to produce 7/4. Every calculation above that line in the book is right; only the answer line is wrong.",
+  "The fractions have been inverted. a<sub>2</sub> = 7/4, not 4/7.",
+  "13/2 is the <b>numerator</b> of a<sub>3</sub> before dividing by the denominator 15/4. Finish the division: (13/2) ÷ (15/4) = 26/15."],
+ sol:"A recursive definition must be climbed one rung at a time. a<sub>2</sub> = (2·2 + 3)/(2 + 2) = 7/4, then a<sub>3</sub> = (2·(7/4) + 3)/((7/4) + 2) = (13/2)/(15/4) = 26/15. Answer: <b>2, 7/4, 26/15</b>."},
+
+{id:6, lec:"L-1", blk:"Sequence, series, progression", topic:"A sequence with alternating signs",
+ q:"A sequence is given by a<sub>n</sub> = 1/n when n is odd and a<sub>n</sub> = −1/n when n is even. The sequence is",
+ opts:[
+  "1, −1/2, 1/3, −1/4, 1/5, …",
+  "1, 1/2, 1/3, 1/4, 1/5, …",
+  "−1, 1/2, −1/3, 1/4, −1/5, …",
+  "1, −2, 1/3, −4, 1/5, …"],
+ ans:0,
+ why:[
+  "Correct. n = 1 is odd → +1; n = 2 is even → −1/2; n = 3 odd → +1/3; n = 4 even → −1/4. The sign alternates while the size shrinks as 1/n.",
+  "The minus sign on the even terms has been dropped entirely.",
+  "The signs are the wrong way round — n = 1 is <b>odd</b>, so a<sub>1</sub> = +1.",
+  "The even terms have been written as −n instead of −1/n."],
+ sol:"Test the parity of n before applying the rule: <b>1, −1/2, 1/3, −1/4, 1/5, −1/6, …</b>"},
+
+{id:7, lec:"L-1", blk:"The n-th term", topic:"The general term",
+ q:"The n<sup>th</sup> term of an A.P. with first term a and common difference d is",
+ opts:["a + (n − 1)d","a + nd","a + (n + 1)d","an + d"],
+ ans:0,
+ why:[
+  "Correct. The 1<sup>st</sup> term has taken <b>zero</b> steps of d, the 2<sup>nd</sup> has taken one, so the n<sup>th</sup> has taken n − 1.",
+  "This is the single most expensive slip in the chapter. Test it: at n = 1 it gives a + d, but the first term is a.",
+  "Off by two. At n = 1 it gives a + 2d.",
+  "This multiplies the first term by n instead of counting steps of d. At n = 1 it gives a + d, not a."],
+ sol:"t<sub>1</sub> = a, t<sub>2</sub> = a + d, t<sub>3</sub> = a + 2d ⇒ <b>t<sub>n</sub> = a + (n − 1)d</b>. The multiple of d always equals the suffix minus one."},
+
+{id:8, lec:"L-1", blk:"The n-th term", topic:"Direct use of the n-th term formula",
+ q:"Show that 9, 12, 15, 18, … is an A.P. and find its 50<sup>th</sup> term.",
+ opts:["156","159","147","153"],
+ ans:0,
+ why:[
+  "Correct. The gaps are all 3, so a = 9 and d = 3, and t<sub>50</sub> = 9 + 49 × 3 = 9 + 147 = 156.",
+  "This uses a + 50d = 9 + 150 — the (n − 1) slip. The 50<sup>th</sup> term takes 49 steps, not 50.",
+  "This is 49d on its own; the first term 9 was never added.",
+  "This uses a + 48d = 9 + 144 — one step too few."],
+ sol:"12 − 9 = 15 − 12 = 18 − 15 = 3 ✓ so it is an A.P. with a = 9, d = 3. t<sub>50</sub> = a + 49d = 9 + 147 = <b>156</b>."},
+
+{id:9, lec:"L-1", blk:"The n-th term", topic:"Direct substitution",
+ q:"An A.P. has first term 2 and common difference 3. Its 50<sup>th</sup> term is",
+ opts:["149","152","147","146"],
+ ans:0,
+ why:[
+  "Correct. t<sub>50</sub> = 2 + 49 × 3 = 2 + 147 = 149.",
+  "This is a + 50d = 2 + 150 — the (n − 1) slip again.",
+  "This is 49d alone, with the first term left out.",
+  "This is a + 48d = 2 + 144 — one step short."],
+ sol:"t<sub>50</sub> = a + 49d = 2 + 49(3) = <b>149</b>."},
+
+{id:10, lec:"L-1", blk:"The n-th term", topic:"Sign of d in a decreasing A.P.",
+ q:"For the A.P. 7, 2, −3, −8, −13, … the common difference is",
+ opts:["−5","5","−4","2"],
+ ans:0,
+ why:[
+  "Correct. d = t<sub>2</sub> − t<sub>1</sub> = 2 − 7 = −5, and every later gap agrees: −3 − 2 = −5.",
+  "This computes t<sub>1</sub> − t<sub>2</sub>. The common difference is always <b>later minus earlier</b>; a falling A.P. has a negative d.",
+  "Miscounted: 2 − 7 = −5, not −4.",
+  "This is the second term, not the difference."],
+ sol:"d = t<sub>2</sub> − t<sub>1</sub> = 2 − 7 = <b>−5</b>. Getting this sign wrong is what wrecks the “from the end” questions, because ℓ − (n−1)d then <i>adds</i> rather than subtracts."},
+
+{id:11, lec:"L-1", blk:"The n-th term", topic:"Counting the terms of an A.P.",
+ q:"How many terms are there in the A.P. 3, 7, 11, …, 407?",
+ opts:["102","101","103","100"],
+ ans:0,
+ why:[
+  "Correct. 407 = 3 + (n − 1)4 ⇒ 404 = 4(n − 1) ⇒ n − 1 = 101 ⇒ n = 102.",
+  "This is n − 1, the number of <b>steps</b>. There is always one more term than there are gaps.",
+  "One too many — 3 + 102 × 4 = 411, past the last term.",
+  "404/4 = 101 steps, so 102 terms; 100 is two short."],
+ sol:"Set the last value equal to the general term and solve for n: 407 = 3 + (n − 1)4 ⇒ n = <b>102</b>. If n came out fractional, the value simply would not be a term of the A.P."},
+
+{id:12, lec:"L-1", blk:"The n-th term", topic:"Membership test",
+ q:"Is 100 a term of the A.P. 3, 7, 11, 15, … ?",
+ opts:[
+  "No — solving for its position gives a fractional n",
+  "Yes, it is the 25<sup>th</sup> term",
+  "Yes, it is the 26<sup>th</sup> term",
+  "Yes, it is the 24<sup>th</sup> term"],
+ ans:0,
+ why:[
+  "Correct. 100 = 3 + (n − 1)4 ⇒ n − 1 = 97/4 = 24.25, which is not a whole number. Every term of this A.P. is odd, so an even value can never appear.",
+  "The 25<sup>th</sup> term is 3 + 24 × 4 = 99, not 100.",
+  "The 26<sup>th</sup> term is 3 + 25 × 4 = 103.",
+  "The 24<sup>th</sup> term is 3 + 23 × 4 = 95."],
+ sol:"Membership test: solve t<sub>n</sub> = value for n. 100 = 3 + 4(n − 1) gives n = 25.25 — <b>not an integer, so 100 is not a term</b>."},
+
+{id:13, lec:"L-1", blk:"The n-th term", topic:"The n-th term from the end",
+ q:"If the last term of an A.P. is ℓ, its n<sup>th</sup> term counted <b>from the end</b> is",
+ opts:["ℓ − (n − 1)d","ℓ + (n − 1)d","ℓ − nd","a + (n − 1)d"],
+ ans:0,
+ why:[
+  "Correct. Treat ℓ as a new first term and walk backwards; reversing direction turns d into −d.",
+  "This walks forwards from the last term, off the end of the A.P.",
+  "The (n − 1) slip: the last term itself is the 1<sup>st</sup> from the end and has taken zero backward steps.",
+  "That is the n<sup>th</sup> term from the <b>start</b>."],
+ sol:"<b>T<sub>n</sub>(from end) = ℓ − (n − 1)d.</b> You never need the total number of terms — finding n first is wasted work."},
+
+{id:14, lec:"L-1", blk:"The n-th term", topic:"Counting backwards from the last term",
+ q:"Find the 8<sup>th</sup> term from the end of the A.P. 7, 10, 13, …, 184.",
+ opts:["163","166","205","28"],
+ ans:0,
+ why:[
+  "Correct. d = 3 and ℓ = 184, so T<sub>8</sub>(from end) = 184 − 7 × 3 = 184 − 21 = 163.",
+  "This uses 6 backward steps instead of 7 — an off-by-one. The 8<sup>th</sup> from the end has taken 8 − 1 = 7 steps.",
+  "The sign is wrong: 184 + 21 walks <i>past</i> the last term instead of back from it.",
+  "This is the 8<sup>th</sup> term from the <b>start</b>: 7 + 7 × 3 = 28."],
+ sol:"a = 7, d = 3, ℓ = 184. T<sub>8</sub>(from end) = ℓ − (8 − 1)d = 184 − 21 = <b>163</b>."},
+
+{id:15, lec:"L-1", blk:"The n-th term", topic:"From the end with a negative d",
+ q:"Find the 16<sup>th</sup> term from the end of the A.P. 7, 2, −3, −8, −13, …, −113.",
+ opts:["−38","−188","−68","−43"],
+ ans:0,
+ why:[
+  "Correct. d = −5, so T<sub>16</sub>(from end) = −113 − 15(−5) = −113 + 75 = −38.",
+  "The minus sign on d has been dropped, giving −113 − 75. When d is negative, ℓ − (n−1)d <b>adds</b>.",
+  "This is the 16<sup>th</sup> term from the <b>start</b>: 7 + 15(−5) = −68.",
+  "This uses 14 backward steps: −113 + 70. The 16<sup>th</sup> from the end takes 15 steps."],
+ sol:"a = 7, d = 2 − 7 = −5, ℓ = −113. T<sub>16</sub>(from end) = ℓ − 15d = −113 − 15(−5) = −113 + 75 = <b>−38</b>. The double negative is the whole difficulty here."},
+
+{id:16, lec:"L-1", blk:"The n-th term", topic:"A weighted term relation forcing a zero term",
+ q:"In an A.P., 5 times the 5<sup>th</sup> term equals 8 times the 8<sup>th</sup> term. Then the 13<sup>th</sup> term is",
+ opts:["0","13","−1","not determined by the data"],
+ ans:0,
+ why:[
+  "Correct. 5(a + 4d) = 8(a + 7d) ⇒ 3a + 36d = 0 ⇒ a + 12d = 0, and a + 12d <i>is</i> T<sub>13</sub>.",
+  "The index 13 is where the answer sits, not what the answer is.",
+  "The condition forces the term to be exactly zero, not −1.",
+  "It is fully determined. The two unknowns a and d are not individually pinned down, but the particular combination a + 12d is — and that is all T<sub>13</sub> needs."],
+ sol:"5(a + 4d) = 8(a + 7d) ⇒ 5a + 20d = 8a + 56d ⇒ 0 = 3a + 36d = 3(a + 12d) ⇒ a + 12d = 0. Since T<sub>13</sub> = a + (13 − 1)d = a + 12d, we get <b>T<sub>13</sub> = 0</b>. The general result: m·T<sub>m</sub> = n·T<sub>n</sub> ⇒ T<sub>m+n</sub> = 0."},
+
+{id:17, lec:"L-1", blk:"The n-th term", topic:"The T<sub>m</sub> = n, T<sub>n</sub> = m identity",
+ q:"In an A.P., T<sub>m</sub> = n and T<sub>n</sub> = m, where m ≠ n. Then T<sub>m+n</sub> equals",
+ opts:["0","m + n","mn","m + n − 1"],
+ ans:0,
+ why:[
+  "Correct. Subtracting the conditions gives (m − n)d = n − m ⇒ d = −1, then a = m + n − 1, so T<sub>m+n</sub> = a + (m + n − 1)(−1) = 0.",
+  "Test m = 2, n = 3: then d = −1, a = 4, and the A.P. is 4, 3, 2, 1, 0, … so T<sub>5</sub> = 0, not 5.",
+  "Same test: T<sub>5</sub> = 0, not 6. (mn/(m+n) is the answer to the corresponding <b>H.P.</b> question — a different chapter.)",
+  "m + n − 1 is the <b>first term</b> a, not the (m+n)<sup>th</sup> term."],
+ sol:"a + (m−1)d = n and a + (n−1)d = m. Subtracting: (m − n)d = n − m ⇒ <b>d = −1</b>; then a = n + (m − 1) = m + n − 1. So T<sub>m+n</sub> = (m + n − 1) − (m + n − 1) = <b>0</b>."},
+
+{id:18, lec:"L-1", blk:"The n-th term", topic:"The reciprocal-index A.P. result",
+ q:"In an A.P., T<sub>m</sub> = 1/n and T<sub>n</sub> = 1/m for positive integers m ≠ n. Then T<sub>mn</sub> equals",
+ opts:["1","mn","1/(mn)","m + n"],
+ ans:0,
+ why:[
+  "Correct. Subtracting gives (m − n)d = (m − n)/(mn) ⇒ d = 1/(mn), then a = 1/(mn), so T<sub>mn</sub> = (1 + mn − 1)/(mn) = 1.",
+  "Test m = 2, n = 3: a = d = 1/6, so T<sub>6</sub> = 1/6 + 5/6 = 1, not 6.",
+  "1/(mn) is the value of <b>both a and d</b> — not of T<sub>mn</sub>.",
+  "Same test: T<sub>6</sub> = 1, not 5."],
+ sol:"a + (m−1)d = 1/n and a + (n−1)d = 1/m ⇒ (m − n)d = 1/n − 1/m = (m − n)/(mn) ⇒ d = 1/(mn); back-substituting gives a = 1/(mn). Then T<sub>mn</sub> = a + (mn − 1)d = mn/(mn) = <b>1</b>."},
+
+/* ---------------- L-2 (20) ---------------- */
+{id:19, lec:"L-2", blk:"Sum of n terms", topic:"The sum formula",
+ q:"The sum of the first n terms of an A.P. is",
+ opts:[
+  "(n/2)[2a + (n − 1)d]",
+  "(n/2)[2a + nd]",
+  "n[2a + (n − 1)d]",
+  "(n/2)[a + (n − 1)d]"],
+ ans:0,
+ why:[
+  "Correct. Pair the sum with its own reverse: each vertical pair adds to 2a + (n − 1)d, and there are n pairs, so 2S<sub>n</sub> = n[2a + (n − 1)d].",
+  "The (n − 1) slip. Test n = 1: this gives (1/2)(2a + d) instead of a.",
+  "The factor n/2 has become n — this is exactly twice the sum. Test n = 1: it gives 2a.",
+  "The first term appears once instead of twice inside the bracket. Test n = 1: it gives a/2."],
+ sol:"<b>S<sub>n</sub> = (n/2)[2a + (n − 1)d]</b>. Always sanity-check a sum formula at n = 1, where it must collapse to a."},
+
+{id:20, lec:"L-2", blk:"Sum of n terms", topic:"The sum when the last term is known",
+ q:"If the last of the n terms is ℓ, the sum of the n terms is",
+ opts:["(n/2)(a + ℓ)","n(a + ℓ)","(n/2)(ℓ − a)","(a + ℓ)/2"],
+ ans:0,
+ why:[
+  "Correct — “half the count times (first + last)”. It is the same formula as (n/2)[2a + (n−1)d] with a + (n−1)d rewritten as ℓ.",
+  "Twice the sum. Test the A.P. 1, 2, 3: the true sum is 6, but this gives 3(1 + 3) = 12.",
+  "The two ends must be <b>added</b>, not subtracted. Test 1, 2, 3: this gives (3/2)(2) = 3, not 6.",
+  "This is the average of the two ends — the mean term, not the sum. Multiply by n to get the sum."],
+ sol:"<b>S<sub>n</sub> = (n/2)(a + ℓ) = (n/2)(first + last)</b>. Use this face of the formula whenever the last term is handed to you; it is one step instead of three."},
+
+{id:21, lec:"L-2", blk:"Sum of n terms", topic:"Direct sum computation",
+ q:"Find the sum of the first 20 terms of the A.P. −4, −2, 0, 2, 4, 6, …",
+ opts:["300","320","280","310"],
+ ans:0,
+ why:[
+  "Correct. a = −4, d = 2, so S<sub>20</sub> = 10[−8 + 19 × 2] = 10 × 30 = 300.",
+  "This uses 20d instead of 19d inside the bracket: 10[−8 + 40] = 320. The 20<sup>th</sup> term takes 19 steps.",
+  "This uses 18d: 10[−8 + 36] = 280 — one step short.",
+  "Not produced by any consistent route; the correct bracket value is exactly 30."],
+ sol:"a = −4, d = 2, n = 20. S<sub>20</sub> = (20/2)[2(−4) + 19(2)] = 10[−8 + 38] = <b>300</b>. <i>(The ICAD module's printed solution states “d = 9” here — a typo; the very next line correctly uses d = 2, and 300 is right.)</i>"},
+
+{id:22, lec:"L-2", blk:"Sum of n terms", topic:"Sum with a negative first term",
+ q:"Evaluate S<sub>12</sub> for the arithmetic sequence −9, −5, −1, 3, 7, …",
+ opts:["156","180","132","144"],
+ ans:0,
+ why:[
+  "Correct. a = −9, d = 4, so S<sub>12</sub> = 6[−18 + 11 × 4] = 6[26] = 156.",
+  "This uses 12d instead of 11d: 6[−18 + 48] = 180.",
+  "This uses 10d: 6[−18 + 40] = 132 — one step short.",
+  "Not reachable by a consistent method; the bracket must come out to 26."],
+ sol:"a = −9, d = (−5) − (−9) = 4, n = 12. S<sub>12</sub> = (12/2)[2(−9) + 11(4)] = 6[−18 + 44] = <b>156</b>."},
+
+{id:23, lec:"L-2", blk:"Sum of n terms", topic:"Recovering a term from the sums",
+ q:"For any series, the n<sup>th</sup> term can be recovered from the sums as",
+ opts:["a<sub>n</sub> = S<sub>n</sub> − S<sub>n−1</sub>","a<sub>n</sub> = S<sub>n</sub> + S<sub>n−1</sub>","a<sub>n</sub> = S<sub>n</sub>/n","a<sub>n</sub> = S<sub>n</sub> − S<sub>1</sub>"],
+ ans:0,
+ why:[
+  "Correct. S<sub>n</sub> = S<sub>n−1</sub> + a<sub>n</sub> by definition, so subtracting isolates the n<sup>th</sup> term. (Use a<sub>1</sub> = S<sub>1</sub> separately.)",
+  "Adding double-counts everything before the n<sup>th</sup> term.",
+  "S<sub>n</sub>/n is the <b>average</b> of the first n terms, not the n<sup>th</sup> term.",
+  "This gives a<sub>2</sub> + a<sub>3</sub> + … + a<sub>n</sub>, a block of terms rather than one term."],
+ sol:"S<sub>n</sub> = S<sub>n−1</sub> + a<sub>n</sub> ⇒ <b>a<sub>n</sub> = S<sub>n</sub> − S<sub>n−1</sub></b>, with a<sub>1</sub> = S<sub>1</sub>. This is the route whenever the sum is handed to you as a formula in n."},
+
+{id:24, lec:"L-2", blk:"Sum of n terms", topic:"n-th term from a given S<sub>n</sub>",
+ q:"If the sum of n terms of a series is S<sub>n</sub> = 5n² + 3n, its n<sup>th</sup> term is",
+ opts:["10n − 2","10n + 3","5n + 3","10n − 5"],
+ ans:0,
+ why:[
+  "Correct. S<sub>n</sub> − S<sub>n−1</sub> = (5n² + 3n) − [5(n−1)² + 3(n−1)] = 10n − 2. Check: T<sub>1</sub> = 8 = S<sub>1</sub> ✓, and the terms 8, 18, 28, 38 have d = 10.",
+  "This is the derivative of S<sub>n</sub>, not its difference. Differentiating is not differencing. Check n = 1: it gives 13, but S<sub>1</sub> = 8.",
+  "This just halves the quadratic coefficient. Check n = 1: 8 ✓ by luck, but n = 2 gives 13, whereas S<sub>2</sub> − S<sub>1</sub> = 26 − 8 = 18.",
+  "An arithmetic slip in the expansion. Check n = 1: it gives 5, but S<sub>1</sub> = 8."],
+ sol:"T<sub>n</sub> = S<sub>n</sub> − S<sub>n−1</sub> = 5n² + 3n − [5n² − 10n + 5 + 3n − 3] = <b>10n − 2</b>. Terms: 8, 18, 28, 38 — an A.P. with d = 10."},
+
+{id:25, lec:"L-2", blk:"Sum of n terms", topic:"The S<sub>n</sub>-is-a-quadratic shortcut",
+ q:"If S<sub>n</sub> = An² + Bn for a series, then its common difference is",
+ opts:["2A","A","A + B","B"],
+ ans:0,
+ why:[
+  "Correct. Differencing a quadratic in n gives a linear term whose slope is 2A. Check on S<sub>n</sub> = 5n² + 3n: T<sub>n</sub> = 10n − 2, so d = 10 = 2 × 5 ✓",
+  "Half the true value — the factor 2 comes from (n² − (n−1)²) = 2n − 1.",
+  "A + B is the <b>first term</b> a, not the common difference.",
+  "B alone controls neither; on 5n² + 3n it would predict d = 3, but the terms are 8, 18, 28 with d = 10."],
+ sol:"S<sub>n</sub> = An² + Bn ⇒ T<sub>n</sub> = A(2n − 1) + B ⇒ <b>d = 2A</b> and <b>a = A + B</b>, both readable straight off with no subtraction."},
+
+{id:26, lec:"L-2", blk:"Sum of n terms", topic:"First term from a quadratic S<sub>n</sub>",
+ q:"If S<sub>n</sub> = An² + Bn, the first term of the series is",
+ opts:["A + B","B","2A","A"],
+ ans:0,
+ why:[
+  "Correct — simply put n = 1: S<sub>1</sub> = A + B, and a<sub>1</sub> = S<sub>1</sub>. Check on 5n² + 3n: a = 8 ✓",
+  "This drops the An² contribution at n = 1, which is A, not 0.",
+  "2A is the common difference, not the first term.",
+  "Only half the story — the Bn term contributes B at n = 1 too."],
+ sol:"a<sub>1</sub> = S<sub>1</sub> = A(1)² + B(1) = <b>A + B</b>. Together with d = 2A this pins the whole A.P. down instantly."},
+
+{id:27, lec:"L-2", blk:"Sum of n terms", topic:"When a quadratic S<sub>n</sub> is not an A.P.",
+ q:"A series has S<sub>n</sub> = 3n² + 2n + 5. The series is",
+ opts:[
+  "not an A.P., because of the non-zero constant term",
+  "an A.P. with d = 6",
+  "an A.P. with d = 3",
+  "an A.P. with first term 5"],
+ ans:0,
+ why:[
+  "Correct. S<sub>1</sub> = 10, so a<sub>1</sub> = 10; but for n ≥ 2, a<sub>n</sub> = S<sub>n</sub> − S<sub>n−1</sub> = 6n − 1, giving a<sub>2</sub> = 11. The first gap is 1 while every later gap is 6 — not constant.",
+  "d = 6 does hold from the 2<sup>nd</sup> term onwards, but the very first gap is 1, so the <b>sequence as a whole</b> is not an A.P. That is exactly what the constant term breaks.",
+  "d = 2A would be 6, not 3 — and in any case the sequence is not an A.P.",
+  "5 is the constant in S<sub>n</sub>, not a term. The first term is S<sub>1</sub> = 10."],
+ sol:"The shortcut only applies when S<sub>n</sub> has <b>no constant term</b>. Here a<sub>1</sub> = S<sub>1</sub> = 10 but the general difference gives 6n − 1 → a<sub>2</sub> = 11, a<sub>3</sub> = 17. Gaps 1, 6, 6, … — <b>not an A.P.</b>"},
+
+{id:28, lec:"L-2", blk:"Sum of n terms", topic:"Two values of n giving the same sum",
+ q:"How many terms of the series 20, 19⅓, 18⅔, … add up to 300?",
+ opts:["25 or 36","25 only","36 only","30"],
+ ans:0,
+ why:[
+  "Correct. n² − 61n + 900 = 0 factorises as (n − 25)(n − 36) = 0, and <b>both</b> roots are valid positive integers.",
+  "25 is a root, but discarding 36 is exactly the trap. Terms 26 to 36 sum to zero, so the running total returns to 300.",
+  "36 is a root, but so is 25 — the smaller root is reached first.",
+  "n = 30 gives S<sub>30</sub> = 15[40 + 29(−2/3)] = 15[40 − 58/3] ≈ 310, not 300."],
+ sol:"a = 20, d = −2/3. (n/2)[40 − 2(n−1)/3] = 300 ⇒ n(61 − n) = 900 ⇒ n² − 61n + 900 = 0 ⇒ <b>n = 25 or 36</b>. T<sub>26</sub> = 10/3 and T<sub>36</sub> = −10/3, and everything between balances to zero."},
+
+{id:29, lec:"L-2", blk:"Sum of n terms", topic:"Why S<sub>n</sub> = k can have two roots",
+ q:"Why can two different values of n give the same sum in an A.P.?",
+ opts:[
+  "Because S<sub>n</sub> = k is a quadratic in n, and in a falling A.P. the terms in between can cancel to zero",
+  "Because the formula contains the factor n/2",
+  "Because the first term may be negative",
+  "It cannot happen — one of the two roots is always invalid"],
+ ans:0,
+ why:[
+  "Correct. S<sub>n</sub> is quadratic in n, so S<sub>n</sub> = k has two roots; when the A.P. decreases through zero, the block of terms between the two roots sums to exactly zero.",
+  "The n/2 is just a constant factor and creates no extra root.",
+  "A negative first term is neither necessary nor sufficient. What matters is that the terms change sign somewhere.",
+  "Both roots can be genuine — Example-3 above has n = 25 and n = 36 both correct. Only <b>negative or fractional</b> roots get rejected."],
+ sol:"S<sub>n</sub> = (n/2)[2a + (n−1)d] is a <b>quadratic in n</b>. Reject a root only if it is negative or fractional — never merely because it is the larger one."},
+
+{id:30, lec:"L-2", blk:"Selecting terms", topic:"Symmetric choice of three terms",
+ q:"When a question gives you the <b>sum</b> of three unknown numbers in A.P., the best way to write them is",
+ opts:["a − d, a, a + d","a, a + d, a + 2d","a − 3d, a − d, a + d","a/r, a, ar"],
+ ans:0,
+ why:[
+  "Correct. The sum is 3a — the d's cancel on the spot, so the sum condition fixes a in one line.",
+  "Perfectly valid as an A.P., but the sum is 3a + 3d, which involves <b>both</b> unknowns. You gain nothing and end up solving simultaneously.",
+  "This is not symmetric — the gaps are 2d then 2d but the block is not centred, so the sum is 3a − 3d.",
+  "That is the symmetric choice for a <b>G.P.</b>, not an A.P."],
+ sol:"Centre the terms: <b>a − d, a, a + d</b>, sum = 3a. Odd count → a genuine middle term and common difference d."},
+
+{id:31, lec:"L-2", blk:"Selecting terms", topic:"Symmetric choice of four terms",
+ q:"Four numbers in A.P. are best taken as a − 3d, a − d, a + d, a + 3d. Their common difference is",
+ opts:["2d","d","3d","d/2"],
+ ans:0,
+ why:[
+  "Correct. Consecutive gaps are (a − d) − (a − 3d) = 2d, and likewise throughout. Their sum is 4a, with the d's cancelling.",
+  "Reading “d” off the symbols is the classic mistake — the spacing here is deliberately 2d so that no halves appear.",
+  "The <b>total</b> spread from first to last is 6d, i.e. 3 gaps of 2d; a single gap is 2d.",
+  "The pattern was chosen precisely to <i>avoid</i> fractions; halving is never needed."],
+ sol:"<b>Odd</b> count → middle term a, common difference d. <b>Even</b> count → middle terms a − d and a + d, common difference <b>2d</b>. Getting this backwards for four terms is the usual error."},
+
+{id:32, lec:"L-2", blk:"Selecting terms", topic:"Sum and sum of squares",
+ q:"The sum of three numbers in A.P. is 27 and the sum of their squares is 293. The numbers are",
+ opts:["4, 9, 14","5, 9, 13","2, 9, 16","6, 9, 12"],
+ ans:0,
+ why:[
+  "Correct. 3a = 27 ⇒ a = 9; then 3a² + 2d² = 293 ⇒ 2d² = 50 ⇒ d = ±5, giving 4, 9, 14 (d = −5 gives the same three in reverse).",
+  "Sum is 27 ✓ but the squares give 25 + 81 + 169 = 275, not 293.",
+  "Sum is 27 ✓ but the squares give 4 + 81 + 256 = 341, too large.",
+  "Sum is 27 ✓ but the squares give 36 + 81 + 144 = 261, too small."],
+ sol:"Take a − d, a, a + d. Sum 3a = 27 ⇒ a = 9. Squares: (a−d)² + a² + (a+d)² = <b>3a² + 2d²</b> (the ±2ad cross terms cancel) = 293 ⇒ 2d² = 293 − 243 = 50 ⇒ d = ±5. Numbers: <b>4, 9, 14</b>."},
+
+{id:33, lec:"L-2", blk:"Selecting terms", topic:"Four terms with a sum and a ratio condition",
+ q:"Find four numbers in A.P. whose sum is 50 and in which the greatest is 4 times the least.",
+ opts:["5, 10, 15, 20","8, 11, 14, 17","2, 9, 16, 23","5, 15, 25, 35"],
+ ans:0,
+ why:[
+  "Correct. Sum 4a = 50 ⇒ a = 25/2; a + 3d = 4(a − 3d) ⇒ 15d = 3a ⇒ d = 5/2, giving 5, 10, 15, 20. Check: sum 50 ✓ and 20 = 4 × 5 ✓",
+  "The sum is 50 ✓ but the greatest 17 is not 4 × 8 = 32.",
+  "The sum is 50 ✓ but the greatest 23 is not 4 × 2 = 8. Both distractors satisfy only one of the two conditions.",
+  "Neither condition holds: the sum is 80 and 35 = 7 × 5."],
+ sol:"Take a − 3d, a − d, a + d, a + 3d. Sum = 4a = 50 ⇒ a = 25/2. Greatest = 4 × least: a + 3d = 4a − 12d ⇒ 15d = 3a ⇒ a = 5d ⇒ d = 5/2. Terms: <b>5, 10, 15, 20</b>."},
+
+{id:34, lec:"L-2", blk:"Selecting terms", topic:"The three-term A.P. condition",
+ q:"Three numbers a, b, c are in A.P. if and only if",
+ opts:["2b = a + c","b² = ac","b = 2ac/(a + c)","b = √(ac)"],
+ ans:0,
+ why:[
+  "Correct. b − a = c − b rearranges to 2b = a + c, i.e. b is the arithmetic mean of a and c.",
+  "That is the <b>G.P.</b> condition (b is the geometric mean).",
+  "That is the <b>H.P.</b> condition (b is the harmonic mean).",
+  "Also the G.P. condition, written as b = √(ac) instead of b² = ac."],
+ sol:"a, b, c in A.P. ⇔ b − a = c − b ⇔ <b>2b = a + c</b> ⇔ b = (a + c)/2, the arithmetic mean."},
+
+{id:35, lec:"L-2", blk:"Selecting terms", topic:"Inserting n arithmetic means",
+ q:"If n arithmetic means are inserted between a and b, the common difference of the resulting A.P. is",
+ opts:["(b − a)/(n + 1)","(b − a)/n","(b − a)/(n + 2)","(a − b)/[ab(n + 1)]"],
+ ans:0,
+ why:[
+  "Correct. The A.P. runs a, then n means, then b — that is n + 2 terms, so b = a + (n + 1)d ⇒ d = (b − a)/(n + 1).",
+  "n counts the means, but there are n + 1 <b>gaps</b> between the n + 2 terms.",
+  "n + 2 is the number of terms, not the number of gaps. There is always one fewer gap than terms.",
+  "This is the answer for <b>harmonic</b> means (chapter M-8C), where the A.P. runs between the reciprocals 1/a and 1/b."],
+ sol:"Total terms = n + 2, so total gaps = n + 1 and <b>d = (b − a)/(n + 1)</b>. The k<sup>th</sup> mean is a + k(b − a)/(n + 1)."},
+
+{id:36, lec:"L-2", blk:"Selecting terms", topic:"Sum of the inserted arithmetic means",
+ q:"The n arithmetic means inserted between a and b add up to",
+ opts:["n(a + b)/2","(a + b)/2","n(a + b)","(n + 2)(a + b)/2"],
+ ans:0,
+ why:[
+  "Correct — n times the single arithmetic mean of the two ends. Check with a = 1, b = 7, n = 2: the means are 3 and 5, summing to 8 = 2(1 + 7)/2 ✓",
+  "That is <b>one</b> arithmetic mean; you must multiply by how many were inserted.",
+  "Twice too large. Same check: this gives 16 instead of 8.",
+  "This counts a and b themselves as well as the means — it is the sum of all n + 2 terms."],
+ sol:"The means are a + k(b − a)/(n + 1) for k = 1…n. Summing: na + [(b − a)/(n+1)]·n(n+1)/2 = na + n(b − a)/2 = <b>n(a + b)/2</b>."},
+
+{id:37, lec:"L-2", blk:"Standard sums", topic:"Sum of the first n natural numbers",
+ q:"1 + 2 + 3 + … + n equals",
+ opts:["n(n + 1)/2","n²","n(n + 1)","n(n + 1)(2n + 1)/6"],
+ ans:0,
+ why:[
+  "Correct. It is an A.P. with a = 1, ℓ = n, so the sum is (n/2)(1 + n). Check n = 4: 10 ✓",
+  "That is the sum of the first n <b>odd</b> numbers. Check n = 4: 1 + 2 + 3 + 4 = 10, not 16.",
+  "That is the sum of the first n <b>even</b> numbers — exactly twice this one. Check n = 4: 20, not 10.",
+  "That is the sum of the first n <b>squares</b>. Check n = 4: 30, not 10."],
+ sol:"S = (n/2)(first + last) = (n/2)(1 + n) = <b>n(n + 1)/2</b>."},
+
+{id:38, lec:"L-2", blk:"Standard sums", topic:"Sum of the first n odd numbers",
+ q:"1 + 3 + 5 + 7 + … to n terms equals",
+ opts:["n²","n(n + 1)","n(n + 1)/2","n(n + 1)(2n + 1)/6"],
+ ans:0,
+ why:[
+  "Correct. a = 1, d = 2, so S = (n/2)[2 + 2(n − 1)] = n². Check n = 4: 1 + 3 + 5 + 7 = 16 = 4² ✓",
+  "That is the sum of the first n <b>even</b> numbers. Check n = 4: 20, not 16.",
+  "That is the sum of the first n natural numbers. Check n = 4: 10, not 16.",
+  "That is the sum of the first n squares. Check n = 4: 30, not 16."],
+ sol:"a = 1, d = 2 ⇒ S<sub>n</sub> = (n/2)[2(1) + (n − 1)2] = (n/2)(2n) = <b>n²</b>."},
+
+{id:39, lec:"L-2", blk:"Standard sums", topic:"Sum of the first n even numbers",
+ q:"2 + 4 + 6 + 8 + … to n terms equals",
+ opts:["n(n + 1)","n²","n(n + 1)/2","2n²"],
+ ans:0,
+ why:[
+  "Correct. a = 2, d = 2 ⇒ S = (n/2)[4 + 2(n − 1)] = n(n + 1). Check n = 4: 2 + 4 + 6 + 8 = 20 = 4 × 5 ✓",
+  "That is the sum of the first n <b>odd</b> numbers. Check n = 4: 16, not 20.",
+  "That is the sum of the first n natural numbers — exactly half of this. Check n = 4: 10, not 20.",
+  "Check n = 4: this gives 32, not 20. (It would need the terms to average 2n, but they average n + 1.)"],
+ sol:"2 + 4 + … + 2n = 2(1 + 2 + … + n) = 2 · n(n + 1)/2 = <b>n(n + 1)</b>."},
+
+/* ---------------- L-3 (12) ---------------- */
+{id:40, lec:"L-3", blk:"Shifting & scaling", topic:"Adding a constant to every term",
+ q:"If a constant K is added to every term of an A.P., the result is",
+ opts:[
+  "an A.P. with the same common difference",
+  "an A.P. with common difference d + K",
+  "an A.P. with common difference dK",
+  "generally not a progression"],
+ ans:0,
+ why:[
+  "Correct. (a<sub>i+1</sub> + K) − (a<sub>i</sub> + K) = a<sub>i+1</sub> − a<sub>i</sub> = d — the K cancels in every gap.",
+  "The K appears in both terms of each difference and cancels; it never reaches d.",
+  "That is what <b>multiplying</b> by K does, not adding.",
+  "Shifting is one of the safest operations on an A.P. — it is Property 1."],
+ sol:"<b>Property 1:</b> a<sub>i</sub> ± K stays an A.P. with <b>d unchanged</b>. This is what licenses the “add 1 (or 2) to every term” manoeuvre."},
+
+{id:41, lec:"L-3", blk:"Shifting & scaling", topic:"Multiplying every term by a constant",
+ q:"If every term of an A.P. is multiplied by a non-zero constant K, the result is an A.P. with common difference",
+ opts:["dK","d","d + K","d/K"],
+ ans:0,
+ why:[
+  "Correct. Ka<sub>i+1</sub> − Ka<sub>i</sub> = K(a<sub>i+1</sub> − a<sub>i</sub>) = Kd — the factor comes straight out.",
+  "That is what <b>adding</b> K does; multiplication does scale d.",
+  "Mixing the two operations: addition leaves d alone, multiplication scales it.",
+  "That is the effect of <b>dividing</b> by K."],
+ sol:"<b>Property 1:</b> a<sub>i</sub>K → A.P. with d × K; a<sub>i</sub>/K → A.P. with d ÷ K (K ≠ 0). This is what licenses clearing a common factor."},
+
+{id:42, lec:"L-3", blk:"Combining A.P.s", topic:"Term-by-term sum of two A.P.s",
+ q:"If {a<sub>i</sub>} and {b<sub>i</sub>} are both A.P.s, then {a<sub>i</sub> + b<sub>i</sub>} is",
+ opts:["an A.P.","a G.P.","an H.P.","generally not a progression"],
+ ans:0,
+ why:[
+  "Correct. The gaps simply add: (a<sub>i+1</sub> + b<sub>i+1</sub>) − (a<sub>i</sub> + b<sub>i</sub>) = d<sub>a</sub> + d<sub>b</sub>, a constant.",
+  "Adding two linear patterns gives another linear pattern, not a multiplicative one.",
+  "H.P.s come from <b>reciprocating</b> an A.P., not from adding two of them.",
+  "It is always a progression — this is Property 2, and it is what makes Solved Example-1 of L-3 a two-line proof."],
+ sol:"<b>Property 2:</b> {a<sub>i</sub> ± b<sub>i</sub>} is an A.P. with common difference d<sub>a</sub> ± d<sub>b</sub>."},
+
+{id:43, lec:"L-3", blk:"Combining A.P.s", topic:"Term-by-term product of two A.P.s",
+ q:"If {a<sub>i</sub>} and {b<sub>i</sub>} are both A.P.s, then {a<sub>i</sub>b<sub>i</sub>} is",
+ opts:["generally not an A.P.","always an A.P.","always a G.P.","always an H.P."],
+ ans:0,
+ why:[
+  "Correct. Multiply 1, 2, 3 by itself: 1, 4, 9 has gaps 3 and 5 — not constant. Products of two linear expressions are quadratic in the index.",
+  "The counterexample 1, 4, 9 settles it. Property 2 covers sums and differences only.",
+  "1, 4, 9 has ratios 4 and 9/4 — not constant either.",
+  "Reciprocals of 1, 4, 9 are 1, 1/4, 1/9 with gaps −3/4 and −5/36 — not an A.P., so it is not an H.P."],
+ sol:"Products and reciprocals are <b>not</b> covered by the properties. Multiplying two A.P.s term by term gives a quadratic in the index; reciprocating an A.P. gives an <b>H.P.</b> (chapter M-8C)."},
+
+{id:44, lec:"L-3", blk:"Combining A.P.s", topic:"Which operation breaks the pattern",
+ q:"Which operation on an A.P. does <b>not</b> generally produce another A.P.?",
+ opts:[
+  "taking the reciprocal of every term",
+  "adding 7 to every term",
+  "multiplying every term by 3",
+  "adding a second A.P. to it term by term"],
+ ans:0,
+ why:[
+  "Correct. Reciprocals of an A.P. form an <b>H.P.</b>, not an A.P. — e.g. 1, 2, 3 → 1, 1/2, 1/3, whose gaps are −1/2 and −1/6.",
+  "Property 1: shifting leaves the A.P. intact with d unchanged.",
+  "Property 1: scaling leaves an A.P. with common difference 3d.",
+  "Property 2: the term-by-term sum of two A.P.s is an A.P."],
+ sol:"Shift ✓, scale ✓, add another A.P. ✓ — but <b>reciprocate ✗</b>. That operation defines the harmonic progression instead."},
+
+{id:45, lec:"L-3", blk:"Equidistant terms", topic:"Pairing the ends",
+ q:"In a finite A.P. a<sub>1</sub>, a<sub>2</sub>, …, a<sub>n</sub>, the quantity a<sub>1</sub> + a<sub>n</sub> is equal to",
+ opts:[
+  "a<sub>2</sub> + a<sub>n−1</sub>, and to every other equidistant pair",
+  "2a<sub>1</sub>",
+  "S<sub>n</sub>/n",
+  "a<sub>n</sub> − a<sub>1</sub>"],
+ ans:0,
+ why:[
+  "Correct. a<sub>2</sub> + a<sub>n−1</sub> = (a + d) + (a + (n − 2)d) = 2a + (n − 1)d = a<sub>1</sub> + a<sub>n</sub>. Whatever one term gains, its partner loses.",
+  "Only true if d = 0. In 1, 2, 3 we have a<sub>1</sub> + a<sub>3</sub> = 4 but 2a<sub>1</sub> = 2.",
+  "S<sub>n</sub>/n is the <b>average</b> term, which is half of a<sub>1</sub> + a<sub>n</sub>. In 1, 2, 3: S/n = 2 but a<sub>1</sub> + a<sub>3</sub> = 4.",
+  "That is the total spread (n − 1)d, a different quantity. In 1, 2, 3: 2, not 4."],
+ sol:"<b>Property 3:</b> a<sub>1</sub> + a<sub>n</sub> = a<sub>2</sub> + a<sub>n−1</sub> = a<sub>3</sub> + a<sub>n−2</sub> = … , a constant. This is the same “pair the ends” idea that produces the sum formula."},
+
+{id:46, lec:"L-3", blk:"Equidistant terms", topic:"Every term is a mid-point",
+ q:"For an A.P. and any valid k, the term a<sub>r</sub> equals",
+ opts:[
+  "(a<sub>r−k</sub> + a<sub>r+k</sub>)/2",
+  "a<sub>r−k</sub> + a<sub>r+k</sub>",
+  "a<sub>r−k</sub> · a<sub>r+k</sub>",
+  "√(a<sub>r−k</sub> · a<sub>r+k</sub>)"],
+ ans:0,
+ why:[
+  "Correct. a<sub>r−k</sub> = a<sub>r</sub> − kd and a<sub>r+k</sub> = a<sub>r</sub> + kd, so their average is exactly a<sub>r</sub>.",
+  "The division by 2 is missing — this is 2a<sub>r</sub>.",
+  "A product is not involved at all in an A.P.",
+  "That is the corresponding <b>G.P.</b> property (each term is the geometric mean of its equidistant neighbours)."],
+ sol:"<b>Property 4:</b> a<sub>r</sub> = (a<sub>r−k</sub> + a<sub>r+k</sub>)/2 — every term is the <b>arithmetic mean</b> of any two neighbours equally spaced around it. Property 3 is this same fact rewritten."},
+
+{id:47, lec:"L-3", blk:"Equidistant terms", topic:"Sum shortcut from equidistant pairs",
+ q:"For a 20-term A.P., a<sub>6</sub> + a<sub>9</sub> + a<sub>12</sub> + a<sub>15</sub> = 20. Then S<sub>20</sub> equals",
+ opts:["100","200","50","400"],
+ ans:0,
+ why:[
+  "Correct. a<sub>6</sub> and a<sub>15</sub> are equidistant from the ends, as are a<sub>9</sub> and a<sub>12</sub>, so the given sum is 2(a<sub>1</sub> + a<sub>20</sub>) = 20 ⇒ a<sub>1</sub> + a<sub>20</sub> = 10, and S<sub>20</sub> = 10 × 10 = 100.",
+  "This takes a<sub>1</sub> + a<sub>20</sub> = 20 — forgetting that the four given terms make <b>two</b> pairs, not one.",
+  "This halves the answer, as if the given sum were 4(a<sub>1</sub> + a<sub>20</sub>).",
+  "Four times too large; there are exactly two equidistant pairs."],
+ sol:"a<sub>6</sub> is 6<sup>th</sup> from the front and a<sub>15</sub> is 6<sup>th</sup> from the back, so a<sub>6</sub> + a<sub>15</sub> = a<sub>1</sub> + a<sub>20</sub>; likewise a<sub>9</sub> + a<sub>12</sub>. So 2(a<sub>1</sub> + a<sub>20</sub>) = 20 ⇒ a<sub>1</sub> + a<sub>20</sub> = 10 ⇒ S<sub>20</sub> = (20/2)(10) = <b>100</b>. No a, no d, no solving."},
+
+{id:48, lec:"L-3", blk:"The add-then-divide manoeuvre", topic:"Turning an awkward triple into an A.P.",
+ q:"If (b + c − a)/a, (c + a − b)/b, (a + b − c)/c are in A.P., then it follows that",
+ opts:[
+  "1/a, 1/b, 1/c are in A.P.",
+  "a, b, c are in A.P.",
+  "a, b, c are in G.P.",
+  "a², b², c² are in A.P."],
+ ans:0,
+ why:[
+  "Correct. Add 2 to every term (Property 1) to get (a+b+c)/a, (a+b+c)/b, (a+b+c)/c, then divide every term by (a + b + c) (Property 1 again) to get 1/a, 1/b, 1/c.",
+  "Not implied. The conclusion is about the <b>reciprocals</b> — indeed 1/a, 1/b, 1/c in A.P. means a, b, c are in H.P., which is generally not an A.P. Test 1/a, 1/b, 1/c = 1, 2, 3: then a, b, c = 1, 1/2, 1/3 with gaps −1/2 and −1/6.",
+  "Same test: 1, 1/2, 1/3 has ratios 1/2 and 2/3 — not a G.P.",
+  "Same test: 1, 1/4, 1/9 has gaps −3/4 and −5/36 — not an A.P."],
+ sol:"Add <b>2</b> to each term: (b + c − a)/a + 2 = (a + b + c)/a, and similarly for the others — still an A.P. by Property 1. Now divide every term by the non-zero constant (a + b + c) — still an A.P. What remains is <b>1/a, 1/b, 1/c</b>."},
+
+{id:49, lec:"L-3", blk:"The add-then-divide manoeuvre", topic:"Dividing an A.P. through by abc",
+ q:"If a, b, c are in A.P., then 1/(bc), 1/(ca), 1/(ab) are in",
+ opts:["A.P.","G.P.","H.P.","no progression"],
+ ans:0,
+ why:[
+  "Correct. Divide a, b, c by the constant abc: a/(abc) = 1/(bc), b/(abc) = 1/(ca), c/(abc) = 1/(ab). Scaling preserves the A.P. Test 1, 2, 3: 1/6, 1/3, 1/2 with equal gaps of 1/6 ✓",
+  "Same test: 1/6, 1/3, 1/2 has ratios 2 and 3/2 — not constant.",
+  "This is the trap. Their <b>reciprocals</b> bc, ca, ab are in H.P.; the triple itself is in A.P.",
+  "It is a genuine A.P., as the numerical check shows."],
+ sol:"Dividing every term of an A.P. by the same non-zero constant abc leaves an A.P.: a, b, c → <b>1/(bc), 1/(ca), 1/(ab)</b>. (Reciprocating <i>that</i> gives bc, ca, ab in H.P.)"},
+
+{id:50, lec:"L-3", blk:"The add-then-divide manoeuvre", topic:"Combining two derived A.P.s",
+ q:"If a, b, c are positive reals in A.P., then a + 1/(bc), b + 1/(ca), c + 1/(ab) are in",
+ opts:["A.P.","G.P.","H.P.","none of these"],
+ ans:0,
+ why:[
+  "Correct. a, b, c is an A.P.; dividing it by abc gives the second A.P. 1/(bc), 1/(ca), 1/(ab); adding two A.P.s term by term (Property 2) gives an A.P.",
+  "Sums of A.P.s stay additive, never multiplicative.",
+  "No reciprocation of the final triple takes place, so no H.P. arises.",
+  "The two properties settle it in two lines — there is no need to expand anything."],
+ sol:"Property 1 turns a, b, c into 1/(bc), 1/(ca), 1/(ab) (divide by abc). Property 2 then lets you add the two A.P.s term by term. Result: <b>an A.P.</b>"},
+
+{id:51, lec:"L-3", blk:"Shifting & scaling", topic:"What a common difference of zero means",
+ q:"An A.P. has common difference d = 0. Which statement is correct?",
+ opts:[
+  "It is a valid A.P. — every term is the same",
+  "It is not an A.P., since the terms must change",
+  "It is a G.P. but not an A.P.",
+  "Its sum of n terms is zero"],
+ ans:0,
+ why:[
+  "Correct. The definition only demands that t<sub>k</sub> − t<sub>k−1</sub> be <i>constant</i>; the constant is allowed to be 0. So 5, 5, 5, 5, … is an A.P. with a = 5, d = 0.",
+  "Constancy, not change, is what the definition requires.",
+  "It happens also to be a G.P. with r = 1 (when a ≠ 0), but that does not stop it being an A.P. — the two are not exclusive here.",
+  "S<sub>n</sub> = (n/2)(2a) = na, which is zero only if a = 0. For 5, 5, 5 the sum is 15."],
+ sol:"d = 0 is permitted: the gaps are all equal (to zero). S<sub>n</sub> = na in that case."},
+
+/* ---------------- Strong Box (8) ---------------- */
+{id:52, lec:"SB", blk:"JEE Main 2026 (22 Jan Shift 1)", topic:"Two sums, one target sum",
+ q:"The sum of the first four terms of an A.P. is 6 and the sum of its first six terms is 4. The sum of its first twelve terms is",
+ opts:["−22","−20","−24","−26"],
+ ans:0,
+ why:[
+  "Correct. 2a + 3d = 3 and 2a + 5d = 4/3 give d = −5/6 and 2a = 11/2, so S<sub>12</sub> = 6(11/2 − 55/6) = −22.",
+  "Would need 2a + 11d = −10/3; the true bracket value is −22/6 = −11/3.",
+  "Would need the bracket to be −4; it is −11/3.",
+  "Would need the bracket to be −13/3."],
+ sol:"S<sub>4</sub> = 2(2a + 3d) = 6 ⇒ 2a + 3d = 3. S<sub>6</sub> = 3(2a + 5d) = 4 ⇒ 2a + 5d = 4/3. Subtract: 2d = −5/3 ⇒ d = −5/6, and 2a = 3 + 5/2 = 11/2. S<sub>12</sub> = 6(2a + 11d) = 6(11/2 − 55/6) = 33 − 55 = <b>−22</b>. Classic Strong Box shape: two linear equations in a and d."},
+
+{id:53, lec:"SB", blk:"JEE Main 2026 (23 Jan Shift 1)", topic:"Quadratic S<sub>n</sub> with two term conditions",
+ q:"Let Σ<sub>k=1..n</sub> a<sub>k</sub> = αn² + βn. If a<sub>10</sub> = 59 and a<sub>6</sub> = 7a<sub>1</sub>, then α + β equals",
+ opts:["5","12","3","7"],
+ ans:0,
+ why:[
+  "Correct. a<sub>n</sub> = α(2n − 1) + β, so 19α + β = 59 and 11α + β = 7(α + β) ⇒ β = 2α/3; solving gives α = 3, β = 2.",
+  "12 would need α + β = 12, but then a<sub>1</sub> = 12 and a<sub>6</sub> = 84, which is inconsistent with a<sub>10</sub> = 59 in an increasing A.P.",
+  "3 is the value of α alone.",
+  "7 is the multiplier in the condition a<sub>6</sub> = 7a<sub>1</sub>, not the answer."],
+ sol:"S<sub>n</sub> = αn² + βn ⇒ a<sub>n</sub> = S<sub>n</sub> − S<sub>n−1</sub> = α(2n − 1) + β, so a<sub>1</sub> = α + β and d = 2α. From a<sub>10</sub>: 19α + β = 59. From a<sub>6</sub> = 7a<sub>1</sub>: 11α + β = 7α + 7β ⇒ 4α = 6β ⇒ β = 2α/3. Then 19α + 2α/3 = 59 ⇒ 59α/3 = 59 ⇒ α = 3, β = 2 ⇒ α + β = <b>5</b>."},
+
+{id:54, lec:"SB", blk:"JEE Main 2025 (24 Jan Shift 2)", topic:"Difference of two partial sums",
+ q:"In an A.P., S<sub>40</sub> = 1030 and S<sub>12</sub> = 57. Then S<sub>30</sub> − S<sub>10</sub> equals",
+ opts:["515","525","510","505"],
+ ans:0,
+ why:[
+  "Correct. 2a + 39d = 51.5 and 2a + 11d = 9.5 give d = 1.5 and 2a = −7, so S<sub>30</sub> = 547.5 and S<sub>10</sub> = 32.5.",
+  "Would require d slightly larger than 1.5; 28d = 42 pins d at exactly 1.5.",
+  "Would require 2a = −8 rather than −7.",
+  "Off by 10 — check S<sub>10</sub> = 5(−7 + 13.5) = 32.5, not 42.5."],
+ sol:"S<sub>40</sub> = 20(2a + 39d) = 1030 ⇒ 2a + 39d = 51.5. S<sub>12</sub> = 6(2a + 11d) = 57 ⇒ 2a + 11d = 9.5. Subtract: 28d = 42 ⇒ d = 1.5, 2a = −7. S<sub>30</sub> = 15(−7 + 43.5) = 547.5, S<sub>10</sub> = 5(−7 + 13.5) = 32.5, difference = <b>515</b>."},
+
+{id:55, lec:"SB", blk:"JEE Main 2022 (27 Jul Shift 1)", topic:"Ratio of sums plus a bounding condition",
+ q:"An A.P. of natural numbers satisfies S<sub>5</sub> : S<sub>9</sub> = 5 : 17 and 110 &lt; a<sub>15</sub> &lt; 120. Then S<sub>10</sub> equals",
+ opts:["380","290","460","510"],
+ ans:0,
+ why:[
+  "Correct. The ratio gives d = 4a; then a<sub>15</sub> = 57a and 110 &lt; 57a &lt; 120 forces a = 2, d = 8, so S<sub>10</sub> = 5(4 + 72) = 380.",
+  "Would correspond to a = 1 (a<sub>15</sub> = 57, outside the given window).",
+  "No integer a produces this; the window admits only a = 2.",
+  "Would correspond to a ≈ 2.7, not a natural number."],
+ sol:"S<sub>5</sub> = 5(a + 2d), S<sub>9</sub> = 9(a + 4d). The ratio 5:17 gives 17(a + 2d) = 9(a + 4d) ⇒ 8a = 2d ⇒ <b>d = 4a</b>. Then a<sub>15</sub> = a + 14d = 57a, and 110 &lt; 57a &lt; 120 forces a = 2 (57 × 2 = 114). So d = 8 and S<sub>10</sub> = 5(2a + 9d) = 5(4 + 72) = <b>380</b>."},
+
+{id:56, lec:"SB", blk:"JEE Main 2026 (24 Jan Shift 2)", topic:"Integer A.P. with a sum and a product condition",
+ q:"Let a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, a<sub>4</sub> be an A.P. of four terms whose terms and common difference ℓ are all integers. If a<sub>1</sub> + a<sub>2</sub> + a<sub>3</sub> + a<sub>4</sub> = 48 and a<sub>1</sub>a<sub>2</sub>a<sub>3</sub>a<sub>4</sub> + ℓ<sup>4</sup> = 361, the largest term is",
+ opts:["27","24","21","23"],
+ ans:0,
+ why:[
+  "Correct. With a − 3t, a − t, a + t, a + 3t and ℓ = 2t: 4a = 48 ⇒ a = 12, and 25t⁴ − 1440t² + 20736 = 361 gives t² = 25 (the other root 32.6 makes ℓ non-integral), so t = 5 and the terms are −3, 7, 17, 27.",
+  "24 is the arithmetic mean times two (a = 12); it is not one of the four terms.",
+  "Would need t = 3, but t² = 9 does not satisfy the quartic.",
+  "Would need t ≈ 3.67, which is not an integer half-difference."],
+ sol:"Symmetric four terms a − 3t, a − t, a + t, a + 3t with ℓ = 2t. Sum = 4a = 48 ⇒ a = 12. Product = (144 − 9t²)(144 − t²) = 9t⁴ − 1440t² + 20736; adding ℓ⁴ = 16t⁴ gives 25t⁴ − 1440t² + 20736 = 361 ⇒ 5t⁴ − 288t² + 4075 = 0 ⇒ t² = 32.6 or 25. Only t² = 25 keeps ℓ = 2t an integer, so t = 5, ℓ = 10, terms −3, 7, 17, 27 and the largest is <b>27</b>."},
+
+{id:57, lec:"SB", blk:"JEE Advanced 2022 (Paper 1)", topic:"Areas of rectangles — a quadratic in the index",
+ q:"l<sub>1</sub>…l<sub>100</sub> is an A.P. with common difference d<sub>1</sub>, and w<sub>1</sub>…w<sub>100</sub> is an A.P. with common difference d<sub>2</sub>, where d<sub>1</sub>d<sub>2</sub> = 10. R<sub>i</sub> is the rectangle of length l<sub>i</sub> and width w<sub>i</sub>, with area A<sub>i</sub>. If A<sub>51</sub> − A<sub>50</sub> = 1000, then A<sub>100</sub> − A<sub>90</sub> equals",
+ opts:["18900","18800","19000","1890"],
+ ans:0,
+ why:[
+  "Correct. Writing k = i − 1, A is a quadratic in k; A<sub>51</sub> − A<sub>50</sub> = P + 99(10) = 1000 gives P = 10, and A<sub>100</sub> − A<sub>90</sub> = 10P + (99² − 89²)(10) = 100 + 18800.",
+  "This drops the 10P = 100 contribution and keeps only the quadratic part.",
+  "Would need P = 20; the first condition pins P at 10.",
+  "A factor-of-ten slip — 1880 × 10 is 18800, not 1880."],
+ sol:"With k = i − 1, A<sub>i</sub> = l<sub>1</sub>w<sub>1</sub> + kP + k²d<sub>1</sub>d<sub>2</sub> where P = l<sub>1</sub>d<sub>2</sub> + w<sub>1</sub>d<sub>1</sub> — a <b>quadratic in k</b>. A<sub>51</sub> − A<sub>50</sub>: (50 − 49)P + (2500 − 2401)(10) = P + 990 = 1000 ⇒ P = 10. A<sub>100</sub> − A<sub>90</sub>: (99 − 89)P + (9801 − 7921)(10) = 100 + 18800 = <b>18900</b>."},
+
+{id:58, lec:"SB", blk:"Pattern of the Strong Box", topic:"Sum of an odd-length A.P.",
+ q:"For an A.P. with an odd number of terms, S<sub>2k+1</sub> equals",
+ opts:[
+  "(2k + 1) × the middle term",
+  "(2k + 1) × the first term",
+  "(2k + 1)(a + ℓ)",
+  "(k + 1) × the middle term"],
+ ans:0,
+ why:[
+  "Correct. S = ((2k+1)/2)(a<sub>1</sub> + a<sub>2k+1</sub>), and by Property 3 the middle term is exactly (a<sub>1</sub> + a<sub>2k+1</sub>)/2. This is why S<sub>5</sub> = 5(a + 2d) and S<sub>9</sub> = 9(a + 4d) in the 2022 question.",
+  "Only true if d = 0. For 1, 2, 3: S<sub>3</sub> = 6 = 3 × 2, not 3 × 1.",
+  "Twice the sum — the factor is (2k+1)/2, not (2k+1). For 1, 2, 3: this gives 3 × 4 = 12, not 6.",
+  "Half the count. For 1, 2, 3 (k = 1): this gives 2 × 2 = 4, not 6."],
+ sol:"<b>S<sub>2k+1</sub> = (2k + 1) × (middle term)</b>. It follows from Property 3 and turns ratio-of-sums questions into one-line algebra."}
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter M-8A mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

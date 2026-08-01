@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-8C Harmonic Progressions — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>M-8C · Harmonic Progressions</h1>
+    <p id="heroSub">Lecture L-1 (the chapter's only lecture) · 58 questions covering definition, general term, symmetric terms, properties, harmonic mean, A.P./G.P./H.P. recognition and the Strong Box PYQs.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter. (M-8C has just one lecture, so it is shown here as its four sub-topics &mdash; L-1a to L-1d &mdash; plus the Strong Box.)</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">58 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">25</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">25</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">25</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint">Unanswered questions are counted as wrong and will come back in the next round.</div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED / ASK FOR REVIEW ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions below will be asked again, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Chapter M-8C mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · M-8C Harmonic Progressions · mastery quiz built from lecture L-1 (theory, solved examples) and the chapter Strong Box · every answer re-derived, not transcribed · the chapter's single lecture is shown as its four sub-topics (L-1a to L-1d), matching the sections of the revision notes, so the lecture picker is actually useful.</div>
+</div>
+
+<script>
+/* ============================================================
+   M-8C HARMONIC PROGRESSIONS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1a", name:"L-1a &middot; What is a Harmonic Progression",
+   desc:"the reciprocal definition, why the A.P. may never contain 0, reading a and d off the reciprocals, how a positive H.P. behaves, and telling an H.P. from a G.P. of fractions"},
+  {key:"L-1b", name:"L-1b &middot; General Term &amp; Assuming Terms",
+   desc:"T&#8345; = 1/[a + (n&minus;1)d], the two-term shortcut ab/[b + (n&minus;1)(a&minus;b)], symmetric choices for 3, 4 and 5 terms, and why there is no sum formula"},
+  {key:"L-1c", name:"L-1c &middot; Properties &amp; the Harmonic Mean",
+   desc:"b = 2ac/(a+c), the (p&minus;q)/(q&minus;r) = p/r identity, H.M. of two and of n numbers, A &ge; G &ge; H with G&sup2; = AH, inserting harmonic means, and the telescoping sum"},
+  {key:"L-1d", name:"L-1d &middot; Recognising A.P., G.P. and H.P.",
+   desc:"the three-term ratio and mean tests, the whole-sequence tests, patterns hidden inside an A.P., exponent chains via logarithms, and the reciprocals-of-a-G.P. trap"},
+  {key:"SB",  name:"Strong Box &middot; Previous Year Questions",
+   desc:"JEE Main 2005 &amp; 2006 and JEE Advanced 2012 &mdash; the telescoping sum, altitudes vs sides in a triangle, where an H.P. turns negative, and the A.P.&ndash;H.P. product trick"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1a  WHAT IS AN H.P. (12) ---------------- */
+{id:1, lec:"L-1a", blk:"What is an H.P.", topic:"Definition — spotting an H.P.",
+ q:"Which of the following sequences is a Harmonic Progression?",
+ opts:[
+  "2, 5, 8, 11, …",
+  "1/2, 1/5, 1/8, 1/11, …",
+  "1/2, 1/4, 1/8, 1/16, …",
+  "2, 4, 8, 16, …"],
+ ans:1,
+ why:[
+  "This is an A.P. (constant difference 3). Its reciprocals 1/2, 1/5, 1/8, 1/11 have gaps −3/10 and −3/40 — not constant — so it is not an H.P.",
+  "Correct. Flip every term: 2, 5, 8, 11 is an A.P. with d = 3 and contains no zero, so the original list is an H.P.",
+  "The reciprocals are 2, 4, 8, 16 — a G.P. with ratio 2, not an A.P. Equal <i>ratios</i> ≠ equal <i>differences</i>. This is a G.P., not an H.P.",
+  "A G.P. with r = 2. Reciprocals of a G.P. are again a G.P. (ratio 1/2), never an A.P., so a G.P. is never an H.P."],
+ sol:"The only test for an H.P. is: <b>flip every term and check the result is an A.P.</b> 1/2, 1/5, 1/8, 1/11 → 2, 5, 8, 11 → differences 3, 3 ✓."},
+
+{id:2, lec:"L-1a", blk:"What is an H.P.", topic:"The reciprocal-looking trap",
+ q:"The sequence 1/3, 1/6, 1/12, 1/24, … is",
+ opts:[
+  "a Harmonic Progression",
+  "a Geometric Progression",
+  "an Arithmetic Progression",
+  "an H.P. whose reciprocal A.P. has d = 3"],
+ ans:1,
+ why:[
+  "Tempting because every term is a reciprocal — but that is not the definition. The reciprocals 3, 6, 12, 24 have gaps 3, 6, 12, which are not constant, so they are not an A.P.",
+  "Correct. Its own ratios are 1/2, 1/2, 1/2 — constant — so it is a G.P. (Equivalently the reciprocals 3, 6, 12, 24 form a G.P., and reciprocals of a G.P. are a G.P.)",
+  "The differences are −1/6, −1/12, −1/24 — not constant — so it is not an A.P.",
+  "The reciprocals are 3, 6, 12, 24; the first gap is 3 but the next is 6. There is no common difference at all."],
+ sol:"A list of fractions is <i>not</i> automatically an H.P. Reciprocals 3, 6, 12, 24 double each time → G.P., so the original is a G.P. too. Compare 1/3, 1/6, 1/9, 1/12 (reciprocals 3, 6, 9, 12) which <b>is</b> an H.P."},
+
+{id:3, lec:"L-1a", blk:"What is an H.P.", topic:"The condition hidden in the definition",
+ q:"“a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, … are in H.P. ⇔ 1/a<sub>1</sub>, 1/a<sub>2</sub>, 1/a<sub>3</sub>, … are in A.P.” — the A.P. must satisfy one extra condition. It is:",
+ opts:[
+  "all of its terms are positive",
+  "it contains no term equal to zero",
+  "its common difference is non-zero",
+  "its first term equals 1"],
+ ans:1,
+ why:[
+  "Not required. An H.P. is perfectly allowed to go negative — JEE Advanced 2012 asks for the first negative term of an H.P. that starts at 5. Only zero is banned.",
+  "Correct. If the A.P. ever hits 0, the corresponding H.P. term would be 1/0, which does not exist. Hence the standard phrasing: an H.P. is the reciprocal of an A.P. <b>that does not contain 0</b>.",
+  "Not required. d = 0 gives a constant A.P. such as 5, 5, 5, whose reciprocals 1/5, 1/5, 1/5 are a legitimate (constant) H.P.",
+  "Not required — a can be any non-zero value; a = 1/6 for the standard example 6, 4, 3, …"],
+ sol:"Reciprocation is the whole definition, so the only thing that can break it is a term you cannot reciprocate. <b>No term of an H.P. — and no term of its A.P. — may be 0.</b>"},
+
+{id:4, lec:"L-1a", blk:"What is an H.P.", topic:"True/false on the basic properties",
+ q:"Which of the following statements is TRUE?",
+ opts:[
+  "A harmonic progression may contain a term equal to 0.",
+  "The sum of n terms of an H.P. is (n/2)[2a + (n − 1)d].",
+  "The reciprocals of a G.P. again form a G.P.",
+  "The reciprocals of an H.P. form a G.P."],
+ ans:2,
+ why:[
+  "False. 1/0 does not exist, so neither the H.P. nor its reciprocal A.P. may contain 0.",
+  "False. That is the A.P. sum formula. A harmonic series has <b>no general sum formula</b> — 1 + 1/2 + 1/3 + … has no closed form and in fact diverges.",
+  "Correct. If the G.P. is a, ar, ar², … the reciprocals are 1/a, 1/(ar), 1/(ar²), … — a G.P. with ratio 1/r. This is why “the reciprocals form a G.P.” is never evidence of an H.P.",
+  "False — they form an <b>A.P.</b> That is the definition of an H.P. Only the A.P.↔H.P. pair swaps under reciprocation."],
+ sol:"Reciprocation swaps A.P. ↔ H.P. and maps G.P. → G.P. (ratio 1/r). And there is no sum formula for an H.P."},
+
+{id:5, lec:"L-1a", blk:"General term &amp; symmetric terms", topic:"Reading a term off an H.P.",
+ q:"The 4<sup>th</sup> term of the harmonic progression 6, 4, 3, … is",
+ opts:["12/5","5/12","5/2","9/4"],
+ ans:0,
+ why:[
+  "Correct. Flip to the A.P. 1/6, 1/4, 1/3 (a = 1/6, d = 1/12), take a + 3d = 5/12, then flip back to 12/5.",
+  "This is the 4<sup>th</sup> term of the <b>reciprocal A.P.</b> — you solved correctly but forgot the final flip back. Always reciprocate at the end.",
+  "This continues 6, 4, 3 by halving the gaps (2, then 1, then 0.5). The gaps of an H.P. are not halved — only the reciprocals are evenly spaced.",
+  "This treats 6, 4, 3 as a G.P. with ratio 3/4 and takes 3 × 3/4. But 4/6 = 2/3 ≠ 3/4, so the sequence is not a G.P. at all."],
+ sol:"A.P.: 1/6, 1/4, 1/3 with d = 1/4 − 1/6 = 1/12. 4<sup>th</sup> A.P. term = 1/6 + 3(1/12) = 2/12 + 3/12 = 5/12. H.P. 4<sup>th</sup> term = <b>12/5</b>."},
+
+{id:24, lec:"L-1a", blk:"General term &amp; symmetric terms", topic:"General term with a negative common difference",
+ q:"The 4<sup>th</sup> term of the harmonic progression 1/3, 8/23, 4/11, … is",
+ opts:["8/21","21/8","2/5","8/23"],
+ ans:0,
+ why:[
+  "Correct. Reciprocals 3, 23/8, 11/4 form an A.P. with d = −1/8; the 4<sup>th</sup> A.P. term is 3 − 3/8 = 21/8, so the H.P. term is 8/21.",
+  "That is the 4<sup>th</sup> term of the reciprocal A.P. — the final flip back was skipped.",
+  "This uses a + 4d instead of a + 3d — an off-by-one in n. The 4<sup>th</sup> term needs three steps of d, not four.",
+  "That is the given 2<sup>nd</sup> term, not the 4<sup>th</sup>."],
+ sol:"Reciprocals: 3, 23/8, 11/4. Gaps: 23/8 − 3 = −1/8 and 11/4 − 23/8 = 22/8 − 23/8 = −1/8 ✓ so a = 3, d = −1/8. a + 3d = 3 − 3/8 = 21/8 ⇒ T<sub>4</sub> = <b>8/21</b>. (The reciprocal A.P. is decreasing, so this H.P. is increasing.)"},
+
+{id:26, lec:"L-1a", blk:"Reading an H.P.", topic:"Eighth term of 6, 4, 3, …",
+ q:"The 8<sup>th</sup> term of the harmonic progression 6, 4, 3, … is",
+ opts:["4/3","3/4","1/2","2"],
+ ans:0,
+ why:[
+  "Correct. The reciprocal A.P. is 1/6, 1/4, 1/3 with a = 1/6 and d = 1/12, so its 8<sup>th</sup> term is 1/6 + 7/12 = 9/12 = 3/4; flipping back gives 4/3.",
+  "3/4 is the 8<sup>th</sup> term of the <b>reciprocal A.P.</b> — the final flip back has been forgotten.",
+  "1/2 would be the reciprocal of 2, but the A.P.'s 8<sup>th</sup> term is 3/4, not 2.",
+  "2 comes from continuing the H.P. by subtracting 1 each time, but 6, 4, 3 does not fall by a constant amount."],
+ sol:"Flip → work in the A.P. → flip back. a = 1/6, d = 1/4 − 1/6 = <b>1/12</b>. A.P. 8<sup>th</sup> = 1/6 + 7(1/12) = 9/12 = 3/4 ⇒ H.P. 8<sup>th</sup> = <b>4/3</b>."},
+
+{id:27, lec:"L-1a", blk:"Reading an H.P.", topic:"Extracting a and d from an H.P.",
+ q:"For the harmonic progression 1/3, 1/6, 1/9, 1/12, …, the first term and common difference of the corresponding A.P. are",
+ opts:["a = 3, d = 3","a = 1/3, d = 1/3","a = 3, d = −3","a = 1/3, d = −1/6"],
+ ans:0,
+ why:[
+  "Correct. The reciprocals are 3, 6, 9, 12, an A.P. starting at 3 and rising by 3.",
+  "1/3 is the first term of the <b>H.P.</b>; a and d always refer to the reciprocal A.P.",
+  "The reciprocals increase, so d is +3. A negative d would make the H.P. terms grow.",
+  "This mixes an H.P. first term with a difference taken between H.P. terms rather than reciprocals."],
+ sol:"⚠ In every H.P. formula, <b>a and d belong to the A.P. of reciprocals</b>, never to the H.P. itself. Here 1/3, 1/6, 1/9, 1/12 flips to 3, 6, 9, 12, giving <b>a = 3, d = 3</b> and T<sub>n</sub> = 1/(3n)."},
+
+{id:28, lec:"L-1a", blk:"Behaviour", topic:"How a positive H.P. behaves",
+ q:"An H.P. of positive terms whose reciprocal A.P. has d &gt; 0 is",
+ opts:[
+  "strictly decreasing, tending to 0",
+  "strictly increasing, tending to infinity",
+  "constant",
+  "increasing at first and then decreasing"],
+ ans:0,
+ why:[
+  "Correct. The reciprocals grow without bound, so their reciprocals shrink steadily toward zero.",
+  "That describes the case d &lt; 0, where the A.P. terms fall toward zero and the H.P. terms blow up.",
+  "A constant sequence needs d = 0, which is excluded here.",
+  "A positive H.P. is monotonic; it cannot turn around while the A.P. terms stay positive."],
+ sol:"<b>d &gt; 0 ⇒ A.P. terms grow ⇒ H.P. terms shrink to 0.</b> With <b>d &lt; 0</b> the A.P. terms fall, the H.P. terms blow up, and once the A.P. crosses zero the H.P. reappears <b>negative</b> — the sign flip the JEE Advanced 2012 question exploits."},
+
+{id:29, lec:"L-1a", blk:"Definition", topic:"Progression versus sequence",
+ q:"The difference between a <b>progression</b> and a general <b>sequence</b> is that a progression",
+ opts:[
+  "has a formula for its n-th term",
+  "must have infinitely many terms",
+  "must have all its terms positive",
+  "must be increasing"],
+ ans:0,
+ why:[
+  "Correct — A.P., G.P. and H.P. each come with an explicit T<sub>n</sub>, which is what makes them progressions.",
+  "Both sequences and progressions may be finite or infinite; length is not the criterion.",
+  "An A.P. such as 5, 2, −1, −4 is a perfectly good progression with negative terms.",
+  "Any H.P. with d &gt; 0 is decreasing, and it is still a progression."],
+ sol:"A <b>sequence</b> follows some logical rule; a <b>progression</b> follows a rule expressible as a formula for T<sub>n</sub>. The three standard progressions are <b>A.P., G.P. and H.P.</b>"},
+
+{id:30, lec:"L-1a", blk:"Definition", topic:"The zero restriction",
+ q:"Which of these arithmetic progressions <b>cannot</b> be flipped to give a harmonic progression?",
+ opts:[
+  "4, 2, 0, −2, −4, …",
+  "5, 3, 1, −1, −3, …",
+  "1, 2, 3, 4, 5, …",
+  "−7, −4, −1, 2, 5, …"],
+ ans:0,
+ why:[
+  "Correct. Its third term is 0, and 1/0 is undefined — so there is no H.P. term in that position.",
+  "This A.P. steps over zero without landing on it: 1 then −1. Every term has a reciprocal, so it flips fine to 1/5, 1/3, 1, −1, −1/3.",
+  "All terms are positive, so it flips to the classic harmonic series 1, 1/2, 1/3, 1/4, 1/5.",
+  "This one also steps over zero, going −1 then 2, so every reciprocal exists."],
+ sol:"The <b>only</b> forbidden case is a term equal to 0. Negative terms are fine, and so is an A.P. that crosses zero — provided it does not <b>land</b> on it. Hence <b>no term of an H.P. can be zero</b>, and an H.P. whose reciprocal A.P. has d &lt; 0 simply blows up and reappears negative."},
+
+{id:31, lec:"L-1a", blk:"Reading an H.P.", topic:"Spotting a non-H.P.",
+ q:"Which of these sequences is <b>not</b> a harmonic progression?",
+ opts:["1, 1/2, 1/4, 1/8, …","1, 1/2, 1/3, 1/4, …","1/2, 1/5, 1/8, 1/11, …","6, 4, 3, 12/5, …"],
+ ans:0,
+ why:[
+  "Correct. Its reciprocals are 1, 2, 4, 8 — a <b>G.P.</b> with ratio 2, not an A.P. So this sequence is itself a G.P.",
+  "Its reciprocals are 1, 2, 3, 4, a textbook A.P. with d = 1 — this is the classic harmonic series.",
+  "Its reciprocals are 2, 5, 8, 11, an A.P. with d = 3.",
+  "Its reciprocals are 1/6, 1/4, 1/3, 5/12, an A.P. with d = 1/12."],
+ sol:"⚠ A list of fractions is <b>not</b> automatically an H.P. Flip it and check for equal <b>differences</b>, not equal ratios. Reciprocals of a G.P. are always another G.P. — only the A.P.↔H.P. pair swaps."},
+
+/* ---------------- L-1b  GENERAL TERM & ASSUMING TERMS (12) ---------------- */
+{id:6, lec:"L-1b", blk:"General term &amp; symmetric terms", topic:"General term from the first two terms",
+ q:"If the first two terms of an H.P. are a and b, then its n<sup>th</sup> term is",
+ opts:[
+  "ab / [ b + (n − 1)(a − b) ]",
+  "ab / [ a + (n − 1)(b − a) ]",
+  "1 / [ a + (n − 1)(b − a) ]",
+  "(a + b) / [ b + (n − 1)(a − b) ]"],
+ ans:0,
+ why:[
+  "Correct. The A.P. starts at 1/a with D = 1/b − 1/a = (a − b)/(ab), so 1/T<sub>n</sub> = [b + (n − 1)(a − b)]/(ab).",
+  "Check n = 2: this gives ab/b… no — it gives ab/[a + (b − a)] = ab/b = a, but the 2<sup>nd</sup> term must be b. The numerator and the “b” in the bracket have been swapped.",
+  "This is the reciprocal of an A.P. whose first term is a, i.e. it treats a and b as terms of the <b>A.P.</b> rather than of the H.P. At n = 1 it gives 1/a, not a.",
+  "The numerator must be the product ab (it comes from the common denominator of 1/a and 1/b), not the sum."],
+ sol:"1/T<sub>n</sub> = 1/a + (n − 1)·(a − b)/(ab) = [b + (n − 1)(a − b)]/(ab) ⇒ T<sub>n</sub> = <b>ab/[b + (n − 1)(a − b)]</b>. Sanity check n = 1 → ab/b = a ✓, n = 2 → ab/a = b ✓."},
+
+{id:7, lec:"L-1b", blk:"General term &amp; symmetric terms", topic:"Finding a term from two given terms",
+ q:"The 6<sup>th</sup> and 11<sup>th</sup> terms of an H.P. are 10 and 18 respectively. Its 16<sup>th</sup> term is",
+ opts:["90","1/90","26","13/90"],
+ ans:0,
+ why:[
+  "Correct. In the reciprocal A.P., a + 5d = 1/10 and a + 10d = 1/18 give d = −2/225 and a = 13/90, so a + 15d = 1/90 and the H.P. term is 90.",
+  "This is the 16<sup>th</sup> term of the reciprocal <b>A.P.</b> The final reciprocation was skipped.",
+  "This extends 10, 18 as if the H.P. itself were an A.P. (+8 per five steps). The H.P. terms are never evenly spaced — only their reciprocals are.",
+  "This is a, the <b>first</b> term of the reciprocal A.P., not the 16<sup>th</sup> term of anything."],
+ sol:"a + 5d = 1/10, a + 10d = 1/18 ⇒ 5d = 1/18 − 1/10 = −4/90 ⇒ d = −2/225; a = 1/10 + 2/45 = 13/90. Then a + 15d = 13/90 − 12/90 = 1/90, so T<sub>16</sub> = <b>90</b>. (The reciprocal A.P. is decreasing, so the H.P. shoots up — exactly as expected.)"},
+
+{id:8, lec:"L-1b", blk:"General term &amp; symmetric terms", topic:"The T<sub>m</sub> = n, T<sub>n</sub> = m result",
+ q:"If the m<sup>th</sup> term of an H.P. is n and its n<sup>th</sup> term is m, then its (m + n)<sup>th</sup> term is",
+ opts:["mn/(m + n)","(m + n)/mn","mn","m + n"],
+ ans:0,
+ why:[
+  "Correct. In the A.P., a = d = 1/(mn), so the (m+n)<sup>th</sup> A.P. term is (m + n)/(mn) and its reciprocal is mn/(m + n).",
+  "This is the (m+n)<sup>th</sup> term of the reciprocal <b>A.P.</b> — one flip short of the answer.",
+  "The denominator (m + n) has been dropped; check with m = 2, n = 3: the true answer is 6/5, not 6.",
+  "Pattern-matching the given numbers. Test m = 2, n = 3 against the actual H.P.: a = d = 1/6, T<sub>5</sub> = 1/(5/6) = 6/5 ≠ 5."],
+ sol:"a + (m − 1)d = 1/n and a + (n − 1)d = 1/m. Subtracting: (m − n)d = (m − n)/(mn) ⇒ d = 1/(mn), and then a = 1/(mn). So the A.P.'s (m+n)<sup>th</sup> term = (1 + m + n − 1)/(mn) = (m + n)/(mn) ⇒ T<sub>m+n</sub> = <b>mn/(m + n)</b>."},
+
+{id:9, lec:"L-1b", blk:"General term &amp; symmetric terms", topic:"Symmetric choice of three terms",
+ q:"When a problem asks you to “assume three numbers in H.P.”, the correct symmetric choice is",
+ opts:[
+  "a − d, a, a + d",
+  "1/(a − d), 1/a, 1/(a + d)",
+  "a/r, a, ar",
+  "1/(a − 3d), 1/(a − d), 1/(a + d)"],
+ ans:1,
+ why:[
+  "This is an <b>A.P.</b>, not an H.P. — the single most common slip in this chapter. The ± d must sit inside the reciprocals.",
+  "Correct. Their reciprocals a − d, a, a + d form an A.P., and they add to 3a, which is exactly why symmetric terms are worth using.",
+  "This is the symmetric choice for a <b>G.P.</b> (ratio r), not an H.P.",
+  "The spacing is uneven (2d then 2d, but the block is not centred) — this is three terms lifted out of the four-term pattern, so the reciprocals do not sum to a clean multiple of a."],
+ sol:"Always place the arithmetic structure in the <b>denominators</b>: 1/(a − d), 1/a, 1/(a + d). Then “sum of the reciprocals” is 3a and fixes a in one line."},
+
+{id:10, lec:"L-1b", blk:"General term &amp; symmetric terms", topic:"Symmetric choice of four terms",
+ q:"Four numbers in H.P. are best assumed as",
+ opts:[
+  "1/(a − 3d), 1/(a − d), 1/(a + d), 1/(a + 3d)",
+  "1/(a − 2d), 1/(a − d), 1/(a + d), 1/(a + 2d)",
+  "a − 3d, a − d, a + d, a + 3d",
+  "1/(a − d), 1/a, 1/(a + d), 1/(a + 2d)"],
+ ans:0,
+ why:[
+  "Correct. For an <b>even</b> count you space the denominators by 2d so there is no middle term and no fractions: gaps are 2d, 2d, 2d, and the reciprocals sum to 4a.",
+  "The denominator gaps are d, 2d, d — not constant — so these reciprocals are not in A.P. and the four numbers are not in H.P. at all.",
+  "These four are in <b>A.P.</b>, not H.P.",
+  "It is not symmetric about a centre (it runs from a − d to a + 2d), so the reciprocals do not sum to a clean multiple of a and you gain nothing."],
+ sol:"Odd count → spacing d with a middle term (a − d, a, a + d). Even count → spacing <b>2d</b> with no middle term (a − 3d, a − d, a + d, a + 3d). Put the whole pattern in the denominators."},
+
+{id:11, lec:"L-1b", blk:"General term &amp; symmetric terms", topic:"The sum of a harmonic progression",
+ q:"The sum of the first n terms of a harmonic progression is",
+ opts:[
+  "(n/2)[2a + (n − 1)d]",
+  "n / (1/a<sub>1</sub> + 1/a<sub>2</sub> + … + 1/a<sub>n</sub>)",
+  "given by no general formula",
+  "a(r<sup>n</sup> − 1)/(r − 1)"],
+ ans:2,
+ why:[
+  "That is the A.P. sum formula. It applies to the reciprocals, not to the H.P. terms themselves.",
+  "That expression is the <b>harmonic mean</b> of the n terms, not their sum.",
+  "Correct. There is no closed form for 1 + 1/2 + 1/3 + … (it even diverges). So an exam “sum” involving H.P. terms must telescope, or the series must secretly be an A.P./G.P.",
+  "That is the G.P. sum formula."],
+ sol:"An H.P. has a general term but <b>no sum formula</b>. If a question asks you to sum H.P.-type terms, look for a telescope such as a<sub>1</sub>a<sub>2</sub> + a<sub>2</sub>a<sub>3</sub> + … = (n − 1)a<sub>1</sub>a<sub>n</sub>."},
+
+{id:32, lec:"L-1b", blk:"General term", topic:"What a and d refer to",
+ q:"In the formula T<sub>n</sub> = 1/[a + (n − 1)d] for an H.P.,",
+ opts:[
+  "a and d are the first term and common difference of the reciprocal A.P.",
+  "a and d are the first term and common difference of the H.P. itself",
+  "a is the first H.P. term and d the common difference of the reciprocal A.P.",
+  "a and d are the first term and common ratio of the reciprocal G.P."],
+ ans:0,
+ why:[
+  "Correct. The bracket is literally the n-th term of the A.P.; the outer reciprocal turns it back into an H.P. term.",
+  "An H.P. has no common difference at all — its consecutive differences are not constant.",
+  "Mixing the two is the most reliable way to get these questions wrong; both a and d live in the A.P.",
+  "There is no G.P. anywhere in this construction."],
+ sol:"<b>T<sub>n</sub> = 1/[a + (n − 1)d]</b> where the bracket is the A.P.'s n-th term. The first H.P. term is therefore <b>1/a</b>, not a."},
+
+{id:33, lec:"L-1b", blk:"Symmetric terms", topic:"Five terms in H.P.",
+ q:"Five numbers in H.P. are best assumed as",
+ opts:[
+  "1/(a − 2d), 1/(a − d), 1/a, 1/(a + d), 1/(a + 2d)",
+  "1/(a − 4d), 1/(a − 2d), 1/a, 1/(a + 2d), 1/(a + 4d)",
+  "a − 2d, a − d, a, a + d, a + 2d",
+  "1/(a − 2d), 1/(a − d), 1/(a + d), 1/(a + 2d), 1/(a + 3d)"],
+ ans:0,
+ why:[
+  "Correct. An <b>odd</b> count keeps a genuine middle term and uses a spacing of d, so the reciprocals sum to 5a.",
+  "The 2d spacing is what an <b>even</b> count needs; with an odd count it is unnecessary and makes the algebra heavier.",
+  "This is a symmetric <b>A.P.</b>, not an H.P. — the ± d must sit inside the reciprocals.",
+  "This is not symmetric about a centre, so the reciprocals do not sum cleanly."],
+ sol:"<b>Odd count → spacing d, with a middle term. Even count → spacing 2d, no middle term.</b> Three: 1/(a−d), 1/a, 1/(a+d). Four: 1/(a−3d), 1/(a−d), 1/(a+d), 1/(a+3d). Five: as above."},
+
+{id:34, lec:"L-1b", blk:"Symmetric terms", topic:"Why 2d spacing for an even count",
+ q:"Four numbers in H.P. are assumed with a spacing of <b>2d</b> rather than d because",
+ opts:[
+  "with an even count there is no middle term, and 2d spacing keeps the reciprocals symmetric about a without fractions",
+  "the common difference of an H.P. is always even",
+  "four terms need twice as large a difference as three",
+  "it makes the four terms sum to zero"],
+ ans:0,
+ why:[
+  "Correct. The reciprocals become a − 3d, a − d, a + d, a + 3d — symmetric about a, and their sum is a clean 4a.",
+  "An H.P. has no common difference, and the parity of d is not a rule.",
+  "d is an unknown to be solved for; nothing forces one problem's d to be twice another's.",
+  "The reciprocals sum to 4a, which is not zero unless a = 0 — and a = 0 is forbidden."],
+ sol:"Symmetric choices exist to make a <b>sum of reciprocals</b> collapse. Odd counts centre on a; even counts straddle it with ±d, ±3d — which is why the spacing is 2d. Reciprocal sums: 3a for three terms, <b>4a</b> for four, 5a for five."},
+
+{id:35, lec:"L-1b", blk:"General term", topic:"Using the two-term shortcut",
+ q:"The first two terms of an H.P. are 3 and 2. Its 5<sup>th</sup> term is",
+ opts:["1","6/5","2/3","5"],
+ ans:0,
+ why:[
+  "Correct. T<sub>n</sub> = ab/[b + (n−1)(a−b)] with a = 3, b = 2, n = 5 gives 6/[2 + 4(1)] = 6/6 = 1.",
+  "6/5 would follow from n = 2, not n = 5.",
+  "2/3 inverts the fraction; the shortcut already returns the H.P. term directly.",
+  "5 comes from continuing 3, 2 by subtracting 1, but an H.P. does not fall by a constant amount."],
+ sol:"Either use <b>T<sub>n</sub> = ab/[b + (n−1)(a−b)]</b>, or flip first: reciprocals 1/3, 1/2 give d = 1/6, so the A.P.'s 5<sup>th</sup> term is 1/3 + 4/6 = 1, and the H.P. term is <b>1</b>. Both routes agree."},
+
+{id:36, lec:"L-1b", blk:"General term", topic:"Locating a given term",
+ q:"In the harmonic progression 1/2, 1/5, 1/8, 1/11, …, the term equal to 1/29 is the",
+ opts:["10<sup>th</sup> term","9<sup>th</sup> term","29<sup>th</sup> term","11<sup>th</sup> term"],
+ ans:0,
+ why:[
+  "Correct. The reciprocals are 2, 5, 8, … with a = 2 and d = 3; solving 2 + (n−1)3 = 29 gives n = 10.",
+  "The 9<sup>th</sup> reciprocal is 2 + 8(3) = 26, so the 9<sup>th</sup> term is 1/26.",
+  "29 is the reciprocal's value, not its position — the A.P. steps by 3, so it reaches 29 much sooner.",
+  "The 11<sup>th</sup> reciprocal is 32, giving 1/32."],
+ sol:"Work in the A.P.: 2 + (n − 1)(3) = 29 ⇒ 3(n − 1) = 27 ⇒ <b>n = 10</b>. Never count along the H.P. itself."},
+
+{id:37, lec:"L-1b", blk:"Symmetric terms", topic:"A classic three-term problem",
+ q:"The sum of three numbers in H.P. is 37 and the sum of their reciprocals is 1/4. The numbers are",
+ opts:["15, 12, 10","20, 12, 5","18, 12, 7","16, 12, 9"],
+ ans:0,
+ why:[
+  "Correct. Taking them as 1/(a−d), 1/a, 1/(a+d), the reciprocal sum is 3a = 1/4 so a = 1/12; the first condition then gives d = 1/60, and the terms are 15, 12 and 10.",
+  "These sum to 37 and are symmetric about 12, but their reciprocals are 1/20, 1/12, 1/5, whose differences are not equal — not an H.P.",
+  "Same objection: 1/18, 1/12, 1/7 has unequal differences.",
+  "1/16, 1/12, 1/9 gives differences 1/48 and 1/36 — unequal, so not an H.P."],
+ sol:"The <b>reciprocal</b> condition fixes a instantly: (a−d) + a + (a+d) = 3a = 1/4 ⇒ a = 1/12, so the middle number is 12. Then 15 + 12 + 10 = 37 ✓ and 15, 12, 10 flip to 1/15, 1/12, 1/10 with a common difference of 1/60 ✓ This is exactly what symmetric terms are for."},
+
+/* ---------------- L-1c  PROPERTIES & HARMONIC MEAN (14) ---------------- */
+{id:12, lec:"L-1c", blk:"Properties &amp; the harmonic mean", topic:"The three-term H.P. condition",
+ q:"If a, b, c are in H.P., then b equals",
+ opts:["(a + c)/2","√(ac)","2ac/(a + c)","ac/(a + c)"],
+ ans:2,
+ why:[
+  "That is the condition for a, b, c to be in <b>A.P.</b> (the arithmetic mean). Mixing this up with the H.P. mean is the most common error in the chapter.",
+  "That is the condition for a, b, c to be in <b>G.P.</b> (the geometric mean, b² = ac).",
+  "Correct. 2/b = 1/a + 1/c ⇒ 2/b = (a + c)/(ac) ⇒ b = 2ac/(a + c) — the harmonic mean of a and c.",
+  "The factor 2 has been dropped. Check on the H.P. 6, 4, 3: 2·6·3/9 = 4 ✓, while 6·3/9 = 2 ✗."],
+ sol:"a, b, c in H.P. means 1/a, 1/b, 1/c in A.P., so 2/b = 1/a + 1/c ⇒ <b>b = 2ac/(a + c)</b>. Check on 6, 4, 3: 2(6)(3)/(6 + 3) = 36/9 = 4 ✓."},
+
+{id:13, lec:"L-1c", blk:"Properties &amp; the harmonic mean", topic:"The gap-ratio test",
+ q:"If p, q, r are in H.P., then (p − q)/(q − r) equals",
+ opts:["1","p/q","p/r","q/r"],
+ ans:2,
+ why:[
+  "(a − b)/(b − c) = 1 is the test for an <b>A.P.</b> — the two gaps are equal.",
+  "(a − b)/(b − c) = a/b is the test for a <b>G.P.</b>",
+  "Correct. From 1/q − 1/p = 1/r − 1/q, cross-multiplying and cancelling q gives (p − q)r = (q − r)p, i.e. (p − q)/(q − r) = p/r.",
+  "The right-hand side must be built from the two <b>outer</b> terms, p and r — never from the middle term q."],
+ sol:"The three tests share one left-hand side and the denominator on the right walks a → b → c: <b>a/a ⇒ A.P., a/b ⇒ G.P., a/c ⇒ H.P.</b> Remember the H.P. one as “outer over outer”. Check on 6, 4, 3: (6 − 4)/(4 − 3) = 2 = 6/3 ✓."},
+
+{id:14, lec:"L-1c", blk:"Properties &amp; the harmonic mean", topic:"Harmonic mean of two numbers",
+ q:"The harmonic mean of 6 and 3 is",
+ opts:["4","4.5","3√2","2"],
+ ans:0,
+ why:[
+  "Correct. H = 2ac/(a + c) = 2(6)(3)/9 = 36/9 = 4. (Consistent with the H.P. 6, 4, 3 from the lecture.)",
+  "That is the <b>arithmetic</b> mean, (6 + 3)/2.",
+  "That is the <b>geometric</b> mean, √18. Note A = 4.5 > G ≈ 4.24 > H = 4, as it must be.",
+  "This drops the factor 2: ac/(a + c) = 18/9 = 2 is half the harmonic mean."],
+ sol:"H = 2ab/(a + b) = 2·6·3/(6 + 3) = <b>4</b>. Cross-check with G² = A·H: 18 = 4.5 × 4 ✓."},
+
+{id:15, lec:"L-1c", blk:"Properties &amp; the harmonic mean", topic:"A.M., G.M. and H.M. relationship",
+ q:"If A, G and H are the arithmetic, geometric and harmonic means of two distinct positive numbers, then",
+ opts:[
+  "A > G > H and G² = AH",
+  "H > G > A and G² = AH",
+  "A > G > H and A² = GH",
+  "A > G > H and H² = AG"],
+ ans:0,
+ why:[
+  "Correct. A ≥ G ≥ H always (equality only if the two numbers are equal), and A·H = [(a+b)/2]·[2ab/(a+b)] = ab = G².",
+  "The inequality is upside-down. Test on 6 and 3: A = 4.5, G ≈ 4.24, H = 4, so A is the largest.",
+  "The product identity is wrong: it is the <b>middle</b> mean that is the geometric mean of the other two, so G² = AH. Test on 6, 3: A² = 20.25 but GH ≈ 16.97.",
+  "Same error the other way. Test on 6, 3: H² = 16 but AG ≈ 19.09."],
+ sol:"A·H = (a + b)/2 × 2ab/(a + b) = ab = G², so <b>A, G, H are themselves in G.P.</b>, and A ≥ G ≥ H for positive numbers."},
+
+{id:16, lec:"L-1c", blk:"Properties &amp; the harmonic mean", topic:"The telescoping sum (JEE Main 2006)",
+ q:"If a<sub>1</sub>, a<sub>2</sub>, …, a<sub>n</sub> are in H.P., then a<sub>1</sub>a<sub>2</sub> + a<sub>2</sub>a<sub>3</sub> + … + a<sub>n−1</sub>a<sub>n</sub> equals",
+ opts:[
+  "n(a<sub>1</sub> − a<sub>n</sub>)",
+  "(n − 1)(a<sub>1</sub> − a<sub>n</sub>)",
+  "n·a<sub>1</sub>a<sub>n</sub>",
+  "(n − 1)·a<sub>1</sub>a<sub>n</sub>"],
+ ans:3,
+ why:[
+  "Wrong on both counts. Test on the H.P. 6, 4, 3 (n = 3): the sum is 6·4 + 4·3 = 36, but n(a<sub>1</sub> − a<sub>n</sub>) = 3(6 − 3) = 9.",
+  "The count (n − 1) is right but the bracket must be a <b>product</b>, not a difference: 2(6 − 3) = 6 ≠ 36.",
+  "The product is right but the count is not: 3 × 6 × 3 = 54 ≠ 36. There are only n − 1 products in the sum.",
+  "Correct. Test on 6, 4, 3: (n − 1)a<sub>1</sub>a<sub>n</sub> = 2 × 6 × 3 = 36 = 6·4 + 4·3 ✓."],
+ sol:"Since 1/a<sub>k+1</sub> − 1/a<sub>k</sub> = d, every product is a<sub>k</sub>a<sub>k+1</sub> = (a<sub>k</sub> − a<sub>k+1</sub>)/d, so the sum telescopes to (a<sub>1</sub> − a<sub>n</sub>)/d. And 1/a<sub>n</sub> − 1/a<sub>1</sub> = (n − 1)d gives (a<sub>1</sub> − a<sub>n</sub>)/d = (n − 1)a<sub>1</sub>a<sub>n</sub>. Answer: <b>(n − 1)a<sub>1</sub>a<sub>n</sub></b>."},
+
+{id:25, lec:"L-1c", blk:"Properties &amp; the harmonic mean", topic:"Inserting n harmonic means",
+ q:"If H<sub>1</sub>, H<sub>2</sub>, …, H<sub>n</sub> are n harmonic means inserted between a and b, the common difference of the corresponding A.P. is",
+ opts:[
+  "(a − b) / [ ab(n + 1) ]",
+  "(b − a) / (n + 1)",
+  "(a − b) / (n + 1)",
+  "(b − a) / [ ab(n + 1) ]"],
+ ans:0,
+ why:[
+  "Correct. The A.P. is 1/a, …, 1/b with n + 2 terms, so 1/b = 1/a + (n + 1)D ⇒ D = (1/b − 1/a)/(n + 1) = (a − b)/[ab(n + 1)].",
+  "That is the common difference when you insert n <b>arithmetic</b> means between a and b. Here the A.P. runs between the reciprocals, so the ab must appear.",
+  "Same error — the reciprocals were never taken, so the factor ab is missing.",
+  "The sign is flipped: 1/b − 1/a = (a − b)/(ab), not (b − a)/(ab). Check with a = 6, b = 3, n = 1: the true D is (6 − 3)/(18·2) = 1/12, giving the H.P. 6, 4, 3 ✓, whereas this option gives −1/12."],
+ sol:"Put 1/a and 1/b at the two ends of an A.P. of <b>n + 2</b> terms: D = (1/b − 1/a)/(n + 1) = <b>(a − b)/[ab(n + 1)]</b>. The k<sup>th</sup> mean is then H<sub>k</sub> = ab(n + 1)/[b(n + 1) + k(a − b)]."},
+
+{id:38, lec:"L-1c", blk:"Harmonic mean", topic:"The harmonic mean of two numbers",
+ q:"The harmonic mean H of two numbers a and b is",
+ opts:["2ab/(a + b)","(a + b)/2","√(ab)","ab/(a + b)"],
+ ans:0,
+ why:[
+  "Correct — it is Property 1 in another guise: a, H, b are in H.P. exactly when H = 2ab/(a+b).",
+  "(a + b)/2 is the <b>arithmetic</b> mean.",
+  "√(ab) is the <b>geometric</b> mean.",
+  "ab/(a + b) is half the harmonic mean; the factor of 2 is essential."],
+ sol:"<b>A = (a+b)/2 · G = √(ab) · H = 2ab/(a+b).</b> Check on 6 and 3: A = 4.5, G = √18 ≈ 4.24, H = 4 — duly A &gt; G &gt; H, and G² = 18 = 4.5 × 4 = AH ✓"},
+
+{id:39, lec:"L-1c", blk:"Harmonic mean", topic:"Harmonic mean of n numbers",
+ q:"The harmonic mean of n numbers a₁, a₂, …, a<sub>n</sub> is",
+ opts:[
+  "n / (1/a₁ + 1/a₂ + … + 1/a<sub>n</sub>)",
+  "(a₁ + a₂ + … + a<sub>n</sub>)/n",
+  "(1/a₁ + 1/a₂ + … + 1/a<sub>n</sub>)/n",
+  "n · (a₁a₂…a<sub>n</sub>)"],
+ ans:0,
+ why:[
+  "Correct — it is the reciprocal of the average of the reciprocals, which is what “harmonic” means.",
+  "That is the arithmetic mean.",
+  "This is the average of the reciprocals; the harmonic mean is its <b>reciprocal</b>.",
+  "A product scaled by n is not a mean of any kind."],
+ sol:"<b>H = n/Σ(1/a<sub>i</sub>).</b> For n = 2 this reduces to 2/(1/a + 1/b) = <b>2ab/(a+b)</b> ✓ It is the right average whenever the quantities are rates — average speed over equal distances, for instance."},
+
+{id:40, lec:"L-1c", blk:"Harmonic mean", topic:"A numerical harmonic mean",
+ q:"The harmonic mean of 4 and 12 is",
+ opts:["6","8","√48","16/3"],
+ ans:0,
+ why:[
+  "Correct. H = 2(4)(12)/(4 + 12) = 96/16 = 6.",
+  "8 is the <b>arithmetic</b> mean, (4 + 12)/2.",
+  "√48 ≈ 6.93 is the <b>geometric</b> mean.",
+  "16/3 divides the sum by the product's factor incorrectly; the numerator must be 2ab = 96."],
+ sol:"H = 2ab/(a+b) = 96/16 = <b>6</b>. Sanity check: A = 8, G = √48 ≈ 6.93, H = 6, so <b>A &gt; G &gt; H</b> ✓ and G² = 48 = 8 × 6 = AH ✓"},
+
+{id:41, lec:"L-1c", blk:"A, G, H", topic:"The relation between the three means",
+ q:"For two distinct positive numbers, the arithmetic, geometric and harmonic means A, G, H are themselves in",
+ opts:["G.P.","A.P.","H.P.","no standard progression"],
+ ans:0,
+ why:[
+  "Correct. G² = AH is exactly the condition for A, G, H to be three terms of a geometric progression.",
+  "An A.P. would need 2G = A + H, which is false: for 4 and 12, 2G ≈ 13.86 while A + H = 14.",
+  "An H.P. would need G = 2AH/(A+H); for 4 and 12 that is 96/14 ≈ 6.86, not 6.93.",
+  "There is a very definite relation — G is the geometric mean of A and H."],
+ sol:"<b>G² = A·H</b>, so A, G, H form a <b>G.P.</b> Combined with <b>A ≥ G ≥ H</b> (equality only when the numbers are equal), this pair of facts answers most mean-comparison questions outright."},
+
+{id:42, lec:"L-1c", blk:"Properties", topic:"Why no term can be zero",
+ q:"No term of a harmonic progression can equal zero because",
+ opts:[
+  "its reciprocal would be undefined, so the corresponding A.P. term could not exist",
+  "an H.P. must have all positive terms",
+  "the common difference would become zero",
+  "the sum would then diverge"],
+ ans:0,
+ why:[
+  "Correct. Every H.P. term is 1/(A.P. term), and 1/x = 0 has no solution — the value 0 is simply never produced.",
+  "H.P. terms may be negative; the JEE Advanced 2012 problem turns on exactly that.",
+  "d is a property of the whole A.P. and is unaffected by any single term's value.",
+  "Divergence of the harmonic series is a separate fact and has nothing to do with the zero restriction."],
+ sol:"H.P. terms are reciprocals, and a reciprocal is never 0. Equivalently, the <b>A.P.</b> may not contain 0 — that would leave the H.P. undefined at that position, not zero."},
+
+{id:43, lec:"L-1c", blk:"Harmonic means", topic:"Inserting harmonic means",
+ q:"Two harmonic means inserted between 1 and 1/4 are",
+ opts:["1/2 and 1/3","1/2 and 1/4","2/3 and 1/3","3/4 and 1/2"],
+ ans:0,
+ why:[
+  "Correct. The reciprocals 1 and 4 must be the ends of a 4-term A.P.: 1, 2, 3, 4 with d = 1, so the means are 1/2 and 1/3.",
+  "1/4 is the second given number, not an inserted mean.",
+  "2/3 would need a reciprocal of 1.5, but the A.P. steps by whole numbers here.",
+  "3/4 and 1/2 correspond to reciprocals 4/3 and 2, which are not equally spaced between 1 and 4."],
+ sol:"Insert the means in the <b>A.P. of reciprocals</b>: 1 and 4 as the ends of a 4-term A.P. gives d = (4 − 1)/3 = 1 and the sequence 1, 2, 3, 4. Flipping back: <b>1, 1/2, 1/3, 1/4</b>, so the two means are <b>1/2 and 1/3</b>."},
+
+{id:44, lec:"L-1c", blk:"Telescoping", topic:"Applying the telescope numerically",
+ q:"For the H.P. 6, 4, 3, the value of a₁a₂ + a₂a₃ is",
+ opts:["36","24","12","18"],
+ ans:0,
+ why:[
+  "Correct. 6(4) + 4(3) = 24 + 12 = 36, matching (n − 1)a₁a<sub>n</sub> = 2 × 6 × 3 = 36.",
+  "24 is only the first product, a₁a₂.",
+  "12 is only the second product, a₂a₃.",
+  "18 is a₁a<sub>n</sub> = 6 × 3 without the factor (n − 1) = 2."],
+ sol:"<b>a₁a₂ + a₂a₃ + … + a<sub>n−1</sub>a<sub>n</sub> = (n − 1)a₁a<sub>n</sub>.</b> Here n = 3, so the sum is 2 × 6 × 3 = <b>36</b> ✓ Checking a formula on a small concrete H.P. like 6, 4, 3 is the fastest way to confirm you have remembered it correctly."},
+
+{id:45, lec:"L-1c", blk:"Properties", topic:"The outer-over-outer identity",
+ q:"For the H.P. 6, 4, 3, the value of (a − b)/(b − c) is",
+ opts:["2","1","3/2","4/3"],
+ ans:0,
+ why:[
+  "Correct. (6 − 4)/(4 − 3) = 2/1 = 2, which equals a/c = 6/3 = 2 as the H.P. test requires.",
+  "A ratio of 1 is the <b>A.P.</b> test, a/a.",
+  "3/2 = a/b would be the <b>G.P.</b> test.",
+  "4/3 = b/c is not one of the three tests."],
+ sol:"<b>H.P. test: (a − b)/(b − c) = a/c</b> — “outer over outer”. Verify with the mean test too: 2ac/(a+c) = 2(6)(3)/9 = 4 = b ✓ Two independent confirmations."},
+
+/* ---------------- L-1d  RECOGNISING A.P./G.P./H.P. (12) ---------------- */
+{id:17, lec:"L-1d", blk:"Recognising A.P./G.P./H.P.", topic:"Patterns that are secretly an H.P.",
+ q:"If a, b, c are in A.P., which of the following is in H.P.?",
+ opts:[
+  "1/(bc), 1/(ca), 1/(ab)",
+  "bc, ca, ab",
+  "a², b², c²",
+  "a + b, b + c, c + a"],
+ ans:1,
+ why:[
+  "Close, but this triple is in <b>A.P.</b>, not H.P. — dividing a, b, c by abc keeps them arithmetic. Test a, b, c = 1, 2, 3: 1/6, 1/3, 1/2 with equal gaps of 1/6.",
+  "Correct. Divide a, b, c by abc to get 1/(bc), 1/(ca), 1/(ab) in A.P.; the reciprocals of that A.P. are bc, ca, ab, which are therefore in H.P. Test 1, 2, 3: 6, 3, 2 — reciprocals 1/6, 1/3, 1/2 in A.P. ✓",
+  "Squaring destroys the pattern. Test 1, 2, 3: 1, 4, 9 is neither A.P. (gaps 3, 5) nor H.P. (reciprocals 1, 1/4, 1/9 have gaps −3/4, −5/36).",
+  "Test 1, 2, 3: the sums are 3, 5, 4 — not in A.P. and not in H.P. (Note that b + c, c + a, a + b <i>is</i> in A.P., but this triple is scrambled.)"],
+ sol:"a, b, c in A.P. ⇒ divide through by abc ⇒ 1/(bc), 1/(ca), 1/(ab) in A.P. ⇒ their reciprocals <b>bc, ca, ab are in H.P.</b>"},
+
+{id:18, lec:"L-1d", blk:"Recognising A.P./G.P./H.P.", topic:"Squares in A.P. ⇒ sums in H.P.",
+ q:"If a², b², c² are in A.P., then b + c, c + a, a + b are in",
+ opts:["A.P.","G.P.","H.P.","none of these"],
+ ans:2,
+ why:[
+  "Test a, b, c = 1, 5, 7 (squares 1, 25, 49 are in A.P.): the sums are 12, 8, 6 with gaps −4 and −2 — not an A.P.",
+  "Same test: 12, 8, 6 has ratios 2/3 and 3/4 — not constant, so not a G.P.",
+  "Correct. 1/(c+a) − 1/(b+c) = (b − a)/[(c+a)(b+c)] and 1/(a+b) − 1/(c+a) = (c − b)/[(a+b)(c+a)]; these are equal exactly when (b − a)(a + b) = (c − b)(b + c), i.e. b² − a² = c² − b². Test 1, 5, 7: 12, 8, 6 → reciprocals 1/12, 1/8, 1/6 with equal gaps of 1/24 ✓",
+  "The triple is genuinely in H.P., as the algebra and the numerical check both confirm."],
+ sol:"Clear the reciprocal differences: both equal after cross-multiplying iff b² − a² = c² − b², which is exactly “a², b², c² in A.P.” So b + c, c + a, a + b are in <b>H.P.</b> — a recurring JEE Main pattern."},
+
+{id:19, lec:"L-1d", blk:"Recognising A.P./G.P./H.P.", topic:"The exponent–logarithm bridge",
+ q:"If a<sup>x</sup> = b<sup>y</sup> = c<sup>z</sup> = k and a, b, c are in G.P., then x, y, z are in",
+ opts:["A.P.","G.P.","H.P.","A.G.P."],
+ ans:2,
+ why:[
+  "This is what 1/x, 1/y, 1/z are in — one flip short. Test a, b, c = 2, 4, 8 with k = 16: x, y, z = 4, 2, 4/3, whose gaps are −2 and −2/3.",
+  "Test 2, 4, 8 with k = 16: 4, 2, 4/3 has ratios 1/2 and 2/3 — not constant.",
+  "Correct. Taking logs, x = log k / log a so 1/x ∝ log a. a, b, c in G.P. ⇒ log a, log b, log c in A.P. ⇒ 1/x, 1/y, 1/z in A.P. ⇒ x, y, z in H.P. Test 2, 4, 8 / k = 16: 4, 2, 4/3 → reciprocals 1/4, 1/2, 3/4 with equal gaps of 1/4 ✓",
+  "An arithmetico-geometric progression has terms of the form (a + nd)·r<sup>n</sup>; nothing here produces that shape."],
+ sol:"Whenever you see a<sup>x</sup> = b<sup>y</sup> = c<sup>z</sup> = k, take logs: <b>1/x, 1/y, 1/z ∝ log a, log b, log c</b>. So “a, b, c in G.P.” becomes “1/x, 1/y, 1/z in A.P.” — i.e. <b>x, y, z in H.P.</b>"},
+
+{id:20, lec:"L-1d", blk:"Recognising A.P./G.P./H.P.", topic:"Test for a whole sequence",
+ q:"A sequence t<sub>1</sub>, t<sub>2</sub>, t<sub>3</sub>, … is a harmonic progression if and only if",
+ opts:[
+  "t<sub>n</sub> − t<sub>n−1</sub> is constant",
+  "t<sub>n</sub> / t<sub>n−1</sub> is constant",
+  "1/t<sub>n</sub> − 1/t<sub>n−1</sub> is constant",
+  "t<sub>n</sub> · t<sub>n−1</sub> is constant"],
+ ans:2,
+ why:[
+  "That is the test for an <b>A.P.</b>",
+  "That is the test for a <b>G.P.</b>",
+  "Correct. Constant difference <i>of the reciprocals</i> is precisely the statement that 1/t<sub>n</sub> is an A.P., which is the definition of an H.P.",
+  "A constant product is not a progression test at all — e.g. 2, 3, 2, 3, … has constant products but is not an H.P."],
+ sol:"Three sequence tests: difference constant ⇒ A.P., ratio constant ⇒ G.P., <b>difference of reciprocals constant ⇒ H.P.</b>"},
+
+{id:21, lec:"L-1d", blk:"Recognising A.P./G.P./H.P.", topic:"Reading the three-term ratio test",
+ q:"For three successive terms a, b, c of a sequence, the condition (a − b)/(b − c) = a/b tells you the sequence is",
+ opts:["an A.P.","a G.P.","an H.P.","none of these"],
+ ans:1,
+ why:[
+  "The A.P. version has a/a = 1 on the right — the two gaps are equal.",
+  "Correct. The denominator on the right walks a → b → c across the three tests; landing on the <b>middle</b> term b is the G.P. case. Check on 1, 2, 4: (1 − 2)/(2 − 4) = 1/2 = 1/2 ✓",
+  "The H.P. version has a/<b>c</b> on the right — the ratio of the two <i>outer</i> terms.",
+  "It is a genuine test — the G.P. one."],
+ sol:"One left-hand side, three right-hand sides: <b>a/a ⇒ A.P., a/b ⇒ G.P., a/c ⇒ H.P.</b>"},
+
+{id:46, lec:"L-1d", blk:"Three-term tests", topic:"The H.P. ratio test",
+ q:"For three successive terms a, b, c, the condition (a − b)/(b − c) = a/c identifies",
+ opts:["an H.P.","an A.P.","a G.P.","an A.G.P."],
+ ans:0,
+ why:[
+  "Correct — the ratio of the two gaps equals the ratio of the two <b>outside</b> terms.",
+  "The A.P. test gives a ratio of 1, since the gaps are equal.",
+  "The G.P. test gives a/b, with the denominator walking one step in from c.",
+  "An arithmetico-geometric progression has no such three-term ratio test."],
+ sol:"All three tests share a left-hand side; only the right-hand denominator walks a → b → c: <b>a/a ⇒ A.P. · a/b ⇒ G.P. · a/c ⇒ H.P.</b>"},
+
+{id:47, lec:"L-1d", blk:"Three-term tests", topic:"The A.P. ratio test",
+ q:"For three successive terms a, b, c, the condition (a − b)/(b − c) = 1 identifies",
+ opts:["an A.P.","an H.P.","a G.P.","a constant sequence only"],
+ ans:0,
+ why:[
+  "Correct. Equal gaps mean a − b = b − c, which is precisely the definition of an arithmetic progression.",
+  "The H.P. test requires the ratio to equal a/c, which is 1 only when a = c.",
+  "The G.P. test requires a/b.",
+  "The gaps are equal but need not be zero; 2, 5, 8 satisfies this and is not constant."],
+ sol:"a − b = b − c rearranges to <b>b = (a + c)/2</b>, the arithmetic mean condition. All three tests can be written as mean conditions instead: <b>b = (a+c)/2 ⇒ A.P. · b² = ac ⇒ G.P. · b = 2ac/(a+c) ⇒ H.P.</b>"},
+
+{id:48, lec:"L-1d", blk:"Three-term tests", topic:"Identifying 2, 3, 6",
+ q:"The three numbers 2, 3, 6 are in",
+ opts:["H.P.","A.P.","G.P.","no standard progression"],
+ ans:0,
+ why:[
+  "Correct. The reciprocals 1/2, 1/3, 1/6 have equal differences of −1/6, so they form an A.P. and the originals form an H.P. Check the mean test: 2(2)(6)/8 = 3 ✓",
+  "The gaps 1 and 3 are unequal, so it is not an A.P.",
+  "The ratios 3/2 and 2 are unequal, so it is not a G.P.",
+  "It is a genuine H.P. — a rising one, since the reciprocal A.P. has d &lt; 0."],
+ sol:"⚠ An H.P. need not look like a list of fractions. Flip 2, 3, 6 to get 1/2, 1/3, 1/6, whose differences are both <b>−1/6</b>. Or apply the mean test directly: <b>2ac/(a+c) = 24/8 = 3 = b</b> ✓"},
+
+{id:49, lec:"L-1d", blk:"Reciprocal traps", topic:"Reciprocals of a G.P.",
+ q:"The reciprocals of a geometric progression with common ratio r form",
+ opts:[
+  "a G.P. with common ratio 1/r",
+  "an A.P.",
+  "an H.P.",
+  "no standard progression"],
+ ans:0,
+ why:[
+  "Correct. Dividing 1 by each term of a, ar, ar², … gives 1/a, 1/(ar), 1/(ar²), …, which has ratio 1/r.",
+  "Only the reciprocals of a G.P. with r = 1 would be constant, a degenerate A.P.",
+  "⚠ This is the trap. Only the <b>A.P.↔H.P.</b> pair swaps under reciprocals; a G.P. maps to itself.",
+  "It is very definitely a G.P., just with the ratio inverted."],
+ sol:"<b>Reciprocals: A.P. ↔ H.P., but G.P. → G.P.</b> So in a “which of these is in H.P.?” question, an option that merely reciprocates a G.P. is never the answer."},
+
+{id:50, lec:"L-1d", blk:"Reciprocal traps", topic:"The definition read backwards",
+ q:"If 1/x, 1/y, 1/z are in A.P., then x, y, z are in",
+ opts:["H.P.","A.P.","G.P.","A.G.P."],
+ ans:0,
+ why:[
+  "Correct — this is the definition of an H.P. read in the other direction.",
+  "x, y, z would be in A.P. only in the degenerate case where all three are equal.",
+  "A G.P. would require y² = xz, which does not follow.",
+  "An A.G.P. is a term-by-term product of an A.P. and a G.P., unrelated to this condition."],
+ sol:"<b>a₁, a₂, a₃ in H.P. ⇔ 1/a₁, 1/a₂, 1/a₃ in A.P.</b> The equivalence runs both ways, and reading it backwards is how most H.P. questions are actually solved."},
+
+{id:51, lec:"L-1d", blk:"Derived patterns", topic:"A pattern hidden in an A.P.",
+ q:"If a, b, c are in A.P., then 1/(bc), 1/(ca), 1/(ab) are in",
+ opts:["A.P.","H.P.","G.P.","no standard progression"],
+ ans:0,
+ why:[
+  "Correct. Multiplying all three by abc gives a, b, c, which is an A.P. — and scaling an A.P. by a constant leaves it an A.P.",
+  "It is the products <b>bc, ca, ab</b> that are in H.P.; their reciprocals go the other way.",
+  "Scaling an A.P. cannot turn it into a G.P.",
+  "The pattern is exact, not accidental."],
+ sol:"Multiply through by abc: <b>1/(bc), 1/(ca), 1/(ab) → a, b, c</b>, an A.P. ⇒ the originals are in <b>A.P.</b> too. Consequently <b>bc, ca, ab</b>, being their reciprocals, are in <b>H.P.</b> — the pair of results is worth learning together."},
+
+{id:52, lec:"L-1d", blk:"Derived patterns", topic:"Exponent chains",
+ q:"If a<sup>x</sup> = b<sup>y</sup> = c<sup>z</sup> = k and x, y, z are in H.P., then a, b, c are in",
+ opts:["G.P.","A.P.","H.P.","no standard progression"],
+ ans:0,
+ why:[
+  "Correct. Taking logs, x = log k/log a, so 1/x ∝ log a. If x, y, z are in H.P. then 1/x, 1/y, 1/z are in A.P., so log a, log b, log c are in A.P., which means a, b, c are in G.P.",
+  "For a, b, c to be in A.P. you would need a, b, c themselves equally spaced, which the log condition does not give.",
+  "That would require 1/log a, 1/log b, 1/log c in A.P., a different chain entirely.",
+  "The chain is exact and reversible."],
+ sol:"<b>Take logs whenever you see a<sup>x</sup> = b<sup>y</sup> = c<sup>z</sup> = k.</b> Then 1/x, 1/y, 1/z ∝ log a, log b, log c, so <b>x, y, z in H.P. ⇔ log a, log b, log c in A.P. ⇔ a, b, c in G.P.</b> The same chain read the other way answers the converse."},
+
+/* ---------------- SB    STRONG BOX (8) ---------------- */
+{id:22, lec:"SB", blk:"Previous Year Questions", topic:"Sign change in an H.P. — JEE Advanced 2012",
+ q:"Let a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, … be in H.P. with a<sub>1</sub> = 5 and a<sub>20</sub> = 25. The least positive integer n for which a<sub>n</sub> &lt; 0 is",
+ opts:["22","23","24","25"],
+ ans:3,
+ why:[
+  "Too early. b<sub>22</sub> = 1/5 − 21(4/475) = (95 − 84)/475 = 11/475 > 0, so a<sub>22</sub> is still positive.",
+  "b<sub>23</sub> = (95 − 88)/475 = 7/475 > 0 — still positive.",
+  "The boundary is n − 1 > 23.75, i.e. n > 24.75, so n = 24 does not qualify: b<sub>24</sub> = (95 − 92)/475 = 3/475 > 0.",
+  "Correct. b<sub>25</sub> = 1/5 − 24(4/475) = (95 − 96)/475 = −1/475 &lt; 0, and it is the first such term."],
+ sol:"Reciprocal A.P.: b<sub>1</sub> = 1/5, b<sub>20</sub> = 1/25 ⇒ 19d = 1/25 − 1/5 = −4/25 ⇒ d = −4/475. A number and its reciprocal share a sign, so solve 1/5 + (n − 1)(−4/475) &lt; 0 ⇒ n − 1 > 475/20 = 23.75 ⇒ n > 24.75 ⇒ least n = <b>25</b>. Never test the H.P. terms directly — solve the linear inequality in the A.P."},
+
+{id:23, lec:"SB", blk:"Previous Year Questions", topic:"Altitudes in H.P. — JEE Main 2005",
+ q:"In a triangle ABC the altitudes drawn from A, B and C to the opposite sides are in H.P. Then sin A, sin B, sin C are in",
+ opts:["G.P.","A.P.","H.P.","A.G.P."],
+ ans:1,
+ why:[
+  "This would need a, b, c in G.P., but the altitudes being in H.P. forces the sides into an A.P., not a G.P.",
+  "Correct. Each altitude is p<sub>a</sub> = 2Δ/a, so the altitudes are proportional to 1/a, 1/b, 1/c. Altitudes in H.P. ⇒ their reciprocals a, b, c are in A.P. ⇒ by the sine rule sin A, sin B, sin C are in A.P.",
+  "This is the trap of copying the given progression into the answer. Reciprocation flips H.P. to A.P., so the sines are in A.P., not H.P.",
+  "Nothing in the problem generates an arithmetico-geometric shape."],
+ sol:"Δ = ½·a·p<sub>a</sub> = ½·b·p<sub>b</sub> = ½·c·p<sub>c</sub> ⇒ p<sub>a</sub> = 2Δ/a, so the altitudes ∝ 1/a, 1/b, 1/c. Altitudes in H.P. ⇒ a, b, c in A.P.; the sine rule a = 2R sin A is a constant multiple, so <b>sin A, sin B, sin C are in A.P.</b>"},
+
+{id:53, lec:"SB", blk:"JEE Main 2006", topic:"The telescoping sum",
+ q:"If a₁, a₂, …, a<sub>n</sub> are in H.P., then a₁a₂ + a₂a₃ + … + a<sub>n−1</sub>a<sub>n</sub> equals",
+ opts:[
+  "(n − 1)a₁a<sub>n</sub>",
+  "(n − 1)(a₁ − a<sub>n</sub>)",
+  "n·a₁a<sub>n</sub>",
+  "n(a₁ − a<sub>n</sub>)"],
+ ans:0,
+ why:[
+  "Correct. Each product is a<sub>k</sub>a<sub>k+1</sub> = (a<sub>k</sub> − a<sub>k+1</sub>)/d, so the sum telescopes to (a₁ − a<sub>n</sub>)/d = (n − 1)a₁a<sub>n</sub>.",
+  "A <b>difference</b> of terms has the wrong dimensions — the left side is a sum of products.",
+  "There are n − 1 products, not n. Test on 6, 4, 3: the sum is 36, and 3 × 6 × 3 = 54.",
+  "Both the count and the product-versus-difference form are wrong. Test on 6, 4, 3: 3(6 − 3) = 9, not 36."],
+ sol:"There is <b>no sum formula for an H.P.</b>, so any exam “sum” must telescope. Since 1/a<sub>k+1</sub> − 1/a<sub>k</sub> = d, each product is (a<sub>k</sub> − a<sub>k+1</sub>)/d and the interior terms cancel. Quick check on 6, 4, 3: 24 + 12 = 36 = 2 × 6 × 3 ✓"},
+
+{id:54, lec:"SB", blk:"JEE Advanced 2012", topic:"The last positive term",
+ q:"For the H.P. with a₁ = 5 and a₂₀ = 25, the <b>last positive</b> term is",
+ opts:["a₂₄","a₂₅","a₂₀","a₂₃"],
+ ans:0,
+ why:[
+  "Correct. The reciprocal A.P. has b<sub>24</sub> = 1/5 − 23(4/475) = +6/475, still positive, while b<sub>25</sub> = −1/475.",
+  "a₂₅ is the <b>first negative</b> term, one step past the sign change.",
+  "a₂₀ = 25 is positive, but the sequence stays positive for four more terms.",
+  "b₂₃ = 1/5 − 22(4/475) = 15/475 is positive, so a₂₃ is not the last one."],
+ sol:"Reciprocal A.P.: b₁ = 1/5, b₂₀ = 1/25, so 19d = 1/25 − 1/5 = −4/25 and d = −4/475. Solve b<sub>n</sub> &lt; 0: n − 1 &gt; 23.75 ⇒ n &gt; 24.75. So <b>a₂₄ is the last positive term and a₂₅ the first negative one</b> — and a₂₄ is enormous, since b₂₄ is tiny."},
+
+{id:55, lec:"SB", blk:"Method", topic:"How to find where an H.P. turns negative",
+ q:"To find the first negative term of an H.P., you should",
+ opts:[
+  "solve the linear inequality a + (n − 1)d &lt; 0 in the reciprocal A.P.",
+  "test the H.P. terms one by one until one comes out negative",
+  "set the H.P. term equal to zero and solve",
+  "find where the H.P. terms stop decreasing"],
+ ans:0,
+ why:[
+  "Correct. A number and its reciprocal always share a sign, so the H.P. turns negative exactly when the A.P. does — and that is a one-line linear inequality.",
+  "Testing term by term works but is slow, and the terms just before the flip are enormous and awkward to compute.",
+  "⚠ No term of an H.P. is ever zero. It is the <b>A.P.</b> that crosses zero, and the H.P. jumps from a huge positive value straight to a large negative one.",
+  "Monotonic behaviour is not the criterion; the sign change is what matters."],
+ sol:"<b>a<sub>n</sub> &lt; 0 ⇔ b<sub>n</sub> &lt; 0</b>, since a number and its reciprocal share a sign. Solve <b>a + (n − 1)d &lt; 0</b> and take the first integer above the boundary. The H.P. never passes through 0 — it blows up and reappears negative."},
+
+{id:56, lec:"SB", blk:"Triangle geometry", topic:"Why altitudes and sides swap",
+ q:"In a triangle, the three altitudes are proportional to",
+ opts:[
+  "1/a, 1/b, 1/c",
+  "a, b, c",
+  "a², b², c²",
+  "sin A, sin B, sin C"],
+ ans:0,
+ why:[
+  "Correct. The area is a single number, and Δ = ½·a·p<sub>a</sub> gives p<sub>a</sub> = 2Δ/a — so each altitude varies inversely with its base.",
+  "Altitudes vary <b>inversely</b> with the sides: the longest side has the shortest altitude.",
+  "There is no square in the relation; it is a plain reciprocal.",
+  "By the sine rule sin A ∝ a, so this is the same error as option two."],
+ sol:"<b>p<sub>a</sub> = 2Δ/a</b>, so the altitudes are proportional to the reciprocals of the sides. Hence <b>altitudes in H.P. ⇔ sides in A.P. ⇔ sin A, sin B, sin C in A.P.</b> (by the sine rule) — the whole of the JEE Main 2005 question in one line."},
+
+{id:57, lec:"SB", blk:"Book Example-4", topic:"The A.P.-and-H.P. product trick",
+ q:"For a, x, y, z, b, the product xyz is 55 when the five are in A.P. and 343/55 when they are in H.P. If a and b are positive integers, then ab equals",
+ opts:["7","55","343","49"],
+ ans:0,
+ why:[
+  "Correct. The two products are built from the same three brackets, once above and once below, so multiplying them leaves a³b³ = 55 × 343/55 = 343, giving ab = 7.",
+  "55 is the A.P. product, not ab.",
+  "343 is (ab)³, so ab is its cube root, 7.",
+  "49 is (ab)², which does not appear in the calculation."],
+ sol:"⚠ Do not attack either condition alone — both are cubics. The A.P. gives xyz = (3a+b)(a+b)(a+3b)/32 and the H.P. gives xyz = 32a³b³/[(a+3b)(a+b)(3a+b)]. <b>Multiplying</b> cancels every bracket and the 32: (ab)³ = 343 ⇒ <b>ab = 7</b>, so (a, b) = (7, 1) or (1, 7)."},
+
+{id:58, lec:"SB", blk:"Traps", topic:"What an H.P. question never asks for",
+ q:"Which of these is <b>never</b> a legitimate step in an H.P. problem?",
+ opts:[
+  "Using S<sub>n</sub> = (n/2)[2a + (n − 1)d] on the H.P. terms",
+  "Flipping to the reciprocal A.P. and solving there",
+  "Recognising a sum that telescopes",
+  "Assuming three terms as 1/(a − d), 1/a, 1/(a + d)"],
+ ans:0,
+ why:[
+  "Correct. There is <b>no sum formula for an H.P.</b>, and the A.P. sum formula applies to the reciprocals, never to the H.P. terms themselves.",
+  "This is the one move the whole chapter is built on.",
+  "Telescoping is exactly how the legitimate H.P. “sums” work, as in a₁a₂ + a₂a₃ + … = (n−1)a₁a<sub>n</sub>.",
+  "This is the standard symmetric assumption for three terms in H.P."],
+ sol:"<b>The harmonic series 1 + 1/2 + 1/3 + … has no closed form and in fact diverges.</b> So any exam “sum” involving H.P. terms is either a telescope or a disguised A.P./G.P. Reaching for the A.P. sum formula is the single most costly mistake in this chapter."}
+
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter M-8C mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

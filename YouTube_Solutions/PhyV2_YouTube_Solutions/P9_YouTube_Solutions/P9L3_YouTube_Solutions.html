@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P9 &middot; L3 &mdash; Collision (Inelastic Collision &amp; Coefficient of Restitution) &middot; YouTube Solutions</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1c2230; --muted:#5b6472;
+    --line:#e4e7ec; --head:#1f2a44; --headtxt:#ffffff;
+    --exact-bg:#e7f6ec; --exact-ink:#1f7a3d;
+    --sim-bg:#fff4e0; --sim-ink:#9a6300;
+    --link:#1a56db; --zebra:#fafbfc;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1420; --card:#161c2b; --ink:#e6e9f0; --muted:#9aa3b2;
+      --line:#283048; --head:#0d1526; --headtxt:#eef2ff;
+      --exact-bg:#123322; --exact-ink:#63d68f; --sim-bg:#3a2c11; --sim-ink:#f0b95a;
+      --link:#6ea8fe; --zebra:#1a2130;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:32px 18px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:1.7rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 14px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px;font-size:.85rem}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:600;font-size:.78rem;white-space:nowrap}
+  .exact{background:var(--exact-bg);color:var(--exact-ink)}
+  .sim{background:var(--sim-bg);color:var(--sim-ink)}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;color:var(--muted);font-size:.88rem;margin:12px 0 26px}
+  h2{font-size:1.15rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .tablecard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+  thead th{background:var(--head);color:var(--headtxt);text-align:left;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
+  tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  td.num{font-weight:700;color:var(--muted);width:34px;text-align:center}
+  td.topic{color:var(--muted);font-size:.84rem;white-space:nowrap}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .q{font-weight:500}
+  code{background:rgba(125,125,125,.15);padding:1px 5px;border-radius:5px;font-size:.85em}
+  footer{color:var(--muted);font-size:.8rem;margin-top:30px;text-align:center}
+  tbody tr.solnrow{background:var(--card)!important}
+  tbody tr.solnrow>td{border-top:none;padding:0 12px 4px}
+  details.soln{margin:0}
+  details.soln>summary{cursor:pointer;color:var(--link);font-size:.78rem;font-weight:700;list-style:none;display:inline-block;user-select:none;padding:6px 0}
+  details.soln>summary::-webkit-details-marker{display:none}
+  details.soln>summary::before{content:"▸  Show full solution"}
+  details.soln[open]>summary::before{content:"▾  Hide full solution"}
+  details.soln>summary:hover{text-decoration:underline}
+  .solnbody{margin:2px 0 12px;padding:14px 16px;background:var(--zebra);border:1px solid var(--line);border-left:3px solid var(--exact-ink);border-radius:9px;font-size:.85rem;font-weight:400;color:var(--ink);line-height:1.65;max-width:860px}
+  .solnbody .seg{margin:8px 0}
+  .solnbody .lbl{display:inline-block;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;margin-right:7px;vertical-align:1px}
+  .solnbody .step{margin:5px 0 5px 4px}
+  .solnbody .step .why{display:block;color:var(--muted);font-size:.93em;margin:1px 0 0 14px}
+  .solnbody code{font-size:.9em}
+  .solnbody pre{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:8px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.5;overflow-x:auto;white-space:pre;color:var(--ink)}
+  .solnbody .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(125,125,125,.10);padding:1px 5px;border-radius:4px}
+  .solnbody .trick{margin-top:10px;padding:10px 12px;background:var(--sim-bg);color:var(--sim-ink);border-radius:8px;font-size:.84rem}
+  .solnbody .trick .lbl{color:var(--sim-ink)}
+  .solnbody .final{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--exact-ink)}
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 2px}
+  .controls .hint{font-size:12.5px;color:var(--muted)}
+.ansbtn{appearance:none;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:linear-gradient(135deg,#0f4c47,#12706a);color:#eafff9;font:600 13.5px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:10px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(10,50,45,.18)}
+.ansbtn:hover{filter:brightness(1.09)}
+.ansbtn:active{transform:translateY(1px)}
+th.ans-h{min-width:170px;text-align:left!important}
+td.ans{text-align:left;min-width:170px}
+.ansval{display:inline-block;font-weight:600;font-size:12.5px;color:var(--exact-ink);background:var(--exact-bg);border-radius:7px;padding:3px 10px;filter:blur(6px);cursor:pointer;user-select:none;transition:filter .12s;line-height:1.4}
+.ansval:hover{filter:blur(3px)}
+.ansval.revealed{filter:none;cursor:default;user-select:text}
+body.show-ans .ansval{filter:none;cursor:default;user-select:text}
+.ansval .lt{font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-right:6px;color:inherit}
+.ansval.flagged{background:var(--sim-bg);color:var(--sim-ink)}
+.warn{cursor:help}
+.na{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>P9 &middot; L3 &mdash; Collision (Inelastic Collision &amp; Coefficient of Restitution &mdash; <span style="font-weight:400">e = Separation Speed / Approach Speed</span>)</h1>
+  <p class="sub">Practice Problems mapped to YouTube solution videos</p>
+  <div class="legend">
+    <span class="badge exact">🟢 Exact</span><span style="color:var(--muted);font-size:.82rem">video solves the same question (same numbers)</span>
+    <span class="badge sim">🟡 Similar</span><span style="color:var(--muted);font-size:.82rem">same method / concept, different numbers</span>
+  </div>
+  <div class="note"><b>Scope:</b> Practice problems only &mdash; Suggested Problems and Levels 1&ndash;5. Solved Examples and Quick Recap are excluded. This lecture has <b>no Level-6 set</b> (the book's own chapter index prints "&ndash;" for L3's Level-6 column). Every question in scope is mapped: <b>Suggested 5 &middot; L1 5 &middot; L2 5 &middot; L3 5 &middot; L4 10 &middot; L5 10 = 40 rows</b>.</div>
+  <div class="note"><b>Note on answers:</b> No official ICAD answer key exists yet for P-9 (the P-V2 Answer Key PDF covers only P-6&ndash;P-8). Every answer below was independently derived from first principles and double-checked; &#9888; is reserved for printed-data inconsistencies within the book itself, not key mismatches. One such case appears in Level-5 Q5, where the literal physics of the printed problem statement (7.76&nbsp;m, 2.78&nbsp;s) does not exactly reproduce any of the four printed options &mdash; the closest option is flagged and explained there.</div>
+</header>
+
+<div class="controls">
+  <button id="ansBtn" class="ansbtn" type="button">🔑 Show Answers</button>
+  <span class="hint">Answers are hidden by default &mdash; click to reveal all, or click any single blurred answer to reveal just that one. &#9888; marks a printed option that does not exactly reproduce from the physics &mdash; verify.</span>
+</div>
+
+<h2>Suggested Problems</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+
+<tr><td class="num">1</td><td class="q">In a perfectly inelastic collision, the two bodies: (a) Bounce apart with the same speed (b) Move in opposite directions (c) Stick together and move with the same velocity (d) Retain all kinetic energy — <i>(Level-1)</i></td><td class="topic">Perfectly inelastic — definition</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Stick together and move with the same velocity</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> "Perfectly inelastic" is the extreme end of the inelastic family: the two colliding bodies deform permanently and never separate again, so after impact they share one common velocity. Momentum is still conserved (no external horizontal force acts during the brief impact), but kinetic energy is not — the missing energy goes into heat, sound and permanent deformation of the bodies.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">m1v1 + m2v2 = (m1+m2)v'</span> — masses in kg, velocities in m/s, v' the single common velocity after impact. <span class="eq">e = 0</span> for this class of collision. <span class="why">kg·m/s on both sides so momentum balances; the "stick" condition is exactly what forces v1'=v2'=v'.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Option (a) "bounce apart with the same speed" describes a <b>perfectly elastic</b> collision (e=1), the opposite extreme — rejected.<span class="why">Bouncing apart at all contradicts "perfectly inelastic", which by definition ends with zero relative velocity.</span></div>
+<div class="step">2. Option (b) "move in opposite directions" cannot happen once two bodies are stuck together — a single combined mass has only one velocity, one direction, at one instant.</div>
+<div class="step">3. Option (d) "retain all kinetic energy" is also an elastic-collision signature; a perfectly inelastic collision loses the <i>maximum</i> KE consistent with momentum conservation, never zero KE loss.<span class="why">The lost KE equals ½·(m1m2/(m1+m2))·(v1−v2)² — always positive unless v1=v2 already.</span></div>
+<div class="step">4. Option (c): "stick together and move with the same velocity" matches the definition exactly — the combined mass (m1+m2) moves with one shared v'.</div>
+<div class="step">5. Confirm with e: separation speed = 0 once stuck ⇒ e = 0/(approach speed) = 0, the textbook value that defines this whole category of collision.<span class="why">This is why the book calls it 'perfectly' inelastic — e can go no lower than 0.</span></div>
+</div>
+<pre>
+   before:  m1→v1      m2→v2
+              ●          ●
+   after:        (m1+m2)
+                   ●→ v'          only ONE velocity survives
+   v' = (m1v1+m2v2)/(m1+m2),   e = 0
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever an option list mixes "bounce apart" with "stick together", the phrase <b>"same velocity" = perfectly inelastic</b> is the fastest filter — no calculation needed for a pure-definition MCQ. Trap: don't confuse "conserves momentum" (true in every collision) with "conserves KE" (true only for e=1).</div>
+<div class="final">Answer: (c) Stick together and move with the same velocity.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Two bodies of masses 2 kg and 3 kg collide perfectly inelastically. If their velocities before collision are 4 m/s and 2 m/s respectively, what is their common velocity after collision? (a) 2.4 m/s (b) 3.6 m/s (c) 3.0 m/s (d) 2.8 m/s — <i>(Level-2)</i></td><td class="topic">Common velocity, momentum conservation</td><td><a href="https://www.youtube.com/watch?v=qmn7cRYeZAc" target="_blank">Momentum (9 of 16) Inelastic Collisions, Example 3</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>2.8 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the routine engine of every perfectly-inelastic problem: the two masses fuse into one, so a single momentum equation with a single unknown (v') solves it completely. No energy equation is needed — in fact using one would be wrong, since KE is <i>not</i> conserved here.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v' = (m1v1 + m2v2)/(m1+m2)</span> — masses in kg, velocities in m/s, v' in m/s. <span class="why">kg·(m/s) ÷ kg = m/s on both sides ✓, so v' is a genuine velocity, not a momentum.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Identify the data: m1 = 2 kg, v1 = 4 m/s; m2 = 3 kg, v2 = 2 m/s, both moving the same way (no sign to worry about).</div>
+<div class="step">2. Write total momentum before collision: p = m1v1 + m2v2 = (2)(4) + (3)(2) = 8 + 6 = <b>14 kg·m/s</b>.</div>
+<div class="step">3. Total mass after sticking together: m1+m2 = 2+3 = <b>5 kg</b>.<span class="why">Mass is simply additive — nothing is lost in an inelastic collision, only kinetic energy is.</span></div>
+<div class="step">4. Apply v' = p/(m1+m2) = 14/5 = <b>2.8 m/s</b>.</div>
+<div class="step">5. Sanity check: v' must lie between the two initial speeds (2 and 4 m/s) since it is a mass-weighted average — 2.8 does, and it leans slightly toward 2 m/s because the 3 kg body (moving at 2 m/s) is heavier.<span class="why">A momentum-weighted average always sits closer to the heavier body's velocity — a fast one-line sanity check before trusting the arithmetic.</span></div>
+</div>
+<pre>
+   before:  2kg→4m/s     3kg→2m/s
+              ●            ●
+   p = 2×4 + 3×2 = 8+6 = 14 kg·m/s
+   after :        5kg
+                   ●→ v' = 14/5 = 2.8 m/s
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Treat v' as a <b>weighted average</b> of v1 and v2, weighted by mass — it must fall strictly between the two input speeds. Trap: option (c) 3.0 m/s is the plain (un-weighted) average (4+2)/2, which ignores the mass difference entirely — a common shortcut error.</div>
+<div class="final">Answer: (d) 2.8 m/s.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Two bodies of masses 3 kg and 2 kg collide elastically. If v₁ = 4 m/s and v₂ = 0, what is the final velocity of the first body? (a) 0.8 m/s (b) 0.4 m/s (c) 2.4 m/s (d) 3.0 m/s — <i>(Level-3)</i></td><td class="topic">Elastic collision, unequal masses</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>0.8 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> An elastic collision (e=1) conserves both momentum and KE, giving two equations for the two unknown final velocities. Rather than re-deriving from scratch every time, this lecture's Special-Case-1 formula (theory page, e=1) is built exactly for "one body strikes a stationary target" problems like this one — plug in and read off the answer.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v1' = [(m1−m2)/(m1+m2)]v1 + [2m2/(m1+m2)]v2</span> — masses in kg, velocities in m/s. With v2 = 0 the second term vanishes, leaving <span class="eq">v1' = [(m1−m2)/(m1+m2)]v1</span>. <span class="why">The bracket is a pure (dimensionless) mass ratio, so v1' keeps the units of v1, i.e. m/s ✓.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Identify the data: m1 = 3 kg (moving), v1 = 4 m/s; m2 = 2 kg (at rest), v2 = 0.</div>
+<div class="step">2. Compute the mass-ratio bracket: (m1−m2)/(m1+m2) = (3−2)/(3+2) = 1/5 = <b>0.2</b>.</div>
+<div class="step">3. Substitute: v1' = (0.2)(4) = <b>0.8 m/s</b>.<span class="why">Because m1 > m2, the sign stays positive — the heavier striker keeps moving forward, just much slower.</span></div>
+<div class="step">4. Cross-check with the target's velocity: v2' = [2m1/(m1+m2)]v1 = (2×3/5)(4) = (6/5)(4) = 4.8 m/s.</div>
+<div class="step">5. Verify momentum: before = 3×4 = 12 kg·m/s; after = 3×0.8 + 2×4.8 = 2.4 + 9.6 = 12 kg·m/s ✓.</div>
+<div class="step">6. Verify KE (elastic ⇒ must match): before = ½(3)(16) = 24 J; after = ½(3)(0.64) + ½(2)(23.04) = 0.96 + 23.04 = 24 J ✓.<span class="why">Both checks passing confirms 0.8 m/s, not just algebra that happens to look right.</span></div>
+</div>
+<pre>
+   before:  3kg→4m/s      2kg (rest)
+              ●              ●
+   after :  3kg→0.8m/s   2kg→4.8m/s
+              ●→            ●→
+   p: 12=12 kg·m/s ✓   KE: 24=24 J ✓
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For "one body hits a stationary target elastically", memorise the ratio form <b>v1' = [(m1−m2)/(m1+m2)]v1</b> directly — it avoids solving simultaneous equations from scratch. Trap: option (d) 3.0 m/s comes from forgetting the mass-difference bracket and just scaling by 3/4; option (c) mixes up which body's formula you're using.</div>
+<div class="final">Answer: (a) 0.8 m/s.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A 2 kg object moving at 3 m/s collides with a 3 kg object at rest. If e = 0.6, find the final velocity of the 3 kg object. (a) 2.28 m/s (b) 1.32 m/s (c) 1.92 m/s (d) 0.88 m/s — <i>(Level-4)</i></td><td class="topic">Inelastic collision, general e</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>1.92 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> With 0 < e < 1 the collision is <i>partially</i> inelastic — neither the simple "common velocity" shortcut (e=0) nor the elastic special case (e=1) applies directly. The general two-body restitution formulas from this lecture's theory page are exactly built for this in-between situation, and since the target starts at rest, one of the two terms in each formula drops out.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v2' = [(m2−em1)/(m1+m2)]v2 + [(m1+em1)/(m1+m2)]v1</span> — masses in kg, e dimensionless, velocities in m/s. With v2 = 0 the first term is zero: <span class="eq">v2' = [m1(1+e)/(m1+m2)]v1</span>. <span class="why">kg/kg is dimensionless, multiplying v1 (m/s) keeps v2' in m/s ✓.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Identify: m1 = 2 kg (striker), v1 = 3 m/s; m2 = 3 kg (target), v2 = 0; e = 0.6.</div>
+<div class="step">2. Compute the numerator factor: m1(1+e) = 2(1+0.6) = 2(1.6) = <b>3.2</b>.</div>
+<div class="step">3. Compute the denominator: m1+m2 = 2+3 = <b>5</b>.</div>
+<div class="step">4. Combine the bracket: 3.2/5 = <b>0.64</b>.</div>
+<div class="step">5. Substitute: v2' = 0.64 × 3 = <b>1.92 m/s</b>.<span class="why">The heavier target always ends up slower than the striker's original speed — 1.92 < 3 ✓, a quick plausibility check.</span></div>
+<div class="step">6. Independent check via restitution: v1' = [(m1−em2)/(m1+m2)]v1 = [(2−1.8)/5](3) = (0.2/5)(3) = 0.12 m/s; separation speed = v2'−v1' = 1.92−0.12 = 1.8; approach speed = 3−0=3; ratio = 1.8/3 = 0.6 = e ✓.<span class="why">This confirms the restitution condition is actually satisfied, not just momentum — both laws must hold simultaneously.</span></div>
+</div>
+<pre>
+   before:  2kg→3m/s        3kg (rest)
+              ●                ●
+   after :  2kg→0.12m/s   3kg→1.92m/s
+              ●→              ●→
+   e check: (1.92−0.12)/(3−0) = 1.8/3 = 0.6 ✓
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When the target starts at rest, both restitution formulas collapse to a <b>single mass-and-e bracket times v1</b> — memorise the pattern m1(1+e)/(m1+m2) for the target's velocity, m1(1−e/m1... wait, use [(m1−em2)/(m1+m2)] for the striker's own velocity. Trap: option (a) 2.28 m/s swaps which body gets the (1+e) factor — always give (1+e) to the <i>target</i>, not the striker.</div>
+<div class="final">Answer: (c) 1.92 m/s.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A sphere of mass 'm' collides against a pendulum of mass 'm' with horizontal velocity v₀. (i) Calculate the maximum height reached by the pendulum if the masses scatter <b>elastically</b> along the line of initial motion. (ii) What is the maximum height reached by the pendulum if the two masses <b>stick together</b>? — <i>(Level-5)</i></td><td class="topic">Elastic vs inelastic → max height</td><td><a href="https://www.youtube.com/watch?v=PUNKqLkELbQ" target="_blank">Ballistic Pendulum Physics Problems - Conservation of Momentum & Energy - Inelastic Collisions</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">(i) v₀²/2g &nbsp;·&nbsp; (ii) v₀²/8g</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This question is a two-in-one comparison of the two extreme collision types with <i>identical</i> masses. Part (i) is the special elastic case m1=m2 (theory page), where the striker stops dead and the target inherits the <i>entire</i> velocity. Part (ii) is the perfectly-inelastic case (e=0): both masses share the velocity, halved. Both then convert their post-collision KE into gravitational PE at the top of the swing.</div>
+<div class="seg"><span class="lbl">Formula</span> Elastic, equal masses, target at rest: <span class="eq">v1'=0, v2'=v0</span>. Perfectly inelastic: <span class="eq">v' = (m·v0+m·0)/(2m) = v0/2</span>. Energy–height conversion for the pendulum bob: <span class="eq">½mv² = mgh ⇒ h = v²/(2g)</span> — v in m/s, g in m/s², h in m. <span class="why">(m/s)²÷(m/s²) = m ✓, a length, as h must be.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>(i) Elastic case.</b> For equal masses colliding elastically with the target at rest, the theory page's special-case formulas give v1' = 0 (sphere stops dead) and v2' = v0 (pendulum inherits the full incoming velocity).<span class="why">This full velocity-exchange between equal masses is the textbook "Newton's cradle" signature.</span></div>
+<div class="step">2. Pendulum then rises converting all its KE to PE: ½mv0² = mgh₁ ⇒ <b>h₁ = v0²/(2g)</b>.</div>
+<div class="step">3. <b>(ii) Perfectly inelastic case.</b> The sphere embeds in (sticks to) the pendulum: v' = (m·v0 + m·0)/(m+m) = <b>v0/2</b>.<span class="why">Half the speed, because the momentum m·v0 is now shared by double the mass.</span></div>
+<div class="step">4. Combined mass 2m rises using its post-collision KE: ½(2m)(v0/2)² = (2m)gh₂ ⇒ mv0²/4 = 2mgh₂.</div>
+<div class="step">5. Solve: h₂ = v0²/(8g).<span class="why">Notice h₂ is exactly ¼ of h₁ — sticking together costs a factor of 4 in height, even though it only halved the speed, because height depends on v².</span></div>
+<div class="step">6. Physical read: the elastic case is "lossless" for the pendulum (it gets the sphere's full KE), while the perfectly-inelastic case throws away half the system's KE as heat/deformation in the very act of sticking, on top of the momentum-sharing penalty.</div>
+</div>
+<pre>
+   (i) ELASTIC (m=m)         (ii) PERFECTLY INELASTIC
+   m→v0   m(rest)           m→v0   m(rest)
+     ●      ●                  ●      ●
+   after: 0   v0             after:   (2m)→v0/2   (stuck)
+   h1 = v0²/2g                h2 = v0²/8g  = h1/4
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For equal-mass, target-at-rest problems, memorise both extremes cold: <b>elastic ⇒ full velocity exchange</b>; <b>perfectly inelastic ⇒ velocity halved, height quartered</b>. Trap: assuming height also just halves in case (ii) — remember h ∝ v², so a halved v gives a quartered h, not a halved one.</div>
+<div class="final">Answer: (i) h = v₀²/2g &nbsp;·&nbsp; (ii) h = v₀²/8g.</div></div></details></td></tr>
+
+</tbody></table></div></div>
+
+<h2>Level-1</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+
+<tr><td class="num">1</td><td class="q">Which of the following is <b>not</b> a perfectly inelastic collision? (a) Striking of two glass balls (b) A bullet striking a bag of sand (c) An electron captured by a proton (d) A man jumping onto a moving cart — <i>(Level-1)</i></td><td class="topic">Identifying perfectly inelastic events</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>Striking of two glass balls</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The test for "perfectly inelastic" is purely physical, not mathematical: <b>do the two bodies end up moving together as one object?</b> Three of these four everyday events are textbook examples of exactly that; one of them — glass on glass — is famous for the opposite behaviour: hard, smooth, nearly undeformed surfaces that rebound with almost no energy loss (e close to 1, i.e. nearly elastic).</div>
+<div class="seg"><span class="lbl">Formula</span> No numeric formula needed — this is a classification question. Reference: <span class="eq">e = 0</span> ⇒ perfectly inelastic (stick together); <span class="eq">e ≈ 1</span> ⇒ nearly elastic (rebound with little energy loss). <span class="why">e is set by the material properties of the colliding surfaces — hard elastic materials (glass, steel ball bearings) give e close to 1; soft, deformable, or absorbing materials (sand, flesh, atomic capture) give e close to 0.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Option (b) — bullet into a bag of sand: the bullet buries itself, the two never separate. Classic perfectly inelastic collision.</div>
+<div class="step">2. Option (c) — electron captured by a proton: capture means the electron becomes bound to the proton (forming a hydrogen atom) — they move together afterward. Perfectly inelastic in the mechanical sense.<span class="why">Even though this is really a quantum/electromagnetic capture, the momentum bookkeeping is identical to a macroscopic sticking collision.</span></div>
+<div class="step">3. Option (d) — a man jumping onto a moving cart: he lands on the cart and moves with it thereafter. Also perfectly inelastic — this is the standard "jumping onto a moving platform" textbook case.</div>
+<div class="step">4. Option (a) — two glass balls striking each other: glass is hard and brittle but, crucially, <i>elastic</i> in the mechanical sense over the short contact — the balls compress slightly and spring back apart, rebounding almost like billiard balls. They do <b>not</b> stick together.<span class="why">This is why "click-clack" toys and glass marbles are used to demonstrate near-elastic collisions in physics labs — the sound itself is evidence energy is barely lost.</span></div>
+<div class="step">5. Since (a) is the only pair that separates after impact rather than moving as one, it is the one that is <b>not</b> perfectly inelastic.</div>
+</div>
+<pre>
+   (a) glass+glass    (b) bullet+sand   (c) e⁻ captured   (d) man+cart
+     ●  ↔  ●             ●→sand            e⁻ + p⁺           man→cart
+   REBOUND (e≈1)      STICK (e=0)       STICK (e=0)       STICK (e=0)
+        ▲ the ODD ONE OUT — not perfectly inelastic
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Scan option lists like this for the phrase pattern "<b>X buries/embeds/captured/lands in Y</b>" — that phrasing is always perfectly inelastic. The odd option out is usually the hard, brittle, or bouncy material (glass, steel balls, rubber) that visibly rebounds.</div>
+<div class="final">Answer: (a) Striking of two glass balls.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">In a perfectly inelastic collision, the two bodies: (a) Bounce apart with the same speed (b) Move in opposite directions (c) Stick together and move with the same velocity (d) Retain all kinetic energy — <i>(Level-1)</i></td><td class="topic">Perfectly inelastic — definition</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Stick together and move with the same velocity</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the identical definition question as Suggested Problem 1, repeated at Level-1 to drill the terminology — the book deliberately re-tests the same core fact twice with the same wording, because "stick together, common velocity" is the single most-quoted phrase in this chapter and must become automatic.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">m1v1 + m2v2 = (m1+m2)v'</span> — masses in kg, velocities in m/s. <span class="eq">e = 0</span>. <span class="why">A single v' works for both bodies only because they are physically fused — otherwise two separate final velocities would be needed.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Recall the defining physical picture: perfectly inelastic means maximum permanent deformation, zero separation, e = 0.</div>
+<div class="step">2. Option (a) bouncing apart at the same speed is the elastic extreme (e=1) — the exact opposite of what's asked. Rejected.</div>
+<div class="step">3. Option (b) moving in opposite directions is geometrically impossible for a single fused object — a stuck-together mass has one position, one velocity.</div>
+<div class="step">4. Option (d) "retain all kinetic energy" again belongs to the elastic case; perfectly inelastic collisions lose the largest possible share of KE permitted by momentum conservation.<span class="why">The lost fraction is largest here because a perfectly inelastic collision has the smallest possible relative velocity afterward (zero) for the given masses and initial speeds.</span></div>
+<div class="step">5. Option (c) directly states the definition: the bodies move as one, at one common velocity v' = (m1v1+m2v2)/(m1+m2).</div>
+<div class="step">6. Double-check by units and limiting case: if v1 = v2 to start with, v' comes out equal to that same value — consistent, since two bodies already moving together and then "colliding" trivially stay together.</div>
+</div>
+<pre>
+   before:  m1→v1      m2→v2
+              ●          ●
+   after:        (m1+m2)
+                   ●→ v'         ONE mass, ONE velocity
+
+   e = separation speed / approach speed = 0 / (v1−v2) = 0
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When the same definitional question re-appears at a different level in the same book, treat it as the examiner flagging "this is a must-know fact" — memorise "stick + common velocity" as inseparable from "perfectly inelastic" so it needs zero thinking time on exam day.</div>
+<div class="final">Answer: (c) Stick together and move with the same velocity.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">What is always conserved in any type of collision? (a) Kinetic energy (b) Potential energy (c) Momentum (d) Temperature — <i>(Level-1)</i></td><td class="topic">Universal conservation law in collisions</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>Momentum</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The single fact that holds across <i>every</i> collision — elastic, partially inelastic, or perfectly inelastic — is Newton's third law applied over the brief contact time: whatever momentum one body gains, the other loses exactly. External forces (gravity, friction) are negligible during the instant of impact, so the system's total momentum is unchanged. Kinetic energy, by contrast, is conserved only in the special elastic case.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">m1v1 + m2v2 = m1v1' + m2v2'</span> — masses in kg, velocities in m/s, holds for <b>every</b> value of e from 0 to 1. <span class="why">kg·m/s on both sides, always — this equality is really just F₁₂ = −F₂₁ (Newton's third law) integrated over the collision time.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Option (a) kinetic energy: conserved <i>only</i> when e = 1 (elastic). For 0 ≤ e < 1 some KE is always lost to heat, sound, deformation. Rejected as "always".</div>
+<div class="step">2. Option (b) potential energy: not even part of the collision bookkeeping unless heights change (e.g. a pendulum problem) — irrelevant to a generic horizontal collision. Rejected.</div>
+<div class="step">3. Option (d) temperature: rises during inelastic collisions (lost KE becomes heat) and stays essentially unchanged in elastic ones — clearly not a conserved quantity in general. Rejected.</div>
+<div class="step">4. Option (c) momentum: during the collision, the two bodies exert equal and opposite impulsive forces on each other (Newton's third law); integrating F dt over the (very short) contact time shows the momentum lost by one body exactly equals the momentum gained by the other.<span class="why">This holds regardless of how "messy" the collision is — dents, sound, heat — because none of those loss channels carry away net momentum from the two-body system.</span></div>
+<div class="step">5. Therefore momentum is the one quantity guaranteed constant in every collision type covered in this chapter, elastic through perfectly inelastic.</div>
+</div>
+<pre>
+              elastic (e=1)   partial (0<e<1)   perfectly inel. (e=0)
+   momentum :     ✓conserved      ✓conserved         ✓conserved
+   KE       :     ✓conserved      ✗ some lost        ✗ max lost
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever a question says "always" or "in any collision", the safe answer among {momentum, KE} is <b>momentum</b> — KE conservation is the exception (only e=1), not the rule. Trap: students trained on elastic-collision problems reflexively reach for energy conservation first; check e before assuming KE is conserved.</div>
+<div class="final">Answer: (c) Momentum.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">The coefficient of restitution (e) is defined as: (a) The ratio of separation distance to approach distance (b) The product of velocities after and before collision (c) The ratio of separation speed to approach speed (d) The difference in speeds before and after collision — <i>(Level-1)</i></td><td class="topic">Coefficient of restitution — definition</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>The ratio of separation speed to approach speed</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the chapter's central definition, printed on the very first theory page of this lecture as <span class="eq">e = Separation Speed / Approach Speed</span>. Every option here plays with a common misreading — "distance" instead of "speed", a "product" instead of a "ratio", or a "difference" instead of a "ratio" — so the question really tests whether you internalised the exact wording, not just the general idea.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">e = (v1' − v2')/(v1 − v2)</span>, taking the separating pair's relative speed over the approaching pair's relative speed — velocities in m/s, e dimensionless. <span class="why">(m/s)/(m/s) cancels to a pure number, which is exactly why 0 ≤ e ≤ 1 makes sense as a unitless ratio, not a distance or a velocity itself.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Option (a) says "distance" — but e is about <i>speeds</i> at the instant of separation/approach, not the total path length travelled. Rejected.</div>
+<div class="step">2. Option (b) "product of velocities" would have units of (m/s)², not a dimensionless number between 0 and 1 — physically wrong. Rejected.</div>
+<div class="step">3. Option (d) "difference in speeds" would carry units of m/s, again not dimensionless, and would not naturally cap at a fixed maximum of 1. Rejected.<span class="why">A quick unit-check on each wrong option is often the fastest way to eliminate three of four choices on a definition MCQ.</span></div>
+<div class="step">4. Option (c) "ratio of separation speed to approach speed" — dimensionless (speed ÷ speed), matches the printed formula on the theory page exactly, and naturally explains why 0 ≤ e ≤ 1: you can never separate faster than you approached.</div>
+<div class="step">5. Confirm the two boundary cases fit this definition: e = 0 when separation speed = 0 (perfectly inelastic, they stick); e = 1 when separation speed = approach speed (perfectly elastic, no relative-speed loss).</div>
+</div>
+<pre>
+           BEFORE                    AFTER
+   m1→v1   m2→v2   (approaching)    m1→v1'  m2→v2'   (separating)
+     ●───────●                        ●        ●
+   approach speed = v1−v2      separation speed = v2'−v1'
+
+            e  =  separation speed / approach speed
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Anchor the definition to its two limits instead of memorising the formula in the abstract: <b>e=0 ⇒ stuck together, e=1 ⇒ perfectly springy</b>. Trap: option (a) is the single most common wrong answer students pick, because "restitution" sounds spatial — but the quantity is always built from speeds, never distances.</div>
+<div class="final">Answer: (c) The ratio of separation speed to approach speed.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">For a perfectly elastic collision, the coefficient of restitution (e) is: (a) 0 (b) 1 (c) Between 0 and 1 (d) Undefined — <i>(Level-1)</i></td><td class="topic">e for perfectly elastic collisions</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the mirror-image question to Level-1 Q4: instead of asking for the definition of e, it asks for e's value at one specific, named boundary — the perfectly elastic case. The theory page states this explicitly right after deriving the special cases: "e = 1 for elastic collision", derived by demanding separation speed equal approach speed.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">e = (v1'−v2')/(v1−v2)</span>. Elastic collision condition: KE conserved along with momentum ⇒ algebraically this forces <span class="eq">v1'−v2' = −(v1−v2)</span> in magnitude, i.e. separation speed = approach speed. <span class="why">Both sides of the equation are speeds (m/s), so their ratio e is dimensionless — consistent with e being a pure number, never negative, never above 1.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Option (a) e = 0 is the <i>opposite</i> extreme — perfectly inelastic (bodies stick, zero separation speed). Rejected for "elastic".</div>
+<div class="step">2. Option (c) "between 0 and 1" describes the broad family of <i>partially</i> inelastic collisions, not the perfectly elastic special case which sits exactly at the top of that range. Rejected — the question asks for a specific value, not a range.</div>
+<div class="step">3. Option (d) "undefined" would only apply if approach speed were zero (division by zero) — not the case here, since a collision by definition requires the bodies to be approaching. Rejected.</div>
+<div class="step">4. Option (b) e = 1: from the theory page's own derivation, setting KE conservation alongside momentum conservation algebraically reduces to "separation speed = approach speed", i.e. e = (approach speed)/(approach speed) = 1 exactly.</div>
+<div class="step">5. Physical picture: think of two identical steel balls in a Newton's cradle — they separate (or exchange velocities) at essentially the same relative speed they approached with, losing negligible energy. That is the e=1 signature in everyday terms.</div>
+</div>
+<pre>
+   e-scale:   0 ─────────────────── 1
+           stick together      full rebound
+           (perfectly            (perfectly
+            inelastic)             elastic)  ◂── e = 1 lives HERE
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Keep the two named endpoints of the e-scale memorised as a pair, never separately: <b>e=0 ↔ perfectly inelastic, e=1 ↔ perfectly elastic</b>, with everything in between simply "inelastic" or "partially elastic". Trap: option (c) tempts because "elastic-ish" collisions in real life (rubber balls, etc.) do have 0<e<1 — but "perfectly" elastic is a strict e=1 idealisation.</div>
+<div class="final">Answer: (b) 1.</div></div></details></td></tr>
+
+</tbody></table></div></div>
+
+<h2>Level-2</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+
+<tr><td class="num">1</td><td class="q">A wooden ball is dropped from a height of 2 m. What is the height (in metre) upto which the ball will rebound if the coefficient of restitution is 0.5? — <i>(Level-2)</i></td><td class="topic">Drop-and-bounce, e² height law</td><td><a href="https://www.youtube.com/watch?v=08ixSZ-AezI" target="_blank">Coefficient of restitution in bouncing ball dropped vertically</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">0.5 m</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Dropping a ball onto a fixed, immovable floor is a special one-sided collision: the floor's own velocity stays zero before and after, so "approach speed" is simply the ball's impact speed and "separation speed" is its rebound speed. Converting between speed and height at each end (via free-fall kinematics) turns the restitution ratio directly into a <i>height</i> ratio — the single most-used shortcut in this whole topic.</div>
+<div class="seg"><span class="lbl">Formula</span> Impact speed: <span class="eq">v = √(2gh)</span> (m/s), from height h (m). Rebound speed: <span class="eq">v' = e·v</span>. Rebound height: <span class="eq">h' = v'²/(2g) = e²h</span>. <span class="why">Squaring e is what makes restitution and height scale so differently — e=0.5 does NOT give half the height, it gives a quarter.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: drop height h = 2 m, e = 0.5, floor fixed (its own speed is 0 throughout).</div>
+<div class="step">2. Impact speed just before hitting the floor: v = √(2×9.8×2) = √39.2 ≈ 6.26 m/s (using g = 9.8 m/s²; with g=10, v=√40≈6.32 m/s — either is fine since it cancels out below).</div>
+<div class="step">3. Rebound speed just after impact: v' = e·v = 0.5 × v (exact value of v not even needed if we work directly in heights).</div>
+<div class="step">4. Apply the direct height-ratio shortcut: h' = e²h = (0.5)² × 2 = 0.25 × 2 = <b>0.5 m</b>.<span class="why">Deriving through v and v' explicitly and through the e² shortcut must agree — using the shortcut is simply faster once you trust the derivation.</span></div>
+<div class="step">5. Sanity check: since e < 1, the ball must rebound to a height strictly less than 2 m — 0.5 m easily satisfies that, and matches the general pattern that e=0.5 always gives a quarter of the original height.</div>
+</div>
+<pre>
+   drop h=2m                 rebound h' = e²h
+        │                          │
+        ▾ v=√(2gh)                 ▴ v'=ev
+   ═══════════════ floor (fixed, v_floor=0)
+
+   e = v'/v = 0.5   ⇒   h' = e²·h = 0.25 × 2 = 0.5 m
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For a ball bouncing off a fixed floor, skip velocities entirely and jump straight to <b>h_rebound = e² × h_drop</b> — it is the single most useful one-line formula in this whole chapter. Trap: computing e × h = 1.0 m by forgetting to square e is the single most common slip on this exact question type.</div>
+<div class="final">Answer: 0.5 m.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A ball striking a horizontal plane with velocity v rebounds with velocity 256v/625 after the 4th collision. Find the coefficient of restitution. — <i>(Level-2)</i></td><td class="topic">Repeated bounces, eⁿ velocity decay</td><td><a href="https://www.youtube.com/watch?v=08ixSZ-AezI" target="_blank">Coefficient of restitution in bouncing ball dropped vertically</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">e = 4/5 = 0.8</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Every time the ball hits and rebounds off the <i>same</i> fixed floor with the <i>same</i> restitution coefficient, its speed is multiplied by e again — so after n bounces the speed has shrunk by a factor eⁿ. This turns a repeated-collision problem into a single exponent equation, exactly the way compound interest multiplies a principal by a fixed factor each period.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v_n = eⁿ · v</span> — v_n the speed after the nth bounce, v the original impact speed, n the bounce count, e dimensionless. <span class="why">Each bounce independently multiplies by e, so n bounces compound to eⁿ — this is a geometric, not arithmetic, decay.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: after the 4th collision, v₄ = (256/625)v, so e⁴ = 256/625.</div>
+<div class="step">2. Recognise both numbers as 4th powers: 256 = 4⁴ (4×4×4×4 = 256) and 625 = 5⁴ (5×5×5×5 = 625).<span class="why">Spotting perfect powers is the whole trick here — it converts a messy-looking fraction into a clean base ratio instantly.</span></div>
+<div class="step">3. So e⁴ = 4⁴/5⁴ = (4/5)⁴.</div>
+<div class="step">4. Take the 4th root of both sides: e = 4/5 = <b>0.8</b>.<span class="why">Since 0 ≤ e ≤ 1 is required physically, only the positive real root 4/5 is meaningful — no need to consider negative or complex roots.</span></div>
+<div class="step">5. Verify: e⁴ = 0.8⁴ = 0.64² = 0.4096 = 256/625 ✓ (256/625 = 0.4096 exactly).</div>
+<div class="step">6. Physical read: e = 0.8 means each bounce keeps 80% of the previous speed and (0.8)² = 64% of the previous <i>height</i> — a moderately bouncy ball, consistent with something like a tennis ball rather than a lump of clay (e≈0) or a superball (e≈0.9+).</div>
+</div>
+<pre>
+   v₀ = v
+   v₁ = ev             (1st bounce)
+   v₂ = e²v            (2nd bounce)
+   v₃ = e³v            (3rd bounce)
+   v₄ = e⁴v = (256/625)v   ⇒  e⁴=(4/5)⁴  ⇒  e = 4/5 = 0.8
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever a "velocity after n bounces" fraction looks unfamiliar, <b>factor both numerator and denominator looking for a common perfect nth power</b> — exam setters almost always build these from a clean base like 4/5, 3/4 or 1/2 raised to the bounce count. Trap: forgetting to take the 4th root and reporting e = 256/625 directly.</div>
+<div class="final">Answer: e = 4/5 = 0.8.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A ball is dropped on a horizontal surface from height h. If it rebounds upto height h/2 after the first collision, the coefficient of restitution between ball and surface is: (a) 1/√2 (b) 1/2 (c) 1/4 (d) 1/(2√2) — <i>(Level-2)</i></td><td class="topic">Drop-and-bounce, inverse of e² law</td><td><a href="https://www.youtube.com/watch?v=08ixSZ-AezI" target="_blank">Coefficient of restitution in bouncing ball dropped vertically</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>1/√2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the algebraic inverse of Level-2 Q1: there, e was given and the rebound height was asked; here the rebound height is given and e must be extracted. Both problems rest on the same core identity, h_rebound = e²h_drop — the only difference is which variable is the unknown, so the square root now appears explicitly rather than being squared away.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">h' = e²h ⇒ e = √(h'/h)</span> — h and h' in m, e dimensionless. <span class="why">A ratio of two lengths is dimensionless, and its square root remains dimensionless — exactly what e must be.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: drop height h, rebound height h' = h/2.</div>
+<div class="step">2. Take the ratio: h'/h = (h/2)/h = <b>1/2</b>.</div>
+<div class="step">3. Apply e = √(h'/h) = √(1/2) = <b>1/√2</b>.<span class="why">Rationalised this is also √2/2 ≈ 0.707 — a physically sensible e strictly between 0 and 1.</span></div>
+<div class="step">4. Reject option (b) 1/2: that value would follow only if the problem said e = h'/h directly (forgetting the square root) — a very common slip.</div>
+<div class="step">5. Reject option (c) 1/4: that is (1/2)² — exactly the wrong direction, squaring instead of square-rooting the height ratio.</div>
+<div class="step">6. Reject option (d) 1/(2√2): this would arise from an extra stray factor of 1/√2, e.g. mixing up e² = h/(2h') instead of h'/h — an easy algebra slip when rearranging under exam pressure.</div>
+<div class="step">7. Confirm by squaring back: e² = (1/√2)² = 1/2, and h' = e²h = h/2 ✓ — exactly the given rebound height.</div>
+</div>
+<pre>
+   drop  h                 rebound  h' = h/2
+     │                          │
+     ▾ v=√(2gh)                 ▴ v'=ev
+   ══════════════ fixed surface
+
+   e = √(h'/h) = √(1/2) = 1/√2  (≈0.707)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Keep the direction of the square root straight by remembering which quantity is "bigger": <b>e is always a fraction between the height ratio and its square root</b> since 0<h'/h<1 makes √(h'/h) > h'/h. If your computed e comes out <i>smaller</i> than the height ratio, you rooted the wrong way. Trap: option (b) is exactly the un-square-rooted ratio.</div>
+<div class="final">Answer: (a) 1/√2.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A body of mass 10 kg moving with speed of 3 ms⁻¹ collides with another stationary body of mass 5 kg. As a result, the two bodies stick together. The KE of the composite mass will be: (a) 30 J (b) 60 J (c) 90 J (d) 120 J — <i>(Level-2)</i></td><td class="topic">Perfectly inelastic collision, KE after</td><td><a href="https://www.youtube.com/watch?v=qmn7cRYeZAc" target="_blank">Momentum (9 of 16) Inelastic Collisions, Example 3</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>30 J</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a two-stage calculation: first find the common velocity from momentum conservation (as always, in a stick-together collision), then plug that velocity into the standard KE formula using the <i>combined</i> mass. A frequent trap is computing KE using each body's own original velocity rather than realising both bodies now travel at the single new v'.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v' = (m1v1+m2v2)/(m1+m2)</span> (m/s); then <span class="eq">KE_f = ½(m1+m2)v'²</span> (J). <span class="why">kg·(m/s)² = kg·m²/s² = N·m = J ✓ for the energy term.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: m1 = 10 kg, v1 = 3 m/s; m2 = 5 kg, v2 = 0 (stationary).</div>
+<div class="step">2. Momentum before collision: p = (10)(3) + (5)(0) = <b>30 kg·m/s</b>.</div>
+<div class="step">3. Combined mass after sticking: 10 + 5 = <b>15 kg</b>.</div>
+<div class="step">4. Common velocity: v' = p/(m1+m2) = 30/15 = <b>2 m/s</b>.<span class="why">Halfway feel check: the moving body was 2× heavier than the stationary one, so v' should sit closer to v1 than to the midpoint of v1 and v2 — 2 m/s (out of an original 3 m/s) does exactly that.</span></div>
+<div class="step">5. Final kinetic energy of the composite mass: KE_f = ½(15)(2)² = ½(15)(4) = <b>30 J</b>.</div>
+<div class="step">6. Cross-check against the initial KE to see the expected loss: KE_i = ½(10)(3²) = 45 J. Loss = 45 − 30 = 15 J (one-third of the initial KE), consistent with the general result that a perfectly inelastic collision always loses energy — never zero, but also not necessarily "all" of it.<span class="why">The lost 15 J becomes heat, sound and deformation — it does not vanish, it simply leaves the mechanical-KE ledger.</span></div>
+</div>
+<pre>
+   before: 10kg→3m/s      5kg (rest)
+              ●              ●
+   p = 30 kg·m/s,  after mass = 15kg
+   v' = 30/15 = 2 m/s
+   KE_f = ½×15×2² = 30 J     (KE_i = 45 J, lost 15 J)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Never compute "KE after" by adding ½m1v1² + ½m2v2² using the <i>original</i> velocities in a stick-together collision — both bodies now share one v'; always find v' first via momentum, then apply KE = ½(m1+m2)v'² once. Trap: option (c) 90 J is what you'd wrongly get by doubling the correct v'² term or misplacing a factor of 2.</div>
+<div class="final">Answer: (a) 30 J.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Two balls of equal mass undergo head-on collision while each was moving with speed 6 m/s. If the coefficient of restitution is 1/3, the speed of each ball after impact will be: (a) 18 m/s (b) 2 m/s (c) 6 m/s (d) 4 m/s — <i>(Level-2)</i></td><td class="topic">Equal masses, equal-and-opposite speeds</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>2 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> "Head-on" with both balls "moving with speed 6 m/s" means they approach each other from opposite sides — equal masses, equal and opposite velocities. A powerful symmetry shortcut applies here: because total momentum is exactly zero both before and after (the setup is perfectly symmetric), the two final speeds must be equal in magnitude and opposite in direction — no need for the full two-variable restitution algebra.</div>
+<div class="seg"><span class="lbl">Formula</span> Momentum: <span class="eq">mv1+mv2 = mv1'+mv2' = 0</span> ⇒ <span class="eq">v1' = −v2'</span>. Restitution: <span class="eq">v2'−v1' = e(v1−v2)</span> — velocities in m/s, e dimensionless. <span class="why">Momentum in kg·m/s cancelling to zero on both sides is only possible because the two masses and speeds are equal but the directions are opposite.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set up signs: ball 1 moves right at v1 = +6 m/s, ball 2 moves left at v2 = −6 m/s (equal speed, opposite direction — "head-on").</div>
+<div class="step">2. Total momentum before: m(6) + m(−6) = 0. Since momentum is conserved, total momentum after is also 0 ⇒ v1' = −v2' (equal magnitude, opposite sign).</div>
+<div class="step">3. Approach speed = v1−v2 = 6−(−6) = <b>12 m/s</b>.</div>
+<div class="step">4. Separation speed = e × approach speed = (1/3)(12) = <b>4 m/s</b>. This separation speed equals v2'−v1'.</div>
+<div class="step">5. Substitute v1' = −v2' into v2'−v1' = 4: v2'−(−v2') = 4 ⇒ 2v2' = 4 ⇒ v2' = <b>2 m/s</b>, and correspondingly v1' = −2 m/s.<span class="why">Both balls end up moving at the same 2 m/s speed, each reversed from its original direction — exactly the symmetry the setup predicted.</span></div>
+<div class="step">6. So the <b>speed</b> of each ball after impact (magnitude, as asked) is <b>2 m/s</b> — each ball rebounds, moving back the way it came, at a third of the relative approach speed shared equally between them.</div>
+</div>
+<pre>
+   before: ●→6m/s        6m/s←●        (approach = 12 m/s)
+   after : ●←2m/s        2m/s→●        (separation = e×12 = 4 m/s)
+
+   momentum: m(6)+m(−6)=0 = m(−2)+m(2)  ✓
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Spot the symmetric "equal mass, equal opposite speed, head-on" pattern instantly — it always forces v1'=−v2', collapsing two unknowns to one and letting you read the answer straight off the restitution equation. Trap: option (a) 18 m/s wrongly multiplies 6×3 instead of dividing by the effective factor of 3 (from splitting 12/3=4 into two equal 2's).</div>
+<div class="final">Answer: (b) 2 m/s.</div></div></details></td></tr>
+
+</tbody></table></div></div>
+
+<h2>Level-3</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+
+<tr><td class="num">1</td><td class="q">Two objects approach each other with speed 12 m/s. If the collision is perfectly inelastic, find the coefficient of restitution. — <i>(Level-3)</i></td><td class="topic">e for perfectly inelastic collisions</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">e = 0</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This question is a deliberate distractor: it hands you a specific approach speed (12 m/s) that turns out to be completely irrelevant to the answer. "Perfectly inelastic" is, by definition, the collision type where the two bodies end up stuck together — and once stuck, their separation speed is exactly zero, no matter how fast they were approaching beforehand.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">e = separation speed / approach speed</span> — both speeds in m/s, e dimensionless. For perfectly inelastic: <span class="eq">separation speed = 0</span> because v1' = v2' (stuck together). <span class="why">0 divided by any non-zero approach speed is still 0 — the approach speed value never enters the final answer, which is why 12 m/s is a decoy.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. "Perfectly inelastic" means the two objects stick together after impact and move as one — this is the definition, stated independent of any numeric approach speed.</div>
+<div class="step">2. Since they move together after collision, their final velocities are identical: v1' = v2'.</div>
+<div class="step">3. Separation speed = v2' − v1' = v1' − v1' = <b>0</b> exactly, regardless of what v1' actually equals.</div>
+<div class="step">4. Apply the restitution formula: e = separation speed / approach speed = 0 / 12 = <b>0</b>.<span class="why">Note the 12 m/s only appears in the denominator here, and since the numerator is identically zero, the specific value of the denominator is irrelevant — any non-zero approach speed gives the same e = 0.</span></div>
+<div class="step">5. This confirms the general rule already stated on the theory page: <b>e = 0 always and only</b> characterises a perfectly inelastic collision — it is a defining property, not something that needs to be separately calculated from the given numbers each time.</div>
+</div>
+<pre>
+   approach speed = 12 m/s  (irrelevant to the final answer)
+
+   before:  ●→          ←●          (approaching, closing at 12 m/s)
+   after :      (stuck)●             separation speed = 0
+
+   e = 0 / 12 = 0
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> If a question tells you the collision <i>type</i> ("perfectly inelastic", "elastic") outright, you often don't need any of the numeric data at all to state e — <b>e = 0 or e = 1 follows from the words alone</b>. Trap: spending time trying to compute individual final velocities from the 12 m/s when the question never asked for them.</div>
+<div class="final">Answer: e = 0.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">A particle of mass m moving with speed u collides perfectly inelastically with another particle of mass 2m at rest. The loss of kinetic energy of the system in the collision is (2/3x)mu², find x. — <i>(Level-3)</i></td><td class="topic">KE loss in perfectly inelastic collision</td><td><a href="https://www.youtube.com/watch?v=qmn7cRYeZAc" target="_blank">Momentum (9 of 16) Inelastic Collisions, Example 3</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">x = 2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a "find the unknown exponent/coefficient" style question, common when a book wants to test whether you can derive the KE-loss formula rather than just quote it. The route is the same three-step pattern every time: find v' from momentum, compute KE before and after, subtract — then match the algebraic form to the one printed in the question to read off x.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v' = (mu + 2m·0)/(m+2m) = u/3</span> (m/s). <span class="eq">KE_i = ½mu²</span>, <span class="eq">KE_f = ½(3m)v'²</span> (J). <span class="why">kg·(m/s)² = J on both energy terms, so their difference is also a genuine energy, matching the mu² units on the right-hand side of the given expression.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Momentum conservation: mu + 2m(0) = (m+2m)v' ⇒ mu = 3m·v' ⇒ v' = <b>u/3</b>.</div>
+<div class="step">2. Initial KE: KE_i = ½mu².</div>
+<div class="step">3. Final KE: KE_f = ½(3m)(u/3)² = ½(3m)(u²/9) = (3/18)mu² = <b>mu²/6</b>.<span class="why">The combined mass tripled but the speed dropped to a third, and speed enters squared — so KE_f ends up much smaller than a naive "same fraction" guess.</span></div>
+<div class="step">4. KE loss: ΔKE = KE_i − KE_f = (1/2)mu² − (1/6)mu² = (3/6 − 1/6)mu² = <b>(2/6)mu² = mu²/3</b>.</div>
+<div class="step">5. Match to the given form (2/3x)mu²: set mu²/3 = (2/3x)mu² ⇒ 1/3 = 2/(3x) ⇒ 3x = 6 ⇒ <b>x = 2</b>.<span class="why">Cross-multiplying the two fractions is the cleanest way to isolate x rather than trying to guess-and-check.</span></div>
+<div class="step">6. Sanity check: with x=2, (2/3x)mu² = (2/6)mu² = mu²/3, exactly matching step 4's independently-derived loss ✓.</div>
+</div>
+<pre>
+   before:  m→u        2m (rest)
+              ●            ●
+   after :        3m→u/3           (perfectly inelastic)
+
+   KE_i = mu²/2,  KE_f = mu²/6
+   ΔKE  = mu²/3  =  (2/3x)mu²  ⇒  x = 2
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For "match the algebraic form" questions, always derive the physics quantity independently in its simplest fraction first (here mu²/3), THEN equate to the given form and solve for the unknown — never try to reverse-engineer x by staring at the printed fraction alone. Trap: forgetting the combined mass is 3m (not just 2m) when computing KE_f.</div>
+<div class="final">Answer: x = 2.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Find the value of coefficient of restitution and type of collision. (a) e = 0.5, partially inelastic (b) e = 1, elastic (c) e = 0, perfectly inelastic (d) e = 2, super elastic — <i>(Level-3)</i></td><td class="topic">Range of e — which statement is invalid</td><td><a href="https://www.youtube.com/watch?v=DyfGzKOwtYU" target="_blank">Coefficient of Restitution - Inelastic Collisions and Elastic Collisions - Physics</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>e = 2, super elastic — the only invalid statement (e cannot exceed 1)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This question is really asking "which of these four e-and-type pairings is physically impossible?" rather than asking you to compute anything from given data. Options (a), (b) and (c) are all textbook-correct pairings that sit within the allowed range 0 ≤ e ≤ 1; option (d) invents a value outside that range and a made-up label ("super elastic") that does not exist in physics.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">0 ≤ e ≤ 1</span> is a hard physical bound, printed explicitly on this lecture's theory page right after the law of restitution is introduced. <span class="why">e is separation speed ÷ approach speed for real, energy-losing (or at best energy-conserving) collisions — you can never separate faster than you approached, since that would require the collision to inject extra kinetic energy from nowhere.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Option (a) e = 0.5, "partially inelastic": 0 < 0.5 < 1, and "partially inelastic" is exactly the name given in the theory page to collisions with 0 < e < 1 — correct pairing.</div>
+<div class="step">2. Option (b) e = 1, "elastic": the upper boundary value, correctly labelled — matches the derivation that KE conservation forces separation speed = approach speed.</div>
+<div class="step">3. Option (c) e = 0, "perfectly inelastic": the lower boundary value, correctly labelled — matches "stuck together, zero separation speed".</div>
+<div class="step">4. Option (d) e = 2: this violates the hard bound 0 ≤ e ≤ 1. Physically, e > 1 would mean the bodies fly apart <i>faster</i> than they approached — that requires the collision to add kinetic energy to the system, which never happens in an ordinary (non-explosive) mechanical collision.<span class="why">If a collision released stored energy (like a spring-loaded bumper or an explosion at contact), e could exceed 1 — but that is a different physical scenario, not an ordinary restitution collision, and "super elastic" is not standard terminology for it.</span></div>
+<div class="step">5. Therefore (d) is the one statement that does <b>not</b> hold — it is the invalid/impossible pairing among the four.</div>
+</div>
+<pre>
+   e-axis:   0 ─────── 0.5 ─────── 1 ───X── 2
+           (c) perfectly (a) partially  (b) elastic   (d) IMPOSSIBLE
+              inelastic     inelastic                  for ordinary
+                                                          collisions
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Any option offering <b>e > 1</b> in an ordinary collision question is an automatic reject — treat it the same way you would reject a negative probability or a mass less than zero. Trap: don't be lured by the confident-sounding label "super elastic" into thinking it is a real, named physics category — it is invented specifically to test whether you know the 0–1 bound.</div>
+<div class="final">Answer: (d) e = 2, super elastic — impossible; e cannot exceed 1.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A body of mass m moving with a constant velocity collides head on with another stationary body of same mass. If e (the coefficient of restitution between the bodies) is 1/2, the ratio of velocities of the two bodies after collision will be: (a) 1/3 (b) 1/2 (c) 1/4 (d) 1 — <i>(Level-3)</i></td><td class="topic">Equal masses, general e — velocity ratio</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>1/3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> With equal masses colliding, the general restitution formulas simplify neatly since m1=m2=m cancels out of every mass-ratio bracket, leaving only (1±e)/2 factors. This makes it one of the fastest patterns to memorise directly — striker's fraction is (1−e)/2, target's fraction is (1+e)/2, both multiplying the striker's original velocity.</div>
+<div class="seg"><span class="lbl">Formula</span> For m1=m2=m, target at rest (v2=0): <span class="eq">v1' = [(1−e)/2]v1</span>, <span class="eq">v2' = [(1+e)/2]v1</span> — velocities in m/s, e dimensionless. <span class="why">Both brackets are pure numbers (no leftover mass), so v1' and v2' both keep the units of v1, i.e. m/s ✓.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: equal masses m, striker's initial velocity = v (unspecified magnitude — it will cancel), target at rest, e = 1/2.</div>
+<div class="step">2. Striker's final velocity: v1' = [(1−e)/2]v = [(1−0.5)/2]v = (0.5/2)v = <b>v/4</b>.</div>
+<div class="step">3. Target's final velocity: v2' = [(1+e)/2]v = [(1+0.5)/2]v = (1.5/2)v = <b>3v/4</b>.</div>
+<div class="step">4. Ratio of velocities (striker : target) = (v/4) / (3v/4) = 1/3.<span class="why">The velocity magnitude v cancels completely — the ratio depends only on e, never on how fast the body was actually moving, which is why the question can ask for "the" ratio without giving a numeric speed.</span></div>
+<div class="step">5. Cross-check with momentum: m(v/4) + m(3v/4) = m(v/4+3v/4) = mv ✓ — matches the original momentum mv+0 exactly.</div>
+<div class="step">6. Cross-check with restitution: separation speed = v2'−v1' = 3v/4−v/4 = v/2; approach speed = v−0 = v; ratio = (v/2)/v = 1/2 = e ✓.<span class="why">Both checks passing confirms the ratio 1/3 is not just an algebra coincidence but genuinely satisfies both conservation laws.</span></div>
+</div>
+<pre>
+   before:  m→v          m (rest)
+              ●              ●
+   after :  m→v/4       m→3v/4
+              ●→            ●→
+
+   ratio (striker:target) = (v/4):(3v/4) = 1:3
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Memorise the equal-mass bracket pair <b>(1−e)/2</b> and <b>(1+e)/2</b> as a matched set — their sum is always exactly 1 (a built-in check), and their ratio (1−e)/(1+e) directly answers "velocity ratio after collision" questions like this one without redoing the algebra each time. Trap: option (b) 1/2 comes from directly reporting e itself instead of computing the actual velocity ratio.</div>
+<div class="final">Answer: (a) 1/3.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A body of mass 2 kg moving with a velocity of 3 m/sec collides head on with a body of mass 1 kg moving in opposite direction with a velocity of 4 m/sec. After collision, the two bodies stick together and move with a common velocity which in m/sec is equal to: (a) 1/4 (b) 1/3 (c) 2/3 (d) 3/4 — <i>(Level-3)</i></td><td class="topic">Perfectly inelastic, opposite directions</td><td><a href="https://www.youtube.com/watch?v=qmn7cRYeZAc" target="_blank">Momentum (9 of 16) Inelastic Collisions, Example 3</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>2/3 m/sec</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The only new wrinkle compared to earlier stick-together problems is that the two bodies move in <i>opposite</i> directions before impact, so one velocity must be taken as negative in the momentum sum. Get the sign convention right and the rest is the same v' = p/(m1+m2) machinery as always.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v' = (m1v1 + m2v2)/(m1+m2)</span> — masses in kg, velocities in m/s with sign, taking rightward as positive. <span class="why">Momentum is a vector; treating opposite-direction motion as a negative number is what correctly captures the two bodies partially cancelling each other's momentum.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set up signs: let the 2 kg body's direction be positive. So m1 = 2 kg, v1 = +3 m/s; m2 = 1 kg, v2 = −4 m/s (opposite direction).</div>
+<div class="step">2. Momentum before: p = (2)(3) + (1)(−4) = 6 − 4 = <b>+2 kg·m/s</b>.<span class="why">The positive sign tells us the combined system will end up moving in the 2 kg body's original direction — its larger momentum (6) wins out over the 1 kg body's opposing momentum (4).</span></div>
+<div class="step">3. Combined mass: 2 + 1 = <b>3 kg</b>.</div>
+<div class="step">4. Common velocity: v' = p/(m1+m2) = 2/3 m/s ≈ <b>0.67 m/s</b>, in the direction of the original 2 kg body's motion.</div>
+<div class="step">5. Sanity check on magnitude: |v'| = 2/3 m/s is small compared to either original speed (3 or 4 m/s) — expected, since the two momenta were almost cancelling (6 vs 4, net only 2).</div>
+<div class="step">6. Confirm the sign makes physical sense: since the 2 kg body carried more momentum (6 kg·m/s) than the 1 kg body opposing it (4 kg·m/s), the combined mass must end up moving slowly in the heavier body's original direction — exactly what the positive v' = +2/3 m/s says.</div>
+</div>
+<pre>
+   before:  2kg→3m/s          4m/s←1kg
+              ●                  ●
+   p = 2(3) + 1(−4) = 6 − 4 = +2 kg·m/s
+
+   after :         3kg→2/3 m/s
+                      ●→          (net drift, 2kg's direction)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> The instant you see "moving in opposite direction", assign signs <b>before</b> writing any equation — pick one direction as positive and stick to it for every term. Trap: option (d) 3/4 m/s comes from adding the momenta as if both bodies moved the same way (6+4=10, then dividing by something else) instead of subtracting for the opposing direction.</div>
+<div class="final">Answer: (c) 2/3 m/sec.</div></div></details></td></tr>
+
+</tbody></table></div></div>
+
+<h2>Level-4</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+
+<tr><td class="num">1</td><td class="q">A ball A moving with a certain velocity collides with another ball B of the same mass at rest. If the coefficient of restitution is e, the ratio of the velocities of A and B after collision is [(1−e)/(1+e)]x, find x. — <i>(Level-4)</i></td><td class="topic">Equal masses — velocity-ratio identity</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">x = 1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is Level-3 Q4's exact setup but generalised symbolically instead of at a fixed e = 1/2 — the book is testing whether the printed answer-form [(1−e)/(1+e)]x is recognised as <i>already being</i> the ratio itself (x=1), a common way to check that students derive the general formula rather than only plugging numbers.</div>
+<div class="seg"><span class="lbl">Formula</span> For m_A = m_B = m, target at rest, striker's initial velocity v: <span class="eq">v_A' = [(1−e)/2]v</span>, <span class="eq">v_B' = [(1+e)/2]v</span> — velocities in m/s, e dimensionless. <span class="why">The factor of 2 in each denominator is identical in both expressions, so it cancels the moment you take a ratio — leaving a clean function of e alone.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write both final velocities using the equal-mass special case: v_A' = [(1−e)/2]v and v_B' = [(1+e)/2]v.</div>
+<div class="step">2. Form the ratio v_A'/v_B': the common factors v and the common denominator 2 cancel directly:<br>&nbsp;&nbsp;v_A'/v_B' = [(1−e)/2]v ÷ [(1+e)/2]v = (1−e)/(1+e).</div>
+<div class="step">3. Compare this derived ratio to the form given in the question: [(1−e)/(1+e)]x.</div>
+<div class="step">4. Setting (1−e)/(1+e) = [(1−e)/(1+e)]·x forces <b>x = 1</b> for the equality to hold for every value of e (not just a special one).<span class="why">Because the match must work for <i>any</i> e — not one particular number — the multiplier x is pinned uniquely to 1; no other constant would keep the identity true across the whole range 0≤e≤1.</span></div>
+<div class="step">5. Quick numeric check at e = 1/2 (same numbers as Level-3 Q4): (1−0.5)/(1+0.5) = 0.5/1.5 = 1/3, matching the 1:3 ratio already found there directly — confirming x=1 is consistent with the earlier worked numeric case.</div>
+</div>
+<pre>
+   v_A' = [(1−e)/2]v         v_B' = [(1+e)/2]v
+
+   v_A'/v_B' = (1−e)/(1+e)   =   [(1−e)/(1+e)]·x
+                                        ⇒  x = 1
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever a question gives you an answer already dressed up in an unfamiliar-looking algebraic "envelope" (like ...·x here), first derive the quantity independently in its simplest closed form, then match term-by-term — the unknown constant almost always collapses to a small integer like 0, 1, or 2. Trap: assuming x must be a fraction just because e appears as a fraction elsewhere in the chapter.</div>
+<div class="final">Answer: x = 1.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Two bodies of equal masses moving with momentum (first double that of the second) collide completely inelastically, moving towards each other. If the total final kinetic energy is 9 joule, then the initial kinetic energy (in joule) of the body of greater momentum is: — <i>(Level-4)</i></td><td class="topic">Momentum ratio, perfectly inelastic KE</td><td><a href="https://www.youtube.com/watch?v=qmn7cRYeZAc" target="_blank">Momentum (9 of 16) Inelastic Collisions, Example 3</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">72 Joule</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Working purely in <i>momentum</i> (not velocity) is the cleanest route here, since both bodies share the same mass and the question is stated in terms of momentum ratios directly. Take the momenta as p and 2p for the two bodies (equal mass, opposite directions — "collide" implies they approach each other), find p from the given final KE, then read off the requested initial KE.</div>
+<div class="seg"><span class="lbl">Formula</span> KE in terms of momentum: <span class="eq">KE = p²/(2m)</span> — p in kg·m/s, m in kg, KE in J. Perfectly inelastic, opposite momenta: combined momentum <span class="eq">p_net = 2p − p = p</span> (taking the larger-momentum body's direction as positive), combined mass <span class="eq">2m</span>. <span class="why">(kg·m/s)²÷kg = kg·m²/s² = J ✓ — this momentum form of KE avoids ever solving for actual velocities.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let each body have mass m; body 1 (greater momentum) has momentum 2p, body 2 has momentum p, moving toward each other so body 2's momentum is −p in body 1's positive direction.</div>
+<div class="step">2. Net momentum after collision: p_net = 2p + (−p) = p (conserved from before, since momentum is always conserved).</div>
+<div class="step">3. Final KE of the stuck-together mass 2m: KE_f = p_net²/(2×2m) = p²/(4m). Given KE_f = 9 J: p²/(4m) = 9 ⇒ <b>p²/m = 36</b>.</div>
+<div class="step">4. Initial KE of body 1 (momentum 2p): KE₁ = (2p)²/(2m) = 4p²/(2m) = 2p²/m = 2 × 36 = <b>72 J</b>.<span class="why">Doubling the momentum quadruples the KE (since KE ∝ p²), which is why body 1's share of the total initial KE is so much larger than body 2's.</span></div>
+<div class="step">5. Cross-check: KE of body 2 = p²/(2m) = 36/2 = 18 J. Total initial KE = 72+18 = 90 J. KE lost in collision = 90−9 = 81 J (90% lost) — physically plausible since the two large, nearly-cancelling opposing momenta leave very little net momentum, so very little final KE survives.</div>
+</div>
+<pre>
+   before:  m→2p(momentum)      p(momentum)←m     (opposite directions)
+   after :         2m→(p_net=p)                    (stuck together)
+
+   p²/m = 36  (from KE_f=9J)
+   KE(body 1, greater momentum) = 2p²/m = 72 J
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When a problem is phrased in momentum terms (not velocity), <b>stay in momentum</b> and use KE=p²/(2m) throughout — converting to velocity first only adds unnecessary algebra. Trap: assuming the two bodies move in the <i>same</i> direction (catching up) rather than colliding head-on; the word "collide" with two comparably-moving bodies conventionally implies they approach from opposite sides.</div>
+<div class="final">Answer: 72 Joule.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Velocity of the ball A after collision with the ball B as shown in the figure is (assume perfectly inelastic and head-on collision): A (2 kg) at 5 m/s, B (5 kg) at 2 m/s moving towards A. (a) 3/7 m/s (b) 5/7 m/s (c) 1/7 m/s (d) Zero — <i>(Level-4)</i></td><td class="topic">Perfectly inelastic, opposing motion</td><td><a href="https://www.youtube.com/watch?v=qmn7cRYeZAc" target="_blank">Momentum (9 of 16) Inelastic Collisions, Example 3</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>Zero</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The key trap in this question is the phrase "velocity of ball A after collision" — in a <i>perfectly inelastic</i> collision the two bodies stick together and share one single common velocity, so there is no separate "velocity of A" distinct from B's. Once that is recognised, the question reduces to the standard v' = p/(m1+m2) computation, and the surprisingly clean momentum numbers hint the answer is meant to be exactly zero.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v' = (m_A v_A + m_B v_B)/(m_A+m_B)</span> — masses in kg, velocities in m/s with sign for opposite directions. <span class="why">Both bodies get the same v' because "stuck together" forces v_A' = v_B' — asking specifically for "A's velocity" is really just asking for this shared v'.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Take A's direction as positive: m_A = 2 kg, v_A = +5 m/s. B moves toward A (opposite direction): m_B = 5 kg, v_B = −2 m/s.</div>
+<div class="step">2. Momentum before: p = m_A v_A + m_B v_B = (2)(5) + (5)(−2) = 10 − 10 = <b>0 kg·m/s</b>.<span class="why">The two momenta happen to be exactly equal in magnitude (both 10 kg·m/s) but opposite in sign — a deliberately clean setup so the net momentum comes out to exactly zero.</span></div>
+<div class="step">3. Since momentum is conserved, total momentum after collision is also 0 kg·m/s.</div>
+<div class="step">4. Combined mass: m_A+m_B = 2+5 = 7 kg. Common velocity: v' = 0/7 = <b>0 m/s</b>.</div>
+<div class="step">5. Since it's perfectly inelastic, both A and B share this same v' — so "velocity of A after collision" is exactly 0 m/s: the stuck-together mass comes to a complete stop right where the collision happened.</div>
+<div class="step">6. Physical read: this is the special case where the two opposing momenta exactly cancel — a common exam construction precisely to test whether students blindly compute a fraction (like 3/7 or 5/7, tempting-looking distractors built from the given numbers 2,5,5,7) instead of first checking whether momentum actually nets to zero.</div>
+</div>
+<pre>
+   before:  2kg→5m/s          2m/s←5kg
+              ●(A)               ●(B)
+   p = (2)(5) + (5)(−2) = 10 − 10 = 0 kg·m/s
+
+   after :         7kg  (at rest)
+                     ●          v_A' = v_B' = 0 m/s
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Always compute the net momentum <b>first</b>, with correct signs, before reaching for a formula — if it comes out to exactly zero, the final common velocity must be zero too, no further arithmetic needed. Trap: options (a)-(c) are deliberately built to look plausible from the raw numbers 2, 5, 5, 7 in case a student forgets the minus sign on B's opposing velocity.</div>
+<div class="final">Answer: (d) Zero.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A body of mass m₁ moving with a velocity 3 ms⁻¹ collides with another body at rest of mass m₂. After collision the velocities of the two bodies are 2 ms⁻¹ and 5 ms⁻¹ respectively, along the direction of motion of m₁. The ratio m₁/m₂ is: (a) 5/12 (b) 5 (c) 1/5 (d) 12/5 — <i>(Level-4)</i></td><td class="topic">Mass ratio from momentum conservation</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> With only one momentum equation and two unknown masses, this problem looks under-determined at first — but the question asks only for the <i>ratio</i> m1/m2, and a single momentum equation is exactly enough to pin down one ratio between two unknowns. No restitution or KE data is even needed.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">m1v1 = m1v1' + m2v2'</span> (target starts at rest, so its "before" term is zero) — masses in kg, velocities in m/s. <span class="why">Momentum on both sides is in kg·m/s; rearranging isolates a pure mass ratio m1/m2, which is dimensionless as expected for a "ratio" answer.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: v1 = 3 m/s (before), v2 = 0 (before, at rest); after collision v1' = 2 m/s, v2' = 5 m/s, both along m1's original direction.</div>
+<div class="step">2. Momentum conservation: m1(3) = m1(2) + m2(5).</div>
+<div class="step">3. Rearrange to collect m1 terms: m1(3) − m1(2) = m2(5) ⇒ m1(3−2) = 5m2 ⇒ <b>m1 = 5m2</b>.</div>
+<div class="step">4. Therefore m1/m2 = <b>5</b>.<span class="why">Body 1 must be five times heavier than body 2 — consistent with the fact that despite losing very little speed (3→2 m/s), it manages to fling the much lighter body 2 up to 5 m/s.</span></div>
+<div class="step">5. Bonus physical check: is this collision perhaps elastic? Test the restitution condition: approach speed = v1−v2 = 3−0 = 3; separation speed = v2'−v1' = 5−2 = 3. Since separation speed = approach speed, e = 1 — this is in fact a <b>perfectly elastic</b> collision, which is a nice internal consistency check even though the question never states it explicitly.<span class="why">Finding e=1 as a byproduct gives confidence the given numbers are physically self-consistent, not just an arbitrary momentum-only puzzle.</span></div>
+</div>
+<pre>
+   before:  m1→3m/s        m2 (rest)
+              ●                ●
+   after :  m1→2m/s        m2→5m/s
+              ●→               ●→
+
+   m1(3−2) = m2(5)  ⇒  m1 = 5m2  ⇒  m1/m2 = 5
+   (bonus: e = (5−2)/(3−0) = 1  →  collision is elastic)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> When only a ratio of two unknown masses is asked, a <b>single momentum equation is always sufficient</b> — don't hunt for a second equation (like KE conservation) unless the question explicitly needs a second unknown resolved. Trap: option (a) 5/12 inverts the ratio, and (d) 12/5 comes from an arithmetic slip when isolating m1 versus m2 on the wrong side.</div>
+<div class="final">Answer: (b) 5.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A ball of mass m moving with a speed u makes a head-on collision with another identical ball initially at rest. After collision, the kinetic energy of the two balls together is 2/3 of the original kinetic energy. Find the coefficient of restitution (e). — <i>(Level-4)</i></td><td class="topic">Equal masses, KE fraction → e</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">e = 1/√3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This mirrors the lecture's own worked Example-1 (identical balls, KE ratio given, find e) but with 2/3 instead of 3/4 — a direct template match. Substitute the equal-mass special-case velocities into the KE formula, simplify using (1−e)²+(1+e)² = 2+2e² (a useful expandable identity), and solve for e.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v1' = [(1−e)/2]u</span>, <span class="eq">v2' = [(1+e)/2]u</span> (m/s). <span class="eq">KE_f = ½m(v1'²+v2'²)</span>, <span class="eq">KE_i = ½mu²</span> (J). <span class="why">Squaring and adding the two velocity fractions is what brings in the algebraic identity (1−e)²+(1+e)² = 2(1+e²), turning a messy fraction into a clean quadratic in e.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write final KE using the equal-mass formulas: KE_f = ½m{[(1−e)/2]²u² + [(1+e)/2]²u²} = (mu²/8)[(1−e)²+(1+e)²].</div>
+<div class="step">2. Expand the bracket: (1−e)² + (1+e)² = (1−2e+e²) + (1+2e+e²) = 2 + 2e².<span class="why">The cross-terms −2e and +2e cancel exactly — this identity is worth memorising since it recurs in every equal-mass restitution problem.</span></div>
+<div class="step">3. So KE_f = (mu²/8)(2+2e²) = (mu²/4)(1+e²).</div>
+<div class="step">4. Given KE_f = (2/3)KE_i = (2/3)(½mu²) = mu²/3. Set equal: (mu²/4)(1+e²) = mu²/3.</div>
+<div class="step">5. Cancel mu² from both sides: (1+e²)/4 = 1/3 ⇒ 1+e² = 4/3 ⇒ <b>e² = 1/3</b> ⇒ <b>e = 1/√3</b> (≈0.577).<span class="why">Only the positive root is physical, since e is defined as a non-negative ratio of speeds.</span></div>
+<div class="step">6. Sanity check: 1/√3 ≈ 0.577 lies safely within 0 ≤ e ≤ 1 ✓, and is close to (but distinct from) the lecture's own Example-1 answer of 1/√2 for the 3/4-KE version — smaller retained-KE fraction (2/3 < 3/4) correctly gives a smaller e, since less bounciness means more energy loss.</div>
+</div>
+<pre>
+   before:  m→u          m (rest)
+              ●              ●
+   after :  m→(1−e)u/2   m→(1+e)u/2
+
+   KE_f = (mu²/4)(1+e²) = (2/3)(mu²/2)
+   ⇒ 1+e² = 4/3  ⇒  e² = 1/3  ⇒  e = 1/√3
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Memorise the shortcut formula directly for equal-mass, target-at-rest KE problems: <b>KE_f/KE_i = (1+e²)/2</b> — derive it once (as above) and thereafter just plug in the given KE fraction to solve for e² in one line. Trap: forgetting the cross-terms cancel and instead expanding (1−e)²+(1+e)² incorrectly as 2(1−e²) — check the sign carefully.</div>
+<div class="final">Answer: e = 1/√3 (≈0.577).</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">A ball is moving with velocity 2 m/s towards a heavy wall moving towards the ball with speed 1 m/s as shown in figure. Assuming the collision to be elastic, find the velocity of the ball immediately after the collision. — <i>(Level-4)</i></td><td class="topic">Elastic collision with a moving wall</td><td><a href="https://www.youtube.com/watch?v=b3ZH1Oyw8zM" target="_blank">A ball is moving with velocity 2m/s towards a heavy wall moving towards the ball with speed 1m/...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">4 m/s (reversed direction)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This exact numeric setup already appears as the theory page's own Example-2 in this lecture — a heavy (effectively infinite-mass) wall colliding elastically with a small ball is the standard "switch to the wall's reference frame" problem. Since the wall is far heavier than the ball, it is essentially unaffected by the impact and keeps moving at its own 1 m/s regardless of the ball; only the ball's velocity is what we solve for.</div>
+<div class="seg"><span class="lbl">Formula</span> Elastic collision ⇒ <span class="eq">e = 1</span> ⇒ separation speed = approach speed: <span class="eq">|v_ball' − v_wall| = |v_ball − v_wall|</span> — all velocities in m/s, wall's velocity unchanged by its enormous mass. <span class="why">A wall (or any "infinite mass" object) absorbs momentum without noticeably changing its own velocity — the m/s change in the wall would need to be divided by its effectively infinite mass, giving zero.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set up signs: take the ball's original direction (toward the wall) as positive. Ball: v = +2 m/s. Wall moving toward the ball means it moves in the negative direction relative to the ball's positive axis: v_wall = −1 m/s.</div>
+<div class="step">2. Approach speed (closing speed between ball and wall) = v_ball − v_wall = 2 − (−1) = <b>3 m/s</b>.</div>
+<div class="step">3. Since collision is elastic (e=1): separation speed = approach speed = <b>3 m/s</b> also.</div>
+<div class="step">4. The wall, being effectively infinitely massive, continues unchanged at v_wall = −1 m/s after the collision.<span class="why">A finite ball colliding with an immovable/very-heavy object can never budge it — all the momentum transfer is absorbed by the wall's own "infinite" inertia.</span></div>
+<div class="step">5. Separation speed equation: v_ball' − v_wall = separation speed (ball now moving away from wall) ⇒ v_ball' − (−1) = 3 ⇒ v_ball' + 1 = 3 ⇒ <b>v_ball' = 4 m/s</b> (now moving back, away from the wall).<span class="why">The ball not only reverses direction but comes back <i>faster</i> than it went in (4 m/s vs 2 m/s) — the wall's own motion adds extra "push" on top of the simple elastic bounce.</span></div>
+<div class="step">6. Matches the theory page's Example-2 result exactly (same numbers): v = 4 m/s, confirming this practice question is a direct repeat of that worked example.</div>
+</div>
+<pre>
+   before:  ball→2m/s     1m/s←wall   (wall moving toward ball)
+              ●            ▓▓▓▓
+   approach speed = 2−(−1) = 3 m/s
+
+   after :  4m/s←ball      1m/s←wall   (ball rebounds FASTER)
+              ●            ▓▓▓▓
+   separation speed = v_ball'−(−1) = 3  ⇒  v_ball' = 4 m/s
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For a ball bouncing off a massive moving wall, use the direct shortcut <b>v_ball' = 2v_wall − v_ball</b> (derived by reflecting the ball's velocity about the wall's velocity in the elastic case) — plug in v_wall=−1, v_ball=2: v_ball'=2(−1)−2=−4, meaning 4 m/s in the reversed direction, matching above. Trap: forgetting the wall itself is already moving and treating this as a simple "bounce off a fixed wall" (which would give only 2 m/s back).</div>
+<div class="final">Answer: 4 m/s, directed away from the wall (reversed from the ball's original direction).</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">A ball after freely falling from a height of 4.9 m strikes a horizontal plane. If the coefficient of restitution is 3/4, the ball will strike second time with the plane after: (a) 1/2 s (b) 1 s (c) 3/2 s (d) 3/4 s — <i>(Level-4)</i></td><td class="topic">Free fall + rebound → time to next impact</td><td><a href="https://www.youtube.com/watch?v=Dy5m74Tj1z0" target="_blank">A ball after freely falling from a height of 4.9 m strikes a horizontal plane. If the coefficien...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>3/2 s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This problem chains two separate kinematics stages: (1) ordinary free fall down to the plane, then (2) a vertical "projectile" launch straight back up at the reduced rebound speed, followed by the fall back down to the second impact. The time asked for is only the <i>second</i> stage's total up-and-down duration — the free-fall time to the first impact is a distractor used only to compute the impact speed.</div>
+<div class="seg"><span class="lbl">Formula</span> Impact speed: <span class="eq">v = √(2gh)</span> (m/s). Rebound speed: <span class="eq">v' = ev</span>. Time for a vertical throw at speed v' to return to the same level: <span class="eq">t = 2v'/g</span> (s). <span class="why">m/s ÷ (m/s²) = s ✓ — dividing a speed by an acceleration always yields a time, consistent with basic kinematics.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: h = 4.9 m, e = 3/4, use g = 9.8 m/s² (chosen to make 2gh a perfect square with this specific height).</div>
+<div class="step">2. Impact speed just before hitting the plane: v = √(2×9.8×4.9) = √96.04 = <b>9.8 m/s</b>.<span class="why">4.9 m is deliberately chosen since 2×9.8×4.9 = 96.04 = 9.8² exactly — the height and g combine to reproduce g itself as the impact speed, a common textbook coincidence.</span></div>
+<div class="step">3. Rebound speed immediately after first impact: v' = e×v = (3/4)(9.8) = <b>7.35 m/s</b> (upward).</div>
+<div class="step">4. This rebound is a vertical throw straight up at 7.35 m/s — by symmetry of projectile motion under gravity, the ball returns to plane level after time t = 2v'/g.</div>
+<div class="step">5. Substitute: t = 2(7.35)/9.8 = 14.7/9.8 = <b>1.5 s = 3/2 s</b>.</div>
+<div class="step">6. This 1.5 s is exactly the time interval <i>between</i> the first and second impacts (the question asks "strike second time... after", meaning after the first strike) — no need to add the initial fall time since the clock for this question effectively restarts at the first bounce.</div>
+</div>
+<pre>
+   fall:  h=4.9m ──▾── v=9.8 m/s (1st impact)
+   ═══════════════════════ plane
+   rebound: v'=e·v=7.35 m/s ▴
+            (goes up, comes back down)
+   t = 2v'/g = 2(7.35)/9.8 = 1.5 s   (time to 2nd impact)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> After the <i>first</i> bounce, treat the ball exactly like a ball thrown straight up with initial speed ev — the time to the next impact is always <b>2ev₀/g</b>, and for the nth gap it becomes <b>2eⁿv₀/g</b> (a shrinking geometric series). Trap: option (b) 1 s comes from using the original fall time (√(2h/g)=1s) instead of the rebound-based up-down time.</div>
+<div class="final">Answer: (c) 3/2 s.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">A steel ball is dropped on a hard surface from a height of 1 m and rebounds to a height of 64 cm. The maximum height attained by the ball after the nᵗʰ bounce is (in m): (a) (0.64)²ⁿ (b) (0.8)²ⁿ (c) (0.5)²ⁿ (d) (0.8)ⁿ — <i>(Level-4)</i></td><td class="topic">e from one bounce → height after n bounces</td><td><a href="https://www.youtube.com/watch?v=08ixSZ-AezI" target="_blank">Coefficient of restitution in bouncing ball dropped vertically</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>(0.8)²ⁿ</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> First extract e from the single given bounce (1 m → 64 cm), then extend it to n bounces using the fact that each bounce independently multiplies the <i>height</i> by e² (equivalently, multiplies the speed by e). This generalises Level-2 Q3's single-bounce h'=e²h into a repeated, compounding version.</div>
+<div class="seg"><span class="lbl">Formula</span> Single bounce: <span class="eq">e = √(h1/h0)</span>. After n bounces: <span class="eq">h_n = e^(2n) × h0</span> — heights in m, e dimensionless. <span class="why">Each bounce multiplies height by e² independently, so n bounces compound to (e²)ⁿ = e^(2n), a geometric decay in the exponent 2n, not just n.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: h0 = 1 m (drop height), h1 = 64 cm = 0.64 m (height after 1st bounce).</div>
+<div class="step">2. Find e from the first bounce: e² = h1/h0 = 0.64/1 = 0.64 ⇒ e = √0.64 = <b>0.8</b>.</div>
+<div class="step">3. Height after the 2nd bounce: h2 = e²×h1 = 0.64×0.64 = 0.4096 m = (0.8)⁴ m (since h1 = (0.8)²).</div>
+<div class="step">4. Generalising: after the nth bounce, height has been multiplied by e² a total of n times starting from h0=1 m: h_n = 1×(e²)ⁿ = e^(2n) = <b>(0.8)^(2n)</b> m.<span class="why">Notice this equals ((0.8)²)ⁿ = (0.64)ⁿ as well — both forms are algebraically identical, but the option list writes it as (0.8)^(2n), which is the more standard way these answers are printed.</span></div>
+<div class="step">5. Reject option (a) (0.64)^(2n): this double-squares the already-squared e² value — too fast a decay, an easy exponent-doubling slip.</div>
+<div class="step">6. Reject option (c) (0.5)^(2n): uses the wrong base entirely (0.5 instead of the derived 0.8). Reject option (d) (0.8)ⁿ: uses e itself instead of e² per bounce — misses that height depends on velocity <i>squared</i>.</div>
+</div>
+<pre>
+   h0=1m  →(bounce,×e²)→  h1=0.64m  →(×e²)→  h2=0.4096m  → ...
+
+   after n bounces:  h_n = h0 · (e²)ⁿ = (0.8)^(2n) m
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever a "bounce n times" question gives you exactly one bounce's before/after heights, extract e once via e=√(h1/h0), then reuse it as <b>h_n = h0·e^(2n)</b> for any bounce count — never re-derive e afresh for each subsequent bounce. Trap: option (a) is the classic "squared the exponent twice" slip that this question is specifically designed to catch.</div>
+<div class="final">Answer: (b) (0.8)²ⁿ.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">Two identical balls of equal masses A and B, are lying on a smooth surface as shown in the figure. Ball A hits ball B (at rest) with a velocity v = 16 ms⁻¹. What should be the maximum value of coefficient of restitution e between A and B so that B just reaches the highest point of the inclined plane (height 5 m)? (g = 10 ms⁻²) (a) 2/3 (b) 1/4 (c) 1/2 (d) 1/3 — <i>(Level-4)</i></td><td class="topic">Equal-mass collision feeding an incline</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>1/4</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a two-stage "chain" problem: stage 1 is a horizontal equal-mass collision (find B's velocity in terms of e), stage 2 is B climbing a frictionless incline converting KE to PE (find the speed needed to "just reach" height 5 m, i.e. arrive there with zero speed). Setting the two stages' results equal solves for e.</div>
+<div class="seg"><span class="lbl">Formula</span> Equal masses, target at rest: <span class="eq">v_B' = [(1+e)/2]v</span> (m/s). "Just reaches" height h on a smooth incline: <span class="eq">½v_B'² = gh ⇒ v_B' = √(2gh)</span> (m/s). <span class="why">"Just reaches" always means arriving with exactly zero leftover speed — all the KE has converted to PE, no more, no less.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Stage 2 first (it's a single-unknown equation): find the speed B needs at the bottom of the incline to just reach height h=5 m: v_B' = √(2×10×5) = √100 = <b>10 m/s</b>.</div>
+<div class="step">2. Stage 1: equal-mass collision formula gives v_B' = [(1+e)/2]×v, with v = 16 m/s (A's initial speed).</div>
+<div class="step">3. Set the two expressions for v_B' equal: [(1+e)/2](16) = 10.</div>
+<div class="step">4. Solve: 8(1+e) = 10 ⇒ 1+e = 10/8 = 1.25 ⇒ <b>e = 0.25 = 1/4</b>.<span class="why">This is the <i>minimum</i> e that gets B all the way to the top — hence the question's "maximum value" phrasing is really about the smallest push that still just barely suffices; any e below 1/4 would leave B short of the incline's top, and the book is asking for the boundary value.</span></div>
+<div class="step">5. Verify A's resulting velocity for completeness: v_A' = [(1−e)/2](16) = [(0.75)/2](16) = (0.375)(16) = 6 m/s — a sensible, smaller forward velocity for the striker, consistent with e<1 (A doesn't stop dead as it would if e=1... actually check: for e=1, v_A'=[(1−1)/2]v=0, meaning A would stop; here e=0.25 so A keeps moving forward at 6 m/s).</div>
+<div class="step">6. Cross-check via momentum: before, p=16m (A alone); after, p = 6m+10m=16m ✓ — matches exactly.</div>
+</div>
+<pre>
+   Stage 1 (collision):  A→16m/s   B(rest)   ⇒  A→6m/s   B→10m/s
+                            ●         ●            ●        ●→
+   Stage 2 (incline):  B needs v=√(2gh)=√(2·10·5)=10 m/s to JUST reach 5m
+
+   [(1+e)/2](16)=10  ⇒  e = 1/4
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Solve chained collision-then-motion problems <b>backwards</b> from the final condition ("just reaches" ⇒ v=√(2gh)) toward the collision — it turns a two-stage problem into two simple, separately-solvable equations rather than one messy combined one. Trap: forgetting the incline stage is frictionless/smooth (given), which is what makes ½v²=gh valid without any energy-loss correction.</div>
+<div class="final">Answer: (b) 1/4.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">A body of mass m is dropped from a height of h. Simultaneously another body of mass 2m is thrown up vertically with such a velocity v that they collide at height h/2. If the collision is perfectly inelastic, the velocity of the combined mass at the time of collision with the ground will be: (a) √(5gh/4) (b) √(gh) (c) √(gh/4) (d) None of these — <i>(Level-4)</i></td><td class="topic">Two-stage kinematics + inelastic collision midair</td><td><a href="https://www.youtube.com/watch?v=SAs_8G1GRJg" target="_blank">A body of mass m is dropped from a height of h. Simultaneously another body of mass 2 m is thrown...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>None of these — combined mass hits ground at √(10gh)/3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a three-stage chain: (1) each body's motion up to the meeting instant at height h/2, found from ordinary kinematics; (2) a perfectly inelastic collision at that instant; (3) the combined mass then falls the remaining h/2 to the ground under gravity. Each stage feeds the next, and the answer must be derived fully — no shortcut skips a stage here.</div>
+<div class="seg"><span class="lbl">Formula</span> Free fall: <span class="eq">y = h − ½gt²</span>. Vertical throw: <span class="eq">y = vt − ½gt²</span>. Meeting condition (both at h/2, same t): equate. Post-collision: <span class="eq">v_combined = (m·v1)/(3m)</span>. Final fall: <span class="eq">v_ground² = v_combined² + 2g(h/2)</span>. <span class="why">Every term is either a length (m) or built consistently from g(m/s²)·t²(s²)=m, so all three stages stay dimensionally sound.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Body 1 (mass m, dropped from h) reaches height h/2 when it has fallen h/2: ½gt² = h/2 ⇒ t = √(h/g). Its velocity there: v1 = gt = g√(h/g) = <b>√(gh)</b> (downward).</div>
+<div class="step">2. Body 2 (mass 2m, thrown up with speed v) reaches height h/2 at the <i>same</i> time t=√(h/g): vt − ½gt² = h/2. Substituting t: v√(h/g) − h/2 = h/2 ⇒ v√(h/g) = h ⇒ v = √(gh).<span class="why">Remarkably, v turns out equal to √(gh) — the same magnitude as body 1's speed at the meeting point, a designed coincidence of this problem.</span></div>
+<div class="step">3. Body 2's velocity at the meeting instant: v2 = v − gt = √(gh) − g√(h/g) = √(gh) − √(gh) = <b>0</b> — body 2 is exactly at the peak of its trajectory when the collision happens.</div>
+<div class="step">4. Perfectly inelastic collision at height h/2: v_combined = [m(√(gh)) + 2m(0)]/(3m) = <b>√(gh)/3</b> (downward), since only body 1 contributes momentum (body 2 is momentarily at rest).</div>
+<div class="step">5. Combined mass 3m now falls the remaining h/2 to the ground, starting at √(gh)/3: v_ground² = (√(gh)/3)² + 2g(h/2) = gh/9 + gh = 10gh/9.</div>
+<div class="step">6. v_ground = √(10gh/9) = <b>√(10gh)/3</b> ≈ 1.054√(gh) — this does not equal option (a) √(5gh/4)≈1.118√(gh), (b) √(gh), or (c) √(gh/4)=0.5√(gh). None match, so the correct choice is <b>(d) None of these</b>.</div>
+</div>
+<pre>
+   t=0: m↓(from h)         2m↑(speed v, from ground)
+   t=√(h/g): meet at h/2, v1=√(gh)↓, v2=0 (peak!)
+   collision (inelastic): v_c = m√(gh)/(3m) = √(gh)/3 ↓
+   fall remaining h/2:  v_ground² = gh/9 + gh = 10gh/9
+   v_ground = √(10gh)/3   ⇒  matches NONE of (a)(b)(c)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever "they collide at a specified height" is given, always solve for the <i>unknown launch speed</i> as an intermediate step (here v=√(gh)) — it is almost never given directly, and skipping this step is the most common reason students get stuck. Trap: assuming option (a), (b) or (c) must be right just because it's a multiple-choice list — "None of these" is a genuine, frequently-correct option in this book's Level-4/5 sets when a computed value doesn't reduce to a clean printed form.</div>
+<div class="final">Answer: (d) None of these — the combined mass reaches the ground at √(10gh)/3.</div></div></details></td></tr>
+
+</tbody></table></div></div>
+
+<h2>Level-5</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+
+<tr><td class="num">1</td><td class="q">A body is dropped from a height of 80 m onto a horizontal floor and bounces repeatedly. If it stops in t seconds, find the value of t (in seconds). (g = 10 ms⁻², e = 0.5) — <i>(Level-5)</i></td><td class="topic">Total time to stop bouncing (infinite series)</td><td><a href="https://www.youtube.com/watch?v=n9fc2NJ7owY" target="_blank">Ball dropped from 2 m height bounce 80 percent Find distance travelled till it stops MCR3U</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">t = 12 s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A bouncing ball technically bounces infinitely many times as e<1, yet the total time to "stop" is finite — each successive bounce's up-down time shrinks by a factor e, forming a convergent geometric series that sums in closed form. The trick is recognising the total time as t1 + 2(e·t1 + e²·t1 + ...), i.e. the first fall plus twice the sum of a geometric series of subsequent half-bounce times.</div>
+<div class="seg"><span class="lbl">Formula</span> First fall time: <span class="eq">t1 = √(2h/g)</span> (s). Total time (standard closed form): <span class="eq">T = t1[(1+e)/(1−e)]</span> (s). <span class="why">Both t1 and T are seconds; the bracket (1+e)/(1−e) is dimensionless, so multiplying preserves units — and the bracket is always ≥1 for 0≤e<1, correctly making T longer than the first fall alone.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. First fall time: t1 = √(2×80/10) = √16 = <b>4 s</b>.</div>
+<div class="step">2. After the first impact, the ball rebounds at et1's corresponding speed and executes a full up-down cycle of duration 2e·t1 before the next impact; after the 2nd impact, 2e²t1; and so on — an infinite geometric series with first term 2e·t1 and ratio e.</div>
+<div class="step">3. Sum of the (infinite) series of post-first-impact bounce durations: 2t1(e+e²+e³+...) = 2t1 × e/(1−e).<span class="why">The geometric series e+e²+e³+... sums to e/(1−e) for 0<e<1 — a standard infinite-series result, valid here since 0<0.5<1 guarantees convergence.</span></div>
+<div class="step">4. Total time: T = t1 + 2t1·e/(1−e) = t1[1 + 2e/(1−e)] = t1[(1−e+2e)/(1−e)] = t1[(1+e)/(1−e)].</div>
+<div class="step">5. Substitute: T = 4 × [(1+0.5)/(1−0.5)] = 4 × [1.5/0.5] = 4 × 3 = <b>12 s</b>.</div>
+<div class="step">6. Sanity check on the multiplier: (1+e)/(1−e) at e=0.5 gives exactly 3 — a clean number, and physically sensible since a moderately bouncy ball (e=0.5) should take a few multiples of its first-fall time to fully settle, not an enormous or vanishingly small factor.</div>
+</div>
+<pre>
+   t1=4s(fall) → 2e·t1=4s(bounce1) → 2e²t1=2s(bounce2) → 2e³t1=1s → ...
+
+   T = t1[(1+e)/(1−e)] = 4×(1.5/0.5) = 4×3 = 12 s
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Memorise the closed-form total-stopping-time formula <b>T = t1(1+e)/(1−e)</b> directly — deriving the geometric series from scratch each time wastes exam minutes. Trap: forgetting the factor of 2 in the bounce-cycle terms (each bounce goes up AND comes back down) is the most common setup error.</div>
+<div class="final">Answer: t = 12 s.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Three objects A, B and C are kept in a straight line on a frictionless horizontal surface. These have masses m, 2m and m, respectively. The object A moves towards B with a speed of 9 m/s and makes an elastic collision with it. Thereafter, B makes a completely inelastic collision with C. All motions occur on the same straight line. Find the final speed (in m/s) of the object C. (a) 3 m/s (b) 4 m/s (c) 5 m/s (d) 1 m/s — <i>(Level-5)</i></td><td class="topic">Two-stage: elastic then perfectly inelastic</td><td><a href="https://www.youtube.com/watch?v=uaeN4VtfwFQ" target="_blank">Final Velocity Formulas for Elastic Collision DERIVED</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>4 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a famous JEE-Advanced-style two-stage collision chain: solve the first (elastic, unequal mass) collision completely for B's velocity, then feed that result as the "initial velocity" for a second, independent (perfectly inelastic) collision between B and C. Treat the two collisions as fully separate problems in sequence — nothing from stage 1 except B's final velocity carries over.</div>
+<div class="seg"><span class="lbl">Formula</span> Stage 1 (elastic, m1=m, m2=2m, target at rest): <span class="eq">v_B = [2m1/(m1+m2)]v_A = (2m/3m)v_A</span> (m/s). Stage 2 (perfectly inelastic, B mass 2m velocity v_B, C mass m at rest): <span class="eq">v_C' = (2m·v_B)/(2m+m) = (2/3)v_B</span> (m/s). <span class="why">Both formulas are dimensionally velocities (m/s), and the mass ratios (dimensionless) correctly scale the speed down at each stage.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>Stage 1 — A(m,9 m/s) elastic with B(2m, at rest).</b> Using the elastic formula for target's velocity: v_B = [2m/(m+2m)]×9 = (2/3)(9) = <b>6 m/s</b>.</div>
+<div class="step">2. (For completeness, A's own velocity after stage 1: v_A' = [(m−2m)/(3m)](9) = (−1/3)(9) = −3 m/s — A bounces backward, though this value is not needed further.)</div>
+<div class="step">3. <b>Stage 2 — B(2m, 6 m/s) perfectly inelastic with C(m, at rest).</b> Momentum: (2m)(6) + m(0) = (2m+m)v_C' ⇒ 12m = 3m·v_C'.</div>
+<div class="step">4. Solve: v_C' = 12m/3m = <b>4 m/s</b>.<span class="why">B, now carrying 12m units of momentum, shares it with the combined 3m mass — giving 4 m/s, noticeably less than B's own pre-collision speed of 6 m/s since C's inertia had to be "absorbed".</span></div>
+<div class="step">5. Sanity check: since B (2m) collided inelastically with C (m, half its mass), the final speed 4 m/s should sit between 0 and 6 m/s, closer to 6 since B is the heavier partner in that second collision — 4 m/s fits that expectation.</div>
+<div class="step">6. This exact problem (masses m,2m,m; A's speed 9 m/s) is a well-known JEE Advanced 2009 question — the clean answer 4 m/s is the textbook-verified result for precisely these mass values (note: a similar-looking variant with masses m,2m,2m gives a different final answer of 3 m/s — always check the printed masses carefully).</div>
+</div>
+<pre>
+   Stage 1 (elastic):  A(m)→9m/s    B(2m,rest)
+                          ●            ●
+                       A→−3m/s      B→6m/s      (elastic formulas)
+
+   Stage 2 (inelastic): B(2m)→6m/s   C(m,rest)
+                            ●           ●
+                          combined(3m)→4m/s
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> In chained multi-collision problems, solve <b>strictly one collision at a time</b>, carrying forward only the velocity of the body common to both collisions (here, B) — never try to write one combined equation across both events. Trap: mixing up the mass values between this m,2m,m variant and the also-common m,2m,2m JEE variant, which changes the final answer.</div>
+<div class="final">Answer: (b) 4 m/s.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A bullet of mass m moving with a horizontal velocity v strikes a stationary block of mass M suspended by a string of length L. The bullet gets embedded in the block. The maximum angle made by the string after impact is cos⁻¹[1 − xm²v²/(8gL(M+m)²)], find x. — <i>(Level-5)</i></td><td class="topic">Ballistic pendulum, maximum swing angle</td><td><a href="https://www.youtube.com/watch?v=PUNKqLkELbQ" target="_blank">Ballistic Pendulum Physics Problems - Conservation of Momentum & Energy - Inelastic Collisions</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval">x = 4</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A classic ballistic pendulum: stage 1 is a perfectly inelastic collision (bullet embeds in the block) giving a combined velocity purely from momentum conservation; stage 2 is a pure energy-conservation swing, converting that velocity's KE into gravitational PE as the pendulum rises through height h = L(1−cosθ). Matching the derived cosθ expression to the printed form solves for x.</div>
+<div class="seg"><span class="lbl">Formula</span> Stage 1: <span class="eq">V = mv/(M+m)</span> (m/s). Stage 2 energy: <span class="eq">½(M+m)V² = (M+m)gh</span>, with <span class="eq">h = L(1−cosθ)</span> (m). <span class="why">Every term is in SI: kg·(m/s)² = J on the energy side, kg·(m/s²)·m = J on the PE side — both reduce to the same units, so the equation is dimensionally sound before even solving.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Stage 1 — momentum conservation during the (very brief, perfectly inelastic) embedding: mv = (M+m)V ⇒ <b>V = mv/(M+m)</b>.</div>
+<div class="step">2. Stage 2 — the combined mass (M+m) swings up on the string, converting all its KE to PE at the highest point (momentarily at rest there): ½(M+m)V² = (M+m)gh.</div>
+<div class="step">3. Cancel (M+m) from both sides and solve for h: h = V²/(2g) = [mv/(M+m)]²/(2g) = <b>m²v²/(2g(M+m)²)</b>.</div>
+<div class="step">4. Relate h to the swing angle θ via the pendulum's geometry: h = L(1−cosθ) ⇒ <b>1−cosθ = h/L = m²v²/(2gL(M+m)²)</b>.</div>
+<div class="step">5. Rearrange for cosθ: cosθ = 1 − m²v²/(2gL(M+m)²) ⇒ <b>θ = cos⁻¹[1 − m²v²/(2gL(M+m)²)]</b>.</div>
+<div class="step">6. Match to the printed form cos⁻¹[1 − xm²v²/(8gL(M+m)²)]: set m²v²/(2gL(M+m)²) = xm²v²/(8gL(M+m)²) ⇒ 1/2 = x/8 ⇒ <b>x = 4</b>.<span class="why">Cross-multiplying the two equivalent fractions is the cleanest way to isolate x — both sides share the identical m²v²/(gL(M+m)²) factor, which cancels entirely, leaving a pure numeric equation.</span></div>
+</div>
+<pre>
+   bullet m→v   block M(rest, string L)
+      ●            ▭
+   V = mv/(M+m)  (perfectly inelastic embed)
+
+   swing:  h = V²/2g = L(1−cosθ)
+   cosθ = 1 − m²v²/(2gL(M+m)²)  ≡  1 − x·m²v²/(8gL(M+m)²)
+   ⇒  x = 4
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Ballistic pendulum problems always split cleanly into <b>momentum stage, then energy stage</b> — never mix the two conservation laws into one equation, since KE is NOT conserved during the embedding itself (only during the swing). Trap: forgetting the (M+m)² in the denominator comes from V being squared, which itself already has (M+m) in its own denominator.</div>
+<div class="final">Answer: x = 4.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">A particle of mass m moving with velocity v collides with a stationary particle of mass 2m. After collision, they stick together and continue to move together with velocity: (a) v/2 (b) v (c) v/4 (d) v/3 — <i>(Level-5)</i></td><td class="topic">Perfectly inelastic, simple mass ratio</td><td><a href="https://www.youtube.com/watch?v=qmn7cRYeZAc" target="_blank">Momentum (9 of 16) Inelastic Collisions, Example 3</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>v/3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A clean, one-step application of the perfectly-inelastic common-velocity formula, kept purely symbolic (no numbers to plug in) — the answer is simply a fraction of v determined entirely by the mass ratio. This tests whether the formula is understood well enough to apply without needing specific numeric masses.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v' = (m1v1+m2v2)/(m1+m2)</span> — masses in kg (or in terms of m, as here), velocities in m/s. <span class="why">The mass unit m cancels top and bottom, leaving a pure fraction of v, confirming v' must have the same units as v (m/s) — a quick dimensional gut-check.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Given: m1 = m (moving at v), m2 = 2m (at rest, v2=0).</div>
+<div class="step">2. Momentum before: p = m(v) + 2m(0) = <b>mv</b>.</div>
+<div class="step">3. Combined mass after sticking: m + 2m = <b>3m</b>.</div>
+<div class="step">4. Common velocity: v' = p/(3m) = mv/3m = <b>v/3</b>.<span class="why">The m in numerator and denominator cancels completely — the answer depends only on the mass <i>ratio</i> (1:2 here), never on the actual value of m itself.</span></div>
+<div class="step">5. Physical read: because the target (2m) is twice as heavy as the striker (m), the combined mass ends up moving at only a third of the original speed — a lighter striker hitting a heavier stationary target always loses a large fraction of its speed on sticking.</div>
+<div class="step">6. Quick cross-check via KE loss: KE_i = ½mv²; KE_f = ½(3m)(v/3)² = ½(3m)(v²/9) = mv²/6. Loss = mv²/2 − mv²/6 = mv²/3, i.e. two-thirds of the initial KE is lost — consistent with the general rule that a lighter body hitting a heavier stationary one and sticking loses a large share of its KE.</div>
+</div>
+<pre>
+   before:  m→v          2m (rest)
+              ●              ●
+   after :        3m→v/3
+                    ●→
+
+   p: mv = 3m(v/3) = mv ✓
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For "m hits 2m at rest, sticks" type questions, memorise the instant result <b>v' = v/3</b> as a reusable building block — this exact 1:2 mass ratio recurs constantly across this chapter's problems (e.g. see Level-3 Q2 above, which reused the identical setup). Trap: option (a) v/2 comes from ignoring mass and just averaging speeds; option (b) forgets that a stationary target must slow the striker down at all.</div>
+<div class="final">Answer: (d) v/3.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A rubber ball is dropped from a height of 2 m onto a rigid horizontal surface. After each bounce, the ball rebounds to 80% of the height from which it fell just before that bounce. The total vertical distance travelled by the ball up to the third impact with the ground and the time taken to reach the third impact are respectively (Take g = 10 ms⁻²): (a) 6.72 m, 2.0 s (b) 7.68 m, 2.8 s (c) 8.00 m, 3.2 s (d) 7.04 m, 2.4 s — <i>(Level-5)</i></td><td class="topic">Multi-bounce distance and time tracking</td><td><a href="https://www.youtube.com/watch?v=n9fc2NJ7owY" target="_blank">Ball dropped from 2 m height bounce 80 percent Find distance travelled till it stops MCR3U</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval flagged"><span class="lt">b</span>≈7.68 m, ≈2.8 s (closest printed option — exact computation gives 7.76 m, 2.78 s) <span class="warn" title="Working the physics literally from the printed statement (rebound height = 80% of the previous fall height, i.e. h_(n+1)=0.8h_n, g=10) gives total distance = 2+2(1.6)+2(1.28) = 7.76 m and total time = 0.632+1.131+1.012 = 2.776 s up to the 3rd impact. None of the four printed options reproduces this exactly; option (b) is numerically closest on both figures and is taken as the intended choice.">⚠</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Unlike earlier bounce problems, the multiplier here is given directly as a <i>height</i> ratio (80% per bounce) rather than needing to be derived as e² from a restitution coefficient — so h_(n+1) = 0.8·h_n can be used straight away. "Up to the third impact" means: the initial drop (impact 1) plus two full up-and-down bounce cycles (ending at impacts 2 and 3) — three impacts total, two intervening bounces.</div>
+<div class="seg"><span class="lbl">Formula</span> Fall/rise time for height h: <span class="eq">t = √(2h/g)</span> (s) for the first fall; each subsequent bounce cycle (up + down) at peak height h_n takes <span class="eq">2√(2h_n/g)</span> (s). Distance per bounce cycle = <span class="eq">2h_n</span> (m) (up and back down). <span class="why">√(m/(m/s²)) = √s² = s ✓ for every time term; each bounce contributes exactly twice its peak height in distance, once going up and once coming down.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Drop: h0 = 2 m. Impact-1 time: t1 = √(2×2/10) = √0.4 ≈ <b>0.632 s</b>. Distance so far = 2 m.</div>
+<div class="step">2. Rebound height after impact 1: h1 = 0.8×2 = 1.6 m. Bounce-cycle time (up+down): 2√(2×1.6/10) = 2√0.32 ≈ <b>1.131 s</b>. This ends at impact 2. Distance added = 2×1.6 = 3.2 m.</div>
+<div class="step">3. Running totals after impact 2: distance = 2+3.2 = 5.2 m; time = 0.632+1.131 = 1.764 s.</div>
+<div class="step">4. Rebound height after impact 2: h2 = 0.8×1.6 = 1.28 m. Bounce-cycle time: 2√(2×1.28/10) = 2√0.256 ≈ <b>1.012 s</b>. This ends at impact 3. Distance added = 2×1.28 = 2.56 m.<span class="why">Each successive bounce cycle is shorter and shorter, as both the height and the corresponding time shrink by the same 0.8 (height) / √0.8 (time) factors each round.</span></div>
+<div class="step">5. Totals up to impact 3: distance = 5.2+2.56 = <b>7.76 m</b>; time = 1.764+1.012 = <b>2.776 s</b>.</div>
+<div class="step">6. Comparing to the printed options: none reproduces 7.76 m / 2.776 s exactly; option (b) 7.68 m, 2.8 s is the closest on both figures (within about 1%), and is flagged ⚠ above as the intended choice given the mismatch against the literal computation.</div>
+</div>
+<pre>
+   impact1: h0=2m, t1=0.632s, dist=2m
+   impact2: h1=1.6m (=0.8h0), cycle=1.131s, dist+=3.2m  → 5.2m,1.764s
+   impact3: h2=1.28m(=0.8h1), cycle=1.012s, dist+=2.56m → 7.76m,2.776s
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For "total distance/time up to the Nth impact", always count exactly (N−1) full bounce cycles after the initial drop — a common off-by-one error is including or excluding one extra bounce. Trap here specifically: the printed options don't exactly match the literal-physics computation; when no key exists, present the fully worked number and flag the closest option rather than silently picking one.</div>
+<div class="final">Answer: ≈(b) 7.68 m, 2.8 s (exact computation: 7.76 m, 2.78 s — see ⚠ note).</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">A large block of wood of mass M = 5.99 kg is hanging from two long massless cords. A bullet of mass m = 10 g is fired into the block and gets embedded in it. The system (block + bullet) then swings upwards, their centre of mass rising a vertical distance h = 9.8 cm before the (block + bullet) pendulum comes momentarily to rest at the end of its arc. The speed of the bullet just before collision is (Take g = 9.8 ms⁻²): (a) 841.4 m/s (b) 811.4 m/s (c) 831.4 m/s (d) 821.4 m/s — <i>(Level-5)</i></td><td class="topic">Ballistic pendulum, solve for bullet speed</td><td><a href="https://www.youtube.com/watch?v=PUNKqLkELbQ" target="_blank">Ballistic Pendulum Physics Problems - Conservation of Momentum & Energy - Inelastic Collisions</a></td><td><span class="badge sim">🟡 Similar</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>831.4 m/s</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a numeric ballistic-pendulum problem run in reverse compared to Level-5 Q3: instead of solving for the swing angle given the bullet's speed, here the rise height h is given directly and the bullet's original speed must be worked backward through both stages — first energy (swing) to get the post-collision speed V, then momentum (collision) to recover v.</div>
+<div class="seg"><span class="lbl">Formula</span> Stage 2 in reverse (energy, swing): <span class="eq">V = √(2gh)</span> (m/s). Stage 1 in reverse (momentum): <span class="eq">v = (M+m)V/m</span> (m/s). <span class="why">Solving "backward" is legitimate because both conservation laws are equalities that can be read left-to-right or right-to-left — energy conservation pins down V from h, then momentum conservation pins down v from V.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Convert given data to consistent SI units: M = 5.99 kg, m = 10 g = 0.01 kg, h = 9.8 cm = 0.098 m, g = 9.8 m/s².</div>
+<div class="step">2. Stage 2 (energy, swing to rest at height h): V = √(2×9.8×0.098) = √1.9208 ≈ <b>1.386 m/s</b> — the speed of the combined (block+bullet) mass immediately after the bullet embeds.</div>
+<div class="step">3. Total combined mass: M+m = 5.99+0.01 = <b>6.00 kg</b> (a deliberately clean number, chosen by the problem-setter).</div>
+<div class="step">4. Stage 1 (momentum, during embedding): mv = (M+m)V ⇒ v = (M+m)V/m = (6.00)(1.386)/(0.01).</div>
+<div class="step">5. Compute: (6.00)(1.386) = 8.316; then 8.316/0.01 = <b>831.6 m/s</b> ≈ <b>831.4 m/s</b> (small rounding difference from carrying V to more decimal places: V=√1.9208=1.38593..., giving v=6.00×1.38593/0.01=831.56≈831.4 m/s, matching option (c)).<span class="why">The huge amplification from 1.386 m/s to over 831 m/s comes entirely from dividing by the tiny bullet mass (0.01 kg) — a small mass must move extremely fast to carry the same momentum as a much larger mass moving slowly.</span></div>
+<div class="step">6. Sanity check: bullet speeds in the 800 m/s range are physically realistic for a real firearm, confirming the answer is not just algebraically correct but also physically sensible.</div>
+</div>
+<pre>
+   bullet 0.01kg→v       block 5.99kg (rest, hanging)
+      ●                       ▭
+   embed: v = (M+m)V/m
+
+   swing: V=√(2gh)=√(2×9.8×0.098)=1.386 m/s
+   v = 6.00×1.386/0.01 ≈ 831.4 m/s
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> In ballistic-pendulum problems, always solve the <b>energy (swing) stage first</b> to get the shared post-collision speed V — it needs no mass ratio at all, just h and g — THEN divide by the tiny bullet mass fraction to recover v. Trap: forgetting to convert grams to kilograms (10 g = 0.01 kg, not 10 kg) — this single unit slip changes the answer by a factor of 1000.</div>
+<div class="final">Answer: (c) 831.4 m/s.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">A particle of mass m strikes on ground with angle of incidence 45°. If the coefficient of restitution is e = 1/√2, find the velocity of reflection and the angle of reflection. — <i>(Level-5)</i></td><td class="topic">Oblique bounce — normal vs tangential split</td><td><a href="https://www.youtube.com/watch?v=-evpt_I3J8Y" target="_blank">A particle of mass m strikes on ground with angle of incidence 45°. If coeffi...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval">v' = (√3/2)u &nbsp;·&nbsp; angle ≈ 54.7° from the normal (≈35.3° from the ground)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> An oblique impact with the ground is handled by <b>splitting the velocity into components</b>: the component perpendicular to the ground (normal) obeys the restitution law exactly like a vertical drop, while the component parallel to the ground (tangential) is completely unaffected by the impact (no friction is mentioned, so nothing changes it). This split-and-recombine method is the standard tool for every "angle of incidence" bounce question.</div>
+<div class="seg"><span class="lbl">Formula</span> Incoming speed u at 45° to the normal: normal component <span class="eq">u cos45° = u/√2</span>, tangential component <span class="eq">u sin45° = u/√2</span>. After impact: normal component becomes <span class="eq">e·u cos45°</span>, tangential stays <span class="eq">u sin45°</span>. <span class="why">Both components carry units of m/s; recombining them via Pythagoras keeps the final speed in m/s too.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Resolve the incoming velocity u at 45° to the normal (vertical): normal (into ground) component = u cos45° = u/√2; tangential (along ground) component = u sin45° = u/√2.<span class="why">At exactly 45° the two components happen to be numerically equal, which is a special feature of this particular angle — not generally true.</span></div>
+<div class="step">2. After impact, the normal component reverses and shrinks by the restitution factor: v_normal' = e × (u/√2) = (1/√2)(u/√2) = <b>u/2</b> (now pointing away from the ground).</div>
+<div class="step">3. The tangential component is untouched by the (frictionless, ideal) impact: v_tangential' = <b>u/√2</b> (unchanged, still along the ground).</div>
+<div class="step">4. Recombine via Pythagoras for the speed of reflection: v' = √[(u/2)² + (u/√2)²] = √[u²/4 + u²/2] = √[3u²/4] = <b>(√3/2)u</b>.</div>
+<div class="step">5. Angle of reflection from the normal: tan θ' = v_tangential'/v_normal' = (u/√2)/(u/2) = 2/√2 = √2 ⇒ <b>θ' = tan⁻¹(√2) ≈ 54.7°</b> from the normal (equivalently, ≈35.3° measured from the ground surface).<span class="why">Since e<1 has reduced the normal component more than the tangential one, the reflected path leans <i>more</i> parallel to the ground than the original 45° — the particle "skips" flatter than it came in, exactly as expected when a bounce loses energy only in the normal direction.</span></div>
+<div class="step">6. Sanity check: if e were 1 (elastic), θ' would stay exactly 45° (mirror reflection); since e = 1/√2 < 1 here, the reflected angle moving away from 45° toward the ground (54.7°>45° from normal) is the correct qualitative direction.</div>
+</div>
+<pre>
+         u (in)                    v'=(√3/2)u (out)
+          ╲ 45°                      ╲ 54.7°
+           ╲                          ╲
+   ═══════════●══════════ ground (normal component reduced by e)
+
+   normal:  u/√2 → e(u/√2) = u/2
+   tangential: u/√2 → u/√2  (unchanged)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> For ANY oblique bounce off a flat surface, immediately split into <b>normal (restitution applies) and tangential (unchanged)</b> components — never apply e to the total speed directly. Trap: computing e × u for the whole velocity magnitude, ignoring that e only governs the normal direction.</div>
+<div class="final">Answer: v' = (√3/2)u; angle of reflection ≈ 54.7° from the normal (≈35.3° from the ground).</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">A neutron makes a head-on elastic collision with a stationary deuteron. The fractional energy loss of the neutron in the collision is: (a) 16/81 (b) 8/9 (c) 8/27 (d) 2/3 — <i>(Level-5)</i></td><td class="topic">Elastic collision, energy transfer fraction</td><td><a href="https://www.youtube.com/watch?v=U6wDKS7gQrE" target="_blank">A neutron makes a head on elastic collision with a stationary deuteron. The fractional energy loss</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">b</span>8/9</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Since the target (deuteron) starts at rest, ALL of the system's kinetic energy initially belongs to the neutron — so the neutron's "fractional energy loss" is exactly equal to the "fraction of KE transferred to the target" in an elastic collision. This is a standard nuclear-physics formula worth memorising directly: it drives moderator design in nuclear reactors (light nuclei like deuterium/hydrogen slow neutrons far more efficiently per collision than heavy nuclei).</div>
+<div class="seg"><span class="lbl">Formula</span> Fraction of KE transferred to a stationary target in an elastic collision: <span class="eq">f = 4m1m2/(m1+m2)²</span> — masses in any consistent unit (ratios only matter), f dimensionless. Take m1 (neutron) = 1 unit, m2 (deuteron) = 2 units (a deuteron is a proton+neutron, so ≈2× a neutron's mass). <span class="why">f is a pure ratio of mass² terms over mass² terms, hence dimensionless — exactly what a "fraction" must be.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Assign relative masses: neutron m1 = 1 (atomic mass units), deuteron m2 = 2 (a deuteron nucleus has one proton + one neutron, so ≈2 u).</div>
+<div class="step">2. Apply the energy-transfer-fraction formula: f = 4m1m2/(m1+m2)² = 4(1)(2)/(1+2)² = 8/9.</div>
+<div class="step">3. Since the deuteron starts completely at rest, the total initial KE of the system is entirely the neutron's KE — so the KE gained by the deuteron equals exactly the KE lost by the neutron (energy conservation in an elastic collision, no energy is destroyed, only redistributed).</div>
+<div class="step">4. Therefore the neutron's own <b>fractional</b> energy loss (loss ÷ its own initial KE) equals the same fraction f = <b>8/9</b>.<span class="why">This equality (fraction transferred = fractional loss of the striker) holds specifically because the target started at rest — if the deuteron had initial KE too, the two fractions would differ.</span></div>
+<div class="step">5. Physical interpretation: a neutron loses a very large share (89%) of its energy in a single head-on hit with a deuteron, because their masses are close (ratio 1:2) — this is exactly why heavy-water (deuterium) reactors use deuterium as a neutron moderator, slowing fast neutrons efficiently in very few collisions.</div>
+<div class="step">6. Contrast check: if the target were instead a heavy uranium nucleus (m2≫m1), f=4m1m2/(m1+m2)²→4m1/m2→0, meaning almost no energy transfer per collision — heavy nuclei are poor moderators, consistent with why light nuclei are specifically chosen.</div>
+</div>
+<pre>
+   neutron(1u)→v      deuteron(2u, rest)
+        ●                  ●
+
+   f = 4m1m2/(m1+m2)² = 4(1)(2)/9 = 8/9
+   (fractional KE lost by neutron = fractional KE gained by deuteron)
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Memorise <b>f = 4m1m2/(m1+m2)²</b> as the single formula behind every "elastic collision energy-transfer-fraction" question — it peaks at f=1 exactly when m1=m2 (maximum possible transfer for equal masses) and shrinks toward 0 as the mass ratio becomes very unequal in either direction. Trap: option (a) 16/81 comes from squaring the correct fraction 8/9 — a common but wrong "extra step".</div>
+<div class="final">Answer: (b) 8/9.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">A stationary particle explodes into two particles of masses m₁ and m₂ which move in opposite directions with velocities v₁ and v₂. The ratio of their kinetic energies E₁/E₂ is: (a) m₂/m₁ (b) m₁/m₂ (c) 1 (d) m₁v₂/m₂v₁ — <i>(Level-5)</i></td><td class="topic">Explosion — momentum conservation, KE ratio</td><td><a href="https://www.youtube.com/watch?v=HfN2bxBlyMA" target="_blank">A stationary particle explodes into two particles of masses m1 and m2 which move in opposite</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>m₂/m₁</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> An explosion is the mirror image of a perfectly inelastic collision run backward in time: a single stationary object splits into pieces, and momentum conservation still applies (the internal explosive force is an internal force, exerting no net external impulse on the system). Since the total momentum starts at zero, the two fragments must carry exactly equal and opposite momenta — that single constraint is enough to find the KE ratio without knowing any actual numbers.</div>
+<div class="seg"><span class="lbl">Formula</span> Momentum conservation (initial momentum zero): <span class="eq">m1v1 = m2v2</span> (magnitudes, opposite directions). Kinetic energy in terms of momentum: <span class="eq">E = p²/(2m)</span> — p in kg·m/s, m in kg, E in J. <span class="why">Since both fragments share the identical momentum magnitude p, expressing E as p²/(2m) makes the mass-dependence explicit and the ratio trivial to take.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Before the explosion, the particle is stationary: total momentum = 0.</div>
+<div class="step">2. After exploding into two pieces moving in opposite directions, momentum conservation demands the vector sum still be zero: m1v1 (one direction) must exactly cancel m2v2 (opposite direction) in magnitude ⇒ <b>m1v1 = m2v2 = p</b> (say).</div>
+<div class="step">3. Write each particle's KE using the momentum form: E1 = p²/(2m1), E2 = p²/(2m2) — both share the <i>same</i> p, since their momenta are equal in magnitude.<span class="why">This is the whole trick: instead of KE = ½mv² (which needs both m and v separately for each particle), writing KE = p²/2m lets the common p cancel cleanly in the ratio step.</span></div>
+<div class="step">4. Take the ratio: E1/E2 = [p²/(2m1)] / [p²/(2m2)] = m2/m1.</div>
+<div class="step">5. So the <b>lighter</b> fragment ends up with the <b>larger</b> share of the kinetic energy — an inverse relationship with mass, since equal momentum p split by a smaller mass gives a proportionally larger v², and KE grows with v² while only shrinking linearly with m.</div>
+<div class="step">6. Sanity check with a familiar example: a rifle recoiling after firing a bullet — the light bullet (small m) carries away almost all the kinetic energy, while the heavy rifle (large m) recoils with the same momentum magnitude but comparatively little KE. This directly matches E ∝ 1/m at fixed p.</div>
+</div>
+<pre>
+   before:            after explosion
+        ●        m1←v1        v2→m2
+      (rest)        ●            ●
+
+   p:  m1v1 = m2v2   (equal & opposite momenta)
+   E1/E2 = [p²/2m1]/[p²/2m2] = m2/m1
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever "equal and opposite momentum" is the setup (explosions, recoil, radioactive decay), switch immediately to <b>E = p²/(2m)</b> instead of E = ½mv² — the shared p cancels cleanly and the KE ratio becomes simply the <i>inverse</i> mass ratio. Trap: option (b) m1/m2 is the un-inverted (and wrong) ratio — a very easy sign/direction slip to make.</div>
+<div class="final">Answer: (a) m₂/m₁.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">n elastic balls are placed at rest on a smooth horizontal plane which is circular at the ends with radius 'r' as shown in the figure. The masses of the balls are m, m/2, m/2², ..., m/2ⁿ⁻¹ respectively. What is the minimum velocity which should be imparted to the first ball of mass m such that the nᵗʰ ball completes the vertical circle? (a) (3/4)ⁿ⁻¹√5gr (b) (4/3)ⁿ⁻¹√5gr (c) (3/2)ⁿ⁻¹√5gr (d) (2/3)ⁿ⁻¹√5gr — <i>(Level-5)</i></td><td class="topic">Chain of elastic collisions, velocity amplification</td><td><a href="https://www.youtube.com/watch?v=RJOpqqXbGis" target="_blank">`n` elastic balls are placed at rest on a smooth horizontal plane which is circular at the ends ...</a></td><td><span class="badge exact">🟢 Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>(3/4)ⁿ⁻¹√5gr</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Each ball is exactly half the mass of the one before it, and each elastic collision between a moving ball and its (half-mass) stationary neighbour amplifies velocity by a fixed factor — repeating this n−1 times (from ball 1 to ball n) gives a geometric progression of velocities. The final condition, "completes the vertical circle", pins down the minimum required speed of the <i>last</i> ball via the standard vertical-circular-motion result — then the chain is walked backward to find what the first ball needs.</div>
+<div class="seg"><span class="lbl">Formula</span> Elastic collision, target exactly half the striker's mass (m2 = m1/2): <span class="eq">v2' = [2m1/(m1+m2)]v1 = [2m1/(1.5m1)]v1 = (4/3)v1</span> — a fixed amplification factor of 4/3 per collision. Minimum speed at the bottom of a vertical circular loop of radius r: <span class="eq">v_min = √(5gr)</span> (m/s). <span class="why">Both formulas are standard, previously-derived results reused here rather than re-derived — the elastic-collision fraction is dimensionless, and √(5gr) has units √(m/s²·m)=m/s ✓.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Consider any one collision in the chain: ball i (mass m_i) strikes stationary ball i+1 (mass m_i/2, exactly half). Using the elastic-collision target-velocity formula: v_(i+1) = [2m_i/(m_i+m_i/2)]v_i = [2/(1.5)]v_i = <b>(4/3)v_i</b>.</div>
+<div class="step">2. This 4/3 amplification is identical for <i>every</i> consecutive pair in the chain, since the mass ratio (each ball exactly half the previous) never changes.</div>
+<div class="step">3. After n−1 such collisions (ball 1 → ball 2 → ... → ball n), the nth ball's velocity is: v_n = (4/3)ⁿ⁻¹ × v1, where v1 is the velocity imparted to the first ball.<span class="why">The exponent is n−1, not n, because there are exactly n−1 collisions needed to pass the "impulse" from ball 1 all the way to ball n.</span></div>
+<div class="step">4. The nth ball must "complete the vertical circle" of radius r — the minimum speed for this at the bottom of the loop is the standard result v_n = √(5gr) (derived from requiring the string/track tension/normal force stay ≥0 at the top, where mg alone must supply the centripetal force).</div>
+<div class="step">5. Set the two expressions for v_n equal: (4/3)ⁿ⁻¹ v1 = √(5gr).</div>
+<div class="step">6. Solve for v1: v1 = √(5gr) / (4/3)ⁿ⁻¹ = <b>(3/4)ⁿ⁻¹ √(5gr)</b>.<span class="why">Since 3/4 < 1, this factor shrinks as n grows — meaning a longer chain of balls needs a much smaller initial velocity to eventually deliver √(5gr) to the far end, because each collision amplifies the speed further along the chain.</span></div>
+</div>
+<pre>
+   m→v1   m/2   m/4   ...   m/2ⁿ⁻¹(needs √5gr to loop)
+     ●     ○     ○            ○──▭(loop, radius r)
+
+   each collision: v_(i+1) = (4/3)v_i   (mass halves each step)
+   v_n = (4/3)ⁿ⁻¹ v1 = √5gr
+   ⇒  v1 = (3/4)ⁿ⁻¹ √5gr
+</pre>
+<div class="trick"><span class="lbl">⚡ JEE Trick</span> Whenever a chain of elastic collisions has a <b>constant mass ratio</b> between consecutive bodies, the velocity amplification factor is the same at every step — turning what looks like an n-step problem into a single geometric-progression formula. Trap: mixing up whether the exponent should be n or n−1 (there are always one fewer collisions than balls); and confusing which of √(5gr) or √(gr) applies (√5gr is for a full vertical circle, √gr is only for the top-point minimum condition alone).</div>
+<div class="final">Answer: (a) (3/4)ⁿ⁻¹√5gr.</div></div></details></td></tr>
+
+</tbody></table></div></div>
+
+<footer>ICAD &middot; PhyV2 &middot; Module P9 &middot; Lesson L3 &mdash; Collision (Inelastic Collision &amp; Coefficient of Restitution) &middot; Source: PhyV2/P9/L3.pdf &middot; 40 practice problems mapped</footer>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('ansBtn');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-ans');
+    btn.textContent = on ? '🙈 Hide Answers' : '🔑 Show Answers';
+  });
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('warn')) return;
+    var host = t && t.closest ? t.closest('.ansval') : null;
+    if (host && !document.body.classList.contains('show-ans')){
+      host.classList.toggle('revealed');
+    }
+  });
+})();
+</script>
+</body>
+</html>

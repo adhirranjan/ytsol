@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-9 Collision — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+  <nav class="toc">
+    <h3>Chapter P-9</h3>
+    <a class="top" href="#top">↑ Overview &amp; Key Facts</a>
+    <a href="#l1">L-1 · Impulse &amp; Conservation of Momentum</a>
+    <a href="#l2">L-2 · Elastic Collision (1-D)</a>
+    <a href="#l3">L-3 · Restitution &amp; Inelastic (1-D)</a>
+    <a href="#l4">L-4 · Energy Loss in Collisions</a>
+    <a href="#l5">L-5 &amp; L-6 · Collisions in 2-D</a>
+    <a href="#strongbox">★ Strong Box</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD · JEE Physics · Revision Notes</p>
+      <h1>P-9 · Collision</h1>
+      <p>Lectures L-1 to L-6 + Strong Box · impulse &amp; momentum, elastic &amp; inelastic collisions, coefficient of restitution, two-dimensional (oblique) collisions</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- KEY FACTS -->
+    <section class="lec" id="keyfacts">
+      <div class="lec-head"><span class="lec-tag">★ MEMORIZE</span><h2>Key Facts &amp; Formula Sheet</h2></div>
+      <div class="twrap"><table>
+        <tr><th>Quantity / Idea</th><th>Result</th></tr>
+        <tr><td>Impulse of a force</td><td><code>J = ∫F dt = Δp = p<sub>f</sub> − p<sub>i</sub> = m(v − u)</code></td></tr>
+        <tr><td>Impulse from an F–t graph</td><td><code>J = area under the F–t curve</code></td></tr>
+        <tr><td>Conservation of linear momentum (F<sub>ext</sub>=0)</td><td><code>Σp = constant</code> &nbsp;⇒&nbsp; <code>m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂'</code></td></tr>
+        <tr><td>Elastic collision</td><td>both <b>KE &amp; momentum conserved</b></td></tr>
+        <tr><td>1-D elastic — final velocities</td><td><code>v₁' = ((m₁−m₂)v₁ + 2m₂v₂)/(m₁+m₂)</code><br><code>v₂' = ((m₂−m₁)v₂ + 2m₁v₁)/(m₁+m₂)</code></td></tr>
+        <tr><td>Equal masses, elastic</td><td>velocities are <b>exchanged</b> (v₁'=v₂, v₂'=v₁)</td></tr>
+        <tr><td>Perfectly inelastic (stick together)</td><td><code>v' = (m₁v₁ + m₂v₂)/(m₁+m₂)</code></td></tr>
+        <tr><td>Coefficient of restitution</td><td><code>e = (separation speed)/(approach speed) = (v₂'−v₁')/(v₁−v₂)</code></td></tr>
+        <tr><td>e limits</td><td><code>e = 1</code> elastic · <code>0 &lt; e &lt; 1</code> partially inelastic · <code>e = 0</code> perfectly inelastic</td></tr>
+        <tr><td>General 1-D (given e)</td><td><code>v₁' = ((m₁−em₂)/(m₁+m₂))v₁ + ((m₂+em₂)/(m₁+m₂))v₂</code></td></tr>
+        <tr><td>Loss of KE (perfectly inelastic)</td><td><code>ΔK = m₁m₂(v₁−v₂)² / [2(m₁+m₂)]</code></td></tr>
+        <tr><td>Ball dropped from h, bounce with e</td><td>height after n bounces <code>h<sub>n</sub> = e<sup>2n</sup> h</code></td></tr>
+        <tr><td>Oblique / 2-D collision</td><td>conserve momentum in <b>x</b> and <b>y</b> separately; restitution acts along line of impact</td></tr>
+        <tr><td>g (unless stated)</td><td>10 m s⁻²</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">★ Core idea</span>In <b>every</b> collision (elastic or not) <b>momentum is conserved</b>; kinetic energy is conserved <b>only</b> if the collision is elastic. The coefficient of restitution <code>e</code> is the single number that tells you where a collision sits between perfectly elastic (e = 1) and perfectly inelastic (e = 0).</div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Impulse, Impulsive Force &amp; Conservation of Momentum</h2></div>
+      <ul>
+        <li><b>Impulse</b> is the change in momentum produced when a force acts for a time interval — the product of force and the time it acts.</li>
+        <li>An <b>impulsive force</b> acts for a very short time but produces a large change in momentum (hammer on a nail, a kicked football, a car hitting a wall).</li>
+      </ul>
+      <div class="formula"><span class="lbl">impulse (constant force)</span>J⃗ = F⃗t &nbsp;·&nbsp; Ft = mv − mu &nbsp;⇒&nbsp; J = Δp⃗ = p⃗<sub>f</sub> − p⃗<sub>i</sub></div>
+      <h3 class="sub">Instantaneous impulse</h3>
+      <ul><li>When a force acts for so short a time that the effect is instantaneous (a bat striking a ball), F and t individually are unknown but their product is found from the momentum change.</li></ul>
+      <div class="formula"><span class="lbl">general impulse</span>J⃗ = ∫F⃗ dt = Δp⃗ = p⃗<sub>f</sub> − p⃗<sub>i</sub> &nbsp;·&nbsp; (mass constant) p<sub>f</sub> − p<sub>i</sub> = m(v<sub>f</sub> − v<sub>i</sub>)</div>
+      <ul>
+        <li><b>Case 1 — constant force:</b> impulse = force × time interval.</li>
+        <li><b>Case 2 — force a function of time:</b> impulse = ∫F dt over the interval.</li>
+        <li><b>Case 3 — F–t graph given:</b> impulse = area under the F–t curve = change in momentum.</li>
+      </ul>
+      <div class="call tip"><span class="h">💡 Force-time curve</span>The <b>area</b> under an F–t graph is the impulse, i.e. the change in linear momentum p<sub>f</sub> − p<sub>i</sub>. Instantaneously, F⃗ = dp⃗/dt.</div>
+      <h3 class="sub">Conservation of linear momentum (recoil, explosion)</h3>
+      <div class="formula"><span class="lbl">from Newton's 2nd law</span>F⃗ = dp⃗/dt &nbsp;·&nbsp; if F<sub>ext</sub> = 0 ⇒ dp⃗/dt = 0 ⇒ p⃗ = constant</div>
+      <ul>
+        <li>With no external force the total momentum of a system stays constant. For a body at rest that explodes into fragments, <code>0 = m₁v⃗₁ + m₂v⃗₂</code> ⇒ the fragments carry <b>equal and opposite momenta</b>.</li>
+        <li>Useful spin-off: <code>p = √(2mK)</code> (K = kinetic energy), so for equal-momentum fragments the lighter one carries more KE.</li>
+      </ul>
+      <div class="det-block det">
+        <div class="dh">Why gun–bullet / explosion problems work</div>
+        The forces driving an explosion (or the gases pushing a bullet) are <b>internal</b> to the system, so they cannot change its total momentum. Starting from rest, the total stays zero: the gun recoils with exactly the momentum the bullet carries forward, <code>m<sub>gun</sub>v<sub>gun</sub> = m<sub>bullet</sub>v<sub>bullet</sub></code>. The lighter body always ends up faster.
+      </div>
+      <div class="call trap"><span class="h">⚠ Trap</span>Impulse and momentum are <b>vectors</b>. For a ball that bounces straight back, Δp = m(v<sub>after</sub> − v<sub>before</sub>) uses <b>opposite signs</b> — the change is m(v + u), not m(v − u).</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">A ball of mass 200 g is projected with a velocity of 30 m/s at 30° from the horizontal. Using the concept of impulse, find the change in velocity in 2 s. (g = 10 m/s²)</div>
+        <div class="s">In flight only gravity acts, a constant force mg, so J = Ft = mΔv ⇒ Δv = (t/m)F = (t/m)(mg) = gt.</div>
+        <div class="s">Δv = g·t = 10 × 2 = 20 m/s, directed downward.</div>
+        <div class="ans">Δv = 20 m/s (downward)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">A time-varying force F = 2t acts on a 2 kg particle moving along the x-axis. Its velocity is 4 m/s along negative x at t = 0. Find the velocity at the end of 4 s.</div>
+        <div class="s">J = ∫₀⁴ F dt = ∫₀⁴ 2t dt = [t²]₀⁴ = 16 kg·m/s.</div>
+        <div class="s">m(v<sub>f</sub> − v<sub>i</sub>) = 16 with v<sub>i</sub> = −4: 2(v<sub>f</sub> + 4) = 16 ⇒ v<sub>f</sub> + 4 = 8.</div>
+        <div class="ans">v<sub>f</sub> = 4 m/s (along positive x)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">A block of mass m and a pan of equal mass are connected by a string over a smooth light pulley. A particle of mass m falls on the pan with speed v and sticks. Find the speed of the system just after the collision.</div>
+        <div class="s">On the particle: ∫N dt = mv − mV. On the pan: ∫(N − T)dt = mV. On the block: ∫T dt = mV.</div>
+        <div class="s">Adding the last two: ∫N dt = 2mV. Equating with the first: mv − mV = 2mV ⇒ v = 3V.</div>
+        <div class="ans">V = v/3</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Two billiard balls each of mass 0.05 kg moving in opposite directions with speed 6 m/s collide and rebound with the same speed. What is the impulse imparted to each ball by the other?</div>
+        <div class="s">Take u₁ = 6, u₂ = −6, v₁ = −6, v₂ = 6 (m/s).</div>
+        <div class="s">J₁₂ = m(v₁ − u₁) = 0.05(−6 − 6) = −0.6 kg·m/s; &nbsp; J₂₁ = m(v₂ − u₂) = 0.05(6 + 6) = +0.6 kg·m/s.</div>
+        <div class="ans">±0.6 kg·m/s (equal and opposite)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">If the change in momentum is 0.5 kg·m/s, what is the area under the curve in the graph of force versus time?</div>
+        <div class="s">The area under an F–t curve equals the change in momentum (impulse).</div>
+        <div class="ans">Area = 0.5 kg·m/s</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">A 50 g ball is loaded into a 1.3 kg cannon. After the explosion a photogate timer measures the cannon to recoil 6 cm in 0.02 s. Determine the speed of the cannon and of the ball after the explosion.</div>
+        <div class="s">v<sub>cannon</sub> = d/t = 0.06/0.02 = 3 m/s.</div>
+        <div class="s">Conservation of momentum: m<sub>ball</sub>v<sub>ball</sub> = −m<sub>cannon</sub>v<sub>cannon</sub> ⇒ 0.05 v<sub>ball</sub> = 1.3 × 3 = 3.9.</div>
+        <div class="ans">v<sub>cannon</sub> = 3 m/s, &nbsp; v<sub>ball</sub> = 78 m/s</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">A bomb of mass 8 kg explodes into two fragments of 2 kg and 6 kg. If the velocity of the 2 kg piece is 2 m/s, find the kinetic energy of the 6 kg piece.</div>
+        <div class="s">Momentum: m₁v₁ = m₂v₂ ⇒ 2 × 2 = 6 v₂ ⇒ v₂ = 2/3 m/s.</div>
+        <div class="s">KE = ½ m₂ v₂² = ½ (6)(2/3)² = 3 × 4/9 = 12/9.</div>
+        <div class="ans">KE of 6 kg piece = 4/3 J ≈ 1.33 J</div>
+      </div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Collisions: Elastic &amp; Inelastic · One-Dimensional Elastic Collision</h2></div>
+      <ul>
+        <li>A <b>collision</b> is any strong, short interaction between bodies — they need not physically touch. During it each body feels an impulse, but the <b>total momentum of the system is always conserved</b>.</li>
+        <li><b>Elastic collision:</b> the bodies regain their original shape and size; <b>both kinetic energy and momentum are conserved</b>.</li>
+        <li><b>Inelastic collision:</b> the bodies do not fully regain their shape; part of the mechanical energy becomes deformation/heat energy. <b>Momentum is still conserved</b>, kinetic energy is not.</li>
+      </ul>
+      <div class="det-block det">
+        <div class="dh">The spring picture of a collision</div>
+        Imagine a spring on the rear block m₂ with the faster block m₁ (v₁ &gt; v₂) catching up. The spring compresses, slowing m₁ and speeding up m₂, until at <b>maximum compression both move with the same velocity</b>. The spring then relaxes, pushing them apart, and finally the front block leaves faster (v₂' &gt; v₁'). If all the stored energy is returned the collision is elastic.
+      </div>
+      <h3 class="sub">One-dimensional elastic collision</h3>
+      <div class="formula"><span class="lbl">conservation laws</span>m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂' &nbsp;·&nbsp; ½m₁v₁² + ½m₂v₂² = ½m₁v₁'² + ½m₂v₂'²</div>
+      <div class="formula"><span class="lbl">solving the two together</span>v₁' = ((m₁−m₂)/(m₁+m₂))v₁ + (2m₂/(m₁+m₂))v₂<br>v₂' = ((m₂−m₁)/(m₁+m₂))v₂ + (2m₁/(m₁+m₂))v₁</div>
+      <h3 class="sub">Special cases</h3>
+      <ul>
+        <li><b>m₁ = m₂:</b> the velocities are simply <b>exchanged</b> — v₁' = v₂, v₂' = v₁.</li>
+        <li><b>m₁ ≫ m₂, v₁ = 0:</b> v₁' = 0, v₂' = −v₂ (light body bounces straight back off the heavy one).</li>
+        <li><b>m₂ ≫ m₁, v₁ = 0:</b> v₁' = 2v₂, v₂' = v₂ (heavy body ploughs on; light body is knocked ahead at twice the heavy body's speed).</li>
+      </ul>
+      <div class="call star"><span class="h">★ Remember</span>Equal-mass elastic collision on a line = a clean <b>swap of velocities</b>. This is why a moving billiard ball stops dead and the struck ball goes off with the incoming speed.</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Two balls of masses m and 2m moving in opposite directions collide head-on elastically with velocities v and 2v. Find their velocities after collision.</div>
+        <div class="s">Take the m-ball as body 1 moving in −x: v₁ = −v, m₁ = m; the 2m-ball: v₂ = +2v, m₂ = 2m.</div>
+        <div class="s">v₁' = ((m−2m)/(3m))(−v) + ((2·2m)/(3m))(2v) = (−1/3)(−v) + (4/3)(2v) = v/3 + 8v/3 = 3v.</div>
+        <div class="s">v₂' = ((2m−m)/(3m))(2v) + ((2m)/(3m))(−v) = (1/3)(2v) − (2/3)(v) = 2v/3 − 2v/3 = 0.</div>
+        <div class="ans">v₁' = 3v, &nbsp; v₂' = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Two pendulum bobs of masses m and 2m collide head-on elastically at the lowest point of their motion. Both are released from a height H above the lowest point. To what heights do they rise for the first time after the collision?</div>
+        <div class="s">Speeds at the bottom: each √(2gH). Body 1 (m): v₁ = −√(2gH); body 2 (2m): v₂ = +√(2gH).</div>
+        <div class="s">v₁' = ((m−2m)/3m)(−√(2gH)) + (4m/3m)(√(2gH)) = (1/3 + 4/3)√(2gH) = (5/3)√(2gH).</div>
+        <div class="s">v₂' = ((2m−m)/3m)(√(2gH)) + (2m/3m)(−√(2gH)) = (1/3 − 2/3)√(2gH) = −(1/3)√(2gH).</div>
+        <div class="s">h₁ = v₁'²/2g = (25/9 · 2gH)/2g = 25H/9; &nbsp; h₂ = v₂'²/2g = (1/9 · 2gH)/2g = H/9.</div>
+        <div class="ans">h₁ = 25H/9 (mass m), &nbsp; h₂ = H/9 (mass 2m)</div>
+      </div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Inelastic Collision · Coefficient of Restitution · 1-D Inelastic Collision</h2></div>
+      <ul>
+        <li>In an <b>inelastic collision</b> the bodies do not regain their shape and some kinetic energy is lost; <b>momentum is still conserved</b>.</li>
+        <li><b>Partially inelastic:</b> the bodies stick briefly then separate — some KE lost, not all.</li>
+        <li><b>Perfectly inelastic:</b> the bodies stick together and move as one — the maximum KE (consistent with momentum) is lost.</li>
+      </ul>
+      <h3 class="sub">Coefficient of restitution e</h3>
+      <div class="formula"><span class="lbl">law of restitution</span>e = (separation speed)/(approach speed) = (v₂' − v₁')/(v₁ − v₂)</div>
+      <div class="formula"><span class="lbl">limits</span>0 ≤ e ≤ 1 &nbsp;·&nbsp; e = 0 (perfectly inelastic, stick) &nbsp;·&nbsp; e = 1 (elastic, separation speed = approach speed)</div>
+      <ul><li>For a given pair of bodies e is a constant that measures how "bouncy" the collision is.</li></ul>
+      <h3 class="sub">General 1-D collision (momentum + restitution)</h3>
+      <div class="formula"><span class="lbl">the two working equations</span>m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂' &nbsp;·&nbsp; v₁' − v₂' = e(v₁ − v₂)</div>
+      <div class="formula"><span class="lbl">solved for the final velocities</span>v₁' = ((m₁−em₂)/(m₁+m₂))v₁ + ((m₂+em₂)/(m₁+m₂))v₂<br>v₂' = ((m₂−em₁)/(m₁+m₂))v₂ + ((m₁+em₁)/(m₁+m₂))v₁</div>
+      <ul>
+        <li><b>e = 1</b> reproduces the elastic formulas of L-2.</li>
+        <li><b>e = 0</b> gives the common velocity v₁' = v₂' = (m₁v₁ + m₂v₂)/(m₁+m₂).</li>
+        <li><b>m₁ = m₂, v₁ = 0</b> (struck ball at rest): v₁' = ((1+e)/2)v₂, &nbsp; v₂' = ((1−e)/2)v₂.</li>
+      </ul>
+      <div class="call trap"><span class="h">⚠ Trap</span>The restitution equation carries a <b>sign convention</b>: separation speed and approach speed are magnitudes along the line of impact. Set up v₁ − v₂ (approach) and v₂' − v₁' (separation) consistently, or you will get the wrong sign for e.</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">A ball of mass m moving at speed v makes a head-on inelastic collision with an identical ball at rest. The kinetic energy after collision is ¾ of the original. Find the coefficient of restitution.</div>
+        <div class="s">Equal masses, target at rest: v₁' = ((1+e)/2)v, v₂' = ((1−e)/2)v.</div>
+        <div class="s">K<sub>f</sub> = ¾K<sub>i</sub>: ((1+e)/2)² + ((1−e)/2)² = ¾ ⇒ (1+e)² + (1−e)² = 3 ⇒ 2 + 2e² = 3.</div>
+        <div class="s">e² = ½.</div>
+        <div class="ans">e = 1/√2 ≈ 0.71</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">A ball is moving with velocity 2 m/s towards a heavy wall moving towards the ball with speed 1 m/s. Assuming the collision is elastic, find the velocity of the ball immediately after the collision.</div>
+        <div class="s">Elastic ⇒ e = 1, so separation speed = approach speed. Approach speed = 2 + 1 = 3 m/s (they move toward each other).</div>
+        <div class="s">The heavy wall keeps its speed (1 m/s, unchanged). If the ball rebounds at v, then v − 1 = 2 + 1.</div>
+        <div class="ans">v = 4 m/s (rebounds, opposite to its original direction)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">A cart A of mass 50 kg moving at 20 km/h hits a lighter cart B of mass 20 kg moving towards it at 10 km/h. The carts cling together. Find the speed of the combined mass after the collision.</div>
+        <div class="s">Perfectly inelastic: v' = (m₁v₁ + m₂v₂)/(m₁+m₂) with v₂ = −10 km/h.</div>
+        <div class="s">v' = (50·20 − 20·10)/70 = (1000 − 200)/70 = 800/70.</div>
+        <div class="ans">v' = 80/7 ≈ 11.4 km/h (in A's original direction)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">An object of mass 10 kg moving with speed 10 m/s hits another object of mass 5 kg moving with velocity v. They stick and the combined mass moves at 25/3 m/s. Find v.</div>
+        <div class="s">v' = (m₁v₁ + m₂v₂)/(m₁+m₂): 25/3 = (10·10 + 5·v)/15 ⇒ 125 = 100 + 5v.</div>
+        <div class="ans">v = 5 m/s</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">A block of mass m moving at velocity v collides head-on with another block of mass 2m at rest. If the coefficient of restitution is ½, find the velocities of the blocks after the collision.</div>
+        <div class="s">Momentum: mv = mv₁' + 2mv₂' ⇒ v = v₁' + 2v₂'.</div>
+        <div class="s">Restitution: (v₂' − v₁')/v = ½ ⇒ v₂' − v₁' = v/2.</div>
+        <div class="s">Adding suitably: 3v₂' = 3v/2 ⇒ v₂' = v/2, then v₁' = 0.</div>
+        <div class="ans">v₁' = 0, &nbsp; v₂' = v/2</div>
+      </div>
+    </section>
+
+    <!-- L4 -->
+    <section class="lec" id="l4">
+      <div class="lec-head"><span class="lec-tag">L-4</span><h2>Loss of Kinetic Energy in Inelastic &amp; Perfectly Inelastic Collisions</h2></div>
+      <ul><li>When a collision is inelastic, some kinetic energy is converted into heat, sound or deformation energy, so K<sub>f</sub> &lt; K<sub>i</sub>. Momentum is still conserved.</li></ul>
+      <div class="formula"><span class="lbl">general loss (using e-form velocities)</span>K<sub>i</sub> − K<sub>f</sub> = ½m₂(v₂' − v₂)(v₁ + v₁' − v₂ − v₂')</div>
+      <h3 class="sub">Perfectly inelastic collision (compact result)</h3>
+      <div class="formula"><span class="lbl">common velocity &amp; energy lost</span>v' = (m₁v₁ + m₂v₂)/(m₁+m₂) &nbsp;⇒&nbsp; K<sub>i</sub> − K<sub>f</sub> = m₁m₂(v₁ − v₂)² / [2(m₁+m₂)]</div>
+      <div class="det-block det">
+        <div class="dh">Where the compact formula comes from</div>
+        Writing K<sub>i</sub> = ½m₁v₁² + ½m₂v₂² and K<sub>f</sub> = ½(m₁+m₂)v'² with v' = (m₁v₁+m₂v₂)/(m₁+m₂), the algebra collapses to <b>ΔK = m₁m₂(v₁−v₂)²/[2(m₁+m₂)]</b>. It depends only on the <b>relative</b> velocity (v₁ − v₂): if the two bodies approach with the same relative speed, the same energy is lost regardless of the frame.
+      </div>
+      <div class="call star"><span class="h">★ Reduced mass shortcut</span>ΔK = ½·μ·(v₁ − v₂)² with the reduced mass μ = m₁m₂/(m₁+m₂). Maximum possible loss in a collision is exactly this — reached when the bodies stick (e = 0).</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">A ball of mass m moving with speed 2v collides with a ball of mass 2m moving with speed v (same line). If the coefficient of restitution is ¼, find the loss in kinetic energy due to the collision.</div>
+        <div class="s">Label as the module does: m₁ = 2m (at v), m₂ = m (at 2v), e = ¼.</div>
+        <div class="s">v₁' = ((2m − m/4)/3m)v + ((m + m/4)/3m)(2v) = (7/12)v + (10/12)v = 17v/12.</div>
+        <div class="s">v₂' = ((m − m/2)/3m)(2v) + ((2m + m/2)/3m)(v) = (1/6)(2v) + (5/6)(v) = 7v/6.</div>
+        <div class="s">Direct check: K<sub>i</sub> = ½(2m)v² + ½(m)(2v)² = mv² + 2mv² = 3mv².</div>
+        <div class="s">K<sub>f</sub> = ½(2m)(17v/12)² + ½(m)(7v/6)² = 289mv²/144 + 98mv²/144 = 387mv²/144.</div>
+        <div class="s">ΔK = 3mv² − 387mv²/144 = (432 − 387)mv²/144 = 45mv²/144 = 5mv²/16.</div>
+        <div class="ans">Loss = 5mv²/16 ⚠ (see note)</div>
+      </div>
+      <div class="call trap det"><span class="h">⚠ Book misprint</span>The module prints the loss for this example as <b>5mv²/8</b>. That drops the leading ½ in the loss formula. Both the direct K<sub>i</sub> − K<sub>f</sub> calculation above (3mv² − 387mv²/144) <b>and</b> ½m₂(v₂'−v₂)(v₁+v₁'−v₂−v₂') = ½m(−5v/6)(−3v/4) give <b>5mv²/16</b>, not 5mv²/8. Use 5mv²/16.</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">In the previous problem, if the coefficient of restitution is ¾, what will be the loss in kinetic energy?</div>
+        <div class="s">m₁ = 2m (at v), m₂ = m (at 2v), e = ¾.</div>
+        <div class="s">v₁' = ((2m − 3m/4)/3m)v + ((m + 3m/4)/3m)(2v) = (5/12)v + (14/12)v = 19v/12.</div>
+        <div class="s">v₂' = ((m − 3m/2)/3m)(2v) + ((2m + 3m/2)/3m)(v) = (−1/6)(2v) + (7/6)(v) = 5v/6.</div>
+        <div class="s">ΔK = ½m₂(v₂'−v₂)(v₁+v₁'−v₂−v₂') = ½m(5v/6 − 2v)(v + 19v/12 − 2v − 5v/6) = ½m(−7v/6)(−v/4).</div>
+        <div class="ans">Loss = 7mv²/48</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">A 60 kg man skating at 10 m/s collides with a 40 kg skater at rest and they cling together. Find the loss of kinetic energy during the collision.</div>
+        <div class="s">Perfectly inelastic: ΔK = m₁m₂(v₁−v₂)²/[2(m₁+m₂)].</div>
+        <div class="s">= (60)(40)(10 − 0)²/[2(60 + 40)] = 240000/200.</div>
+        <div class="ans">Loss = 1200 J</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">A block of mass 2.0 kg moving at 2.0 m/s collides head-on with another block of equal mass at rest. Find the maximum possible loss in kinetic energy due to the collision.</div>
+        <div class="s">Maximum loss ⇒ perfectly inelastic: ΔK = m₁m₂(v₁−v₂)²/[2(m₁+m₂)].</div>
+        <div class="s">= (2)(2)(2 − 0)²/[2(2 + 2)] = 16/8.</div>
+        <div class="ans">Maximum loss = 2 J</div>
+      </div>
+    </section>
+
+    <!-- L5 & L6 -->
+    <section class="lec" id="l5">
+      <div class="lec-head"><span class="lec-tag">L-5 &amp; L-6</span><h2>Collisions in Two Dimensions (Oblique Collisions)</h2></div>
+      <ul>
+        <li>When bodies move off in different directions after impact (billiard balls, air molecules), the <b>vector</b> nature of momentum matters. Resolve everything into two perpendicular directions (x and y) and <b>conserve momentum in each separately</b>. 2-D collisions come in the same three flavours: elastic, partially elastic and perfectly inelastic.</li>
+      </ul>
+      <h3 class="sub">Perfectly inelastic collision in 2-D</h3>
+      <ul><li>Two objects collide and stick, moving off as one body with common velocity v' at angle θ₂. Momentum is conserved in both x and y; kinetic energy is not.</li></ul>
+      <div class="formula"><span class="lbl">m₁ along x, m₂ at angle θ₁; combined at θ₂</span>x: m₁v₁ + m₂v₂cosθ₁ = (m₁+m₂)v'cosθ₂<br>y: m₂v₂sinθ₁ = (m₁+m₂)v'sinθ₂</div>
+      <h3 class="sub">Partially inelastic (non-sticking) 2-D collision</h3>
+      <ul><li>Both bodies scatter along different directions. Conserve momentum in x and y, and apply restitution <b>along the line of impact</b> (the line joining the centres), since the contact force acts along that line.</li></ul>
+      <div class="formula"><span class="lbl">momentum (u = before, v = after)</span>x: m₁u₁ + m₂u₂cosθ = m₁v₁cosθ₁ + m₂v₂cosθ₂<br>y: m₂u₂sinθ = m₁v₁sinθ₁ − m₂v₂sinθ₂</div>
+      <div class="formula"><span class="lbl">restitution along the line of contact</span>e = [v₂cosα₂ − v₁cos(θ₁+α₁)] / [u₁cosα₁ − u₂cos(θ+θ₂+α₂)]</div>
+      <div class="call star"><span class="h">★ Equal-mass elastic corner</span>When one body strikes an equal-mass body at rest and the collision is elastic and oblique, the two fly off at <b>90°</b> to each other — the classic billiards result.</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5 &amp; L-6</span>
+        <div class="q">Perfectly inelastic 2-D collision: m₁ = m along x with v₁ = v, m₂ = 2m with v₂ = 2v at θ₁ = 45°. Find the common speed v' and angle θ₂.</div>
+        <div class="s">x: mv + (2m)(2v)cos45° = (m+2m)v'cosθ₂ ⇒ (1 + 2√2)v = 3v'cosθ₂.</div>
+        <div class="s">y: (2m)(2v)sin45° = 3m·v'sinθ₂ ⇒ 2√2 v = 3v'sinθ₂.</div>
+        <div class="s">Dividing: tanθ₂ = 2√2/(1 + 2√2) ⇒ θ₂ = tan⁻¹(2√2/(1+2√2)).</div>
+        <div class="s">v' = (1/3)√((1+2√2)² + (2√2)²) v = (1/3)√(17 + 4√2) v.</div>
+        <div class="ans">v' = (√(17 + 4√2)/3) v, &nbsp; θ₂ = tan⁻¹(2√2/(1+2√2))</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5 &amp; L-6</span>
+        <div class="q">Same as above but with θ₁ = 30°. Find v' and θ₂.</div>
+        <div class="s">x: mv + (2m)(2v)cos30° = 3v'cosθ₂ ⇒ (1 + 2√3)v = 3v'cosθ₂.</div>
+        <div class="s">y: (2m)(2v)sin30° = 3v'sinθ₂ ⇒ 2v = 3v'sinθ₂.</div>
+        <div class="s">tanθ₂ = 2/(1 + 2√3) ⇒ θ₂ = tan⁻¹(2/(1+2√3)); &nbsp; v' = (1/3)√((1+2√3)² + 4) v = (√(17 + 4√3)/3) v.</div>
+        <div class="ans">v' = (√(17 + 4√3)/3) v, &nbsp; θ₂ = tan⁻¹(2/(1+2√3))</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5 &amp; L-6</span>
+        <div class="q">Partially inelastic 2-D collision: m₁ = 1 kg, m₂ = 2 kg, u₁ = 2 m/s, u₂ = 1 m/s, θ = 45°, θ₁ = 30°, θ₂ = 60°. Find v₁ and v₂.</div>
+        <div class="s">x: 1·2 + 2·1·cos45° = 1·v₁cos30° + 2·v₂cos60° ⇒ (×2) &nbsp; 4 + 2√2 = √3 v₁ + 2v₂ … (i)</div>
+        <div class="s">y: 2·1·sin45° = v₁sin30° − 2v₂sin60° ⇒ (×2) &nbsp; 2√2 = v₁ − 2√3 v₂ … (ii)</div>
+        <div class="s">Multiply (ii) by √3: 2√6 = √3 v₁ − 6v₂ … (iii). Subtract (iii) from (i): 4 + 2√2 − 2√6 = 8v₂.</div>
+        <div class="s">v₂ = (4 + 2√2 − 2√6)/8; back-substituting in (i): v₁ = (6 + 3√2 + √6)/(2√3).</div>
+        <div class="ans">v₂ = (4 + 2√2 − 2√6)/8 m/s, &nbsp; v₁ = (6 + 3√2 + √6)/(2√3) m/s</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5 &amp; L-6</span>
+        <div class="q">For the previous collision, with the line-of-impact angles α₁ = 45°, θ₂ = 30°, α₂ = 15°, find the coefficient of restitution, keeping the final speed v₁ the same as before and v₂ = 0.6 m/s.</div>
+        <div class="s">Use e = [v₂cosα₂ − v₁cos(θ₁+α₁)] / [u₁cosα₁ − u₂cos(θ+θ₂+α₂)] with v₁ = (6+3√2+√6)/(2√3), v₂ = 0.6.</div>
+        <div class="s">Numerator = ((4+2√2−2√6)/8)cos15° − 0.6cos75°; denominator = 2cos45° − 1·cos90°.</div>
+        <div class="ans">e ≈ 0.05</div>
+      </div>
+    </section>
+
+    <!-- STRONG BOX -->
+    <section class="lec" id="strongbox">
+      <div class="lec-head"><span class="lec-tag">★ STRONG BOX</span><h2>Previous-Year Questions (fully worked)</h2></div>
+      <ul>
+        <li>Momentum is conserved in <b>every</b> collision and explosion — that single law solves most of these. Reach for restitution only when the collision is not perfectly elastic or inelastic.</li>
+        <li>For an exploding body at rest, fragments carry <b>equal and opposite total momentum</b>; combine perpendicular momenta by Pythagoras.</li>
+        <li>For a bullet-in-block that then rises, chain two ideas: momentum through the (inelastic) hit, then energy for the rise.</li>
+      </ul>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2024)</span>
+        <div class="q">A simple pendulum of length 1 m has a wooden bob of mass 1 kg. It is struck by a bullet of mass 10⁻² kg moving at 2×10² m/s. The bullet embeds. Find the height to which the bob rises. (g = 10)</div>
+        <div class="s">Inelastic hit: v = (0.01×200)/(1.01) = 2/1.01 ≈ 1.98 m/s.</div>
+        <div class="s">Rise: h = v²/2g = (1.98)²/20 ≈ 3.92/20 ≈ 0.196 m.</div>
+        <div class="ans">h ≈ 0.20 m &nbsp;(option b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2024)</span>
+        <div class="q">A stationary particle breaks into two parts of masses m<sub>A</sub>, m<sub>B</sub> moving with velocities v<sub>A</sub>, v<sub>B</sub>. Find the ratio of their kinetic energies K<sub>B</sub> : K<sub>A</sub>.</div>
+        <div class="s">Momentum: m<sub>A</sub>v<sub>A</sub> = m<sub>B</sub>v<sub>B</sub> = p. KE = p²/2m, so K<sub>B</sub>/K<sub>A</sub> = m<sub>A</sub>/m<sub>B</sub>.</div>
+        <div class="s">Since m<sub>A</sub>/m<sub>B</sub> = v<sub>B</sub>/v<sub>A</sub>, the ratio equals v<sub>B</sub> : v<sub>A</sub>.</div>
+        <div class="ans">K<sub>B</sub> : K<sub>A</sub> = v<sub>B</sub> : v<sub>A</sub> &nbsp;(option a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2024)</span>
+        <div class="q">A spherical body of mass 100 g is dropped from 10 m. After hitting the ground it rebounds to 5 m. Find the impulse imparted by the ground. (g = 9.8)</div>
+        <div class="s">Down: v₁ = √(2·9.8·10) = 14 m/s. Up: v₂ = √(2·9.8·5) = √98 ≈ 9.9 m/s.</div>
+        <div class="s">Impulse = m(v₂ + v₁) = 0.1(9.9 + 14) = 0.1 × 23.9.</div>
+        <div class="ans">≈ 2.39 kg·m/s &nbsp;(option d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2024)</span>
+        <div class="q">A body of mass 1000 kg is moving at 6 m/s. If 200 kg extra mass is added, find the final velocity.</div>
+        <div class="s">Momentum conserved: 1000×6 = 1200×v ⇒ v = 6000/1200.</div>
+        <div class="ans">v = 5 m/s &nbsp;(option d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2024)</span>
+        <div class="q">An artillery piece of mass M₁ fires a shell of mass M₂ horizontally. Just after firing, find the ratio of KE of the artillery to that of the shell.</div>
+        <div class="s">Equal and opposite momenta: M₁V₁ = M₂V₂ = p. KE = p²/2M, so KE<sub>art</sub>/KE<sub>shell</sub> = M₂/M₁.</div>
+        <div class="ans">M₂/M₁ &nbsp;(option b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2023)</span>
+        <div class="q">A ball of mass 200 g rests on a vertical post of height 20 m. A bullet of mass 10 g hits its centre horizontally; afterward both travel independently. The ball lands 30 m and the bullet 120 m from the foot. Find the bullet's initial velocity. (g = 10)</div>
+        <div class="s">Fall time t = √(2·20/10) = 2 s. So v<sub>ball</sub> = 30/2 = 15, v<sub>bullet,after</sub> = 120/2 = 60 m/s.</div>
+        <div class="s">Momentum: 0.01u = 0.01·60 + 0.2·15 = 0.6 + 3 = 3.6 ⇒ u = 360.</div>
+        <div class="ans">u = 360 m/s &nbsp;(option d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2023)</span>
+        <div class="q">100 balls each of mass m moving at speed v strike a wall normally and reflect back with the same speed, in time t s. Find the total force on the wall.</div>
+        <div class="s">Each ball: Δp = 2mv. Total over 100 balls = 200mv in time t.</div>
+        <div class="ans">F = 200mv/t &nbsp;(option b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2023)</span>
+        <div class="q">A bullet of 10 g leaves a gun barrel at 600 m/s. The barrel is 50 cm long and the gun mass is 3 kg. Find the impulse supplied to the gun.</div>
+        <div class="s">Impulse on the gun = gun's recoil momentum = bullet's momentum = 0.01 × 600 (barrel length and gun mass are distractors).</div>
+        <div class="ans">6 N·s &nbsp;(option a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2022)</span>
+        <div class="q">A bag of sand of mass 9.8 kg is suspended. A bullet of 200 g travelling at 10 m/s embeds in it. Find the loss of kinetic energy.</div>
+        <div class="s">v = (0.2×10)/(10) = 0.2 m/s. K<sub>i</sub> = ½·0.2·10² = 10 J; K<sub>f</sub> = ½·10·0.2² = 0.2 J.</div>
+        <div class="ans">Loss = 9.8 J &nbsp;(option b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2022)</span>
+        <div class="q">A body of mass M at rest explodes into three pieces in the mass ratio 1:1:2. The two smaller pieces fly off perpendicular to each other at 30 m/s and 40 m/s. Find the velocity of the third piece.</div>
+        <div class="s">Smaller momenta: p₁ = 1·30 = 30, p₂ = 1·40 = 40, at 90° ⇒ resultant √(30²+40²) = 50.</div>
+        <div class="s">Third piece (mass 2) carries 50 in the opposite direction: v = 50/2.</div>
+        <div class="ans">25 m/s &nbsp;(option c)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Main 2022)</span>
+        <div class="q">A batsman hits back a ball of mass 0.4 kg straight towards the bowler without changing its speed of 15 m/s. Find the impulse imparted to the ball.</div>
+        <div class="s">Direction reverses: Δp = m(v − (−v)) = 0.4 × (15 + 15) = 0.4 × 30.</div>
+        <div class="ans">Impulse = 12 N·s</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Advanced 2025)</span>
+        <div class="q">In a scattering experiment a particle of mass 2m collides elastically with a particle of mass m initially at rest. Find the maximum angular deviation θ of the heavier particle (in radians).</div>
+        <div class="s">When a heavier body (mass 2m) strikes a lighter one at rest, the maximum deflection satisfies sinθ<sub>max</sub> = m₂/m₁ = m/(2m) = ½.</div>
+        <div class="ans">θ<sub>max</sub> = π/6 &nbsp;(option d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Advanced 2011)</span>
+        <div class="q">A ball of mass 0.2 kg rests on a post of height 5 m. A bullet of 0.01 kg at velocity V hits its centre horizontally; afterward both travel independently, the ball landing 20 m and the bullet 100 m from the foot. Find V.</div>
+        <div class="s">Fall time t = √(2·5/10) = 1 s. So v<sub>ball</sub> = 20, v<sub>bullet,after</sub> = 100 m/s.</div>
+        <div class="s">Momentum: 0.01V = 0.01·100 + 0.2·20 = 1 + 4 = 5 ⇒ V = 500.</div>
+        <div class="ans">V = 500 m/s &nbsp;(option d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Advanced 2010)</span>
+        <div class="q">Three objects A, B, C of masses m, 2m, m lie in a line. A moves at 9 m/s and collides elastically with B; then B collides completely inelastically with C. Find the final speed of C.</div>
+        <div class="s">A(m,9) elastic with B(2m,0): v<sub>B</sub>' = (2m/3m)·9 = 6 m/s.</div>
+        <div class="s">B(2m,6) sticks to C(m,0): v = (2m·6)/(3m) = 4 m/s.</div>
+        <div class="ans">v<sub>C</sub> = 4 m/s &nbsp;(option b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Advanced 2023, multiple correct)</span>
+        <div class="q">A frictionless slide (horizontal at its lower end) sits on a terrace of height 3h. A ball of mass m is released from height h above the terrace top, leaves the slide with u₀ horizontal, falls a distance d at angle θ, bounces with velocity v to height h₁; e = 1/√3. Which statements are correct?</div>
+        <div class="s">Leaving the slide: u₀ = √(2gh) x̂ ⇒ (a) correct.</div>
+        <div class="s">At the ground v<sub>x</sub> = √(2gh), v<sub>y</sub> = √(2g·3h) = √(6gh) ⇒ tanθ = √(6gh)/√(2gh) = √3 ⇒ θ = 60° ⇒ (c) correct.</div>
+        <div class="s">After bounce v<sub>y</sub>' = e√(6gh) = √(2gh) (upward, +ẑ), v<sub>x</sub> unchanged = √(2gh); so v = √(2gh)(x̂ + ẑ) — option (b) writes (x̂ − ẑ), wrong sign ⇒ (b) incorrect.</div>
+        <div class="s">h₁ = (v<sub>y</sub>')²/2g = h; d = u₀√(6h/g) = √(2gh)·√(6h/g) = 2√3 h ⇒ d/h₁ = 2√3 ⇒ (d) correct.</div>
+        <div class="ans">Correct: (a), (c), (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ (JEE Advanced 2010, multiple correct)</span>
+        <div class="q">A point mass of 1 kg collides elastically with a stationary 5 kg mass. After collision the 1 kg reverses and moves at 2 m/s. Which statements are correct?</div>
+        <div class="s">Elastic: v₁' = ((1−5)/6)u = −2u/3 = −2 ⇒ u = 3 m/s; v₂' = (2·1/6)u = u/3 = 1 m/s.</div>
+        <div class="s">(a) Total momentum = 1×3 = 3 kg·m/s ✓. (b) 5 kg momentum = 5×1 = 5, not 4 ✗.</div>
+        <div class="s">(c) V<sub>cm</sub> = 3/6 = 0.5 ⇒ KE<sub>cm</sub> = ½·6·0.5² = 0.75 J ✓. (d) Total KE = ½·1·3² = 4.5 J (elastic), not 4 J ✗.</div>
+        <div class="ans">Correct: (a) and (c)</div>
+      </div>
+    </section>
+
+    <div class="foot">ICAD · P-9 Collision · Revision Notes (L-1 to L-6 + Strong Box) · Quick + Detailed views. Built from the ICAD Command Capsule lecture PDFs (theory + every solved example) and the Strong Box PYQs; every result re-worked from first principles. One flagged book misprint (L-4 Example-1 energy loss: 5mv²/16, not 5mv²/8).</div>
+  </div>
+</div>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

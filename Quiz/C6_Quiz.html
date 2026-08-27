@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C-6 Thermodynamics — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Chemistry · Chapter Mastery Quiz</p>
+    <h1>C-6 · Thermodynamics</h1>
+    <p id="heroSub">Lectures L-1 to L-12 + Strong Box · 136 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">136 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · C-6 Thermodynamics · mastery quiz built from lectures L-1 to L-12 and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   C-6 THERMODYNAMICS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Systems, State Functions & Basic Terms",
+   desc:"open/closed/isolated systems, the boundary, extensive vs intensive properties, state functions vs path functions, thermodynamic equilibrium"},
+  {key:"L-2", name:"L-2 · Internal Energy, Heat, Work & Process Types",
+   desc:"internal energy as a state function, sign conventions for q and w, isothermal/adiabatic/isochoric/isobaric/cyclic processes"},
+  {key:"L-3", name:"L-3 · The First Law & Pressure–Volume Work",
+   desc:"ΔU = q + w, w = −P_ext ΔV, free expansion, calorie and litre-atm conversions, first-law numericals"},
+  {key:"L-4", name:"L-4 · Enthalpy",
+   desc:"H = U + PV, ΔH = ΔU + PΔV, exothermic vs endothermic, ΔH as a state function, when ΔH = ΔU"},
+  {key:"L-5", name:"L-5 · Work in Different Processes",
+   desc:"isochoric (w = 0), isobaric (w = −PΔV), reversible vs irreversible, cyclic work as enclosed area, expansion into vacuum"},
+  {key:"L-6", name:"L-6 · ΔH − ΔU, Heat Capacities & Calorimetry",
+   desc:"ΔH − ΔU = Δng RT, Mayer's relation Cp − Cv = R, γ = Cp/Cv, the bomb calorimeter, reversible isothermal work"},
+  {key:"L-7", name:"L-7 · Thermochemistry & Thermochemical Equations",
+   desc:"thermochemical equations with states, ΔH extensive and path-independent, converting bomb ΔU to ΔH, standard enthalpies"},
+  {key:"L-8", name:"L-8 · Hess's Law, Formation Enthalpies & Born–Haber",
+   desc:"Hess's law of constant heat summation, ΔH from ΔHf, assembling formation equations, the Born–Haber cycle"},
+  {key:"L-9", name:"L-9 · Bond Enthalpies",
+   desc:"bond dissociation vs mean bond enthalpy, ΔH from bonds broken − bonds formed, bond energy from combustion/atomisation cycles"},
+  {key:"L-10", name:"L-10 · Entropy & the Second Law",
+   desc:"spontaneity, ΔS = qrev/T, ΔS = nR ln(V₂/V₁), the Clausius inequality, ΔS_universe > 0"},
+  {key:"L-11", name:"L-11 · Gibbs Free Energy & Spontaneity",
+   desc:"ΔG = ΔH − TΔS, sign combinations, the crossover temperature, ΔG = 0 at equilibrium"},
+  {key:"L-12", name:"L-12 · Free Energy, Equilibrium & Electrochemistry",
+   desc:"ΔG° = −RT ln K = −2.303 RT log K = −nFE°, ΔG at phase equilibrium, driving reactions from thermodynamic data"},
+  {key:"SB",  name:"Strong Box · Mixed Thermodynamics",
+   desc:"cross-topic first-law, thermochemistry, entropy and free-energy problems in the previous-year style"}
+];
+
+const QUIZ = [
+
+/* ---------------- L-1 · Systems & state functions (10) ---------------- */
+{id:1, lec:"L-1", blk:"Systems", topic:"Classification of systems",
+ q:"A system that can exchange energy but not matter with its surroundings is called",
+ opts:["a closed system","an open system","an isolated system","an adiabatic system"],
+ ans:0,
+ why:[
+  "Correct. A closed system has a fixed amount of matter but permits energy (heat/work) exchange — like a sealed, conducting flask.",
+  "An open system exchanges both matter and energy (an open beaker).",
+  "An isolated system exchanges neither matter nor energy (an ideal thermos).",
+  "'Adiabatic' describes a process with no heat exchange, not a class of system."],
+ sol:"<b>Closed system</b>: energy in/out but no matter (sealed vessel). Open: matter + energy. Isolated: neither (perfectly insulated, sealed)."},
+
+{id:2, lec:"L-1", blk:"Systems", topic:"Isolated system",
+ q:"An isolated system is one that exchanges",
+ opts:[
+  "neither matter nor energy with its surroundings",
+  "energy but not matter",
+  "matter but not energy",
+  "both matter and energy freely"],
+ ans:0,
+ why:[
+  "Correct. An isolated system is sealed to matter and perfectly insulated to energy — an idealisation approached by a good thermos flask.",
+  "Exchanging energy only describes a closed system.",
+  "Exchanging matter only is not a standard category; matter transfer normally carries energy too.",
+  "Free exchange of both is an open system."],
+ sol:"<b>Isolated system</b>: no exchange of matter <i>or</i> energy. The universe as a whole is the ultimate isolated system."},
+
+{id:3, lec:"L-1", blk:"Properties", topic:"Extensive vs intensive property",
+ q:"Which of the following is an intensive property?",
+ opts:["temperature","mass","volume","internal energy"],
+ ans:0,
+ why:[
+  "Correct. Temperature does not depend on the amount of substance — halving the sample leaves T unchanged.",
+  "Mass is extensive: it doubles when the amount doubles.",
+  "Volume is extensive.",
+  "Internal energy is extensive (scales with the amount of matter)."],
+ sol:"<b>Intensive</b> = independent of amount (T, P, density, molar quantities). <b>Extensive</b> = scales with amount (mass, volume, U, H, S). A useful test: the ratio of two extensive properties (e.g. mass/volume = density) is intensive."},
+
+{id:4, lec:"L-1", blk:"State functions", topic:"Definition of a state function",
+ q:"A state function is a property whose value depends on",
+ opts:[
+  "only the present state of the system, not the path taken to reach it",
+  "the path taken to reach the state",
+  "the amount of heat supplied",
+  "the amount of work done"],
+ ans:0,
+ why:[
+  "Correct. A state function (U, H, S, G, T, P, V) is fixed by the current state; the route there is irrelevant.",
+  "Path dependence characterises path functions like q and w, not state functions.",
+  "Heat is a path function, not a state function.",
+  "Work is a path function too."],
+ sol:"<b>State functions</b> depend only on the state (U, H, S, G, P, V, T). <b>Path functions</b> (q, w) depend on how the change is carried out. For a state function, Δ = (final) − (initial), path-independent."},
+
+{id:5, lec:"L-1", blk:"State functions", topic:"Which is a path function",
+ q:"Which pair are both path functions?",
+ opts:["heat and work","enthalpy and entropy","internal energy and volume","temperature and pressure"],
+ ans:0,
+ why:[
+  "Correct. Both heat (q) and work (w) depend on the route between two states, so they are path functions.",
+  "Enthalpy and entropy are state functions.",
+  "Internal energy and volume are state functions.",
+  "Temperature and pressure are state functions (intensive ones)."],
+ sol:"<b>q and w are path functions</b>; everything else in the list (H, S, U, V, T, P) is a state function. This is why the first law combines two path functions (q + w) into a change in the state function U."},
+
+{id:6, lec:"L-1", blk:"Equilibrium", topic:"Thermodynamic equilibrium",
+ q:"A system is in complete thermodynamic equilibrium only when it simultaneously has",
+ opts:[
+  "thermal, mechanical and chemical equilibrium",
+  "thermal equilibrium alone",
+  "mechanical equilibrium alone",
+  "a constant temperature only"],
+ ans:0,
+ why:[
+  "Correct. Full equilibrium requires uniform temperature (thermal), no unbalanced forces/pressure (mechanical), and no net reaction or diffusion (chemical).",
+  "Thermal equilibrium alone is not enough — pressures or composition could still be changing.",
+  "Mechanical equilibrium alone ignores temperature and composition gradients.",
+  "Constant temperature is only the thermal part of the requirement."],
+ sol:"Thermodynamic equilibrium = <b>thermal + mechanical + chemical</b> equilibrium at once: no gradients in T, P, or composition, so no macroscopic property changes with time."},
+
+{id:7, lec:"L-1", blk:"Systems", topic:"Real-world closed system",
+ q:"Which is the best example of a closed system?",
+ opts:[
+  "a sealed, rigid metal cylinder of gas that can be heated",
+  "an open cup of hot coffee",
+  "a perfectly insulated, sealed thermos",
+  "a boiling open pan of water"],
+ ans:0,
+ why:[
+  "Correct. The sealed cylinder keeps its matter fixed but conducts heat through its walls — matter fixed, energy exchanged = closed.",
+  "An open cup loses both vapour (matter) and heat (energy) = open system.",
+  "A sealed, perfectly insulated thermos exchanges neither = isolated system.",
+  "A boiling open pan loses steam and heat = open system."],
+ sol:"<b>Sealed but conducting</b> = closed (matter fixed, energy free). Insulated + sealed = isolated. Open to the air = open."},
+
+{id:8, lec:"L-1", blk:"Boundary", topic:"Definition of boundary",
+ q:"The boundary of a thermodynamic system is",
+ opts:[
+  "the real or imaginary surface separating the system from its surroundings",
+  "always a rigid physical wall",
+  "the same as the surroundings",
+  "the total energy of the system"],
+ ans:0,
+ why:[
+  "Correct. The boundary may be real (a flask wall) or imaginary (a mathematical surface enclosing a region of gas); it defines what is 'system'.",
+  "It need not be rigid or even material — an imaginary surface is a valid boundary.",
+  "The boundary separates the system <i>from</i> the surroundings; it is not the surroundings.",
+  "The boundary is a surface, not an energy."],
+ sol:"<b>Boundary</b>: the surface (real or imaginary) enclosing the system. Its properties (rigid/movable, conducting/insulating, permeable/impermeable) fix whether the system is open, closed or isolated."},
+
+{id:9, lec:"L-1", blk:"Properties", topic:"Counting extensive properties",
+ q:"How many of these are extensive: mass, temperature, volume, density, internal energy, molar heat capacity?",
+ opts:["3 (mass, volume, internal energy)","2 (mass, volume)","4","1"],
+ ans:0,
+ why:[
+  "Correct. Mass, volume and internal energy scale with amount (extensive); temperature, density and molar heat capacity do not (intensive).",
+  "Internal energy is also extensive, so the count is 3, not 2.",
+  "Density and molar heat capacity are intensive, so the count is not 4.",
+  "There are clearly three extensive properties here, not one."],
+ sol:"Extensive (scale with amount): <b>mass, volume, internal energy</b> = 3. Intensive: temperature, density (mass/volume), molar heat capacity (per mole)."},
+
+{id:10, lec:"L-1", blk:"State functions", topic:"State function change over a cycle",
+ q:"For any state function, its change over a complete cyclic process is",
+ opts:["zero","equal to the heat absorbed","equal to the work done","always positive"],
+ ans:0,
+ why:[
+  "Correct. A cyclic process returns the system to its initial state, so every state function (ΔU, ΔH, ΔS, …) is zero.",
+  "The heat absorbed over a cycle is generally non-zero (it equals −w), but that is a path function, not a state function.",
+  "Work over a cycle is generally non-zero (the enclosed area), again a path function.",
+  "State-function changes over a cycle are exactly zero, not positive."],
+ sol:"Over a cycle the initial and final states coincide ⇒ <b>ΔU = ΔH = ΔS = ΔG = 0</b>. The path functions q and w need not vanish (q = −w = enclosed P–V area)."},
+
+/* ---------------- L-2 · Internal energy, heat, work, processes (10) ---------------- */
+{id:11, lec:"L-2", blk:"Internal energy", topic:"Internal energy as a state function",
+ q:"The internal energy of a system is",
+ opts:[
+  "a state function and an extensive property",
+  "a path function",
+  "an intensive property",
+  "always zero for an ideal gas"],
+ ans:0,
+ why:[
+  "Correct. U depends only on the state and scales with the amount of substance — a state function and extensive.",
+  "U is a state function, not a path function (unlike q and w).",
+  "U is extensive, not intensive.",
+  "U is not zero for an ideal gas; only its <i>change</i> in an isothermal process is zero."],
+ sol:"<b>Internal energy U</b>: total kinetic + potential energy of all particles. It is a state function (ΔU is path-independent) and extensive. For an ideal gas, U depends on temperature only."},
+
+{id:12, lec:"L-2", blk:"Sign convention", topic:"Sign of heat absorbed",
+ q:"Using the convention ΔU = q + w, heat absorbed by the system is taken as",
+ opts:["positive (q > 0)","negative (q &lt; 0)","zero","undefined"],
+ ans:0,
+ why:[
+  "Correct. In the modern IUPAC convention, energy entering the system is positive, so heat absorbed gives q &gt; 0.",
+  "Heat released by the system is negative; heat absorbed is positive.",
+  "Absorbed heat is a real energy input, not zero.",
+  "The sign is well defined: positive for absorption."],
+ sol:"IUPAC convention (ΔU = q + w): energy <b>into</b> the system is positive. So heat absorbed q &gt; 0, heat released q &lt; 0, work done on the system w &gt; 0."},
+
+{id:13, lec:"L-2", blk:"Sign convention", topic:"Sign of work done on the system",
+ q:"When a gas is compressed by the surroundings, the work term w (in ΔU = q + w) is",
+ opts:[
+  "positive, because energy is transferred into the system",
+  "negative",
+  "zero",
+  "equal to the heat released"],
+ ans:0,
+ why:[
+  "Correct. Compression means the surroundings do work on the gas, adding energy, so w &gt; 0 (w = −P_ext ΔV with ΔV &lt; 0).",
+  "Work done <i>on</i> the system is positive in this convention; only work done <i>by</i> the system is negative.",
+  "Compression does real work, so w is not zero.",
+  "Work and heat are independent; w need not equal any heat term."],
+ sol:"w = −P_ext ΔV. On compression ΔV &lt; 0 ⇒ w &gt; 0 (energy in). On expansion ΔV &gt; 0 ⇒ w &lt; 0 (energy out)."},
+
+{id:14, lec:"L-2", blk:"Process types", topic:"Adiabatic process definition",
+ q:"An adiabatic process is defined by the condition",
+ opts:["q = 0 (no heat exchange)","ΔU = 0","ΔT = 0","w = 0"],
+ ans:0,
+ why:[
+  "Correct. 'Adiabatic' means no heat crosses the boundary: q = 0. Temperature and internal energy can still change (via work).",
+  "ΔU = 0 defines an isothermal process of an ideal gas, not adiabatic.",
+  "ΔT = 0 is isothermal, not adiabatic; in fact an adiabatic process usually changes T.",
+  "w = 0 is a free expansion or a rigid-wall process, not the definition of adiabatic."],
+ sol:"<b>Adiabatic: q = 0.</b> Then ΔU = w — all the internal-energy change comes from work, so an adiabatic compression heats the gas and an adiabatic expansion cools it."},
+
+{id:15, lec:"L-2", blk:"Process types", topic:"Cyclic process",
+ q:"For a cyclic process, which quantity is necessarily zero?",
+ opts:["ΔU","q","w","the enclosed P–V area"],
+ ans:0,
+ why:[
+  "Correct. A cycle returns to the initial state, so the state function change ΔU = 0 (and ΔH = ΔS = 0).",
+  "The heat q over a cycle equals −w, generally non-zero.",
+  "The net work over a cycle equals the enclosed area, generally non-zero.",
+  "The enclosed area is the net work, non-zero for a real cycle."],
+ sol:"Cyclic ⇒ <b>ΔU = 0</b>, hence q = −w. The net work (and net heat) equals the enclosed P–V loop area, which is not zero for a working cycle."},
+
+{id:16, lec:"L-2", blk:"Heat", topic:"Direction of heat flow",
+ q:"Heat spontaneously flows",
+ opts:[
+  "from a hotter body to a colder one",
+  "from a colder body to a hotter one",
+  "only when work is done",
+  "in either direction equally"],
+ ans:0,
+ why:[
+  "Correct. Heat flows down a temperature gradient — from high T to low T — until thermal equilibrium is reached.",
+  "The reverse (cold → hot) is non-spontaneous and needs external work (a refrigerator).",
+  "Spontaneous heat flow needs only a temperature difference, no work.",
+  "The flow has a definite direction set by the temperature difference."],
+ sol:"Heat flows <b>hot → cold</b> spontaneously (a consequence of the second law). Driving it the other way requires work input."},
+
+{id:17, lec:"L-2", blk:"Process types", topic:"Isothermal ideal gas ΔU",
+ q:"For any isothermal process of an ideal gas, the change in internal energy is",
+ opts:["zero","equal to q","equal to w","positive"],
+ ans:0,
+ why:[
+  "Correct. An ideal gas's internal energy depends only on temperature; if T is constant, ΔU = 0.",
+  "ΔU = 0 here, and separately q = −w, but ΔU itself is zero, not equal to q.",
+  "ΔU is zero, not equal to w.",
+  "ΔU is exactly zero, neither positive nor negative."],
+ sol:"Ideal gas: U = U(T) only. Isothermal ⇒ ΔT = 0 ⇒ <b>ΔU = 0</b>, so q = −w (all absorbed heat becomes work, or vice versa)."},
+
+{id:18, lec:"L-2", blk:"Internal energy", topic:"Ideal gas internal energy dependence",
+ q:"The internal energy of an ideal gas depends on",
+ opts:[
+  "temperature only",
+  "temperature and volume",
+  "pressure only",
+  "volume only"],
+ ans:0,
+ why:[
+  "Correct. With no intermolecular forces, an ideal gas has no potential-energy contribution, so U is a function of T (kinetic energy) alone.",
+  "For a <i>real</i> gas U depends on volume too (through intermolecular forces); for an ideal gas it does not.",
+  "U does not depend on pressure independently for an ideal gas.",
+  "Volume alone does not fix U for an ideal gas."],
+ sol:"Ideal gas: no intermolecular forces ⇒ <b>U = U(T) only</b>. This is why ΔU = 0 for any isothermal ideal-gas process, regardless of volume or pressure change."},
+
+{id:19, lec:"L-2", blk:"Process types", topic:"Isochoric process",
+ q:"In an isochoric (constant-volume) process, the work done is",
+ opts:["zero","−PΔV, non-zero","+PΔV","equal to q"],
+ ans:0,
+ why:[
+  "Correct. w = −P_ext ΔV, and ΔV = 0 at constant volume, so w = 0. All heat goes into internal energy: ΔU = qv.",
+  "ΔV = 0 makes −PΔV zero, not non-zero.",
+  "There is no volume change, so no PV work of either sign.",
+  "With w = 0, ΔU = qv, but w itself equals zero, not q."],
+ sol:"Isochoric: ΔV = 0 ⇒ <b>w = 0</b> ⇒ ΔU = qv. Constant-volume heat measures ΔU directly (the bomb-calorimeter principle)."},
+
+{id:20, lec:"L-2", blk:"Process types", topic:"Adiabatic first law",
+ q:"For an adiabatic process, the first law reduces to",
+ opts:["ΔU = w","ΔU = q","ΔU = 0","ΔU = q + PΔV"],
+ ans:0,
+ why:[
+  "Correct. Adiabatic means q = 0, so ΔU = q + w = w — the internal-energy change equals the work done on the gas.",
+  "q = 0 in an adiabatic process, so ΔU cannot equal q (which is zero).",
+  "ΔU is generally non-zero in an adiabatic process (unless it is also free expansion).",
+  "This mixes conventions; with q = 0 the correct reduction is ΔU = w."],
+ sol:"Adiabatic: q = 0 ⇒ <b>ΔU = w</b>. Work done on the gas (compression) raises U and heats it; work done by the gas (expansion) lowers U and cools it."},
+
+/* ---------------- L-3 · First law & PV work (11) ---------------- */
+{id:21, lec:"L-3", blk:"First law", topic:"Statement of the first law",
+ q:"The first law of thermodynamics, in the form ΔU = q + w, expresses",
+ opts:[
+  "conservation of energy: the change in internal energy equals heat added plus work done on the system",
+  "that entropy always increases",
+  "that energy is destroyed in every process",
+  "that heat always equals work"],
+ ans:0,
+ why:[
+  "Correct. The first law is energy conservation applied to a thermodynamic system.",
+  "Increasing entropy is the second law, not the first.",
+  "Energy is conserved, never destroyed — that is the whole point of the first law.",
+  "Heat and work are separate energy transfers; they need not be equal."],
+ sol:"<b>First law: ΔU = q + w</b> (energy conservation). q = heat added to the system, w = work done on the system. Equivalently ΔU = q − W, where W = −w is work done <i>by</i> the system."},
+
+{id:22, lec:"L-3", blk:"PV work", topic:"Expression for expansion work",
+ q:"The work done on a gas expanding against a constant external pressure P_ext is",
+ opts:["w = −P_ext ΔV","w = +P_ext ΔV","w = −ΔV/P_ext","w = P_ext V"],
+ ans:0,
+ why:[
+  "Correct. w = −P_ext ΔV; on expansion ΔV &gt; 0 makes w negative (energy leaves the system).",
+  "The sign is wrong: expansion does negative work on the system, not positive.",
+  "The formula is a product P_ext ΔV, not a quotient.",
+  "Work depends on the <i>change</i> in volume, not the absolute volume."],
+ sol:"<b>w = −P_ext ΔV.</b> Expansion (ΔV &gt; 0) ⇒ w &lt; 0 (system does work on surroundings). Compression (ΔV &lt; 0) ⇒ w &gt; 0."},
+
+{id:23, lec:"L-3", blk:"Free expansion", topic:"Work in free expansion",
+ q:"When a gas expands into a vacuum (free expansion), the work done is",
+ opts:["zero, because P_ext = 0","−P_ext ΔV, large and negative","positive","equal to nRT ln 2"],
+ ans:0,
+ why:[
+  "Correct. With nothing to push against (P_ext = 0), w = −P_ext ΔV = 0.",
+  "P_ext = 0, so the product is zero, not large.",
+  "No work is done, so it is neither positive nor negative but exactly zero.",
+  "nRT ln 2 is the reversible isothermal work, not the free-expansion work."],
+ sol:"Free expansion: P_ext = 0 ⇒ <b>w = 0</b>. For an isothermal ideal gas this also gives ΔU = 0 and hence q = 0 — nothing is exchanged."},
+
+{id:24, lec:"L-3", blk:"Unit conversion", topic:"Litre-atm to joule",
+ q:"A gas does 5 L·atm of work. In joules (1 L·atm = 101.3 J) this is",
+ opts:["506.5 J","20.3 J","101.3 J","5 J"],
+ ans:0,
+ why:[
+  "Correct. 5 × 101.3 = 506.5 J.",
+  "20.3 J divides instead of multiplying.",
+  "101.3 J is the value for 1 L·atm, not 5.",
+  "5 J ignores the conversion factor."],
+ sol:"1 L·atm = 101.3 J ⇒ 5 L·atm = 5 × 101.3 = <b>506.5 J</b>."},
+
+{id:25, lec:"L-3", blk:"Unit conversion", topic:"Calorie to joule",
+ q:"A process releases 50 cal of heat. In joules (1 cal = 4.184 J) this is",
+ opts:["209.2 J","11.95 J","50 J","4.184 J"],
+ ans:0,
+ why:[
+  "Correct. 50 × 4.184 = 209.2 J.",
+  "11.95 J divides by the factor instead of multiplying.",
+  "50 J ignores the conversion factor.",
+  "4.184 J is the value of 1 cal, not 50."],
+ sol:"1 cal = 4.184 J ⇒ 50 cal = 50 × 4.184 = <b>209.2 J</b>."},
+
+{id:26, lec:"L-3", blk:"First law numeric", topic:"Finding ΔU from q and w",
+ q:"A system absorbs 100 J of heat and has 40 J of work done on it. Its change in internal energy is",
+ opts:["+140 J","+60 J","−140 J","−60 J"],
+ ans:0,
+ why:[
+  "Correct. ΔU = q + w = (+100) + (+40) = +140 J; both inputs raise the internal energy.",
+  "+60 J subtracts the work — but work done <i>on</i> the system adds energy, so it should be added.",
+  "Both terms are positive energy inputs, so ΔU is positive, not −140.",
+  "The signs of both terms are positive here."],
+ sol:"ΔU = q + w. Heat absorbed (+100) and work done on the system (+40) both add: ΔU = <b>+140 J</b>."},
+
+{id:27, lec:"L-3", blk:"First law numeric", topic:"Work done by the system",
+ q:"A gas absorbs 200 J of heat and does 80 J of work on the surroundings. Its ΔU is",
+ opts:["+120 J","+280 J","−120 J","−280 J"],
+ ans:0,
+ why:[
+  "Correct. Work done by the system is w = −80 J, so ΔU = q + w = 200 − 80 = +120 J.",
+  "+280 J wrongly adds the work; work done <i>by</i> the system removes energy.",
+  "The heat input (200) exceeds the work output (80), so ΔU is positive.",
+  "ΔU is +120 J, not −280."],
+ sol:"Work done <i>by</i> the system ⇒ w = −80 J. ΔU = q + w = 200 + (−80) = <b>+120 J</b> (equivalently ΔU = q − W = 200 − 80)."},
+
+{id:28, lec:"L-3", blk:"PV work numeric", topic:"Expansion work against constant pressure",
+ q:"A gas expands from 2 L to 5 L against a constant external pressure of 2 atm. The work done on the gas is",
+ opts:["−6 L·atm (≈ −608 J)","+6 L·atm","−10 L·atm","−3 L·atm"],
+ ans:0,
+ why:[
+  "Correct. w = −P_ext ΔV = −2 × (5 − 2) = −6 L·atm ≈ −6 × 101.3 = −608 J (system does work on surroundings).",
+  "Expansion does negative work on the gas, so the sign must be negative.",
+  "−10 uses ΔV = 5 (the final volume) instead of the change 5 − 2 = 3.",
+  "−3 L·atm forgets to multiply by the 2 atm pressure."],
+ sol:"w = −P_ext ΔV = −(2 atm)(5 − 2 L) = <b>−6 L·atm ≈ −608 J</b>. Negative because the gas expands and does work on the surroundings."},
+
+{id:29, lec:"L-3", blk:"First law numeric", topic:"Back-solving heat",
+ q:"For a process ΔU = +50 J and the surroundings do 30 J of work on the system. The heat exchanged is",
+ opts:["q = +20 J (absorbed)","q = +80 J","q = −20 J","q = −80 J"],
+ ans:0,
+ why:[
+  "Correct. ΔU = q + w ⇒ 50 = q + 30 ⇒ q = +20 J (heat absorbed).",
+  "+80 J adds the work instead of accounting for it in the balance; 50 − 30 = 20.",
+  "The balance gives +20 J absorbed, not released.",
+  "q is +20 J, not −80."],
+ sol:"ΔU = q + w ⇒ q = ΔU − w = 50 − 30 = <b>+20 J</b>. The system still absorbs 20 J of heat even though work already added 30 J."},
+
+{id:30, lec:"L-3", blk:"Free expansion", topic:"Isothermal free expansion of ideal gas",
+ q:"For the isothermal free expansion of an ideal gas into a vacuum, which set is correct?",
+ opts:[
+  "w = 0, q = 0, ΔU = 0",
+  "w &lt; 0, q &gt; 0, ΔU = 0",
+  "w = 0, q &gt; 0, ΔU &gt; 0",
+  "w &gt; 0, q = 0, ΔU &gt; 0"],
+ ans:0,
+ why:[
+  "Correct. Vacuum ⇒ P_ext = 0 ⇒ w = 0; isothermal ideal gas ⇒ ΔU = 0; so q = ΔU − w = 0.",
+  "Free expansion does no work (w = 0), unlike a reversible isothermal expansion.",
+  "ΔU = 0 for an isothermal ideal gas, so it is not positive.",
+  "w = 0 here (no external pressure), and ΔU = 0."],
+ sol:"Isothermal free expansion: P_ext = 0 ⇒ w = 0; U depends on T only ⇒ ΔU = 0 ⇒ <b>q = 0</b>. All three vanish — contrast the reversible case where w and q are non-zero."},
+
+{id:31, lec:"L-3", blk:"First law numeric", topic:"Compression plus heat release",
+ q:"A gas is compressed with 150 J of work done on it while it releases 60 J of heat. Its ΔU is",
+ opts:["+90 J","+210 J","−90 J","−210 J"],
+ ans:0,
+ why:[
+  "Correct. w = +150 J (on the system), q = −60 J (released), so ΔU = 150 − 60 = +90 J.",
+  "+210 J wrongly adds the released heat; heat leaving the system is negative.",
+  "The work input (150) outweighs the heat loss (60), so ΔU is positive.",
+  "ΔU is +90 J, not −210."],
+ sol:"ΔU = q + w = (−60) + (+150) = <b>+90 J</b>. Compression adds more energy than the released heat removes, so U rises."},
+
+/* ---------------- L-4 · Enthalpy (10) ---------------- */
+{id:32, lec:"L-4", blk:"Definition", topic:"Definition of enthalpy",
+ q:"Enthalpy is defined as",
+ opts:["H = U + PV","H = U − PV","H = U + PΔV","H = q − w"],
+ ans:0,
+ why:[
+  "Correct. Enthalpy H = U + PV; its change at constant pressure equals the heat absorbed, ΔH = qp.",
+  "The sign is wrong; it is a sum, H = U + PV.",
+  "The definition uses PV, not PΔV (the ΔV form appears in ΔH = ΔU + PΔV, a derived relation).",
+  "q − w is the first law rearranged, not the definition of enthalpy."],
+ sol:"<b>H = U + PV</b>, a state function. At constant pressure, ΔH = qp — the heat of reaction at constant pressure, which is why enthalpy is so useful in chemistry."},
+
+{id:33, lec:"L-4", blk:"ΔH = qp", topic:"Physical meaning of ΔH",
+ q:"At constant pressure, the enthalpy change of a process equals",
+ opts:[
+  "the heat exchanged, qp",
+  "the work done, w",
+  "the internal energy change exactly",
+  "zero"],
+ ans:0,
+ why:[
+  "Correct. ΔH = qp at constant pressure — the measurable heat of a reaction run in an open vessel.",
+  "Work is a separate term; ΔH captures the heat, not the work.",
+  "ΔH = ΔU only when Δng = 0; in general they differ by Δng RT.",
+  "ΔH is generally non-zero for a reaction."],
+ sol:"At constant P, <b>ΔH = qp</b>. This makes enthalpy the natural 'heat content' bookkeeper for chemistry, since most reactions occur at atmospheric (constant) pressure."},
+
+{id:34, lec:"L-4", blk:"Exothermic/endothermic", topic:"Sign of ΔH for exothermic reaction",
+ q:"For an exothermic reaction, the sign of ΔH is",
+ opts:[
+  "negative (heat is released)",
+  "positive",
+  "zero",
+  "positive or negative depending on temperature"],
+ ans:0,
+ why:[
+  "Correct. Exothermic means heat flows out of the system, so the products have lower enthalpy and ΔH &lt; 0.",
+  "Positive ΔH is endothermic (heat absorbed).",
+  "An exothermic reaction has a definite negative ΔH, not zero.",
+  "The sign for an exothermic reaction is always negative."],
+ sol:"<b>Exothermic ⇒ ΔH &lt; 0</b> (heat released, products lower in enthalpy). Endothermic ⇒ ΔH &gt; 0 (heat absorbed). Combustion is strongly exothermic."},
+
+{id:35, lec:"L-4", blk:"ΔH vs ΔU", topic:"Relation between ΔH and ΔU",
+ q:"For a chemical reaction, ΔH and ΔU are related by",
+ opts:[
+  "ΔH = ΔU + Δng RT",
+  "ΔH = ΔU − Δng RT",
+  "ΔH = ΔU + RT",
+  "ΔH = ΔU always"],
+ ans:0,
+ why:[
+  "Correct. ΔH = ΔU + Δ(PV); for ideal gases Δ(PV) = Δng RT, giving ΔH = ΔU + Δng RT.",
+  "The sign is wrong; the gas-mole change is added, not subtracted.",
+  "The RT term must be multiplied by the change in gas moles Δng, not left as RT.",
+  "ΔH = ΔU only in the special case Δng = 0."],
+ sol:"<b>ΔH = ΔU + Δng RT</b>, where Δng = (moles gaseous products) − (moles gaseous reactants). Only gases count; solids and liquids contribute negligibly to Δ(PV)."},
+
+{id:36, lec:"L-4", blk:"ΔH = ΔU condition", topic:"When ΔH equals ΔU",
+ q:"ΔH equals ΔU for a reaction when",
+ opts:[
+  "the change in the number of moles of gas, Δng, is zero",
+  "the reaction is exothermic",
+  "the temperature is 298 K",
+  "the reaction is at constant volume"],
+ ans:0,
+ why:[
+  "Correct. ΔH = ΔU + Δng RT, so ΔH = ΔU exactly when Δng = 0 (equal gas moles on both sides).",
+  "Exothermicity affects the sign, not whether ΔH = ΔU.",
+  "The temperature value is irrelevant; the Δng RT term vanishes only if Δng = 0.",
+  "Constant volume changes which heat equals ΔU, but ΔH = ΔU still needs Δng = 0."],
+ sol:"<b>ΔH = ΔU ⇔ Δng = 0.</b> Example: H₂(g) + Cl₂(g) → 2HCl(g), Δng = 2 − 2 = 0, so ΔH = ΔU."},
+
+{id:37, lec:"L-4", blk:"Δng numeric", topic:"Computing Δng",
+ q:"For N₂(g) + 3H₂(g) → 2NH₃(g), the value of Δng is",
+ opts:["−2","+2","−1","0"],
+ ans:0,
+ why:[
+  "Correct. Gaseous moles: products 2, reactants 1 + 3 = 4, so Δng = 2 − 4 = −2.",
+  "The sign is wrong; there are fewer gas moles in the products, so Δng is negative.",
+  "−1 miscounts the reactant gas moles (should be 4, not 3).",
+  "0 would require equal gas moles on both sides, but 2 ≠ 4."],
+ sol:"Δng = (gas products) − (gas reactants) = 2 − (1 + 3) = <b>−2</b>. So ΔH = ΔU + (−2)RT, i.e. ΔH &lt; ΔU here."},
+
+{id:38, lec:"L-4", blk:"ΔH − ΔU numeric", topic:"ΔH − ΔU for ammonia synthesis",
+ q:"For N₂(g) + 3H₂(g) → 2NH₃(g) at 298 K, ΔH − ΔU equals (R = 8.314 J/mol·K)",
+ opts:["≈ −4.95 kJ","≈ +4.95 kJ","≈ −2.48 kJ","0"],
+ ans:0,
+ why:[
+  "Correct. ΔH − ΔU = Δng RT = (−2)(8.314)(298) = −4954 J ≈ −4.95 kJ.",
+  "The sign follows Δng = −2, so the result is negative, not positive.",
+  "−2.48 kJ uses Δng = −1; the correct Δng is −2.",
+  "It is non-zero because Δng ≠ 0."],
+ sol:"ΔH − ΔU = Δng RT = (−2)(8.314)(298) ≈ <b>−4.95 kJ</b>. The enthalpy change is about 5 kJ less than the internal-energy change per mole of reaction as written."},
+
+{id:39, lec:"L-4", blk:"Characteristics", topic:"Enthalpy is a state function",
+ q:"Which statement about enthalpy is correct?",
+ opts:[
+  "It is a state function and an extensive property",
+  "It is a path function",
+  "It is always negative",
+  "It depends on the route taken"],
+ ans:0,
+ why:[
+  "Correct. Since H = U + PV and U, P, V are all state functions, H is a state function; it scales with amount, so it is extensive.",
+  "Enthalpy is a state function, not a path function.",
+  "ΔH can be positive (endothermic) or negative (exothermic).",
+  "As a state function, ΔH is independent of path — that is what makes Hess's law work."],
+ sol:"<b>Enthalpy is a state function</b> (built from state functions U, P, V) and extensive. Path-independence of ΔH is the basis of Hess's law."},
+
+{id:40, lec:"L-4", blk:"Endothermic", topic:"Endothermic dissolution",
+ q:"When ammonium chloride dissolves in water the solution gets colder. This tells us the dissolution is",
+ opts:[
+  "endothermic (ΔH > 0)",
+  "exothermic (ΔH &lt; 0)",
+  "athermal (ΔH = 0)",
+  "impossible"],
+ ans:0,
+ why:[
+  "Correct. The solution cools because the process absorbs heat from the water, so ΔH &gt; 0 (endothermic).",
+  "Exothermic dissolution would <i>warm</i> the solution, the opposite of what is observed.",
+  "A temperature drop means heat is absorbed, so ΔH is not zero.",
+  "Endothermic dissolution is perfectly possible (driven by the entropy increase)."],
+ sol:"Cooling ⇒ heat absorbed ⇒ <b>endothermic, ΔH &gt; 0</b>. It still occurs spontaneously because the large entropy increase makes ΔG negative."},
+
+{id:41, lec:"L-4", blk:"ΔH sign rule", topic:"General ΔH vs ΔU sign for gas-increasing reaction",
+ q:"For a reaction in which the number of moles of gas increases (Δng > 0), how does ΔH compare with ΔU?",
+ opts:[
+  "ΔH > ΔU",
+  "ΔH &lt; ΔU",
+  "ΔH = ΔU",
+  "cannot be determined"],
+ ans:0,
+ why:[
+  "Correct. ΔH = ΔU + Δng RT; with Δng &gt; 0 the added term is positive, so ΔH &gt; ΔU.",
+  "ΔH &lt; ΔU happens when Δng &lt; 0 (gas moles decrease).",
+  "ΔH = ΔU only when Δng = 0.",
+  "It is fully determined by the sign of Δng."],
+ sol:"Δng &gt; 0 ⇒ Δng RT &gt; 0 ⇒ <b>ΔH &gt; ΔU</b>. More gas produced means the system does extra expansion work, raising ΔH relative to ΔU."},
+
+/* ---------------- L-5 · Work in processes (10) ---------------- */
+{id:42, lec:"L-5", blk:"Isochoric", topic:"Work in a rigid vessel",
+ q:"A reaction is carried out in a sealed rigid steel vessel. The pressure–volume work done is",
+ opts:["zero","−PΔV (negative)","+PΔV","nRT ln(V₂/V₁)"],
+ ans:0,
+ why:[
+  "Correct. A rigid vessel keeps the volume fixed (ΔV = 0), so w = −P_ext ΔV = 0.",
+  "There is no volume change, so no PV work of either sign.",
+  "No expansion or compression occurs in a rigid vessel.",
+  "The reversible isothermal expression needs a volume change, which cannot occur here."],
+ sol:"Rigid vessel ⇒ ΔV = 0 ⇒ <b>w = 0</b>. This is exactly the bomb-calorimeter condition, where qv = ΔU."},
+
+{id:43, lec:"L-5", blk:"Isobaric", topic:"Isobaric work",
+ q:"At constant pressure, the work done on a system when its volume changes by ΔV is",
+ opts:["w = −PΔV","w = +PΔV","w = 0","w = −V ΔP"],
+ ans:0,
+ why:[
+  "Correct. Constant pressure gives w = −P ΔV directly.",
+  "The sign is wrong for work done <i>on</i> the system during expansion.",
+  "There is a volume change at constant pressure, so work is non-zero.",
+  "At constant pressure ΔP = 0, so −V ΔP would be zero — the wrong expression."],
+ sol:"Isobaric: <b>w = −P ΔV</b>. The area under a horizontal line on a P–V plot is PΔV, the magnitude of this work."},
+
+{id:44, lec:"L-5", blk:"Reversible isothermal", topic:"Reversible isothermal work formula",
+ q:"The work done on an ideal gas in a reversible isothermal expansion from V₁ to V₂ is",
+ opts:[
+  "w = −nRT ln(V₂/V₁)",
+  "w = −P ΔV",
+  "w = nRT(V₂ − V₁)",
+  "w = −nRT ln(V₁/V₂) ... with a sign error"],
+ ans:0,
+ why:[
+  "Correct. Integrating −P dV with P = nRT/V at constant T gives w = −nRT ln(V₂/V₁).",
+  "−PΔV applies to a constant external pressure (irreversible), not a reversible path.",
+  "The volume difference form is dimensionally wrong; the reversible result is logarithmic.",
+  "Writing ln(V₁/V₂) flips the sign incorrectly for an expansion."],
+ sol:"Reversible isothermal: <b>w = −nRT ln(V₂/V₁) = −nRT ln(P₁/P₂)</b>. For expansion V₂ &gt; V₁ ⇒ w &lt; 0. Since ΔU = 0, q = −w = +nRT ln(V₂/V₁)."},
+
+{id:45, lec:"L-5", blk:"Reversible isothermal numeric", topic:"Reversible isothermal work value",
+ q:"Two moles of an ideal gas expand reversibly and isothermally at 300 K to double their volume. The work done by the gas is about (R = 8.314)",
+ opts:["≈ 3.46 kJ","≈ 1.73 kJ","≈ 4.99 kJ","≈ 5.76 kJ"],
+ ans:0,
+ why:[
+  "Correct. |w| = nRT ln 2 = 2 × 8.314 × 300 × 0.693 ≈ 3457 J ≈ 3.46 kJ.",
+  "1.73 kJ uses n = 1 instead of 2.",
+  "4.99 kJ uses ln(V₂/V₁) = 1 rather than ln 2 = 0.693.",
+  "5.76 kJ would require T ≈ 500 K or a larger volume ratio."],
+ sol:"W (by gas) = nRT ln(V₂/V₁) = 2 × 8.314 × 300 × ln 2 = 4988 × 0.693 ≈ <b>3.46 kJ</b>. The gas absorbs the same amount of heat (q = +3.46 kJ, ΔU = 0)."},
+
+{id:46, lec:"L-5", blk:"Cyclic work", topic:"Cyclic work as enclosed area",
+ q:"For a cyclic process shown on a P–V diagram, the net work done equals",
+ opts:[
+  "the area enclosed by the loop",
+  "zero always",
+  "the length of the loop",
+  "the area under the upper curve only"],
+ ans:0,
+ why:[
+  "Correct. Net work over a cycle = enclosed loop area; the sign depends on the direction (clockwise = work done by the gas).",
+  "The net work is zero only for a degenerate (zero-area) loop; ΔU is what is always zero.",
+  "Work relates to area, not perimeter length.",
+  "You must subtract the area under the return path, leaving the enclosed area, not just the top curve."],
+ sol:"Cyclic net work = <b>enclosed P–V area</b>. Clockwise loop ⇒ net work done <i>by</i> the gas (heat engine); anticlockwise ⇒ net work done <i>on</i> the gas."},
+
+{id:47, lec:"L-5", blk:"Cyclic work direction", topic:"Sign of work for a clockwise cycle",
+ q:"For a clockwise cycle on a P–V diagram, the net work is",
+ opts:[
+  "done by the gas on the surroundings (system loses energy as work)",
+  "done on the gas by the surroundings",
+  "zero",
+  "always equal to the heat released"],
+ ans:0,
+ why:[
+  "Correct. A clockwise loop encloses positive expansion work overall, so the gas does net work on the surroundings (as in a heat engine).",
+  "An anticlockwise loop is the one where net work is done on the gas.",
+  "The enclosed area is non-zero, so net work is non-zero.",
+  "Over a cycle q = −w (since ΔU = 0), but the phrase here is about the direction of work, which is 'by the gas'."],
+ sol:"<b>Clockwise ⇒ net work by the gas</b> (engine); anticlockwise ⇒ net work on the gas (refrigerator/heat pump). Over the cycle ΔU = 0, so q_net = −w_net."},
+
+{id:48, lec:"L-5", blk:"Vacuum expansion", topic:"Work of expansion against vacuum",
+ q:"A gas expands from 1 L to 10 L against a vacuum. The work done is",
+ opts:["0","−9 L·atm","−10 L·atm","−911 J"],
+ ans:0,
+ why:[
+  "Correct. Vacuum means P_ext = 0, so w = −P_ext ΔV = 0 regardless of the volume change.",
+  "−9 L·atm would apply if P_ext were 1 atm; against a vacuum it is zero.",
+  "−10 L·atm also assumes a non-zero external pressure.",
+  "−911 J is −9 L·atm in joules; again it wrongly assumes P_ext = 1 atm."],
+ sol:"Against a vacuum, P_ext = 0 ⇒ <b>w = 0</b> no matter how large ΔV is. Work requires something to push against."},
+
+{id:49, lec:"L-5", blk:"Compression sign", topic:"Sign of compression work",
+ q:"When a gas is compressed, the work done on the gas is",
+ opts:[
+  "positive (energy is transferred into the gas)",
+  "negative",
+  "zero",
+  "equal to the heat absorbed"],
+ ans:0,
+ why:[
+  "Correct. Compression means ΔV &lt; 0, so w = −P_ext ΔV &gt; 0 — work is done on the gas, adding energy.",
+  "Negative work on the gas would describe expansion.",
+  "Real compression does non-zero work.",
+  "Work and heat are independent; w need not equal q."],
+ sol:"Compression: ΔV &lt; 0 ⇒ <b>w = −P_ext ΔV &gt; 0</b>. The surroundings push in and add energy to the gas."},
+
+{id:50, lec:"L-5", blk:"Irreversible work numeric", topic:"Irreversible expansion work",
+ q:"A gas expands from 1.0 L to 4.0 L against a constant pressure of 3.0 bar. The work done by the gas (1 L·bar = 100 J) is",
+ opts:["≈ 900 J","≈ 1200 J","≈ 300 J","≈ 100 J"],
+ ans:0,
+ why:[
+  "Correct. |w| = P ΔV = 3.0 × (4.0 − 1.0) = 9.0 L·bar = 900 J.",
+  "1200 J uses ΔV = 4.0 (final volume) instead of the change 3.0.",
+  "300 J forgets to multiply by the 3.0 bar pressure.",
+  "100 J is just the conversion factor, not the work."],
+ sol:"W (by gas) = P_ext ΔV = 3.0 bar × 3.0 L = 9.0 L·bar = <b>900 J</b> (w on the gas = −900 J)."},
+
+{id:51, lec:"L-5", blk:"Cyclic ΔU vs q", topic:"What is zero in a cycle",
+ q:"For a cyclic process, which is correct?",
+ opts:[
+  "ΔU = 0 but q and w need not be zero",
+  "q = 0 but ΔU ≠ 0",
+  "both ΔU and q are zero",
+  "w = 0 always"],
+ ans:0,
+ why:[
+  "Correct. The state function ΔU returns to zero over a cycle, but the path functions q and w (the enclosed area) generally do not.",
+  "q is generally non-zero over a cycle; it is ΔU that vanishes.",
+  "q equals −w (the enclosed area), not zero, in a working cycle.",
+  "Net work equals the enclosed area, not zero, for a real cycle."],
+ sol:"Cyclic: <b>ΔU = 0</b> (state function), so q_net = −w_net = enclosed area. Confusing 'ΔU = 0' with 'q = 0' is a classic trap."},
+
+/* ---------------- L-6 · ΔH−ΔU, heat capacities, calorimetry (11) ---------------- */
+{id:52, lec:"L-6", blk:"Mayer relation", topic:"Cp − Cv for an ideal gas",
+ q:"For one mole of an ideal gas, Cp − Cv equals",
+ opts:["R","0","R/2","2R"],
+ ans:0,
+ why:[
+  "Correct. Mayer's relation: Cp − Cv = R for one mole of ideal gas (the extra Cp accounts for expansion work at constant pressure).",
+  "They differ by exactly R, not zero.",
+  "R/2 is per degree of freedom, not the Cp − Cv difference.",
+  "The difference is R, not 2R."],
+ sol:"<b>Mayer's relation: Cp − Cv = R</b> (per mole). At constant pressure the gas also does expansion work, so Cp exceeds Cv by R."},
+
+{id:53, lec:"L-6", blk:"Heat capacities", topic:"Cv of a monatomic gas",
+ q:"The molar heat capacity at constant volume, Cv, of an ideal monatomic gas is",
+ opts:["(3/2)R","(5/2)R","3R","R"],
+ ans:0,
+ why:[
+  "Correct. A monatomic gas has 3 translational degrees of freedom, each contributing (1/2)R, giving Cv = (3/2)R.",
+  "(5/2)R is Cp of a monatomic gas, not Cv.",
+  "3R is the Cv of a non-linear triatomic (or the Dulong–Petit solid value), not a monatomic gas.",
+  "R alone omits the factor 3/2."],
+ sol:"Monatomic: 3 translational DOF ⇒ Cv = (3/2)R, Cp = (5/2)R, γ = Cp/Cv = <b>5/3</b>."},
+
+{id:54, lec:"L-6", blk:"Heat capacities", topic:"γ for a diatomic gas",
+ q:"The ratio γ = Cp/Cv for an ideal diatomic gas (at ordinary temperature) is",
+ opts:["7/5","5/3","4/3","1"],
+ ans:0,
+ why:[
+  "Correct. Diatomic: Cv = (5/2)R (3 translational + 2 rotational DOF), Cp = (7/2)R, so γ = 7/5 = 1.4.",
+  "5/3 is the monatomic value.",
+  "4/3 is the value for a non-linear triatomic gas.",
+  "γ is always greater than 1 for a gas; it cannot equal 1."],
+ sol:"Diatomic: Cv = (5/2)R, Cp = (7/2)R ⇒ γ = <b>7/5 = 1.4</b>. (Monatomic 5/3, non-linear triatomic 4/3.)"},
+
+{id:55, lec:"L-6", blk:"Bomb calorimeter", topic:"What a bomb calorimeter measures",
+ q:"A bomb calorimeter operates at constant volume, so it measures directly",
+ opts:[
+  "ΔU (the internal-energy change), since qv = ΔU",
+  "ΔH directly",
+  "the work done",
+  "the entropy change"],
+ ans:0,
+ why:[
+  "Correct. At constant volume w = 0, so qv = ΔU — the bomb measures the internal-energy change.",
+  "ΔH is obtained only after converting: ΔH = ΔU + Δng RT.",
+  "No PV work is done at constant volume, so it cannot measure work.",
+  "The calorimeter measures heat (hence ΔU), not entropy directly."],
+ sol:"Bomb (constant V): w = 0 ⇒ <b>qv = ΔU</b>. To get ΔH you then add Δng RT. Constant-pressure calorimetry, by contrast, gives ΔH directly."},
+
+{id:56, lec:"L-6", blk:"Bomb calorimetry", topic:"Converting bomb ΔU to ΔH",
+ q:"A combustion in a bomb calorimeter gives ΔU = −3200 kJ/mol with Δng = −2 at 298 K. The ΔH is about (R = 8.314)",
+ opts:["≈ −3205 kJ/mol","≈ −3195 kJ/mol","≈ −3200 kJ/mol","≈ −3210 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. ΔH = ΔU + Δng RT = −3200 + (−2)(8.314)(298)/1000 = −3200 − 4.95 ≈ −3205 kJ/mol.",
+  "−3195 adds +4.95 instead of subtracting; with Δng = −2 the correction is negative.",
+  "−3200 ignores the Δng RT correction entirely.",
+  "−3210 doubles the correction term."],
+ sol:"ΔH = ΔU + Δng RT = −3200 + (−2)(8.314 × 298 × 10⁻³) = −3200 − 4.95 ≈ <b>−3205 kJ/mol</b>."},
+
+{id:57, lec:"L-6", blk:"Reversible isothermal", topic:"All quantities for reversible isothermal expansion",
+ q:"For the reversible isothermal expansion of an ideal gas, which is true?",
+ opts:[
+  "ΔU = 0, ΔH = 0, q = −w > 0",
+  "ΔU > 0, q = 0",
+  "ΔH > 0, w > 0",
+  "q = 0, w = 0"],
+ ans:0,
+ why:[
+  "Correct. Isothermal ideal gas ⇒ ΔU = 0 and ΔH = 0; the gas absorbs heat equal to the work it does, so q = −w &gt; 0.",
+  "ΔU = 0 (not positive) and q ≠ 0 for a reversible expansion.",
+  "ΔH = 0 for an isothermal ideal gas, and w &lt; 0 (work done by the gas).",
+  "Reversible isothermal expansion exchanges heat and work; they are not zero (that is free expansion)."],
+ sol:"Reversible isothermal (ideal gas): <b>ΔU = ΔH = 0</b>, w = −nRT ln(V₂/V₁) &lt; 0, and q = −w &gt; 0. The absorbed heat is fully converted to work."},
+
+{id:58, lec:"L-6", blk:"γ", topic:"γ for a non-linear triatomic gas",
+ q:"For a non-linear triatomic ideal gas (3 translational + 3 rotational DOF), γ = Cp/Cv is",
+ opts:["4/3","7/5","5/3","3/2"],
+ ans:0,
+ why:[
+  "Correct. Cv = 3R (6 × ½R), Cp = 4R, so γ = 4R/3R = 4/3.",
+  "7/5 is the diatomic value.",
+  "5/3 is the monatomic value.",
+  "3/2 is not a γ value; it is the monatomic Cv/R."],
+ sol:"Non-linear triatomic: 3 trans + 3 rot = 6 DOF ⇒ Cv = 3R, Cp = 4R ⇒ γ = <b>4/3</b>."},
+
+{id:59, lec:"L-6", blk:"ΔH − ΔU", topic:"ΔH − ΔU for a combustion",
+ q:"For C(s) + O₂(g) → CO₂(g), the value of ΔH − ΔU is",
+ opts:[
+  "0, because Δng = 0",
+  "Δng RT with Δng = +1",
+  "Δng RT with Δng = −1",
+  "RT"],
+ ans:0,
+ why:[
+  "Correct. Gas moles: 1 (CO₂) − 1 (O₂) = 0 (the solid carbon does not count), so ΔH − ΔU = 0.",
+  "Δng is 0, not +1; one gas mole is produced but one is consumed.",
+  "Δng is 0 here (one gas mole made, one consumed), not −1.",
+  "With Δng = 0, the RT term vanishes."],
+ sol:"Only gases count: products 1 (CO₂), reactants 1 (O₂). Δng = 0 ⇒ <b>ΔH − ΔU = 0</b> ⇒ ΔH = ΔU for this combustion."},
+
+{id:60, lec:"L-6", blk:"Bomb calorimetry", topic:"Constant-volume heat identity",
+ q:"At constant volume, the heat released by a reaction equals",
+ opts:["ΔU","ΔH","−ΔH","w"],
+ ans:0,
+ why:[
+  "Correct. Constant volume ⇒ w = 0 ⇒ qv = ΔU.",
+  "ΔH equals the heat at constant pressure (qp), not constant volume.",
+  "−ΔH has no special meaning here.",
+  "No PV work is done at constant volume, so the heat is not work."],
+ sol:"<b>qv = ΔU</b> (constant volume), <b>qp = ΔH</b> (constant pressure). The two heats differ by Δng RT."},
+
+{id:61, lec:"L-6", blk:"Average KE", topic:"Translational kinetic energy per mole",
+ q:"The average translational kinetic energy of one mole of an ideal gas at temperature T is",
+ opts:["(3/2)RT","(3/2)kT","(5/2)RT","RT"],
+ ans:0,
+ why:[
+  "Correct. Per mole, average translational KE = (3/2)RT (three translational DOF, each ½RT).",
+  "(3/2)kT is the value per <i>molecule</i>, not per mole.",
+  "(5/2)RT includes rotational contributions, not just translation.",
+  "RT omits the factor 3/2."],
+ sol:"Per mole: <b>KE_trans = (3/2)RT</b>; per molecule it is (3/2)kT. This is why a monatomic gas has Cv = (3/2)R."},
+
+{id:62, lec:"L-6", blk:"Mayer relation", topic:"Cp from Cv",
+ q:"If the molar Cv of a gas is 20.8 J/mol·K, its Cp is about (R = 8.314)",
+ opts:["29.1 J/mol·K","12.5 J/mol·K","20.8 J/mol·K","41.6 J/mol·K"],
+ ans:0,
+ why:[
+  "Correct. Cp = Cv + R = 20.8 + 8.314 ≈ 29.1 J/mol·K.",
+  "12.5 subtracts R instead of adding it.",
+  "20.8 ignores the +R correction.",
+  "41.6 adds 2R rather than R."],
+ sol:"Mayer: Cp = Cv + R = 20.8 + 8.314 = <b>29.1 J/mol·K</b>. (Cv = 20.8 ≈ (5/2)R marks a diatomic gas.)"},
+
+/* ---------------- L-7 · Thermochemistry (10) ---------------- */
+{id:63, lec:"L-7", blk:"Thermochemical equations", topic:"Physical states in thermochemical equations",
+ q:"A thermochemical equation must include the physical states of all species because",
+ opts:[
+  "ΔH depends on the states (s, l, g, aq) of reactants and products",
+  "states have no effect on ΔH",
+  "it is only a convention with no physical meaning",
+  "states determine the reaction rate"],
+ ans:0,
+ why:[
+  "Correct. The enthalpy of, say, water differs between liquid and gas, so ΔH changes if the state changes — states must be specified.",
+  "States strongly affect ΔH (e.g. product H₂O(l) vs H₂O(g) differ by the enthalpy of vaporisation).",
+  "It is not arbitrary; the states carry real enthalpy differences.",
+  "Rate is a kinetic matter; thermochemical equations are about ΔH, which depends on state."],
+ sol:"ΔH is state-dependent: e.g. combustion giving H₂O(l) releases more heat than giving H₂O(g), by the enthalpy of vaporisation. <b>Always label states.</b>"},
+
+{id:64, lec:"L-7", blk:"ΔH extensive", topic:"ΔH scales with the equation",
+ q:"If H₂(g) + ½O₂(g) → H₂O(l) has ΔH = −286 kJ, then for 2H₂(g) + O₂(g) → 2H₂O(l), ΔH is",
+ opts:["−572 kJ","−286 kJ","−143 kJ","+572 kJ"],
+ ans:0,
+ why:[
+  "Correct. Enthalpy is extensive: doubling the amounts doubles ΔH, −286 × 2 = −572 kJ.",
+  "−286 kJ is for one mole of water; doubling the equation doubles it.",
+  "−143 kJ halves it, the opposite of doubling.",
+  "The reaction is exothermic; the sign stays negative when scaled up."],
+ sol:"ΔH is <b>extensive</b>: multiply the equation by 2 ⇒ multiply ΔH by 2 ⇒ <b>−572 kJ</b>. Reversing an equation flips the sign instead."},
+
+{id:65, lec:"L-7", blk:"ΔH state function", topic:"Reversing a thermochemical equation",
+ q:"If A → B has ΔH = +40 kJ, then B → A has ΔH =",
+ opts:["−40 kJ","+40 kJ","0","+80 kJ"],
+ ans:0,
+ why:[
+  "Correct. Reversing a reaction reverses the sign of its enthalpy change: −40 kJ.",
+  "The forward value +40 kJ applies to A → B, not the reverse.",
+  "The reverse ΔH is equal in magnitude and opposite in sign, not zero.",
+  "The magnitude stays 40 kJ; it does not double."],
+ sol:"Because H is a state function, <b>ΔH(reverse) = −ΔH(forward)</b> = −40 kJ. This is one of the operations Hess's law permits."},
+
+{id:66, lec:"L-7", blk:"Standard enthalpy", topic:"Standard enthalpy of formation definition",
+ q:"The standard enthalpy of formation of a compound is the enthalpy change when",
+ opts:[
+  "one mole of the compound forms from its elements in their standard states",
+  "one mole of the compound decomposes",
+  "one mole of the compound burns completely",
+  "the compound dissolves in water"],
+ ans:0,
+ why:[
+  "Correct. ΔHf° is defined for forming 1 mol of compound from elements in their reference (standard) states.",
+  "Decomposition is the reverse process; its ΔH is −ΔHf°.",
+  "Complete combustion defines the enthalpy of combustion, not formation.",
+  "Dissolution defines the enthalpy of solution."],
+ sol:"<b>ΔHf°</b>: enthalpy change to form <b>1 mole</b> of a compound from its elements in their standard states. By convention, ΔHf° of an element in its standard state is zero."},
+
+{id:67, lec:"L-7", blk:"ΔHf of element", topic:"Formation enthalpy of an element",
+ q:"The standard enthalpy of formation of O₂(g) is",
+ opts:["0","−286 kJ/mol","+286 kJ/mol","undefined"],
+ ans:0,
+ why:[
+  "Correct. O₂(g) is the standard state of the element oxygen, so its ΔHf° is defined as zero.",
+  "−286 kJ/mol is the formation enthalpy of liquid water, not O₂.",
+  "There is no enthalpy cost to 'form' an element from itself; it is zero, not +286.",
+  "It is well defined and equals zero by convention."],
+ sol:"By definition, <b>ΔHf° of any element in its standard state = 0</b> (O₂(g), N₂(g), C(graphite), etc.). This zero is the reference level for all formation enthalpies."},
+
+{id:68, lec:"L-7", blk:"ΔHrxn from ΔHf", topic:"Reaction enthalpy from formation enthalpies",
+ q:"The standard enthalpy of a reaction is calculated as",
+ opts:[
+  "Σ ΔHf°(products) − Σ ΔHf°(reactants)",
+  "Σ ΔHf°(reactants) − Σ ΔHf°(products)",
+  "Σ ΔHf°(products) + Σ ΔHf°(reactants)",
+  "ΔHf°(products) × ΔHf°(reactants)"],
+ ans:0,
+ why:[
+  "Correct. Each ΔHf° is weighted by its stoichiometric coefficient; products minus reactants gives ΔHrxn°.",
+  "This is the negative of the correct expression (reactants minus products).",
+  "The two sums are subtracted, not added.",
+  "Formation enthalpies are summed and subtracted, never multiplied."],
+ sol:"<b>ΔHrxn° = Σ n·ΔHf°(products) − Σ n·ΔHf°(reactants)</b>, using stoichiometric coefficients n. It follows directly from Hess's law."},
+
+{id:69, lec:"L-7", blk:"ΔHrxn numeric", topic:"Computing reaction enthalpy",
+ q:"Given ΔHf°[CO₂(g)] = −393 kJ/mol and ΔHf°[CO(g)] = −110 kJ/mol, the ΔH for CO(g) + ½O₂(g) → CO₂(g) is",
+ opts:["−283 kJ","−503 kJ","+283 kJ","−393 kJ"],
+ ans:0,
+ why:[
+  "Correct. ΔH = ΔHf°(CO₂) − ΔHf°(CO) − ½ΔHf°(O₂) = −393 − (−110) − 0 = −283 kJ.",
+  "−503 kJ adds the two formation enthalpies instead of subtracting.",
+  "The reaction is exothermic; the sign is negative, not positive.",
+  "−393 kJ forgets to subtract the CO formation enthalpy."],
+ sol:"ΔH = [−393] − [−110 + 0] = −393 + 110 = <b>−283 kJ</b> (O₂ contributes 0 as an element in its standard state)."},
+
+{id:70, lec:"L-7", blk:"Bomb ΔU → ΔH", topic:"Converting bomb data with Δng",
+ q:"For a reaction with Δng = +1 at 300 K, if ΔU = −500 kJ, then ΔH is about (R = 8.314)",
+ opts:["≈ −497.5 kJ","≈ −502.5 kJ","≈ −500 kJ","≈ −505 kJ"],
+ ans:0,
+ why:[
+  "Correct. ΔH = ΔU + Δng RT = −500 + (1)(8.314)(300)/1000 = −500 + 2.49 ≈ −497.5 kJ.",
+  "−502.5 subtracts the correction; with Δng = +1 it should be added.",
+  "−500 ignores the Δng RT term.",
+  "−505 uses roughly double the correct correction."],
+ sol:"ΔH = ΔU + Δng RT = −500 + (1)(8.314 × 300 × 10⁻³) = −500 + 2.49 ≈ <b>−497.5 kJ</b>."},
+
+{id:71, lec:"L-7", blk:"ΔH state function", topic:"Path independence of ΔH",
+ q:"That the enthalpy of a reaction is the same whether it occurs in one step or several is a statement of",
+ opts:[
+  "Hess's law (ΔH is path-independent)",
+  "the first law's sign convention",
+  "the second law",
+  "Le Chatelier's principle"],
+ ans:0,
+ why:[
+  "Correct. Hess's law follows from ΔH being a state function: the total ΔH depends only on initial and final states.",
+  "Sign conventions concern q and w, not the path-independence of ΔH.",
+  "The second law is about entropy and spontaneity, not enthalpy summation.",
+  "Le Chatelier's principle is about equilibrium shifts, not thermochemistry."],
+ sol:"<b>Hess's law</b>: the overall ΔH is the sum of the ΔH of individual steps, because enthalpy is a state function. It lets you compute hard-to-measure enthalpies from accessible ones."},
+
+{id:72, lec:"L-7", blk:"ΔHrxn numeric", topic:"Reaction enthalpy with coefficients",
+ q:"For 2H₂(g) + O₂(g) → 2H₂O(g), given ΔHf°[H₂O(g)] = −242 kJ/mol, the reaction enthalpy is",
+ opts:["−484 kJ","−242 kJ","−121 kJ","+484 kJ"],
+ ans:0,
+ why:[
+  "Correct. ΔH = 2 × ΔHf°(H₂O,g) − 0 = 2 × (−242) = −484 kJ (the elements H₂ and O₂ contribute 0).",
+  "−242 kJ is for one mole of water; the equation makes two.",
+  "−121 kJ halves the per-mole value, the opposite of the required doubling.",
+  "The reaction is exothermic, so the sign is negative."],
+ sol:"ΔH = Σ ΔHf°(products) − Σ ΔHf°(reactants) = 2(−242) − [2(0) + 0] = <b>−484 kJ</b>."},
+
+/* ---------------- L-8 · Hess, formation, Born-Haber (11) ---------------- */
+{id:73, lec:"L-8", blk:"Hess's law", topic:"Statement of Hess's law",
+ q:"Hess's law of constant heat summation states that the total enthalpy change of a reaction",
+ opts:[
+  "is independent of the number of steps or the path taken",
+  "depends on the reaction rate",
+  "depends on the catalyst used",
+  "is always positive"],
+ ans:0,
+ why:[
+  "Correct. Because ΔH is a state function, the overall ΔH is fixed by the initial and final states regardless of route.",
+  "Rate is kinetic; it does not affect ΔH.",
+  "A catalyst changes the pathway but not the net ΔH.",
+  "ΔH can be positive or negative depending on the reaction."],
+ sol:"<b>Hess's law</b>: ΔH_total = Σ ΔH_steps, path-independent. Add, reverse, and scale known equations to reach the target reaction and combine their ΔH the same way."},
+
+{id:74, lec:"L-8", blk:"Hess numeric", topic:"Combining two steps",
+ q:"Given C(s) + O₂(g) → CO₂(g), ΔH = −393 kJ and CO(g) + ½O₂(g) → CO₂(g), ΔH = −283 kJ, the ΔH for C(s) + ½O₂(g) → CO(g) is",
+ opts:["−110 kJ","−676 kJ","+110 kJ","−676/2 kJ"],
+ ans:0,
+ why:[
+  "Correct. Target = (step 1) − (step 2): −393 − (−283) = −110 kJ.",
+  "−676 kJ adds the two, but the second step must be reversed and subtracted.",
+  "The result is exothermic (−110), not +110.",
+  "Halving is not the correct operation here; subtraction gives −110."],
+ sol:"Subtract the equations: [C + O₂ → CO₂] − [CO + ½O₂ → CO₂] gives C + ½O₂ → CO with ΔH = −393 − (−283) = <b>−110 kJ</b>."},
+
+{id:75, lec:"L-8", blk:"Formation equation", topic:"What a formation equation looks like",
+ q:"Which is a correct formation equation for methane?",
+ opts:[
+  "C(graphite) + 2H₂(g) → CH₄(g)",
+  "CH₄(g) → C(graphite) + 2H₂(g)",
+  "C(g) + 4H(g) → CH₄(g)",
+  "2C(graphite) + 4H₂(g) → 2CH₄(g)"],
+ ans:0,
+ why:[
+  "Correct. A formation equation makes exactly one mole of the compound from its elements in their standard states (graphite and H₂ gas).",
+  "This is decomposition, the reverse of formation.",
+  "The elements must be in their standard states (graphite, H₂ gas), not gaseous atoms.",
+  "A formation equation forms exactly one mole, not two."],
+ sol:"A formation equation makes <b>one mole</b> from elements in standard states: <b>C(graphite) + 2H₂(g) → CH₄(g)</b>. Fractional coefficients on the elements are allowed, but the product must be 1 mole."},
+
+{id:76, lec:"L-8", blk:"Born-Haber", topic:"Purpose of the Born–Haber cycle",
+ q:"The Born–Haber cycle is a Hess's-law cycle used mainly to determine",
+ opts:[
+  "the lattice enthalpy of an ionic solid",
+  "the rate of an ionic reaction",
+  "the pH of a salt solution",
+  "the bond angle in a molecule"],
+ ans:0,
+ why:[
+  "Correct. Lattice enthalpy cannot be measured directly, so it is obtained by closing the Born–Haber cycle of sublimation, ionisation, dissociation, electron gain and formation.",
+  "Rates are kinetic and not part of the cycle.",
+  "pH is unrelated to the Born–Haber energetics.",
+  "Bond angles come from structure, not thermochemical cycles."],
+ sol:"<b>Born–Haber cycle</b>: applies Hess's law around a closed loop (sublimation + ionisation + ½ dissociation + electron gain + lattice = formation) to solve for the otherwise inaccessible <b>lattice enthalpy</b>."},
+
+{id:77, lec:"L-8", blk:"Born-Haber numeric", topic:"Solving a Born–Haber cycle",
+ q:"For NaCl, ΔHf = −411, sublimation of Na = +108, ionisation of Na = +496, ½ dissociation of Cl₂ = +122, electron gain of Cl = −349 (all kJ/mol). The lattice enthalpy (formation of the solid from gaseous ions) is",
+ opts:["−788 kJ/mol","−411 kJ/mol","+788 kJ/mol","−1137 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. ΔHf = sub + IE + ½diss + EA + U ⇒ U = ΔHf − (sub + IE + ½diss + EA) = −411 − (108 + 496 + 122 − 349) = −411 − 377 = −788 kJ/mol.",
+  "−411 is the formation enthalpy, not the lattice enthalpy.",
+  "Lattice enthalpy (ions → solid) is strongly exothermic, hence negative, not +788.",
+  "−1137 double-counts one of the endothermic terms."],
+ sol:"U = ΔHf − (ΔH_sub + IE + ½ΔH_diss + ΔH_eg) = −411 − (108 + 496 + 122 − 349) = −411 − 377 = <b>−788 kJ/mol</b>."},
+
+{id:78, lec:"L-8", blk:"Hess with scaling", topic:"Scaling before adding",
+ q:"To use S(s) + O₂(g) → SO₂(g) (ΔH₁) and 2SO₂(g) + O₂(g) → 2SO₃(g) (ΔH₂) for S(s) + 3/2 O₂(g) → SO₃(g), you should combine them as",
+ opts:[
+  "ΔH₁ + ½ΔH₂",
+  "ΔH₁ + ΔH₂",
+  "ΔH₁ − ½ΔH₂",
+  "2ΔH₁ + ΔH₂"],
+ ans:0,
+ why:[
+  "Correct. Halving the second equation gives SO₂ + ½O₂ → SO₃ (ΔH = ½ΔH₂); adding it to the first cancels SO₂ and yields the target with ΔH₁ + ½ΔH₂.",
+  "Adding ΔH₂ unscaled would produce 2 mol SO₃, not 1.",
+  "The second step is added (not subtracted) once halved, since SO₂ is a product then a reactant.",
+  "Doubling the first equation overshoots the 1 mole of sulfur needed."],
+ sol:"Halve equation 2, then add to equation 1: SO₂ cancels, leaving S(s) + 3/2 O₂ → SO₃ with ΔH = <b>ΔH₁ + ½ΔH₂</b>."},
+
+{id:79, lec:"L-8", blk:"Formation from steps", topic:"Assembling a formation equation",
+ q:"When several thermochemical steps are added by Hess's law to build a formation equation, the target ΔHf equals",
+ opts:[
+  "the algebraic sum of the ΔH values of the combined steps (each scaled/reversed as needed)",
+  "the largest single ΔH among the steps",
+  "the average of the step ΔH values",
+  "always zero"],
+ ans:0,
+ why:[
+  "Correct. Hess's law: combine the steps (reverse/scale as required) and sum their ΔH the same way to get ΔHf.",
+  "ΔHf is the sum of all contributing steps, not just the biggest one.",
+  "It is a stoichiometric sum, not an average.",
+  "ΔHf is generally non-zero (it is zero only for elements in their standard states)."],
+ sol:"Manipulate the given equations to add up to the formation equation; the target <b>ΔHf = Σ (scaled/reversed step ΔH)</b>."},
+
+{id:80, lec:"L-8", blk:"Allotropes", topic:"Enthalpy difference between allotropes",
+ q:"Given ΔH_combustion of C(graphite) = −393 kJ/mol and of C(diamond) = −395 kJ/mol, the enthalpy of the transition C(graphite) → C(diamond) is",
+ opts:["+2 kJ/mol","−2 kJ/mol","−788 kJ/mol","+788 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. graphite → diamond = combustion(graphite) − combustion(diamond) = −393 − (−395) = +2 kJ/mol (diamond is slightly higher in enthalpy).",
+  "The sign is positive: diamond has a higher enthalpy than graphite, so the conversion is endothermic.",
+  "−788 adds the two combustion values, which is not the correct Hess combination.",
+  "The magnitude is 2 kJ, not 788."],
+ sol:"C(gr) → C(dia): subtract the combustion equations. ΔH = −393 − (−395) = <b>+2 kJ/mol</b> (endothermic; graphite is the more stable allotrope)."},
+
+{id:81, lec:"L-8", blk:"Bond dissociation", topic:"Bond dissociation enthalpy per mole",
+ q:"For Cl₂(g) → 2Cl(g), ΔH = +242 kJ. The Cl–Cl bond dissociation enthalpy is",
+ opts:["242 kJ/mol of Cl₂ bonds","121 kJ/mol","484 kJ/mol","−242 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. Breaking one mole of Cl–Cl bonds requires +242 kJ; that is the bond dissociation enthalpy.",
+  "121 kJ would be the energy per mole of Cl <i>atoms</i> formed (dividing by 2), not per bond.",
+  "484 kJ doubles the value incorrectly.",
+  "Bond breaking is endothermic, so the value is positive, not negative."],
+ sol:"One mole of Cl₂ has one mole of Cl–Cl bonds. ΔH = +242 kJ ⇒ Cl–Cl bond enthalpy = <b>242 kJ/mol</b>. Bond breaking always costs energy (endothermic)."},
+
+{id:82, lec:"L-8", blk:"Born-Haber", topic:"Sign of lattice enthalpy",
+ q:"The lattice enthalpy for the process Na⁺(g) + Cl⁻(g) → NaCl(s) is",
+ opts:[
+  "large and negative (energy released)",
+  "large and positive",
+  "zero",
+  "equal to the ionisation energy"],
+ ans:0,
+ why:[
+  "Correct. Assembling gaseous ions into the crystal releases a large amount of energy, so this lattice enthalpy is strongly negative.",
+  "Forming the lattice from ions releases energy; the positive value is for the reverse (breaking the lattice).",
+  "It is a large energy release, not zero.",
+  "It is unrelated to and much larger in magnitude than the ionisation energy."],
+ sol:"Ions → solid releases energy ⇒ <b>lattice enthalpy is large and negative</b> (about −788 kJ/mol for NaCl). The reverse (solid → gaseous ions) is the positive lattice dissociation enthalpy."},
+
+{id:83, lec:"L-8", blk:"Hess sign", topic:"Combining a reversed step",
+ q:"If A → B has ΔH = −100 kJ and C → B has ΔH = −60 kJ, then A → C has ΔH =",
+ opts:["−40 kJ","−160 kJ","+40 kJ","+160 kJ"],
+ ans:0,
+ why:[
+  "Correct. A → C = (A → B) + (B → C) = −100 + (+60) = −40 kJ (reverse the second: B → C is +60).",
+  "−160 adds the two forward values without reversing the second.",
+  "The result is −40, not +40; the larger exothermic step dominates.",
+  "+160 both fails to reverse and flips the sign."],
+ sol:"Reverse C → B to get B → C (+60 kJ), then add to A → B: ΔH(A→C) = −100 + 60 = <b>−40 kJ</b>."},
+
+/* ---------------- L-9 · Bond enthalpies (10) ---------------- */
+{id:84, lec:"L-9", blk:"Definition", topic:"Mean bond enthalpy",
+ q:"The mean bond enthalpy of a bond (e.g. C–H) is",
+ opts:[
+  "the average energy to break that type of bond, taken over many molecules",
+  "the energy released when the bond forms in one specific molecule",
+  "always equal to the exact bond dissociation energy in every molecule",
+  "the energy to break the whole molecule at once"],
+ ans:0,
+ why:[
+  "Correct. Because a given bond type has slightly different strengths in different molecules, the mean bond enthalpy is an average value.",
+  "Bond breaking is endothermic; and the mean value is about breaking, averaged, not forming in one molecule.",
+  "Individual bond dissociation energies vary (e.g. the four C–H bonds in methane differ); the mean is an average.",
+  "The mean bond enthalpy is per bond, not for the whole molecule at once."],
+ sol:"<b>Mean bond enthalpy</b> = average energy to break one mole of a bond type across many compounds. Individual bond dissociation enthalpies differ slightly, so tabulated values are averages."},
+
+{id:85, lec:"L-9", blk:"ΔH from bonds", topic:"Bond-enthalpy formula for ΔH",
+ q:"Using bond enthalpies, the enthalpy of a reaction is",
+ opts:[
+  "Σ (bond enthalpies of bonds broken) − Σ (bond enthalpies of bonds formed)",
+  "Σ (bonds formed) − Σ (bonds broken)",
+  "Σ (bonds broken) + Σ (bonds formed)",
+  "the product of the two sums"],
+ ans:0,
+ why:[
+  "Correct. Breaking bonds costs energy (+) and forming bonds releases it (−); ΔH = Σ broken − Σ formed.",
+  "This is the negative of the correct expression; it would flip the sign of ΔH.",
+  "The two sums are subtracted, not added.",
+  "Bond enthalpies are summed and subtracted, never multiplied."],
+ sol:"<b>ΔH = Σ B.E.(bonds broken) − Σ B.E.(bonds formed).</b> Reactant bonds are broken (endothermic), product bonds are formed (exothermic)."},
+
+{id:86, lec:"L-9", blk:"ΔH from bonds numeric", topic:"Reaction enthalpy from bond enthalpies",
+ q:"For H₂(g) + Cl₂(g) → 2HCl(g), with B.E.(H–H) = 436, B.E.(Cl–Cl) = 242, B.E.(H–Cl) = 431 kJ/mol, ΔH is",
+ opts:["−184 kJ","+184 kJ","−105 kJ","−862 kJ"],
+ ans:0,
+ why:[
+  "Correct. Broken: 436 + 242 = 678; formed: 2 × 431 = 862; ΔH = 678 − 862 = −184 kJ.",
+  "The reaction is exothermic (more energy from forming two H–Cl bonds), so ΔH is negative.",
+  "−105 miscounts the H–Cl bonds (uses one instead of two).",
+  "−862 counts only the bonds formed and forgets the bonds broken."],
+ sol:"ΔH = (436 + 242) − 2(431) = 678 − 862 = <b>−184 kJ</b>. Forming two strong H–Cl bonds releases more than breaking H–H and Cl–Cl costs."},
+
+{id:87, lec:"L-9", blk:"Bond breaking sign", topic:"Sign of bond breaking",
+ q:"Breaking a chemical bond is",
+ opts:[
+  "endothermic (energy must be supplied)",
+  "exothermic (energy is released)",
+  "athermal (no energy change)",
+  "sometimes exothermic"],
+ ans:0,
+ why:[
+  "Correct. A bond is a stabilising interaction; breaking it requires energy input, so it is always endothermic.",
+  "Energy is released when bonds <i>form</i>, not when they break.",
+  "Bond breaking always involves an energy cost.",
+  "Bond breaking is invariably endothermic, never exothermic."],
+ sol:"<b>Bond breaking is endothermic</b> (+); <b>bond forming is exothermic</b> (−). Whether a reaction is exo- or endothermic depends on the balance between the two."},
+
+{id:88, lec:"L-9", blk:"Bond enthalpy numeric", topic:"Enthalpy of combustion of methane from bonds",
+ q:"For CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(g), with B.E. (kJ/mol): C–H 414, O=O 499, C=O 799, O–H 463, the ΔH is",
+ opts:["−796 kJ","−498 kJ","+796 kJ","−1194 kJ"],
+ ans:0,
+ why:[
+  "Correct. Broken: 4(414) + 2(499) = 1656 + 998 = 2654. Formed: 2(799) + 4(463) = 1598 + 1852 = 3450. ΔH = 2654 − 3450 = −796 kJ.",
+  "−498 undercounts the bonds formed; the four O–H and two C=O bonds total 3450 kJ.",
+  "Combustion of methane is strongly exothermic, so the sign must be negative.",
+  "−1194 double-counts the C=O bonds; there are two C=O bonds (1598 kJ), not four."],
+ sol:"ΔH = Σ broken − Σ formed = [4(414) + 2(499)] − [2(799) + 4(463)] = 2654 − 3450 = <b>−796 kJ</b> (the value varies slightly with the exact tabulated bond enthalpies used)."},
+
+{id:89, lec:"L-9", blk:"Bond enthalpy vs dissociation", topic:"Difference between the two",
+ q:"For a diatomic molecule like HCl, the mean bond enthalpy and the bond dissociation enthalpy are",
+ opts:[
+  "identical, because there is only one bond to break",
+  "always different",
+  "unrelated quantities",
+  "both zero"],
+ ans:0,
+ why:[
+  "Correct. With a single bond in the molecule, the average equals the one dissociation value; there is nothing to average.",
+  "They differ only for polyatomic molecules where a bond type appears more than once with slightly varying strengths.",
+  "They are closely related — the mean is an average of dissociation values.",
+  "Neither is zero; HCl has a definite, positive bond enthalpy."],
+ sol:"For diatomics (H₂, HCl, Cl₂) the <b>mean bond enthalpy = bond dissociation enthalpy</b>. They diverge only in polyatomics (e.g. the four successive C–H dissociations in methane average to the mean C–H value)."},
+
+{id:90, lec:"L-9", blk:"Average bond enthalpy numeric", topic:"Average O–H bond energy in water",
+ q:"If breaking both O–H bonds in H₂O(g) → 2H(g) + O(g) requires 926 kJ/mol, the average O–H bond enthalpy is",
+ opts:["463 kJ/mol","926 kJ/mol","231.5 kJ/mol","1852 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. Two O–H bonds share 926 kJ, so the average is 926/2 = 463 kJ/mol.",
+  "926 kJ is the total for both bonds, not per bond.",
+  "231.5 divides by 4 instead of 2.",
+  "1852 doubles the total instead of halving it."],
+ sol:"Average O–H bond enthalpy = (total to break both bonds)/2 = 926/2 = <b>463 kJ/mol</b>."},
+
+{id:91, lec:"L-9", blk:"Bond energy from cycle", topic:"Bond energy from atomisation",
+ q:"To find the C≡C bond energy from combustion and atomisation data, one uses",
+ opts:[
+  "a Hess's-law (thermochemical) cycle relating the bond energy to ΔHf and atomisation enthalpies",
+  "the ideal gas law",
+  "the rate equation",
+  "the Clausius inequality"],
+ ans:0,
+ why:[
+  "Correct. Bond energies are extracted by constructing a Hess cycle linking formation, atomisation of the elements, and the bonds in the molecule.",
+  "The ideal gas law relates P, V, T, not bond energies.",
+  "Rate equations are kinetic, unrelated to bond-energy determination.",
+  "The Clausius inequality concerns entropy, not bond energies."],
+ sol:"Bond energies come from <b>Hess-law cycles</b>: combine ΔHf and atomisation enthalpies to isolate the energy of the bond of interest (e.g. C≡C in acetylene)."},
+
+{id:92, lec:"L-9", blk:"ΔH from bonds", topic:"Exothermic when product bonds stronger",
+ q:"A reaction is exothermic when",
+ opts:[
+  "the bonds formed in the products are stronger (release more energy) than the bonds broken in the reactants",
+  "the bonds broken are stronger than the bonds formed",
+  "no bonds are broken",
+  "the reaction is fast"],
+ ans:0,
+ why:[
+  "Correct. If more energy is released forming product bonds than is spent breaking reactant bonds, the net ΔH is negative (exothermic).",
+  "If breaking dominates over forming, the reaction is endothermic.",
+  "Reactions generally involve breaking some bonds; that is not the criterion.",
+  "Speed (rate) is kinetic and does not determine exo/endothermicity."],
+ sol:"Exothermic ⇔ <b>Σ(bonds formed) &gt; Σ(bonds broken)</b> in energy, so ΔH = broken − formed &lt; 0."},
+
+{id:93, lec:"L-9", blk:"ΔH sign vs rate", topic:"ΔH and reaction rate",
+ q:"The sign and magnitude of ΔH for a reaction tell us about its",
+ opts:[
+  "thermodynamic stability/heat, but not its rate",
+  "reaction rate",
+  "activation energy",
+  "catalyst requirement"],
+ ans:0,
+ why:[
+  "Correct. ΔH is a thermodynamic quantity (heat, stability); it says nothing about how fast the reaction goes.",
+  "Rate is governed by kinetics (activation energy), not by ΔH.",
+  "Activation energy is a separate, kinetic barrier unrelated to ΔH's value.",
+  "Catalyst need is a kinetic issue, independent of ΔH."],
+ sol:"ΔH is a <b>thermodynamic</b> property (energy/heat, feasibility with ΔG); it does not determine the <b>rate</b>, which depends on the activation energy (kinetics). A very exothermic reaction can still be extremely slow."},
+
+/* ---------------- L-10 · Entropy & second law (11) ---------------- */
+{id:94, lec:"L-10", blk:"Spontaneity", topic:"Definition of a spontaneous process",
+ q:"A spontaneous process is one that",
+ opts:[
+  "occurs on its own without continuous external help, in a definite direction",
+  "occurs instantly",
+  "requires continuous energy input to proceed",
+  "always releases heat"],
+ ans:0,
+ why:[
+  "Correct. Spontaneity is about direction and feasibility, not speed — it proceeds without sustained outside intervention.",
+  "Spontaneous does not mean fast; rusting is spontaneous but slow.",
+  "A process needing continuous input is non-spontaneous.",
+  "Some spontaneous processes are endothermic (e.g. ice melting above 0 °C, salt dissolving)."],
+ sol:"<b>Spontaneous</b> = naturally proceeds in one direction without continuous external aid. It says nothing about rate, and it need not be exothermic — the true criterion is ΔG &lt; 0."},
+
+{id:95, lec:"L-10", blk:"Entropy definition", topic:"Defining equation for entropy",
+ q:"The entropy change of a reversible process at temperature T is",
+ opts:["ΔS = q_rev / T","ΔS = q_rev × T","ΔS = w/T","ΔS = ΔH × T"],
+ ans:0,
+ why:[
+  "Correct. Entropy change equals the reversible heat divided by the absolute temperature.",
+  "It is a quotient, not a product, of heat and temperature.",
+  "Entropy is defined via heat q_rev, not work w.",
+  "ΔS is not ΔH times T; that has the wrong dimensions."],
+ sol:"<b>ΔS = q_rev / T</b> (units J/K). Entropy measures the dispersal of energy; only the reversible heat divided by T gives the true entropy change."},
+
+{id:96, lec:"L-10", blk:"Entropy numeric", topic:"Entropy of isothermal expansion",
+ q:"For the isothermal expansion of an ideal gas, the entropy change is",
+ opts:[
+  "ΔS = nR ln(V₂/V₁)",
+  "ΔS = nR ln(V₁/V₂)",
+  "ΔS = nR(V₂ − V₁)",
+  "ΔS = 0"],
+ ans:0,
+ why:[
+  "Correct. q_rev = nRT ln(V₂/V₁) for isothermal ideal-gas expansion, so ΔS = q_rev/T = nR ln(V₂/V₁).",
+  "ln(V₁/V₂) flips the sign; expansion increases entropy (V₂ &gt; V₁ ⇒ ΔS &gt; 0).",
+  "The dependence is logarithmic, not a simple difference.",
+  "ΔS is non-zero even though ΔU = 0; the gas disperses into a larger volume."],
+ sol:"Isothermal ideal gas: q_rev = nRT ln(V₂/V₁) ⇒ <b>ΔS = nR ln(V₂/V₁)</b>. Expansion (V₂ &gt; V₁) gives ΔS &gt; 0, even though ΔU = 0."},
+
+{id:97, lec:"L-10", blk:"Entropy numeric", topic:"Computing ΔS for a doubling of volume",
+ q:"One mole of ideal gas expands isothermally to double its volume. Its entropy change is about (R = 8.314)",
+ opts:["+5.76 J/K","+8.31 J/K","−5.76 J/K","0"],
+ ans:0,
+ why:[
+  "Correct. ΔS = nR ln 2 = 1 × 8.314 × 0.693 ≈ 5.76 J/K.",
+  "+8.31 J/K uses ln(V₂/V₁) = 1 rather than ln 2 = 0.693.",
+  "Expansion increases entropy, so the sign is positive, not negative.",
+  "ΔS is non-zero for an expansion, even at constant temperature."],
+ sol:"ΔS = nR ln(V₂/V₁) = 1 × 8.314 × ln 2 = 8.314 × 0.693 ≈ <b>+5.76 J/K</b>."},
+
+{id:98, lec:"L-10", blk:"Second law", topic:"Entropy criterion for spontaneity",
+ q:"According to the second law, a process is spontaneous when",
+ opts:[
+  "the total entropy of the universe (system + surroundings) increases",
+  "the entropy of the system alone decreases",
+  "the entropy of the surroundings alone decreases",
+  "the total entropy stays constant"],
+ ans:0,
+ why:[
+  "Correct. Spontaneity requires ΔS_universe = ΔS_system + ΔS_surroundings &gt; 0.",
+  "The system's entropy may fall (e.g. freezing) as long as the surroundings gain more.",
+  "The surroundings' entropy may fall if the system gains more; it is the total that must rise.",
+  "Constant total entropy corresponds to equilibrium (a reversible process), not a spontaneous change."],
+ sol:"<b>Second law: ΔS_universe &gt; 0</b> for a spontaneous process; ΔS_universe = 0 at equilibrium. The system's entropy alone can decrease if the surroundings compensate."},
+
+{id:99, lec:"L-10", blk:"Clausius inequality", topic:"Clausius inequality",
+ q:"The Clausius inequality for a real (irreversible) process states that",
+ opts:[
+  "ΔS > q/T",
+  "ΔS = q/T",
+  "ΔS &lt; q/T",
+  "ΔS = 0"],
+ ans:0,
+ why:[
+  "Correct. For an irreversible process the actual heat divided by T underestimates the entropy change: ΔS &gt; q_irrev/T.",
+  "ΔS = q/T holds only for a reversible process (the equality case).",
+  "The inequality goes the other way; ΔS is greater than q/T for irreversible changes.",
+  "ΔS is generally non-zero; it is zero only for a reversible adiabatic (isentropic) process."],
+ sol:"<b>Clausius: ΔS ≥ q/T</b>, with equality for reversible and strict inequality (ΔS &gt; q/T) for irreversible processes. It underlies the entropy criterion for spontaneity."},
+
+{id:100, lec:"L-10", blk:"Entropy trends", topic:"Sign of ΔS for a physical change",
+ q:"Which change has a positive entropy change (ΔS > 0)?",
+ opts:[
+  "melting of ice to liquid water",
+  "condensation of steam to water",
+  "freezing of water to ice",
+  "deposition of a gas to a solid"],
+ ans:0,
+ why:[
+  "Correct. Solid → liquid increases molecular disorder, so ΔS &gt; 0.",
+  "Gas → liquid decreases disorder ⇒ ΔS &lt; 0.",
+  "Liquid → solid decreases disorder ⇒ ΔS &lt; 0.",
+  "Gas → solid is the largest decrease in disorder ⇒ ΔS &lt; 0."],
+ sol:"Entropy rises with disorder: solid &lt; liquid &lt; gas. <b>Melting (solid → liquid) has ΔS &gt; 0</b>; the other three go toward more ordered states (ΔS &lt; 0)."},
+
+{id:101, lec:"L-10", blk:"Entropy over a cycle", topic:"ΔS for a cyclic process",
+ q:"Over a complete thermodynamic cycle, the entropy change of the system is",
+ opts:["zero","positive","negative","equal to q/T"],
+ ans:0,
+ why:[
+  "Correct. Entropy is a state function, so ΔS_system = 0 over any closed cycle.",
+  "It is exactly zero, not positive, for the system (though the universe's entropy may rise if the cycle is irreversible).",
+  "It is zero, not negative.",
+  "q/T over the cycle is generally non-zero for irreversible cycles; ΔS_system is still zero."],
+ sol:"Entropy is a state function ⇒ <b>ΔS_system = 0 over a cycle</b>. The universe's entropy increases for an irreversible cycle, but the system returns to its initial entropy."},
+
+{id:102, lec:"L-10", blk:"Entropy driving force", topic:"Entropy and endothermic dissolution",
+ q:"Why does an endothermic process like the dissolution of NH₄Cl occur spontaneously?",
+ opts:[
+  "the large increase in entropy makes ΔG negative despite ΔH > 0",
+  "it is actually exothermic",
+  "entropy decreases and drives it",
+  "it is not spontaneous"],
+ ans:0,
+ why:[
+  "Correct. The disorder of dispersed ions gives a big positive ΔS; TΔS outweighs the positive ΔH, so ΔG = ΔH − TΔS &lt; 0.",
+  "The dissolution is endothermic (the solution cools), not exothermic.",
+  "The entropy <i>increases</i> on dissolution; a decrease would oppose spontaneity.",
+  "It is observed to be spontaneous, so 'not spontaneous' is wrong."],
+ sol:"Endothermic yet spontaneous ⇒ driven by <b>entropy</b>: ΔS &gt; 0 makes TΔS large enough that ΔG = ΔH − TΔS &lt; 0."},
+
+{id:103, lec:"L-10", blk:"Entropy on heating", topic:"Entropy change on heating",
+ q:"When a substance is heated (temperature raised), its entropy generally",
+ opts:[
+  "increases",
+  "decreases",
+  "stays constant",
+  "becomes zero"],
+ ans:0,
+ why:[
+  "Correct. Higher temperature spreads molecules over more accessible energy levels, increasing entropy (ΔS = ∫Cp dT/T &gt; 0).",
+  "Heating adds thermal disorder, so entropy rises, not falls.",
+  "Entropy changes with temperature; it is not constant.",
+  "Entropy approaches zero only as T → 0 K (third law), the opposite of heating."],
+ sol:"Heating ⇒ more thermal motion ⇒ <b>entropy increases</b> (ΔS = ∫ Cp dT/T for a temperature rise at constant pressure)."},
+
+{id:104, lec:"L-10", blk:"Third law", topic:"Entropy at absolute zero",
+ q:"According to the third law of thermodynamics, the entropy of a perfect crystalline substance at 0 K is",
+ opts:["zero","positive and large","negative","equal to R"],
+ ans:0,
+ why:[
+  "Correct. A perfect crystal at absolute zero has only one microstate, so its entropy is exactly zero.",
+  "Its entropy is minimal (zero), not large, at 0 K.",
+  "Entropy is never negative.",
+  "R is the gas constant, not the zero-point entropy of a perfect crystal."],
+ sol:"<b>Third law: S = 0 for a perfect crystal at 0 K</b> (a single microstate ⇒ zero disorder). This provides the absolute reference for tabulated standard entropies."},
+
+/* ---------------- L-11 · Gibbs free energy (11) ---------------- */
+{id:105, lec:"L-11", blk:"Definition", topic:"Gibbs free energy relation",
+ q:"The Gibbs free energy change is defined (at constant T, P) by",
+ opts:["ΔG = ΔH − TΔS","ΔG = ΔH + TΔS","ΔG = TΔS − ΔH","ΔG = ΔU − TΔS"],
+ ans:0,
+ why:[
+  "Correct. ΔG = ΔH − TΔS combines the enthalpy and entropy factors into the spontaneity criterion.",
+  "The entropy term is subtracted, not added.",
+  "The terms are in the wrong order and sign; the correct form is ΔH − TΔS.",
+  "The correct definition uses ΔH, not ΔU (G = H − TS)."],
+ sol:"<b>ΔG = ΔH − TΔS.</b> Spontaneous if ΔG &lt; 0, at equilibrium if ΔG = 0, non-spontaneous if ΔG &gt; 0."},
+
+{id:106, lec:"L-11", blk:"Spontaneity criterion", topic:"Sign of ΔG for spontaneity",
+ q:"A process at constant T and P is spontaneous when",
+ opts:["ΔG &lt; 0","ΔG > 0","ΔG = 0","ΔH &lt; 0 only"],
+ ans:0,
+ why:[
+  "Correct. A negative Gibbs free energy change is the criterion for a spontaneous process at constant T, P.",
+  "ΔG &gt; 0 means the process is non-spontaneous (the reverse is spontaneous).",
+  "ΔG = 0 corresponds to equilibrium, not net spontaneity.",
+  "A negative ΔH alone does not guarantee spontaneity; the TΔS term can override it."],
+ sol:"<b>ΔG &lt; 0 ⇒ spontaneous.</b> ΔG = 0 ⇒ equilibrium; ΔG &gt; 0 ⇒ non-spontaneous. ΔG, not ΔH alone, is the decisive quantity."},
+
+{id:107, lec:"L-11", blk:"Equilibrium", topic:"ΔG at equilibrium",
+ q:"At equilibrium, the Gibbs free energy change ΔG is",
+ opts:["0","negative","positive","undefined"],
+ ans:0,
+ why:[
+  "Correct. Equilibrium is the point where the system has no further tendency to change, so ΔG = 0.",
+  "A negative ΔG means the forward process still proceeds spontaneously — not yet equilibrium.",
+  "A positive ΔG favours the reverse direction — not equilibrium.",
+  "ΔG is well defined and equals zero at equilibrium."],
+ sol:"<b>ΔG = 0 at equilibrium.</b> This is also the condition used to find the crossover temperature of a phase change (ΔH = TΔS)."},
+
+{id:108, lec:"L-11", blk:"Sign combinations", topic:"Always-spontaneous combination",
+ q:"Which combination of signs makes a reaction spontaneous at all temperatures?",
+ opts:[
+  "ΔH &lt; 0 and ΔS > 0",
+  "ΔH > 0 and ΔS &lt; 0",
+  "ΔH &lt; 0 and ΔS &lt; 0",
+  "ΔH > 0 and ΔS > 0"],
+ ans:0,
+ why:[
+  "Correct. With ΔH &lt; 0 and ΔS &gt; 0, both terms make ΔG = ΔH − TΔS negative at every temperature.",
+  "ΔH &gt; 0 and ΔS &lt; 0 gives ΔG &gt; 0 always — never spontaneous.",
+  "ΔH &lt; 0, ΔS &lt; 0 is spontaneous only at low temperature.",
+  "ΔH &gt; 0, ΔS &gt; 0 is spontaneous only at high temperature."],
+ sol:"ΔG = ΔH − TΔS. <b>ΔH &lt; 0 and ΔS &gt; 0 ⇒ ΔG &lt; 0 for all T</b> (always spontaneous). The opposite pair is never spontaneous; mixed pairs are temperature-dependent."},
+
+{id:109, lec:"L-11", blk:"Crossover temperature", topic:"Temperature where a reaction turns spontaneous",
+ q:"For a reaction with ΔH > 0 and ΔS > 0, spontaneity is achieved when the temperature exceeds",
+ opts:["T = ΔH/ΔS","T = ΔS/ΔH","T = ΔH·ΔS","T = ΔH − ΔS"],
+ ans:0,
+ why:[
+  "Correct. ΔG = ΔH − TΔS &lt; 0 requires T &gt; ΔH/ΔS (both ΔH, ΔS positive).",
+  "ΔS/ΔH is the reciprocal and has the wrong dimensions for a temperature.",
+  "The product ΔH·ΔS is not a temperature.",
+  "A difference of ΔH and ΔS is dimensionally inconsistent as a temperature."],
+ sol:"Setting ΔG = 0 gives the crossover <b>T = ΔH/ΔS</b>. For ΔH &gt; 0, ΔS &gt; 0, the reaction becomes spontaneous above this temperature."},
+
+{id:110, lec:"L-11", blk:"Crossover numeric", topic:"Computing the crossover temperature",
+ q:"A reaction has ΔH = +30 kJ/mol and ΔS = +100 J/mol·K. It becomes spontaneous above",
+ opts:["300 K","3 K","30 000 K","33 K"],
+ ans:0,
+ why:[
+  "Correct. T = ΔH/ΔS = 30 000 J / 100 J·K⁻¹ = 300 K (convert kJ to J first).",
+  "3 K forgets to convert ΔH from kJ to J.",
+  "30 000 K multiplies instead of dividing after conversion.",
+  "33 K is 30/... a miscalculation; the correct quotient is 300."],
+ sol:"T = ΔH/ΔS = (30 000 J/mol)/(100 J/mol·K) = <b>300 K</b>. Above 300 K, TΔS &gt; ΔH so ΔG &lt; 0."},
+
+{id:111, lec:"L-11", blk:"ΔG when ΔS unfavourable", topic:"Low-temperature spontaneity",
+ q:"A reaction with ΔH &lt; 0 and ΔS &lt; 0 is spontaneous",
+ opts:[
+  "only at low temperatures (below ΔH/ΔS)",
+  "at all temperatures",
+  "only at high temperatures",
+  "never"],
+ ans:0,
+ why:[
+  "Correct. ΔG = ΔH − TΔS; with ΔS &lt; 0, −TΔS is positive and grows with T, so ΔG stays negative only while T is small.",
+  "It is not spontaneous at all T; high T makes −TΔS dominate and ΔG &gt; 0.",
+  "High temperature works against this reaction, not for it.",
+  "It is spontaneous at low temperature, so 'never' is wrong."],
+ sol:"ΔH &lt; 0, ΔS &lt; 0 ⇒ spontaneous <b>only below T = ΔH/ΔS</b>. Enthalpy favours it but the entropy penalty grows with temperature."},
+
+{id:112, lec:"L-11", blk:"ΔG when ΔS = 0", topic:"ΔG with zero entropy change",
+ q:"If ΔS = 0 for a process, then ΔG equals",
+ opts:["ΔH","−TΔS","0","TΔS"],
+ ans:0,
+ why:[
+  "Correct. ΔG = ΔH − TΔS; with ΔS = 0, the second term vanishes and ΔG = ΔH.",
+  "−TΔS is zero when ΔS = 0, so it is not the value of ΔG (which equals ΔH).",
+  "ΔG equals ΔH, which is generally non-zero.",
+  "TΔS is zero here, not the value of ΔG."],
+ sol:"ΔS = 0 ⇒ TΔS = 0 ⇒ <b>ΔG = ΔH</b>. Then the enthalpy sign alone decides spontaneity."},
+
+{id:113, lec:"L-11", blk:"Phase change", topic:"ΔG at a phase equilibrium",
+ q:"At the normal boiling point of a liquid, for the process liquid ⇌ vapour,",
+ opts:[
+  "ΔG = 0 and ΔH = TΔS",
+  "ΔG &lt; 0",
+  "ΔS = 0",
+  "ΔH = 0"],
+ ans:0,
+ why:[
+  "Correct. At the boiling point the two phases are in equilibrium, so ΔG = 0, which gives ΔH_vap = TΔS_vap.",
+  "ΔG &lt; 0 would mean vaporisation is spontaneous — true only above the boiling point.",
+  "Vaporisation has a large positive ΔS, not zero.",
+  "Vaporisation is endothermic (ΔH &gt; 0), not zero."],
+ sol:"At a phase equilibrium (e.g. boiling point), <b>ΔG = 0 ⇒ ΔH = TΔS</b>, so the transition temperature is T = ΔH/ΔS = ΔH_vap/ΔS_vap."},
+
+{id:114, lec:"L-11", blk:"Boiling point numeric", topic:"Boiling point from ΔH and ΔS",
+ q:"A liquid has ΔH_vap = 40 kJ/mol and ΔS_vap = 100 J/mol·K. Its normal boiling point is",
+ opts:["400 K","4 K","40 000 K","250 K"],
+ ans:0,
+ why:[
+  "Correct. T_b = ΔH_vap/ΔS_vap = 40 000 J / 100 J·K⁻¹ = 400 K.",
+  "4 K forgets to convert kJ to J.",
+  "40 000 K multiplies instead of dividing.",
+  "250 K would need ΔS = 160 J/mol·K, not 100."],
+ sol:"At the boiling point ΔG = 0 ⇒ T_b = ΔH_vap/ΔS_vap = 40 000/100 = <b>400 K</b>."},
+
+{id:115, lec:"L-11", blk:"ΔG both favourable", topic:"Both factors favourable",
+ q:"When both ΔH &lt; 0 and ΔS > 0, the value of ΔG = ΔH − TΔS is",
+ opts:[
+  "negative at all temperatures",
+  "positive at all temperatures",
+  "zero at all temperatures",
+  "negative only at high T"],
+ ans:0,
+ why:[
+  "Correct. ΔH &lt; 0 contributes negatively and −TΔS is also negative (since ΔS &gt; 0), so ΔG &lt; 0 for every T.",
+  "Both terms drive ΔG negative, so it cannot be positive.",
+  "ΔG is negative, not zero, throughout.",
+  "It is negative at all temperatures, not only high T."],
+ sol:"ΔH &lt; 0 and ΔS &gt; 0 ⇒ both terms of ΔH − TΔS are negative ⇒ <b>ΔG &lt; 0 for all T</b> (always spontaneous)."},
+
+/* ---------------- L-12 · Free energy, equilibrium, electrochemistry (11) ---------------- */
+{id:116, lec:"L-12", blk:"ΔG° and K", topic:"Relation between ΔG° and K",
+ q:"The standard Gibbs free energy change is related to the equilibrium constant by",
+ opts:[
+  "ΔG° = −RT ln K",
+  "ΔG° = +RT ln K",
+  "ΔG° = −RT K",
+  "ΔG° = RT/ln K"],
+ ans:0,
+ why:[
+  "Correct. ΔG° = −RT ln K; a large K (products favoured) gives a large negative ΔG°.",
+  "The sign is wrong; a spontaneous reaction (K &gt; 1) must have ΔG° &lt; 0.",
+  "K appears inside a logarithm, not multiplied directly.",
+  "The relation is a product RT ln K, not a quotient."],
+ sol:"<b>ΔG° = −RT ln K = −2.303 RT log K.</b> K &gt; 1 ⇒ ΔG° &lt; 0 (products favoured); K &lt; 1 ⇒ ΔG° &gt; 0."},
+
+{id:117, lec:"L-12", blk:"ΔG° and K sign", topic:"Sign of ΔG° when K > 1",
+ q:"If the equilibrium constant K of a reaction is greater than 1, then ΔG° is",
+ opts:["negative","positive","zero","equal to RT"],
+ ans:0,
+ why:[
+  "Correct. K &gt; 1 ⇒ ln K &gt; 0 ⇒ ΔG° = −RT ln K &lt; 0.",
+  "Positive ΔG° corresponds to K &lt; 1 (reactants favoured).",
+  "ΔG° = 0 corresponds to K = 1.",
+  "ΔG° = −RT ln K, which is negative here, not equal to RT."],
+ sol:"K &gt; 1 ⇒ products favoured ⇒ ln K &gt; 0 ⇒ <b>ΔG° &lt; 0</b>. K = 1 ⇒ ΔG° = 0; K &lt; 1 ⇒ ΔG° &gt; 0."},
+
+{id:118, lec:"L-12", blk:"ΔG° from K numeric", topic:"Computing ΔG° from K",
+ q:"For a reaction with K = 10 at 300 K, ΔG° is about (use ΔG° = −2.303 RT log K, R = 8.314)",
+ opts:["≈ −5.74 kJ/mol","≈ +5.74 kJ/mol","≈ −2.49 kJ/mol","≈ −57.4 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. ΔG° = −2.303 × 8.314 × 300 × log 10 = −2.303 × 8.314 × 300 × 1 ≈ −5744 J ≈ −5.74 kJ/mol.",
+  "K &gt; 1 gives a negative ΔG°, not positive.",
+  "−2.49 kJ uses ln instead of the 2.303-log form incorrectly (or the wrong T).",
+  "−57.4 kJ is off by a factor of ten (log 10 = 1, not 10)."],
+ sol:"ΔG° = −2.303 RT log K = −2.303 × 8.314 × 300 × 1 ≈ <b>−5.74 kJ/mol</b> (log 10 = 1)."},
+
+{id:119, lec:"L-12", blk:"ΔG° and E°", topic:"Relation between ΔG° and cell potential",
+ q:"The standard free energy change of a redox reaction relates to the standard cell potential by",
+ opts:[
+  "ΔG° = −nFE°",
+  "ΔG° = +nFE°",
+  "ΔG° = −E°/nF",
+  "ΔG° = nF/E°"],
+ ans:0,
+ why:[
+  "Correct. ΔG° = −nFE°; a positive cell potential (spontaneous cell) gives a negative ΔG°.",
+  "The sign is wrong; a spontaneous cell (E° &gt; 0) must have ΔG° &lt; 0.",
+  "The relation is a product nFE°, not a quotient.",
+  "n and F multiply E°, they do not divide it."],
+ sol:"<b>ΔG° = −nFE°</b> (n = electrons transferred, F = 96 500 C/mol). E° &gt; 0 ⇒ ΔG° &lt; 0 ⇒ spontaneous cell, linking thermodynamics to electrochemistry."},
+
+{id:120, lec:"L-12", blk:"ΔG° from E° numeric", topic:"Computing ΔG° from E°",
+ q:"For a cell reaction with n = 2 and E° = +1.10 V (F = 96 500 C/mol), ΔG° is",
+ opts:["−212.3 kJ/mol","+212.3 kJ/mol","−106.15 kJ/mol","−2.12 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. ΔG° = −nFE° = −(2)(96 500)(1.10) = −212 300 J ≈ −212.3 kJ/mol.",
+  "A positive E° gives a negative ΔG°, not positive.",
+  "−106.15 uses n = 1 instead of 2.",
+  "−2.12 kJ is off by a factor of 100 (unit error)."],
+ sol:"ΔG° = −nFE° = −2 × 96 500 × 1.10 = −212 300 J ≈ <b>−212.3 kJ/mol</b> (the Daniell cell)."},
+
+{id:121, lec:"L-12", blk:"ΔG° from ΔH° and ΔS°", topic:"Combining ΔH° and ΔS° into ΔG°",
+ q:"Given ΔH° = −100 kJ/mol and ΔS° = −200 J/mol·K at 300 K, ΔG° is",
+ opts:["−40 kJ/mol","−160 kJ/mol","+40 kJ/mol","−100 kJ/mol"],
+ ans:0,
+ why:[
+  "Correct. ΔG° = ΔH° − TΔS° = −100 − (300)(−200)/1000 = −100 + 60 = −40 kJ/mol.",
+  "−160 subtracts +60 instead of adding it (the −TΔS° term is positive here since ΔS° &lt; 0).",
+  "The result is −40, not +40; enthalpy still dominates at 300 K.",
+  "−100 forgets the entropy term."],
+ sol:"ΔG° = ΔH° − TΔS° = −100 − (300 × −0.200) = −100 + 60 = <b>−40 kJ/mol</b> (still spontaneous at 300 K, but the crossover is at 500 K)."},
+
+{id:122, lec:"L-12", blk:"ΔG vs ΔG°", topic:"Difference between ΔG and ΔG°",
+ q:"The relation between ΔG and ΔG° is",
+ opts:[
+  "ΔG = ΔG° + RT ln Q, where Q is the reaction quotient",
+  "ΔG = ΔG° always",
+  "ΔG = ΔG° − RT ln K",
+  "ΔG = RT ln Q"],
+ ans:0,
+ why:[
+  "Correct. ΔG = ΔG° + RT ln Q; at equilibrium Q = K and ΔG = 0, recovering ΔG° = −RT ln K.",
+  "ΔG equals ΔG° only under standard conditions (Q = 1); in general they differ.",
+  "This confuses Q with K; the general expression uses the reaction quotient Q.",
+  "The ΔG° term must be included; ΔG is not simply RT ln Q."],
+ sol:"<b>ΔG = ΔG° + RT ln Q.</b> At equilibrium Q = K, ΔG = 0, giving ΔG° = −RT ln K. Under standard conditions Q = 1 and ΔG = ΔG°."},
+
+{id:123, lec:"L-12", blk:"ΔS = q/T", topic:"Entropy of surroundings",
+ q:"For a process releasing heat q to surroundings at temperature T, the entropy change of the surroundings is",
+ opts:[
+  "+q/T (surroundings gain heat, entropy increases)",
+  "−q/T",
+  "zero",
+  "q·T"],
+ ans:0,
+ why:[
+  "Correct. Heat released by the system (q leaving the system) is absorbed by the surroundings, raising their entropy by +q/T.",
+  "The surroundings gain the heat, so their entropy rises (+), not falls.",
+  "Heat transfer changes the surroundings' entropy, so it is not zero.",
+  "Entropy is heat divided by T, not multiplied."],
+ sol:"ΔS_surroundings = −ΔH_system/T (heat gained by the surroundings over T). An exothermic reaction (ΔH &lt; 0) increases the surroundings' entropy, aiding spontaneity."},
+
+{id:124, lec:"L-12", blk:"Phase transition entropy", topic:"Entropy of vaporisation",
+ q:"The entropy of vaporisation, ΔS_vap, at the boiling point is given by",
+ opts:[
+  "ΔH_vap / T_b",
+  "ΔH_vap × T_b",
+  "T_b / ΔH_vap",
+  "ΔH_vap − T_b"],
+ ans:0,
+ why:[
+  "Correct. At the boiling point the transition is reversible, so ΔS_vap = q_rev/T = ΔH_vap/T_b.",
+  "It is a quotient, not a product.",
+  "The reciprocal has the wrong dimensions for an entropy.",
+  "A difference of ΔH and T is dimensionally inconsistent."],
+ sol:"<b>ΔS_vap = ΔH_vap/T_b</b> (reversible heat over temperature). Trouton's rule notes this is ≈ 85–88 J/mol·K for many normal liquids."},
+
+{id:125, lec:"L-12", blk:"ΔG° from log K", topic:"Finding log K from ΔG°",
+ q:"If ΔG° = −11.48 kJ/mol at 300 K, then log K is about (2.303 RT ≈ 5.74 kJ/mol)",
+ opts:["≈ 2","≈ −2","≈ 0.5","≈ 11.48"],
+ ans:0,
+ why:[
+  "Correct. log K = −ΔG°/(2.303 RT) = −(−11.48)/5.74 = +2, so K ≈ 100.",
+  "The sign is wrong; a negative ΔG° gives a positive log K.",
+  "0.5 would need ΔG° ≈ −2.87 kJ/mol.",
+  "11.48 is the ΔG° magnitude, not log K."],
+ sol:"log K = −ΔG°/(2.303 RT) = 11.48/5.74 ≈ <b>2</b> ⇒ K ≈ 100. A negative ΔG° gives K &gt; 1."},
+
+{id:126, lec:"L-12", blk:"ΔG driving direction", topic:"What ΔG° tells about a reaction",
+ q:"A large negative ΔG° for a reaction indicates that",
+ opts:[
+  "the equilibrium lies far toward the products (K ≫ 1)",
+  "the reaction is fast",
+  "the reaction is endothermic",
+  "the products are less stable than the reactants"],
+ ans:0,
+ why:[
+  "Correct. ΔG° = −RT ln K, so a large negative ΔG° corresponds to a large K — products strongly favoured at equilibrium.",
+  "ΔG° is thermodynamic; it says nothing about rate (kinetics).",
+  "The sign of ΔG° does not directly give the sign of ΔH; a reaction can be exo- or endothermic.",
+  "A large negative ΔG° means the products are <i>more</i> stable, not less."],
+ sol:"Large negative ΔG° ⇒ large K ⇒ <b>equilibrium far toward products</b>. It measures feasibility/extent, not speed."},
+
+/* ---------------- SB · Mixed thermodynamics (10) ---------------- */
+{id:127, lec:"SB", blk:"First law", topic:"Combined first-law numeric",
+ q:"A gas absorbs 300 J of heat while doing 120 J of work on the surroundings. Its ΔU is",
+ opts:["+180 J","+420 J","−180 J","−420 J"],
+ ans:0,
+ why:[
+  "Correct. ΔU = q + w = 300 + (−120) = +180 J (work done by the gas is −120 J).",
+  "+420 J wrongly adds the work; work done by the system removes energy.",
+  "The heat input exceeds the work output, so ΔU is positive.",
+  "ΔU is +180 J, not −420."],
+ sol:"ΔU = q + w = 300 − 120 = <b>+180 J</b> (equivalently ΔU = q − W = 300 − 120)."},
+
+{id:128, lec:"SB", blk:"ΔH vs ΔU", topic:"Reaction with maximum ΔH − ΔU",
+ q:"For which reaction is ΔH most greater than ΔU (largest positive Δng)?",
+ opts:[
+  "CaCO₃(s) → CaO(s) + CO₂(g)",
+  "N₂(g) + 3H₂(g) → 2NH₃(g)",
+  "H₂(g) + Cl₂(g) → 2HCl(g)",
+  "C(s) + O₂(g) → CO₂(g)"],
+ ans:0,
+ why:[
+  "Correct. Δng = +1 (one mole of gas produced from a solid), so ΔH − ΔU = +RT &gt; 0 — the largest positive value here.",
+  "Ammonia synthesis has Δng = −2 ⇒ ΔH &lt; ΔU.",
+  "HCl formation has Δng = 0 ⇒ ΔH = ΔU.",
+  "Carbon combustion has Δng = 0 ⇒ ΔH = ΔU."],
+ sol:"ΔH − ΔU = Δng RT. Decomposition of CaCO₃ gives Δng = +1 (largest positive), so <b>ΔH &gt; ΔU</b> by RT for that reaction."},
+
+{id:129, lec:"SB", blk:"Entropy", topic:"Sign of ΔS for a gas-producing reaction",
+ q:"For CaCO₃(s) → CaO(s) + CO₂(g), the entropy change ΔS is",
+ opts:[
+  "positive, because a gas is produced from a solid",
+  "negative",
+  "zero",
+  "positive only above 1000 K"],
+ ans:0,
+ why:[
+  "Correct. Generating gaseous CO₂ from a solid greatly increases disorder, so ΔS &gt; 0.",
+  "Producing gas increases entropy, so ΔS is positive, not negative.",
+  "The gas release makes ΔS clearly non-zero.",
+  "ΔS is positive at all temperatures here; the temperature only affects ΔG's sign."],
+ sol:"Solid → solid + gas raises disorder ⇒ <b>ΔS &gt; 0</b>. Since ΔH &gt; 0 too, the decomposition becomes spontaneous only above the crossover temperature T = ΔH/ΔS."},
+
+{id:130, lec:"SB", blk:"Gibbs", topic:"Spontaneity from ΔH and ΔS",
+ q:"An endothermic reaction (ΔH > 0) with a positive ΔS is spontaneous",
+ opts:[
+  "at high temperatures",
+  "at all temperatures",
+  "at low temperatures",
+  "never"],
+ ans:0,
+ why:[
+  "Correct. ΔG = ΔH − TΔS; with ΔS &gt; 0, a large enough T makes TΔS exceed ΔH, so ΔG &lt; 0.",
+  "At low T the positive ΔH dominates, so it is not spontaneous at all temperatures.",
+  "Low temperature keeps ΔG positive here; high temperature is needed.",
+  "It becomes spontaneous once T &gt; ΔH/ΔS, so 'never' is wrong."],
+ sol:"ΔH &gt; 0, ΔS &gt; 0 ⇒ spontaneous <b>above T = ΔH/ΔS</b> (high temperature). Entropy drives it once TΔS beats ΔH."},
+
+{id:131, lec:"SB", blk:"Hess", topic:"ΔH from formation values",
+ q:"Given ΔHf°: CO₂(g) = −393, H₂O(l) = −286, CH₄(g) = −75 (kJ/mol), the enthalpy of combustion of CH₄ (→ CO₂ + 2H₂O(l)) is",
+ opts:["−890 kJ","−604 kJ","−754 kJ","+890 kJ"],
+ ans:0,
+ why:[
+  "Correct. ΔH = [(−393) + 2(−286)] − [(−75) + 0] = (−393 − 572) + 75 = −965 + 75 = −890 kJ.",
+  "−604 forgets one of the water molecules (uses one instead of two).",
+  "−754 miscounts the CH₄ term.",
+  "Combustion is exothermic, so the sign is negative."],
+ sol:"ΔH = Σ ΔHf(products) − Σ ΔHf(reactants) = [−393 + 2(−286)] − [−75 + 2(0)] = −965 + 75 = <b>−890 kJ</b>."},
+
+{id:132, lec:"SB", blk:"Bond enthalpy", topic:"ΔH from bond enthalpies",
+ q:"For the reaction H₂(g) + ½O₂(g) → H₂O(g), with B.E. H–H = 436, O=O = 498, O–H = 463 kJ/mol, ΔH is",
+ opts:["−241 kJ","−241/2 kJ","+241 kJ","−926 kJ"],
+ ans:0,
+ why:[
+  "Correct. Broken: 436 + ½(498) = 436 + 249 = 685. Formed: 2(463) = 926. ΔH = 685 − 926 = −241 kJ.",
+  "The full O=O bond is halved (½ mol O₂), but the answer is −241, not −120.5.",
+  "The reaction is exothermic, so the sign is negative.",
+  "−926 counts only the O–H bonds formed and omits the bonds broken."],
+ sol:"ΔH = [436 + ½(498)] − 2(463) = 685 − 926 = <b>−241 kJ</b> (close to the tabulated ΔHf of gaseous water, −242 kJ/mol)."},
+
+{id:133, lec:"SB", blk:"Free energy", topic:"ΔG° from ΔH° and ΔS° at a temperature",
+ q:"For a reaction ΔH° = +50 kJ/mol, ΔS° = +125 J/mol·K. At 300 K, the reaction is",
+ opts:[
+  "non-spontaneous (ΔG° = +12.5 kJ/mol)",
+  "spontaneous (ΔG° = −12.5 kJ/mol)",
+  "at equilibrium (ΔG° = 0)",
+  "spontaneous at all temperatures"],
+ ans:0,
+ why:[
+  "Correct. ΔG° = 50 − (300)(0.125) = 50 − 37.5 = +12.5 kJ/mol &gt; 0 ⇒ non-spontaneous at 300 K.",
+  "ΔG° is +12.5 kJ/mol here, not negative; it becomes spontaneous only above 400 K.",
+  "ΔG° = 0 (equilibrium) occurs at the crossover T = 400 K, not 300 K.",
+  "With ΔH &gt; 0 it is not spontaneous at low temperature."],
+ sol:"ΔG° = ΔH° − TΔS° = 50 − 300(0.125) = +12.5 kJ/mol ⇒ <b>non-spontaneous</b> at 300 K (crossover T = 50 000/125 = 400 K)."},
+
+{id:134, lec:"SB", blk:"Reversible isothermal", topic:"q for reversible isothermal expansion",
+ q:"For the reversible isothermal expansion of an ideal gas absorbing heat q while doing work, which holds?",
+ opts:[
+  "q = −w > 0 and ΔU = 0",
+  "q = 0",
+  "ΔU = q",
+  "q = w"],
+ ans:0,
+ why:[
+  "Correct. Isothermal ideal gas ⇒ ΔU = 0, so all absorbed heat becomes work: q = −w &gt; 0.",
+  "q = 0 describes a free expansion, not a reversible isothermal one.",
+  "ΔU = 0 here, so ΔU ≠ q (q is positive).",
+  "q = −w, not q = w; the two have opposite signs in this convention."],
+ sol:"Reversible isothermal expansion: ΔU = 0 ⇒ <b>q = −w &gt; 0</b>. The heat absorbed exactly equals the work done by the gas."},
+
+{id:135, lec:"SB", blk:"Calorimetry", topic:"ΔU from bomb-calorimeter temperature rise",
+ q:"In a bomb calorimeter (heat capacity 5.0 kJ/K), a reaction raises the temperature by 2.0 K. The heat released at constant volume is",
+ opts:[
+  "10 kJ (so ΔU = −10 kJ)",
+  "2.5 kJ",
+  "10 kJ (so ΔU = +10 kJ)",
+  "7.0 kJ"],
+ ans:0,
+ why:[
+  "Correct. q = C·ΔT = 5.0 × 2.0 = 10 kJ absorbed by the calorimeter, i.e. released by the reaction, so ΔU = −10 kJ (qv = ΔU).",
+  "2.5 kJ divides instead of multiplying.",
+  "The reaction releases heat (temperature rises), so ΔU is negative, not +10 kJ.",
+  "7.0 kJ adds C and ΔT rather than multiplying."],
+ sol:"q_released = C·ΔT = 5.0 kJ/K × 2.0 K = 10 kJ. At constant volume qv = ΔU, so <b>ΔU = −10 kJ</b> (exothermic)."},
+
+{id:136, lec:"SB", blk:"State vs path", topic:"Identifying a state function",
+ q:"Which of the following is NOT a state function?",
+ opts:["work","enthalpy","entropy","Gibbs free energy"],
+ ans:0,
+ why:[
+  "Correct. Work (like heat) depends on the path taken, so it is a path function, not a state function.",
+  "Enthalpy is a state function.",
+  "Entropy is a state function.",
+  "Gibbs free energy is a state function."],
+ sol:"<b>Work is a path function</b> (so is heat). Enthalpy, entropy and Gibbs free energy — like U, P, V, T — are all state functions."}
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter C-6 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-9 Collision — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>P-9 · Collision</h1>
+    <p id="heroSub">Lectures L-1 to L-5 + Strong Box · 70 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">70 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-9 Collision · mastery quiz built from lectures L-1 to L-5 and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   P-9 COLLISION — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Impulse, Momentum Conservation & Explosions",
+   desc:"impulse J = ∫F dt = area under the F–t graph = Δp, conservation of linear momentum, explosions (momentum conserved while KE is not), gun–bullet recoil, thrust as the rate of momentum delivery (dm/dt)v, 2-D vector momentum and resultant direction, velocity of the centre of mass, explosion at the top of a projectile, max spring compression from relative-velocity KE, and Δp = 2mv on a full reversal"},
+  {key:"L-2", name:"L-2 · One-Dimensional Elastic Collisions",
+   desc:"the elastic final-velocity formulas v₁' = ((m₁−m₂)/(m₁+m₂))u₁ + (2m₂/(m₁+m₂))u₂, equal-mass velocity exchange, the heavy-vs-light limits (v → 2u, v → −u), the fraction of KE transferred 4m₁m₂/(m₁+m₂)² and its maximum at equal mass, KE retained by the striker, back-solving the target mass, Newton's-cradle chains, and neutron moderation"},
+  {key:"L-3", name:"L-3 · Inelastic Collisions & Coefficient of Restitution",
+   desc:"perfectly inelastic collisions (common velocity, KE loss ½·(m₁m₂/(m₁+m₂))·(u₁−u₂)²), the coefficient of restitution e = separation/approach, the range 0 ≤ e ≤ 1 with e = 1 elastic and e = 0 perfectly inelastic, the drop-and-bounce height law h' = e²h and hₙ = e²ⁿh, velocity decay eⁿ, and the quantity conserved in every collision"},
+  {key:"L-4", name:"L-4 · Rebounds, Successive Bounces & Ballistic Pendulum",
+   desc:"e = √(h'/h) from a rebound, total distance H(1+e²)/(1−e²) and total time of an infinite bounce series, impulse on a given bounce, the ballistic pendulum v = ((M+m)/m)√(2gh), working backward from a rebound height for speed and % energy lost, restitution-e equal-mass collisions, and oblique bounce off a smooth surface (tangential kept, normal ×e)"},
+  {key:"L-5", name:"L-5 · Oblique & Two-Dimensional Collisions",
+   desc:"the equal-mass elastic 90° right-angle rule with v₁'²+v₂'²=u², 2-D perfectly inelastic collisions by vector momentum, resolving an oblique impact into normal and tangential components, oblique bounce off a fixed surface/sphere/incline (tanθ' = tanθ/e), symmetric oblique collisions as an elasticity check, and disintegration into fragments"},
+  {key:"SB", name:"Strong Box · Mixed PYQ",
+   desc:"previous-year problems spanning the whole chapter: the ballistic pendulum, explosion momentum-vs-KE ratios, impulse on free-fall rebound, collision-then-projectile motion, impulse from repeated bounces, 2-D explosion momentum, the maximum elastic scattering angle sinθ_max = m₂/m₁ for a heavier incident body, and chained elastic-then-inelastic collisions"}
+];
+
+const QUIZ = [
+
+
+
+/* ===== P9_L1.js ===== */
+{id:1, lec:"L-1", blk:"Impulse = area under F–t graph", topic:"Impulse–momentum",
+ q:"A 2 kg body starts from rest on a frictionless surface. A single horizontal force acts on it: the F–t graph rises linearly from 0 to 10 N over t = 0 to 2 s, stays constant at 10 N from 2 s to 4 s, then falls linearly from 10 N back to 0 over 4 s to 6 s. Find the body's speed at t = 6 s.",
+ opts:["40 m/s","15 m/s","20 m/s","10 m/s"],
+ ans:2,
+ why:[
+  "Reports the impulse (40 N·s) as the speed — forgot to divide the area by the mass 2 kg.",
+  "Treats the whole graph as one big triangle ½·6·10 = 30 N·s, then divides by 2 — ignores that the middle part is a rectangle, not a slope.",
+  "Correct: total area (impulse) = 10 + 20 + 10 = 40 N·s, so v = 40/2 = 20 m/s.",
+  "Uses only the flat rectangle's area (20 N·s) and drops both triangular pieces before dividing by 2."],
+ sol:"Impulse J = area under F–t graph = ½·2·10 (rising triangle) + 2·10 (rectangle) + ½·2·10 (falling triangle) = 10 + 20 + 10 = 40 N·s. By the impulse–momentum theorem J = Δp = m·v − 0, so v = J/m = 40/2 = <b>20 m/s</b>. The exact shape between the corners never matters — only the enclosed area does."},
+{id:2, lec:"L-1", blk:"Explosion then kinetic energy", topic:"Momentum → KE",
+ q:"A stationary 5 kg body explodes into a 2 kg piece and a 3 kg piece. The 2 kg piece flies off at 15 m/s. Find the kinetic energy of the 3 kg piece.",
+ opts:["225 J","375 J","100 J","150 J"],
+ ans:3,
+ why:[
+  "Computes ½·2·15² = 225 J — the KE of the 2 kg fragment, not the 3 kg one asked for.",
+  "Adds both fragments' KE (225 + 150) to give the total energy released, instead of just the 3 kg piece.",
+  "Pairs the 3 kg piece's correct speed (10 m/s) with the wrong mass: ½·2·10² = 100 J.",
+  "Correct: momentum 2·15 = 3·v gives v = 10 m/s, so KE = ½·3·10² = 150 J."],
+ sol:"The body is at rest, so the two pieces carry equal and opposite momenta: 2·15 = 3·v ⇒ v = 30/3 = 10 m/s for the 3 kg piece. Its kinetic energy = ½·m·v² = ½·3·10² = <b>150 J</b>. Cross-check via KE = p²/(2m) = (3·10)²/(2·3) = 900/6 = 150 J."},
+{id:3, lec:"L-1", blk:"Explosion: what is conserved", topic:"Conceptual",
+ q:"A firecracker initially at rest bursts into many fragments flying off in all directions. Ignoring external forces during the burst, which statement is correct?",
+ opts:["Both momentum and kinetic energy are conserved","Momentum is conserved; kinetic energy decreases","Neither momentum nor kinetic energy is conserved","Momentum is conserved; kinetic energy increases"],
+ ans:3,
+ why:[
+  "Kinetic energy is not conserved in an explosion — stored chemical energy is added, so this cannot be right.",
+  "The direction is backwards: an explosion releases energy, so KE increases, it does not decrease (that would be an inelastic collision).",
+  "Momentum IS conserved because the burst forces are all internal (Newton's third law), so 'neither' is wrong.",
+  "Correct: internal forces cannot change total momentum, but the explosive's chemical energy converts into fragment KE, so KE increases."],
+ sol:"Burst forces act only between the fragments — they are internal, so ΣF_ext = 0 and total momentum stays fixed at its initial value (zero here). Kinetic energy has no such protection: the chemical energy stored in the charge is released as extra KE of the fragments, so total KE strictly increases. Hence <b>momentum is conserved; kinetic energy increases</b>."},
+{id:4, lec:"L-1", blk:"Gun–bullet recoil", topic:"Recoil",
+ q:"A gun of mass 4 kg fires a bullet of mass 20 g horizontally with a muzzle speed of 200 m/s. Find the recoil speed of the gun.",
+ opts:["1 m/s","4 m/s","0.5 m/s","10 m/s"],
+ ans:0,
+ why:[
+  "Correct: 0.02·200 = 4·V gives V = 1 m/s.",
+  "Uses the bullet's momentum (4 kg·m/s) as if it were the speed — forgot to divide by the gun mass.",
+  "Divides the bullet momentum by 2M = 8 kg, inserting a spurious factor of 2 that recoil does not have.",
+  "Mis-converts 20 g to 0.2 kg (should be 0.02 kg): 0.2·200/4 = 10 m/s."],
+ sol:"System starts at rest, so momenta balance: m_bullet·v = M_gun·V ⇒ (0.020)(200) = (4)·V ⇒ 4 = 4V ⇒ V = <b>1 m/s</b>, directed opposite to the bullet. Note 20 g = 0.020 kg, not 0.2 kg — the commonest slip here."},
+{id:5, lec:"L-1", blk:"Rate of momentum (thrust)", topic:"dm/dt · v",
+ q:"A machine gun fires bullets of mass 25 g each at a speed of 400 m/s, at a rate of 5 bullets per second. What horizontal force must a person exert to hold the gun steady?",
+ opts:["10 N","50 N","500 N","100 N"],
+ ans:1,
+ why:[
+  "Uses the momentum of a single bullet (0.025·400 = 10 kg·m/s) but forgets to multiply by the firing rate of 5 per second.",
+  "Correct: F = (dm/dt)·v = (5·0.025)(400) = 0.125·400 = 50 N.",
+  "Mis-converts 25 g to 0.25 kg: 0.25·5·400 = 500 N — a tenfold unit slip.",
+  "Applies the elastic-rebound formula F = (dm/dt)(2v), doubling to 100 N, though fired bullets never rebound into the gun."],
+ sol:"Thrust equals the rate at which momentum is carried away: F = (mass fired per second)·(speed) = (5·0.025 kg/s)(400 m/s) = (0.125)(400) = <b>50 N</b>. Equivalently, each bullet carries Δp = 0.025·400 = 10 kg·m/s, and 5 leave per second, so F = 10·5 = 50 N."},
+{id:6, lec:"L-1", blk:"2-D explosion, three fragments", topic:"Vector momentum",
+ q:"A body at rest of mass 5m explodes into three fragments. Two of them, each of mass m, fly off perpendicular to each other, each at 9 m/s. The third fragment has mass 3m. Find its speed and direction.",
+ opts:["9√2 m/s at 135° from each of the two fragments","3√2 m/s at 45° from each fragment","3√2 m/s at 135° from each of the two fragments","6 m/s at 135° from each fragment"],
+ ans:2,
+ why:[
+  "Correct magnitude of the combined momentum (9m√2) but forgot to divide by the third mass 3m to get its speed.",
+  "Right speed but wrong direction: 45° points along the resultant of the two, whereas the third fragment must point opposite to it.",
+  "Correct: the two perpendicular momenta combine to 9m√2, so v₃ = 9m√2/(3m) = 3√2 m/s, directed opposite the resultant, i.e. 135° from each.",
+  "Adds the two speeds arithmetically (9 + 9 = 18) instead of combining by Pythagoras, then divides by 3."],
+ sol:"Take the two equal fragments along x and y: p⃗₁ = 9m x̂, p⃗₂ = 9m ŷ, perpendicular. Their resultant has magnitude √((9m)²+(9m)²) = 9m√2 at 45° between them. The third fragment must cancel this: |p⃗₃| = 9m√2, so v₃ = 9m√2/(3m) = <b>3√2 m/s ≈ 4.24 m/s</b>, pointing opposite the 45° bisector — i.e. at 135° from each of the two fragments."},
+{id:7, lec:"L-1", blk:"Velocity of centre of mass", topic:"v of c.o.m.",
+ q:"A 4 kg particle moves east at 6 m/s and a 2 kg particle moves west at 3 m/s. Find the velocity of the centre of mass of the two-particle system.",
+ opts:["3 m/s east","5 m/s east","1.5 m/s east","4.5 m/s east"],
+ ans:0,
+ why:[
+  "Correct: v_cm = [4·6 + 2·(−3)] / (4+2) = (24−6)/6 = 3 m/s east.",
+  "Forgot the negative sign on the westward 2 kg particle: (24+6)/6 = 5 m/s.",
+  "Took a plain average of the two velocities (6 + (−3))/2 = 1.5, ignoring the mass weighting.",
+  "Averaged the two speeds (6 + 3)/2 = 4.5, ignoring both mass and direction."],
+ sol:"Take east as positive: v₁ = +6 m/s (4 kg), v₂ = −3 m/s (2 kg). Then v_cm = (m₁v₁ + m₂v₂)/(m₁+m₂) = (4·6 + 2·(−3))/6 = (24 − 6)/6 = 18/6 = <b>3 m/s, eastward</b>. The heavier eastward particle wins the weighted average, so the c.o.m. drifts east."},
+{id:8, lec:"L-1", blk:"Explosion at highest point", topic:"Projectile + momentum",
+ q:"A shell is fired at 50 m/s at 60° above the horizontal. At the highest point of its path it bursts into two equal-mass pieces, and one piece retraces its path exactly back to the gun. Find the speed of the other piece immediately after the burst.",
+ opts:["25 m/s","50 m/s","150 m/s","75 m/s"],
+ ans:3,
+ why:[
+  "Gives only V cos60° = 25 m/s — the shell's own speed at the top — forgetting the reversed piece adds momentum.",
+  "Gives 2V cos60° = 50 m/s, missing that the retracing piece contributes an extra +V cos60°, making the factor 3.",
+  "Uses 3V = 150 m/s, forgetting the cos60° factor for the horizontal component.",
+  "Correct: 3V cos60° = 3·50·0.5 = 75 m/s."],
+ sol:"At the top the velocity is purely horizontal: V cos60° = 50·0.5 = 25 m/s. 'Retraces its path' means one piece's velocity becomes −25 m/s. Horizontal momentum: 2m(25) = m(−25) + m·v′ ⇒ 50m = −25m + m·v′ ⇒ v′ = <b>75 m/s</b> = 3V cos60°, directed forward."},
+{id:9, lec:"L-1", blk:"Maximum spring compression", topic:"Relative-velocity KE",
+ q:"On a frictionless surface a 2 kg block moves at 10 m/s and, ahead of it in the same direction, a 3 kg block moves at 5 m/s. An ideal spring of stiffness k = 3000 N/m is attached to the back of the 3 kg block. Find the maximum compression of the spring after the blocks engage.",
+ opts:["0.2 m","0.26 m","0.1 m","0.13 m"],
+ ans:2,
+ why:[
+  "Uses the total mass (m+M = 5 kg) in place of the reduced mass, giving (10−5)√(5/3000) ≈ 0.2 m.",
+  "Uses the trailing block's full speed 10 m/s instead of the relative speed 10−5: 10√(2/3000) ≈ 0.26 m.",
+  "Correct: reduced mass μ = 2·3/5 = 1.2, so x = (10−5)√(1.2/3000) = 5·0.02 = 0.1 m.",
+  "Uses the relative speed correctly but with a single mass m = 2 kg instead of the reduced mass: 5√(2/3000) ≈ 0.13 m."],
+ sol:"Compression is maximum when both blocks share the c.o.m. velocity (relative velocity = 0). Energy stored then equals the relative-motion KE: ½k·x² = ½·μ·(Δv)², with μ = mM/(m+M) = 2·3/5 = 1.2 kg and Δv = 10 − 5 = 5 m/s. So x = Δv·√(μ/k) = 5·√(1.2/3000) = 5·√(0.0004) = 5·0.02 = <b>0.1 m</b>."},
+{id:10, lec:"L-1", blk:"Free fall then impulsive stop", topic:"Impulse with weight",
+ q:"A 0.5 kg ball is dropped from a height of 5 m onto sand and is brought to rest in 0.1 s after touching the sand. Taking g = 10 m/s², find the average force exerted by the sand on the ball.",
+ opts:["50 N","55 N","45 N","5 N"],
+ ans:1,
+ why:[
+  "Uses F·t = Δp alone (0.5·10/0.1 = 50 N) and forgets that the ball's weight also acts during the stop.",
+  "Correct: (F − mg)·t = m·v gives F = m·v/t + mg = 50 + 5 = 55 N.",
+  "Subtracts the weight instead of adding it (50 − 5 = 45 N) — wrong sign on the mg term.",
+  "Gives only the ball's weight mg = 0.5·10 = 5 N, ignoring the stopping impulse entirely."],
+ sol:"Landing speed: v = √(2gh) = √(2·10·5) = √100 = 10 m/s. During the stop, the sand's upward force F and the downward weight mg both act: (F − mg)·t = m·v. So F = m·v/t + mg = (0.5·10)/0.1 + 0.5·10 = 50 + 5 = <b>55 N</b>. Dropping the +mg term is the classic error."},
+{id:11, lec:"L-1", blk:"Impulse from a full reversal", topic:"Δp with direction",
+ q:"A 0.2 kg ball travelling horizontally at 15 m/s strikes a wall and rebounds straight back along the same line at 10 m/s. Find the magnitude of the impulse the wall delivers to the ball.",
+ opts:["1 N·s","3 N·s","2 N·s","5 N·s"],
+ ans:3,
+ why:[
+  "Subtracts the speeds (0.2·(15−10) = 1 N·s), treating the rebound as if the ball kept moving the same way.",
+  "Uses only the incoming momentum 0.2·15 = 3 N·s, as though the ball merely stopped.",
+  "Uses only the outgoing momentum 0.2·10 = 2 N·s, ignoring the incoming part.",
+  "Correct: with the reversal, Δv = 10 − (−15) = 25 m/s, so J = 0.2·25 = 5 N·s."],
+ sol:"Take the rebound direction as positive: v_i = −15 m/s, v_f = +10 m/s. The velocity change spans the full reversal: Δv = v_f − v_i = 10 − (−15) = 25 m/s. Impulse J = m·Δv = 0.2·25 = <b>5 N·s</b>, directed away from the wall. The speeds must be added (opposite directions), not subtracted."},
+{id:12, lec:"L-1", blk:"Impulse from v(t)", topic:"Vector components",
+ q:"A particle of mass 3 kg has velocity v⃗ = (3t² î + 6 ĵ) m/s, with t in seconds. Find the impulse imparted to it between t = 0 and t = 2 s.",
+ opts:["12 N·s along +î","36 N·s directed along +î","40.2 N·s","18 N·s"],
+ ans:1,
+ why:[
+  "Gives the magnitude of Δv⃗ (12 m/s) but forgets to multiply by the mass 3 kg.",
+  "Correct: Δv⃗ = 12 î, so J⃗ = 3·12 î = 36 î, magnitude 36 N·s along +î.",
+  "Fails to cancel the constant 6 ĵ term (keeps it only at t = 2), giving |36 î + 18 ĵ| ≈ 40.2 N·s.",
+  "Applies a ½ factor as if computing kinetic energy: ½·3·12 = 18."],
+ sol:"With mass constant, J⃗ = m·Δv⃗ = m(v⃗(2) − v⃗(0)). Here v⃗(0) = 6 ĵ and v⃗(2) = 3·(2²) î + 6 ĵ = 12 î + 6 ĵ. The constant 6 ĵ cancels: Δv⃗ = 12 î. So J⃗ = 3·12 î = 36 î, i.e. <b>36 N·s directed along +î</b>. Any velocity component with no t in it is constant and drops out of Δv⃗."},
+
+
+/* ===== P9_L2.js ===== */
+{id:13, lec:"L-2", blk:"Final-velocity formula", topic:"v₁′ (target at rest)",
+ q:"A 4 kg ball moving at 10 m/s collides head-on and elastically with a 6 kg ball at rest. What is the final velocity of the 4 kg striker?",
+ opts:["−2 m/s","+2 m/s","+8 m/s","−8 m/s"],
+ ans:0,
+ why:["Correct: (m₁−m₂) is negative, so the heavier target throws the lighter striker back.","Right magnitude but wrong sign — dropped the negative in (m₁−m₂) = (4−6).","That is the target's velocity v₂′ = 2m₂/(m₁+m₂)·u₁, not the striker's.","Sign slip plus using the 2m₂ coefficient instead of (m₁−m₂)."],
+ sol:"With target at rest, v₁′ = [(m₁−m₂)/(m₁+m₂)]u₁ = [(4−6)/(4+6)]×10 = (−2/10)×10 = <b>−2 m/s</b>. The striker recoils because m₁ is lighter than m₂. Check: v₂′ = 2m₁/(m₁+m₂)·u₁ = (8/10)×10 = 8; momentum 4(−2)+6(8) = 40 = 4×10 ✓."},
+{id:14, lec:"L-2", blk:"Equal-mass exchange", topic:"Velocity swap",
+ q:"Two identical 2 kg blocks approach head-on and collide elastically: block A moves at +5 m/s and block B at −3 m/s. What is the final velocity of block A?",
+ opts:["+5 m/s (unchanged)","−3 m/s","+1 m/s","+2 m/s"],
+ ans:1,
+ why:["Forgot that equal masses exchange velocities — A cannot keep its own velocity.","Correct: equal-mass 1-D elastic collision swaps velocities, so A takes B's −3 m/s.","This is the perfectly-inelastic common velocity (m₁u₁+m₂u₂)/(m₁+m₂), not the elastic result.","Took B's speed as a magnitude with the wrong sign."],
+ sol:"For a 1-D elastic collision of equal masses the velocities are simply exchanged: v_A′ = u_B and v_B′ = u_A. Hence v_A′ = <b>−3 m/s</b> and v_B′ = +5 m/s. Check momentum: 2(−3)+2(5) = 4 = 2(5)+2(−3) ✓, and KE is unchanged since the same two speeds reappear."},
+{id:15, lec:"L-2", blk:"Heavy-on-light limit", topic:"v₂′ → 2u",
+ q:"A very heavy truck moving at 15 m/s strikes a light stationary ball elastically head-on (m_truck ≫ m_ball). Approximately what speed does the ball acquire?",
+ opts:["7.5 m/s","15 m/s (≈ u)","≈ 0 m/s","30 m/s (≈ 2u)"],
+ ans:3,
+ why:["Halved the speed instead of doubling it.","Assumed the target simply takes the striker's own speed — true only for equal masses.","Confused this with the light-on-heavy case, where the target barely moves.","Correct: for m₁ ≫ m₂ the coefficient 2m₁/(m₁+m₂) → 2, so v₂′ → 2u."],
+ sol:"v₂′ = [2m₁/(m₁+m₂)]u₁. As m₁ ≫ m₂, the ratio 2m₁/(m₁+m₂) → 2, so v₂′ → 2u₁ = 2×15 = <b>30 m/s</b>. The massive truck keeps almost its full velocity while flinging the light ball off at nearly twice the truck's speed."},
+{id:16, lec:"L-2", blk:"Light-on-heavy limit", topic:"v₁′ → −u",
+ q:"A light ball moving at 8 m/s strikes a very massive stationary block elastically head-on (m_ball ≪ m_block). What is the ball's final velocity, approximately?",
+ opts:["+8 m/s","−8 m/s","0 m/s","−16 m/s"],
+ ans:1,
+ why:["A light body does not pass through — it rebounds; the velocity reverses.","Correct: for m₁ ≪ m₂ the coefficient (m₁−m₂)/(m₁+m₂) → −1, so v₁′ → −u.","Assumed it stops — that is the equal-mass striker result, not light-on-heavy.","Doubled the speed; that is the 2u target formula, not the striker's rebound."],
+ sol:"v₁′ = [(m₁−m₂)/(m₁+m₂)]u₁. As m₂ ≫ m₁, (m₁−m₂)/(m₁+m₂) → −1, so v₁′ → −u₁ = <b>−8 m/s</b>. The ball bounces straight back at essentially the same speed while the huge block stays almost still — the same physics as bouncing off a wall."},
+{id:17, lec:"L-2", blk:"Fraction of KE transferred", topic:"4m₁m₂/(m₁+m₂)²",
+ q:"A 1 kg particle moving elastically strikes a stationary 3 kg particle head-on. What fraction of its kinetic energy does it transfer to the 3 kg particle?",
+ opts:["25%","50%","75%","88.9%"],
+ ans:2,
+ why:["That is the fraction the striker retains, ((m₁−m₂)/(m₁+m₂))², not what it transfers.","A halfway guess with no basis in the mass ratio.","Correct: f = 4m₁m₂/(m₁+m₂)² = 12/16 = 0.75.","That is the 1:2 mass-ratio result (8/9); wrong masses used here."],
+ sol:"Fraction transferred f = 4m₁m₂/(m₁+m₂)² = 4(1)(3)/(1+3)² = 12/16 = 0.75 = <b>75%</b>. Cross-check: the retained fraction is ((m₁−m₂)/(m₁+m₂))² = (−2/4)² = 0.25, and 0.25 + 0.75 = 1 as required for an elastic collision."},
+{id:18, lec:"L-2", blk:"Maximum transfer", topic:"Peak at m₁ = m₂",
+ q:"For a striker of fixed mass hitting a stationary target elastically head-on, what is the greatest fraction of kinetic energy that can ever be transferred, and when?",
+ opts:["100%, when the two masses are equal","50%, when the target is twice the striker","Between 50% and 90%, never reaching 100%","It depends on the striker's speed"],
+ ans:0,
+ why:["Correct: f = 4m₁m₂/(m₁+m₂)² peaks at f = 1 exactly when m₁ = m₂.","Equal-mass, not 1:2, gives the maximum; 1:2 yields only 8/9.","The peak does reach a full 100% at equal masses, not a capped sub-100% value.","f depends only on the mass ratio, never on speed — the speed cancels out."],
+ sol:"f = 4m₁m₂/(m₁+m₂)². By AM–GM, (m₁+m₂)² ≥ 4m₁m₂ with equality only when m₁ = m₂, so f ≤ 1 and f = 1 exactly at equal masses — a complete velocity exchange hands over <b>100%</b> of the KE. The result is independent of speed."},
+{id:19, lec:"L-2", blk:"KE retained by striker", topic:"((m₁−m₂)/(m₁+m₂))²",
+ q:"A 2 kg ball moving at speed u strikes a stationary 6 kg ball elastically head-on. What fraction of its initial kinetic energy does the 2 kg striker retain?",
+ opts:["25%","75%","50%","0%"],
+ ans:0,
+ why:["Correct: retained = (v₁′/u)² = ((m₁−m₂)/(m₁+m₂))² = (−0.5)² = 0.25.","That is the fraction transferred to the target, not the fraction the striker keeps.","A halfway guess unrelated to the mass ratio.","The striker stops only for equal masses; here it keeps a quarter of its KE."],
+ sol:"The striker's speed ratio is v₁′/u = (m₁−m₂)/(m₁+m₂) = (2−6)/(2+6) = −0.5, so the KE it retains is (v₁′/u)² = (−0.5)² = 0.25 = <b>25%</b>. The remaining 75% is transferred (4m₁m₂/(m₁+m₂)² = 48/64 = 0.75), and 25% + 75% = 100% ✓."},
+{id:20, lec:"L-2", blk:"Back-solving mass", topic:"Find m₂ from v₁′",
+ q:"A 2 kg ball moving at 12 m/s collides elastically head-on with a stationary ball and rebounds at −4 m/s. What is the mass of the stationary ball?",
+ opts:["3 kg","6 kg","4 kg","8 kg"],
+ ans:2,
+ why:["Sign slip while solving the ratio equation for m₂.","Used +4 m/s instead of −4 m/s, ignoring that the ball rebounds.","Correct: solving (2−m₂)/(2+m₂) = −1/3 gives m₂ = 4 kg.","Arithmetic doubling error in the final step."],
+ sol:"v₁′ = [(m₁−m₂)/(m₁+m₂)]u₁ ⇒ −4 = [(2−m₂)/(2+m₂)]×12, so (2−m₂)/(2+m₂) = −1/3. Cross-multiplying: 3(2−m₂) = −(2+m₂) ⇒ 6−3m₂ = −2−m₂ ⇒ 8 = 2m₂ ⇒ m₂ = <b>4 kg</b>. Check: (2−4)/(2+4)×12 = (−2/6)×12 = −4 ✓."},
+{id:21, lec:"L-2", blk:"Chain of collisions", topic:"Newton's cradle",
+ q:"A ball of mass m moving at 6 m/s hits an identical ball at rest elastically; that ball then hits a third identical ball at rest elastically. What is the final velocity of the third ball?",
+ opts:["2 m/s","3 m/s","0 m/s","6 m/s"],
+ ans:3,
+ why:["Velocity is not shared out among the balls — each equal-mass hit passes it on whole.","Speed is not halved at each collision; equal-mass elastic collisions transfer it fully.","The third ball does move — the velocity relays all the way through.","Correct: each equal-mass elastic collision is a full velocity swap, so 6 m/s relays to the end."],
+ sol:"Equal-mass 1-D elastic collisions exchange velocities. Ball 1 (6 m/s) stops and passes 6 m/s to ball 2; ball 2 then stops and passes 6 m/s to ball 3. The velocity relays undiminished, so the third ball leaves at <b>6 m/s</b> while the first two end at rest — exactly the Newton's-cradle result."},
+{id:22, lec:"L-2", blk:"Neutron moderation", topic:"Fractional KE loss",
+ q:"A neutron (mass ≈ 1 u) makes a head-on elastic collision with a stationary carbon-12 nucleus (mass ≈ 12 u). Approximately what fraction of its kinetic energy does the neutron lose?",
+ opts:["≈ 8%","≈ 72%","≈ 100%","≈ 28%"],
+ ans:3,
+ why:["Underestimate — the 4m₁m₂ numerator was mishandled.","That is the fraction the neutron retains, not the fraction it loses.","Complete loss happens for a proton (equal mass), not for carbon-12.","Correct: f = 4(1)(12)/(13)² = 48/169 ≈ 0.284."],
+ sol:"Fraction lost = fraction transferred = 4m₁m₂/(m₁+m₂)² = 4(1)(12)/(1+12)² = 48/169 ≈ 0.284 = <b>≈28%</b>. The retained fraction is ((1−12)/13)² = 121/169 ≈ 0.72, confirming 28% is lost. This is why light nuclei (like hydrogen) moderate neutrons far more effectively than carbon."},
+{id:23, lec:"L-2", blk:"Both bodies moving", topic:"General v₁′",
+ q:"A 2 kg body moving at +6 m/s collides head-on and elastically with a 4 kg body moving at −3 m/s. What is the final velocity of the 2 kg body?",
+ opts:["+6 m/s","−6 m/s","−2 m/s","0 m/s"],
+ ans:1,
+ why:["Kept the first term's magnitude with the wrong sign and dropped the cross term.","Correct: both terms of the general formula give −2 + (−4) = −6 m/s.","Kept only the (m₁−m₂)u₁ term and forgot the 2m₂u₂/(m₁+m₂) term.","This is the common (perfectly-inelastic) velocity p/M = 0, not the elastic result."],
+ sol:"v₁′ = [(m₁−m₂)/(m₁+m₂)]u₁ + [2m₂/(m₁+m₂)]u₂ = [(2−4)/6](6) + [(8)/6](−3) = (−2) + (−4) = <b>−6 m/s</b>. Check: v₂′ = +3 m/s; momentum before 2(6)+4(−3) = 0 = 2(−6)+4(3) after ✓, KE 54 J both sides ✓."},
+{id:24, lec:"L-2", blk:"Elastic vs inelastic", topic:"What is conserved",
+ q:"In a one-dimensional elastic collision between two bodies, which quantity or quantities are conserved?",
+ opts:["Kinetic energy only","Linear momentum only","Both linear momentum and kinetic energy","Neither"],
+ ans:2,
+ why:["Linear momentum is also conserved — it holds in every collision.","True for an inelastic collision, but an elastic one additionally conserves KE.","Correct: an elastic collision conserves both total momentum and total kinetic energy.","At least momentum is always conserved, so 'neither' is never right."],
+ sol:"Total linear momentum is conserved in every collision (Newton's third law). An elastic collision is defined by the extra condition that total kinetic energy is also conserved. Hence <b>both linear momentum and kinetic energy</b> are conserved — whereas an inelastic collision conserves momentum only."},
+
+
+/* ===== P9_L3.js ===== */
+{id:25, lec:"L-3", blk:"Perfectly inelastic", topic:"common velocity",
+ q:"A body of mass 3 kg moving at 8 m/s collides perfectly inelastically with a 5 kg body at rest. Their common velocity after collision is:",
+ opts:["3 m/s","4 m/s","4.8 m/s","5 m/s"],
+ ans:0,
+ why:["Correct: momentum (3)(8)=24 kg·m/s shared by (3+5)=8 kg gives v'=24/8=3 m/s.",
+      "4 m/s is the plain average (8+0)/2, which ignores that the masses differ.",
+      "4.8 m/s divides the momentum 24 by only m₂=5 kg instead of the total mass 8 kg.",
+      "5 m/s swaps the masses; the 3 kg body is the one that was moving, not the 5 kg."],
+ sol:"Perfectly inelastic means the bodies stick and share one velocity, found from momentum conservation. Total momentum = (3)(8)+(5)(0) = 24 kg·m/s. Combined mass = 3+5 = 8 kg. So v' = 24/8 = <b>3 m/s</b>. It lies between the two initial speeds, mass-weighted toward the heavier resting body."},
+{id:26, lec:"L-3", blk:"Max KE loss", topic:"reduced-mass formula",
+ q:"Two bodies, m₁=2 kg moving at 10 m/s and m₂=3 kg at rest, collide. What is the maximum possible loss of kinetic energy in the collision?",
+ opts:["120 J","60 J","40 J","100 J"],
+ ans:1,
+ why:["120 J forgot the factor ½ in the reduced-mass loss formula ½·μ·(Δu)².",
+      "Correct: μ=m₁m₂/(m₁+m₂)=6/5, so loss=½·(6/5)·10²=60 J.",
+      "40 J is the composite body's final KE (½·5·4²), not the energy lost.",
+      "100 J is the initial KE (½·2·10²); only part of that is lost."],
+ sol:"Maximum KE loss occurs in the perfectly inelastic case and equals ½·μ·(Δu)², where μ=m₁m₂/(m₁+m₂) is the reduced mass. Here μ=(2·3)/(2+3)=6/5=1.2 kg and Δu=10−0=10 m/s. Loss = ½·1.2·10² = <b>60 J</b>. Check: KE_i=100 J, v'=20/5=4 m/s, KE_f=40 J, difference 60 J."},
+{id:27, lec:"L-3", blk:"Restitution", topic:"e = separation/approach",
+ q:"Body A (6 m/s) overtakes and strikes body B (2 m/s) moving the same way. After impact A moves at 3 m/s and B at 5 m/s. The coefficient of restitution is:",
+ opts:["0.25","2.0","0.5","1.0"],
+ ans:2,
+ why:["0.25 squares the ratio, confusing e with the height law h'=e²h.",
+      "2.0 inverts the ratio, using approach/separation instead of separation/approach.",
+      "Correct: e=(5−3)/(6−2)=2/4=0.5, separation speed over approach speed.",
+      "1.0 would need separation = approach; here 2 ≠ 4, so it is not elastic."],
+ sol:"The coefficient of restitution is e = velocity of separation / velocity of approach. Approach speed (before) = 6−2 = 4 m/s. Separation speed (after) = 5−3 = 2 m/s. So e = 2/4 = <b>0.5</b>. Because separation is slower than approach, e lies between 0 and 1, a partially inelastic collision."},
+{id:28, lec:"L-3", blk:"Bounce height", topic:"h' = e²h",
+ q:"A ball is dropped from a height of 5 m onto a fixed floor. If the coefficient of restitution is 0.6, the height to which it rebounds is:",
+ opts:["3.0 m","0.36 m","2.5 m","1.8 m"],
+ ans:3,
+ why:["3.0 m uses e·h = 0.6·5, forgetting to square e.",
+      "0.36 m is e²=0.36 alone, without multiplying by the drop height.",
+      "2.5 m is a halving guess, unrelated to the e² height law.",
+      "Correct: h'=e²h=(0.6)²·5=0.36·5=1.8 m."],
+ sol:"For a ball bouncing off a fixed floor, rebound height follows h' = e²h, because the impact speed √(2gh) is scaled by e and height scales as speed squared. Here h' = (0.6)²·5 = 0.36·5 = <b>1.8 m</b>. Note that e=0.6 gives 36% of the original height, not 60%."},
+{id:29, lec:"L-3", blk:"Repeated bounce", topic:"hₙ = e²ⁿh",
+ q:"A ball is dropped from 64 m onto a fixed surface with e=0.5. The height it reaches after the 2nd bounce is:",
+ opts:["16 m","8 m","4 m","32 m"],
+ ans:2,
+ why:["16 m is e²h, the first-bounce height (n=1) instead of n=2.",
+      "8 m miscounts the exponent as e³ instead of e²ⁿ=e⁴.",
+      "Correct: h₂=e²ⁿh=e⁴·64=(0.5)⁴·64=4 m.",
+      "32 m applies a single factor of e (the velocity law), not e²ⁿ for height."],
+ sol:"After each bounce the height is multiplied by e², so after n bounces hₙ = e²ⁿh. For the 2nd bounce n=2, giving h₂ = e⁴h = (0.5)⁴·64 = 0.0625·64 = <b>4 m</b>. Each bounce compounds the e² factor, exactly like repeated geometric multiplication."},
+{id:30, lec:"L-3", blk:"Velocity decay", topic:"vₙ = eⁿv",
+ q:"A ball strikes a horizontal floor with speed 20 m/s and e=0.5. Its rebound speed just after the 3rd bounce is:",
+ opts:["10 m/s","5 m/s","20 m/s","2.5 m/s"],
+ ans:3,
+ why:["10 m/s is eⁿv with n=1, only one bounce counted.",
+      "5 m/s is e²v, stopping at the second bounce.",
+      "20 m/s is the original impact speed with no decay applied.",
+      "Correct: vₙ=eⁿv, so v₃=(0.5)³·20=0.125·20=2.5 m/s."],
+ sol:"Each bounce multiplies the speed by e, so after n bounces vₙ = eⁿv. After the 3rd bounce v₃ = e³v = (0.5)³·20 = 0.125·20 = <b>2.5 m/s</b>. Speed decays geometrically, halving at every bounce here because e=0.5, unlike height which falls by e² each time."},
+{id:31, lec:"L-3", blk:"Energy fraction", topic:"equal-mass KE loss",
+ q:"A body of mass m moving at speed u collides perfectly inelastically with an identical mass m at rest. The fraction of the initial kinetic energy lost is:",
+ opts:["1/4","1/2","1/3","1"],
+ ans:1,
+ why:["1/4 is the absolute loss ¼mu² mistaken for a fraction; divide by KE_i=½mu².",
+      "Correct: v'=u/2, KE_f=¼mu², loss=¼mu², fraction=(¼mu²)/(½mu²)=½.",
+      "1/3 uses an unequal-mass fraction; equal masses give exactly ½.",
+      "1 assumes all KE is lost, but the composite still moves at u/2 and keeps ¼mu²."],
+ sol:"Equal masses, one moving at u and one at rest, sticking together give v' = u/2 from momentum. KE_i = ½mu². KE_f = ½(2m)(u/2)² = ¼mu². Loss = ½mu² − ¼mu² = ¼mu². Fraction lost = (¼mu²)/(½mu²) = <b>½</b>. Exactly half the kinetic energy is always lost in this symmetric equal-mass case."},
+{id:32, lec:"L-3", blk:"Head-on symmetric", topic:"equal & opposite speeds",
+ q:"Two balls of equal mass move directly toward each other, each at 5 m/s, and collide head-on. If e=0.4, the speed of each ball after impact is:",
+ opts:["2 m/s","5 m/s","4 m/s","1 m/s"],
+ ans:0,
+ why:["Correct: by symmetry v₁'=−v₂'; separation=e·10=4 split equally gives 2 m/s each.",
+      "5 m/s is the unchanged original speed, ignoring the energy loss since e is below 1.",
+      "4 m/s is the total separation speed of the pair, not the speed of each ball.",
+      "1 m/s halves again, dividing the separation speed by 4 instead of 2."],
+ sol:"Two equal masses with equal and opposite speeds have zero total momentum, so v₁'=−v₂' after impact. Approach speed = 5+5 = 10 m/s. Separation speed = e·10 = 0.4·10 = 4 m/s, shared equally between the two, so each ball has speed 4/2 = <b>2 m/s</b>, reversed in direction."},
+{id:33, lec:"L-3", blk:"Velocity ratio", topic:"(1−e)/(1+e) identity",
+ q:"A body of mass m collides head-on with a stationary body of the same mass. If e=1/3, the ratio of the striker's final velocity to the target's final velocity is:",
+ opts:["1/3","1/2","2/3","1/4"],
+ ans:1,
+ why:["1/3 reports e itself, not the after-collision velocity ratio.",
+      "Correct: v₁'=[(1−e)/2]v, v₂'=[(1+e)/2]v, so ratio=(1−e)/(1+e)=(2/3)/(4/3)=1/2.",
+      "2/3 is v₂'/v (the target's own fraction), not the ratio of the two final velocities.",
+      "1/4 squares the ratio, an extra unjustified step."],
+ sol:"For equal masses with the target at rest, v₁'=[(1−e)/2]v and v₂'=[(1+e)/2]v. With e=1/3: v₁'=(2/3)/2·v=v/3 and v₂'=(4/3)/2·v=2v/3. Ratio v₁':v₂' = (1/3)/(2/3) = <b>1/2</b>, which is exactly (1−e)/(1+e). The unknown speed v cancels, so no numeric speed is needed."},
+{id:34, lec:"L-3", blk:"Classification", topic:"identify perfectly inelastic",
+ q:"Which of the following is a perfectly inelastic collision?",
+ opts:["Two steel ball bearings that rebound after striking","A rubber ball bouncing back up off the ground","Two protons that repel and veer apart without touching","A lump of wet clay thrown at a wall and sticking to it"],
+ ans:3,
+ why:["Steel bearings rebound with e near 1 (nearly elastic); they do not stick together.",
+      "A bouncing rubber ball separates from the floor, so e is between 0 and 1, not perfectly inelastic.",
+      "Repelling protons never make contact and fly apart; this is not a sticking collision.",
+      "Correct: the clay deforms and stays put, so the bodies move together and e=0."],
+ sol:"A collision is perfectly inelastic when the bodies move together afterward, i.e. e=0. Wet clay hitting a wall deforms and stays stuck, so it qualifies. Steel bearings and rubber balls rebound (e near 1, or between 0 and 1), and repelling protons never touch. The <b>clay sticking to the wall</b> is the only perfectly inelastic case."},
+{id:35, lec:"L-3", blk:"Conservation", topic:"universal conserved quantity",
+ q:"Which quantity is conserved in every collision — elastic, partially inelastic, and perfectly inelastic alike?",
+ opts:["Kinetic energy","Total mechanical energy","Linear momentum","The velocity of each body"],
+ ans:2,
+ why:["Kinetic energy is conserved only when e=1 (elastic); inelastic collisions lose KE.",
+      "Mechanical energy also drops whenever KE is lost to heat and sound, so not always conserved.",
+      "Correct: linear momentum is conserved in every collision by Newton's third law, for any e.",
+      "Individual velocities change during a collision; only the total momentum stays fixed."],
+ sol:"Linear momentum is conserved in every collision because the colliding bodies exert equal and opposite impulsive forces on each other (Newton's third law), whatever the value of e. Kinetic and mechanical energy are conserved only for elastic collisions (e=1), and individual velocities always change. So <b>linear momentum</b> is the one universally conserved quantity."},
+
+
+/* ===== P9_L4.js ===== */
+{id:36, lec:"L-4", blk:"Restitution from rebound height", topic:"e = √(h′/h)",
+ q:"A ball is dropped onto a floor from a height of 4 m and rebounds to a height of 1 m. The coefficient of restitution between ball and floor is:",
+ opts:["0.25","0.5","0.75","2.0"],
+ ans:1,
+ why:["This is the raw height ratio h′/h = 1/4; the restitution needs its square root.",
+      "Correct: e = √(h′/h) = √(1/4) = 0.5, since each side of the bounce converts height to speed by v = √(2gh).",
+      "This is 1 − h′/h = 0.75, the fraction of energy lost, not the restitution.",
+      "This is the inverted root √(h/h′) = √4 = 2, which would need e greater than 1 — physically impossible."],
+ sol:"On a fixed floor the speed ratio after/before is e, while heights scale as speed², so h′/h = e². Hence e = √(h′/h) = √(1/4) = <b>0.5</b>. The g and the ½ cancel because both fall and rise use v = √(2gh)."},
+
+{id:37, lec:"L-4", blk:"Successive bounces — total distance", topic:"H(1+e²)/(1−e²)",
+ q:"A ball is dropped from H = 10 m onto a floor of coefficient of restitution e = 0.5 and bounces repeatedly until it stops. The total vertical distance it travels is:",
+ opts:["16.67 m","30 m","13.33 m","12.5 m"],
+ ans:0,
+ why:["Correct: total distance = H(1+e²)/(1−e²) = 10(1.25)/(0.75) = 16.67 m.",
+      "This used e instead of e² in the geometric ratio, giving H(1+e)/(1−e) = 30 m.",
+      "This is H/(1−e²) = 13.33 m, dropping the (1+e²) numerator that accounts for the up-and-down legs.",
+      "This is just H(1+e²) = 12.5 m, the first drop plus first rise, forgetting to sum the infinite series."],
+ sol:"The drop H, then each bounce rises to e²×(previous height) and falls the same, so distance = H + 2H(e² + e⁴ + …) = H + 2He²/(1−e²) = H(1+e²)/(1−e²). With H = 10, e² = 0.25: 10(1.25)/(0.75) = <b>16.67 m</b>."},
+
+{id:38, lec:"L-4", blk:"Successive bounces — total time", topic:"√(2H/g)·(1+e)/(1−e)",
+ q:"A ball is dropped from H = 5 m (take g = 10 m/s²) onto a floor with e = 0.5 and keeps bouncing until it comes to rest. The total time for which it keeps bouncing is:",
+ opts:["1 s","2 s","3 s","4 s"],
+ ans:2,
+ why:["This is only √(2H/g) = 1 s, the time of the first fall alone, ignoring every bounce.",
+      "This used 1/(1−e) instead of (1+e)/(1−e), giving √(2H/g)/(1−e) = 2 s.",
+      "Correct: T = √(2H/g)·(1+e)/(1−e) = 1×(1.5/0.5) = 3 s.",
+      "This is 2√(2H/g)/(1−e) = 4 s, wrongly doubling the very first fall as if it were an up-and-down leg."],
+ sol:"First fall takes t₀ = √(2H/g) = 1 s. Each bounce reaches e²×previous height, giving an up-down time 2e^n·t₀. Total = t₀[1 + 2e/(1−e)] = t₀(1+e)/(1−e) = 1×(1.5/0.5) = <b>3 s</b>. Only the first leg is one-way; all later legs are round trips."},
+
+{id:39, lec:"L-4", blk:"Impulse on a bounce", topic:"J = mu(1+e)",
+ q:"A 0.2 kg ball dropped from 5 m (g = 10 m/s²) strikes the floor with e = 0.6. The magnitude of the impulse the floor delivers to the ball during this bounce is:",
+ opts:["0.8 N·s","1.2 N·s","2.0 N·s","3.2 N·s"],
+ ans:3,
+ why:["This is mu(1−e) = 0.8 N·s, formed by subtracting the rebound momentum instead of adding it.",
+      "This is mu·e = 1.2 N·s, counting only the outgoing rebound momentum.",
+      "This is mu = 2.0 N·s, counting only the incoming momentum and forgetting the rebound reverses direction.",
+      "Correct: impulse = m(u + eu) = mu(1+e) = 0.2×10×1.6 = 3.2 N·s."],
+ sol:"Impact speed u = √(2gh) = √(100) = 10 m/s downward; rebound speed eu = 6 m/s upward. Impulse = change in momentum = m(eu − (−u)) = mu(1+e) = 0.2×10×1.6 = <b>3.2 N·s</b>. The two speeds add because the velocity reverses direction across the bounce."},
+
+{id:40, lec:"L-4", blk:"Ballistic pendulum — embed", topic:"v = ((M+m)/m)√(2gh)",
+ q:"A 10 g bullet embeds in a 1.99 kg block hanging at rest; the block-plus-bullet then rises 0.2 m (g = 10 m/s²). The bullet's speed just before impact was:",
+ opts:["2 m/s","398 m/s","400 m/s","800 m/s"],
+ ans:2,
+ why:["This is just √(2gh) = 2 m/s, the block's post-impact speed, forgetting the (M+m)/m amplification.",
+      "This used M/m = 199 instead of (M+m)/m = 200 in the numerator, giving 398 m/s.",
+      "Correct: v = ((M+m)/m)√(2gh) = (2/0.01)×√4 = 200×2 = 400 m/s.",
+      "This used 2gh = 4 directly instead of √(2gh) = 2, doubling to 800 m/s."],
+ sol:"The block rises h, so its speed just after impact is V = √(2gh) = 2 m/s. Perfectly inelastic momentum: mv = (M+m)V, so v = ((M+m)/m)√(2gh) = (2.00/0.01)×2 = <b>400 m/s</b>. The whole mass (M+m) appears, not M alone."},
+
+{id:41, lec:"L-4", blk:"Ballistic pendulum — swing angle", topic:"h = L(1−cosθ)",
+ q:"A 20 g bullet embeds in a 1.98 kg block hanging from a 1.6 m string; the block swings up to θ = 60° from the vertical (g = 10 m/s²). The bullet's speed just before impact was:",
+ opts:["566 m/s","400 m/s","396 m/s","4 m/s"],
+ ans:1,
+ why:["This used the full string length as the rise h = L = 1.6 m, forgetting the (1−cosθ) geometry.",
+      "Correct: h = L(1−cos60°) = 0.8 m, V = √(2gh) = 4 m/s, v = (2/0.02)×4 = 400 m/s.",
+      "This used M/m = 99 instead of (M+m)/m = 100 in the numerator, giving 396 m/s.",
+      "This is only √(2gh) = 4 m/s, the block's speed, forgetting the (M+m)/m factor."],
+ sol:"Rise of the bob: h = L(1−cosθ) = 1.6(1−0.5) = 0.8 m. Post-impact speed V = √(2gh) = √16 = 4 m/s. Momentum in the embed: v = ((M+m)/m)V = (2.00/0.02)×4 = <b>400 m/s</b>. The height is L(1−cosθ), not L."},
+
+{id:42, lec:"L-4", blk:"Working backward — energy lost", topic:"loss = 1 − e²",
+ q:"A ball dropped from 5 m rebounds to 1.8 m off the floor. The percentage of its kinetic energy lost in the bounce is:",
+ opts:["36%","40%","60%","64%"],
+ ans:3,
+ why:["This is h′/h = 36%, the fraction of energy retained, not the fraction lost.",
+      "This used 1 − e = 1 − 0.6 = 40%, applying e instead of e² to the energy.",
+      "This took e = √(0.36) = 0.6 itself as the fraction lost, 60%.",
+      "Correct: fraction lost = 1 − h′/h = 1 − e² = 1 − 0.36 = 0.64 = 64%."],
+ sol:"At the floor, KE ∝ height, so the fraction of KE retained equals h′/h = 1.8/5 = 0.36 (which is e²). Fraction lost = 1 − e² = 1 − 0.36 = 0.64, i.e. <b>64%</b>. Energy scales as e², not e, so 40% and 60% are the classic slips."},
+
+{id:43, lec:"L-4", blk:"Restitution collision, equal masses", topic:"v₂′ = u(1+e)/2",
+ q:"A ball moving at 6 m/s strikes an identical ball at rest head-on with coefficient of restitution e = 1/3. The speed of the struck (originally stationary) ball after the collision is:",
+ opts:["2 m/s","3 m/s","4 m/s","8 m/s"],
+ ans:2,
+ why:["This is v₁′ = u(1−e)/2 = 2 m/s, the striker's speed, not the struck ball's.",
+      "This is u/2 = 3 m/s, the perfectly-inelastic (e = 0) common speed, ignoring restitution.",
+      "Correct: v₂′ = u(1+e)/2 = 6×(4/3)/2 = 4 m/s.",
+      "This is u(1+e) = 8 m/s, forgetting the factor of ½ from the equal-mass result."],
+ sol:"For equal masses with one at rest: v₁′ = u(1−e)/2 and v₂′ = u(1+e)/2. The struck ball gets v₂′ = 6×(1+1/3)/2 = 6×(4/3)/2 = <b>4 m/s</b>. Check: v₁′ = 2 m/s, and separation speed 4−2 = 2 = e×6, consistent."},
+
+{id:44, lec:"L-4", blk:"Oblique bounce off smooth surface", topic:"normal ×e, tangential fixed",
+ q:"A ball approaches a smooth horizontal floor with velocity components 3 m/s horizontal and 8 m/s vertical (downward). With e = 0.5, its speed just after the bounce is:",
+ opts:["8.1 m/s","8.5 m/s","4.3 m/s","5 m/s"],
+ ans:3,
+ why:["This scaled the horizontal (tangential) component by e and left the vertical alone: √(1.5²+8²) ≈ 8.1 m/s.",
+      "This is √(3²+8²) ≈ 8.5 m/s, the approach speed unchanged — no e applied at all.",
+      "This scaled both components by e: √(1.5²+4²) ≈ 4.3 m/s.",
+      "Correct: vertical (normal) → 0.5×8 = 4, horizontal (tangential) stays 3, speed = √(3²+4²) = 5 m/s."],
+ sol:"A smooth surface exerts force only along its normal. The tangential (horizontal) component 3 m/s is unchanged; the normal (vertical) component reverses and scales by e: 8 → 0.5×8 = 4 m/s. Rebound speed = √(3² + 4²) = <b>5 m/s</b>. Only the normal component is scaled, never the tangential."},
+
+{id:45, lec:"L-4", blk:"Two sequential inelastic collisions", topic:"chained momentum",
+ q:"A 1 kg block moving at 8 m/s hits a 1 kg block at rest and sticks; the combined pair then hits a 2 kg block at rest and sticks to it too. The final common speed of all three is:",
+ opts:["1.6 m/s","4 m/s","2 m/s","2.67 m/s"],
+ ans:2,
+ why:["This is 8/5 = 1.6 m/s, dividing by one mass too many.",
+      "This is the speed after only the first collision (8×1/2 = 4 m/s), stopping short of the second.",
+      "Correct: first gives 4 m/s (2 kg), second gives 2×4/4 = 2 m/s (4 kg); equivalently 8/4 by overall momentum.",
+      "This is 8/3 = 2.67 m/s, dividing the initial momentum by 3 kg instead of the full 4 kg."],
+ sol:"First collision: 1×8 = 2×v₁, so v₁ = 4 m/s. Second: 2×4 = 4×v₂, so v₂ = <b>2 m/s</b>. Since momentum is conserved through both sticks, the shortcut is total momentum 8 kg·m/s over final mass 4 kg = 2 m/s."},
+
+{id:46, lec:"L-4", blk:"Spring-mediated collision", topic:"common v at max compression",
+ q:"A 2 kg block moving at 10 m/s approaches a stationary 3 kg block that carries an ideal spring on its face. At the instant of maximum spring compression, the common velocity of the two blocks is:",
+ opts:["4 m/s","3.33 m/s","5 m/s","6.67 m/s"],
+ ans:0,
+ why:["Correct: at maximum compression both move together, v = m₁u₁/(m₁+m₂) = 20/5 = 4 m/s.",
+      "This is 10/3 = 3.33 m/s, dividing by the target mass 3 kg alone.",
+      "This is 10/2 = 5 m/s, dividing by the number of bodies rather than the total mass.",
+      "This is 20/3 = 6.67 m/s, dividing the moving block's momentum by 3 kg only."],
+ sol:"Maximum compression is the instant the two blocks have zero relative velocity, i.e. they move as one. Momentum conservation gives common v = (m₁u₁ + m₂u₂)/(m₁+m₂) = (2×10 + 0)/(2+3) = 20/5 = <b>4 m/s</b>. This is identical to the perfectly-inelastic common velocity."},
+
+
+/* ===== P9_L5.js ===== */
+{id:47, lec:"L-5", blk:"90° right-angle rule", topic:"elastic 2-D, equal mass",
+ q:"A moving ball collides elastically and obliquely with an identical ball that is initially at rest. The angle between the two balls' velocities after the collision is:",
+ opts:["0°","45°","90°","180°"],
+ ans:2,
+ why:["0° would mean they move along the same line — that is the head-on limit, not a genuine oblique split.","45° is not forced by the conservation laws; the right-angle rule fixes the sum at exactly 90°.","Momentum (x,y) + KE conservation with equal masses and a stationary target gives 2v₁v₂cos(θ₁+θ₂)=0, so θ₁+θ₂=90°.","180° would need the balls to move opposite ways, impossible when both carry forward momentum from the incoming ball."],
+ sol:"For equal masses, elastic, target at rest: cancel m, square-and-add the two momentum equations to get u²=v₁²+v₂²+2v₁v₂cos(θ₁+θ₂). Energy gives u²=v₁²+v₂², so 2v₁v₂cos(θ₁+θ₂)=0. Since both balls move (v₁,v₂≠0), cos(θ₁+θ₂)=0 ⇒ θ₁+θ₂=<b>90°</b>. All three conditions (elastic, equal mass, one at rest) are needed."},
+
+{id:48, lec:"L-5", blk:"speed relation", topic:"elastic 2-D, v₁²+v₂²=u²",
+ q:"Two identical balls collide elastically; one was at rest. The incoming ball had speed u=10 m/s. After the collision the struck ball moves off at 6 m/s. The speed of the other ball is:",
+ opts:["4 m/s","6 m/s","10 m/s","8 m/s"],
+ ans:3,
+ why:["4 m/s comes from a linear guess u−6=4 instead of the Pythagorean energy relation.","6 m/s just repeats the given speed; the two final speeds are not equal here.","10 m/s keeps the full incoming speed, but KE is shared between two balls now.","Elastic equal-mass KE relation u²=v₁²+v₂² ⇒ v₂=√(100−36)=√64=8 m/s."],
+ sol:"For an elastic collision between equal masses the mass cancels from the energy equation, leaving u²=v₁²+v₂². With u=10 and v₁=6: v₂²=100−36=64 ⇒ v₂=<b>8 m/s</b>. Note 6-8-10 is a Pythagorean triple, and the 90° right-angle rule is exactly what makes this clean speed relation hold."},
+
+{id:49, lec:"L-5", blk:"2-D inelastic", topic:"common speed, stick together",
+ q:"A 2 kg body moving at 4 m/s along +x strikes a 3 kg body moving at 2 m/s along +y. They stick together. The speed of the combined body is:",
+ opts:["2.8 m/s","2 m/s","3.5 m/s","6 m/s"],
+ ans:1,
+ why:["2.8 m/s ≈ P/(m₁+m₂) using P=10√2 as if the momenta were equal — but they are 8 and 6, not equal.","p_x=8, p_y=6 ⇒ P=√(64+36)=10 kg·m/s; divide by total mass 5 kg ⇒ 2 m/s.","3.5 m/s adds the two speeds' average (4+2)/2 ≈ 3, wrong — you add momenta as vectors, not speeds.","6 m/s divides P=10 by one mass or forgets the vector addition entirely."],
+ sol:"Momentum is a vector conserved component-wise: p_x=2×4=8, p_y=3×2=6 kg·m/s. Resultant P=√(8²+6²)=√100=10 kg·m/s. Combined mass=2+3=5 kg, so common speed v=P/(m₁+m₂)=10/5=<b>2 m/s</b>. The 3-4-5-style geometry keeps the answer clean."},
+
+{id:50, lec:"L-5", blk:"2-D inelastic", topic:"direction of combined mass",
+ q:"For the same collision (2 kg at 4 m/s along +x, 3 kg at 2 m/s along +y, stuck together), the direction of the combined body, measured from the x-axis, is:",
+ opts:["45°","53° from the x-axis","30°","37° from the x-axis"],
+ ans:3,
+ why:["45° assumes p_x=p_y, but here p_x=8 ≠ p_y=6.","53° is tan⁻¹(8/6) — the ratio is inverted; angle from x-axis uses p_y/p_x.","30° would need tanθ=1/√3≈0.577, but the true ratio is 0.75.","tanθ=p_y/p_x=6/8=0.75 ⇒ θ=tan⁻¹(3/4)≈37° above the x-axis."],
+ sol:"The combined momentum points along the resultant of p_x=8 and p_y=6. tanθ=p_y/p_x=6/8=3/4 ⇒ θ=tan⁻¹(0.75)≈<b>37° from the x-axis</b>. This is the same 3-4-5 triangle as the speed calculation, so the direction leans toward the larger (x) momentum."},
+
+{id:51, lec:"L-5", blk:"2-D inelastic", topic:"kinetic-energy loss",
+ q:"Two identical 1 kg balls, each moving at 10 m/s in mutually perpendicular directions, collide and stick together. The kinetic energy lost in the collision is:",
+ opts:["25 J","50 J","100 J","0 J"],
+ ans:1,
+ why:["25 J is half of the correct loss — it uses only one ball's initial KE.","KE_i=100 J, KE_f=50 J (combined 2 kg at 10/√2), so loss=50 J.","100 J is the full initial KE, as if all of it were lost — but the combined body still moves.","0 J would mean an elastic collision, but sticking together is perfectly inelastic."],
+ sol:"Each ball: KE=½(1)(10²)=50 J, so KE_i=100 J. Perpendicular equal momenta give P=√((10)²+(10)²)=10√2 kg·m/s; combined mass 2 kg ⇒ v_f=10√2/2=10/√2. KE_f=½(2)(10/√2)²=½(2)(50)=50 J. Loss=100−50=<b>50 J</b>, dissipated as heat/deformation."},
+
+{id:52, lec:"L-5", blk:"oblique split, normal/tangential", topic:"smooth wall, tangential unchanged",
+ q:"A smooth ball strikes a smooth fixed wall with speed 10 m/s, its velocity making 60° with the wall. The coefficient of restitution is 0.5. The component of velocity parallel to the wall (tangential) just after impact is:",
+ opts:["5 m/s","2.5 m/s","5√3 m/s","10 m/s"],
+ ans:0,
+ why:["Tangential component = 10cos60° = 5 m/s, and it is unchanged because the smooth wall exerts no tangential force.","2.5 m/s wrongly scales the tangential component by e — e acts on the NORMAL component only.","5√3 m/s is the normal component (10sin60°) before impact, not the tangential one.","10 m/s is the full incoming speed, ignoring the resolution into components."],
+ sol:"Resolve the velocity: tangential (parallel to wall) = 10cos60°=5 m/s, normal (perpendicular) = 10sin60°=5√3 m/s. A smooth wall gives no friction, so the tangential component is untouched: it stays <b>5 m/s</b>. Only the normal part is scaled by e (becoming 0.5×5√3). Scaling tangential by e is the classic slip."},
+
+{id:53, lec:"L-5", blk:"oblique bounce", topic:"reflection angle tanθ'=tanθ/e",
+ q:"A particle hits a smooth surface with angle of incidence 60° (measured from the normal). If the coefficient of restitution is e=1/√3, the angle of reflection (from the normal) is:",
+ opts:["tan⁻¹(√3)","tan⁻¹(1/√3)","tan⁻¹(3)","60°"],
+ ans:2,
+ why:["tan⁻¹(√3)=60° would mean e=1, i.e. the angle is unchanged — but e&lt;1 flattens the bounce.","tan⁻¹(1/√3)=30° divides by e the wrong way, making the ray steeper instead of flatter.","tanθ'=tanθ/e=tan60°/(1/√3)=√3·√3=3 ⇒ θ'=tan⁻¹(3)≈71.6°.","60° repeats the incidence angle; with e&lt;1 the reflection angle must exceed it."],
+ sol:"Only the normal component is scaled by e; the tangential is preserved. So tanθ'=v_t/(e·v_n)=tanθ/e. Here tanθ=tan60°=√3, e=1/√3 ⇒ tanθ'=√3/(1/√3)=3 ⇒ θ'=<b>tan⁻¹(3)≈71.6°</b>. Since e&lt;1, θ'>θ: the particle always bounces flatter (nearer the surface) than it arrived."},
+
+{id:54, lec:"L-5", blk:"symmetric split, elasticity check", topic:"right-angle rule as test",
+ q:"Two equal masses undergo an oblique collision with one initially at rest. After the collision the angle between their velocities is measured to be 80°. The collision is:",
+ opts:["perfectly elastic","inelastic","perfectly inelastic","elastic only if the two speeds are equal"],
+ ans:1,
+ why:["Perfectly elastic equal-mass collisions with a stationary target ALWAYS give exactly 90°, not 80°.","A separation angle less than 90° means kinetic energy was lost, so the collision is inelastic.","Perfectly inelastic means they stick and move as one (0° between them), not 80°.","Equal speeds don't restore elasticity; the 90° condition failed regardless of the speeds."],
+ sol:"For equal masses with the target at rest, an elastic collision forces the separation angle to be exactly 90° (the right-angle rule). A measured 80°&lt;90° signals that some kinetic energy was lost, so the collision is <b>inelastic</b>. The right-angle rule thus works as a quick elasticity test: only 90° is consistent with elastic."},
+
+{id:55, lec:"L-5", blk:"ground bounce", topic:"restitution on normal component only",
+ q:"A ball strikes smooth ground with speed 6 m/s, its angle of incidence being 45° from the normal. If the coefficient of restitution is e=1/3, the speed of the ball just after the bounce is:",
+ opts:["6 m/s","2√5 m/s","3√5 m/s","2 m/s"],
+ ans:1,
+ why:["6 m/s keeps the full speed, which only happens for a perfectly elastic bounce (e=1).","v_n=6cos45°=3√2 → after: (1/3)(3√2)=√2; v_t=3√2 unchanged; speed=√(2+18)=√20=2√5 m/s.","3√5 m/s comes from scaling the tangential component too, but the smooth ground leaves it unchanged.","2 m/s is just the normal component after impact, forgetting the surviving tangential part."],
+ sol:"Resolve: normal v_n=6cos45°=3√2 m/s, tangential v_t=6sin45°=3√2 m/s. Restitution acts on the normal only: v_n'=e·3√2=√2 m/s; v_t stays 3√2 m/s. Resultant speed=√((√2)²+(3√2)²)=√(2+18)=√20=<b>2√5 ≈ 4.47 m/s</b>, less than 6 since e&lt;1 removes energy from the normal direction."},
+
+{id:56, lec:"L-5", blk:"wedge-and-block", topic:"momentum + energy, free wedge",
+ q:"A 1 kg block is released from rest at the top of a smooth curved wedge of mass 3 kg (height 0.6 m) that rests on a frictionless floor. When the block leaves the wedge at the bottom (moving horizontally), the speed of the wedge is (g=10 m/s²):",
+ opts:["3 m/s","√2 m/s","1 m/s","2 m/s"],
+ ans:2,
+ why:["3 m/s is the block's speed (v=3V), not the wedge's — the lighter block moves faster.","√2 m/s ignores horizontal momentum conservation and treats the wedge as fixed.","Horizontal momentum: 1·v=3·V ⇒ v=3V; energy mgh=½v²+3½V² gives 6V²=6 ⇒ V=1 m/s.","2 m/s drops the wedge's own KE term from the energy equation."],
+ sol:"No external horizontal force, so horizontal momentum (initially 0) gives m·v=M·V ⇒ v=3V. Energy: mgh=½mv²+½MV² ⇒ 1·10·0.6=½(1)(3V)²+½(3)V²=½(9V²)+½(3V²)=6V². So 6=6V² ⇒ V²=1 ⇒ V=<b>1 m/s</b> (block leaves at v=3 m/s the other way). The floating wedge recoils; a fixed wedge would give V=0."},
+
+{id:57, lec:"L-5", blk:"disintegration", topic:"vector momentum conservation",
+ q:"A stationary body explodes into three fragments of equal mass. Two fragments fly off perpendicular to each other, one at 9 m/s and the other at 12 m/s. The speed of the third fragment is:",
+ opts:["21 m/s","15 m/s","7.5 m/s","3 m/s"],
+ ans:1,
+ why:["21 m/s adds the two speeds (9+12) — momenta must be added as perpendicular vectors, not scalars.","The two fragments give resultant momentum m√(9²+12²)=15m; the third must be equal and opposite, so 15 m/s.","7.5 m/s halves the correct value with no physical basis.","3 m/s takes the difference 12−9, valid only for anti-parallel (1-D) momenta, not perpendicular ones."],
+ sol:"Total momentum before = 0, so it stays 0 after. The two named fragments (equal mass m) carry momenta 9m and 12m at right angles; their resultant is m√(9²+12²)=√(81+144)·m=15m. The third fragment (mass m) must cancel this, so its momentum is 15m opposite to the resultant ⇒ speed=<b>15 m/s</b> (a 9-12-15 = 3-4-5 triple)."},
+
+{id:58, lec:"L-5", blk:"equal-mass elastic scattering", topic:"90° rule + vᵢ=u cosθᵢ",
+ q:"A ball moving at 8 m/s collides elastically with an identical ball at rest. The incoming ball is scattered through 60° from its original direction. The speed of the struck (target) ball after the collision is:",
+ opts:["4 m/s","4√3 m/s","8 m/s","6 m/s"],
+ ans:1,
+ why:["4 m/s is the incoming ball's final speed (8cos60°), not the target's.","Target leaves at 30° (=90°−60°) with speed u cos30°=8(√3/2)=4√3 m/s.","8 m/s keeps the full incoming speed, but KE is now shared between the two balls.","6 m/s misreads cos30° or applies a wrong fraction of u."],
+ sol:"Equal masses, elastic, target at rest ⇒ the right-angle rule: the target moves at 90°−60°=30°. For this family vᵢ=u cosθᵢ, so v_target=8cos30°=8(√3/2)=<b>4√3 ≈ 6.93 m/s</b> (and the cue ball is 8cos60°=4 m/s). Check: 4²+(4√3)²=16+48=64=8² ✓ energy conserved."},
+
+
+/* ===== P9_SB.js ===== */
+{id:59, lec:"SB", blk:"Ballistic pendulum", topic:"momentum→energy",
+ q:"A simple pendulum of length 1 m has a wooden bob of mass 1 kg. It is struck by a bullet of mass 10⁻² kg moving at 2×10² m s⁻¹, which embeds in the bob. Taking g = 10 m s⁻², the height to which the bob rises is:",
+ opts:["2000 m","0.10 m","0.20 m","1.0 m"],
+ ans:2,
+ why:["Plugs the bullet's 200 m/s straight into h = u²/2g, skipping the collision entirely.","Halves the true rise, or uses v ≈ 1 m/s from dropping the bullet's mass.","Correct: v = 1.98 m/s after impact, then h = v²/2g ≈ 0.196 m ≈ 0.20 m.","Confuses the small rise with the string length L = 1 m."],
+ sol:"Momentum for the embedding: m u = (m+M)v, so v = (0.01·200)/1.01 = 1.98 m/s. Then the swing is energy-conserving: h = v²/2g = 1.98²/20 = 3.92/20 = 0.196 m. Answer <b>0.20 m</b>. Never conserve KE through the inelastic bang, nor momentum through the smooth swing."},
+{id:60, lec:"SB", blk:"Explosion", topic:"KE-ratio from momentum",
+ q:"A stationary particle breaks into two parts of masses m_A and m_B moving with velocities v_A and v_B respectively. The ratio of their kinetic energies K_B : K_A is:",
+ opts:["v_B : v_A","m_B : m_A","m_B v_B : m_A v_A","1 : 1"],
+ ans:0,
+ why:["Correct: equal momenta give K_B/K_A = (m_B/m_A)(v_B/v_A)² = v_B/v_A.","Inverted mass ratio — the slip from not squaring the velocity ratio.","This is just the equal-momentum statement (= 1:1), not a KE ratio at all.","Assumes equal KE, which fails whenever the two masses differ."],
+ sol:"From rest the fragments carry equal and opposite momenta: m_A v_A = m_B v_B, so m_B/m_A = v_A/v_B. Then K_B/K_A = (m_B v_B²)/(m_A v_A²) = (m_B/m_A)(v_B/v_A)² = (v_A/v_B)(v_B/v_A)² = v_B/v_A. Answer <b>v_B : v_A</b>. Check m_A=1,m_B=2 ⇒ v_A=2,v_B=1 ⇒ K_A=2,K_B=1 ⇒ 1:2 = v_B:v_A."},
+{id:61, lec:"SB", blk:"Impulse = Δp", topic:"free fall + rebound",
+ q:"A spherical body of mass 100 g is dropped from a height of 10 m. After hitting the ground it rebounds to 5 m. Taking g = 9.8 m s⁻², the magnitude of the impulse imparted by the ground to the body is:",
+ opts:["0.41 kg m s⁻¹","1.40 kg m s⁻¹","23.9 kg m s⁻¹","2.39 kg m s⁻¹"],
+ ans:3,
+ why:["Subtracts the two speeds instead of adding — ignores the direction reversal.","Uses only the fall speed and omits the rebound contribution entirely.","Forgets the 100 g → 0.1 kg conversion, inflating the answer tenfold.","Correct: J = m(v₁+v₂) = 0.1(14+9.9) ≈ 2.39 kg m s⁻¹."],
+ sol:"Impact speed v₁ = √(2·9.8·10) = 14 m/s down; rebound speed v₂ = √(2·9.8·5) = 9.9 m/s up. The velocity reverses, so |Δp| adds the magnitudes: J = m(v₁+v₂) = 0.1(14+9.9) = 0.1·23.9 = <b>2.39 kg m s⁻¹</b>. Adding (not subtracting) the speeds is the whole trick here."},
+{id:62, lec:"SB", blk:"Inelastic mass addition", topic:"momentum conservation",
+ q:"A body of mass 1000 kg moving horizontally at 6 m s⁻¹ has an extra 200 kg of mass (initially at rest) added to it. The final velocity of the body is:",
+ opts:["6 m s⁻¹","2 m s⁻¹","3 m s⁻¹","5 m s⁻¹"],
+ ans:3,
+ why:["Assumes velocity is unchanged when mass is added — ignores momentum.","Arbitrary division not matching 6000/1200.","Comes from a wrong mass sum or misplaced factor.","Correct: v = 6000/1200 = 5 m s⁻¹."],
+ sol:"Adding stationary mass is a perfectly inelastic event, so momentum is conserved: m₁u₁ = (m₁+m₂)v. Thus v = (1000·6)/(1000+200) = 6000/1200 = <b>5 m s⁻¹</b>. Equivalently v = u·m₁/(m₁+m₂) = 6·(1000/1200) = 5. The body slows because the same momentum now moves a larger mass."},
+{id:63, lec:"SB", blk:"Recoil", topic:"KE-ratio, gun & shell",
+ q:"An artillery piece of mass M₁ fires a shell of mass M₂ horizontally. Immediately after firing, the ratio of the kinetic energy of the artillery to that of the shell is:",
+ opts:["M₁/(M₁+M₂)","M₂/M₁","M₂/(M₁+M₂)","M₁/M₂"],
+ ans:1,
+ why:["A reduced-mass-looking form with no basis in a two-body recoil from rest.","Correct: with equal momenta, K ∝ 1/M, so K_gun/K_shell = M₂/M₁.","Same spurious sum-in-denominator form; not applicable here.","The reciprocal — this is K_shell/K_gun, exactly upside down."],
+ sol:"The system starts at rest, so gun and shell carry equal momentum magnitude p. Using K = p²/2M, K_artillery/K_shell = (p²/2M₁)/(p²/2M₂) = <b>M₂/M₁</b>. The light shell (small M₂) carries most of the energy while the heavy gun barely recoils. Check M₁=100, M₂=1: 50 J vs 5000 J = 1/100 = M₂/M₁."},
+{id:64, lec:"SB", blk:"Collision + projectile", topic:"range → momentum",
+ q:"A ball of mass 200 g rests on a vertical post of height 20 m. A horizontal bullet of mass 10 g hits its centre; afterwards both travel independently. The ball lands 30 m from the post's foot and the bullet 120 m. Taking g = 10 m s⁻², the bullet's initial velocity was:",
+ opts:["120 m s⁻¹","60 m s⁻¹","400 m s⁻¹","360 m s⁻¹"],
+ ans:3,
+ why:["The bullet's own post-collision speed, not its initial speed.","The ball-related figure, mis-assigned to the bullet's launch.","A units slip that drops the ball's momentum share.","Correct: 0.01u = 0.01·60 + 0.2·15 = 3.6 ⇒ u = 360 m s⁻¹."],
+ sol:"Both fall the same 20 m, so t = √(2·20/10) = 2 s. Post-collision speeds: v_ball = 30/2 = 15 m/s, v_bullet = 120/2 = 60 m/s. Horizontal momentum: m u = m·v_bullet + M·v_ball ⇒ 0.01u = 0.01·60 + 0.2·15 = 0.6 + 3.0 = 3.6, so u = 3.6/0.01 = <b>360 m s⁻¹</b>."},
+{id:65, lec:"SB", blk:"Repeated bounces", topic:"impulse of many balls",
+ q:"100 balls, each of mass m moving with speed v, simultaneously strike a wall normally and rebound with the same speed, all within time t. The total force exerted by the balls on the wall is:",
+ opts:["100 m v / t","200 m v / t","200 m v t","m v / (100 t)"],
+ ans:1,
+ why:["Misses the factor of 2 — treats each bounce as Δp = mv, not 2mv.","Correct: each bounce reverses velocity (Δp = 2mv), ×100 ÷ t.","Multiplies by time instead of dividing — wrong dimensions for force.","Inverts the ball count and drops the factor of 2."],
+ sol:"A ball reversing at the same speed changes momentum by 2mv, not zero. For 100 simultaneous strikes the total impulse is 100·2mv = 200mv, delivered over time t, so F = 200mv/t. Answer <b>200 m v / t</b>. Units: kg·(m/s)/s = N. This is the kinetic-theory pressure derivation in miniature."},
+{id:66, lec:"SB", blk:"Newton's 3rd law", topic:"impulse on the gun",
+ q:"A 10 g bullet leaves the barrel of a gun at 600 m s⁻¹. The barrel is 50 cm long and the gun's mass is 3 kg. The magnitude of the impulse supplied to the gun is:",
+ opts:["6 N s","3 N s","36 N s","12 N s"],
+ ans:0,
+ why:["Correct: |J| = m·v = 0.01·600 = 6 N s, equal and opposite to the bullet's.","Uses the gun's 3 kg somewhere it does not belong.","Multiplies 6 by the 50 cm barrel length — a meaningless unit mash-up.","Doubles the bullet's momentum with no reason to."],
+ sol:"By Newton's third law the impulse on the gun equals the bullet's momentum change: J = m(v−0) = 0.01·600 = <b>6 N s</b>. Barrel length and gun mass are decoys (they'd matter only for recoil speed or firing time). Check: recoil v = 6/3 = 2 m/s ⇒ gun impulse = 3·2 = 6 N s."},
+{id:67, lec:"SB", blk:"Inelastic collision", topic:"KE loss",
+ q:"A bag of sand of mass 9.8 kg hangs from a rope. A bullet of mass 200 g travelling at 10 m s⁻¹ embeds in it. The loss of kinetic energy of the system is:",
+ opts:["10 J","9.8 J","0.2 J","4.9 J"],
+ ans:1,
+ why:["The initial KE of the bullet, not the loss (final KE not subtracted).","Correct: 10 J − 0.2 J = 9.8 J dissipated.","The final KE of the combined mass, not the loss.","Half of the initial KE, from a stray factor of ½."],
+ sol:"Momentum: V = (0.2·10)/(0.2+9.8) = 2/10 = 0.2 m/s. Initial KE = ½·0.2·10² = 10 J; final KE = ½·10·0.2² = 0.2 J. Loss = 10 − 0.2 = <b>9.8 J</b>. Reduced-mass shortcut: ΔKE = ½·(mM/(m+M))·u² = ½·0.196·100 = 9.8 J, confirming ~98% of the bullet's KE is lost."},
+{id:68, lec:"SB", blk:"Explosion (2-D)", topic:"vector momentum",
+ q:"A body of mass M at rest explodes into three pieces with masses in the ratio 1 : 1 : 2. The two lighter pieces fly off perpendicular to each other at 30 m s⁻¹ and 40 m s⁻¹. The speed of the third (heavier) piece is:",
+ opts:["50 m s⁻¹","35 m s⁻¹","25 m s⁻¹","70 m s⁻¹"],
+ ans:2,
+ why:["Divides the 50m resultant by m instead of the third piece's mass 2m.","Averages the two speeds, ignoring the perpendicular geometry.","Correct: |p₃| = √(30²+40²)·m = 50m, so v₃ = 50m/2m = 25 m s⁻¹.","Adds the two speeds directly, ignoring perpendicularity."],
+ sol:"Let masses be m, m, 2m. The two perpendicular momenta are 30m and 40m, resultant √(30²+40²)·m = 50m (a 3-4-5 triple). The third piece must carry 50m opposite to this, and its mass is 2m, so v₃ = 50m/2m = <b>25 m s⁻¹</b>, directed opposite to the resultant of the other two."},
+{id:69, lec:"SB", blk:"Velocity reversal", topic:"impulse = Δp",
+ q:"A batsman hits a ball of mass 0.4 kg straight back toward the bowler without changing its speed of 15 m s⁻¹. The magnitude of the impulse imparted to the ball is:",
+ opts:["6 N s","24 N s","12 N s","0 N s"],
+ ans:2,
+ why:["Treats the ball as merely stopped (Δv = 15), missing the reversal.","Doubles the correct impulse — an extra factor of 2.","Correct: |J| = 2mv = 2·0.4·15 = 12 N s.","Reads 'same speed' as 'no change', but velocity fully reverses."],
+ sol:"Speed is unchanged but direction reverses: Δv = (−15) − (+15) = −30 m/s. So |J| = m|Δv| = 0.4·30 = <b>12 N s</b>. Equivalently |J| = 2mv = 2·0.4·15 = 12 N s. 'Same speed' describes magnitude only — the velocity vector flips, doubling the change."},
+{id:70, lec:"SB", blk:"Elastic scattering", topic:"max deflection, heavier incident",
+ q:"In a scattering experiment a particle of mass 2m collides elastically with a stationary particle of mass m. The maximum angular deviation θ of the heavier (incident) particle, in radians, is:",
+ opts:["π","tan⁻¹(1/2)","π/3","π/6"],
+ ans:3,
+ why:["Would require the incident mass to be lighter or equal — no cap then.","Mixes up sin and tan of the mass ratio — a close but wrong value.","60°, from mis-solving the optimisation for the deflection.","Correct: sin θ_max = m₂/m₁ = m/2m = 1/2 ⇒ θ_max = π/6."],
+ sol:"When a heavier body strikes a lighter stationary one elastically, its lab-frame deflection is capped by sin θ_max = m₂/m₁. Here m₁ = 2m, m₂ = m, so sin θ_max = 1/2 ⇒ θ_max = 30° = <b>π/6</b>. (COM check: tan θ = sinφ/(2+cosφ) is maximised at cosφ = −½, giving tan θ = 1/√3 ⇒ 30°.)"}
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter P-9 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

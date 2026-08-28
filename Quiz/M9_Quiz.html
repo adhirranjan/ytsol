@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-9 Complex Number-I — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>M-9 · Complex Number-I</h1>
+    <p id="heroSub">Lectures L-1 to L-7 + Strong Box · 97 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">97 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · M-9 Complex Number-I · mastery quiz built from lectures L-1 to L-7 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   M-8A ARITHMETIC PROGRESSIONS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Iota & the Algebra of Complex Numbers",
+   desc:"i = √(−1) and its powers, the standard form a + ib, equality, addition/subtraction/multiplication/division, square roots of negative and complex numbers, powers of (1 ± i)"},
+  {key:"L-2", name:"L-2 · Conjugate, Inverse & Real/Imaginary Parts",
+   desc:"z̄ and its properties, z·z̄ = |z|², z ± z̄, the multiplicative inverse z̄/|z|², the conjugate-root theorem, and why there is no order relation on ℂ"},
+  {key:"L-3", name:"L-3 · Modulus & its Properties",
+   desc:"|z| = √(a²+b²), |z₁z₂| = |z₁||z₂|, |zⁿ| = |z|ⁿ, |z̄| = |z|, |z|² = z·z̄, unimodular numbers and the parallelogram law"},
+  {key:"L-4", name:"L-4 · Geometry, Distance & Modulus Inequalities",
+   desc:"|z₁ − z₂| as distance, loci (perpendicular bisector, circle, ellipse), the triangle inequality and ||z₁|−|z₂|| ≤ |z₁ − z₂|, and max/min modulus on a circle or disc"},
+  {key:"L-5", name:"L-5 · Argument & Polar Form",
+   desc:"arg z and its principal value by quadrant, arg(z₁z₂) = arg z₁ + arg z₂, arg(z̄) = −arg z, polar form r(cos θ + i sin θ) and conversion to a + ib"},
+  {key:"L-6", name:"L-6 · De Moivre's Theorem & Euler Form",
+   desc:"(cos θ + i sin θ)ⁿ = cos nθ + i sin nθ, the exponential form e^(iθ), computing high powers via polar form, and roots as vertices of a regular polygon"},
+  {key:"L-7", name:"L-7 · Roots of Unity & the Cube Root ω",
+   desc:"the cube roots of unity 1, ω, ω² with ω³ = 1 and 1 + ω + ω² = 0; nth roots of unity and of a complex number; series and geometry of ω"},
+  {key:"SB", name:"Strong Box · Mixed PYQ",
+   desc:"previous-year problems combining conjugate roots, loci, De Moivre, ω-identities, modulus results and roots of unity"}
+];
+
+const QUIZ = [
+
+/* ---------------- L-1 · Iota & algebra (13) ---------------- */
+{id:1, lec:"L-1", blk:"Powers of iota", topic:"Value of i²",
+ q:"By definition, i² equals",
+ opts:["−1","1","i","−i"],
+ ans:0,
+ why:[
+  "Correct. i = √(−1), so i² = −1 — the defining property.",
+  "i² = 1 would make i a real square root of 1, contradicting i = √(−1).",
+  "i itself is i¹, the first power, not i².",
+  "−i is i³ = i²·i = −i, not i²."],
+ sol:"i is defined by <b>i² = −1</b> (i = √(−1)). The powers then cycle: i¹ = i, i² = −1, i³ = −i, i⁴ = 1."},
+
+{id:2, lec:"L-1", blk:"Powers of iota", topic:"High power of i",
+ q:"The value of i⁵⁰ is",
+ opts:["−1","1","i","−i"],
+ ans:0,
+ why:[
+  "Correct. 50 = 4·12 + 2, so i⁵⁰ = (i⁴)¹²·i² = 1·(−1) = −1.",
+  "1 would need the exponent to be a multiple of 4.",
+  "i corresponds to remainder 1, but 50 leaves remainder 2.",
+  "−i corresponds to remainder 3, not 2."],
+ sol:"Powers of i repeat every 4. 50 mod 4 = 2, so i⁵⁰ = i² = <b>−1</b>."},
+
+{id:3, lec:"L-1", blk:"Powers of iota", topic:"Reciprocal of iota",
+ q:"1/i equals",
+ opts:["−i","i","−1","1"],
+ ans:0,
+ why:[
+  "Correct. 1/i = i/i² = i/(−1) = −i.",
+  "i would require 1/i = i, i.e. i² = 1, which is false.",
+  "−1 equals i², which is not the reciprocal 1/i.",
+  "1 equals i⁰, which is not the reciprocal 1/i."],
+ sol:"Multiply top and bottom by i: 1/i = i/i² = i/(−1) = <b>−i</b>."},
+
+{id:4, lec:"L-1", blk:"Powers of iota", topic:"Sum of four consecutive powers",
+ q:"The value of i + i² + i³ + i⁴ is",
+ opts:["0","1","i","−1"],
+ ans:0,
+ why:[
+  "Correct. i + (−1) + (−i) + 1 = 0 — any four consecutive powers of i sum to zero.",
+  "1 ignores the cancellation of the four terms.",
+  "i is only the first term of the four.",
+  "−1 is only the second term, i²."],
+ sol:"i + i² + i³ + i⁴ = i − 1 − i + 1 = <b>0</b>. (This is why Σ of powers of i over a full period vanishes.)"},
+
+{id:5, lec:"L-1", blk:"Multiplication", topic:"Square of (1 + i)",
+ q:"(1 + i)² equals",
+ opts:["2i","2","1 + 2i","−2i"],
+ ans:0,
+ why:[
+  "Correct. (1 + i)² = 1 + 2i + i² = 1 + 2i − 1 = 2i.",
+  "2 forgets the i² = −1 and the cross term.",
+  "1 + 2i keeps 1 instead of cancelling it with i² = −1.",
+  "−2i has the wrong sign; the cross term 2i is positive."],
+ sol:"(1 + i)² = 1² + 2·1·i + i² = 1 + 2i − 1 = <b>2i</b>."},
+
+{id:6, lec:"L-1", blk:"Addition", topic:"Sum in standard form",
+ q:"(2 + 3i) + (4 − 5i) equals",
+ opts:["6 − 2i","6 + 2i","−2 + 6i","6 − 8i"],
+ ans:0,
+ why:[
+  "Correct. Add real parts (2 + 4 = 6) and imaginary parts (3 − 5 = −2): 6 − 2i.",
+  "6 + 2i has the wrong sign on the imaginary part.",
+  "−2 + 6i swaps the roles of real and imaginary sums.",
+  "6 − 8i adds instead of the correct 3 + (−5) = −2."],
+ sol:"Add componentwise: (2 + 4) + (3 − 5)i = <b>6 − 2i</b>."},
+
+{id:7, lec:"L-1", blk:"Multiplication", topic:"Product of two complex numbers",
+ q:"(2 + 3i)(1 − 2i) equals",
+ opts:["8 − i","−4 − i","8 + 7i","2 − 6i"],
+ ans:0,
+ why:[
+  "Correct. 2 − 4i + 3i − 6i² = 2 − i + 6 = 8 − i.",
+  "−4 − i forgets that −6i² = +6.",
+  "8 + 7i has the wrong imaginary part (−4i + 3i = −i, not +7i).",
+  "2 − 6i multiplies only the outer terms."],
+ sol:"(2 + 3i)(1 − 2i) = 2 − 4i + 3i − 6i² = 2 − i − 6(−1) = 2 + 6 − i = <b>8 − i</b>."},
+
+{id:8, lec:"L-1", blk:"Division", topic:"Quotient (1+i)/(1−i)",
+ q:"(1 + i)/(1 − i) equals",
+ opts:["i","−i","1","−1"],
+ ans:0,
+ why:[
+  "Correct. Multiply by (1 + i)/(1 + i): (1 + i)²/(1 + 1) = 2i/2 = i.",
+  "−i comes from rationalising with the wrong conjugate.",
+  "1 would require numerator = denominator, which they are not.",
+  "−1 misplaces the sign of i²."],
+ sol:"(1 + i)/(1 − i) · (1 + i)/(1 + i) = (1 + i)²/(1² + 1²) = 2i/2 = <b>i</b>."},
+
+{id:9, lec:"L-1", blk:"Equality", topic:"Equality of complex numbers",
+ q:"If a + bi = 3 − 2i (a, b real), then (a, b) is",
+ opts:["(3, −2)","(−2, 3)","(3, 2)","(−3, −2)"],
+ ans:0,
+ why:[
+  "Correct. Equality of complex numbers means real = real and imaginary = imaginary: a = 3, b = −2.",
+  "(−2, 3) swaps the two parts.",
+  "(3, 2) has the wrong sign on b.",
+  "(−3, −2) has the wrong sign on a."],
+ sol:"Two complex numbers are equal iff their real parts and imaginary parts match separately: a = 3, b = −2 ⇒ <b>(3, −2)</b>."},
+
+{id:10, lec:"L-1", blk:"Square roots", topic:"Square root of a negative number",
+ q:"√(−16) equals",
+ opts:["4i","−4","4","±4"],
+ ans:0,
+ why:[
+  "Correct. √(−16) = √16 · √(−1) = 4i.",
+  "−4 is a real number; its square is +16, not −16.",
+  "4 squares to +16, not −16.",
+  "±4 are real; neither squares to −16."],
+ sol:"√(−16) = √(16·(−1)) = 4√(−1) = <b>4i</b> (principal value)."},
+
+{id:11, lec:"L-1", blk:"Square roots", topic:"Square root of a complex number",
+ q:"A square root of 3 + 4i is",
+ opts:["2 + i","1 + 2i","2 − i","4 + i"],
+ ans:0,
+ why:[
+  "Correct. (2 + i)² = 4 + 4i + i² = 4 + 4i − 1 = 3 + 4i.",
+  "(1 + 2i)² = 1 + 4i − 4 = −3 + 4i, not 3 + 4i.",
+  "(2 − i)² = 3 − 4i, the conjugate case.",
+  "(4 + i)² = 16 + 8i − 1 = 15 + 8i."],
+ sol:"Seek x + yi with (x + yi)² = 3 + 4i: x² − y² = 3, 2xy = 4. Then x = 2, y = 1 works: <b>2 + i</b> (and its negative)."},
+
+{id:12, lec:"L-1", blk:"Powers of a quotient", topic:"High power of (1+i)/(1−i)",
+ q:"[(1 + i)/(1 − i)]¹⁰⁰ equals",
+ opts:["1","i","−1","−i"],
+ ans:0,
+ why:[
+  "Correct. (1 + i)/(1 − i) = i, so the expression is i¹⁰⁰ = 1 (100 is a multiple of 4).",
+  "i would need exponent ≡ 1 (mod 4).",
+  "−1 would need exponent ≡ 2 (mod 4).",
+  "−i would need exponent ≡ 3 (mod 4)."],
+ sol:"(1 + i)/(1 − i) = i (from Q8), so [(1+i)/(1−i)]¹⁰⁰ = i¹⁰⁰ = (i⁴)²⁵ = <b>1</b>."},
+
+{id:13, lec:"L-1", blk:"Powers", topic:"Cube of (1 + i)",
+ q:"(1 + i)³ equals",
+ opts:["−2 + 2i","2 + 2i","2 − 2i","−2 − 2i"],
+ ans:0,
+ why:[
+  "Correct. (1 + i)³ = (1 + i)(1 + i)² = (1 + i)(2i) = 2i + 2i² = −2 + 2i.",
+  "2 + 2i drops the i² = −1 in the real part.",
+  "2 − 2i has both signs wrong.",
+  "−2 − 2i has the wrong sign on the imaginary part."],
+ sol:"(1 + i)² = 2i, so (1 + i)³ = (1 + i)(2i) = 2i + 2i² = 2i − 2 = <b>−2 + 2i</b>."},
+
+/* ---------------- L-2 · Conjugate & inverse (12) ---------------- */
+{id:14, lec:"L-2", blk:"Conjugate", topic:"Definition of conjugate",
+ q:"The conjugate of 3 − 5i is",
+ opts:["3 + 5i","−3 + 5i","−3 − 5i","5 − 3i"],
+ ans:0,
+ why:[
+  "Correct. Conjugation flips the sign of the imaginary part only: 3 − 5i → 3 + 5i.",
+  "−3 + 5i wrongly negates the real part too.",
+  "−3 − 5i negates the real part and keeps the imaginary sign.",
+  "5 − 3i swaps real and imaginary parts."],
+ sol:"For z = a + bi, z̄ = a − bi. So conjugate of 3 − 5i is <b>3 + 5i</b>."},
+
+{id:15, lec:"L-2", blk:"z·z̄", topic:"Product of z and its conjugate",
+ q:"For z = 3 + 4i, the value of z·z̄ is",
+ opts:["25","7","24i","5"],
+ ans:0,
+ why:[
+  "Correct. z·z̄ = a² + b² = 3² + 4² = 25 = |z|².",
+  "7 = a² − b² would be Re(z²), not z·z̄.",
+  "z·z̄ is always real; 24i is imaginary.",
+  "5 = |z|, not |z|² = z·z̄."],
+ sol:"z·z̄ = (a + bi)(a − bi) = a² + b² = 9 + 16 = <b>25</b> = |z|²."},
+
+{id:16, lec:"L-2", blk:"z + z̄", topic:"Sum with conjugate",
+ q:"For any complex number z, z + z̄ equals",
+ opts:["2·Re(z)","2·Im(z)","2i·Im(z)","|z|²"],
+ ans:0,
+ why:[
+  "Correct. (a + bi) + (a − bi) = 2a = 2·Re(z), always real.",
+  "2·Im(z) is not correct; the imaginary parts cancel, they don't add.",
+  "2i·Im(z) = z − z̄, not z + z̄.",
+  "|z|² = z·z̄, a product, not the sum."],
+ sol:"z + z̄ = (a + bi) + (a − bi) = <b>2a = 2·Re(z)</b>."},
+
+{id:17, lec:"L-2", blk:"z − z̄", topic:"Difference with conjugate",
+ q:"For z = 3 + 4i, z − z̄ equals",
+ opts:["8i","6","8","6i"],
+ ans:0,
+ why:[
+  "Correct. z − z̄ = 2i·Im(z) = 2i·4 = 8i.",
+  "6 = 2·Re(z) = z + z̄, not the difference.",
+  "8 = 2·Im(z) but misses the factor i.",
+  "6i incorrectly uses the real part with an i."],
+ sol:"z − z̄ = (a + bi) − (a − bi) = 2bi = 2i·Im(z) = 2i·4 = <b>8i</b>."},
+
+{id:18, lec:"L-2", blk:"Real condition", topic:"When z = z̄",
+ q:"z = z̄ holds if and only if z is",
+ opts:["purely real","purely imaginary","zero only","unimodular"],
+ ans:0,
+ why:[
+  "Correct. z = z̄ ⇒ bi = −bi ⇒ b = 0, so z is real.",
+  "Purely imaginary numbers satisfy z̄ = −z, not z = z̄.",
+  "z = 0 is one case, but every real number works, not only zero.",
+  "Unimodular means |z| = 1, unrelated to z = z̄."],
+ sol:"z = z̄ ⇔ a + bi = a − bi ⇔ 2bi = 0 ⇔ b = 0 ⇔ z is <b>purely real</b>."},
+
+{id:19, lec:"L-2", blk:"Inverse", topic:"Multiplicative inverse",
+ q:"The multiplicative inverse of 3 + 4i is",
+ opts:["(3 − 4i)/25","(3 + 4i)/25","(3 − 4i)/5","3 − 4i"],
+ ans:0,
+ why:[
+  "Correct. z⁻¹ = z̄/|z|² = (3 − 4i)/25.",
+  "(3 + 4i)/25 uses z instead of z̄ in the numerator.",
+  "Dividing by |z| = 5 instead of |z|² = 25 is wrong.",
+  "3 − 4i is z̄, but the inverse also divides by |z|²."],
+ sol:"z⁻¹ = z̄/(z·z̄) = z̄/|z|² = (3 − 4i)/(3² + 4²) = <b>(3 − 4i)/25</b>."},
+
+{id:20, lec:"L-2", blk:"Conjugate root theorem", topic:"Complex roots of real polynomials",
+ q:"If a polynomial with real coefficients has 2 + 3i as a root, another root must be",
+ opts:["2 − 3i","−2 + 3i","3 + 2i","2 + 3i again"],
+ ans:0,
+ why:[
+  "Correct. For real coefficients, complex roots occur in conjugate pairs, so 2 − 3i is also a root.",
+  "−2 + 3i is not the conjugate; conjugation changes only the imaginary sign.",
+  "3 + 2i swaps the parts — not the conjugate.",
+  "A repeated root 2 + 3i is not forced; the conjugate is what's guaranteed."],
+ sol:"Real-coefficient polynomials have non-real roots in <b>conjugate pairs</b>, so 2 + 3i ⇒ <b>2 − 3i</b> is also a root."},
+
+{id:21, lec:"L-2", blk:"Conjugate", topic:"Nature of z + z̄",
+ q:"For every complex number z, the quantity z + z̄ is",
+ opts:["always real","always imaginary","always zero","real only if z is real"],
+ ans:0,
+ why:[
+  "Correct. z + z̄ = 2·Re(z), which is real for every z.",
+  "It is real, not imaginary — the imaginary parts cancel.",
+  "It is zero only when Re(z) = 0, not always.",
+  "It is real for all z, not only real z."],
+ sol:"z + z̄ = 2·Re(z) ∈ ℝ for <b>every</b> complex z (the imaginary parts cancel)."},
+
+{id:22, lec:"L-2", blk:"Conjugate properties", topic:"Conjugate of a quotient",
+ q:"The conjugate of z₁/z₂ (z₂ ≠ 0) equals",
+ opts:["z̄₁/z̄₂","z̄₂/z̄₁","z₁/z₂","−z̄₁/z̄₂"],
+ ans:0,
+ why:[
+  "Correct. Conjugation distributes over division: conj(z₁/z₂) = z̄₁/z̄₂.",
+  "z̄₂/z̄₁ inverts the quotient — that is the conjugate of z₂/z₁.",
+  "z₁/z₂ is the original, not its conjugate.",
+  "The minus sign is spurious; conjugation introduces no extra sign."],
+ sol:"Conjugation is multiplicative: conj(z₁/z₂) = <b>z̄₁/z̄₂</b> (likewise for products and sums)."},
+
+{id:23, lec:"L-2", blk:"Conjugate", topic:"Conjugate of a computed value",
+ q:"If z = (1 + i)/(1 − i), then z̄ equals",
+ opts:["−i","i","1","−1"],
+ ans:0,
+ why:[
+  "Correct. z = i (from L-1), so z̄ = −i.",
+  "i is z itself, not its conjugate.",
+  "1 is not the conjugate of i.",
+  "−1 = i², not the conjugate of i."],
+ sol:"z = (1 + i)/(1 − i) = i, so z̄ = <b>−i</b>."},
+
+{id:24, lec:"L-2", blk:"Purely imaginary", topic:"Condition for purely imaginary",
+ q:"A non-zero z is purely imaginary if and only if",
+ opts:["z̄ = −z","z̄ = z","z·z̄ = 1","z + z̄ = 2z"],
+ ans:0,
+ why:[
+  "Correct. Purely imaginary ⇒ a = 0 ⇒ z̄ = −z.",
+  "z̄ = z characterises purely real numbers.",
+  "z·z̄ = 1 means |z| = 1 (unimodular), not purely imaginary.",
+  "z + z̄ = 2z would force z̄ = z (real), the opposite case."],
+ sol:"z = bi ⇒ z̄ = −bi = −z. So purely imaginary ⇔ <b>z̄ = −z</b> (equivalently Re(z) = 0)."},
+
+{id:25, lec:"L-2", blk:"Order relation", topic:"No ordering on ℂ",
+ q:"Which statement about inequalities between complex numbers is correct?",
+ opts:[
+  "'z₁ &lt; z₂' is undefined for non-real complex numbers",
+  "z₁ &lt; z₂ whenever |z₁| &lt; |z₂|",
+  "z₁ &lt; z₂ whenever Re(z₁) &lt; Re(z₂)",
+  "every two complex numbers can be ordered by argument"],
+ ans:0,
+ why:[
+  "Correct. ℂ is not an ordered field; inequalities like z₁ &lt; z₂ have no meaning for non-real complex numbers.",
+  "Comparing moduli compares real numbers |z₁|, |z₂| — it does not order the complex numbers themselves.",
+  "Comparing real parts ignores the imaginary parts; it is not a valid order on ℂ.",
+  "Argument is many-valued and cannot linearly order ℂ consistently."],
+ sol:"There is <b>no order relation</b> on ℂ compatible with its arithmetic. We may compare real quantities like |z| or Re(z), but not the complex numbers directly."},
+
+/* ---------------- L-3 · Modulus (13) ---------------- */
+{id:26, lec:"L-3", blk:"Modulus", topic:"Modulus of a complex number",
+ q:"|3 + 4i| equals",
+ opts:["5","7","25","√7"],
+ ans:0,
+ why:[
+  "Correct. |z| = √(a² + b²) = √(9 + 16) = √25 = 5.",
+  "7 = a + b, not √(a² + b²).",
+  "25 = a² + b² = |z|², not |z|.",
+  "√7 mixes the parts incorrectly; the modulus is √(a² + b²) = 5."],
+ sol:"|3 + 4i| = √(3² + 4²) = √25 = <b>5</b>."},
+
+{id:27, lec:"L-3", blk:"|z|²", topic:"Modulus squared as z·z̄",
+ q:"For z = 2 + 3i, |z|² equals",
+ opts:["13","√13","5","12"],
+ ans:0,
+ why:[
+  "Correct. |z|² = a² + b² = 4 + 9 = 13 = z·z̄.",
+  "√13 is |z|, not |z|².",
+  "5 = a + b, unrelated to |z|².",
+  "12 = 2·6 is not a² + b²."],
+ sol:"|z|² = z·z̄ = a² + b² = 2² + 3² = <b>13</b>."},
+
+{id:28, lec:"L-3", blk:"Modulus of product", topic:"|z₁z₂| = |z₁||z₂|",
+ q:"If |z₁| = 2 and |z₂| = 5, then |z₁z₂| equals",
+ opts:["10","7","2.5","√29"],
+ ans:0,
+ why:[
+  "Correct. The modulus is multiplicative: |z₁z₂| = |z₁||z₂| = 2·5 = 10.",
+  "7 = |z₁| + |z₂|; modulus of a product multiplies, not adds.",
+  "2.5 = |z₁|/|z₂| would be |z₁/z₂|.",
+  "√29 = √(2² + 5²) is not the product rule."],
+ sol:"|z₁z₂| = |z₁|·|z₂| = 2·5 = <b>10</b>."},
+
+{id:29, lec:"L-3", blk:"Modulus of power", topic:"|zⁿ| = |z|ⁿ",
+ q:"|(1 + i)¹⁰| equals",
+ opts:["32","10√2","2¹⁰","√10"],
+ ans:0,
+ why:[
+  "Correct. |1 + i| = √2, so |(1 + i)¹⁰| = (√2)¹⁰ = 2⁵ = 32.",
+  "10√2 wrongly multiplies the modulus by the exponent.",
+  "2¹⁰ = 1024 squares the exponent's effect; (√2)¹⁰ = 2⁵.",
+  "√10 has no basis here."],
+ sol:"|zⁿ| = |z|ⁿ. |1 + i| = √2 ⇒ |(1 + i)¹⁰| = (√2)¹⁰ = 2⁵ = <b>32</b>."},
+
+{id:30, lec:"L-3", blk:"Modulus of quotient", topic:"|z₁/z₂| = |z₁|/|z₂|",
+ q:"|(3 + 4i)/(4 + 3i)| equals",
+ opts:["1","5","7/25","25"],
+ ans:0,
+ why:[
+  "Correct. |3 + 4i| = 5 and |4 + 3i| = 5, so the quotient of moduli is 5/5 = 1.",
+  "5 is each modulus separately, not their quotient.",
+  "7/25 comes from mishandling the division.",
+  "25 = |z₁||z₂|, a product, not a quotient."],
+ sol:"|z₁/z₂| = |z₁|/|z₂| = √(9+16)/√(16+9) = 5/5 = <b>1</b>."},
+
+{id:31, lec:"L-3", blk:"Conjugate modulus", topic:"|z̄| = |z|",
+ q:"For any complex z, |z̄| compared with |z| is",
+ opts:["equal to |z|","the reciprocal of |z|","the negative of |z|","|z|²"],
+ ans:0,
+ why:[
+  "Correct. |a − bi| = √(a² + b²) = |a + bi|, so |z̄| = |z|.",
+  "The reciprocal would be 1/|z|, which is |z⁻¹|, not |z̄|.",
+  "Modulus is never negative, so −|z| is impossible.",
+  "|z|² is the square, not |z̄|."],
+ sol:"|z̄| = √(a² + (−b)²) = √(a² + b²) = <b>|z|</b>. Conjugation reflects across the real axis, preserving distance from 0."},
+
+{id:32, lec:"L-3", blk:"Unimodular", topic:"Modulus of cos θ + i sin θ",
+ q:"|cos θ + i sin θ| equals",
+ opts:["1","cos θ + sin θ","√2","|θ|"],
+ ans:0,
+ why:[
+  "Correct. √(cos²θ + sin²θ) = √1 = 1 — every such number is unimodular.",
+  "cos θ + sin θ is the sum of the parts, not the modulus.",
+  "√2 would need cos²θ + sin²θ = 2, which is false.",
+  "|θ| is unrelated to the modulus."],
+ sol:"|cos θ + i sin θ| = √(cos²θ + sin²θ) = <b>1</b>. Points on the unit circle are exactly the unimodular numbers."},
+
+{id:33, lec:"L-3", blk:"Unimodular", topic:"Modulus of (1+i)/(1−i)",
+ q:"|(1 + i)/(1 − i)| equals",
+ opts:["1","√2","2","1/√2"],
+ ans:0,
+ why:[
+  "Correct. |1 + i| = |1 − i| = √2, so the quotient of moduli is 1 (also (1+i)/(1−i) = i, and |i| = 1).",
+  "√2 is each modulus, not their ratio.",
+  "2 = |1+i|·|1−i|, a product not a quotient.",
+  "1/√2 halves the exponent incorrectly."],
+ sol:"|(1 + i)/(1 − i)| = √2/√2 = 1 (indeed the quotient is i, |i| = <b>1</b>)."},
+
+{id:34, lec:"L-3", blk:"Parallelogram law", topic:"|z₁+z₂|² + |z₁−z₂|²",
+ q:"For all complex z₁, z₂, the sum |z₁ + z₂|² + |z₁ − z₂|² equals",
+ opts:["2(|z₁|² + |z₂|²)","|z₁|² + |z₂|²","4·Re(z₁z̄₂)","2|z₁||z₂|"],
+ ans:0,
+ why:[
+  "Correct. This is the parallelogram law: the two diagonals² sum to twice the sum of the sides².",
+  "|z₁|² + |z₂|² is only half the correct value.",
+  "4·Re(z₁z̄₂) is the difference |z₁+z₂|² − |z₁−z₂|², not the sum.",
+  "2|z₁||z₂| is not generally equal to this sum."],
+ sol:"Expanding via |w|² = w·w̄: |z₁+z₂|² + |z₁−z₂|² = <b>2(|z₁|² + |z₂|²)</b> — the parallelogram law."},
+
+{id:35, lec:"L-3", blk:"Zero modulus", topic:"When |z| = 0",
+ q:"|z| = 0 if and only if",
+ opts:["z = 0","z is real","z is purely imaginary","Re(z) = 0"],
+ ans:0,
+ why:[
+  "Correct. √(a² + b²) = 0 forces a = b = 0, i.e. z = 0.",
+  "A non-zero real number has |z| = |a| ≠ 0.",
+  "A non-zero purely imaginary number has |z| = |b| ≠ 0.",
+  "Re(z) = 0 alone (e.g. z = i) gives |z| = 1 ≠ 0."],
+ sol:"|z| = √(a² + b²) = 0 ⇔ a = 0 and b = 0 ⇔ <b>z = 0</b>."},
+
+{id:36, lec:"L-3", blk:"Modulus", topic:"Modulus of a purely imaginary number",
+ q:"|−5i| equals",
+ opts:["5","−5","5i","25"],
+ ans:0,
+ why:[
+  "Correct. |−5i| = √(0² + (−5)²) = 5.",
+  "Modulus is never negative.",
+  "Modulus is a real non-negative number, not imaginary.",
+  "25 = |z|² is the square of the modulus, not |z| itself."],
+ sol:"|−5i| = √(0² + (−5)²) = √25 = <b>5</b>."},
+
+{id:37, lec:"L-3", blk:"Rotation", topic:"Modulus after multiplying by i",
+ q:"For any complex z, |iz| equals",
+ opts:["|z|","i|z|","−|z|","|z|²"],
+ ans:0,
+ why:[
+  "Correct. |iz| = |i||z| = 1·|z| = |z| — multiplying by i is a 90° rotation, which preserves length.",
+  "Modulus is real; i|z| is imaginary.",
+  "Modulus cannot be negative.",
+  "|z|² is the square, not |iz|."],
+ sol:"|iz| = |i|·|z| = 1·|z| = <b>|z|</b>. Multiplying by i rotates z by 90° without changing its distance from 0."},
+
+{id:38, lec:"L-3", blk:"|z|²", topic:"Relation z·z̄ = |z|²",
+ q:"For every complex number z, z·z̄ equals",
+ opts:["|z|²","|z|","z²","Re(z)²"],
+ ans:0,
+ why:[
+  "Correct. (a + bi)(a − bi) = a² + b² = |z|².",
+  "|z| is the square root of z·z̄, not z·z̄ itself.",
+  "z² = (a + bi)² ≠ a² + b² in general.",
+  "Re(z)² = a² misses the b² term."],
+ sol:"z·z̄ = (a + bi)(a − bi) = a² + b² = <b>|z|²</b>. This is the key bridge between conjugate and modulus."},
+
+/* ---------------- L-4 · Geometry & inequalities (12) ---------------- */
+{id:39, lec:"L-4", blk:"Distance", topic:"Distance between two points",
+ q:"The distance between the points z₁ = 1 + 2i and z₂ = 4 + 6i in the Argand plane is",
+ opts:["5","√13","7","√(41)"],
+ ans:0,
+ why:[
+  "Correct. Distance = |z₁ − z₂| = |−3 − 4i| = √(9 + 16) = 5.",
+  "√13 uses the wrong differences.",
+  "7 = 3 + 4 adds the coordinate differences instead of taking √(3² + 4²).",
+  "√41 = √(4² + 5²) uses the coordinates themselves, not their differences."],
+ sol:"Distance = |z₁ − z₂| = |(1 − 4) + (2 − 6)i| = |−3 − 4i| = √(3² + 4²) = <b>5</b>."},
+
+{id:40, lec:"L-4", blk:"Locus", topic:"Perpendicular bisector locus",
+ q:"The locus of z satisfying |z − z₁| = |z − z₂| (z₁ ≠ z₂) is",
+ opts:[
+  "the perpendicular bisector of the segment joining z₁ and z₂",
+  "a circle with diameter z₁z₂",
+  "an ellipse with foci z₁, z₂",
+  "the line through z₁ and z₂"],
+ ans:0,
+ why:[
+  "Correct. Points equidistant from z₁ and z₂ form the perpendicular bisector of the segment.",
+  "A circle on diameter z₁z₂ is the locus of |z − z₁||z − z₂|-type or right-angle conditions, not equal distances.",
+  "An ellipse arises from |z − z₁| + |z − z₂| = constant, a sum not an equality.",
+  "The line through z₁ and z₂ is where distances are unequal except at the midpoint."],
+ sol:"|z − z₁| = |z − z₂| says z is equidistant from z₁ and z₂ ⇒ the <b>perpendicular bisector</b> of segment z₁z₂."},
+
+{id:41, lec:"L-4", blk:"Locus", topic:"Circle locus",
+ q:"The locus |z − (2 + 3i)| = 5 is",
+ opts:[
+  "a circle of radius 5 centred at (2, 3)",
+  "a circle of radius 25 centred at (2, 3)",
+  "a line at distance 5 from (2, 3)",
+  "a circle of radius 5 centred at the origin"],
+ ans:0,
+ why:[
+  "Correct. |z − z₀| = r is the circle of radius r centred at z₀ = (2, 3).",
+  "The radius is 5, not 25 (25 = r²).",
+  "|z − z₀| = r is a circle, not a line.",
+  "The centre is z₀ = 2 + 3i, not the origin."],
+ sol:"|z − z₀| = r describes all points at distance r from z₀: a <b>circle radius 5, centre (2, 3)</b>."},
+
+{id:42, lec:"L-4", blk:"Triangle inequality", topic:"Equality case",
+ q:"|z₁ + z₂| = |z₁| + |z₂| holds precisely when",
+ opts:[
+  "z₁ and z₂ have the same argument (one is a positive real multiple of the other)",
+  "z₁ and z₂ are conjugates",
+  "z₁ and z₂ have opposite arguments",
+  "|z₁| = |z₂|"],
+ ans:0,
+ why:[
+  "Correct. Equality in the triangle inequality needs z₁, z₂ collinear with 0 and pointing the same way — same argument.",
+  "Conjugates have opposite arguments, giving strict inequality unless both are real.",
+  "Opposite arguments give |z₁ + z₂| = ||z₁| − |z₂||, not the sum.",
+  "Equal moduli alone (e.g. 1 and i) do not give equality."],
+ sol:"|z₁ + z₂| ≤ |z₁| + |z₂|, with equality iff z₁ and z₂ point in the <b>same direction</b> (equal arguments, i.e. z₁ = t z₂ for some t > 0)."},
+
+{id:43, lec:"L-4", blk:"Modulus inequality", topic:"Reverse triangle inequality",
+ q:"For all complex z₁, z₂, which inequality is always true?",
+ opts:[
+  "||z₁| − |z₂|| ≤ |z₁ − z₂|",
+  "|z₁ − z₂| ≤ ||z₁| − |z₂||",
+  "|z₁ − z₂| = |z₁| − |z₂|",
+  "|z₁ + z₂| ≥ |z₁| + |z₂|"],
+ ans:0,
+ why:[
+  "Correct. The reverse triangle inequality: ||z₁| − |z₂|| ≤ |z₁ − z₂|.",
+  "This reverses the true direction; the difference of moduli is the smaller side.",
+  "Equality holds only in special aligned cases, not always.",
+  "|z₁ + z₂| ≤ |z₁| + |z₂| (the ≥ direction is false)."],
+ sol:"From the triangle inequality, <b>||z₁| − |z₂|| ≤ |z₁ − z₂|</b> — the modulus of the difference is at least the difference of the moduli."},
+
+{id:44, lec:"L-4", blk:"Max/min in a disc", topic:"Maximum modulus in a disc",
+ q:"If |z − 3 − 4i| ≤ 2, the maximum value of |z| is",
+ opts:["7","5","3","9"],
+ ans:0,
+ why:[
+  "Correct. The disc is centred at 3 + 4i (distance 5 from 0) with radius 2; the farthest point is 5 + 2 = 7.",
+  "5 is the distance to the centre, i.e. |z| at the centre, not the max.",
+  "3 = 5 − 2 is the minimum |z|, not the maximum.",
+  "9 overshoots; max = centre distance + radius = 7."],
+ sol:"Centre 3 + 4i has |centre| = 5, radius 2. Max |z| = 5 + 2 = <b>7</b> (min would be 5 − 2 = 3)."},
+
+{id:45, lec:"L-4", blk:"Max/min on a circle", topic:"Minimum modulus on a circle",
+ q:"If |z − (3 + 4i)| = 2, the least value of |z| is",
+ opts:["3","5","7","1"],
+ ans:0,
+ why:[
+  "Correct. Nearest point on the circle to 0 is at distance |centre| − radius = 5 − 2 = 3.",
+  "5 is the centre's distance from 0, not the nearest point.",
+  "7 = 5 + 2 is the maximum |z|, not the minimum.",
+  "1 would need radius 4 or a different centre."],
+ sol:"Circle centre 3 + 4i (distance 5), radius 2. Min |z| = 5 − 2 = <b>3</b>."},
+
+{id:46, lec:"L-4", blk:"Modulus identity", topic:"|z₁ + z₂|² expansion",
+ q:"|z₁ + z₂|² equals",
+ opts:[
+  "|z₁|² + |z₂|² + 2·Re(z₁z̄₂)",
+  "|z₁|² + |z₂|²",
+  "|z₁|² + |z₂|² + 2|z₁||z₂|",
+  "|z₁|² + |z₂|² − 2·Re(z₁z̄₂)"],
+ ans:0,
+ why:[
+  "Correct. |z₁+z₂|² = (z₁+z₂)(z̄₁+z̄₂) = |z₁|² + |z₂|² + z₁z̄₂ + z̄₁z₂ = |z₁|² + |z₂|² + 2Re(z₁z̄₂).",
+  "Dropping the cross term holds only when z₁z̄₂ is purely imaginary.",
+  "2|z₁||z₂| is the real-vector case; the general cross term is 2Re(z₁z̄₂).",
+  "The −2Re(...) form is |z₁ − z₂|², not |z₁ + z₂|²."],
+ sol:"|z₁+z₂|² = |z₁|² + |z₂|² + <b>2·Re(z₁z̄₂)</b>. (With a minus sign it gives |z₁ − z₂|².)"},
+
+{id:47, lec:"L-4", blk:"Locus", topic:"Equidistant from i and −i",
+ q:"The locus |z − i| = |z + i| is",
+ opts:["the real axis","the imaginary axis","the unit circle","the origin only"],
+ ans:0,
+ why:[
+  "Correct. Points equidistant from i and −i lie on the perpendicular bisector of that segment — the real axis.",
+  "The imaginary axis is equidistant from real points like 1 and −1, not from i and −i.",
+  "The unit circle is |z| = 1, a different condition.",
+  "The origin is one such point, but the whole real axis qualifies."],
+ sol:"i and −i are reflections across the real axis, so their perpendicular bisector is the <b>real axis</b> (Im(z) = 0)."},
+
+{id:48, lec:"L-4", blk:"Locus", topic:"Ellipse locus",
+ q:"The locus |z − 1| + |z + 1| = 4 is",
+ opts:[
+  "an ellipse with foci at (1, 0) and (−1, 0)",
+  "a circle of radius 4",
+  "a hyperbola with foci ±1",
+  "the segment joining (1,0) and (−1,0)"],
+ ans:0,
+ why:[
+  "Correct. Constant sum of distances to two fixed points (with sum > focal distance 2) is an ellipse.",
+  "A circle has |z − z₀| = r (one centre), not a sum of two distances.",
+  "A hyperbola comes from a constant difference of distances, not a sum.",
+  "The segment arises only when the sum equals the focal distance (= 2 here), but 4 > 2."],
+ sol:"|z − z₁| + |z − z₂| = k with k > |z₁ − z₂| is an <b>ellipse</b> with foci z₁ = 1, z₂ = −1 (here k = 4 > 2)."},
+
+{id:49, lec:"L-4", blk:"Max/min", topic:"Extreme distance from a point",
+ q:"If |z| = 1, the maximum value of |z − 2| is",
+ opts:["3","1","2","√5"],
+ ans:0,
+ why:[
+  "Correct. z lies on the unit circle; the farthest point from 2 is z = −1, giving |−1 − 2| = 3.",
+  "1 is the minimum |z − 2| (at z = 1).",
+  "2 is the distance from the centre 0 to the point 2, not the max on the circle.",
+  "√5 would apply to a point off the real axis, not the extreme."],
+ sol:"Distance from the fixed point 2 to the unit circle ranges over [2 − 1, 2 + 1] = [1, 3]. Max = <b>3</b> (at z = −1)."},
+
+{id:50, lec:"L-4", blk:"Locus", topic:"Apollonius circle",
+ q:"For k > 0, k ≠ 1, the locus |z − z₁| = k|z − z₂| is",
+ opts:["a circle","a straight line","an ellipse","a parabola"],
+ ans:0,
+ why:[
+  "Correct. A constant ratio of distances to two fixed points (ratio ≠ 1) is an Apollonius circle.",
+  "The ratio k = 1 gives a line (perpendicular bisector); for k ≠ 1 it is a circle.",
+  "An ellipse comes from a sum of distances, not a ratio.",
+  "A parabola needs distance to a point equal to distance to a line."],
+ sol:"|z − z₁| = k|z − z₂| with k ≠ 1 is the <b>Apollonius circle</b>. (k = 1 degenerates to the perpendicular bisector line.)"},
+
+/* ---------------- L-5 · Argument & polar form (13) ---------------- */
+{id:51, lec:"L-5", blk:"Argument", topic:"Argument of 1 + i",
+ q:"The principal argument of 1 + i is",
+ opts:["π/4","π/2","3π/4","−π/4"],
+ ans:0,
+ why:[
+  "Correct. 1 + i is in the first quadrant with equal parts, so arg = tan⁻¹(1/1) = π/4.",
+  "π/2 is the argument of i (pure imaginary).",
+  "3π/4 is the argument of −1 + i (second quadrant).",
+  "−π/4 is the argument of 1 − i (fourth quadrant)."],
+ sol:"arg(1 + i) = tan⁻¹(1/1) = <b>π/4</b> (first quadrant)."},
+
+{id:52, lec:"L-5", blk:"Argument", topic:"Argument in the second quadrant",
+ q:"The principal argument of −1 + i is",
+ opts:["3π/4","π/4","−3π/4","5π/4"],
+ ans:0,
+ why:[
+  "Correct. Second quadrant, reference angle π/4, so arg = π − π/4 = 3π/4.",
+  "π/4 ignores the negative real part.",
+  "−3π/4 is the third-quadrant value (−1 − i).",
+  "5π/4 exceeds the principal range (−π, π]."],
+ sol:"−1 + i is in the second quadrant; principal arg = π − tan⁻¹(1/1) = π − π/4 = <b>3π/4</b>."},
+
+{id:53, lec:"L-5", blk:"Argument", topic:"Argument in the third quadrant",
+ q:"The principal argument of −1 − i is",
+ opts:["−3π/4","3π/4","−π/4","5π/4"],
+ ans:0,
+ why:[
+  "Correct. Third quadrant; principal value is negative: −(π − π/4) = −3π/4.",
+  "3π/4 is the second-quadrant value.",
+  "−π/4 is the fourth-quadrant value (1 − i).",
+  "5π/4 lies outside (−π, π]; the principal value is −3π/4."],
+ sol:"−1 − i is in the third quadrant. Principal argument (in (−π, π]) is <b>−3π/4</b>."},
+
+{id:54, lec:"L-5", blk:"Argument", topic:"Argument of iota",
+ q:"The principal argument of i is",
+ opts:["π/2","0","π","−π/2"],
+ ans:0,
+ why:[
+  "Correct. i = 0 + 1i sits on the positive imaginary axis: arg = π/2.",
+  "0 is the argument of a positive real number.",
+  "π is the argument of a negative real number.",
+  "−π/2 is the argument of −i."],
+ sol:"i lies on the positive imaginary axis, so arg(i) = <b>π/2</b>."},
+
+{id:55, lec:"L-5", blk:"Argument of product", topic:"arg(z₁z₂)",
+ q:"For non-zero z₁, z₂, arg(z₁z₂) equals (mod 2π)",
+ opts:["arg z₁ + arg z₂","arg z₁ − arg z₂","arg z₁ · arg z₂","(arg z₁ + arg z₂)/2"],
+ ans:0,
+ why:[
+  "Correct. Multiplying complex numbers adds their arguments.",
+  "Subtraction gives arg(z₁/z₂), the quotient rule.",
+  "Arguments add, they do not multiply.",
+  "Averaging arguments has no basis."],
+ sol:"In polar form z = r e^(iθ), z₁z₂ = r₁r₂ e^(i(θ₁+θ₂)), so arg(z₁z₂) = <b>arg z₁ + arg z₂</b> (mod 2π)."},
+
+{id:56, lec:"L-5", blk:"Argument of quotient", topic:"arg(z₁/z₂)",
+ q:"For non-zero z₁, z₂, arg(z₁/z₂) equals (mod 2π)",
+ opts:["arg z₁ − arg z₂","arg z₁ + arg z₂","arg z₂ − arg z₁","arg z₁ · arg z₂"],
+ ans:0,
+ why:[
+  "Correct. Dividing subtracts arguments: arg(z₁/z₂) = arg z₁ − arg z₂.",
+  "Addition is the product rule, not the quotient.",
+  "arg z₂ − arg z₁ is the negative — that's arg(z₂/z₁).",
+  "Arguments never multiply."],
+ sol:"z₁/z₂ = (r₁/r₂) e^(i(θ₁−θ₂)) ⇒ arg(z₁/z₂) = <b>arg z₁ − arg z₂</b> (mod 2π)."},
+
+{id:57, lec:"L-5", blk:"Argument of conjugate", topic:"arg(z̄)",
+ q:"For a non-real complex number z, arg(z̄) equals",
+ opts:["−arg z","arg z","π − arg z","π + arg z"],
+ ans:0,
+ why:[
+  "Correct. Conjugation reflects across the real axis, negating the argument: arg(z̄) = −arg z.",
+  "arg z would mean z̄ has the same direction as z, false for non-real z.",
+  "π − arg z is the argument of −z̄, not z̄.",
+  "π + arg z is the argument of −z."],
+ sol:"z̄ is the mirror image of z in the real axis, so arg(z̄) = <b>−arg z</b>."},
+
+{id:58, lec:"L-5", blk:"Polar form", topic:"Polar form of 1 + i√3",
+ q:"The polar form of 1 + i√3 is",
+ opts:[
+  "2(cos π/3 + i sin π/3)",
+  "2(cos π/6 + i sin π/6)",
+  "√3(cos π/3 + i sin π/3)",
+  "2(cos π/4 + i sin π/4)"],
+ ans:0,
+ why:[
+  "Correct. |1 + i√3| = √(1 + 3) = 2 and arg = tan⁻¹(√3/1) = π/3.",
+  "π/6 would need real and imaginary parts swapped (√3 + i).",
+  "The modulus is 2, not √3.",
+  "π/4 needs equal parts (1 + i), not 1 + i√3."],
+ sol:"r = √(1² + (√3)²) = 2; θ = tan⁻¹(√3) = π/3. So 1 + i√3 = <b>2(cos π/3 + i sin π/3)</b>."},
+
+{id:59, lec:"L-5", blk:"Argument", topic:"Argument of real numbers",
+ q:"The principal argument of a negative real number (e.g. −7) is",
+ opts:["π","0","−π/2","π/2"],
+ ans:0,
+ why:[
+  "Correct. Negative reals lie on the negative real axis: arg = π.",
+  "0 is the argument of a positive real number.",
+  "−π/2 is the argument of −i (negative imaginary axis).",
+  "π/2 is the argument of +i."],
+ sol:"A negative real number points along the negative real axis, so its principal argument is <b>π</b>."},
+
+{id:60, lec:"L-5", blk:"Argument", topic:"Principal argument of −i",
+ q:"The principal argument of −i is",
+ opts:["−π/2","π/2","π","3π/2"],
+ ans:0,
+ why:[
+  "Correct. −i is on the negative imaginary axis; principal value (in (−π, π]) is −π/2.",
+  "π/2 is arg(i), the opposite direction.",
+  "π is the argument of a negative real number.",
+  "3π/2 is outside the principal range; its equivalent is −π/2."],
+ sol:"−i lies on the negative imaginary axis, so the principal argument is <b>−π/2</b> (not 3π/2, which is out of range)."},
+
+{id:61, lec:"L-5", blk:"Polar to rectangular", topic:"Convert polar to a + ib",
+ q:"The number 2(cos 30° + i sin 30°) in the form a + ib is",
+ opts:["√3 + i","1 + i√3","√3 − i","2 + i"],
+ ans:0,
+ why:[
+  "Correct. 2·cos30° = 2·(√3/2) = √3 and 2·sin30° = 2·(1/2) = 1, giving √3 + i.",
+  "1 + i√3 comes from 60°, not 30°.",
+  "√3 − i has the wrong sign on the imaginary part.",
+  "2 + i uses the modulus as the real part directly, ignoring cos30°."],
+ sol:"a = 2cos30° = √3, b = 2sin30° = 1, so the number is <b>√3 + i</b>."},
+
+{id:62, lec:"L-5", blk:"Argument", topic:"Argument of 1 + i√3 (recall)",
+ q:"arg(1 + i√3) equals",
+ opts:["π/3","π/6","π/4","2π/3"],
+ ans:0,
+ why:[
+  "Correct. tan θ = √3/1 = √3 with both parts positive ⇒ θ = π/3.",
+  "π/6 would be arg(√3 + i), the swapped version.",
+  "π/4 needs equal parts.",
+  "2π/3 is second-quadrant; 1 + i√3 is first-quadrant."],
+ sol:"Both parts positive (first quadrant), tan θ = √3 ⇒ arg = <b>π/3</b>."},
+
+{id:63, lec:"L-5", blk:"Square root of iota", topic:"Square roots of i",
+ q:"The square roots of i are",
+ opts:[
+  "±(1 + i)/√2",
+  "±(1 − i)/√2",
+  "±i/√2",
+  "±(1 + i)"],
+ ans:0,
+ why:[
+  "Correct. i = cos90° + i sin90°, so √i = ±(cos45° + i sin45°) = ±(1 + i)/√2.",
+  "±(1 − i)/√2 are the square roots of −i, not i.",
+  "±i/√2 squares to −1/2, not i.",
+  "±(1 + i) squares to ±2i, not i (modulus too big)."],
+ sol:"i = e^(iπ/2), so √i = e^(iπ/4) = cos45° + i sin45° = <b>±(1 + i)/√2</b>. Check: [(1+i)/√2]² = 2i/2 = i. ✓"},
+
+/* ---------------- L-6 · De Moivre & Euler (11) ---------------- */
+{id:64, lec:"L-6", blk:"De Moivre", topic:"Statement of De Moivre's theorem",
+ q:"De Moivre's theorem states that (cos θ + i sin θ)ⁿ equals",
+ opts:[
+  "cos nθ + i sin nθ",
+  "cosⁿθ + i sinⁿθ",
+  "n(cos θ + i sin θ)",
+  "cos θ + i sin nθ"],
+ ans:0,
+ why:[
+  "Correct. Raising to the nth power multiplies the argument by n: cos nθ + i sin nθ.",
+  "cosⁿθ + i sinⁿθ powers the individual functions — not valid.",
+  "n(cos θ + i sin θ) scales instead of raising to a power.",
+  "Only the sine's angle is scaled here — both must be nθ."],
+ sol:"<b>(cos θ + i sin θ)ⁿ = cos nθ + i sin nθ</b> (De Moivre). In exponential form, (e^(iθ))ⁿ = e^(inθ)."},
+
+{id:65, lec:"L-6", blk:"De Moivre", topic:"Applying De Moivre",
+ q:"(cos π/6 + i sin π/6)⁶ equals",
+ opts:["−1","1","i","−i"],
+ ans:0,
+ why:[
+  "Correct. By De Moivre, the result is cos(6·π/6) + i sin(π) = cos π + i sin π = −1.",
+  "1 would need the angle to be a multiple of 2π; here it is π.",
+  "i is e^(iπ/2), not e^(iπ).",
+  "−i is e^(−iπ/2), a rotation the other way."],
+ sol:"(cos π/6 + i sin π/6)⁶ = cos π + i sin π = −1 + 0 = <b>−1</b>."},
+
+{id:66, lec:"L-6", blk:"Euler", topic:"Euler's identity",
+ q:"The value of e^(iπ) is",
+ opts:["−1","1","i","0"],
+ ans:0,
+ why:[
+  "Correct. e^(iπ) = cos π + i sin π = −1 (Euler's identity e^(iπ) + 1 = 0).",
+  "1 = e^(i·0) or e^(i2π), not e^(iπ).",
+  "i = e^(iπ/2), a quarter-turn, not e^(iπ).",
+  "e^(iπ) has modulus 1, so it cannot be 0."],
+ sol:"By Euler's formula e^(iθ) = cos θ + i sin θ, e^(iπ) = cos π + i sin π = <b>−1</b>."},
+
+{id:67, lec:"L-6", blk:"Euler", topic:"Euler's formula",
+ q:"e^(iθ) equals",
+ opts:[
+  "cos θ + i sin θ",
+  "cos θ − i sin θ",
+  "sin θ + i cos θ",
+  "1 + iθ"],
+ ans:0,
+ why:[
+  "Correct. Euler's formula: e^(iθ) = cos θ + i sin θ.",
+  "cos θ − i sin θ is e^(−iθ).",
+  "sin θ + i cos θ swaps the roles of sine and cosine.",
+  "1 + iθ is only the first-order approximation, not the exact value."],
+ sol:"<b>e^(iθ) = cos θ + i sin θ</b> (Euler). This unifies the polar and exponential forms."},
+
+{id:68, lec:"L-6", blk:"Powers via polar", topic:"(1 + i)⁸ using polar form",
+ q:"Using polar form, (1 + i)⁸ equals",
+ opts:["16","−16","16i","256"],
+ ans:0,
+ why:[
+  "Correct. 1 + i = √2 e^(iπ/4), so (1 + i)⁸ = (√2)⁸ e^(i2π) = 16·1 = 16.",
+  "−16 would need the angle to land on π; 8·π/4 = 2π lands on 1.",
+  "16i would need the angle at π/2.",
+  "256 = (√2)¹⁶ squares the exponent's modulus effect."],
+ sol:"1 + i = √2·e^(iπ/4). (1 + i)⁸ = (√2)⁸ e^(i·8·π/4) = 16·e^(i2π) = 16·1 = <b>16</b>."},
+
+{id:69, lec:"L-6", blk:"Reciprocal", topic:"Inverse in polar form",
+ q:"(cos θ + i sin θ)⁻¹ equals",
+ opts:[
+  "cos θ − i sin θ",
+  "cos θ + i sin θ",
+  "−cos θ − i sin θ",
+  "sin θ − i cos θ"],
+ ans:0,
+ why:[
+  "Correct. (e^(iθ))⁻¹ = e^(−iθ) = cos θ − i sin θ.",
+  "That is the original number, not its inverse.",
+  "−cos θ − i sin θ = e^(i(θ+π)), a rotation by π, not the inverse.",
+  "sin θ − i cos θ is a different number entirely."],
+ sol:"(cos θ + i sin θ)⁻¹ = cos(−θ) + i sin(−θ) = <b>cos θ − i sin θ</b> = e^(−iθ). (For a unimodular number, the inverse equals the conjugate.)"},
+
+{id:70, lec:"L-6", blk:"Euler", topic:"Modulus of e^(iθ)",
+ q:"For real θ, |e^(iθ)| equals",
+ opts:["1","θ","e^θ","0"],
+ ans:0,
+ why:[
+  "Correct. e^(iθ) = cos θ + i sin θ has modulus √(cos²θ + sin²θ) = 1.",
+  "θ is the argument, not the modulus.",
+  "e^θ is the modulus of e^θ (real exponent), not e^(iθ).",
+  "The modulus is 1, never 0."],
+ sol:"|e^(iθ)| = √(cos²θ + sin²θ) = <b>1</b> for all real θ — e^(iθ) traces the unit circle."},
+
+{id:71, lec:"L-6", blk:"Powers via polar", topic:"nth power of r·e^(iθ)",
+ q:"If z = r e^(iθ), then zⁿ equals",
+ opts:["rⁿ e^(inθ)","r e^(inθ)","rⁿ e^(iθ)","nr e^(iθ)"],
+ ans:0,
+ why:[
+  "Correct. Both modulus and argument scale: modulus to the nth power, argument times n.",
+  "r e^(inθ) forgets to raise the modulus.",
+  "rⁿ e^(iθ) forgets to scale the argument.",
+  "nr e^(iθ) scales the modulus linearly instead of as a power."],
+ sol:"zⁿ = (r e^(iθ))ⁿ = <b>rⁿ e^(inθ)</b> — De Moivre in exponential form."},
+
+{id:72, lec:"L-6", blk:"De Moivre", topic:"Power giving 1",
+ q:"(cos 40° + i sin 40°)⁹ equals",
+ opts:["1","−1","i","cos 40° + i sin 40°"],
+ ans:0,
+ why:[
+  "Correct. 9·40° = 360°, so the result is cos 360° + i sin 360° = 1.",
+  "−1 would need the total angle to be 180°.",
+  "i would need the total angle to be 90°.",
+  "The ninth power is not the original number."],
+ sol:"(cos 40° + i sin 40°)⁹ = cos 360° + i sin 360° = <b>1</b>."},
+
+{id:73, lec:"L-6", blk:"Roots geometry", topic:"nth roots as a polygon",
+ q:"The n distinct nth roots of a non-zero complex number, plotted in the Argand plane, are",
+ opts:[
+  "the vertices of a regular n-gon centred at the origin",
+  "collinear points on a line through the origin",
+  "the vertices of a square regardless of n",
+  "all at the same point"],
+ ans:0,
+ why:[
+  "Correct. The roots share modulus |z|^(1/n) and are equally spaced by 2π/n — a regular n-gon.",
+  "They are equally spaced around a circle, not collinear.",
+  "It is a regular n-gon, a square only when n = 4.",
+  "They are distinct points, not coincident."],
+ sol:"All n roots have equal modulus and arguments differing by 2π/n, so they are the <b>vertices of a regular n-gon</b> on a circle centred at 0."},
+
+{id:74, lec:"L-6", blk:"Powers via polar", topic:"(√3 + i)⁶",
+ q:"(√3 + i)⁶ equals",
+ opts:["−64","64","64i","−64i"],
+ ans:0,
+ why:[
+  "Correct. √3 + i = 2 e^(iπ/6), so (√3 + i)⁶ = 2⁶ e^(iπ) = 64·(−1) = −64.",
+  "64 would need the angle to reach 2π; 6·π/6 = π gives −1.",
+  "64i needs the angle at π/2.",
+  "−64i needs the angle at −π/2 (or 3π/2)."],
+ sol:"√3 + i = 2(cos π/6 + i sin π/6). (√3 + i)⁶ = 2⁶(cos π + i sin π) = 64·(−1) = <b>−64</b>."},
+
+/* ---------------- L-7 · Roots of unity & omega (11) ---------------- */
+{id:75, lec:"L-7", blk:"Cube roots of unity", topic:"Defining ω",
+ q:"A non-real cube root of unity ω satisfies",
+ opts:["ω³ = 1 and ω ≠ 1","ω² = 1","ω = 1","ω³ = −1"],
+ ans:0,
+ why:[
+  "Correct. The cube roots of unity solve x³ = 1; the non-real ones satisfy ω³ = 1 with ω ≠ 1.",
+  "ω² = 1 would make ω a square root of unity (±1), not a cube root.",
+  "ω = 1 is the real (trivial) cube root, not the non-real ω.",
+  "ω³ = −1 defines a cube root of −1, not of unity."],
+ sol:"The cube roots of unity are 1, ω, ω² where <b>ω³ = 1, ω ≠ 1</b>, with ω = (−1 + i√3)/2."},
+
+{id:76, lec:"L-7", blk:"Omega identities", topic:"Sum of cube roots of unity",
+ q:"1 + ω + ω² equals",
+ opts:["0","1","3","ω³"],
+ ans:0,
+ why:[
+  "Correct. The three cube roots of unity sum to zero (sum of roots of x³ − 1 = 0 with no x² term).",
+  "1 ignores the two non-real roots.",
+  "3 would hold only if all three roots equalled 1.",
+  "ω³ = 1, not 0 — and it is not the value of the sum."],
+ sol:"x³ − 1 = (x − 1)(x − ω)(x − ω²); the coefficient of x² is 0, so 1 + ω + ω² = <b>0</b>."},
+
+{id:77, lec:"L-7", blk:"Omega identities", topic:"Product ω·ω²",
+ q:"ω·ω² equals",
+ opts:["1","ω","ω²","0"],
+ ans:0,
+ why:[
+  "Correct. ω·ω² = ω³ = 1.",
+  "ω would require the product to be ω³·ω⁻² — not the case.",
+  "ω² is ω·ω, not ω·ω².",
+  "The product of two non-zero numbers is non-zero."],
+ sol:"ω·ω² = ω³ = <b>1</b> (also the product of all roots of x³ − 1 apart from 1)."},
+
+{id:78, lec:"L-7", blk:"Omega identities", topic:"Reducing a high power of ω",
+ q:"ω⁴ equals",
+ opts:["ω","ω²","1","ω³"],
+ ans:0,
+ why:[
+  "Correct. ω⁴ = ω³·ω = 1·ω = ω. Powers of ω cycle every 3.",
+  "ω² is ω·ω; reducing ω⁴ mod 3 gives ω, not ω².",
+  "1 = ω³ (exponent divisible by 3), whereas ω⁴ leaves remainder 1.",
+  "ω³ = 1, but the next power ω⁴ = ω³·ω = ω."],
+ sol:"Since ω³ = 1, powers repeat mod 3: ω⁴ = ω^(3+1) = ω³·ω = <b>ω</b>."},
+
+{id:79, lec:"L-7", blk:"Omega identities", topic:"(1 + ω)(1 + ω²)",
+ q:"(1 + ω)(1 + ω²) equals",
+ opts:["1","−1","0","ω"],
+ ans:0,
+ why:[
+  "Correct. 1 + ω = −ω² and 1 + ω² = −ω, so the product is (−ω²)(−ω) = ω³ = 1.",
+  "−1 mishandles the signs; the two minus signs cancel.",
+  "0 would need one factor to vanish, but neither does.",
+  "ω is not the product."],
+ sol:"Using 1 + ω + ω² = 0: 1 + ω = −ω², 1 + ω² = −ω. Product = ω³ = <b>1</b>."},
+
+{id:80, lec:"L-7", blk:"Omega identities", topic:"Value of 1 + ω²",
+ q:"1 + ω² equals",
+ opts:["−ω","−ω²","ω","1"],
+ ans:0,
+ why:[
+  "Correct. From 1 + ω + ω² = 0, 1 + ω² = −ω.",
+  "−ω² would follow from 1 + ω = −ω², a different grouping.",
+  "ω has the wrong sign.",
+  "1 ignores the identity 1 + ω + ω² = 0."],
+ sol:"1 + ω + ω² = 0 ⇒ 1 + ω² = <b>−ω</b>."},
+
+{id:81, lec:"L-7", blk:"nth roots of unity", topic:"Sum of nth roots of unity",
+ q:"For n ≥ 2, the sum of all n nth roots of unity is",
+ opts:["0","1","n","−1"],
+ ans:0,
+ why:[
+  "Correct. They are the roots of xⁿ − 1 = 0, whose xⁿ⁻¹ coefficient is 0, so the sum is 0.",
+  "1 is only one of the roots, not the sum.",
+  "n would need every root to equal 1.",
+  "−1 is the product for even n, not the sum."],
+ sol:"The nth roots of unity are roots of xⁿ − 1 = 0; the coefficient of xⁿ⁻¹ is 0, so their sum is <b>0</b> (for n ≥ 2)."},
+
+{id:82, lec:"L-7", blk:"Omega identities", topic:"Sum of squares of cube roots of unity",
+ q:"1 + ω² + ω⁴ equals",
+ opts:["0","3","1","ω"],
+ ans:0,
+ why:[
+  "Correct. ω⁴ = ω, so 1 + ω² + ω⁴ = 1 + ω² + ω = 0.",
+  "3 would need each term to be 1.",
+  "1 ignores the two non-real terms.",
+  "ω is not the value of this symmetric sum."],
+ sol:"ω⁴ = ω³·ω = ω, so 1 + ω² + ω⁴ = 1 + ω + ω² = <b>0</b>."},
+
+{id:83, lec:"L-7", blk:"nth roots of unity", topic:"How many nth roots",
+ q:"The equation zⁿ = 1 has exactly",
+ opts:[
+  "n distinct roots, equally spaced on the unit circle",
+  "one root, z = 1",
+  "two roots, z = ±1",
+  "infinitely many roots"],
+ ans:0,
+ why:[
+  "Correct. zⁿ = 1 has n distinct solutions e^(2πik/n), k = 0…n−1, on the unit circle.",
+  "z = 1 is only one of the n roots.",
+  "±1 are all the roots only when n = 2.",
+  "A degree-n polynomial has exactly n roots, not infinitely many."],
+ sol:"zⁿ = 1 ⇒ z = e^(2πik/n), k = 0, 1, …, n−1: <b>n distinct roots</b> spaced by 2π/n around the unit circle."},
+
+{id:84, lec:"L-7", blk:"Roots of a complex number", topic:"Cube roots of 8",
+ q:"The three cube roots of 8 are",
+ opts:["2, 2ω, 2ω²","2, −2, 2i","8, 8ω, 8ω²","2, 4, 8"],
+ ans:0,
+ why:[
+  "Correct. One real cube root is 2; the others are 2ω and 2ω² (multiply by the cube roots of unity).",
+  "2, −2, 2i are not all cube roots of 8 (only 2 cubes to 8).",
+  "8, 8ω, 8ω² cube to 512, not 8.",
+  "2, 4, 8 is a geometric list, not the cube roots."],
+ sol:"Cube roots of 8 = 2·(cube roots of unity) = <b>2, 2ω, 2ω²</b>. Each cubes to 8·ω³ᵏ = 8."},
+
+{id:85, lec:"L-7", blk:"Geometry of roots", topic:"Cube roots of unity as a triangle",
+ q:"The three cube roots of unity in the Argand plane form",
+ opts:[
+  "an equilateral triangle inscribed in the unit circle",
+  "a right-angled triangle",
+  "a straight line",
+  "three points at the origin"],
+ ans:0,
+ why:[
+  "Correct. 1, ω, ω² are unimodular and spaced 120° apart — an equilateral triangle on the unit circle.",
+  "The spacing is 120°, giving equal sides, not a right angle.",
+  "They are not collinear; they surround the origin.",
+  "They are three distinct unit-modulus points, not the origin."],
+ sol:"1, ω, ω² lie on the unit circle at 0°, 120°, 240° — the vertices of an <b>equilateral triangle</b>."},
+
+/* ---------------- Strong Box · Mixed PYQ (12) ---------------- */
+{id:86, lec:"SB", blk:"Conjugate roots", topic:"Real quadratic from a complex root",
+ q:"If 1 + 2i is a root of x² + px + q = 0 with real p, q, then (p, q) is",
+ opts:["(−2, 5)","(2, 5)","(−2, −3)","(−1, 5)"],
+ ans:0,
+ why:[
+  "Correct. The other root is 1 − 2i. Sum = 2 = −p ⇒ p = −2; product = 1 + 4 = 5 = q.",
+  "(2, 5) has the wrong sign on p (sum of roots = −p).",
+  "(−2, −3) uses product = (1)(1) − ... incorrectly; product is 5.",
+  "(−1, 5) halves the sum of roots."],
+ sol:"Real coefficients ⇒ roots 1 ± 2i. Sum = 2 = −p ⇒ p = −2; product = (1+2i)(1−2i) = 5 = q. So <b>(−2, 5)</b>."},
+
+{id:87, lec:"SB", blk:"Locus", topic:"Equidistant from 3 and −3",
+ q:"The locus |z − 3| = |z + 3| is",
+ opts:["the imaginary axis","the real axis","the unit circle","a circle of radius 3"],
+ ans:0,
+ why:[
+  "Correct. Points equidistant from 3 and −3 (reflections in the imaginary axis) form the imaginary axis.",
+  "The real axis is equidistant from i and −i, a different pair.",
+  "The unit circle is |z| = 1, unrelated.",
+  "No radius-3 circle satisfies equal distances to ±3."],
+ sol:"3 and −3 are mirror images in the imaginary axis, so their perpendicular bisector is the <b>imaginary axis</b> (Re(z) = 0)."},
+
+{id:88, lec:"SB", blk:"Omega identities", topic:"(1 − ω + ω²)³",
+ q:"The value of (1 − ω + ω²)³ is",
+ opts:["−8","8","−1","1"],
+ ans:0,
+ why:[
+  "Correct. 1 + ω² = −ω, so 1 − ω + ω² = −ω − ω = −2ω; cubed = −8ω³ = −8.",
+  "8 has the wrong sign; (−2ω)³ = −8ω³ = −8.",
+  "−1 ignores the factor (−2)³ = −8.",
+  "1 = ω³, but the expression cubes to −8."],
+ sol:"1 + ω² = −ω ⇒ 1 − ω + ω² = −2ω. So (1 − ω + ω²)³ = (−2ω)³ = −8ω³ = <b>−8</b>."},
+
+{id:89, lec:"SB", blk:"De Moivre", topic:"Product of two De Moivre powers",
+ q:"(cos θ + i sin θ)⁵ (cos θ − i sin θ)³ equals",
+ opts:["cos 2θ + i sin 2θ","cos 8θ + i sin 8θ","cos θ + i sin θ","1"],
+ ans:0,
+ why:[
+  "Correct. = e^(i5θ)·e^(−i3θ) = e^(i2θ) = cos 2θ + i sin 2θ.",
+  "cos 8θ + i sin 8θ would come from adding the exponents; the second factor has a minus.",
+  "The exponents combine to 2θ, not θ.",
+  "It equals 1 only if 2θ is a multiple of 2π, not in general."],
+ sol:"(cos θ + i sin θ)⁵ = e^(i5θ); (cos θ − i sin θ)³ = e^(−i3θ). Product = e^(i2θ) = <b>cos 2θ + i sin 2θ</b>."},
+
+{id:90, lec:"SB", blk:"Modulus identity", topic:"|1+z|² + |1−z|²",
+ q:"For a complex number z with |z| = 1, the value of |1 + z|² + |1 − z|² is",
+ opts:["4","2","1","2|z|"],
+ ans:0,
+ why:[
+  "Correct. By the parallelogram law, |1+z|² + |1−z|² = 2(1² + |z|²) = 2(1 + 1) = 4.",
+  "2 forgets to double both terms in 2(1 + |z|²).",
+  "1 is far below the correct value of 4.",
+  "2|z| = 2 is not the correct expression."],
+ sol:"Parallelogram law with the two numbers 1 and z: |1+z|² + |1−z|² = 2(|1|² + |z|²) = 2(1 + 1) = <b>4</b>."},
+
+{id:91, lec:"SB", blk:"Roots of unity", topic:"Sum of fifth roots of unity",
+ q:"The sum of all five fifth roots of unity is",
+ opts:["0","1","5","−1"],
+ ans:0,
+ why:[
+  "Correct. The sum of all nth roots of unity is 0 for n ≥ 2.",
+  "1 is just the root z = 1.",
+  "5 would need all roots equal to 1.",
+  "−1 is the product for odd n... actually the product of the fifth roots of unity is (−1)^(5+1) = 1; regardless, the sum is 0."],
+ sol:"Roots of x⁵ − 1 = 0; the x⁴ coefficient is 0, so the sum of all five roots is <b>0</b>."},
+
+{id:92, lec:"SB", blk:"Purely imaginary", topic:"Locus from a purely imaginary ratio",
+ q:"If (z − 1)/(z + 1) is purely imaginary, then z lies on",
+ opts:["the unit circle |z| = 1","the real axis","the imaginary axis","the line Re(z) = 1"],
+ ans:0,
+ why:[
+  "Correct. (z−1)/(z+1) purely imaginary ⇒ its real part is 0 ⇒ |z|² = 1, i.e. |z| = 1.",
+  "On the real axis the ratio is real, not imaginary.",
+  "The imaginary axis is a special case but not the full locus.",
+  "Re(z) = 1 does not make the ratio purely imaginary."],
+ sol:"Let w = (z−1)/(z+1). w + w̄ = 0 ⇒ (z−1)(z̄+1) + (z̄−1)(z+1) = 0 ⇒ 2(z z̄ − 1) = 0 ⇒ |z|² = 1: the <b>unit circle</b>."},
+
+{id:93, lec:"SB", blk:"Locus", topic:"Centre of a circle locus",
+ q:"The locus |z − 2 − 3i| = 4 is a circle whose centre is",
+ opts:["(2, 3)","(−2, −3)","(4, 0)","(2, −3)"],
+ ans:0,
+ why:[
+  "Correct. |z − z₀| = r has centre z₀ = 2 + 3i, i.e. (2, 3), radius 4.",
+  "(−2, −3) has both signs flipped.",
+  "(4, 0) mistakes the radius for a coordinate.",
+  "(2, −3) has the wrong sign on the imaginary part."],
+ sol:"|z − (2 + 3i)| = 4 is a circle centred at <b>(2, 3)</b> with radius 4."},
+
+{id:94, lec:"SB", blk:"Roots", topic:"Roots of z² + z + 1 = 0",
+ q:"The roots of z² + z + 1 = 0 are",
+ opts:["ω and ω² (the non-real cube roots of unity)","1 and −1","i and −i","1 and ω"],
+ ans:0,
+ why:[
+  "Correct. z² + z + 1 = 0 gives z = (−1 ± i√3)/2 = ω, ω².",
+  "1 and −1 are roots of z² − 1, not this.",
+  "i and −i are roots of z² + 1.",
+  "1 is not a root (1 + 1 + 1 = 3 ≠ 0); the roots are ω and ω²."],
+ sol:"z² + z + 1 = 0 ⇒ z = (−1 ± √(1 − 4))/2 = (−1 ± i√3)/2 = <b>ω and ω²</b> (since (z−1)(z²+z+1) = z³−1)."},
+
+{id:95, lec:"SB", blk:"Argument", topic:"Principal argument in the third quadrant",
+ q:"The principal argument of −1 − i√3 is",
+ opts:["−2π/3","2π/3","−π/3","4π/3"],
+ ans:0,
+ why:[
+  "Correct. Third quadrant, reference angle tan⁻¹(√3) = π/3, principal value −(π − π/3) = −2π/3.",
+  "2π/3 is the second-quadrant value (−1 + i√3).",
+  "−π/3 ignores that the real part is negative.",
+  "4π/3 is outside (−π, π]; its principal equivalent is −2π/3."],
+ sol:"−1 − i√3 is in the third quadrant; reference angle π/3, so principal arg = <b>−2π/3</b>."},
+
+{id:96, lec:"SB", blk:"Square root", topic:"Square root of 5 + 12i",
+ q:"A square root of 5 + 12i is",
+ opts:["3 + 2i","2 + 3i","3 − 2i","1 + 2i"],
+ ans:0,
+ why:[
+  "Correct. (3 + 2i)² = 9 + 12i + 4i² = 9 + 12i − 4 = 5 + 12i.",
+  "(2 + 3i)² = 4 + 12i − 9 = −5 + 12i, not 5 + 12i.",
+  "(3 − 2i)² = 5 − 12i, the conjugate.",
+  "(1 + 2i)² = 1 + 4i − 4 = −3 + 4i."],
+ sol:"Solve (x + yi)² = 5 + 12i: x² − y² = 5, 2xy = 12. x = 3, y = 2 works: <b>3 + 2i</b> (and its negative)."},
+
+{id:97, lec:"SB", blk:"Triangle inequality", topic:"Equality of |z₁+z₂| and |z₁|+|z₂|",
+ q:"|z₁ + z₂| = |z₁| + |z₂| holds when z₁ and z₂",
+ opts:[
+  "have the same argument",
+  "have equal moduli",
+  "are conjugates of each other",
+  "are perpendicular in the Argand plane"],
+ ans:0,
+ why:[
+  "Correct. Equality in the triangle inequality requires z₁ and z₂ to point the same way — equal arguments.",
+  "Equal moduli alone (e.g. 1 and i) do not give equality.",
+  "Conjugates have opposite arguments, so equality fails unless both are real.",
+  "Perpendicular vectors give |z₁+z₂|² = |z₁|² + |z₂|², a strict inequality for the moduli sum."],
+ sol:"|z₁ + z₂| = |z₁| + |z₂| ⇔ z₁ and z₂ are positive real multiples of each other ⇔ <b>same argument</b> (collinear with 0, same direction)."}
+
+];
+
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter M-9 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

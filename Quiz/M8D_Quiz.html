@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-8D Some Special Series — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>M-8D · Some Special Series</h1>
+    <p id="heroSub">Lectures L-1 to L-5 + Strong Box · 77 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">77 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · M-8D Some Special Series · mastery quiz built from lectures L-1 to L-5 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   M-8A ARITHMETIC PROGRESSIONS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Sums of Special Series (Power Sums)",
+   desc:"Σn, Σn² and Σn³; summing a series from its general term; products, odd-number and alternating series reduced to the three standard power sums"},
+  {key:"L-2", name:"L-2 · Arithmetico-Geometric Progression",
+   desc:"terms formed as (A.P. term)×(G.P. term); the S − rS method for finite sums; the infinite sum a/(1−r) + dr/(1−r)² for |r| &lt; 1"},
+  {key:"L-3", name:"L-3 · Method of Differences & Telescoping",
+   desc:"writing Tₙ as f(r) − f(r+1) so the sum collapses; the Vₙ method for reciprocal products; partial fractions, factorials and surd telescoping"},
+  {key:"L-4", name:"L-4 · Arithmetic, Geometric & Harmonic Means",
+   desc:"A = (a+b)/2, G = √(ab), H = 2ab/(a+b); inserting n means between two numbers; the relation G² = AH and building a quadratic from A and G"},
+  {key:"L-5", name:"L-5 · Inequalities of Means (A.M. ≥ G.M. ≥ H.M.)",
+   desc:"the A.M.–G.M.–H.M. inequality and its equality case; optimising sums/products; A, G, H in G.P.; ratio a:b from a given A:G"},
+  {key:"SB", name:"Strong Box · Mixed PYQ",
+   desc:"previous-year problems blending A.P./G.P./A.G.P., telescoping, Fibonacci, mean inequalities and common terms of two progressions"}
+];
+
+const QUIZ = [
+
+/* ---------------- L-1 · Power sums (13) ---------------- */
+{id:1, lec:"L-1", blk:"Standard sums", topic:"Sum of first n natural numbers",
+ q:"The sum 1 + 2 + 3 + … + n equals",
+ opts:["n(n+1)/2","n(n+1)(2n+1)/6","[n(n+1)/2]²","n²"],
+ ans:0,
+ why:[
+  "Correct. Σr = n(n+1)/2 — the classic pairing of first and last terms.",
+  "That is Σr² (sum of squares), not Σr.",
+  "That is Σr³ (sum of cubes), which equals (Σr)².",
+  "n² is the sum of the first n odd numbers, not of 1…n."],
+ sol:"<b>Σr = n(n+1)/2.</b> It is an A.P. with a = 1, d = 1, so S = (n/2)(first + last) = (n/2)(1 + n)."},
+
+{id:2, lec:"L-1", blk:"Standard sums", topic:"Sum of squares, numeric",
+ q:"The value of 1² + 2² + 3² + … + 10² is",
+ opts:["385","285","3025","505"],
+ ans:0,
+ why:[
+  "Correct. Σr² = n(n+1)(2n+1)/6 = 10·11·21/6 = 385.",
+  "285 = Σr² up to n = 9 (9·10·19/6); an off-by-one in n.",
+  "3025 = (Σr)² = 55² = Σr³ up to 10, not Σr².",
+  "505 does not match any standard sum here."],
+ sol:"<b>Σr² = n(n+1)(2n+1)/6.</b> With n = 10: 10·11·21 = 2310, ÷6 = <b>385</b>."},
+
+{id:3, lec:"L-1", blk:"Standard sums", topic:"Sum of cubes identity",
+ q:"1³ + 2³ + 3³ + … + n³ is equal to",
+ opts:["[n(n+1)/2]²","n(n+1)(2n+1)/6","n(n+1)/2","(2n+1)²"],
+ ans:0,
+ why:[
+  "Correct. Σr³ = [n(n+1)/2]² = (Σr)² — the sum of cubes is the square of the sum.",
+  "That is Σr², a different power sum.",
+  "That is Σr (first powers), not cubes.",
+  "(2n+1)² is not a standard sum formula."],
+ sol:"<b>Σr³ = [n(n+1)/2]² = (Σr)².</b> The sum of the first n cubes equals the square of the sum of the first n naturals."},
+
+{id:4, lec:"L-1", blk:"Odd numbers", topic:"Sum of first n odd numbers",
+ q:"1 + 3 + 5 + … + (2n − 1) equals",
+ opts:["n²","n(n+1)","n(2n−1)","2n − 1"],
+ ans:0,
+ why:[
+  "Correct. The sum of the first n odd numbers is n² (an A.P. with a = 1, d = 2: S = (n/2)(1 + 2n−1) = n²).",
+  "n(n+1) is the sum of the first n even numbers, 2 + 4 + … + 2n.",
+  "n(2n−1) is not this sum; it over-counts.",
+  "2n − 1 is just the last term, not the sum."],
+ sol:"<b>Σ(2r − 1) = 2·Σr − n = n(n+1) − n = n².</b> The partial sums 1, 4, 9, 16, … are perfect squares."},
+
+{id:5, lec:"L-1", blk:"General term", topic:"Series of products r(r+1)",
+ q:"1·2 + 2·3 + 3·4 + … + n(n+1) equals",
+ opts:["n(n+1)(n+2)/3","n(n+1)(n+2)/6","n(n+1)/2","[n(n+1)/2]²"],
+ ans:0,
+ why:[
+  "Correct. Tᵣ = r(r+1) = r² + r, so the sum is Σr² + Σr = n(n+1)(n+2)/3.",
+  "n(n+1)(n+2)/6 is Σ of r(r+1)/2 (triangular numbers), half of this.",
+  "n(n+1)/2 is only Σr; it ignores the r² part.",
+  "That is Σr³, unrelated here."],
+ sol:"Tᵣ = r² + r. Σ = n(n+1)(2n+1)/6 + n(n+1)/2 = n(n+1)[(2n+1) + 3]/6 = <b>n(n+1)(n+2)/3</b>. Check n = 1: 1·2 = 2 = 1·2·3/3. ✓"},
+
+{id:6, lec:"L-1", blk:"General term", topic:"Sum of squares of odd numbers",
+ q:"1² + 3² + 5² + … to n terms (i.e. up to (2n − 1)²) equals",
+ opts:["n(2n−1)(2n+1)/3","n(n+1)(2n+1)/6","n²(2n²−1)","(2n−1)²(2n+1)"],
+ ans:0,
+ why:[
+  "Correct. Tᵣ = (2r − 1)² = 4r² − 4r + 1; summing gives n(2n − 1)(2n + 1)/3.",
+  "That is Σr² over all integers, not just odd ones.",
+  "n²(2n² − 1) is the sum of cubes of odd numbers, not squares.",
+  "That is a single term times a factor, not the sum."],
+ sol:"Σ(2r−1)² = 4Σr² − 4Σr + n = 4·n(n+1)(2n+1)/6 − 4·n(n+1)/2 + n = <b>n(2n−1)(2n+1)/3</b>. Check n = 2: 1 + 9 = 10 = 2·3·5/3. ✓"},
+
+{id:7, lec:"L-1", blk:"Alternating", topic:"Alternating sum of squares",
+ q:"The value of 1² − 2² + 3² − 4² + … + (2n − 1)² − (2n)² is",
+ opts:["−n(2n + 1)","n(2n + 1)","−n²","n(n + 1)"],
+ ans:0,
+ why:[
+  "Correct. Pair terms: (2r−1)² − (2r)² = −(4r − 1), and Σ(−(4r−1)) = −(2n² + n) = −n(2n+1).",
+  "The sum is negative (each pair is negative), so a positive value is wrong.",
+  "−n² would follow if each pair contributed −(2r); it actually contributes −(4r−1).",
+  "n(n+1) ignores both the sign and the correct pairing."],
+ sol:"Group in pairs: (2r−1)² − (2r)² = (2r−1 − 2r)(2r−1 + 2r) = (−1)(4r − 1) = −(4r − 1). Σ over r = 1…n: −(4·n(n+1)/2 − n) = −(2n² + n) = <b>−n(2n + 1)</b>. Check n = 1: 1 − 4 = −3 = −1·3. ✓"},
+
+{id:8, lec:"L-1", blk:"General term", topic:"Finding Tₙ then summing",
+ q:"For the series 2 + 5 + 10 + 17 + 26 + … the nth term is n² + 1. Its sum to n terms is",
+ opts:["n(n+1)(2n+1)/6 + n","n(n+1)(2n+1)/6","n(n+1)/2 + n","n³ + n"],
+ ans:0,
+ why:[
+  "Correct. Σ(r² + 1) = Σr² + Σ1 = n(n+1)(2n+1)/6 + n.",
+  "That drops the '+1' contributed by each of the n terms.",
+  "That uses Σr instead of Σr² for the square part.",
+  "n³ + n is not the closed form of Σ(r² + 1)."],
+ sol:"Tᵣ = r² + 1 ⇒ S = Σr² + Σ1 = <b>n(n+1)(2n+1)/6 + n</b>. Check n = 2: 2 + 5 = 7; formula 2·3·5/6 + 2 = 5 + 2 = 7. ✓"},
+
+{id:9, lec:"L-1", blk:"General term", topic:"nth term from differences",
+ q:"The nth term of the series 1, 3, 7, 13, 21, … is",
+ opts:["n² − n + 1","n² + 1","2n − 1","n² − 1"],
+ ans:0,
+ why:[
+  "Correct. First differences are 2, 4, 6, 8 (an A.P.), so Tₙ is quadratic; fitting gives n² − n + 1.",
+  "n² + 1 gives 2, 5, 10, … — the wrong sequence.",
+  "2n − 1 gives 1, 3, 5, 7 — linear, but the differences here grow.",
+  "n² − 1 gives 0, 3, 8, 15 — starts wrong."],
+ sol:"Differences 2, 4, 6, … are an A.P., so Tₙ = an² + bn + c. Solving with T₁ = 1, T₂ = 3, T₃ = 7 gives a = 1, b = −1, c = 1: <b>Tₙ = n² − n + 1</b>. Check n = 4: 16 − 4 + 1 = 13. ✓"},
+
+{id:10, lec:"L-1", blk:"General term", topic:"Series of products r(r+2)",
+ q:"1·3 + 2·4 + 3·5 + … + n(n + 2) equals",
+ opts:["n(n+1)(2n+7)/6","n(n+1)(n+2)/3","n(n+1)(2n+1)/6","n(n+1)(n+5)/6"],
+ ans:0,
+ why:[
+  "Correct. Tᵣ = r² + 2r, so Σ = Σr² + 2Σr = n(n+1)(2n+1)/6 + n(n+1) = n(n+1)(2n+7)/6.",
+  "n(n+1)(n+2)/3 is Σr(r+1), which uses +1 not +2 in the second factor.",
+  "That is just Σr², missing the 2Σr part.",
+  "n(n+1)(n+5)/6 is close but the linear coefficient is wrong."],
+ sol:"Tᵣ = r² + 2r. Σ = n(n+1)(2n+1)/6 + 2·n(n+1)/2 = n(n+1)[(2n+1) + 6]/6 = <b>n(n+1)(2n+7)/6</b>. Check n = 1: 1·3 = 3 = 1·2·9/6. ✓"},
+
+{id:11, lec:"L-1", blk:"Even cubes", topic:"Sum of cubes of even numbers",
+ q:"2³ + 4³ + 6³ + … + (2n)³ equals",
+ opts:["2n²(n + 1)²","n²(n + 1)²","[n(n+1)/2]²","4n²(n + 1)²"],
+ ans:0,
+ why:[
+  "Correct. Factor out 2³ = 8: Σ(2r)³ = 8·Σr³ = 8·[n(n+1)/2]² = 2n²(n+1)².",
+  "n²(n+1)² is Σr³ (all cubes), missing the factor 8/4 = 2.",
+  "[n(n+1)/2]² is Σr³ itself — you forgot to pull out the 8.",
+  "4n²(n+1)² double-counts the factor; 8·[n(n+1)/2]² = 8·n²(n+1)²/4 = 2n²(n+1)², not 4."],
+ sol:"Σ(2r)³ = 8Σr³ = 8·[n(n+1)/2]² = 8·n²(n+1)²/4 = <b>2n²(n+1)²</b>. Check n = 1: 8 = 2·1·4. ✓"},
+
+{id:12, lec:"L-1", blk:"Triple products", topic:"Σ r(r+1)(r+2)",
+ q:"1·2·3 + 2·3·4 + … + n(n+1)(n+2) equals",
+ opts:["n(n+1)(n+2)(n+3)/4","n(n+1)(n+2)/3","n(n+1)(n+2)(n+3)/6","[n(n+1)(n+2)]/2"],
+ ans:0,
+ why:[
+  "Correct. Using the telescoping identity Σr(r+1)(r+2) = n(n+1)(n+2)(n+3)/4.",
+  "n(n+1)(n+2)/3 is Σr(r+1), one factor short.",
+  "Dividing by 6 instead of 4 is the wrong constant for a product of three consecutive integers.",
+  "Halving the last term is not a valid sum formula."],
+ sol:"Standard result: <b>Σr(r+1)(r+2) = n(n+1)(n+2)(n+3)/4</b> (extend the falling-product telescoping pattern). Check n = 1: 6 = 1·2·3·4/4. ✓"},
+
+{id:13, lec:"L-1", blk:"Sum of sums", topic:"Sum of triangular numbers",
+ q:"1 + (1+2) + (1+2+3) + … + (1+2+…+n) equals",
+ opts:["n(n+1)(n+2)/6","n(n+1)/2","n(n+1)(2n+1)/6","[n(n+1)/2]²"],
+ ans:0,
+ why:[
+  "Correct. The rth term is Tᵣ = r(r+1)/2, so Σ = ½Σ(r² + r) = n(n+1)(n+2)/6.",
+  "n(n+1)/2 is only the last bracket, not the running sum of all brackets.",
+  "That is Σr²; here each term is a triangular number r(r+1)/2.",
+  "That is Σr³, unrelated."],
+ sol:"Tᵣ = r(r+1)/2 (the rth triangular number). Σ = ½[Σr² + Σr] = ½·n(n+1)(n+2)/3 = <b>n(n+1)(n+2)/6</b>. Check n = 2: 1 + 3 = 4 = 2·3·4/6. ✓"},
+
+/* ---------------- L-2 · Arithmetico-Geometric Progression (13) ---------------- */
+{id:14, lec:"L-2", blk:"Definition", topic:"What is an A.G.P.",
+ q:"An arithmetico-geometric progression (A.G.P.) has each term formed as",
+ opts:[
+  "(a term of an A.P.) × (the corresponding term of a G.P.)",
+  "(a term of an A.P.) + (a term of a G.P.)",
+  "the average of an A.P. term and a G.P. term",
+  "a G.P. whose common ratio increases arithmetically"],
+ ans:0,
+ why:[
+  "Correct. The nth term is [a + (n−1)d]·r^(n−1): an A.P. factor times a G.P. factor.",
+  "Adding an A.P. and a G.P. term-by-term does not give an A.G.P.; the terms are products.",
+  "It is a product, not an average.",
+  "A G.P. by definition has a constant ratio; a changing ratio is not a G.P."],
+ sol:"An <b>A.G.P.</b> multiplies matching terms: Tₙ = [a + (n−1)d]·r^(n−1). E.g. 1, 2x, 3x², 4x³, … has A.P. part 1, 2, 3, 4 and G.P. part 1, x, x², x³."},
+
+{id:15, lec:"L-2", blk:"nth term", topic:"General term of an A.G.P.",
+ q:"The nth term of 1 + 2x + 3x² + 4x³ + … is",
+ opts:["n·x^(n−1)","n·xⁿ","(n+1)x^(n−1)","x^(n−1)"],
+ ans:0,
+ why:[
+  "Correct. A.P. part = n, G.P. part = x^(n−1), so Tₙ = n·x^(n−1).",
+  "n·xⁿ shifts the power up by one; T₁ would be x, not 1.",
+  "(n+1)x^(n−1) gives T₁ = 2, but the first term is 1.",
+  "x^(n−1) omits the arithmetic coefficient n."],
+ sol:"Coefficients 1, 2, 3, 4 (A.P.) times powers 1, x, x², x³ (G.P.) ⇒ <b>Tₙ = n·x^(n−1)</b>."},
+
+{id:16, lec:"L-2", blk:"Infinite sum", topic:"Sum of Σn x^(n−1)",
+ q:"For |x| &lt; 1, the sum to infinity of 1 + 2x + 3x² + 4x³ + … is",
+ opts:["1/(1 − x)²","1/(1 − x)","x/(1 − x)²","1/(1 − x)³"],
+ ans:0,
+ why:[
+  "Correct. Σ n x^(n−1) = 1/(1 − x)² for |x| &lt; 1 — the derivative of the geometric sum 1/(1 − x).",
+  "1/(1 − x) is the plain geometric sum Σx^(n−1), without the coefficients n.",
+  "x/(1 − x)² is Σ n xⁿ (powers shifted up by one).",
+  "1/(1 − x)³ corresponds to Σ n(n+1)/2 · x^(n−1), a different series."],
+ sol:"Since Σ x^n = 1/(1 − x), differentiating gives Σ n x^(n−1) = <b>1/(1 − x)²</b> for |x| &lt; 1."},
+
+{id:17, lec:"L-2", blk:"Infinite sum", topic:"Σ n/2ⁿ",
+ q:"The sum 1/2 + 2/4 + 3/8 + 4/16 + … to infinity equals",
+ opts:["2","1","3/2","4"],
+ ans:0,
+ why:[
+  "Correct. This is Σ n·(1/2)ⁿ = (1/2)/(1 − 1/2)² = (1/2)/(1/4) = 2.",
+  "1 is Σ (1/2)ⁿ (the plain geometric part), not the weighted sum.",
+  "3/2 under-counts the tail contributions.",
+  "4 is Σ n·(1/2)^(n−1), i.e. this sum's terms without the extra factor 1/2."],
+ sol:"Σ n xⁿ = x/(1 − x)². With x = 1/2: (1/2)/(1/2)² = (1/2)/(1/4) = <b>2</b>."},
+
+{id:18, lec:"L-2", blk:"Infinite sum", topic:"Σ n/2^(n−1)",
+ q:"The sum 1 + 2/2 + 3/4 + 4/8 + … to infinity equals",
+ opts:["4","2","3","8"],
+ ans:0,
+ why:[
+  "Correct. This is Σ n·(1/2)^(n−1) = 1/(1 − 1/2)² = 1/(1/4) = 4.",
+  "2 is Σ n·(1/2)ⁿ, the same series with one extra factor of 1/2 per term.",
+  "3 is a mid-value that does not match either standard sum.",
+  "8 doubles the correct value."],
+ sol:"Σ n x^(n−1) = 1/(1 − x)². With x = 1/2: 1/(1/2)² = 1/(1/4) = <b>4</b>."},
+
+{id:19, lec:"L-2", blk:"Infinite sum", topic:"A.G.P. with r = 1/3",
+ q:"1 + 2·(1/3) + 3·(1/3)² + 4·(1/3)³ + … to infinity equals",
+ opts:["9/4","3/2","4/9","3"],
+ ans:0,
+ why:[
+  "Correct. This is Σ n·(1/3)^(n−1) = 1/(1 − 1/3)² = 1/(2/3)² = 1/(4/9) = 9/4.",
+  "3/2 is 1/(1 − 1/3) — the plain geometric sum, ignoring the coefficients.",
+  "4/9 is (1 − 1/3)², the reciprocal of the answer.",
+  "3 does not match; it comes from a wrong ratio."],
+ sol:"Σ n x^(n−1) = 1/(1 − x)². With x = 1/3: 1/(2/3)² = <b>9/4</b>."},
+
+{id:20, lec:"L-2", blk:"Finite sum", topic:"Finite A.G.P. via S − rS",
+ q:"The sum S = 1 + 2·2 + 3·2² + … + n·2^(n−1) equals",
+ opts:["(n − 1)·2ⁿ + 1","n·2ⁿ − 1","(n + 1)·2ⁿ − 1","n·2^(n−1)"],
+ ans:0,
+ why:[
+  "Correct. Using S − 2S telescopes to S = (n − 1)·2ⁿ + 1.",
+  "n·2ⁿ − 1 is close but the coefficient of 2ⁿ should be (n − 1), not n.",
+  "(n + 1)·2ⁿ − 1 over-counts the leading coefficient.",
+  "n·2^(n−1) is just the last term, not the sum."],
+ sol:"S = Σ r·2^(r−1). Compute S − 2S = (1 + 2 + 2² + … + 2^(n−1)) − n·2ⁿ = (2ⁿ − 1) − n·2ⁿ, so −S = (2ⁿ − 1) − n·2ⁿ ⇒ S = <b>(n − 1)·2ⁿ + 1</b>. Check n = 3: 1 + 4 + 12 = 17 = 2·8 + 1. ✓"},
+
+{id:21, lec:"L-2", blk:"Convergence", topic:"When an infinite A.G.P. converges",
+ q:"The infinite sum of an A.G.P. [a + (n−1)d]r^(n−1) exists (is finite) provided",
+ opts:["|r| &lt; 1","|r| &gt; 1","r = 1","d = 0"],
+ ans:0,
+ why:[
+  "Correct. Convergence needs the geometric factor to shrink: |r| &lt; 1.",
+  "|r| &gt; 1 makes the terms grow without bound — the sum diverges.",
+  "r = 1 turns it into an ordinary A.P., which diverges for d ≠ 0.",
+  "d = 0 reduces it to a G.P.; convergence still requires |r| &lt; 1, so d = 0 alone is not the condition."],
+ sol:"An A.G.P. converges iff its geometric ratio satisfies <b>|r| &lt; 1</b>, giving S∞ = a/(1 − r) + dr/(1 − r)²."},
+
+{id:22, lec:"L-2", blk:"Infinite sum", topic:"S∞ formula applied",
+ q:"The sum to infinity of 2 + 5·(1/2) + 8·(1/2)² + 11·(1/2)³ + … is",
+ opts:["10","8","6","12"],
+ ans:0,
+ why:[
+  "Correct. Here a = 2, d = 3, r = 1/2: S∞ = a/(1−r) + dr/(1−r)² = 2/(1/2) + 3·(1/2)/(1/4) = 4 + 6 = 10.",
+  "8 comes from forgetting the dr/(1−r)² term partly.",
+  "6 uses only one of the two contributions.",
+  "12 over-counts the arithmetic contribution."],
+ sol:"A.P. part a = 2, d = 3; G.P. ratio r = 1/2. S∞ = 2/(1 − 1/2) + 3·(1/2)/(1 − 1/2)² = 4 + (3/2)/(1/4) = 4 + 6 = <b>10</b>."},
+
+{id:23, lec:"L-2", blk:"Infinite sum", topic:"A.G.P. sum, another set",
+ q:"The sum to infinity 1 + 3/2 + 5/4 + 7/8 + … (numerators in A.P., denominators doubling) equals",
+ opts:["6","4","5","8"],
+ ans:0,
+ why:[
+  "Correct. a = 1, d = 2, r = 1/2: S∞ = 1/(1/2) + 2·(1/2)/(1/4) = 2 + 4 = 6.",
+  "4 is only the a/(1 − r) part.",
+  "5 mixes the two contributions incorrectly.",
+  "8 doubles the geometric-tail contribution."],
+ sol:"Terms are (2r − 1)·(1/2)^(r−1): a = 1, d = 2, r = 1/2. S∞ = 1/(1 − 1/2) + 2·(1/2)/(1 − 1/2)² = 2 + (1)/(1/4) = 2 + 4 = <b>6</b>."},
+
+{id:24, lec:"L-2", blk:"Identify", topic:"Recognising an A.G.P.",
+ q:"Which of these is an arithmetico-geometric series?",
+ opts:[
+  "1 + 2·3 + 3·3² + 4·3³ + …",
+  "3 + 9 + 27 + 81 + …",
+  "1 + 4 + 9 + 16 + …",
+  "1 + 1/2 + 1/3 + 1/4 + …"],
+ ans:0,
+ why:[
+  "Correct. Coefficients 1, 2, 3, 4 (A.P.) times powers of 3 (G.P.) — a genuine A.G.P.",
+  "3, 9, 27, 81 is a pure G.P. (ratio 3), no arithmetic factor.",
+  "1, 4, 9, 16 are the squares Σr² — a power sum, not an A.G.P.",
+  "1, 1/2, 1/3, … is the harmonic series, neither A.P., G.P. nor A.G.P."],
+ sol:"An A.G.P. needs both a linear (A.P.) coefficient and a geometric power. Only <b>1 + 2·3 + 3·3² + …</b> has Tₙ = n·3^(n−1)."},
+
+{id:25, lec:"L-2", blk:"Infinite sum", topic:"A.G.P. with a = 1, d = 3",
+ q:"The sum to infinity 1 + 4·(1/2) + 7·(1/2)² + 10·(1/2)³ + … equals",
+ opts:["8","6","10","5"],
+ ans:0,
+ why:[
+  "Correct. a = 1, d = 3, r = 1/2: S∞ = 1/(1/2) + 3·(1/2)/(1/4) = 2 + 6 = 8.",
+  "6 is the dr/(1−r)² term alone.",
+  "10 over-counts by using the wrong first-term contribution.",
+  "5 under-counts the geometric tail."],
+ sol:"a = 1, d = 3, r = 1/2. S∞ = 1/(1 − 1/2) + 3·(1/2)/(1 − 1/2)² = 2 + (3/2)/(1/4) = 2 + 6 = <b>8</b>."},
+
+{id:26, lec:"L-2", blk:"Method", topic:"The technique for summing an A.G.P.",
+ q:"The standard trick to sum a finite A.G.P. with ratio r is to compute",
+ opts:[
+  "S − rS, which converts the A.P. coefficients into a plain G.P.",
+  "S + rS, doubling every term",
+  "S/r, dividing through by the ratio",
+  "differentiate the series term by term"],
+ ans:0,
+ why:[
+  "Correct. Forming S − rS shifts the series by one place; the differences of the A.P. coefficients are constant (= d), leaving a geometric series plus end terms.",
+  "S + rS does not cause the cancellation that simplifies the sum.",
+  "Dividing by r does not collapse the arithmetic coefficients.",
+  "Differentiation is a route to the infinite sum formula, not the finite S − rS algebra taught here."],
+ sol:"Write S and rS aligned one term to the right; subtracting, <b>S − rS</b>, replaces each coefficient difference by the constant d, turning the middle into a geometric series that sums in closed form."},
+
+/* ---------------- L-3 · Method of differences & telescoping (13) ---------------- */
+{id:27, lec:"L-3", blk:"Telescoping", topic:"Σ 1/[r(r+1)] finite",
+ q:"1/(1·2) + 1/(2·3) + 1/(3·4) + … + 1/[n(n+1)] equals",
+ opts:["n/(n+1)","1/(n+1)","1 − 1/n","(n−1)/n"],
+ ans:0,
+ why:[
+  "Correct. 1/[r(r+1)] = 1/r − 1/(r+1); the sum telescopes to 1 − 1/(n+1) = n/(n+1).",
+  "1/(n+1) is the leftover subtracted term, not the sum.",
+  "1 − 1/n would come from a wrong last term 1/(n−1)·… ",
+  "(n−1)/n telescopes the wrong pair."],
+ sol:"1/[r(r+1)] = 1/r − 1/(r+1). Telescoping: (1 − 1/2) + (1/2 − 1/3) + … + (1/n − 1/(n+1)) = 1 − 1/(n+1) = <b>n/(n+1)</b>."},
+
+{id:28, lec:"L-3", blk:"Telescoping", topic:"Σ 1/[r(r+1)] to infinity",
+ q:"The sum to infinity 1/(1·2) + 1/(2·3) + 1/(3·4) + … equals",
+ opts:["1","1/2","2","∞ (diverges)"],
+ ans:0,
+ why:[
+  "Correct. The finite sum is n/(n+1) → 1 as n → ∞.",
+  "1/2 is only the first term, not the limit.",
+  "2 overshoots; the partial sums never exceed 1.",
+  "It converges — the terms fall like 1/r², so the series is finite."],
+ sol:"n/(n+1) → <b>1</b> as n → ∞. (Contrast the harmonic series Σ1/r, which diverges; here the terms ~1/r² are summable.)"},
+
+{id:29, lec:"L-3", blk:"Telescoping", topic:"Σ 1/[(2r−1)(2r+1)]",
+ q:"1/(1·3) + 1/(3·5) + 1/(5·7) + … + 1/[(2n−1)(2n+1)] equals",
+ opts:["n/(2n+1)","n/(2n−1)","1/(2n+1)","2n/(2n+1)"],
+ ans:0,
+ why:[
+  "Correct. 1/[(2r−1)(2r+1)] = ½[1/(2r−1) − 1/(2r+1)]; telescoping gives ½[1 − 1/(2n+1)] = n/(2n+1).",
+  "n/(2n−1) mishandles the final subtracted term.",
+  "1/(2n+1) is the leftover term, not the whole sum.",
+  "2n/(2n+1) forgets the factor ½ from the partial fractions."],
+ sol:"Partial fractions: 1/[(2r−1)(2r+1)] = ½[1/(2r−1) − 1/(2r+1)]. Sum = ½[1 − 1/(2n+1)] = ½·(2n)/(2n+1) = <b>n/(2n+1)</b>. Check n = 1: 1/3 = 1/3. ✓"},
+
+{id:30, lec:"L-3", blk:"Vₙ method", topic:"Σ 1/[r(r+1)(r+2)] to infinity",
+ q:"The sum to infinity 1/(1·2·3) + 1/(2·3·4) + 1/(3·4·5) + … equals",
+ opts:["1/4","1/2","1/3","1/6"],
+ ans:0,
+ why:[
+  "Correct. 1/[r(r+1)(r+2)] = ½[1/(r(r+1)) − 1/((r+1)(r+2))]; sum = ½·(1/2) = 1/4.",
+  "1/2 forgets the outer factor ½.",
+  "1/3 is the first term, not the limit.",
+  "1/6 is the first term of the series (1/(1·2·3)), not the sum."],
+ sol:"Vₙ method: 1/[r(r+1)(r+2)] = ½[1/(r(r+1)) − 1/((r+1)(r+2))]. Telescoping leaves ½·1/(1·2) = <b>1/4</b>."},
+
+{id:31, lec:"L-3", blk:"Concept", topic:"Idea of the method of differences",
+ q:"The 'method of differences' sums a series by writing each term Tᵣ as",
+ opts:[
+  "f(r) − f(r+1) (or f(r+1) − f(r)) so consecutive parts cancel",
+  "the average of Tᵣ₋₁ and Tᵣ₊₁",
+  "a constant multiple of r",
+  "the product f(r)·f(r+1)"],
+ ans:0,
+ why:[
+  "Correct. If Tᵣ = f(r) − f(r+1), the sum telescopes to f(1) − f(n+1).",
+  "Averaging neighbouring terms does not produce cancellation.",
+  "Assuming Tᵣ ∝ r only works for an A.P., not general series.",
+  "A product form does not telescope; a difference form does."],
+ sol:"Express Tᵣ = f(r) − f(r+1). Then ΣTᵣ = f(1) − f(n+1): all interior terms cancel — the essence of <b>telescoping</b>."},
+
+{id:32, lec:"L-3", blk:"Factorials", topic:"Σ r/(r+1)!",
+ q:"The sum to infinity 1/2! + 2/3! + 3/4! + … (i.e. Σ r/(r+1)!) equals",
+ opts:["1","1/2","2","e − 1"],
+ ans:0,
+ why:[
+  "Correct. r/(r+1)! = 1/r! − 1/(r+1)!; telescoping gives 1/1! − 0 = 1.",
+  "1/2 is only the first term.",
+  "2 overshoots the telescoped limit.",
+  "e − 1 is Σ 1/r!, a different series."],
+ sol:"r/(r+1)! = (r+1 − 1)/(r+1)! = 1/r! − 1/(r+1)!. Sum to ∞ = 1/1! − lim 1/(n+1)! = <b>1</b>. Check first term 1/2! = 1/2 = 1/1! − 1/2!. ✓"},
+
+{id:33, lec:"L-3", blk:"Surds", topic:"Telescoping with surds",
+ q:"1/(√1+√2) + 1/(√2+√3) + … + 1/(√n + √(n+1)) equals",
+ opts:["√(n+1) − 1","√(n+1) + 1","√n − 1","(√(n+1) − 1)/2"],
+ ans:0,
+ why:[
+  "Correct. Rationalise: 1/(√r + √(r+1)) = √(r+1) − √r; telescoping gives √(n+1) − 1.",
+  "√(n+1) + 1 has the wrong sign on the leftover term.",
+  "√n − 1 uses the wrong final surd.",
+  "The factor ½ is spurious — rationalising by (√(r+1) − √r) leaves denominator 1."],
+ sol:"Multiply each term by (√(r+1) − √r)/(√(r+1) − √r): denominator (r+1) − r = 1, so Tᵣ = √(r+1) − √r. Telescoping ⇒ <b>√(n+1) − 1</b>. Check n = 1: 1/(1+√2) = √2 − 1. ✓"},
+
+{id:34, lec:"L-3", blk:"Factorials", topic:"Σ r·r!",
+ q:"1·1! + 2·2! + 3·3! + … + n·n! equals",
+ opts:["(n+1)! − 1","(n+1)!","n! − 1","n·n!"],
+ ans:0,
+ why:[
+  "Correct. r·r! = (r+1)! − r!; telescoping gives (n+1)! − 1! = (n+1)! − 1.",
+  "(n+1)! forgets the −1 leftover from the first term.",
+  "n! − 1 uses the wrong top factorial.",
+  "n·n! is just the last term."],
+ sol:"r·r! = (r+1 − 1)·r! = (r+1)! − r!. Telescoping: (2! − 1!) + (3! − 2!) + … + ((n+1)! − n!) = (n+1)! − 1! = <b>(n+1)! − 1</b>. Check n = 2: 1 + 4 = 5 = 3! − 1. ✓"},
+
+{id:35, lec:"L-3", blk:"Method of differences", topic:"nth term when differences are a G.P.",
+ q:"For the series 1, 3, 7, 15, 31, … (each term ≈ double the previous) the nth term is",
+ opts:["2ⁿ − 1","2ⁿ + 1","2^(n−1)","n² − 1"],
+ ans:0,
+ why:[
+  "Correct. Differences 2, 4, 8, 16 form a G.P.; summing them gives Tₙ = 2ⁿ − 1.",
+  "2ⁿ + 1 gives 3, 5, 9 — the wrong start.",
+  "2^(n−1) gives 1, 2, 4, 8 — the differences, not the terms.",
+  "n² − 1 gives 0, 3, 8, 15 — differences don't match."],
+ sol:"First differences are 2, 4, 8, 16 (a G.P.). Tₙ = T₁ + Σ differences = 1 + (2 + 4 + … + 2^(n−1)) = 1 + (2ⁿ − 2) = <b>2ⁿ − 1</b>. Check n = 4: 15 = 16 − 1. ✓"},
+
+{id:36, lec:"L-3", blk:"Telescoping", topic:"Σ 1/[(3r−2)(3r+1)]",
+ q:"1/(1·4) + 1/(4·7) + 1/(7·10) + … + 1/[(3n−2)(3n+1)] equals",
+ opts:["n/(3n+1)","n/(3n−2)","1/[3(3n+1)]","3n/(3n+1)"],
+ ans:0,
+ why:[
+  "Correct. 1/[(3r−2)(3r+1)] = ⅓[1/(3r−2) − 1/(3r+1)]; telescoping gives ⅓[1 − 1/(3n+1)] = n/(3n+1).",
+  "n/(3n−2) mishandles the last subtracted term.",
+  "1/[3(3n+1)] is the leftover term, not the whole sum.",
+  "3n/(3n+1) drops the factor ⅓."],
+ sol:"Partial fractions with gap 3: Tᵣ = ⅓[1/(3r−2) − 1/(3r+1)]. Sum = ⅓[1 − 1/(3n+1)] = ⅓·(3n)/(3n+1) = <b>n/(3n+1)</b>. Check n = 1: 1/4 = 1/4. ✓"},
+
+{id:37, lec:"L-3", blk:"Telescoping", topic:"Numeric telescoping sum",
+ q:"The value of 1/(1·2) + 1/(2·3) + 1/(3·4) + … + 1/(9·10) is",
+ opts:["9/10","10/11","1/10","0.95"],
+ ans:0,
+ why:[
+  "Correct. Sum = n/(n+1) with n = 9 gives 9/10.",
+  "10/11 uses n = 10, but the last term 1/(9·10) means n = 9.",
+  "1/10 is the leftover 1/(n+1), not the sum.",
+  "0.95 is not equal to 9/10 = 0.9."],
+ sol:"Sum to n = 9 terms = 9/(9+1) = <b>9/10</b> = 0.9."},
+
+{id:38, lec:"L-3", blk:"Telescoping", topic:"Σ (2r+1)/[r²(r+1)²]",
+ q:"The sum to infinity 3/(1²·2²) + 5/(2²·3²) + 7/(3²·4²) + … equals",
+ opts:["1","1/2","3/4","2"],
+ ans:0,
+ why:[
+  "Correct. (2r+1)/[r²(r+1)²] = 1/r² − 1/(r+1)²; telescoping gives 1 − 0 = 1.",
+  "1/2 is a partial value, not the limit.",
+  "3/4 is only the first term 3/(1·4).",
+  "2 overshoots the telescoped total."],
+ sol:"Note (2r+1)/[r²(r+1)²] = 1/r² − 1/(r+1)². Telescoping: 1/1² − lim 1/(n+1)² = <b>1</b>. Check first term 3/4 = 1 − 1/4. ✓"},
+
+{id:39, lec:"L-3", blk:"Method of differences", topic:"nth term when 2nd differences are constant",
+ q:"For a series whose first differences are 3, 5, 7, 9, … (an A.P.), the nth term is a polynomial of degree",
+ opts:["2","1","3","0"],
+ ans:0,
+ why:[
+  "Correct. If the first differences form an A.P. (constant second differences), Tₙ is a quadratic — degree 2.",
+  "Degree 1 (linear) would give constant first differences, not an A.P. of differences.",
+  "Degree 3 would need the second differences themselves to form an A.P.",
+  "Degree 0 is a constant sequence — no differences at all."],
+ sol:"Constant kth differences ⇒ Tₙ is degree k. Here the <i>first</i> differences form an A.P., so the <i>second</i> differences are constant ⇒ Tₙ is a <b>degree-2</b> (quadratic) polynomial."},
+
+/* ---------------- L-4 · Means (13) ---------------- */
+{id:40, lec:"L-4", blk:"Definitions", topic:"Arithmetic mean of two numbers",
+ q:"The arithmetic mean (A.M.) of two numbers a and b is",
+ opts:["(a + b)/2","√(ab)","2ab/(a + b)","(a + b)"],
+ ans:0,
+ why:[
+  "Correct. A.M. = (a + b)/2 — the value making a, A.M., b an A.P.",
+  "√(ab) is the geometric mean, not the arithmetic mean.",
+  "2ab/(a + b) is the harmonic mean.",
+  "a + b is the sum, not the mean."],
+ sol:"<b>A.M. = (a + b)/2.</b> It is the middle term of the A.P. a, A.M., b, so 2·A.M. = a + b."},
+
+{id:41, lec:"L-4", blk:"Definitions", topic:"Geometric mean, numeric",
+ q:"The geometric mean of 4 and 9 is",
+ opts:["6","6.5","36","5"],
+ ans:0,
+ why:[
+  "Correct. G.M. = √(4·9) = √36 = 6.",
+  "6.5 = (4 + 9)/2 is the arithmetic mean, not the geometric mean.",
+  "36 = 4·9 is the product, not its square root.",
+  "5 is neither √36 nor any standard mean of 4 and 9."],
+ sol:"<b>G.M. = √(ab) = √(4·9) = √36 = 6.</b>"},
+
+{id:42, lec:"L-4", blk:"Definitions", topic:"Harmonic mean, numeric",
+ q:"The harmonic mean of 3 and 6 is",
+ opts:["4","4.5","2","9/2"],
+ ans:0,
+ why:[
+  "Correct. H.M. = 2ab/(a + b) = 2·18/9 = 4.",
+  "4.5 = (3 + 6)/2 is the arithmetic mean.",
+  "2 comes from mis-forming the reciprocal average.",
+  "9/2 = 4.5 is again the arithmetic mean, not the harmonic."],
+ sol:"<b>H.M. = 2ab/(a + b) = 2·(3·6)/(3 + 6) = 36/9 = 4.</b> (Equivalently 1/H = ½(1/3 + 1/6) = 1/4.)"},
+
+{id:43, lec:"L-4", blk:"Relations", topic:"G² = AH",
+ q:"For two positive numbers with arithmetic mean A, geometric mean G and harmonic mean H, the correct relation is",
+ opts:["G² = A·H","A² = G·H","H² = A·G","G = A·H"],
+ ans:0,
+ why:[
+  "Correct. A = (a+b)/2, H = 2ab/(a+b), so A·H = ab = G² — the G.M. is the geometric mean of A and H.",
+  "A² = G·H is false; test a = 4, b = 9: A = 6.5, G = 6, H ≈ 5.54, A² ≠ GH.",
+  "H² = A·G fails the same numeric test.",
+  "G = A·H has wrong dimensions (product of two means, not their geometric mean)."],
+ sol:"A·H = (a+b)/2 · 2ab/(a+b) = ab = G². Hence <b>G² = A·H</b>, i.e. G is the G.M. of A and H, and A ≥ G ≥ H."},
+
+{id:44, lec:"L-4", blk:"Relations", topic:"Verify G² = AH numerically",
+ q:"For the numbers 8 and 2, A = 5, G = 4. The harmonic mean H is",
+ opts:["3.2","3","4","2.5"],
+ ans:0,
+ why:[
+  "Correct. From G² = A·H: H = G²/A = 16/5 = 3.2. (Directly: 2·16/10 = 3.2.)",
+  "3 is not consistent with G² = AH (would need G² = 15).",
+  "4 = G, not H; H must be less than G here.",
+  "2.5 does not satisfy 5·H = 16."],
+ sol:"H = 2ab/(a+b) = 2·16/10 = <b>3.2</b>. Check: A·H = 5·3.2 = 16 = 4² = G². ✓"},
+
+{id:45, lec:"L-4", blk:"Inserting means", topic:"Insert 3 A.M.s",
+ q:"Three arithmetic means inserted between 2 and 14 are",
+ opts:["5, 8, 11","4, 8, 12","6, 8, 10","5, 8, 12"],
+ ans:0,
+ why:[
+  "Correct. With 3 means, d = (14 − 2)/(3 + 1) = 3, giving 5, 8, 11.",
+  "4, 8, 12 uses d = 4, which would need 2 means between 2 and 14, not 3 (and 2+4·4 = 18 ≠ 14).",
+  "6, 8, 10 is symmetric about 8 but with the wrong spacing (d = 2 doesn't reach 14).",
+  "5, 8, 12 has an unequal step at the end."],
+ sol:"n means ⇒ d = (b − a)/(n + 1) = (14 − 2)/4 = 3. The means are 2 + 3, 2 + 6, 2 + 9 = <b>5, 8, 11</b> (then 14). ✓"},
+
+{id:46, lec:"L-4", blk:"Inserting means", topic:"Insert 2 G.M.s",
+ q:"Two geometric means inserted between 3 and 24 are",
+ opts:["6, 12","9, 18","6, 18","8, 16"],
+ ans:0,
+ why:[
+  "Correct. With 2 means, r = (24/3)^(1/3) = 2, giving 6, 12.",
+  "9, 18 would be arithmetic-like steps, not a G.P. (9/3 = 3 but 18/9 = 2).",
+  "6, 18 gives ratios 2 then 3 — not constant.",
+  "8, 16 gives 8/3 as first ratio — not a valid G.P. from 3."],
+ sol:"n G.M.s ⇒ r = (b/a)^(1/(n+1)) = (24/3)^(1/3) = 8^(1/3) = 2. Means: 3·2, 3·4 = <b>6, 12</b> (then 24). ✓"},
+
+{id:47, lec:"L-4", blk:"Inserting means", topic:"Sum of n inserted A.M.s",
+ q:"If four arithmetic means are inserted between 1 and 26, their sum is",
+ opts:["54","52","27","108"],
+ ans:0,
+ why:[
+  "Correct. The sum of n A.M.s between a and b is n(a + b)/2 = 4·27/2 = 54.",
+  "52 = 4·13 uses the wrong single-mean value.",
+  "27 is the sum a + b, not the sum of the four means.",
+  "108 doubles the correct total."],
+ sol:"Sum of n inserted A.M.s = n × (single A.M.) = n(a + b)/2 = 4·(1 + 26)/2 = 4·13.5 = <b>54</b>."},
+
+{id:48, lec:"L-4", blk:"Inserting means", topic:"Product of n inserted G.M.s",
+ q:"If n geometric means are inserted between a and b, their product equals",
+ opts:["(√(ab))ⁿ","√(ab)","(ab)ⁿ","n·√(ab)"],
+ ans:0,
+ why:[
+  "Correct. The product of n inserted G.M.s is Gⁿ = (√(ab))ⁿ, since each pairs with its mirror to give ab.",
+  "√(ab) is a single G.M., not the product of n of them.",
+  "(ab)ⁿ over-counts by squaring the geometric mean.",
+  "n·√(ab) confuses a sum-like scaling with a product."],
+ sol:"Pairing the kth and (n+1−k)th means gives ab each; overall product = (ab)^(n/2) = <b>(√(ab))ⁿ = Gⁿ</b>."},
+
+{id:49, lec:"L-4", blk:"Build a quadratic", topic:"Find numbers from A and G",
+ q:"Two positive numbers have arithmetic mean 10 and geometric mean 8. The numbers are",
+ opts:["16 and 4","18 and 2","14 and 6","20 and 5"],
+ ans:0,
+ why:[
+  "Correct. They are roots of x² − 2Ax + G² = 0 = x² − 20x + 64, i.e. x = 16, 4.",
+  "18 and 2 give G = 6, not 8.",
+  "14 and 6 give G = √84 ≈ 9.17, not 8.",
+  "20 and 5 give A = 12.5, not 10."],
+ sol:"a, b are roots of x² − 2Ax + G² = 0: x² − 20x + 64 = 0 ⇒ (x − 16)(x − 4) = 0 ⇒ <b>16 and 4</b>. Check A = 10, G = √64 = 8. ✓"},
+
+{id:50, lec:"L-4", blk:"Ordering", topic:"Largest of A, G, H",
+ q:"For two distinct positive numbers, which of A (arithmetic), G (geometric), H (harmonic) is the largest?",
+ opts:["A","G","H","they are always equal"],
+ ans:0,
+ why:[
+  "Correct. For distinct positives, A > G > H strictly.",
+  "G lies between A and H, so it is not the largest.",
+  "H is the smallest of the three.",
+  "They coincide only when the two numbers are equal; for distinct numbers A > G > H."],
+ sol:"<b>A ≥ G ≥ H</b>, with equality iff the numbers are equal. So for distinct positives, the arithmetic mean <b>A</b> is largest."},
+
+{id:51, lec:"L-4", blk:"Definitions", topic:"Harmonic mean via reciprocals",
+ q:"The harmonic mean H of a and b satisfies",
+ opts:["1/H = ½(1/a + 1/b)","H = ½(a + b)","1/H = 1/a + 1/b","H² = ab"],
+ ans:0,
+ why:[
+  "Correct. The reciprocal of the H.M. is the A.M. of the reciprocals: 1/H = ½(1/a + 1/b).",
+  "½(a + b) is the arithmetic mean, not harmonic.",
+  "1/H = 1/a + 1/b omits the factor ½.",
+  "H² = ab describes the geometric mean (G² = ab), not the harmonic mean."],
+ sol:"H is defined so that 1/a, 1/H, 1/b are in A.P.: <b>1/H = ½(1/a + 1/b)</b>, giving H = 2ab/(a + b)."},
+
+{id:52, lec:"L-4", blk:"Three-term means", topic:"a, b, c in A.P./G.P./H.P.",
+ q:"For three numbers a, b, c, 'b is the geometric mean of a and c' means",
+ opts:["b² = ac","2b = a + c","2/b = 1/a + 1/c","b = (a + c)/2"],
+ ans:0,
+ why:[
+  "Correct. b is the G.M. ⇔ a, b, c are in G.P. ⇔ b² = ac.",
+  "2b = a + c makes b the arithmetic mean (A.P.).",
+  "2/b = 1/a + 1/c makes b the harmonic mean (H.P.).",
+  "b = (a + c)/2 is again the arithmetic mean."],
+ sol:"b is the G.M. of a and c ⇔ a, b, c form a G.P. ⇔ b/a = c/b ⇔ <b>b² = ac</b>."},
+
+/* ---------------- L-5 · Inequalities of means (13) ---------------- */
+{id:53, lec:"L-5", blk:"AM-GM", topic:"Statement and equality case",
+ q:"For positive reals, the A.M.–G.M. inequality A ≥ G becomes an equality (A = G) precisely when",
+ opts:["all the numbers are equal","the numbers are in G.P.","one number is zero","the numbers are in A.P."],
+ ans:0,
+ why:[
+  "Correct. A.M. = G.M. iff every number is equal.",
+  "Being in G.P. does not force equality (e.g. 1, 2, 4 has A = 7/3 > G = 2).",
+  "The numbers must be positive; a zero makes G = 0 and the means unequal.",
+  "Being in A.P. does not give A = G either (e.g. 1, 2, 3)."],
+ sol:"<b>A.M. ≥ G.M.</b>, with equality <b>iff all terms are equal</b>. This equality condition is the key to solving optimisation problems."},
+
+{id:54, lec:"L-5", blk:"AM-GM", topic:"Minimum of x + 1/x",
+ q:"For x > 0, the minimum value of x + 1/x is",
+ opts:["2","1","0","4"],
+ ans:0,
+ why:[
+  "Correct. By A.M. ≥ G.M., x + 1/x ≥ 2√(x·1/x) = 2, attained at x = 1.",
+  "1 is below the achievable minimum.",
+  "0 is impossible for positive x (the expression exceeds 2).",
+  "4 is the minimum of x + 4/x, a different expression."],
+ sol:"A.M. ≥ G.M.: (x + 1/x)/2 ≥ √(x·1/x) = 1, so x + 1/x ≥ <b>2</b>, with equality at x = 1."},
+
+{id:55, lec:"L-5", blk:"AM-GM", topic:"Minimum of a/b + b/a",
+ q:"For positive a, b, the minimum value of a/b + b/a is",
+ opts:["2","1","0","√2"],
+ ans:0,
+ why:[
+  "Correct. a/b + b/a ≥ 2√(a/b · b/a) = 2, with equality when a = b.",
+  "1 is below the minimum.",
+  "0 is unreachable for positive a, b.",
+  "√2 is not the bound; the correct minimum is 2."],
+ sol:"Let t = a/b > 0. Then a/b + b/a = t + 1/t ≥ <b>2</b> by A.M.–G.M., equality at a = b."},
+
+{id:56, lec:"L-5", blk:"AM-GM", topic:"(a+b)(1/a+1/b) ≥ 4",
+ q:"For positive a, b, the minimum value of (a + b)(1/a + 1/b) is",
+ opts:["4","2","1","√(ab)"],
+ ans:0,
+ why:[
+  "Correct. (a + b)(1/a + 1/b) = 2 + a/b + b/a ≥ 2 + 2 = 4, equality at a = b.",
+  "2 is the value of just the a/b + b/a part's bound, not the whole expression.",
+  "1 is far below the minimum.",
+  "√(ab) is dimensionally wrong; the expression is a pure number ≥ 4."],
+ sol:"(a + b)(1/a + 1/b) = 1 + a/b + b/a + 1 = 2 + (a/b + b/a) ≥ 2 + 2 = <b>4</b>, equality when a = b."},
+
+{id:57, lec:"L-5", blk:"AM-GM", topic:"(a+b+c)(1/a+1/b+1/c) ≥ 9",
+ q:"For positive a, b, c, the minimum value of (a + b + c)(1/a + 1/b + 1/c) is",
+ opts:["9","6","3","1"],
+ ans:0,
+ why:[
+  "Correct. By A.M. ≥ G.M. on each factor, (a+b+c) ≥ 3(abc)^(1/3) and (1/a+1/b+1/c) ≥ 3(abc)^(−1/3); the product ≥ 9.",
+  "6 is below the bound.",
+  "3 is the value of a single A.M.–G.M. factor, not the product.",
+  "1 is far below the true minimum of 9."],
+ sol:"(a + b + c)(1/a + 1/b + 1/c) ≥ 3(abc)^(1/3) · 3(abc)^(−1/3) = <b>9</b>, equality when a = b = c."},
+
+{id:58, lec:"L-5", blk:"Optimisation", topic:"Max product with fixed sum",
+ q:"If x + y = 10 with x, y > 0, the maximum value of xy is",
+ opts:["25","20","50","100"],
+ ans:0,
+ why:[
+  "Correct. A.M. ≥ G.M.: √(xy) ≤ (x + y)/2 = 5, so xy ≤ 25, attained at x = y = 5.",
+  "20 is achievable but not maximal (e.g. 2·8 = 16, 4·6 = 24, both below 25).",
+  "50 exceeds the bound xy ≤ 25.",
+  "100 = (x + y)²/... is the square of the sum, not the max product."],
+ sol:"With sum fixed, product is maximised when the numbers are equal: x = y = 5 ⇒ xy = <b>25</b>. (√(xy) ≤ (x+y)/2 = 5.)"},
+
+{id:59, lec:"L-5", blk:"AM-GM", topic:"Minimum of x + 4/x",
+ q:"For x > 0, the minimum value of x + 4/x is",
+ opts:["4","2","8","4√2"],
+ ans:0,
+ why:[
+  "Correct. x + 4/x ≥ 2√(x·4/x) = 2·2 = 4, attained at x = 2.",
+  "2 is the minimum of x + 1/x, a different expression.",
+  "8 is the value at x = 4 or the bound of x + 16/x, not this one.",
+  "4√2 arises from a mis-taken geometric mean."],
+ sol:"A.M. ≥ G.M.: x + 4/x ≥ 2√(x · 4/x) = 2√4 = <b>4</b>, with equality when x = 4/x ⇒ x = 2."},
+
+{id:60, lec:"L-5", blk:"Optimisation", topic:"Max product with fixed sum, three vars",
+ q:"If a + b + c = 3 with a, b, c > 0, the maximum value of abc is",
+ opts:["1","3","9","1/3"],
+ ans:0,
+ why:[
+  "Correct. A.M. ≥ G.M.: (abc)^(1/3) ≤ (a+b+c)/3 = 1, so abc ≤ 1, attained at a = b = c = 1.",
+  "3 exceeds the bound abc ≤ 1.",
+  "9 is far above the maximum.",
+  "1/3 is below the achievable maximum of 1."],
+ sol:"(abc)^(1/3) ≤ (a + b + c)/3 = 1 ⇒ abc ≤ <b>1</b>, equality at a = b = c = 1."},
+
+{id:61, lec:"L-5", blk:"Optimisation", topic:"Min sum with fixed product",
+ q:"For positive a, b, c with abc = 1, the minimum value of a + b + c is",
+ opts:["3","1","9","0"],
+ ans:0,
+ why:[
+  "Correct. A.M. ≥ G.M.: (a + b + c)/3 ≥ (abc)^(1/3) = 1, so a + b + c ≥ 3, at a = b = c = 1.",
+  "1 is below the achievable minimum.",
+  "9 is not forced; the sum can be as small as 3.",
+  "0 is impossible for positive numbers with product 1."],
+ sol:"(a + b + c)/3 ≥ (abc)^(1/3) = 1 ⇒ a + b + c ≥ <b>3</b>, equality when a = b = c = 1."},
+
+{id:62, lec:"L-5", blk:"Ratio from A and G", topic:"a:b when A = 2G",
+ q:"If the arithmetic mean of two positive numbers is twice their geometric mean (A = 2G), then a : b equals",
+ opts:["(2 + √3) : (2 − √3)","(3 + √2) : (3 − √2)","4 : 1","(1 + √3) : (1 − √3)"],
+ ans:0,
+ why:[
+  "Correct. a : b = (A + √(A² − G²)) : (A − √(A² − G²)); with A = 2G this is (2 + √3) : (2 − √3).",
+  "(3 + √2):(3 − √2) comes from A = 3G, not A = 2G.",
+  "4 : 1 would give A/G = 5/4, not 2.",
+  "(1 + √3):(1 − √3) has a negative second term — not two positive numbers."],
+ sol:"a, b = A ± √(A² − G²). With A = 2G: √(4G² − G²) = G√3, so a : b = (2G + G√3) : (2G − G√3) = <b>(2 + √3) : (2 − √3)</b>."},
+
+{id:63, lec:"L-5", blk:"Means in G.P.", topic:"A, G, H form a G.P.",
+ q:"The arithmetic, geometric and harmonic means A, G, H of two positive numbers are themselves in",
+ opts:["Geometric Progression","Arithmetic Progression","Harmonic Progression","no special progression"],
+ ans:0,
+ why:[
+  "Correct. G² = A·H means A, G, H form a G.P. (G is their geometric mean).",
+  "They are in A.P. only if A = G = H, i.e. the numbers are equal.",
+  "The reciprocals relation doesn't make A, G, H harmonic in general.",
+  "There is a definite relation, G² = AH, so 'none' is wrong."],
+ sol:"Since <b>G² = A·H</b>, the three means satisfy the defining property of a G.P.: A, G, H are in <b>Geometric Progression</b>."},
+
+{id:64, lec:"L-5", blk:"AM-GM", topic:"Minimum of 9x² + 1/x²",
+ q:"For x > 0, the minimum value of 9x² + 1/x² is",
+ opts:["6","3","2","9"],
+ ans:0,
+ why:[
+  "Correct. 9x² + 1/x² ≥ 2√(9x²·1/x²) = 2·3 = 6, at 9x² = 1/x² ⇒ x² = 1/3.",
+  "3 halves the correct bound.",
+  "2 is the bound of x² + 1/x², without the factor 9.",
+  "9 is a coefficient, not the minimum."],
+ sol:"A.M. ≥ G.M.: 9x² + 1/x² ≥ 2√(9x² · 1/x²) = 2√9 = <b>6</b>, equality when 9x² = 1/x² ⇒ x⁴ = 1/9."},
+
+{id:65, lec:"L-5", blk:"AM-GM", topic:"n-variable A.M.–G.M.",
+ q:"For n positive numbers a₁, a₂, …, aₙ, the A.M.–G.M. inequality states",
+ opts:[
+  "(a₁ + … + aₙ)/n ≥ (a₁·a₂·…·aₙ)^(1/n)",
+  "(a₁ + … + aₙ)/n ≤ (a₁·…·aₙ)^(1/n)",
+  "(a₁ + … + aₙ) ≥ n·(a₁·…·aₙ)",
+  "(a₁ + … + aₙ)/n = (a₁·…·aₙ)^(1/n) always"],
+ ans:0,
+ why:[
+  "Correct. The arithmetic mean is at least the geometric mean of n positive numbers.",
+  "The inequality goes the other way — A.M. ≥ G.M., not ≤.",
+  "The right side must be the nth root of the product, not n times the product.",
+  "Equality holds only when all the numbers are equal, not always."],
+ sol:"<b>(a₁ + … + aₙ)/n ≥ (a₁·a₂·…·aₙ)^(1/n)</b> for positive numbers, with equality iff a₁ = a₂ = … = aₙ."},
+
+/* ---------------- Strong Box · Mixed PYQ (12) ---------------- */
+{id:66, lec:"SB", blk:"A and G", topic:"Find numbers from A.M. and G.M.",
+ q:"Two positive numbers have arithmetic mean 25 and geometric mean 20. The numbers are",
+ opts:["40 and 10","45 and 5","36 and 14","30 and 20"],
+ ans:0,
+ why:[
+  "Correct. Roots of x² − 50x + 400 = 0 are 40 and 10 (A = 25, G = √400 = 20).",
+  "45 and 5 give G = 15, not 20.",
+  "36 and 14 give G = √504 ≈ 22.4, not 20.",
+  "30 and 20 give A = 25 but G = √600 ≈ 24.5, not 20."],
+ sol:"a, b are roots of x² − 2Ax + G² = 0 = x² − 50x + 400 ⇒ x = (50 ± √(2500 − 1600))/2 = (50 ± 30)/2 = <b>40, 10</b>. ✓"},
+
+{id:67, lec:"SB", blk:"A.G.P.", topic:"Solve for r given the infinite sum",
+ q:"If 1 + 2r + 3r² + 4r³ + … = 9 (|r| &lt; 1), then r equals",
+ opts:["2/3","1/3","3/4","1/2"],
+ ans:0,
+ why:[
+  "Correct. The sum is 1/(1 − r)² = 9 ⇒ (1 − r)² = 1/9 ⇒ 1 − r = 1/3 ⇒ r = 2/3.",
+  "1/3 gives 1/(1 − 1/3)² = 9/4, not 9.",
+  "3/4 gives 1/(1/4)² = 16, not 9.",
+  "1/2 gives 1/(1/2)² = 4, not 9."],
+ sol:"1/(1 − r)² = 9 ⇒ (1 − r)² = 1/9 ⇒ 1 − r = ⅓ (take + root for |r| &lt; 1) ⇒ r = <b>2/3</b>."},
+
+{id:68, lec:"SB", blk:"Fibonacci", topic:"Fibonacci term",
+ q:"The Fibonacci sequence has F₁ = F₂ = 1 and Fₙ = Fₙ₋₁ + Fₙ₋₂. The value of F₁₀ is",
+ opts:["55","34","89","44"],
+ ans:0,
+ why:[
+  "Correct. 1, 1, 2, 3, 5, 8, 13, 21, 34, 55 — the tenth term is 55.",
+  "34 is F₉, one place too early.",
+  "89 is F₁₁, one place too late.",
+  "44 is not a Fibonacci number."],
+ sol:"1, 1, 2, 3, 5, 8, 13, 21, 34, <b>55</b> — F₁₀ = 55."},
+
+{id:69, lec:"SB", blk:"AM-GM equality", topic:"When A.M. = G.M.",
+ q:"If the arithmetic mean of two positive numbers equals their geometric mean, then the numbers",
+ opts:["are equal","are reciprocals of each other","differ by 1","are in the ratio 2 : 1"],
+ ans:0,
+ why:[
+  "Correct. A = G forces (a − b)² = 0, so a = b.",
+  "Reciprocals like 2 and 1/2 have A = 1.25, G = 1 — not equal.",
+  "Differing by 1 (e.g. 3, 4) gives A = 3.5 > G ≈ 3.46.",
+  "Ratio 2:1 (e.g. 4, 2) gives A = 3, G ≈ 2.83 — unequal means."],
+ sol:"A = G ⇒ (a + b)/2 = √(ab) ⇒ (a + b)² = 4ab ⇒ (a − b)² = 0 ⇒ <b>a = b</b>."},
+
+{id:70, lec:"SB", blk:"Telescoping", topic:"Σ r/(r⁴ + r² + 1)",
+ q:"The sum to infinity Σ (from r = 1) of r/(r⁴ + r² + 1) equals",
+ opts:["1/2","1","1/4","1/3"],
+ ans:0,
+ why:[
+  "Correct. r⁴ + r² + 1 = (r² − r + 1)(r² + r + 1), and r/(r⁴+r²+1) = ½[1/(r²−r+1) − 1/(r²+r+1)]; telescoping gives ½·1 = 1/2.",
+  "1 forgets the factor ½ from the partial fractions.",
+  "1/4 mishandles the first block value.",
+  "1/3 is the first term, not the sum."],
+ sol:"Factor r⁴ + r² + 1 = (r² + r + 1)(r² − r + 1). Since (r²+r+1) − (r²−r+1) = 2r, we get r/(r⁴+r²+1) = ½[1/(r²−r+1) − 1/(r²+r+1)]. Note r² − r + 1 at r+1 equals r² + r + 1, so it telescopes to ½·[1/(1²−1+1)] = ½·1 = <b>1/2</b>."},
+
+{id:71, lec:"SB", blk:"Common terms", topic:"Common terms of two A.P.s",
+ q:"The terms common to the A.P.s 2, 5, 8, 11, … and 3, 7, 11, 15, … themselves form an A.P. whose first term and common difference are",
+ opts:["11 and 12","11 and 7","5 and 12","23 and 12"],
+ ans:0,
+ why:[
+  "Correct. The first common term is 11; the common difference of the shared A.P. is lcm(3, 4) = 12.",
+  "The common difference must be lcm(3, 4) = 12, not 7.",
+  "5 is in the first A.P. but not the second; the first common term is 11.",
+  "23 is the second common term, not the first."],
+ sol:"First A.P. step 3, second step 4. Common terms recur every lcm(3, 4) = 12. Smallest common value is 11, so the sequence is <b>11, 23, 35, …</b> — first term 11, common difference 12."},
+
+{id:72, lec:"SB", blk:"A.G.P.", topic:"Finite A.G.P. numeric sum",
+ q:"The value of 1·2⁰ + 2·2¹ + 3·2² + … + 10·2⁹ (i.e. Σ r·2^(r−1) to 10 terms) is",
+ opts:["9217","10240","5121","9216"],
+ ans:0,
+ why:[
+  "Correct. Using S = (n − 1)·2ⁿ + 1 with n = 10: 9·2¹⁰ + 1 = 9·1024 + 1 = 9217.",
+  "10240 = 10·1024 ignores the finite-sum correction.",
+  "5121 uses the wrong coefficient on 2ⁿ.",
+  "9216 = 9·1024 forgets the +1."],
+ sol:"Σ r·2^(r−1) = (n − 1)·2ⁿ + 1. With n = 10: 9·1024 + 1 = <b>9217</b>."},
+
+{id:73, lec:"SB", blk:"A.P.", topic:"Three numbers in A.P. from sum and product",
+ q:"Three numbers in A.P. have sum 15 and product 80. The numbers are",
+ opts:["2, 5, 8","1, 5, 9","3, 5, 7","4, 5, 6"],
+ ans:0,
+ why:[
+  "Correct. Take a − d, a, a + d: sum 3a = 15 ⇒ a = 5; product 5(25 − d²) = 80 ⇒ d² = 9 ⇒ d = 3 ⇒ 2, 5, 8.",
+  "1, 5, 9 has product 45, not 80.",
+  "3, 5, 7 has product 105, not 80.",
+  "4, 5, 6 has product 120, not 80."],
+ sol:"Let terms be 5 − d, 5, 5 + d (sum 15 ⇒ middle 5). Product 5(25 − d²) = 80 ⇒ 25 − d² = 16 ⇒ d² = 9 ⇒ d = 3. Numbers: <b>2, 5, 8</b>. ✓"},
+
+{id:74, lec:"SB", blk:"AM-GM", topic:"Minimum of x² + 1/x²",
+ q:"For x > 0, the minimum value of x² + 1/x² is",
+ opts:["2","1","0","4"],
+ ans:0,
+ why:[
+  "Correct. x² + 1/x² ≥ 2√(x²·1/x²) = 2, attained at x = 1.",
+  "1 is below the achievable minimum.",
+  "0 is impossible for x > 0.",
+  "4 would be the minimum of x² + 4/x² or (x + 1/x)² etc., not this."],
+ sol:"A.M. ≥ G.M.: x² + 1/x² ≥ 2√(x² · 1/x²) = <b>2</b>, equality at x² = 1/x² ⇒ x = 1."},
+
+{id:75, lec:"SB", blk:"Inserting H.M.s", topic:"Insert harmonic means",
+ q:"Four harmonic means inserted between 1 and 1/6 are",
+ opts:["1/2, 1/3, 1/4, 1/5","1/2, 1/4, 1/5, 1/6","2, 3, 4, 5","1/3, 1/4, 1/5, 1/6"],
+ ans:0,
+ why:[
+  "Correct. Reciprocals 1 and 6 with 4 A.M.s inserted are 2, 3, 4, 5; the H.M.s are their reciprocals 1/2, 1/3, 1/4, 1/5.",
+  "1/2, 1/4, 1/5, 1/6 skips 1/3 — the reciprocals wouldn't be an A.P.",
+  "2, 3, 4, 5 are the reciprocals themselves (the A.P.), not the harmonic means.",
+  "1/3, 1/4, 1/5, 1/6 starts one step too far in."],
+ sol:"To insert n H.M.s, insert n A.M.s between the reciprocals. Reciprocals 1 and 6, with 4 A.M.s: d = (6 − 1)/5 = 1 ⇒ 2, 3, 4, 5. The H.M.s are <b>1/2, 1/3, 1/4, 1/5</b>."},
+
+{id:76, lec:"SB", blk:"Power sums", topic:"Σ r(r+1) numeric",
+ q:"The value of 1·2 + 2·3 + 3·4 + … + 10·11 is",
+ opts:["440","385","505","550"],
+ ans:0,
+ why:[
+  "Correct. Σr(r+1) = n(n+1)(n+2)/3 = 10·11·12/3 = 440.",
+  "385 is Σr² up to 10, not Σr(r+1).",
+  "505 does not match the formula.",
+  "550 = 10·55 over-counts."],
+ sol:"Σr(r+1) = n(n+1)(n+2)/3. With n = 10: 10·11·12/3 = 1320/3 = <b>440</b>."},
+
+{id:77, lec:"SB", blk:"A.G.P.", topic:"Infinite A.G.P. numeric sum",
+ q:"The sum to infinity 2 + 4/3 + 6/9 + 8/27 + … equals",
+ opts:["9/2","3","6","4"],
+ ans:0,
+ why:[
+  "Correct. Terms are 2r·(1/3)^(r−1): a = 2, d = 2, r = 1/3 ⇒ S∞ = 2/(2/3) + 2·(1/3)/(2/3)² = 3 + 3/2 = 9/2.",
+  "3 is only the a/(1 − r) part.",
+  "6 over-counts the geometric tail.",
+  "4 uses a wrong ratio."],
+ sol:"a = 2, d = 2, r = 1/3. S∞ = a/(1 − r) + dr/(1 − r)² = 2/(2/3) + 2·(1/3)/(4/9) = 3 + (2/3)·(9/4) = 3 + 3/2 = <b>9/2</b>."}
+
+];
+
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter M-8D mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

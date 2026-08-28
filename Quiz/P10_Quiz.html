@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-10 Circular Motion — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>P-10 · Circular Motion</h1>
+    <p id="heroSub">Lectures L-1 to L-6 + Strong Box · 83 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">83 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-10 Circular Motion · mastery quiz built from lectures L-1 to L-6 and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   P-10 CIRCULAR MOTION — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Angular Kinematics",
+   desc:"angular displacement, velocity and acceleration (θ, ω, α), the link v = ωr and a = ωv, RPM ↔ rad/s, angular speeds of clock hands, revolutions under constant α via θ = ω₀t + ½αt² and ω² = ω₀² + 2αθ, the 1:3:5 successive-interval rule, the change in velocity over an arc |Δv| = 2v sin(Δθ/2), the axial direction of ω, belt- and gear-coupled discs, and what stays constant in uniform circular motion"},
+  {key:"L-2", name:"L-2 · Radial & Tangential Acceleration",
+   desc:"centripetal acceleration a_c = v²/r = ω²r = vω, tangential acceleration a_t = dv/dt = rα, the net acceleration a = √(a_c² + a_t²) of a body speeding up on a circle and the angle it makes with the radius (tanφ = a_t/a_c), a_c and a_t when v = kt or kt², the radius of curvature ρ = v²/a_c, a ∝ r for equal periods, and uniform (a_t = 0) versus non-uniform circular motion"},
+  {key:"L-3", name:"L-3 · Centripetal Force & Horizontal-Circle Applications",
+   desc:"the centripetal force F = mv²/r = mω²r, the zero work it does (always ⊥ to velocity), a coin on a rotating turntable with μmg ≥ mω²r giving ω_max = √(μg/r), the maximum speed and rpm before a whirled string breaks v_max = √(T_max r/m), the radius of curvature and force, F ∝ r for equal periods, and two-sphere whirled strings"},
+  {key:"L-4", name:"L-4 · Motion in a Vertical Circle",
+   desc:"the radial equation T = mv²/r + mg cosθ, tension maximum at the bottom and minimum at the top, the critical speeds v_top = √(gR) and v_bottom = √(5gR) with v_side = √(3gR), the universal result T_bottom − T_top = 6mg, where the string goes slack in the upper half, released-from-horizontal giving T_lowest = 3mg, and speed/KE ratios around the loop"},
+  {key:"L-5", name:"L-5 · Vertical-Circle Applications — Well of Death, Bucket & Hemisphere",
+   desc:"the Well/Globe of Death and rotor with μN = mg, N = mv²/r giving v_min = √(gr/μ), the minimum height 5R/2 to complete a loop from rest, the bucket of water needing v_top = √(gR), a block leaving a smooth convex hemisphere or bridge when N = 0 at cosθ = 2/3 (height 2R/3 below the top), and the normal reaction on a convex crest N = mg − mv²/r"},
+  {key:"L-6", name:"L-6 · Banking, Level Turns & the Conical Pendulum",
+   desc:"the level-road limit v_max = √(μrg), the frictionless banking condition tanθ = v²/(rg), the banked-with-friction range v_max = √(rg(tanθ+μ)/(1−μtanθ)), why the outer rail is raised and its elevation, the conical pendulum (tanθ = v²/(rg) = ω²r/g, period τ = 2π√(Lcosθ/g)), overturning of a car, and the crest/dip normal force N = mg ∓ mv²/r"},
+  {key:"SB", name:"Strong Box · Mixed PYQ",
+   desc:"previous-year problems spanning the whole chapter: a bead on a rotating rod and spring stretch, the ratio of centripetal force to normal reaction, the 5:1 bottom-to-top KE ratio of a critical vertical circle, μ from a maximum banked speed, the angle at which a string slackens, the minimum ω to stick to a rotating drum, the radius of curvature of a projectile, and a skier leaving a hemisphere"}
+];
+
+const QUIZ = [
+
+
+
+/* ===== P10_L1.js ===== */
+{id:1, lec:"L-1", blk:"RPM → rad/s conversion", topic:"Unit conversion",
+ q:"A wheel spins at 300 revolutions per minute. Its angular velocity in rad/s is:",
+ opts:["5", "10π (≈ 31.4)", "600π", "5π/3"],
+ ans:1,
+ why:["divided 300 by 60 to get rev/s but forgot to multiply by 2π","correct: ω = 2πN/60 = 2π(300)/60 = 10π rad/s","multiplied by 2π but forgot to divide the per-minute rate by 60","treated 300 as degrees and used π/180 instead of the rev→rad factor 2π"],
+ sol:"One revolution is 2π rad and 'per minute' means divide by 60 s. So ω = 2πN/60 = 2π × 300 / 60 = 2π × 5 = 10π ≈ 31.4 rad/s. The two operations that trip students are the 2π (rev→rad) and the /60 (min→s); dropping either changes the answer by a large factor. Final: <b>10π ≈ 31.4 rad/s</b>."},
+
+{id:2, lec:"L-1", blk:"Linear from angular speed", topic:"v = ωr",
+ q:"A point lies at radius r = 0.5 m on a disc turning at ω = 4 rad/s. Its linear (tangential) speed is:",
+ opts:["8 m/s", "4 m/s", "2 m/s", "1 m/s"],
+ ans:2,
+ why:["used v = ω/r = 4/0.5 instead of the product ωr","quoted ω itself as the speed, ignoring the radius entirely","correct: v = ωr = 4 × 0.5 = 2 m/s","used ωr² = 4 × 0.25, squaring the radius by mistake"],
+ sol:"The arc relation s = rθ differentiates to v = ωr, valid with ω in rad/s and r in metres. Here v = ωr = 4 × 0.5 = 2 m/s. Note ω must already be in rad/s (it is), and it is the radius, not the diameter, that enters. The common slip is v = ω/r, which even carries the wrong units (1/(m·s)). Final: <b>2 m/s</b>."},
+
+{id:3, lec:"L-1", blk:"Centripetal via ω and v", topic:"a = ωv",
+ q:"A particle in uniform circular motion has angular velocity ω = 5 rad/s and linear speed v = 4 m/s. Its centripetal acceleration is:",
+ opts:["20 m/s²", "16 m/s²", "9 m/s²", "10 m/s²"],
+ ans:0,
+ why:["correct: a = v²/r = (ωr)ω = ωv = 5 × 4 = 20 m/s²","used a = v² = 16, i.e. took r = 1 m and dropped the ω factor","added ω + v = 5 + 4, combining the two rates instead of multiplying","used ½ωv = 10, importing a spurious ½ from a kinematics formula"],
+ sol:"Centripetal acceleration is a = v²/r. Since v = ωr, write r = v/ω, giving a = v²/(v/ω) = ωv. Numerically a = ωv = 5 × 4 = 20 m/s². Equivalently a = ω²r; both routes agree. The trap a = v² = 16 silently assumes r = 1 m; the true radius here is r = v/ω = 0.8 m, and v²/0.8 = 20 confirms the result. Final: <b>20 m/s²</b>."},
+
+{id:4, lec:"L-1", blk:"Angular velocity of clock hands", topic:"Clock ω",
+ q:"The angular velocity of the second hand of a clock (which completes one revolution in 60 s) is:",
+ opts:["π/1800 rad/s (≈ 1.75×10⁻³)", "1/60 rad/s (≈ 0.017)", "π/30 rad/s (≈ 0.105)", "π/21600 rad/s (≈ 1.45×10⁻⁴)"],
+ ans:2,
+ why:["used T = 3600 s — that is the minute hand's period, not the second hand's","divided 1 by 60 and forgot the 2π, so this is rev/s not rad/s","correct: ω = 2π/T = 2π/60 = π/30 rad/s","used T = 43200 s (12 h) — that is the hour hand's period"],
+ sol:"For uniform rotation ω = 2π/T, where T is the time for one full turn. The second hand sweeps 2π rad every 60 s, so ω = 2π/60 = π/30 ≈ 0.105 rad/s. For comparison the minute hand (T = 3600 s) gives π/1800 and the hour hand (T = 43200 s) gives π/21600 — both distractors here. Final: <b>π/30 ≈ 0.105 rad/s</b>."},
+
+{id:5, lec:"L-1", blk:"Revolutions under constant α", topic:"θ = ω₀t + ½αt²",
+ q:"A wheel starts from rest and accelerates uniformly at α = 4π rad/s² for 5 s. How many complete revolutions does it make?",
+ opts:["50", "25", "12.5", "157"],
+ ans:1,
+ why:["dropped the ½ in θ = ½αt², getting 100π rad → 50 rev","correct: θ = ½αt² = ½(4π)(25) = 50π rad → 50π/2π = 25 rev","applied the ½ twice (once in the formula, once again), halving 25","reported θ = 50π ≈ 157 rad as if radians were revolutions, skipping ÷2π"],
+ sol:"From rest, ω₀ = 0, so θ = ω₀t + ½αt² = ½ × 4π × 5² = ½ × 4π × 25 = 50π rad. Revolutions N = θ/2π = 50π/2π = 25. The final ÷2π is the only place the 'revolution' unit enters — omit it and you report 50π ≈ 157 by mistake. Final: <b>25 revolutions</b>."},
+
+{id:6, lec:"L-1", blk:"Final ω from angle swept", topic:"ω² = ω₀² + 2αθ",
+ q:"A disc starting from rest turns through θ = 6 rad under constant angular acceleration α = 3 rad/s². Its angular velocity at that instant is:",
+ opts:["4.24 rad/s", "18 rad/s", "36 rad/s", "6 rad/s"],
+ ans:3,
+ why:["dropped the factor 2, using ω = √(αθ) = √18 ≈ 4.24","stopped at αθ = 18 without taking the square root","stopped at 2αθ = 36, forgetting to take the square root","correct: ω = √(2αθ) = √(2·3·6) = √36 = 6 rad/s"],
+ sol:"With ω₀ = 0, the equation ω² = ω₀² + 2αθ gives ω² = 2αθ = 2 × 3 × 6 = 36, so ω = √36 = 6 rad/s. The two frequent slips are forgetting the 2 (giving √18 ≈ 4.24) and forgetting the square root (reporting 36). Final: <b>6 rad/s</b>."},
+
+{id:7, lec:"L-1", blk:"Angle in successive equal intervals", topic:"1 : 3 : 5 rule",
+ q:"A wheel starts from rest with constant angular acceleration and turns through 2 rad during the 1st second. Through what angle does it turn during the 3rd second?",
+ opts:["6 rad", "18 rad", "10 rad", "14 rad"],
+ ans:2,
+ why:["used the wrong ratio 1:2:3, taking the 3rd term as 3 × 2","reported the total angle swept in 3 s (½α·3² = 18 rad), not the 3rd-second slice","correct: intervals go 1:3:5, so 3rd second = 5 × 2 = 10 rad","used the 4th term of 1:3:5:7, taking 7 × 2 by miscounting the interval"],
+ sol:"For motion from rest under constant α, the angles swept in the 1st, 2nd, 3rd … seconds are in the ratio 1:3:5:… (the odd numbers). If the 1st second is 2 rad, the 3rd second is 5 × 2 = 10 rad. Check: θ(3s) − θ(2s) with α = 4 rad/s² (since ½α = 2) gives ½·4·9 − ½·4·4 = 18 − 8 = 10 rad. Final: <b>10 rad</b>."},
+
+{id:8, lec:"L-1", blk:"Change in velocity over an arc", topic:"|Δv| = 2v·sin(Δθ/2)",
+ q:"A particle moves in a circle at a constant speed of 5 m/s. The magnitude of the change in its velocity after it completes half a revolution is:",
+ opts:["0", "10 m/s", "5 m/s", "7.07 m/s"],
+ ans:1,
+ why:["assumed |Δv| = 0 because the speed is constant — but velocity is a vector that reverses","correct: |Δv| = 2v·sin(Δθ/2) = 2(5)·sin(90°) = 2v = 10 m/s","gave the speed v itself, ignoring that the two velocity vectors are opposed","used a quarter revolution (Δθ = 90°): 2v·sin45° = 5√2 ≈ 7.07"],
+ sol:"Velocity changes because its direction changes even at constant speed: |Δv| = 2v·sin(Δθ/2). Over half a revolution Δθ = π (180°), so |Δv| = 2v·sin(90°) = 2v = 2 × 5 = 10 m/s. Physically the velocity vector flips to the exact opposite, so the change is v − (−v) = 2v. Final: <b>10 m/s</b>."},
+
+{id:9, lec:"L-1", blk:"Direction of the ω vector", topic:"Axial / right-hand rule",
+ q:"For a body rotating about a fixed axis, the angular velocity vector ω points:",
+ opts:["tangent to the circular path", "radially inward, toward the centre", "radially outward, away from the centre", "along the axis of rotation, sense given by the right-hand rule"],
+ ans:3,
+ why:["that is the direction of the linear velocity v, not the angular velocity ω","that is the direction of the centripetal acceleration, not ω","no vector in circular motion points radially outward in an inertial frame","correct: ω is axial — along the rotation axis, sense set by the right-hand rule"],
+ sol:"Angular velocity is an axial vector: it lies along the axis of rotation, perpendicular to the plane of motion, not in the plane. Curl the right hand's fingers along the sense of rotation and the extended thumb gives the direction of ω. The tangential direction belongs to v and the inward radial direction to centripetal acceleration — neither is ω. Final: <b>along the axis of rotation, by the right-hand rule</b>."},
+
+{id:10, lec:"L-1", blk:"Constant quantity in UCM", topic:"Uniform circular motion",
+ q:"A particle is in uniform circular motion. Which one of the following remains constant?",
+ opts:["velocity", "speed", "momentum", "acceleration"],
+ ans:1,
+ why:["velocity is a vector; its direction turns continuously, so it is not constant","correct: speed is a scalar and is fixed by definition in uniform circular motion","momentum p = mv is a vector that rotates with the velocity, so it changes","the centripetal acceleration has fixed magnitude but its direction rotates, so it changes"],
+ sol:"'Uniform' means constant speed — a scalar — so speed is the constant quantity. Velocity, momentum and acceleration are all vectors of fixed magnitude but continuously rotating direction, so each of them changes at every instant. Only one scalar option is offered, so there is a single correct answer. Final: <b>speed</b>."},
+
+{id:11, lec:"L-1", blk:"Belt-coupled discs", topic:"Equal rim speed",
+ q:"Two pulleys of radii 10 cm and 25 cm are connected by a taut belt that does not slip. The ratio of the angular velocity of the smaller pulley to that of the larger pulley (ω_small / ω_large) is:",
+ opts:["2.5", "0.4", "1", "6.25"],
+ ans:0,
+ why:["correct: equal rim speed gives ω_small/ω_large = r_large/r_small = 25/10 = 2.5","inverted the ratio, using r_small/r_large = 10/25 = 0.4","assumed both pulleys share the same ω, which is true only for a rigid common shaft","squared the radius ratio, (25/10)² = 6.25, as if v ∝ ωr²"],
+ sol:"A non-slipping belt forces equal rim (linear) speeds: ω₁r₁ = ω₂r₂. Hence ω_small/ω_large = r_large/r_small = 25/10 = 2.5 — the smaller pulley spins faster. (Note: equal ω would apply only if they shared one rigid shaft, not a belt.) Final: <b>2.5</b>."},
+
+{id:12, lec:"L-1", blk:"Average angular acceleration", topic:"Average vs instantaneous α",
+ q:"A fan's speed rises uniformly from 300 rpm to 900 rpm in 10 s. Its average angular acceleration is:",
+ opts:["60 rad/s²", "1 rad/s²", "2π rad/s² (≈ 6.28)", "4π rad/s² (≈ 12.57)"],
+ ans:2,
+ why:["used Δ(rpm)/Δt = 600/10 = 60, leaving the rate in rev/min per second, not rad/s²","converted rpm→rev/s but forgot the 2π, giving (10−5)/10... in rev/s² not rad/s²","correct: Δω = (900−300)(2π/60) = 20π rad/s, so α_avg = 20π/10 = 2π rad/s²","used the sum (900+300) instead of the difference, giving 40π/10 = 4π"],
+ sol:"Average angular acceleration is α_avg = Δω/Δt. Convert both rates: ω changes by (900 − 300) rpm = 600 rpm = 600 × 2π/60 = 20π rad/s. Then α_avg = 20π/10 = 2π ≈ 6.28 rad/s². Because α is constant here, the instantaneous value equals this average; had ω varied non-linearly, only the endpoints would fix the average. Final: <b>2π ≈ 6.28 rad/s²</b>."},
+
+
+/* ===== P10_L2.js ===== */
+{id:13, lec:"L-2", blk:"Radial acceleration", topic:"a_c = v²/r",
+ q:"A stone moves in a circle of radius 2 m with a constant speed of 6 m/s. Its centripetal (radial) acceleration is:",
+ opts:["3 m/s²","36 m/s²","18 m/s²","9 m/s²"],
+ ans:2,
+ why:["This is v/r = 6/2; the speed was not squared, so it is not an acceleration at all.","This is v² alone (36); the division by r was forgotten, effectively taking r = 1 m.","Correct: a_c = v²/r = 6²/2 = 36/2 = 18 m/s², directed toward the centre.","This is v²/r² = 36/4; the radius was squared, which is dimensionally wrong for a_c."],
+ sol:"Centripetal acceleration for uniform circular motion is a_c = v²/r. Substitute v = 6 m/s and r = 2 m: a_c = 6²/2 = 36/2 = <b>18 m/s²</b>. It points radially inward toward the centre. Note v/r (=3) and v² (=36) are common wrong forms."},
+
+{id:14, lec:"L-2", blk:"Radial acceleration", topic:"a_c = ω²r",
+ q:"A particle rotates in a circle of radius 0.5 m with a constant angular speed ω = 4 rad/s. The magnitude of its centripetal acceleration is:",
+ opts:["2 m/s²","8 m/s²","4 m/s²","16 m/s²"],
+ ans:1,
+ why:["This is ωr = 4×0.5, the linear speed v, not the acceleration — ω was not squared.","Correct: a_c = ω²r = 4²×0.5 = 16×0.5 = 8 m/s², directed toward the centre.","This is ω²r² = 16×0.25; the radius was squared instead of appearing to the first power.","This is ω² = 16; the factor r = 0.5 m was dropped entirely."],
+ sol:"With angular speed given, use a_c = ω²r. Here ω²= 4² = 16 rad²/s² and r = 0.5 m, so a_c = 16×0.5 = <b>8 m/s²</b>. The trap is writing ωr (=2, which is the speed v) or ω²r² (=4). Only ω²r has units of m/s²."},
+
+{id:15, lec:"L-2", blk:"Tangential acceleration", topic:"a_t = rα",
+ q:"A wheel of radius 0.4 m spins up with a constant angular acceleration α = 5 rad/s². The tangential (linear) acceleration of a point on its rim is:",
+ opts:["2 m/s²","10 m/s²","12.5 m/s²","0.08 m/s²"],
+ ans:0,
+ why:["Correct: a_t = rα = 0.4×5 = 2 m/s², directed along the tangent to the circle.","This is α²r = 25×0.4; α was squared, which is the form for a_c = ω²r, not for a_t = rα.","This is α/r = 5/0.4; the radius was divided instead of multiplied.","This is r/α = 0.4/5; the roles of radius and angular acceleration are inverted."],
+ sol:"Tangential acceleration links to angular acceleration by a_t = rα. Substitute r = 0.4 m and α = 5 rad/s²: a_t = 0.4×5 = <b>2 m/s²</b>, along the tangent. Squaring α (giving 10) confuses this with the centripetal form ω²r; dividing by r (giving 12.5) is dimensionally wrong."},
+
+{id:16, lec:"L-2", blk:"Net acceleration", topic:"a = √(a_c² + a_t²)",
+ q:"A car speeding up on a circular track has, at one instant, a centripetal acceleration of 3 m/s² and a tangential acceleration of 4 m/s². The magnitude of its total (net) acceleration is:",
+ opts:["7 m/s²","1 m/s²","5 m/s²","√7 m/s²"],
+ ans:2,
+ why:["This is 3 + 4, adding the two perpendicular components linearly instead of in quadrature.","This is 4 − 3, subtracting the components — valid only if they were antiparallel, which they are not.","Correct: a_c ⊥ a_t, so a = √(a_c² + a_t²) = √(9+16) = √25 = 5 m/s².","This is √(4²−3²) = √7; the components were combined as a difference of squares, not a sum."],
+ sol:"The radial and tangential accelerations are always perpendicular, so they add by Pythagoras: a = √(a_c² + a_t²) = √(3² + 4²) = √(9+16) = √25 = <b>5 m/s²</b>. Adding them directly (7) ignores that they are at 90°; this is the classic 3-4-5 combination."},
+
+{id:17, lec:"L-2", blk:"Direction of net acceleration", topic:"tanφ = a_t/a_c",
+ q:"At an instant a particle on a circle has centripetal acceleration a_c = 3 m/s² and tangential acceleration a_t = 3√3 m/s². The angle the net acceleration makes with the radius (the centripetal direction) is:",
+ opts:["60°","30°","45°","90°"],
+ ans:0,
+ why:["Correct: measured from the radius, tanφ = a_t/a_c = 3√3/3 = √3, so φ = 60°.","This is tan⁻¹(a_c/a_t) = tan⁻¹(1/√3); that angle is measured from the tangent (velocity), not the radius.","This assumes a_t = a_c, but here a_t = √3·a_c, so the angle is not 45°.","This would require a_c = 0 (purely tangential); here a_c ≠ 0, so the net vector is not along the tangent."],
+ sol:"The net acceleration is the vector sum of a_c (along the radius) and a_t (along the tangent), which are perpendicular. The angle from the radial direction satisfies tanφ = a_t/a_c = 3√3/3 = √3, giving φ = <b>60°</b>. Measuring from the tangent instead would give the complement, 30°."},
+
+{id:18, lec:"L-2", blk:"Uniform circular motion", topic:"direction of a in UCM",
+ q:"A body moves in uniform circular motion (constant speed). At every instant its acceleration is directed:",
+ opts:["Along the tangent, in the direction of motion","Radially inward, toward the centre","Radially outward, away from the centre","Zero, because the speed does not change"],
+ ans:1,
+ why:["A tangential acceleration would change the speed; in UCM the speed is constant, so a_t = 0.","Correct: with constant speed a_t = 0, leaving only a_c = v²/r pointing radially inward to the centre.","The acceleration points toward the centre, not away; 'centrifugal outward' is a pseudo-force, not the real acceleration.","Speed is constant but velocity direction changes, so acceleration is not zero — it is v²/r inward."],
+ sol:"In uniform circular motion the speed is constant, so the tangential acceleration dv/dt = 0. The velocity direction still changes, requiring a centripetal acceleration a_c = v²/r = ω²r directed <b>radially inward, toward the centre</b>. It is perpendicular to the velocity and does no work, which is why the speed stays constant."},
+
+{id:19, lec:"L-2", blk:"a_c for v = kt", topic:"a_c = v²/r at an instant",
+ q:"A particle moves on a circle of radius 9 m with speed increasing as v = 3t (SI units). Its centripetal acceleration at t = 3 s is:",
+ opts:["3 m/s²","81 m/s²","1 m/s²","9 m/s²"],
+ ans:3,
+ why:["This is dv/dt = 3, the tangential acceleration a_t, not the centripetal acceleration that was asked.","This is v² = 9² = 81; the division by r was omitted.","This is v/r = 9/9; the speed was not squared before dividing by r.","Correct: at t = 3 s, v = 3(3) = 9 m/s, so a_c = v²/r = 81/9 = 9 m/s²."],
+ sol:"First find the speed at the instant: v = 3t = 3(3) = 9 m/s. Then a_c = v²/r = 9²/9 = 81/9 = <b>9 m/s²</b>. Note dv/dt = 3 m/s² is the tangential acceleration (constant here), a different quantity from the centripetal acceleration the question asks for."},
+
+{id:20, lec:"L-2", blk:"a_t for v = kt²", topic:"a_t = dv/dt",
+ q:"A particle's speed on a circular path grows as v = 2t² (SI units). Its tangential acceleration at t = 2 s is:",
+ opts:["2 m/s²","4 m/s²","16 m/s²","8 m/s²"],
+ ans:3,
+ why:["This is the coefficient k = 2; the speed was treated as v = kt, so dv/dt was taken as constant k.","This is 2k = 4; only the constant was differentiated, dropping the factor of t from d(t²)/dt.","This is 4t² = 4(2²) at t = 2 s; the speed's coefficient was scaled but the expression was never differentiated.","Correct: a_t = dv/dt = d(2t²)/dt = 4t = 4(2) = 8 m/s²."],
+ sol:"Tangential acceleration is a_t = dv/dt. Differentiate v = 2t²: dv/dt = 4t. At t = 2 s, a_t = 4(2) = <b>8 m/s²</b>. Because v grows as t² the tangential acceleration is not constant — treating it as the constant coefficient (2 or 4) is the usual error."},
+
+{id:21, lec:"L-2", blk:"Radius of curvature", topic:"ρ = v²/a_c",
+ q:"At a point on a curved path a particle has speed 20 m/s and its acceleration component normal (perpendicular) to the velocity is 10 m/s². The radius of curvature of the path there is:",
+ opts:["40 m","2 m","400 m","20 m"],
+ ans:0,
+ why:["Correct: the normal acceleration is v²/ρ, so ρ = v²/a_n = 20²/10 = 400/10 = 40 m.","This is v/a_n = 20/10; the speed was not squared, giving wrong units for a length.","This is v² = 400; the division by the normal acceleration was omitted.","This is just v = 20; neither the square nor the division was carried out."],
+ sol:"The component of acceleration perpendicular to the velocity provides the turning: a_n = v²/ρ. Solving for the radius of curvature, ρ = v²/a_n = 20²/10 = 400/10 = <b>40 m</b>. Only the normal (centripetal) component sets ρ; any tangential component changes speed, not curvature."},
+
+{id:22, lec:"L-2", blk:"a ∝ r", topic:"equal periods",
+ q:"Two particles revolve in circles of radii in the ratio 1 : 4 with the same period T. The ratio of their centripetal accelerations is:",
+ opts:["4 : 1","1 : 16","1 : 4","1 : 2"],
+ ans:2,
+ why:["This inverts the relation, as if a_c ∝ 1/r; that holds for fixed speed, not for fixed period.","This is the ratio of r², from writing a_c ∝ r² instead of a_c ∝ r.","Correct: equal T means equal ω, so a_c = ω²r ∝ r, giving the ratio 1 : 4 directly.","This is the square root of the radius ratio, which corresponds to no correct relation here."],
+ sol:"With the same period, both share the same angular speed ω = 2π/T. Then a_c = ω²r, so with ω fixed a_c ∝ r. The acceleration ratio equals the radius ratio, <b>1 : 4</b>. (If instead the speeds were equal, a_c = v²/r would give the inverse ratio 4 : 1 — but here the periods, not the speeds, match.)"},
+
+{id:23, lec:"L-2", blk:"Uniform vs non-uniform", topic:"a_t = 0 condition",
+ q:"Circular motion is called 'uniform' precisely when:",
+ opts:["The net acceleration is zero","The tangential acceleration is zero","The centripetal acceleration is zero","Both the centripetal and tangential accelerations are zero"],
+ ans:1,
+ why:["The net acceleration is never zero in circular motion; even at constant speed a_c = v²/r remains.","Correct: uniform means constant speed, i.e. a_t = dv/dt = 0, while a_c = v²/r still curves the path.","If a_c were zero the path would be a straight line, not a circle at all.","Zero total acceleration means no force and straight-line motion, which is not circular motion."],
+ sol:"'Uniform' circular motion means the speed is constant, which requires the tangential acceleration a_t = dv/dt = <b>0</b>. The centripetal acceleration a_c = v²/r is never zero for a real circle — it continually turns the velocity. Non-uniform circular motion is exactly the case a_t ≠ 0."},
+
+{id:24, lec:"L-2", blk:"Clock hand acceleration", topic:"a_c = ω²r, second hand",
+ q:"The second hand of a clock is 0.1 m long. The centripetal acceleration of its tip is closest to:",
+ opts:["1.05×10⁻² m/s²","1.1×10⁻⁴ m/s²","1.05×10⁻¹ m/s²","1.1×10⁻³ m/s²"],
+ ans:3,
+ why:["This is ωr = 0.1047×0.1, the tip's linear speed v, not its acceleration — ω was not squared.","This drops a factor of 10, e.g. from using r = 0.01 m or an extra decimal slip.","This is ten times too large, e.g. from ωr with r kept as 1 m or a misplaced power of ten.","Correct: ω = 2π/60 ≈ 0.1047 rad/s, so a_c = ω²r = 0.1047²×0.1 ≈ 1.1×10⁻³ m/s²."],
+ sol:"The second hand completes one turn in T = 60 s, so ω = 2π/60 ≈ 0.1047 rad/s. Then a_c = ω²r = (0.1047)²×0.1 ≈ 0.01097×0.1 ≈ <b>1.1×10⁻³ m/s²</b>, directed toward the centre. Using ωr instead gives the tip speed (≈1.05×10⁻² m/s), a different quantity."},
+
+
+/* ===== P10_L3.js ===== */
+{id:25, lec:"L-3", blk:"Centripetal force", topic:"F = mv²/r",
+ q:"A stone of mass 0.5 kg is whirled in a horizontal circle of radius 1 m at a steady speed of 4 m/s. The centripetal force on it is:",
+ opts:["2 N","4 N","8 N","16 N"],
+ ans:2,
+ why:["Used mv/r and forgot to square the speed.","Halved it using mv²/2r as if it were an energy term.","Correct: F = mv²/r = 0.5·16/1 = 8 N.","Doubled it, using 2mv²/r by mistake."],
+ sol:"Centripetal force keeps the body on the circle: F = mv²/r. Substitute m = 0.5 kg, v = 4 m/s, r = 1 m → F = 0.5·(4)²/1 = 0.5·16 = <b>8 N</b>, directed towards the centre. Note it also equals mω²r with ω = v/r = 4 rad/s: 0.5·16·1 = 8 N."},
+{id:26, lec:"L-3", blk:"Work-energy", topic:"Work by centripetal force",
+ q:"A particle moves in a horizontal circle of radius r under a centripetal force F at constant speed. The work done by the centripetal force in one complete revolution is:",
+ opts:["Zero","F × 2πr","½mv²","2πr·F/r"],
+ ans:0,
+ why:["Correct: the force is ⊥ to velocity at every instant, so W = 0.","Multiplied the force by the circumference as if W = F·distance.","Confused the work with the kinetic energy of the particle.","Multiplied force by path length, ignoring that F ⊥ displacement."],
+ sol:"The centripetal force always points to the centre, exactly perpendicular to the tangential velocity (and to the displacement). Since W = F·s·cosθ with θ = 90° at every instant, cos90° = 0, so the work is <b>zero</b> over any path, including a full revolution. The speed, and hence kinetic energy, stays unchanged — consistent with zero net work."},
+{id:27, lec:"L-3", blk:"UCM geometry", topic:"Angle F vs v",
+ q:"For a particle in uniform circular motion, the angle between the centripetal force and the instantaneous velocity is always:",
+ opts:["0°","45°","180°","90°"],
+ ans:3,
+ why:["Would mean force along the motion, which only changes speed.","No geometry gives a fixed 45° between them here.","Anti-parallel would be a decelerating tangential force.","Correct: velocity is tangential, force radial-inward, so they are ⊥."],
+ sol:"In uniform circular motion the velocity is tangent to the circle while the centripetal force (and acceleration) points along the radius towards the centre. A tangent and a radius meet at a right angle, so the angle is <b>90°</b> at every instant. This perpendicularity is exactly why the force changes the direction of v but never its magnitude — the speed stays uniform."},
+{id:28, lec:"L-3", blk:"Turntable", topic:"ω_max = √(μg/r)",
+ q:"A coin rests on a turntable at radius 0.1 m. The coefficient of friction is 0.5 (g = 10 m/s²). The maximum angular speed at which the coin does not slip is:",
+ opts:["0.71 rad/s","7.07 rad/s","50 rad/s","2.24 rad/s"],
+ ans:1,
+ why:["Used √(μg·r) instead of √(μg/r).","Correct: ω_max = √(μg/r) = √(5/0.1) = √50 ≈ 7.07 rad/s.","Forgot the square root and quoted ω² = μg/r = 50.","Used √(μg), dropping the radius entirely."],
+ sol:"Friction supplies the centripetal force. The coin stays put while μmg ≥ mω²r, i.e. ω² ≤ μg/r. So ω_max = √(μg/r) = √(0.5·10/0.1) = √(5/0.1) = √50 ≈ <b>7.07 rad/s</b>. Beyond this the required mω²r exceeds the maximum static friction μmg and the coin flies off."},
+{id:29, lec:"L-3", blk:"Turntable", topic:"r_max = μg/ω²",
+ q:"A turntable rotates at ω = 4 rad/s. A coin has coefficient of friction 0.4 with it (g = 10 m/s²). The maximum radius at which the coin can be placed without slipping is:",
+ opts:["64 m","1 m","0.25 m","0.025 m"],
+ ans:2,
+ why:["Used r = μgω² instead of dividing by ω².","Divided by ω instead of ω², forgetting to square.","Correct: r = μg/ω² = 4/16 = 0.25 m.","Misplaced a decimal, effectively using g = 1."],
+ sol:"For no slipping, friction must supply the centripetal force: μmg ≥ mω²r, so r ≤ μg/ω². Thus r_max = μg/ω² = (0.4·10)/(4)² = 4/16 = <b>0.25 m</b>. Nearer the centre the demand mω²r is small; past 0.25 m it exceeds μmg and the coin slides outward."},
+{id:30, lec:"L-3", blk:"Breaking string", topic:"v_max = √(T·r/m)",
+ q:"A 0.5 kg ball is whirled in a horizontal circle of radius 2 m on a string that snaps at a tension of 100 N. The maximum speed the ball can have is:",
+ opts:["20 m/s","14.1 m/s","28.3 m/s","400 m/s"],
+ ans:0,
+ why:["Correct: v_max = √(T_max·r/m) = √(100·2/0.5) = √400 = 20 m/s.","Used √(T_max/m), forgetting the r.","Slipped in an extra factor of 2, using √(2T_max·r/m).","Forgot the square root, quoting T·r/m = 400."],
+ sol:"The string tension is the only centripetal force, so at breaking T_max = mv²/r. Solving for v: v_max = √(T_max·r/m) = √(100·2/0.5) = √(200/0.5) = √400 = <b>20 m/s</b>. Any faster and the required tension mv²/r would exceed 100 N and the string breaks."},
+{id:31, lec:"L-3", blk:"Breaking string", topic:"Max rpm from tension",
+ q:"A 0.5 kg stone is whirled in a horizontal circle of radius 0.5 m. The string breaks when the tension reaches 100 N. The maximum number of revolutions per minute is about:",
+ opts:["20 rpm","1200 rpm","400 rpm","191 rpm"],
+ ans:3,
+ why:["Reported ω in rad/s, skipping the rpm conversion.","Used 60ω but forgot to divide by 2π.","Quoted ω² = 400 without rooting or converting.","Correct: ω = √(T/mr) = 20 rad/s → n = 20·60/2π ≈ 191 rpm."],
+ sol:"At breaking, T_max = mω²r, so ω = √(T_max/(mr)) = √(100/(0.5·0.5)) = √(100/0.25) = √400 = 20 rad/s. Convert to rpm: n = ω·60/(2π) = 20·60/6.283 ≈ <b>191 rpm</b>. The conversion factor 60/2π ≈ 9.55 is what turns rad/s into rev/min."},
+{id:32, lec:"L-3", blk:"Radius of curvature", topic:"R = mv²/F",
+ q:"A 2 kg particle moving at 10 m/s experiences a centripetal force of 50 N. The radius of curvature of its path is:",
+ opts:["0.4 m","4 m","2 m","8 m"],
+ ans:1,
+ why:["Used mv/F and dropped one power of the speed.","Correct: R = mv²/F = 2·100/50 = 4 m.","Forgot the mass, using v²/F = 2.","Used F = mv²/2R, giving twice the true value."],
+ sol:"The centripetal force sets the curvature: F = mv²/R, so R = mv²/F = (2·10²)/50 = 200/50 = <b>4 m</b>. A larger force at the same speed bends the path more sharply (smaller R); a heavier or faster particle needs a bigger radius for the same force."},
+{id:33, lec:"L-3", blk:"Proportionality", topic:"F ∝ r at equal period",
+ q:"Two particles of equal mass revolve in horizontal circles with the same period. Their radii are in the ratio 1 : 2. The ratio of the centripetal forces on them is:",
+ opts:["1 : 2","2 : 1","1 : 4","4 : 1"],
+ ans:0,
+ why:["Correct: equal period ⇒ equal ω, so F = mω²r ∝ r → 1 : 2.","Used F = mv²/r with equal v, giving F ∝ 1/r.","Squared the radius, treating F ∝ r².","Combined both the 1/r and squaring slips."],
+ sol:"Equal period means equal angular speed ω (ω = 2π/T). With F = mω²r and both m and ω the same, the force is directly proportional to the radius: F ∝ r. So F₁ : F₂ = r₁ : r₂ = <b>1 : 2</b>. The v²/r form misleads here because the speeds v = ωr are not equal — the larger circle moves faster."},
+{id:34, lec:"L-3", blk:"Concept check", topic:"Which relation is wrong",
+ q:"For a particle in uniform circular motion, which of the following relations is NOT correct?",
+ opts:["a_c = v²/r","a_c = ω²r","F = mωr","v = ωr"],
+ ans:2,
+ why:["Correct relation for centripetal acceleration in terms of v.","Correct relation for centripetal acceleration in terms of ω.","This is the wrong one: centripetal force is F = mω²r, not mωr.","Correct relation linking linear and angular speed."],
+ sol:"The valid relations are a_c = v²/r = ω²r for the centripetal acceleration and v = ωr for the speed. The centripetal force is F = ma_c = mω²r (or mv²/r). The relation <b>F = mωr</b> is dimensionally and physically wrong — it is missing one factor of ω, so it is the incorrect statement to pick."},
+{id:35, lec:"L-3", blk:"Two spheres", topic:"Tension in each segment",
+ q:"Two identical masses m are attached to a light string, one at distance L and the other at 2L from a fixed centre, and the whole system is whirled in a horizontal circle with angular speed ω. The ratio of the tension in the inner segment (centre-to-first mass) to that in the outer segment is:",
+ opts:["1 : 2","2 : 3","2 : 1","3 : 2"],
+ ans:3,
+ why:["Put only the far mass's force on the inner segment.","Computed the ratio the wrong way up (outer : inner).","Assumed both masses sit at L, ignoring the outer being at 2L.","Correct: T_inner = 3mω²L, T_outer = 2mω²L → 3 : 2."],
+ sol:"The outer segment supplies the centripetal force for the outer mass only: T_outer = mω²(2L) = 2mω²L. The inner segment must supply the force for BOTH masses: T_inner = mω²L + mω²(2L) = 3mω²L. So T_inner : T_outer = 3mω²L : 2mω²L = <b>3 : 2</b>. The inner segment always carries the larger tension because it pulls everything beyond it."},
+{id:36, lec:"L-3", blk:"Gramophone coin", topic:"Max rpm before slipping",
+ q:"A coin sits on a gramophone record 0.1 m from the centre; the coefficient of friction is 0.5 (g = 9.8 m/s²). The maximum rotational speed of the record for which the coin does not slip is about:",
+ opts:["7 rpm","67 rpm","49 rpm","420 rpm"],
+ ans:1,
+ why:["Left the answer as ω = 7 rad/s without converting to rpm.","Correct: ω = √(μg/r) = 7 rad/s → n = 7·60/2π ≈ 67 rpm.","Quoted ω² = 49 without rooting or converting.","Used 60ω but forgot to divide by 2π."],
+ sol:"Friction provides the centripetal force, so the coin holds while μmg ≥ mω²r, giving ω_max = √(μg/r) = √(0.5·9.8/0.1) = √49 = 7 rad/s. Converting: n = ω·60/(2π) = 7·60/6.283 ≈ <b>67 rpm</b>. Beyond this the required mω²r exceeds μmg and the coin slides off the record."},
+
+
+/* ===== P10_L4.js ===== */
+{id:37, lec:"L-4", blk:"Critical speed", topic:"min speed at top",
+ q:"A particle of mass m is tied to a light string of length R and whirled in a vertical circle. What is the minimum speed it must have at the highest point to keep the string taut and complete the circle?",
+ opts:["√(2gR)","√(gR)","√(5gR)","√(3gR)"],
+ ans:1,
+ why:["√(2gR) is the launch speed that just lifts a bob to the horizontal level from rest — not a top-point condition.","Correct: T=0 at the top gives mg = mv²/R, so v_min = √(gR).","√(5gR) is the minimum speed needed at the lowest point, not at the top.","√(3gR) is the speed at the horizontal (side) position during a critical loop, not at the top."],
+ sol:"At the highest point the centre is below the particle, so tension and weight both point inward: T + mg = mv²/R. A string cannot push, so the least it supplies is T=0, leaving mg = mv²/R. Hence v²=gR and the minimum top speed is <b>√(gR)</b>."},
+{id:38, lec:"L-4", blk:"Critical speed", topic:"min speed at bottom",
+ q:"For a particle on a string to just complete a vertical circle of radius R, what is the minimum speed it must be given at the lowest point?",
+ opts:["√(gR)","√(3gR)","√(5gR)","√(2gR)"],
+ ans:2,
+ why:["√(gR) is the critical speed at the TOP, not at the bottom.","√(3gR) is the speed at the side position for a critical loop, not the launch speed at the bottom.","Correct: v_top²=gR and energy gives v_bottom² = gR + 4gR = 5gR, so √(5gR).","√(2gR) only lifts the bob to the horizontal level; the circle is not completed."],
+ sol:"The critical top speed is v_top=√(gR). Energy conservation over the height 2R from bottom to top gives v_bottom² = v_top² + 4gR = gR + 4gR = 5gR. So the minimum launch speed at the lowest point is <b>√(5gR)</b>."},
+{id:39, lec:"L-4", blk:"Tension identity", topic:"T_bottom − T_top",
+ q:"A particle completes a vertical circle on a string. Whatever the launch speed, the difference between the tension at the lowest point and the tension at the highest point equals:",
+ opts:["3mg","6mg","2mg","It depends on the launch speed"],
+ ans:1,
+ why:["3mg is the lowest-point tension for a bob released from rest at the horizontal — a specific case, not the general difference.","Correct: T_b − T_t = m(v_b²−v_t²)/R + 2mg = 4mg + 2mg = 6mg, independent of speed.","2mg keeps only the 2mg from the gravity sign flip and forgets the 4mg from v_b²−v_t²=4gR.","The difference is fixed at 6mg because v_b²−v_t²=4gR holds for every launch speed."],
+ sol:"T_b = mv_b²/R + mg and T_t = mv_t²/R − mg. Subtracting: T_b − T_t = m(v_b²−v_t²)/R + 2mg. Energy fixes v_b²−v_t² = 4gR for any speed, so this is 4mg + 2mg = <b>6mg</b>, independent of the launch speed and radius."},
+{id:40, lec:"L-4", blk:"Tension profile", topic:"where T is max",
+ q:"A stone is whirled in a vertical circle on a string. At which position is the tension in the string the greatest?",
+ opts:["At the highest point","At the horizontal (side) position","Where the string first goes slack","At the lowest point"],
+ ans:3,
+ why:["The highest point carries the MINIMUM tension, since gravity there helps the centripetal pull.","The side position gives an intermediate value, T = mv²/R with no gravity component.","A slack point has T=0 by definition — the smallest possible tension, not the largest.","Correct: T = mv_b²/R − 2mg + 3mg cosθ peaks at cosθ = +1 (θ=0), the lowest point."],
+ sol:"Combining the radial law with energy gives T = mv_b²/R − 2mg + 3mg cosθ, with θ from the bottom. Only the 3mg cosθ term varies, and cosθ is largest (+1) at the lowest point, where speed is also greatest. So tension is maximum <b>at the lowest point</b>."},
+{id:41, lec:"L-4", blk:"Tension ratio", topic:"T_max : T_min",
+ q:"A body revolves in a vertical circle of radius r with speed √(7gr) at the lowest point. The ratio of the maximum to the minimum tension in the string is:",
+ opts:["4 : 1","3 : 1","7 : 1","2 : 1"],
+ ans:0,
+ why:["Correct: T_max = 8mg, T_min = 2mg, so the ratio is 4:1.","3:1 would need T_min = 8mg/3; it drops the gravity terms inconsistently.","7:1 keeps only the mv²/r parts (7mg and roughly mg) and ignores the ±mg contributions.","2:1 comes from T_min = 3mg + mg = 4mg, wrongly carrying the bottom-point +mg sign to the top."],
+ sol:"At the bottom T_max = mv_b²/r + mg = 7mg + mg = 8mg. Energy gives v_top² = 7gr − 4gr = 3gr, so T_min = 3mg − mg = 2mg. Ratio = 8mg : 2mg = <b>4 : 1</b>. Check: T_max − T_min = 6mg ✓."},
+{id:42, lec:"L-4", blk:"Released from rest", topic:"released from horizontal",
+ q:"A pendulum bob of mass m on a string of length R is released from rest with the string held horizontal. What is the tension in the string when the bob reaches the lowest point?",
+ opts:["mg","2mg","3mg","6mg"],
+ ans:2,
+ why:["mg ignores the centripetal term mv²/R entirely at the lowest point.","2mg is only the mv²/R part; the weight mg must be added at the bottom.","Correct: falling through R gives v²=2gR, so T = 2mg + mg = 3mg.","6mg is the full-loop lowest-point result (v²=5gR) or the T_b−T_t identity, not this release."],
+ sol:"Dropping from the horizontal, the bob falls a height R, so v² = 2gR at the bottom. The radial law there is T − mg = mv²/R, giving T = mg + 2mg = <b>3mg</b>. Equivalently T = mg(3 − 2cosθ) with θ=90°, which is 3mg."},
+{id:43, lec:"L-4", blk:"Speed profile", topic:"speed at the side",
+ q:"A particle just completes a vertical circle of radius R (given the minimum speed at the bottom). What is its speed when the string is horizontal?",
+ opts:["√(gR)","√(2gR)","√(5gR)","√(3gR)"],
+ ans:3,
+ why:["√(gR) is the speed at the TOP for a critical loop, not at the side.","√(2gR) mistakes the height risen (2R to the top) and only fits a bob released from the horizontal.","√(5gR) is the bottom speed itself, before any height is climbed.","Correct: v_side² = 5gR − 2gR = 3gR, so v = √(3gR)."],
+ sol:"For a just-completed loop v_bottom² = 5gR. The horizontal position is a height R above the bottom, so energy gives v_side² = 5gR − 2gR = 3gR. Hence the side speed is <b>√(3gR)</b>, sitting between √(5gR) at the bottom and √(gR) at the top."},
+{id:44, lec:"L-4", blk:"Slack point", topic:"angle where string slackens",
+ q:"A bob on a string of length R is given a speed √(3gR) at the lowest point. At what angle θ (measured from the lowest point) does the string go slack?",
+ opts:["cosθ = −1/3","cosθ = +1/3","cosθ = −1/2","The string never goes slack"],
+ ans:0,
+ why:["Correct: slack means T=0, giving cosθ = (2gR − v_b²)/(3gR) = (2−3)/3 = −1/3.","+1/3 comes from writing T = mv²/R − mg cosθ, dragging the bottom-point sign to a general angle, and gives an impossible release below the horizontal.","cosθ = −1/2 is the slack angle for v_b² = 3.5gR, not 3gR.","Since 3gR lies between 2gR and 5gR, the bob does leave the circle in the upper half."],
+ sol:"With 2gR &lt; 3gR &lt; 5gR the string slackens in the upper half. Energy: v² = 3gR − 2gR(1−cosθ). Slack: T=0 means v² = −gR cosθ. Equating, 3 − 2(1−cosθ) = −cosθ, so 1 + 3cosθ = 0 and <b>cosθ = −1/3</b> (θ ≈ 109.5°)."},
+{id:45, lec:"L-4", blk:"Boundary case", topic:"exactly √(2gl) launch",
+ q:"A bob on a string of length l is given exactly the speed √(2gl) at the lowest point. Which statement is correct?",
+ opts:["It completes the full vertical circle","It just reaches the horizontal level, where its speed and the tension both fall to zero, and it stays on the circle","The string slackens in the upper half and the bob becomes a projectile","It reaches the top of the circle with speed √(gl)"],
+ ans:1,
+ why:["Completing the circle needs v_b² ≥ 5gl; 2gl falls far short.","Correct: at θ=90°, v² = 2gl − 2gl = 0 and T = mv²/l + mg·0 = 0, so it just reaches the horizontal and stays on the circle.","Slackening in the upper half needs v_b² between 2gl and 5gl; here 2gl is the lower boundary, so the bob does not leave the circle.","Reaching the top needs v_b² = 5gl; with only 2gl the bob never climbs past the horizontal."],
+ sol:"v_b² = 2gl is the boundary between oscillation and leaving the circle. At the horizontal (θ=90°, height l) energy gives v² = 2gl − 2gl = 0, and there tension is mv²/l + mg cos90° = 0. So the bob <b>just reaches the horizontal with zero speed and stays on the circle</b>, then swings back — it never goes slack."},
+{id:46, lec:"L-4", blk:"Rod vs string", topic:"rigid rod minimum speed",
+ q:"A particle is fixed to the end of a light rigid ROD of length R and rotated in a vertical circle. What is the minimum speed at the lowest point needed to complete the circle?",
+ opts:["√(5gR)","2√(gR)","√(gR)","√(2gR)"],
+ ans:1,
+ why:["√(5gR) is the STRING result; a rigid rod can push, so the top speed may be zero.","Correct: a rod allows v_top = 0, so v_bottom² = 0 + 4gR and v_bottom = 2√(gR) = √(4gR).","√(gR) is the string's critical TOP speed, not the rod's bottom speed.","√(2gR) only reaches the horizontal level and is insufficient even for a rod."],
+ sol:"Unlike a string, a rigid rod can push outward, so tension may be negative and the minimum top speed is v_top = 0. Energy over the height 2R gives v_bottom² = 0 + 4gR = 4gR. Hence the minimum launch speed is <b>2√(gR)</b>, smaller than the string's √(5gR)."},
+{id:47, lec:"L-4", blk:"Energy profile", topic:"KE ratio bottom:top",
+ q:"A particle just completes a vertical circle. What is the ratio of its kinetic energy at the lowest point to that at the highest point?",
+ opts:["5 : 1","5 : 3","3 : 1","2 : 1"],
+ ans:0,
+ why:["Correct: KE ∝ v², and v_b² : v_t² = 5gR : gR = 5 : 1.","5:3 is the bottom-to-side ratio (5gR : 3gR), not bottom-to-top.","3:1 is the side-to-top ratio (3gR : gR).","2:1 does not match any pair of positions in a critical vertical circle."],
+ sol:"Kinetic energy is ½mv², so the ratio equals v_b² : v_t². For a just-completed loop v_b² = 5gR and v_t² = gR, giving <b>5 : 1</b>. (The side position sits at 3gR, so bottom:side:top KE goes as 5 : 3 : 1.)"},
+{id:48, lec:"L-4", blk:"Tension calc", topic:"tension at the top",
+ q:"A particle on a string of radius R is given a speed √(6gR) at the lowest point. What is the tension in the string when it reaches the highest point?",
+ opts:["mg","2mg","0","3mg"],
+ ans:0,
+ why:["Correct: v_top² = 6gR − 4gR = 2gR, so T = 2mg − mg = mg.","2mg keeps only mv_top²/R and forgets to subtract mg at the top.","Zero tension needs v_top² = gR, i.e. the critical launch v_b² = 5gR, but here v_b² = 6gR.","3mg uses +mg (the bottom-point sign) instead of −mg at the top."],
+ sol:"Energy over height 2R: v_top² = 6gR − 4gR = 2gR. At the top the radial law is T + mg = mv_top²/R, so T = 2mg − mg = <b>mg</b>. Since v_b² = 6gR exceeds 5gR, the tension stays positive throughout the loop."},
+
+
+/* ===== P10_L5.js ===== */
+{id:49, lec:"L-5", blk:"Well of Death", topic:"v_min formula",
+ q:"A stunt rider circles the inside of the vertical cylindrical wall of a Well of Death of radius r; the coefficient of friction between tyre and wall is μ. The minimum speed at which the rider can ride without sliding down is:",
+ opts:["√(μgr)","√(gr)","√(gr/μ)","√(2gr/μ)"],
+ ans:2,
+ why:["√(μgr) multiplies μ, but friction μN must supply mg, so μ divides: v_min=√(gr/μ)","√(gr) is the top-of-loop / bucket speed; it drops μ, which the well cannot ignore","correct: μN=mg with N=mv²/r gives v²=gr/μ, so v_min=√(gr/μ)","√(2gr/μ) invents a factor 2; the balance μN=mg carries no ½ or 2"],
+ sol:"On a vertical wall the normal reaction N is horizontal and supplies the centripetal force, N=mv²/r. Friction acts vertically up and must carry the weight, f=mg, but f≤μN. At the slowest safe speed friction is fully mobilised: μN=mg → μ(mv²/r)=mg → v²=gr/μ. Hence <b>v_min=√(gr/μ)</b>. N and μ divide because a larger N (faster ride) buys more available friction."},
+{id:50, lec:"L-5", blk:"Well of Death", topic:"v_min numeric",
+ q:"In a Well of Death of radius r=5 m the tyre-wall friction coefficient is μ=0.5. Taking g=10 m/s², the minimum speed the rider needs to avoid slipping down is:",
+ opts:["5 m/s","7.07 m/s","10 m/s","100 m/s"],
+ ans:2,
+ why:["√(μgr)=√(10·5·0.5)=√25=5; here μ has been multiplied instead of divided","√(gr)=√50≈7.07; the friction coefficient was dropped from the formula","correct: √(gr/μ)=√(10·5/0.5)=√100=10 m/s","100 is v²=gr/μ, not v; the square root was not taken"],
+ sol:"Split the forces: horizontally N=mv²/r, vertically the wall friction must hold the weight so μN=mg at the minimum. Eliminating N gives v_min=√(gr/μ). Substituting: v_min=√(10·5/0.5)=√(50/0.5)=√100=<b>10 m/s</b>. Note the mass never enters, and dividing by μ (0.5) increases the requirement — a rougher wall (larger μ) would instead lower it."},
+{id:51, lec:"L-5", blk:"Well of Death", topic:"minimum ω",
+ q:"For the same Well of Death (r=5 m, μ=0.5, g=10 m/s²), the minimum angular speed ω at which the rider must move to stay up is:",
+ opts:["1.41 rad/s","1 rad/s","4 rad/s","2 rad/s"],
+ ans:3,
+ why:["√(g/r)=√2≈1.41; μ was omitted from ω_min=√(g/μr)","√(gμ/r)=√1=1; μ was placed in the numerator instead of the denominator","4=g/(μr); this is ω², the square root was not taken","correct: ω_min=v_min/r=√(gr/μ)/r=√(g/μr)=√(10/(0.5·5))=√4=2 rad/s"],
+ sol:"Since v=ωr, the minimum-speed condition v_min=√(gr/μ) becomes ω_min=v_min/r=√(gr/μ)/r=√(g/(μr)). Substituting: ω_min=√(10/(0.5·5))=√(10/2.5)=√4=<b>2 rad/s</b>. Consistency check: v_min=√(gr/μ)=√100=10 m/s and ω=v/r=10/5=2 rad/s agree. A larger radius or rougher wall would lower this minimum angular speed."},
+{id:52, lec:"L-5", blk:"Loop / Globe", topic:"minimum start height",
+ q:"A small bead is released from rest and slides down a smooth track that feeds into a vertical circular loop of radius R. The minimum release height, measured above the bottom of the loop, needed to just complete the loop is:",
+ opts:["2R","5R/2","R","5R"],
+ ans:1,
+ why:["h=2R is only the height of the loop top; it ignores the √(gR) speed still required there","correct: v_top²=gR and energy mgh=½mv_top²+mg·2R give h=2R+R/2=5R/2","R is merely the radius, far short of the 5R/2 a full loop demands","5R doubles the answer; the correct total is 2R+R/2=5R/2, not 5R"],
+ sol:"At the top of the loop the minimum condition is that gravity alone supplies the centripetal force: mg=mv_top²/R → v_top²=gR. Energy conservation from the release height h to the top (which sits at height 2R): mgh=½mv_top²+mg(2R)=½m(gR)+2mgR. Cancelling m: gh=gR/2+2gR=5gR/2, so <b>h=5R/2</b>. With R=2 m this gives 5 m."},
+{id:53, lec:"L-5", blk:"Loop / Globe", topic:"max loop radius",
+ q:"A block is released from rest at a height h=5 m on a smooth track and then enters a vertical circular loop. Taking g=10 m/s², the maximum loop radius R it can just complete is:",
+ opts:["1 m","2.5 m","5 m","2 m"],
+ ans:3,
+ why:["1 m assumes h=5R (too strict); the real condition is h=5R/2 → R=2h/5","2.5 m uses h=2R (loop-top height only), omitting the ½mv_top² term","5 m uses h=R, ignoring that the top is at 2R and needs speed √(gR)","correct: h=5R/2 → R=2h/5=2·5/5=2 m"],
+ sol:"Completing the loop requires h≥5R/2 (top speed √(gR) plus the 2R climb). The largest loop is the one that just uses up all the drop: h=5R/2, so R_max=2h/5. Substituting h=5 m: R_max=2·5/5=<b>2 m</b>. The height is fixed and independent of mass; only the geometry of the 5R/2 rule sets the ceiling on R."},
+{id:54, lec:"L-5", blk:"Bucket", topic:"v_top numeric",
+ q:"A bucket of water is whirled in a vertical circle of radius R=0.9 m. Taking g=10 m/s², the minimum speed at the top of the circle so that the water does not fall out is:",
+ opts:["3 m/s","4.24 m/s","9 m/s","1.5 m/s"],
+ ans:0,
+ why:["correct: v_top=√(gR)=√(10·0.9)=√9=3 m/s","√(2gR)=√18≈4.24; the top condition is mg=mv²/R, with no factor 2","9 is v²=gR, not v; the square root was not taken","1.5=½·3 halves the speed with no physical basis"],
+ sol:"At the top both gravity and the bucket's normal push act downward toward the centre. The slowest safe whirl has N=0, so gravity alone is centripetal: mg=mv_top²/R → v_top=√(gR). Substituting: v_top=√(10·0.9)=√9=<b>3 m/s</b>. The mass of the water cancels, so it is irrelevant — any smaller speed and the water would need an outward pull nothing can provide, so it spills."},
+{id:55, lec:"L-5", blk:"Leaving a hemisphere", topic:"leaving angle",
+ q:"A particle slides from rest from the top of a smooth convex hemisphere of radius R. It leaves the surface at the angle θ (measured from the vertical through the centre) satisfying:",
+ opts:["cosθ=1/2","cosθ=2/3","cosθ=1/3","cosθ=3/2"],
+ ans:1,
+ why:["cosθ=½ (θ=60°) comes from mis-setting N=mg; the leaving condition is N=0","correct: mg cosθ=mv²/R with v²=2gR(1−cosθ) gives 3cosθ=2, so cosθ=2/3","cosθ=1/3 inverts the algebra; 3cosθ=2 yields 2/3, not 1/3","cosθ=3/2 exceeds 1 and is impossible; the ratio 2/3 was flipped"],
+ sol:"Radially: mg cosθ−N=mv²/R. Energy from the top (drop R(1−cosθ)): v²=2gR(1−cosθ). The particle leaves when the surface stops pushing, N=0: mg cosθ=mv²/R=m·2gR(1−cosθ)/R=2mg(1−cosθ). Cancel mg: cosθ=2−2cosθ → 3cosθ=2 → <b>cosθ=2/3</b> (θ≈48.2°). This is independent of R, g and mass."},
+{id:56, lec:"L-5", blk:"Leaving a hemisphere", topic:"drop at leaving",
+ q:"For a particle sliding from rest off the top of a smooth convex hemisphere of radius R, the vertical distance it descends below the top before leaving the surface is:",
+ opts:["2R/3","R/2","R/3","R"],
+ ans:2,
+ why:["2R/3 is the height of the leaving point above the centre (R cosθ), not the drop below the top","R/2 follows from cosθ=½; the leaving point actually has cosθ=2/3, giving drop R/3","correct: vertical drop=R(1−cosθ)=R(1−2/3)=R/3 below the top","R is the full radius (reaching the base); the particle leaves well before that"],
+ sol:"The particle leaves at cosθ=2/3. Its height above the centre is R cosθ=2R/3, while the top is at height R. So the vertical distance dropped below the top is R−R cosθ=R(1−cosθ)=R(1−2/3)=<b>R/3</b>. Do not confuse the drop below the top (R/3) with the height above the centre (2R/3); the two add to R."},
+{id:57, lec:"L-5", blk:"Leaving a hemisphere", topic:"speed at leaving",
+ q:"The speed of the particle at the instant it leaves the smooth convex hemisphere of radius R is:",
+ opts:["√(gR)","√(2gR)","√(gR/3)","√(2gR/3)"],
+ ans:3,
+ why:["√(gR) uses mg cosθ with cosθ=1; it ignores the descent to the leaving point","√(2gR) assumes the full drop R (cosθ=0), i.e. the base; it leaves at cosθ=2/3","√(gR/3) drops the factor 2 in v²=2gR(1−cosθ)","correct: v²=2gR(1−cosθ)=2gR(1/3)=2gR/3, so v=√(2gR/3)"],
+ sol:"Energy conservation from the top gives v²=2gR(1−cosθ) at any angle θ. The particle leaves at cosθ=2/3, so 1−cosθ=1/3 and v²=2gR(1/3)=2gR/3. Therefore <b>v=√(2gR/3)</b>. Cross-check with the radial law at N=0: v²=gR cosθ=gR(2/3)=2gR/3 — the two routes agree exactly."},
+{id:58, lec:"L-5", blk:"Convex bridge", topic:"normal force at top",
+ q:"A vehicle of mass 2 kg (scaled model) passes the top of a convex bridge of radius 5 m at a constant speed of 5 m/s. Taking g=10 m/s², the normal reaction on it at the top is:",
+ opts:["10 N","20 N","30 N","0 N"],
+ ans:0,
+ why:["correct: N=mg−mv²/r=2·10−2·25/5=20−10=10 N","20 N=mg alone; the −mv²/r reduction at a convex crest was dropped","30 N=mg+mv²/r; the sign is wrong — a convex crest subtracts, a concave dip adds","0 N would need v=√(gr)=√50≈7.07 m/s, faster than the given 5 m/s"],
+ sol:"At the crest of a convex bridge the centre of curvature is below the road, so the net downward force is centripetal: mg−N=mv²/r → N=mg−mv²/r. Substituting: N=2·10−2·(5²)/5=20−(2·25/5)=20−10=<b>10 N</b>. Because N is less than mg (20 N), the vehicle feels lighter at the top; it would lift off (N=0) only at v=√(gr)=√50≈7.07 m/s."},
+{id:59, lec:"L-5", blk:"Conical funnel", topic:"speed in rotating cone",
+ q:"A ball rides the smooth inner wall of a funnel whose semi-vertical angle (between the wall and the vertical axis) is 37°, moving in a horizontal circle of radius 0.3 m. Taking g=10 m/s² and tan37°=0.75, its speed is:",
+ opts:["1.5 m/s","1.73 m/s","2 m/s","4 m/s"],
+ ans:2,
+ why:["√(gr tanα)=√2.25=1.5; tanα was used where cotα=1/tanα is required","√(gr)=1.73; the funnel angle was dropped from v²=gr cotα","correct: v²=gr cotα=gr/tanα=10·0.3/0.75=4, so v=2 m/s","4 is v²=gr/tanα, not v; the square root was not taken"],
+ sol:"For a ball on a smooth cone of semi-vertical angle α, the normal reaction resolves to N sinα=mg (vertical) and N cosα=mv²/r (horizontal). Dividing: cotα=... gives v²=gr cotα=gr/tanα. Substituting: v²=10·0.3/0.75=3/0.75=4, so v=<b>2 m/s</b>. Equivalently r=v²tanα/g, matching the funnel result; the angle must appear as cotα, not tanα."},
+
+
+/* ===== P10_L6.js ===== */
+{id:60, lec:"L-6", blk:"Level turn", topic:"v_max on a flat road",
+ q:"A car rounds a flat (unbanked) curve of radius 150 m. If the coefficient of friction between the tyres and the road is 0.6, what is the maximum speed at which it can turn without skidding? (g = 10 m/s²)",
+ opts:["50 m/s","900 m/s","30 m/s","3 m/s"],
+ ans:2,
+ why:["This is √(rg/μ) — μ has been put in the denominator instead of multiplying, inverting its role.",
+      "This is μrg = 900 itself; the square root was never taken, so the units are m²/s² not m/s.",
+      "Correct: on a level turn friction alone supplies mv²/r, so μmg = mv²_max/r ⟹ v_max = √(μrg) = √(0.6·150·10) = √900 = 30 m/s.",
+      "This is √(μr/g), with g wrongly divided instead of multiplied inside the root."],
+ sol:"On a flat road the only horizontal force is friction, which caps at μmg. Setting it equal to the centripetal need: μmg = mv²/r, so mass cancels and v_max = √(μrg) = √(0.6 × 150 × 10) = √900 = <b>30 m/s</b>. The mass is not needed; it drops out of both sides."},
+
+{id:61, lec:"L-6", blk:"Banking (frictionless)", topic:"optimum/design speed",
+ q:"A road is banked so that a vehicle can round a curve of radius 120 m with no help from friction when tanθ = 0.75. What is this optimum (design) speed? (g = 10 m/s²)",
+ opts:["40 m/s","30 m/s","34.6 m/s","26.8 m/s"],
+ ans:1,
+ why:["Used v = √(rg/tanθ), placing tanθ in the denominator — the tanθ = v²/(rg) relation has been inverted.",
+      "Correct: for zero-friction banking tanθ = v₀²/(rg), so v₀ = √(rg·tanθ) = √(120·10·0.75) = √900 = 30 m/s.",
+      "This is √(rg) = √1200; the tanθ factor was dropped entirely.",
+      "Used sinθ (= 0.6) instead of tanθ in the design-speed formula, giving √720."],
+ sol:"On a frictionless bank the horizontal component of the normal reaction supplies the centripetal force: N sinθ = mv²/r and N cosθ = mg, so tanθ = v₀²/(rg). Hence v₀ = √(rg·tanθ) = √(120 × 10 × 0.75) = √900 = <b>30 m/s</b>. At this one speed the tyres feel no sideways scrub."},
+
+{id:62, lec:"L-6", blk:"Banking (with friction)", topic:"v_max on a banked road",
+ q:"A curve of radius 90 m is banked at 45° (tanθ = 1) and the tyre–road friction coefficient is 0.5. What is the maximum speed at which a car can go round without sliding up and off the bank? (g = 10 m/s²)",
+ opts:["30 m/s","52 m/s","36.7 m/s","17.3 m/s"],
+ ans:1,
+ why:["Used (1 + μtanθ) in the denominator — that is the minimum-speed denominator, not the maximum's (1 − μtanθ).",
+      "Correct: v_max = √[rg(tanθ+μ)/(1−μtanθ)] = √[900(1.5)/(0.5)] = √2700 ≈ 52 m/s.",
+      "Forgot the (1 − μtanθ) denominator entirely, computing only √[rg(tanθ+μ)] = √1350.",
+      "This is v_min = √[rg(tanθ−μ)/(1+μtanθ)] = √300 — the minimum speed, not the maximum."],
+ sol:"Above the design speed the car tends to slide outward and up, so friction acts down the bank. Balancing gives v_max = √[rg(tanθ+μ)/(1−μtanθ)] = √[90·10·(1+0.5)/(1−0.5·1)] = √[900·1.5/0.5] = √2700 ≈ <b>52 m/s</b>. The (1 − μtanθ) denominator is what separates v_max from v_min."},
+
+{id:63, lec:"L-6", blk:"Banking (with friction)", topic:"v_min on a banked road",
+ q:"A curve of radius 120 m is banked at 45° (tanθ = 1) with tyre–road friction coefficient 0.5. Below what minimum speed will the car tend to slide down the bank? (g = 10 m/s²)",
+ opts:["34.6 m/s","24.5 m/s","60 m/s","20 m/s"],
+ ans:3,
+ why:["Used (tanθ+μ) in the numerator — that is the maximum-speed numerator, giving √1200.",
+      "Dropped the (1 + μtanθ) denominator, computing only √[rg(tanθ−μ)] = √600.",
+      "This is v_max = √[rg(tanθ+μ)/(1−μtanθ)] = √3600, the maximum speed, not the minimum.",
+      "Correct: v_min = √[rg(tanθ−μ)/(1+μtanθ)] = √[1200(0.5)/(1.5)] = √400 = 20 m/s."],
+ sol:"Below the design speed the car tends to slip down, so friction acts up the bank. Balancing gives v_min = √[rg(tanθ−μ)/(1+μtanθ)] = √[120·10·(1−0.5)/(1+0.5·1)] = √[1200·0.5/1.5] = √400 = <b>20 m/s</b>. Note the sign flip versus v_max: minus over plus here, plus over minus there."},
+
+{id:64, lec:"L-6", blk:"Concept", topic:"why tracks are banked",
+ q:"Railway tracks are banked (the outer rail raised) on curves mainly so that:",
+ opts:["the weight of the train is reduced on the curve",
+      "the train cannot fall inward toward the centre",
+      "the horizontal component of the normal reaction supplies the centripetal force",
+      "friction between wheel flanges and rail is increased"],
+ ans:2,
+ why:["Weight = mg depends only on mass and g; banking cannot change it (in fact N = mg/cosθ exceeds mg).",
+      "A train on a curve tends to be thrown outward, not inward, and banking is a force-supply device, not an anti-topple one.",
+      "Correct: tilting the bed tilts the normal reaction N, whose horizontal component N sinθ = mv²/r provides the inward force without straining the flanges.",
+      "Banking is designed precisely to avoid relying on flange friction, which is wearing; at the design speed friction is zero."],
+ sol:"On level track the inward mv²/r can only come from the rail pushing sideways on the wheel flanges — a harsh, wearing contact. Raising the outer rail tilts the normal reaction so its horizontal component N sinθ supplies the centripetal force, giving tanθ = v²/(rg). So the correct statement is <b>the horizontal component of the normal reaction supplies the centripetal force</b>."},
+
+{id:65, lec:"L-6", blk:"Banking", topic:"elevation of outer rail",
+ q:"On a curve of radius 50 m a train travels at 10 m/s. If the gauge (separation of the rails) is 1.6 m, by how much should the outer rail be raised above the inner one? (h = ℓ·v²/(rg), g = 10 m/s²)",
+ opts:["8 m","0.2 m","0.032 m","0.32 m"],
+ ans:3,
+ why:["Used tanθ = rg/v² inverted (= 5) before multiplying by the gauge, giving an absurd 8 m rise.",
+      "Gave tanθ = v²/(rg) = 0.2 itself and forgot to multiply by the gauge width ℓ.",
+      "A decimal slipped — v² was read as 10 instead of 100, shrinking the answer tenfold.",
+      "Correct: h ≈ ℓ·tanθ = ℓ·v²/(rg) = 1.6·(100)/(50·10) = 1.6·0.2 = 0.32 m."],
+ sol:"For small banking, the outer-rail lift is h ≈ ℓ·tanθ where ℓ is the gauge. Since tanθ = v²/(rg) = 100/(50·10) = 0.2, the rise is h = 1.6 × 0.2 = <b>0.32 m</b> (32 cm). The gauge multiplies the tangent of the banking angle."},
+
+{id:66, lec:"L-6", blk:"Conical pendulum", topic:"tension in the string",
+ q:"A conical pendulum has a bob of mass 0.5 kg revolving so that the string makes a semi-vertical angle of 60° with the vertical. What is the tension in the string? (g = 10 m/s²)",
+ opts:["2.5 N","8.66 N","10 N","5 N"],
+ ans:2,
+ why:["Wrote T = mg·cosθ instead of mg/cosθ, multiplying by cosθ rather than dividing.",
+      "This is the horizontal component mg·tanθ = 5·√3, not the tension along the string.",
+      "Correct: the vertical balance is T cosθ = mg, so T = mg/cosθ = (0.5·10)/cos60° = 5/0.5 = 10 N.",
+      "This is just mg = 5 N, ignoring the cone angle altogether."],
+ sol:"For a conical pendulum the vertical component of tension carries the weight: T cosθ = mg, while the horizontal component T sinθ = mω²r bends the bob. From the vertical equation T = mg/cosθ = (0.5 × 10)/cos60° = 5/0.5 = <b>10 N</b>. The tension always exceeds mg because cosθ &lt; 1."},
+
+{id:67, lec:"L-6", blk:"Conical pendulum", topic:"period τ = 2π√(Lcosθ/g)",
+ q:"A conical pendulum of string length 0.8 m sweeps a cone whose semi-vertical angle is 60°. What is its period? (g = 10 m/s², π ≈ 3.14)",
+ opts:["1.65 s","1.26 s","1.78 s","0.63 s"],
+ ans:1,
+ why:["Used sinθ instead of cosθ under the root, giving 2π√(0.8·0.866/10).",
+      "Correct: τ = 2π√(Lcosθ/g) = 2π√(0.8·0.5/10) = 2π√0.04 = 2π·0.2 = 1.26 s.",
+      "Dropped the cosθ factor and used τ = 2π√(L/g) instead.",
+      "Used π instead of 2π in front of the root (π·0.2 = 0.63)."],
+ sol:"The period of a conical pendulum is τ = 2π√(Lcosθ/g), where Lcosθ is the vertical height of the cone's apex above the bob. With cos60° = 0.5: τ = 2π√(0.8 × 0.5/10) = 2π√0.04 = 2π × 0.2 = <b>1.26 s</b>. The cosθ shortens the effective length as the cone opens out."},
+
+{id:68, lec:"L-6", blk:"Cyclist", topic:"banking angle of a cyclist",
+ q:"A cyclist rounds a curve of radius 50 m at 20 m/s. To what value must tanθ (θ = angle of lean from vertical) equal for the turn to be safe without relying on friction? (g = 10 m/s²)",
+ opts:["1.25","0.04","0.8","8"],
+ ans:2,
+ why:["Inverted the relation to tanθ = rg/v² = 500/400 = 1.25.",
+      "Used v instead of v² in the numerator: 20/(50·10) = 0.04.",
+      "Correct: leaning cyclist obeys tanθ = v²/(rg) = 400/(50·10) = 0.8.",
+      "Omitted g from the denominator, computing v²/r = 400/50 = 8."],
+ sol:"A leaning cyclist balances just like a banked road: the ground reaction tilts so its horizontal component gives mv²/r while its vertical component carries mg, hence tanθ = v²/(rg) = (20²)/(50 × 10) = 400/500 = <b>0.8</b>. Speed enters as its square, so doubling speed quadruples the required tanθ."},
+
+{id:69, lec:"L-6", blk:"Overturning", topic:"which wheels lift",
+ q:"When a car takes a level curve too fast and begins to overturn, which pair of wheels lifts off the road first?",
+ opts:["The outer wheels","The inner wheels","The front wheels","The rear wheels"],
+ ans:1,
+ why:["The outer wheels are pressed harder into the road, not unloaded, so they are the last to lift.",
+      "Correct: the outward centrifugal tendency shifts load onto the outer wheels and unloads the inner pair, so the inner wheels lift and the car topples outward about the outer wheels.",
+      "Front-versus-rear is set by braking/acceleration pitch, not by the sideways overturning of a turn.",
+      "Rear lift comes from hard braking (pitch), not from cornering; the turn lifts the inner side."],
+ sol:"Cornering makes the car tend to slide outward, throwing weight onto the outer wheels and lightening the inner ones. Overturning is a rotation about the outer wheels, so the <b>inner wheels</b> lift first. The car stays safe while v² ≤ grd/(2h), where d is the track width and h the height of the centre of gravity."},
+
+{id:70, lec:"L-6", blk:"Turning car", topic:"pendulum deflection tanθ = a/g",
+ q:"A small plumb-bob hangs from the roof of a car that is rounding a curve of radius 80 m at 20 m/s. What is tanθ of its deflection from the vertical? (g = 10 m/s²)",
+ opts:["2.0","5","0.25","0.5"],
+ ans:3,
+ why:["Inverted the relation to tanθ = g/a = 10/5 = 2.",
+      "Reported the centripetal acceleration a = 5 m/s² itself, forgetting to divide by g.",
+      "Carried a stray factor of 2, using v²/(2rg) = 400/1600 = 0.25.",
+      "Correct: the bob hangs along the effective gravity, so tanθ = a/g = (v²/r)/g = (400/80)/10 = 5/10 = 0.5."],
+ sol:"In the car's frame the bob feels gravity g down and a pseudo-force of magnitude a = v²/r outward, so it settles along their resultant: tanθ = a/g. Here a = v²/r = 400/80 = 5 m/s², giving tanθ = 5/10 = <b>0.5</b>. The deflection points outward, away from the centre of the curve."},
+
+{id:71, lec:"L-6", blk:"Crest & dip", topic:"normal force at a crest",
+ q:"A car of mass 800 kg passes over the top (crest) of a convex bridge of radius of curvature 20 m at 10 m/s. What is the normal force the road exerts on it? (g = 10 m/s²)",
+ opts:["4000 N","12000 N","8000 N","6000 N"],
+ ans:0,
+ why:["Correct: at a crest the road is below the centre, so mg − N = mv²/r, giving N = mg − mv²/r = 8000 − 4000 = 4000 N.",
+      "Used N = mg + mv²/r — that is the dip (valley) case, where the centre is above the car.",
+      "Ignored the centripetal term and reported mg = 8000 N, the flat-road weight.",
+      "Slipped a factor of 2 into the centripetal term, using mg − mv²/(2r) = 8000 − 2000 = 6000 N."],
+ sol:"At a crest the centre of the circular path is below the car, so gravity must both hold it down and turn it: mg − N = mv²/r. Thus N = mg − mv²/r = 800·10 − 800·(10²)/20 = 8000 − 4000 = <b>4000 N</b>. The car feels lighter at a crest; at a dip the signs reverse to N = mg + mv²/r."},
+
+
+/* ===== P10_SB.js ===== */
+{id:72, lec:"SB", blk:"Vertical circle", topic:"tube-just-reaches-top",
+ q:"A small ball is pushed with speed v into a smooth circular tube of radius R fixed in a vertical plane, entering at a point a vertical height h above the lowest point (with h below 2R). Because it is a tube its walls can push both inward and outward, so no minimum speed is required at the top — the ball need only just reach it. The minimum v is:",
+ opts:["√(g(5R−2h))","√(2gR)","√(2g(h+2R))","√(2g(2R−h))"],
+ ans:3,
+ why:["That 5R−2R form is the taut-string result; a tube needs no v at the top.","Ignores the height difference between entry point and the top of the tube.","Adds h instead of subtracting it — wrong sign on the entry height.","Energy: ½v²=g(2R−h) since the top sits (2R−h) above the entry point."],
+ sol:"In a tube the walls supply any needed reaction, so the top can be reached with zero speed — unlike a string, which needs v²=gR. The top lies a height (2R−h) above the entry point. Energy conservation: ½mv²=mg(2R−h), giving <b>v=√(2g(2R−h))</b>."},
+
+{id:73, lec:"SB", blk:"Vertical circle", topic:"KE-ratio-bottom-top",
+ q:"A body on a light string moves in a vertical circle of radius R with the minimum (critical) speed needed to just complete the loop. The ratio of its kinetic energy at the lowest point to that at the highest point is:",
+ opts:["5 : 1","3 : 1","4 : 1","2 : 1"],
+ ans:0,
+ why:["v_bottom²=5gR and v_top²=gR, so KE ratio =5gR : gR =5 : 1.","Uses a height gain of only R instead of the full diameter 2R.","Drops the top-point contribution when equating speeds.","Confuses the speed ratio (√5) with the kinetic-energy ratio."],
+ sol:"At the top the critical condition is v_top²=gR. Energy from top to bottom: v_bottom²=v_top²+2g(2R)=gR+4gR=5gR. Kinetic energy scales as v², so KE_bottom : KE_top = 5gR : gR = <b>5 : 1</b>."},
+
+{id:74, lec:"SB", blk:"Vertical circle", topic:"string-slackens",
+ q:"A heavy particle hangs from a point O by a string of length a and is projected horizontally from the lowest point with speed u = √((2+√3)ag). As it rises, the string goes slack. The angle the string makes with the upward vertical at the instant it becomes slack is:",
+ opts:["cos⁻¹(½)","cos⁻¹(√3/2)","cos⁻¹(1/√3)","cos⁻¹(⅔)"],
+ ans:2,
+ why:["60° would need cosθ=½; the energy balance gives cosθ=1/√3 instead.","30° (cos=√3/2) misreads √3 as the cosine rather than as 3cosθ.","T=0 gives v²=ga cosθ; energy then yields cosθ=1/√3, θ≈54.7°.","⅔ is the hemisphere-leaving value, a different geometry entirely."],
+ sol:"Let θ be the angle from the upward vertical. Slack means T=0: mg cosθ=mv²/a, so v²=ga cosθ. The point is a height a(1+cosθ) above the bottom, so u²=v²+2ga(1+cosθ)=2ga+3ga cosθ. With u²=(2+√3)ag: 3cosθ=√3, cosθ=1/√3, giving <b>θ=cos⁻¹(1/√3)≈54.7°</b>."},
+
+{id:75, lec:"SB", blk:"Projectile geometry", topic:"radius-of-curvature",
+ q:"A projectile is launched with speed u at angle θ above the horizontal. Find the radius of curvature ρ of its path at the instant its velocity makes angle θ/2 with the horizontal.",
+ opts:["u²cos²θ/(g cos(θ/2))","u²cos²θ/(g cos³(θ/2))","u²cos²(θ/2)/(g cosθ)","u²cosθ/(g cos²(θ/2))"],
+ ans:1,
+ why:["Divides by only one power of cos(θ/2); the speed² already brings two.","ρ=v²/a⊥ with v=u cosθ/cos(θ/2) and a⊥=g cos(θ/2) gives cos³ below.","Inverts the roles of θ and θ/2 in numerator and denominator.","Uses v to the first power instead of v² in ρ=v²/a⊥."],
+ sol:"Horizontal velocity is constant: u cosθ. Where the velocity tilts at φ=θ/2, speed v=u cosθ/cos(θ/2). The centripetal (perpendicular) acceleration is a⊥=g cosφ=g cos(θ/2). Then ρ=v²/a⊥=u²cos²θ/cos²(θ/2) ÷ (g cos(θ/2)) = <b>u²cos²θ/(g cos³(θ/2))</b>."},
+
+{id:76, lec:"SB", blk:"Banked road", topic:"friction-from-vmax",
+ q:"A car takes a turn on a banked road of radius r and banking angle θ. The maximum speed at which it can go without slipping outward is v₀. The coefficient of friction μ between the tyres and road is:",
+ opts:["(v₀²−rg tanθ)/(rg + v₀² tanθ)","(v₀² + rg tanθ)/(rg − v₀² tanθ)","(rg tanθ − v₀²)/(rg + v₀² tanθ)","v₀²/(rg) − tanθ"],
+ ans:0,
+ why:["Solving v₀²=rg(tanθ+μ)/(1−μtanθ) for μ gives exactly this.","Swaps the signs — this is the minimum-speed (inward-slip) arrangement.","Reverses numerator sign, which would make μ negative for v₀²>rg tanθ.","Ignores the (1−μtanθ) coupling — valid only for a level road."],
+ sol:"At the maximum speed the car tends to slip outward, so friction acts down the incline and adds to the horizontal push. The standard result is v₀²=rg(tanθ+μ)/(1−μtanθ). Cross-multiplying: v₀²−v₀²μtanθ=rg tanθ+rgμ, so collecting the μ terms, v₀²−rg tanθ=μ(rg+v₀² tanθ). Hence <b>μ=(v₀²−rg tanθ)/(rg + v₀² tanθ)</b>, which is positive whenever v₀²>rg tanθ."},
+
+{id:77, lec:"SB", blk:"Rotating drum", topic:"min-omega-stuck",
+ q:"A large hollow drum of radius R spins about its vertical axis with angular velocity ω. A body of mass M pressed against the inner wall stays stuck without sliding down; the coefficient of friction between body and wall is μ. The minimum ω for this is:",
+ opts:["√(g/R)","√(μg/R)","√(Mg/(μR))","√(g/(μR))"],
+ ans:3,
+ why:["Omits μ entirely; friction is what holds the body up.","Multiplies by μ instead of dividing — friction should reduce ω needed.","Mass cancels out and cannot appear inside the answer.","N=Mω²R, friction μN≥Mg ⇒ ω²≥g/(μR), so ω_min=√(g/(μR))."],
+ sol:"The wall's normal reaction supplies the centripetal force: N=Mω²R. To prevent sliding, upward friction must balance weight: μN≥Mg, i.e. μMω²R≥Mg. Thus ω²≥g/(μR) and the minimum is <b>ω=√(g/(μR))</b>. Mass cancels, as expected."},
+
+{id:78, lec:"SB", blk:"Leaving a surface", topic:"skier-hemisphere",
+ q:"A skier starts from rest and slides down a short smooth chute, arriving at the top of a fixed smooth hemisphere of radius R from a height R/4 above that top with negligible speed lost. He then slides over the hemisphere. Measuring θ from the vertical (top), the angle at which he leaves the surface satisfies:",
+ opts:["cosθ = ½","cosθ = ⅔","cosθ = 5/6","cosθ = 3/4"],
+ ans:2,
+ why:["½ ignores both the start height and the leaving condition.","⅔ is the answer only if he starts from rest AT the top (no R/4 drop).","Leaving: v²=gR cosθ; energy with the R/4 head start gives cosθ=5/6.","Misbalances the R/4 term as R/3 in the energy equation."],
+ sol:"He leaves when N=0: mg cosθ=mv²/R, so v²=gR cosθ. Energy from the start (height R/4 above the top, then dropping R(1−cosθ) more): ½v²=g(R/4+R(1−cosθ)). Substituting v²=gR cosθ: cosθ=2(5/4−cosθ), so 3cosθ=5/2, giving <b>cosθ=5/6</b> (θ≈33.6°). The bare-top value ⅔ is wrong here."},
+
+{id:79, lec:"SB", blk:"Level road", topic:"max-speed-flat",
+ q:"A car negotiates a flat (unbanked) horizontal curve of radius 50 m. The coefficient of friction between tyres and road is 0.34. Taking g = 10 m s⁻², the approximate maximum speed at which it can turn without skidding is:",
+ opts:["3.4 m s⁻¹","13.0 m s⁻¹","22.4 m s⁻¹","17.0 m s⁻¹"],
+ ans:1,
+ why:["Uses μg only (=3.4) and forgets to multiply by radius and take the root.","v=√(μrg)=√(0.34·50·10)=√170≈13.0 m s⁻¹.","Would need μ≈1 or a banked road; too fast for μ=0.34 on the flat.","Comes from √(μrg) with r taken as 85 m rather than 50 m."],
+ sol:"On a level curve there is no banking, so friction alone must supply the entire centripetal force: μmg=mv²/r. Solving for the top speed gives v_max=√(μrg). Substituting the numbers: √(0.34×50×10)=√170≈<b>13.0 m s⁻¹</b>. Mass cancels out, so it never enters the numerical answer, and any faster speed makes the car skid outward."},
+
+{id:80, lec:"SB", blk:"Tangential dynamics", topic:"equal-accelerations-time",
+ q:"A particle moves in a circle of radius r = 0.5 m so that at every instant its tangential and centripetal accelerations are equal in magnitude. Its speed at t = 0 is v₀ = 4 m s⁻¹ and it speeds up. The time to complete the first full revolution is:",
+ opts:["(r/v₀)(1−e⁻²ᵖ) ≈ 0.125 s","(r/v₀)(e²ᵖ−1) ≈ 66.9 s","(r/v₀) ≈ 0.125 s (independent of the exponential)","(2πr/v₀) ≈ 0.785 s"],
+ ans:0,
+ why:["dv/dt=v²/r ⇒ 1/v=1/v₀−t/r; with v=v₀e²ᵖ after one turn, t=(r/v₀)(1−e⁻²ᵖ).","Right factor form but wrong exponent sign; the bracket (1−e⁻²ᵖ) stays below 1.","The exponential does matter — dropping it gives the t→∞ asymptote, not one turn.","Assumes constant speed v₀, but the particle accelerates throughout."],
+ sol:"Set the tangential acceleration equal to the centripetal one: dv/dt=a_t=a_c=v²/r. Integrating this in time gives 1/v=1/v₀−t/r. Separately, writing a_t as v·dv/ds=v²/r yields v=v₀e^{s/r}, so after one full revolution (arc s=2πr) the speed is v=v₀e^{2π}. Substituting back, 1/(v₀e^{2π})=1/v₀−t/r, hence t=(r/v₀)(1−e⁻²ᵖ)=(0.5/4)(1−e⁻²ᵖ)≈<b>0.125 s</b>."},
+
+{id:81, lec:"SB", blk:"Rotating spring", topic:"spring-extension",
+ q:"In gravity-free space, a particle of mass m is fixed to one end of a light spring of force constant k and natural length ℓ. The other end is held on an axis and the system is rotated about that axis with constant angular velocity ω. The increase in the spring's length (its extension) is:",
+ opts:["mω²ℓ/k","mω²ℓ/(k+mω²)","mω²(ℓ+x)/k","mω²ℓ/(k−mω²)"],
+ ans:3,
+ why:["Uses radius ℓ instead of the stretched radius (ℓ+x), so it under-counts.","Sign error: the mω² term subtracts from k, it does not add.","Leaves the unknown x in the answer — not solved.","kx=mω²(ℓ+x) ⇒ x(k−mω²)=mω²ℓ, so x=mω²ℓ/(k−mω²)."],
+ sol:"Let the extension be x. The stretched spring pulls the mass inward, and this spring force is exactly the centripetal force needed at the new radius (ℓ+x): kx=mω²(ℓ+x). Rearranging, kx−mω²x=mω²ℓ, so x(k−mω²)=mω²ℓ. The extension is therefore <b>x=mω²ℓ/(k−mω²)</b>. This stays finite and positive only while k>mω²; as mω² approaches k the required stretch diverges."},
+
+{id:82, lec:"SB", blk:"Hemispherical bowl", topic:"Fc-to-N-ratio",
+ q:"A small particle is released from rest at the rim (level with the centre) of a smooth hemispherical bowl of radius R and slides down inside it. At any point where the radius to the particle makes angle θ with the vertical, the ratio of the centripetal force to the normal reaction on the particle is:",
+ opts:["cosθ","⅔","2cosθ/3","depends on θ, ranging 0 to 1"],
+ ans:1,
+ why:["cosθ is the direction factor, not the force ratio, which is θ-free.","F_c=2mg cosθ, N=3mg cosθ; cosθ cancels, giving a constant ⅔.","Keeps a stray cosθ that actually cancels between F_c and N.","The cosθ terms cancel, so the ratio is constant, not θ-dependent."],
+ sol:"Dropping from the rim (centre level) to angle θ, the depth below centre is R cosθ, so v²=2gR cosθ. Centripetal force F_c=mv²/R=2mg cosθ. Radially, N−mg cosθ=mv²/R gives N=3mg cosθ. The ratio F_c/N=2mg cosθ/(3mg cosθ)=<b>⅔</b>, independent of θ."},
+
+{id:83, lec:"SB", blk:"Conical pendulum", topic:"bob-angle-in-turning-car",
+ q:"A car moves at a constant 20 m s⁻¹ on a flat horizontal circular track of radius 40 m. A small bob hangs from the roof by a light string. Taking g = 10 m s⁻², the angle the string makes with the vertical in the steady state is:",
+ opts:["30°","tan⁻¹(2) ≈ 63°","45°","60°"],
+ ans:2,
+ why:["30° would need v²/(rg)=1/√3; here the ratio is exactly 1.","tan⁻¹2 comes from using r=20 m instead of the given 40 m.","tanθ=v²/(rg)=400/(40·10)=1, so θ=45°.","60° needs tanθ=√3; the computed tanθ is 1."],
+ sol:"In the car's frame the bob feels its weight mg down and a pseudo-force mv²/r outward. It settles so the string aligns with the net: tanθ=(mv²/r)/(mg)=v²/(rg)=400/(40×10)=1. Therefore <b>θ=45°</b>, independent of the bob's mass."}
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter P-10 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

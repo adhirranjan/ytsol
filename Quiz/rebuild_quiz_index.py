@@ -69,6 +69,15 @@ html.append('''<style>
   .howto{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:16px 0;font-size:.9rem}
   .howto h2{margin:0 0 6px;font-size:1.02rem;color:var(--brand2)}
   .howto ol{margin:6px 0 0;padding-left:20px}
+  .toc{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:16px 0}
+  .toc h2{margin:0 0 8px;font-size:1.02rem;color:var(--brand2)}
+  .toc .grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:5px 0}
+  .toc .lbl{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.02em;flex:0 0 58px}
+  .toc a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:.78rem;color:var(--ink);
+    background:var(--chip);border:1px solid var(--line);border-radius:7px;padding:2px 8px 2px 3px;transition:.12s}
+  .toc a b{font-weight:800;font-size:.72rem;color:#fff;background:var(--brand);border-radius:5px;padding:1px 6px}
+  .toc a:hover{border-color:var(--brand);background:var(--card)}
+  .toc a:hover b{background:var(--brand2)}
   h2.sub{margin:26px 0 8px;font-size:1.05rem;color:var(--brand2);border-bottom:1px solid var(--line);padding-bottom:5px}
   a.card{display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:inherit;background:var(--card);
     border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin:9px 0;transition:.14s}
@@ -110,6 +119,18 @@ html.append(f'''  <header class="hero">
     </ol>
   </div>
 ''')
+
+# compact table of contents — one chip per chapter, grouped by subject·volume
+html.append('  <div class="toc">\n    <h2>All chapters</h2>')
+_ABBR = {"Chemistry": "Chem", "Mathematics": "Math", "Physics": "Phys"}
+for label, codes in GROUPS:
+    subj, vol = [x.strip() for x in label.split("·")]
+    short = f'{_ABBR.get(subj, subj)}-V{vol.split()[-1]}'
+    chips = "".join(
+        f'<a href="{c}_Quiz.html"><b>{cards[c]["tag"]}</b>{cards[c]["name"]}</a>'
+        for c in codes)
+    html.append(f'    <div class="grp"><span class="lbl">{short}</span>{chips}</div>')
+html.append('  </div>')
 
 for label, codes in GROUPS:
     html.append(f'  <h2 class="sub">{label}</h2>')

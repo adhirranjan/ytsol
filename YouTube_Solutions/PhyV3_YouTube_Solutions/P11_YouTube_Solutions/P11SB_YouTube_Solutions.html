@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P11 &middot; Strong Box &mdash; Centre of Mass &middot; YouTube Solutions</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1c2230; --muted:#5b6472;
+    --line:#e4e7ec; --head:#1f2a44; --headtxt:#ffffff;
+    --exact-bg:#e7f6ec; --exact-ink:#1f7a3d;
+    --sim-bg:#fff4e0; --sim-ink:#9a6300;
+    --link:#1a56db; --zebra:#fafbfc;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1420; --card:#161c2b; --ink:#e6e9f0; --muted:#9aa3b2;
+      --line:#283048; --head:#0d1526; --headtxt:#eef2ff;
+      --exact-bg:#123322; --exact-ink:#63d68f; --sim-bg:#3a2c11; --sim-ink:#f0b95a;
+      --link:#6ea8fe; --zebra:#1a2130;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:32px 18px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:1.7rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 14px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px;font-size:.85rem}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:600;font-size:.78rem;white-space:nowrap}
+  .exact{background:var(--exact-bg);color:var(--exact-ink)}
+  .sim{background:var(--sim-bg);color:var(--sim-ink)}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;color:var(--muted);font-size:.88rem;margin:12px 0 26px}
+  h2{font-size:1.15rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .tablecard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+  thead th{background:var(--head);color:var(--headtxt);text-align:left;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
+  tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  td.num{font-weight:700;color:var(--muted);width:34px;text-align:center}
+  td.topic{color:var(--muted);font-size:.84rem;white-space:nowrap}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .q{font-weight:500}
+  code{background:rgba(125,125,125,.15);padding:1px 5px;border-radius:5px;font-size:.85em}
+  footer{color:var(--muted);font-size:.8rem;margin-top:30px;text-align:center}
+  /* --- Collapsible worked solutions (full-width rows) --- */
+  tbody tr.solnrow{background:var(--card)!important}
+  tbody tr.solnrow>td{border-top:none;padding:0 12px 4px}
+  details.soln{margin:0}
+  details.soln>summary{cursor:pointer;color:var(--link);font-size:.78rem;font-weight:700;list-style:none;display:inline-block;user-select:none;padding:6px 0}
+  details.soln>summary::-webkit-details-marker{display:none}
+  details.soln>summary::before{content:"▸  Show full solution"}
+  details.soln[open]>summary::before{content:"▾  Hide full solution"}
+  details.soln>summary:hover{text-decoration:underline}
+  .solnbody{margin:2px 0 12px;padding:14px 16px;background:var(--zebra);border:1px solid var(--line);border-left:3px solid var(--exact-ink);border-radius:9px;font-size:.85rem;font-weight:400;color:var(--ink);line-height:1.65;max-width:860px}
+  .solnbody .seg{margin:8px 0}
+  .solnbody .lbl{display:inline-block;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;margin-right:7px;vertical-align:1px}
+  .solnbody .step{margin:5px 0 5px 4px}
+  .solnbody .step .why{display:block;color:var(--muted);font-size:.93em;margin:1px 0 0 14px}
+  .solnbody code{font-size:.9em}
+  .solnbody pre{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:8px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.5;overflow-x:auto;white-space:pre;color:var(--ink)}
+  .solnbody .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(125,125,125,.10);padding:1px 5px;border-radius:4px}
+  .solnbody .trick{margin-top:10px;padding:10px 12px;background:var(--sim-bg);color:var(--sim-ink);border-radius:8px;font-size:.84rem}
+  .solnbody .trick .lbl{color:var(--sim-ink)}
+  .solnbody .final{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--exact-ink)}
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 2px}
+  .controls .hint{font-size:12.5px;color:var(--muted)}
+.ansbtn{appearance:none;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:linear-gradient(135deg,#0f4c47,#12706a);color:#eafff9;font:600 13.5px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:10px 16px;border-radius:10px;box-shadow:0 2px 8px rgba(10,50,45,.18)}
+.ansbtn:hover{filter:brightness(1.09)}
+.ansbtn:active{transform:translateY(1px)}
+th.ans-h{min-width:170px;text-align:left!important}
+td.ans{text-align:left;min-width:170px}
+.ansval{display:inline-block;font-weight:600;font-size:12.5px;color:var(--exact-ink);background:var(--exact-bg);border-radius:7px;padding:3px 10px;filter:blur(6px);cursor:pointer;user-select:none;transition:filter .12s;line-height:1.4}
+.ansval:hover{filter:blur(3px)}
+.ansval.revealed{filter:none;cursor:default;user-select:text}
+body.show-ans .ansval{filter:none;cursor:default;user-select:text}
+.ansval .lt{font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-right:6px;color:inherit}
+.ansval.flagged{background:var(--sim-bg);color:var(--sim-ink)}
+.warn{cursor:help}
+.na{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>P11 &middot; Strong Box &mdash; Centre of Mass (<span style="font-weight:400">Previous Year JEE Questions</span>)</h1>
+  <p class="sub">Practice Problems mapped to YouTube solution videos</p>
+  <div class="legend">
+    <span class="badge exact">&#128994; Exact</span><span style="color:var(--muted);font-size:.82rem">video solves the same question (same numbers)</span>
+    <span class="badge sim">&#128993; Similar</span><span style="color:var(--muted);font-size:.82rem">same method / concept, different numbers</span>
+  </div>
+  <div class="note"><b>Scope:</b> Previous Year Questions from the chapter Strong Box. Every question in scope is mapped: <b>Previous Year Questions 7 = 7 rows</b> (7 carry a verified video link).</div>
+  <div class="note"><b>Note on answers:</b> Answers come from the official ICAD key (<i>PhyV3/P-V3-Answer Key.pdf</i>, book pp. 351&ndash;352). Every one was nevertheless re-derived from first principles before being written here.</div>
+</header>
+
+<div class="controls">
+  <button id="ansBtn" class="ansbtn" type="button">&#128273; Show Answers</button>
+  <span class="hint">Answers are hidden by default &mdash; click to reveal all, or click any single blurred answer to reveal just that one. &#9888; marks a key/printed-data problem &mdash; verify.</span>
+</div>
+
+<h2>Previous Year Questions</h2>
+<div class="tablecard"><div class="scroll"><table><thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Two particles, 1 and 2, each of mass m, are connected by a massless spring, and are on a horizontal frictionless plane, as shown in the figure. Initially, the two particles, with their center of mass at x<sub>0</sub>, are oscillating with amplitude &lsquo;a&rsquo; and angular frequency &omega;. Thus, their positions at time t are given by x<sub>1</sub>(t) = (x<sub>0</sub> + d) + a&nbsp;sin&omega;t and x<sub>2</sub>(t) = (x<sub>0</sub> &minus; d) &minus; a&nbsp;sin&omega;t, respectively, where d &gt; 2a. Particle 3 of mass m moves towards this system with speed u<sub>0</sub> = a&omega;/2, and undergoes instantaneous elastic collision with particle 2, at time t<sub>0</sub>. Finally, particles 1 and 2 acquire a center of mass speed v<sub>cm</sub> and oscillate with amplitude b and the same angular frequency &omega;. <em>(JEE Advanced 2024 Paper 2)</em> If the collision occurs at time t<sub>0</sub> = &pi;/(2&omega;), then the value of 4b<sup>2</sup>/a<sup>2</sup> will be ____. (a) 4.25 (b) 3.25 (c) 4.50 (d) 3.50</td><td class="topic">Two-body spring oscillator, elastic hit</td><td><a href="https://www.youtube.com/watch?v=iN0cpIS3mxs" target="_blank">SHM + Elastic Collision Problem | JEE Advanced Level Mechanics | Two particles 1 and 2, each of mass m</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>4.25</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody">
+<div class="seg"><span class="lbl">Concept</span> A spring-linked pair is a <em>two-body oscillator</em>: its entire internal state is carried by the relative coordinate s = x<sub>1</sub> &minus; x<sub>2</sub> &minus; 2d, measured from the natural length 2d. The collision is instantaneous, so it changes velocities but not positions &mdash; s survives the hit untouched while v<sub>rel</sub> jumps. The tempting shortcut, &ldquo;new amplitude = old amplitude + kick amplitude&rdquo;, is wrong because amplitude is not additive; only the phase-space invariant s<sup>2</sup> + (v<sub>rel</sub>/&omega;)<sup>2</sup> is conserved through free SHM.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">S<sup>2</sup> = s<sup>2</sup> + (v<sub>rel</sub>/&omega;)<sup>2</sup></span> for the relative coordinate, plus the equal-mass elastic rule <span class="eq">v<sub>2</sub>&prime; = u<sub>0</sub>, v<sub>3</sub>&prime; = v<sub>2</sub></span>. <span class="why">Both particles have mass m, so the reduced mass is &mu; = m/2 and k = &mu;&omega;<sup>2</sup>; the invariant then follows from energy without ever needing k itself.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Relative coordinate: s(t) = x<sub>1</sub> &minus; x<sub>2</sub> &minus; 2d = 2a&nbsp;sin&omega;t, so the relative motion has amplitude 2a while each particle swings by a about the centre of mass.<span class="why">Working in s removes the centre-of-mass drift for free &mdash; that drift never affects amplitude.</span></div>
+<div class="step">2. Velocities: v<sub>1</sub> = a&omega;cos&omega;t, v<sub>2</sub> = &minus;a&omega;cos&omega;t. At t<sub>0</sub> = &pi;/(2&omega;), &omega;t<sub>0</sub> = &pi;/2 &rarr; cos = 0, so v<sub>1</sub> = v<sub>2</sub> = 0.<span class="why">This is the turning point: the pair is momentarily frozen with all energy in the spring.</span></div>
+<div class="step">3. Position at that instant: s = 2a&nbsp;sin(&pi;/2) = 2a &mdash; maximum stretch, and it is unchanged by the instantaneous collision.</div>
+<div class="step">4. Equal masses in a head-on elastic collision exchange velocities: particle 2 leaves with u<sub>0</sub> = a&omega;/2 (towards +x), particle 3 is left at rest.<span class="why">No need for the two-line elastic formula &mdash; equal masses always swap, which is why the problem chose mass m for particle 3.</span></div>
+<div class="step">5. New relative velocity: v<sub>rel</sub> = v<sub>1</sub> &minus; v<sub>2</sub> = 0 &minus; a&omega;/2 = &minus;a&omega;/2, so (v<sub>rel</sub>/&omega;)<sup>2</sup> = a<sup>2</sup>/4.</div>
+<div class="step">6. New relative amplitude: S<sup>2</sup> = s<sup>2</sup> + (v<sub>rel</sub>/&omega;)<sup>2</sup> = (2a)<sup>2</sup> + a<sup>2</sup>/4 = 4a<sup>2</sup> + 0.25a<sup>2</sup> = 4.25a<sup>2</sup>.</div>
+<div class="step">7. Each particle&rsquo;s amplitude is b, so the relative amplitude is S = 2b: 4b<sup>2</sup> = 4.25a<sup>2</sup> &rArr; 4b<sup>2</sup>/a<sup>2</sup> = 4.25 &mdash; matching the key.<span class="why">The answer is a pure number, so the unknown spring constant k never had to be found.</span></div>
+</div>
+<pre>
+ ledger at t0 = pi/(2w)   (before -> after the hit)
+ ------------------------------------------------
+ s   (stretch)   2a        ->   2a    (unchanged)
+ v1              0         ->   0
+ v2              0         ->   +aw/2 (swap with 3)
+ v3             +aw/2      ->   0
+ s_dot = v1-v2   0         ->   -aw/2
+ S^2 = s^2 + (s_dot/w)^2 = 4a^2 + a^2/4 = 4.25 a^2
+ S = 2b  ->  4b^2/a^2 = 4.25
+</pre>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The trap is thinking a collision must always add speed to the spring &mdash; at t<sub>0</sub> = &pi;/(2&omega;) the pair is at rest at maximum stretch, so the kick is delivered <em>cleanly</em> and simply adds a<sup>2</sup>/4 to the 4a<sup>2</sup> already stored. Option (c) 4.50 is the classic reduced-mass slip: using the full mass m instead of &mu; = m/2 in the relative kinetic energy doubles the kick to a<sup>2</sup>/2. Options (b) 3.25 and (d) 3.50 are the same two numbers with the sign flipped &mdash; they assume the collision <em>drains</em> the oscillation, which an incoming particle never does.</div>
+<div class="final">Answer: (a) 4.25.</div>
+</div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Two particles, 1 and 2, each of mass m, are connected by a massless spring, and are on a horizontal frictionless plane, as shown in the figure. Initially, the two particles, with their center of mass at x<sub>0</sub>, are oscillating with amplitude &lsquo;a&rsquo; and angular frequency &omega;. Thus, their positions at time t are given by x<sub>1</sub>(t) = (x<sub>0</sub> + d) + a&nbsp;sin&omega;t and x<sub>2</sub>(t) = (x<sub>0</sub> &minus; d) &minus; a&nbsp;sin&omega;t, respectively, where d &gt; 2a. Particle 3 of mass m moves towards this system with speed u<sub>0</sub> = a&omega;/2, and undergoes instantaneous elastic collision with particle 2, at time t<sub>0</sub>. Finally, particles 1 and 2 acquire a center of mass speed v<sub>cm</sub> and oscillate with amplitude b and the same angular frequency &omega;. <em>(JEE Advanced 2024 Paper 2)</em> If the collision occurs at time t<sub>0</sub> = 0, then the value of v<sub>cm</sub>/(a&omega;) will be ____. (a) 0.75 (b) 0.71 (c) 0.79 (d) 0.77</td><td class="topic">COM velocity after elastic collision</td><td><a href="https://www.youtube.com/watch?v=evT1yuerOS0" target="_blank">JEE ADVANCED 2024 : Two particles, 1 and 2, each of mass m, are connected by a massless spring</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>0.75</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody">
+<div class="seg"><span class="lbl">Concept</span> The centre-of-mass speed of the pair (1, 2) after the hit depends only on their two velocities at that instant &mdash; the spring, however stretched, is an <em>internal</em> agent and cannot shift v<sub>cm</sub>. The whole question therefore reduces to: what is v<sub>2</sub> just before t<sub>0</sub> = 0, and what does the elastic collision replace it with? The obvious wrong move is to assume particle 2 was at rest (as it was in the &pi;/(2&omega;) version); at t<sub>0</sub> = 0 the pair is passing through the natural length, so both particles are at their <em>maximum</em> speed a&omega;.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">v<sub>cm</sub> = (mv<sub>1</sub> + mv<sub>2</sub>)/(m + m) = (v<sub>1</sub> + v<sub>2</sub>)/2</span>, with the equal-mass elastic rule <span class="eq">v<sub>2</sub>&prime; = u<sub>0</sub>, v<sub>3</sub>&prime; = v<sub>2</sub></span>. <span class="why">Momentum of the pair is redefined by the collision, so v<sub>cm</sub> must be recomputed from the post-collision velocities, not carried over.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Differentiate the given positions: v<sub>1</sub> = a&omega;cos&omega;t and v<sub>2</sub> = &minus;a&omega;cos&omega;t; at t<sub>0</sub> = 0 this gives v<sub>1</sub> = +a&omega; and v<sub>2</sub> = &minus;a&omega;.<span class="why">At t = 0 the separation is x<sub>1</sub> &minus; x<sub>2</sub> = 2d, the natural length &mdash; zero spring energy, so the speeds are maximal. That is exactly the opposite of the previous part.</span></div>
+<div class="step">2. Geometry check: particle 3 comes from the left with u<sub>0</sub> = +a&omega;/2 while particle 2 is moving left with &minus;a&omega;, so they are closing head-on &mdash; the collision is legitimate.</div>
+<div class="step">3. Equal masses, head-on and elastic &rarr; the two swap velocities: v<sub>2</sub>&prime; = +a&omega;/2 and v<sub>3</sub>&prime; = &minus;a&omega;.<span class="why">Check it against the two conservation laws: momentum &minus;a&omega; + a&omega;/2 is unchanged, and the kinetic energies (a&omega;)<sup>2</sup> + (a&omega;/2)<sup>2</sup> merely trade owners.</span></div>
+<div class="step">4. Particle 1 is untouched by the instantaneous collision, so v<sub>1</sub>&prime; = +a&omega; still.<span class="why">The spring transmits force only over finite time; an instantaneous impulse on 2 cannot reach 1 through it.</span></div>
+<div class="step">5. New centre-of-mass speed: v<sub>cm</sub> = (v<sub>1</sub>&prime; + v<sub>2</sub>&prime;)/2 = (a&omega; + a&omega;/2)/2 = (3a&omega;/2)/2 = 3a&omega;/4.</div>
+<div class="step">6. Required ratio: v<sub>cm</sub>/(a&omega;) = (3a&omega;/4)/(a&omega;) = 3/4 = 0.75, agreeing with the key.<span class="why">The answer is a clean fraction; the three decimal-looking distractors 0.71, 0.77, 0.79 exist purely to make you doubt an exact 3/4.</span></div>
+<div class="step">7. Sanity: from now on the pair drifts right at 3a&omega;/4 while oscillating about that drifting centre &mdash; no external horizontal force acts, so this v<sub>cm</sub> is permanent.</div>
+</div>
+<pre>
+ ledger at t0 = 0     (before  ->  after the hit)
+ -----------------------------------------------
+ stretch x1-x2-2d      0      ->   0
+ v1                  +aw      ->  +aw      (untouched)
+ v2                  -aw      ->  +aw/2    (swap)
+ v3                  +aw/2    ->  -aw
+ v_cm = (v1+v2)/2  = (aw + aw/2)/2 = 3aw/4
+ v_cm/(aw) = 0.75
+</pre>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The trap is carrying over the previous part&rsquo;s picture, where the pair was frozen at maximum stretch; here at t<sub>0</sub> = 0 particle 2 is racing <em>towards</em> particle 3 at a&omega;, and swapping that away is what makes v<sub>cm</sub> so large. Answer 0.25 (not offered) is what you get if you wrongly leave v<sub>2</sub> = &minus;a&omega; and only add the incoming momentum. The three ugly decimals decode as near-misses built on &radic;2 arithmetic: 0.71 &asymp; 1/&radic;2 and 0.79 &asymp; 1/&radic;2 + 0.08 tempt anyone who inserts a cos(&pi;/4) that this problem never contains.</div>
+<div class="final">Answer: (a) 0.75.</div>
+</div></details></td></tr>
+<tr><td class="num">3</td><td class="q"><em>Multiple Correct Answer Question.</em> A block of mass M has a circular cut with a frictionless surface as shown. The block rests on the horizontal frictionless surface of a fixed table. Initially the right edge of the block is at x = 0, in a coordinate system fixed to the table. A point mass m is released from rest at the topmost point of the path as shown and it slides down. When the mass loses contact with the block its position is x and velocity is v. At that instant which of the following options is correct? <em>(JEE Advanced 2017 Paper 1)</em> (a) The velocity of the point mass m is v = &radic;[2gR / (1 + m/M)] (b) The velocity of the block M is v = &minus;(m/M)&radic;(2gR) (c) The position of the point mass is x = &minus;&radic;2 &middot; mR/(m + M) (d) The x component of displacement of the centre of mass of block M is &minus;mR/(m + M)</td><td class="topic">Momentum &amp; energy on a movable track</td><td><a href="https://www.youtube.com/watch?v=-HL6WwRmXUc" target="_blank">JEE Advanced 2017 Physics Paper 1 (Q 2) || A block of mass M has a circular cut with a frictionless</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a,d</span></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody">
+<div class="seg"><span class="lbl">Concept</span> Table and cut are both frictionless, so no horizontal external force ever acts on the (M + m) system: horizontal momentum stays zero and the system&rsquo;s centre of mass never moves sideways. Those two statements do all the work &mdash; energy conservation then fixes the speeds and the fixed-COM condition fixes the displacements. The classic error is to use v = &radic;(2gR) as if the block were bolted down; because M recoils, part of the released potential energy goes into M and m ends up slower than the textbook &radic;(2gR).</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">mv + MV = 0</span>, <span class="eq">mgR = &frac12;mv<sup>2</sup> + &frac12;MV<sup>2</sup></span>, and <span class="eq">m&Delta;x<sub>m</sub> + M&Delta;x<sub>M</sub> = 0</span>. <span class="why">The mass leaves the block at the bottom of the arc where the surface is horizontal, so at that instant v is purely horizontal and both relations apply with scalars.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Momentum: 0 = mv + MV &rArr; V = &minus;mv/M &mdash; the block slides the opposite way, which is why the answer for M carries a minus sign.</div>
+<div class="step">2. Energy, substituting V: mgR = &frac12;mv<sup>2</sup> + &frac12;M(mv/M)<sup>2</sup> = &frac12;mv<sup>2</sup>(1 + m/M) &rArr; v = &radic;[2gR/(1 + m/M)]. <strong>Option (a) is correct.</strong><span class="why">Here v is the velocity <em>relative to the ground</em>; the drop is R because the mass falls from the top of the quarter-circle to its bottom.</span></div>
+<div class="step">3. Test (b): V = &minus;(m/M)v = &minus;(m/M)&radic;[2gR/(1 + m/M)], which is smaller in magnitude than the printed &minus;(m/M)&radic;(2gR) &mdash; the option silently drops the recoil factor. <strong>(b) is wrong.</strong><span class="why">The two agree only in the limit M &gg; m, the very case the question is built to exclude.</span></div>
+<div class="step">4. Displacements: the mass slides from the top of the arc to the bottom, i.e. a horizontal distance R <em>relative to the block</em>, so &Delta;x<sub>m</sub> = &Delta;x<sub>M</sub> + R.</div>
+<div class="step">5. Fixed centre of mass: m(&Delta;x<sub>M</sub> + R) + M&Delta;x<sub>M</sub> = 0 &rArr; &Delta;x<sub>M</sub> = &minus;mR/(m + M). <strong>Option (d) is correct.</strong><span class="why">Zero horizontal momentum from rest means the system COM stays put &mdash; no integration needed.</span></div>
+<div class="step">6. Test (c): &Delta;x<sub>m</sub> = &Delta;x<sub>M</sub> + R = MR/(m + M), and the mass started at x = &minus;R, so its final position is x = &minus;R + MR/(m+M) = &minus;mR/(m + M). No &radic;2. <strong>(c) is wrong.</strong></div>
+<div class="step">7. Only (a) and (d) survive &mdash; this matches the printed key (a, d).</div>
+</div>
+<pre>
+ horizontal bookkeeping (start from rest, x_cm fixed)
+ ----------------------------------------------------
+ momentum : m*v + M*V = 0        -> V = -m v / M
+ energy   : m g R = (1/2) m v^2 (1 + m/M)
+            v = sqrt( 2gR / (1 + m/M) )     <- (a) OK
+ shift    : dx_m - dx_M = +R  (arc spans R)
+            m dx_m + M dx_M = 0
+            dx_M = -mR/(m+M)                <- (d) OK
+            x_m  = -R + MR/(m+M) = -mR/(m+M) <- (c) NO
+</pre>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> In every &ldquo;block free to recoil&rdquo; problem, write the two zero-momentum lines <em>before</em> touching energy; the factor (1 + m/M) then appears by itself. Option (b) is the standard fixed-wedge answer smuggled in &mdash; it is what you get if you use the ground-frame energy equation for m alone. Option (c) dresses the right structure mR/(m+M) in a bogus &radic;2, betting that you will accept any expression that &ldquo;looks like&rdquo; the derived one; the horizontal run of a quarter-circle is R, never R&radic;2.</div>
+<div class="final">Answer: (a) and (d).</div>
+</div></details></td></tr>
+<tr><td class="num">4</td><td class="q"><strong>Statement I</strong> If there is no external torque on a body about its centre of mass, then the velocity of the centre of mass remains constant. <strong>Statement II</strong> The linear momentum of an isolated system remains constant. <em>(JEE Advanced 2007 Paper 2)</em> (a) Statement I is true, Statement II is true; Statement II is a correct explanation for Statement I (b) Statement I is true, Statement II is true; Statement II is NOT a correct explanation for Statement I (c) Statement I is true, Statement II is false (d) Statement I is false, Statement II is true</td><td class="topic">Assertion&ndash;reason: torque vs force</td><td><a href="https://www.youtube.com/watch?v=5cvtnYnlrB4" target="_blank">Centre of Mass PYQs Part-2 | JEE Advanced Problem Solving | Master Rigid Body Concepts</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">d</span>Statement I false, Statement II true</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody">
+<div class="seg"><span class="lbl">Concept</span> Translation and rotation are governed by two <em>independent</em> equations: net external force controls the centre of mass, net external torque controls angular momentum. Statement I quietly swaps one for the other. The alternative reading, &ldquo;no torque means nothing is pushing it&rdquo;, is wrong: a force acting <em>through</em> the centre of mass has zero moment arm about that point, so it gives zero torque while still accelerating the body.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">&Sigma;F<sub>ext</sub> = M a<sub>cm</sub></span> and, separately, <span class="eq">&Sigma;&tau;<sub>cm</sub> = dL<sub>cm</sub>/dt</span>. <span class="why">These are two different theorems with two different left-hand sides; neither implies the other, which is exactly the gap Statement I falls into.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Test Statement I with the cheapest counterexample &mdash; a ball in free fall: gravity acts at the COM, so &tau;<sub>cm</sub> = r &times; F = 0 &times; F = 0, yet a<sub>cm</sub> = g &ne; 0 and v<sub>cm</sub> grows every second.<span class="why">One valid counterexample kills a universal claim outright; no further analysis is needed.</span></div>
+<div class="step">2. Read it structurally: v<sub>cm</sub> = constant requires &Sigma;F<sub>ext</sub> = M a<sub>cm</sub> = 0, a statement about <em>force</em>. &tau;<sub>cm</sub> = 0 is a statement about <em>moment</em>. &tau;<sub>cm</sub> = 0 does not force &Sigma;F<sub>ext</sub> = 0. <strong>Statement I is false.</strong></div>
+<div class="step">3. The converse direction <em>is</em> true and is what students half-remember: &Sigma;F<sub>ext</sub> = 0 &rArr; v<sub>cm</sub> constant. Statement I is that implication run backwards through the wrong quantity.<span class="why">Assertion&ndash;reason papers reward spotting a reversed or substituted implication far more often than a numerical slip.</span></div>
+<div class="step">4. Test Statement II: &ldquo;isolated&rdquo; means &Sigma;F<sub>ext</sub> = 0, so dP/dt = &Sigma;F<sub>ext</sub> = 0 and P = Mv<sub>cm</sub> is constant. <strong>Statement II is true</strong> &mdash; it is Newton&rsquo;s second law for a system, stated correctly.</div>
+<div class="step">5. Combination: false + true &rarr; only choice (d) fits. Options (a), (b), (c) all require Statement I to be true, and (c) additionally mislabels the standard momentum law as false.<span class="why">Once Statement I is falsified, three of the four options die at once &mdash; do the falsification first, it is the fastest route.</span></div>
+<div class="step">6. Note the explanation question never even arises: Statement II <em>would</em> explain &ldquo;no external force &rArr; v<sub>cm</sub> constant&rdquo;, but it cannot explain a false claim about torque.</div>
+<div class="step">7. This reproduces the printed key (d), so no discrepancy is flagged here.</div>
+</div>
+<pre>
+ two independent theorems (do not mix)
+ -------------------------------------
+   sum F_ext = M a_cm      -> controls v_cm
+   sum tau_cm = dL_cm/dt   -> controls spin
+
+ counterexample: ball in free fall
+   force at COM  -> tau_cm = 0     (I's premise holds)
+   but a_cm = g  -> v_cm changes   (I's claim fails)
+   => Statement I  FALSE
+   isolated => sum F_ext = 0 => P const
+   => Statement II TRUE   => option (d)
+</pre>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Whenever an assertion&ndash;reason item pairs a <em>torque</em> premise with a <em>translation</em> conclusion (or the reverse), suspect the swap immediately &mdash; it is the single most reused trap in this format. Options (a) and (b) bait you into arguing &ldquo;is II a correct explanation?&rdquo; before checking whether I is even true. Option (c) is for the candidate who rejects Statement I but then over-corrects and doubts the momentum law itself.</div>
+<div class="final">Answer: (d) Statement I is false, Statement II is true.</div>
+</div></details></td></tr>
+<tr><td class="num">5</td><td class="q">The position vectors of two 1 kg particles, (A) and (B), are given by r&#8407;<sub>A</sub> = (&alpha;<sub>1</sub>t<sup>2</sup>&icirc; + &alpha;<sub>2</sub>t&jcirc; + &alpha;<sub>3</sub>t k&#770;) m and r&#8407;<sub>B</sub> = (&beta;<sub>1</sub>t&icirc; + &beta;<sub>2</sub>t<sup>2</sup>&jcirc; + &beta;<sub>3</sub>t k&#770;) m, respectively; (&alpha;<sub>1</sub> = 1 m/s<sup>2</sup>, &alpha;<sub>2</sub> = 3n m/s, &alpha;<sub>3</sub> = 2 m/s, &beta;<sub>1</sub> = 2 m/s, &beta;<sub>2</sub> = &minus;1 m/s<sup>2</sup>, &beta;<sub>3</sub> = 4p m/s), where t is time, n and p are constants. At t = 1 s, |v&#8407;<sub>A</sub>| = |v&#8407;<sub>B</sub>| and velocities v&#8407;<sub>A</sub> and v&#8407;<sub>B</sub> of the particles are orthogonal to each other. At t = 1 s, the magnitude of angular momentum of particle (A) with respect to the position of particle (B) is &radic;L kg m<sup>2</sup> s<sup>&minus;1</sup>. The value of L is ____. <em>(JEE Main 2025 Shift 1)</em></td><td class="topic">Angular momentum about a moving point</td><td><a href="https://www.youtube.com/watch?v=TyrRqAMdlZM" target="_blank">JEE Main 2025: The position vectors of two 1kg particles, A and B, are given by rA = (&alpha;1t&sup2;i + &alpha;2tj + &alpha;3tk)</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">90</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody">
+<div class="seg"><span class="lbl">Concept</span> Two unknown constants n and p are hidden inside the data, and the problem hands you exactly two scalar conditions &mdash; equal speeds and perpendicular velocities &mdash; to pin them down. Only after n and p are fixed does the angular-momentum part become arithmetic. The trap is to reach for the cross product first with symbols still floating; the other trap is taking the angular momentum about the <em>origin</em>, whereas &ldquo;with respect to the position of particle B&rdquo; means the moment arm is r&#8407;<sub>A</sub> &minus; r&#8407;<sub>B</sub>.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">L&#8407; = (r&#8407;<sub>A</sub> &minus; r&#8407;<sub>B</sub>) &times; m v&#8407;<sub>A</sub></span>, with v&#8407; = dr&#8407;/dt. <span class="why">Angular momentum is always defined about a chosen reference point; shifting that point from O to B changes the moment arm and therefore the answer.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Differentiate: v&#8407;<sub>A</sub> = (2&alpha;<sub>1</sub>t, &alpha;<sub>2</sub>, &alpha;<sub>3</sub>) &rarr; at t = 1 s, v&#8407;<sub>A</sub> = (2, 3n, 2); v&#8407;<sub>B</sub> = (&beta;<sub>1</sub>, 2&beta;<sub>2</sub>t, &beta;<sub>3</sub>) &rarr; v&#8407;<sub>B</sub> = (2, &minus;2, 4p).</div>
+<div class="step">2. Equal speeds: 4 + 9n<sup>2</sup> + 4 = 4 + 4 + 16p<sup>2</sup> &rArr; 9n<sup>2</sup> = 16p<sup>2</sup>.<span class="why">Squaring keeps it linear-in-squares; do not take square roots yet or you lose a sign you will need.</span></div>
+<div class="step">3. Orthogonality: v&#8407;<sub>A</sub>&middot;v&#8407;<sub>B</sub> = 4 &minus; 6n + 8p = 0 &rArr; 8p = 6n &minus; 4, i.e. 4p = 3n &minus; 2.</div>
+<div class="step">4. Substitute into step 2 as (4p)<sup>2</sup> = (3n)<sup>2</sup>: (3n &minus; 2)<sup>2</sup> = 9n<sup>2</sup> &rArr; 9n<sup>2</sup> &minus; 12n + 4 = 9n<sup>2</sup> &rArr; n = 1/3, hence 4p = 1 &minus; 2 = &minus;1 and p = &minus;1/4.<span class="why">The 9n<sup>2</sup> cancels, so the system is linear in disguise &mdash; that cancellation is the whole design of the question.</span></div>
+<div class="step">5. Therefore &alpha;<sub>2</sub> = 3n = 1 and &beta;<sub>3</sub> = 4p = &minus;1. At t = 1 s: r&#8407;<sub>A</sub> = (1, 1, 2), r&#8407;<sub>B</sub> = (2, &minus;1, &minus;1), v&#8407;<sub>A</sub> = (2, 1, 2), v&#8407;<sub>B</sub> = (2, &minus;2, &minus;1). Check: |v&#8407;<sub>A</sub>| = |v&#8407;<sub>B</sub>| = 3 and v&#8407;<sub>A</sub>&middot;v&#8407;<sub>B</sub> = 4 &minus; 2 &minus; 2 = 0. &#10003;</div>
+<div class="step">6. Moment arm: r&#8407;<sub>A</sub> &minus; r&#8407;<sub>B</sub> = (&minus;1, 2, 3). With m = 1 kg, L&#8407; = (&minus;1, 2, 3) &times; (2, 1, 2) = (2&middot;2 &minus; 3&middot;1, 3&middot;2 &minus; (&minus;1)&middot;2, (&minus;1)&middot;1 &minus; 2&middot;2) = (1, 8, &minus;5).</div>
+<div class="step">7. Magnitude: |L&#8407;| = &radic;(1<sup>2</sup> + 8<sup>2</sup> + 5<sup>2</sup>) = &radic;(1 + 64 + 25) = &radic;90, so &radic;L = &radic;90 and L = 90 &mdash; agreeing with the key.<span class="why">The answer asked for is L, not |L&#8407;|; stopping at &radic;90 &asymp; 9.49 is the most common lost mark on this question.</span></div>
+</div>
+<pre>
+ at t = 1 s, after solving n = 1/3, p = -1/4
+ --------------------------------------------
+ r_A = ( 1,  1,  2)      v_A = ( 2,  1,  2), |v_A| = 3
+ r_B = ( 2, -1, -1)      v_B = ( 2, -2, -1), |v_B| = 3
+ v_A . v_B = 4 - 2 - 2 = 0        (orthogonal OK)
+
+ r_A - r_B = (-1, 2, 3)
+ L = (-1,2,3) x (2,1,2) = (1, 8, -5)
+ |L| = sqrt(1 + 64 + 25) = sqrt(90)   ->  L = 90
+</pre>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Count unknowns against conditions before computing: two constants, two conditions &mdash; solve them first and the vector algebra becomes integer arithmetic. The buried trap is the phrase &ldquo;with respect to the position of particle B&rdquo;; using r&#8407;<sub>A</sub> alone gives L&#8407; = (1,1,2)&times;(2,1,2) = (0, 2, &minus;1) and the wrong value 5. A second trap is crossing the arm with v&#8407;<sub>B</sub> instead of v&#8407;<sub>A</sub> &mdash; the angular momentum belongs to particle A, so it must carry A&rsquo;s momentum. Finally, report L = 90, not &radic;90.</div>
+<div class="final">Answer: L = 90.</div>
+</div></details></td></tr>
+<tr><td class="num">6</td><td class="q">The center of mass of a thin rectangular plate (fig&nbsp;&minus;&nbsp;x) with sides of length a and b, whose mass per unit area (&sigma;) varies as &sigma; = &sigma;<sub>0</sub>x/(ab) (where &sigma;<sub>0</sub> is a constant), would be &mdash; the plate occupies 0 &le; x &le; a, 0 &le; y &le; b with one corner at the origin O. <em>(JEE Main 2025 Shift 1)</em> (a) (2a/3, b/2) (b) (a/2, b/2) (c) (a/3, b/2) (d) (2a/3, 2b/3)</td><td class="topic">COM of a non-uniform lamina</td><td><a href="https://www.youtube.com/watch?v=gjX9nnxMma8" target="_blank">JEE MAIN 2025 (28 Jan Shift 1) The centre of mass of a thin rectangular plate with sides of length a and b</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">a</span>(2a/3, b/2)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody">
+<div class="seg"><span class="lbl">Concept</span> The density &sigma; = &sigma;<sub>0</sub>x/(ab) grows linearly with x and is completely independent of y. That single observation splits the problem in two: along y the plate is uniform, so y<sub>cm</sub> is the plain geometric midpoint b/2 with no integration at all; along x the mass is biased towards the far edge, so x<sub>cm</sub> must lie <em>beyond</em> a/2. Assuming the geometric centre (a/2, b/2) is the standard error &mdash; that answer only holds for constant &sigma;.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">x<sub>cm</sub> = &int;x&sigma;&nbsp;dA / &int;&sigma;&nbsp;dA</span>, with strip element dA = b&nbsp;dx. <span class="why">Because &sigma; depends only on x, a full-height vertical strip of width dx has uniform density, so the 2-D integral collapses to a 1-D one and the constant b cancels top and bottom.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Take a vertical strip at distance x, width dx, height b: its mass is dm = &sigma;&middot;b&nbsp;dx = (&sigma;<sub>0</sub>x/ab)&middot;b&nbsp;dx = (&sigma;<sub>0</sub>/a)x&nbsp;dx.<span class="why">Choosing the strip along the direction of <em>constant</em> density is what makes this a one-line integral instead of a double integral.</span></div>
+<div class="step">2. Total mass: M = &int;<sub>0</sub><sup>a</sup>(&sigma;<sub>0</sub>/a)x&nbsp;dx = (&sigma;<sub>0</sub>/a)(a<sup>2</sup>/2) = &sigma;<sub>0</sub>a/2.</div>
+<div class="step">3. First moment about the y-axis: &int;x&nbsp;dm = &int;<sub>0</sub><sup>a</sup>(&sigma;<sub>0</sub>/a)x<sup>2</sup>&nbsp;dx = (&sigma;<sub>0</sub>/a)(a<sup>3</sup>/3) = &sigma;<sub>0</sub>a<sup>2</sup>/3.</div>
+<div class="step">4. Divide: x<sub>cm</sub> = (&sigma;<sub>0</sub>a<sup>2</sup>/3)/(&sigma;<sub>0</sub>a/2) = (a<sup>2</sup>/3)&middot;(2/a) = 2a/3.<span class="why">&sigma;<sub>0</sub> and b both cancel, as they must &mdash; a centre of mass cannot depend on the overall mass scale.</span></div>
+<div class="step">5. y-direction: &sigma; contains no y, so every horizontal layer carries the same mass and y<sub>cm</sub> = b/2 by symmetry &mdash; verified formally by &int;<sub>0</sub><sup>b</sup>y&nbsp;dy / &int;<sub>0</sub><sup>b</sup>dy = (b<sup>2</sup>/2)/b = b/2.</div>
+<div class="step">6. So the centre of mass is at (2a/3, b/2), which is option (a) and matches the printed key.</div>
+<div class="step">7. Sanity: 2a/3 &gt; a/2, i.e. shifted towards the heavier (large-x) edge &mdash; exactly what a density rising with x demands.<span class="why">This one inequality check rejects options (b) and (c) instantly, before any integration.</span></div>
+</div>
+<pre>
+ strip at x, width dx, height b
+ ------------------------------
+ dm = sigma * b dx = (sigma0 x / a b) * b dx
+    = (sigma0 / a) x dx
+
+ M       = int_0^a (s0/a) x   dx = (s0/a)(a^2/2) = s0 a / 2
+ int x dm= int_0^a (s0/a) x^2 dx = (s0/a)(a^3/3) = s0 a^2/3
+
+ x_cm = (s0 a^2/3) / (s0 a/2) = 2a/3
+ y_cm = b/2      (sigma has no y dependence)
+ => COM at (2a/3, b/2)
+</pre>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Read the density function before you read the shape: a &sigma; that is a function of x alone means y<sub>cm</sub> is free and only one integral survives. Any linear density &sigma; &prop; x over 0 to a always gives 2a/3, so this can be quoted on sight. Option (c) a/3 is the same integral with numerator and denominator swapped, or the answer measured from the wrong edge; option (b) is the uniform-plate reflex; option (d) applies the 2/3 result to y as well, forgetting that &sigma; never mentioned y.</div>
+<div class="final">Answer: (a) (2a/3, b/2).</div>
+</div></details></td></tr>
+<tr><td class="num">7</td><td class="q">Two blocks of masses 10 kg and 30 kg are placed on the same straight line with coordinates (0, 0) cm and (x, 0) cm respectively. The block of 10 kg is moved on the same line through a distance of 6 cm towards the other block. The distance through which the block of 30 kg must be moved to keep the position of centre of mass of the system unchanged is <em>(JEE Main 2022 Shift 1)</em> (a) 4 cm towards the 10 kg block (b) 2 cm away from the 10 kg block (c) 2 cm towards the 10 kg block (d) 4 cm away from the 10 kg block</td><td class="topic">Zero net shift of centre of mass</td><td><a href="https://www.youtube.com/watch?v=azg9Q3hdr7M" target="_blank">Two blocks of masses 10 kg and 30 kg are placed on the same straight line with coordinates (0,0) cm</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">c</span>2 cm towards the 10 kg block</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody">
+<div class="seg"><span class="lbl">Concept</span> Holding the centre of mass fixed means the total first moment m<sub>1</sub>&Delta;x<sub>1</sub> + m<sub>2</sub>&Delta;x<sub>2</sub> must vanish, so the two displacements are <em>opposite in sign</em> and inversely proportional to the masses. Notice what the question does not need: the unknown separation x never enters, because only <em>changes</em> in position matter. The seductive wrong move is to compute the original x<sub>cm</sub> and the new one and solve &mdash; correct, but three times the work, and it invites an arithmetic slip.</div>
+<div class="seg"><span class="lbl">Formula</span> <span class="eq">&Delta;x<sub>cm</sub> = (m<sub>1</sub>&Delta;x<sub>1</sub> + m<sub>2</sub>&Delta;x<sub>2</sub>)/(m<sub>1</sub> + m<sub>2</sub>) = 0</span>. <span class="why">Differencing the definition x<sub>cm</sub> = &Sigma;m<sub>i</sub>x<sub>i</sub>/&Sigma;m<sub>i</sub> kills every constant term, which is why x and the total mass 40 kg both drop out.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Set the axis: the 10 kg block sits at the origin and the 30 kg block at x &gt; 0, so &ldquo;towards the other block&rdquo; means the 10 kg block moves &Delta;x<sub>1</sub> = +6 cm.<span class="why">Fixing the sign convention before substituting is the whole battle here &mdash; every wrong option is a sign or ratio error.</span></div>
+<div class="step">2. Impose the condition and solve in one line: 0 = 10(+6) + 30(&Delta;x<sub>2</sub>) &rArr; 30&Delta;x<sub>2</sub> = &minus;60 &rArr; &Delta;x<sub>2</sub> = &minus;2 cm.</div>
+<div class="step">3. Interpret the minus sign: the 30 kg block moves 2 cm in the &minus;x direction, i.e. <em>towards</em> the 10 kg block &mdash; option (c), agreeing with the printed key.<span class="why">Both blocks moving towards each other is the physical picture: their approach keeps the balance point pinned.</span></div>
+<div class="step">4. Ratio check: |&Delta;x<sub>2</sub>|/|&Delta;x<sub>1</sub>| = m<sub>1</sub>/m<sub>2</sub> = 10/30 = 1/3, so 6 cm &times; 1/3 = 2 cm &mdash; the heavier block always moves less, by exactly the mass ratio.</div>
+<div class="step">5. Cross-check the long way with x = 10 cm say: initially x<sub>cm</sub> = (10&middot;0 + 30&middot;10)/40 = 7.5 cm; finally (10&middot;6 + 30&middot;8)/40 = (60 + 240)/40 = 7.5 cm. &#10003; Unchanged, and the assumed value of x cancelled out as promised.</div>
+<div class="step">6. Reject (b) and (d): moving the 30 kg block <em>away</em> from the 10 kg block would shift both first moments the same way and drive x<sub>cm</sub> forward, not hold it.</div>
+<div class="step">7. Reject (a): 4 cm would demand a mass ratio 6:4 = 3:2, i.e. blocks of 30 kg and 20 kg &mdash; it uses the wrong pair of masses.</div>
+</div>
+<pre>
+ keep x_cm fixed  =>  m1*dx1 + m2*dx2 = 0
+ ---------------------------------------------
+   10 kg at 0 ---------- 30 kg at x
+        --> +6 cm            <-- ? cm
+
+   10(+6) + 30(dx2) = 0  ->  dx2 = -2 cm
+
+ verify with x = 10 cm:
+   before: (10*0  + 30*10)/40 = 7.5 cm
+   after : (10*6  + 30* 8)/40 = 7.5 cm   (same)
+   => 2 cm TOWARDS the 10 kg block
+</pre>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For a fixed centre of mass just read off the inverse mass ratio &mdash; here 10:30 means the 30 kg block moves one third of 6 cm &mdash; and then spend your effort on the <em>direction</em> word, which is where the marks are lost. Option (b) has the right 2 cm with the direction flipped and traps anyone who ignores the minus sign; options (a) and (d) both pair a wrong 4 cm (from the ratio 10:(30&minus;10) or from halving 6+2) with the two directions, so that every careless route lands on a printed option.</div>
+<div class="final">Answer: (c) 2 cm towards the 10 kg block.</div>
+</div></details></td></tr>
+</tbody></table></div></div>
+
+<footer>ICAD &middot; PhyV3 &middot; Module P-11 &middot; Strong Box &mdash; Centre of Mass &middot; Source: PhyV3/P11/Strong Box.pdf &middot; 7 practice problems mapped</footer>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('ansBtn');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-ans');
+    btn.textContent = on ? '🙈 Hide Answers' : '🔑 Show Answers';
+  });
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('warn')) return;
+    var host = t && t.closest ? t.closest('.ansval') : null;
+    if (host && !document.body.classList.contains('show-ans')){
+      host.classList.toggle('revealed');
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,15 +1,22 @@
-"""Per-chapter COVERAGE drill (mock-style, code-pointer). Full coverage = 1 representative per
-(lecture x level-band) cell, grouped by level band so every lecture at every difficulty shows.
-Usage: python build_chapter.py <CHAPTER>   e.g. C4, P6, M5.  Out: MockPapers/ChapterPapers/<CH>-Chapter-Paper.html"""
+"""Per-chapter drills (mock-style, code-pointer), TWO versions each, grouped by level band.
+  1. <CH>-Coverage.html : 1 rep per (lecture x band) across all 8 bands + mid-level (L3/L4) top-up
+                          from the mock archetypes -> full difficulty coverage + method density.
+  2. <CH>-Mock.html     : the chapter's mock-paper picks only (high-yield, mid-level sample).
+Also writes ChapterPapers/Chapter_Index.html.
+Usage: python build_chapter.py [CH]   (no arg = all 17 + index)."""
 import json, os, re, sys, collections
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-POOL = os.path.join(ROOT,"MockPapers","pool")
+POOL = os.path.join(ROOT,"MockPapers","pool"); RANK=os.path.join(ROOT,"MockPapers","rankings")
 OUT  = os.path.join(ROOT,"MockPapers","ChapterPapers"); os.makedirs(OUT, exist_ok=True)
-BANDS=["1","2","3","4","5","6","Board","Sugg"]            # Recap excluded
+BANDS=["1","2","3","4","5","6","Board","Sugg"]          # coverage bands (Recap = theory, excluded there)
+DISPLAY=BANDS+["Recap"]                                  # Mock version shows everything, incl. any Recap
 BANDNAME={"1":"Level 1","2":"Level 2","3":"Level 3","4":"Level 4","5":"Level 5","6":"Level 6",
-          "Board":"Level: Board","Sugg":"Suggested Problems"}
-PERCELL=1                                                  # representatives per (lecture,band) cell
+          "Board":"Level: Board","Sugg":"Suggested Problems","Recap":"Quick Recap"}
+BANDSHORT={"1":"L1","2":"L2","3":"L3","4":"L4","5":"L5","6":"L6","Board":"Board","Sugg":"Sugg","Recap":"Recap"}
+SUBJ={"PHY":["P1","P2","P3","P4","P5","P6"],"CHEM":["C1","C2","C3","C4"],
+      "MATH":["M1","M2","M3","M4","M5","M6","M7"]}
+SUBJ_OF={c:s for s,cs in SUBJ.items() for c in cs}
 CHNAME={"P1":"BMT-1","P2":"BMT-2","P3":"Vectors","P4":"Motion in 1D & 2D","P5":"Force System",
  "P6":"Newton's Laws of Motion","C1":"States of Matter","C2":"Structure of Atom",
  "C3":"Basics of Chemistry","C4":"Classification of Elements — Periodicity",
@@ -17,70 +24,119 @@ CHNAME={"P1":"BMT-1","P2":"BMT-2","P3":"Vectors","P4":"Motion in 1D & 2D","P5":"
  "M5":"Compound Angles → Conditional Identities","M6":"Functions-2","M7":"Exp & Log Eqn/Ineqn"}
 def chap(lec):
     b=re.match(r'([A-Z]+\d+)',lec).group(1); return 'M5' if b.startswith('M5') else b
+def qnum(c):
+    m=re.search(r'Q(\d+)$',c); return int(m.group(1)) if m else 0
+def norm(s): return re.sub(r'[^a-z0-9]','',s.lower())[:80]
 
-def build(ch):
-    cells=collections.defaultdict(list)      # (band,lec) -> rows
-    lecs=set()
-    for f in os.listdir(POOL):
-        lec=f[:-5]
-        if chap(lec)!=ch: continue
-        lecs.add(lec)
-        for r in json.load(open(os.path.join(POOL,f),encoding="utf-8")):
-            if r["sec"] in BANDS: cells[(r["sec"],lec)].append(r)
-    # 1 (or PERCELL) representative per cell, deduped by stem
-    chosen=[]
+# global pool meta
+META={}; CH_ROWS=collections.defaultdict(list)
+for f in os.listdir(POOL):
+    lec=f[:-5]
+    for r in json.load(open(os.path.join(POOL,f),encoding="utf-8")):
+        META[r["code"]]=r
+        if r["sec"] in BANDS: CH_ROWS[chap(lec)].append(r)
+CAT=open(os.path.join(ROOT,"MockPapers","CAT4-Mock-Sets.html"),encoding="utf-8",errors="replace").read()
+CSS=CAT[CAT.find("<style>"):CAT.find("</style>")+8]
+
+def mock_codes(ch):
+    # EVERY pick for this chapter that is in the mock (== all its questions across the 10 sets).
+    # No band filter -> nothing can be silently dropped.
+    fin=json.load(open(os.path.join(RANK,SUBJ_OF[ch]+"_final.json"),encoding="utf-8"))
+    seen=set(); out=[]
+    for p in fin["chapters"][ch]["picks"]:
+        c=p["code"]
+        if c in META and c not in seen: seen.add(c); out.append(c)
+    return out
+
+def coverage_rows(ch):
+    cells=collections.defaultdict(list)
+    for r in CH_ROWS[ch]: cells[(r["sec"],r["lec"])].append(r)
+    chosen=[]; used=set(); usedstem=set()
+    # 1 rep per (band,lecture) cell
+    lecs=sorted(set(r["lec"] for r in CH_ROWS[ch]))
     for band in BANDS:
-        for lec in sorted(lecs):
-            rows=cells.get((band,lec))
-            if not rows: continue
-            seen=set(); reps=[]
-            rows=sorted(rows,key=lambda r:int(re.search(r'Q(\d+)$',r['code']).group(1)) if re.search(r'Q(\d+)$',r['code']) else 0)
+        for lec in lecs:
+            rows=sorted(cells.get((band,lec),[]),key=lambda r:qnum(r["code"]))
             for r in rows:
-                k=re.sub(r'[^a-z0-9]','',r['stem'].lower())[:80]
-                if k in seen: continue
-                seen.add(k); reps.append(r)
-                if len(reps)>=PERCELL: break
-            for r in reps: chosen.append((band,lec,r))
-    # css
-    cat=open(os.path.join(ROOT,"MockPapers","CAT4-Mock-Sets.html"),encoding="utf-8",errors="replace").read()
-    CSS=cat[cat.find("<style>"):cat.find("</style>")+8]
-    def ansof(c,META):
-        a=re.sub(r"\s+"," ",META[c]).strip(); return a or "?"
-    META={r['code']:r['answer'] for _,_,r in chosen}
-    # group for display by band
+                if norm(r["stem"]) in usedstem: continue
+                chosen.append(r); used.add(r["code"]); usedstem.add(norm(r["stem"])); break
+    # top-up: mock archetypes at L3/L4 not already present
+    for c in mock_codes(ch):
+        r=META[c]
+        if r["sec"] in ("3","4") and c not in used and norm(r["stem"]) not in usedstem:
+            chosen.append(r); used.add(c); usedstem.add(norm(r["stem"]))
+    return chosen
+
+def render(ch, rows, version, subtitle):
     byband=collections.defaultdict(list)
-    for band,lec,r in chosen: byband[band].append(r)
-    total=len(chosen)
-    def grid(rows,akey=False):
-        cells_html=[]
-        for i,r in enumerate(rows,1):
-            c=r['code']; extra='<span class="ans">%s</span>'%ansof(c,META) if akey else ''
-            cells_html.append('<div class="cell"><span class="n">%d</span><span class="code">%s</span>%s</div>'%(i,c,extra))
-        return '<div class="grid">'+"".join(cells_html)+'</div>'
-    body=[]; nav=[]
-    for band in BANDS:
+    for r in rows: byband[r["sec"]].append(r)
+    for b in byband: byband[b].sort(key=lambda r:(r["lec"],qnum(r["code"])))
+    total=len(rows)
+    def grid(rs,akey=False):
+        out=[]
+        for i,r in enumerate(rs,1):
+            a='<span class="ans">%s</span>'%re.sub(r"\s+"," ",r["answer"]).strip() if akey else ''
+            out.append('<div class="cell"><span class="n">%d</span><span class="code">%s</span>%s</div>'%(i,r["code"],a))
+        return '<div class="grid">'+"".join(out)+'</div>'
+    nav=[]; body=[]; ak=['<details class="ansbox"><summary>Answer key (%d)</summary>'%total]
+    for band in DISPLAY:
         if band not in byband: continue
-        rows=byband[band]; bid="b_"+band
-        nav.append('<a href="#%s">%s</a>'%(bid,BANDNAME[band].replace("Level ","L").replace("Suggested Problems","Sugg").replace("Level: Board","Board")))
-        body.append('<div class="subj" id="%s"><h3>%s <span style="color:var(--mut);font-weight:400;font-size:.85rem">(%d)</span></h3>%s</div>'%(bid,BANDNAME[band],len(rows),grid(rows)))
-    # answer key (all, grouped)
-    ak=['<details class="ansbox"><summary>Answer key (%d)</summary>'%total]
-    for band in BANDS:
-        if band not in byband: continue
-        ak.append('<div class="akey subj"><h4>%s</h4>%s</div>'%(BANDNAME[band],grid(byband[band],True)))
+        rs=byband[band]; bid="b_"+band
+        nav.append('<a href="#%s">%s (%d)</a>'%(bid,BANDSHORT[band],len(rs)))
+        body.append('<div class="subj" id="%s"><h3>%s <span style="color:var(--mut);font-weight:400;font-size:.85rem">(%d)</span></h3>%s</div>'%(bid,BANDNAME[band],len(rs),grid(rs)))
+        ak.append('<div class="akey subj"><h4>%s</h4>%s</div>'%(BANDNAME[band],grid(rs,True)))
     ak.append('</details>')
+    tag=" · ".join("%s %d"%(BANDSHORT[b],len(byband[b])) for b in BANDS if b in byband)
     html=('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-     '<meta name="viewport" content="width=device-width, initial-scale=1"><title>ICAD %s Chapter Paper</title>'%ch
-     +CSS+'</head><body><div class="wrap"><header id="top"><h1>%s · %s</h1>'%(ch,CHNAME.get(ch,ch))
-     +'<p>Full-coverage chapter drill · %d questions · every lecture at every level (Levels 1–6 + Board + Suggested) · 4R−1W</p></header>'%total
-     +'<nav><b>Levels</b>'+"".join(nav)+'</nav>'
+     '<meta name="viewport" content="width=device-width, initial-scale=1"><title>ICAD %s %s</title>'%(ch,version)
+     +CSS+'</head><body><div class="wrap"><header id="top"><h1>%s · %s <span class="tier">%s</span></h1>'%(ch,CHNAME.get(ch,ch),version)
+     +'<p>%s · %d questions · %s</p></header>'%(subtitle,total,tag)
+     +'<nav><b>Levels</b>'+"".join(nav)+' &nbsp; <a href="Chapter_Index.html">all chapters ↗</a></nav>'
      +'<div class="legend">Codes are book pointers <code>{Lecture}V{Level}Q{Number}</code>. '
-      'One representative per (lecture × level) cell — clear the whole sheet and you have covered every concept in the chapter at every difficulty. '
       'Answers are the book key — re-verify (ICAD keys ~1-in-14 defective).</div>'
      +'<div class="setcard">'+"".join(body)+"".join(ak)+'</div></div></body></html>')
-    p=os.path.join(OUT,ch+"-Chapter-Paper.html"); open(p,"w",encoding="utf-8").write(html)
-    covered=collections.Counter(b for b,_,_ in chosen)
-    print("WROTE",os.path.relpath(p,ROOT),"| total",total,"| lectures",len(lecs),"| by band",dict(covered))
+    p=os.path.join(OUT,"%s-%s.html"%(ch,version)); open(p,"w",encoding="utf-8").write(html)
+    return total
+
+def build(ch):
+    cov=coverage_rows(ch)
+    codes=mock_codes(ch); mk=[META[c] for c in codes]
+    # invariant: Mock version == ALL of this chapter's questions across the 10 mock sets
+    fin=json.load(open(os.path.join(RANK,SUBJ_OF[ch]+"_final.json"),encoding="utf-8"))
+    want={p["code"] for p in fin["chapters"][ch]["picks"] if p["code"] in META}
+    assert want.issubset(set(codes)), (ch,"Mock dropped",want-set(codes))
+    n1=render(ch,cov,"Coverage","Full-coverage drill — every lecture at every level + mid-level depth")
+    n2=render(ch,mk,"Mock","All of this chapter's questions from the 10 mock sets")
+    print(f"{ch:4} Coverage {n1:3}  Mock {n2:3}")
+    return n1,n2
+
+def build_index(stats):
+    rows=[]
+    for s,chs in SUBJ.items():
+        cards=[]
+        for ch in chs:
+            n1,n2=stats[ch]
+            cards.append('<div class="cell" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 10px">'
+              '<b>%s · %s</b>'
+              '<span><a href="%s-Coverage.html">Coverage (%d)</a> &nbsp;·&nbsp; <a href="%s-Mock.html">Mock (%d)</a></span></div>'%(ch,CHNAME[ch],ch,n1,ch,n2))
+        rows.append('<div class="subj"><h3>%s</h3><div class="grid" style="grid-template-columns:repeat(2,1fr)">%s</div></div>'%(
+            {"PHY":"Physics","CHEM":"Chemistry","MATH":"Mathematics"}[s],"".join(cards)))
+    html=('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+     '<meta name="viewport" content="width=device-width, initial-scale=1"><title>ICAD Chapter Papers</title>'
+     +CSS+'</head><body><div class="wrap"><header id="top"><h1>ICAD Chapter Papers</h1>'
+     '<p>RT-3 syllabus · per-chapter drills · two versions each</p></header>'
+     '<div class="legend"><b>Coverage</b> = every lecture at every level (1–6 + Board + Suggested) + mid-level depth — master the whole chapter. '
+     '<b>Mock</b> = the chapter\'s mock-paper picks only (high-yield, mid-level). Number in ( ) = question count.</div>'
+     +"".join(rows)+'</div></body></html>')
+    open(os.path.join(OUT,"Chapter_Index.html"),"w",encoding="utf-8").write(html)
+    print("WROTE ChapterPapers/Chapter_Index.html")
 
 if __name__=="__main__":
-    build(sys.argv[1] if len(sys.argv)>1 else "C4")
+    if len(sys.argv)>1:
+        build(sys.argv[1])
+    else:
+        stats={}
+        for s,chs in SUBJ.items():
+            for ch in chs: stats[ch]=build(ch)
+        build_index(stats)
+        print("TOTAL files:", len(stats)*2+1)

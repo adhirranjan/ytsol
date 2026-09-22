@@ -9,8 +9,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OUT = os.path.join(ROOT, "MockPapers", "pool")
 os.makedirs(OUT, exist_ok=True)
 
-ALLOWED = {"P1","P2","P3","P4","P5","P6","C1","C2","C3","C4",
-           "M1","M2","M3","M4","M5A","M5B","M5C","M6","M7"}
+ALLOWED = {"P1","P2","P3","P4","P5","P6","P7","P8","C1","C2","C3","C4","C5",
+           "M1","M2","M3","M4","M5A","M5B","M5C","M6","M7","M8A","M8B"}   # +CAT-5 chapters
 
 def chapter_of(base):
     m = re.match(r"^([A-Z]+\d+)([A-Z])?L", base)

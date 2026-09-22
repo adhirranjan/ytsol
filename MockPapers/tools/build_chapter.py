@@ -7,23 +7,29 @@ Usage: python build_chapter.py [CH]   (no arg = all 17 + index)."""
 import json, os, re, sys, collections
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-POOL = os.path.join(ROOT,"MockPapers","pool"); RANK=os.path.join(ROOT,"MockPapers","rankings")
+POOL = os.path.join(ROOT,"MockPapers","pool")
+RANKDIRS=[os.path.join(ROOT,"MockPapers","rankings"),
+          os.path.join(ROOT,"MockPapers","rankings","cat5")]   # RT-3 library, then CAT-5's
 OUT  = os.path.join(ROOT,"MockPapers","ChapterPapers"); os.makedirs(OUT, exist_ok=True)
 BANDS=["1","2","3","4","5","6","Board","Sugg"]          # coverage bands (Recap = theory, excluded there)
 DISPLAY=BANDS+["Recap"]                                  # Mock version shows everything, incl. any Recap
 BANDNAME={"1":"Level 1","2":"Level 2","3":"Level 3","4":"Level 4","5":"Level 5","6":"Level 6",
           "Board":"Level: Board","Sugg":"Suggested Problems","Recap":"Quick Recap"}
 BANDSHORT={"1":"L1","2":"L2","3":"L3","4":"L4","5":"L5","6":"L6","Board":"Board","Sugg":"Sugg","Recap":"Recap"}
-SUBJ={"PHY":["P1","P2","P3","P4","P5","P6"],"CHEM":["C1","C2","C3","C4"],
-      "MATH":["M1","M2","M3","M4","M5","M6","M7"]}
+SUBJ={"PHY":["P1","P2","P3","P4","P5","P6","P7","P8"],"CHEM":["C1","C2","C3","C4","C5"],
+      "MATH":["M1","M2","M3","M4","M5","M6","M7","M8A","M8B"]}
+EXAM_OF={c:"CAT-5" for c in ("P7","P8","C5","M8A","M8B")}   # everything else is RT-3
 SUBJ_OF={c:s for s,cs in SUBJ.items() for c in cs}
 CHNAME={"P1":"BMT-1","P2":"BMT-2","P3":"Vectors","P4":"Motion in 1D & 2D","P5":"Force System",
  "P6":"Newton's Laws of Motion","C1":"States of Matter","C2":"Structure of Atom",
  "C3":"Basics of Chemistry","C4":"Classification of Elements — Periodicity",
  "M1":"Angle Measurement","M2":"Set Theory","M3":"Trig Ratios & Identity","M4":"Function-I",
- "M5":"Compound Angles → Conditional Identities","M6":"Functions-2","M7":"Exp & Log Eqn/Ineqn"}
+ "M5":"Compound Angles → Conditional Identities","M6":"Functions-2","M7":"Exp & Log Eqn/Ineqn",
+ "P7":"Friction","P8":"Work, Energy & Power","C5":"Chemical Bonding",
+ "M8A":"Sequence & Series — AP","M8B":"Sequence & Series — GP"}
 def chap(lec):
-    b=re.match(r'([A-Z]+\d+)',lec).group(1); return 'M5' if b.startswith('M5') else b
+    b=re.match(r'([A-Z]+\d+[A-C]?)',lec).group(1)
+    return 'M5' if b.startswith('M5') else b      # M5A/B/C are one chapter; M8A/M8B are not
 def qnum(c):
     m=re.search(r'Q(\d+)$',c); return int(m.group(1)) if m else 0
 def norm(s): return re.sub(r'[^a-z0-9]','',s.lower())[:80]
@@ -38,10 +44,16 @@ for f in os.listdir(POOL):
 CAT=open(os.path.join(ROOT,"MockPapers","CAT4-Mock-Sets.html"),encoding="utf-8",errors="replace").read()
 CSS=CAT[CAT.find("<style>"):CAT.find("</style>")+8]
 
+def rank_file(ch):
+    for d in RANKDIRS:
+        p=os.path.join(d,SUBJ_OF[ch]+"_final.json")
+        if os.path.exists(p) and ch in json.load(open(p,encoding="utf-8"))["chapters"]: return p
+    raise SystemExit("no ranking file holds chapter "+ch)
+
 def mock_codes(ch):
     # EVERY pick for this chapter that is in the mock (== all its questions across the 10 sets).
     # No band filter -> nothing can be silently dropped.
-    fin=json.load(open(os.path.join(RANK,SUBJ_OF[ch]+"_final.json"),encoding="utf-8"))
+    fin=json.load(open(rank_file(ch),encoding="utf-8"))
     seen=set(); out=[]
     for p in fin["chapters"][ch]["picks"]:
         c=p["code"]
@@ -102,41 +114,58 @@ def build(ch):
     cov=coverage_rows(ch)
     codes=mock_codes(ch); mk=[META[c] for c in codes]
     # invariant: Mock version == ALL of this chapter's questions across the 10 mock sets
-    fin=json.load(open(os.path.join(RANK,SUBJ_OF[ch]+"_final.json"),encoding="utf-8"))
+    fin=json.load(open(rank_file(ch),encoding="utf-8"))
     want={p["code"] for p in fin["chapters"][ch]["picks"] if p["code"] in META}
     assert want.issubset(set(codes)), (ch,"Mock dropped",want-set(codes))
     n1=render(ch,cov,"Coverage","Full-coverage drill — every lecture at every level + mid-level depth")
-    n2=render(ch,mk,"Mock","All of this chapter's questions from the 10 mock sets")
+    n2=render(ch,mk,"Mock","All of this chapter's questions from the %s mock sets"%EXAM_OF.get(ch,"RT-3"))
     print(f"{ch:4} Coverage {n1:3}  Mock {n2:3}")
     return n1,n2
 
-def build_index(stats):
+def build_index(_=None):
+    """Scan ChapterPapers/ for whatever has been built - never drops chapters built in an earlier run."""
+    found={}
+    for f in os.listdir(OUT):
+        m=re.match(r"([A-Z]+\d+[A-C]?)-(Coverage|Mock)\.html$",f)
+        if not m: continue
+        t=open(os.path.join(OUT,f),encoding="utf-8").read()
+        n=re.search(r"·\s*(\d+) questions",t)
+        found.setdefault(m.group(1),{})[m.group(2)]=int(n.group(1)) if n else 0
     rows=[]
-    for s,chs in SUBJ.items():
-        cards=[]
-        for ch in chs:
-            n1,n2=stats[ch]
-            cards.append('<div class="cell" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 10px">'
-              '<b>%s · %s</b>'
-              '<span><a href="%s-Coverage.html">Coverage (%d)</a> &nbsp;·&nbsp; <a href="%s-Mock.html">Mock (%d)</a></span></div>'%(ch,CHNAME[ch],ch,n1,ch,n2))
-        rows.append('<div class="subj"><h3>%s</h3><div class="grid" style="grid-template-columns:repeat(2,1fr)">%s</div></div>'%(
-            {"PHY":"Physics","CHEM":"Chemistry","MATH":"Mathematics"}[s],"".join(cards)))
+    for exam in ("RT-3","CAT-5"):
+        chs=[c for c in found if EXAM_OF.get(c,"RT-3")==exam]
+        if not chs: continue
+        rows.append('<h2 style="margin:22px 0 2px;font-size:1.1rem">%s syllabus</h2>'%exam)
+        for s_,order in SUBJ.items():
+            mine=[c for c in order if c in chs]
+            if not mine: continue
+            cards=["".join([
+              '<div class="cell" style="flex-direction:column;align-items:stretch;gap:4px;padding:8px 10px">',
+              '<b>%s · %s</b>'%(ch,CHNAME.get(ch,ch)),
+              '<span><a href="%s-Coverage.html">Coverage (%d)</a> &nbsp;·&nbsp; '
+              '<a href="%s-Mock.html">Mock (%d)</a></span></div>'%(
+                  ch,found[ch].get("Coverage",0),ch,found[ch].get("Mock",0))]) for ch in mine]
+            rows.append('<div class="subj"><h3>%s</h3><div class="grid" '
+                        'style="grid-template-columns:repeat(2,1fr)">%s</div></div>'%(
+                {"PHY":"Physics","CHEM":"Chemistry","MATH":"Mathematics"}[s_],"".join(cards)))
     html=('<!doctype html><html lang="en"><head><meta charset="utf-8">'
      '<meta name="viewport" content="width=device-width, initial-scale=1"><title>ICAD Chapter Papers</title>'
      +CSS+'</head><body><div class="wrap"><header id="top"><h1>ICAD Chapter Papers</h1>'
-     '<p>RT-3 syllabus · per-chapter drills · two versions each</p></header>'
-     '<div class="legend"><b>Coverage</b> = every lecture at every level (1–6 + Board + Suggested) + mid-level depth — master the whole chapter. '
-     '<b>Mock</b> = the chapter\'s mock-paper picks only (high-yield, mid-level). Number in ( ) = question count.</div>'
+     '<p>Per-chapter drills · two versions each</p></header>'
+     '<div class="legend"><b>Coverage</b> = every lecture at every level (1-6 + Board + Suggested) + mid-level depth '
+     "- master the whole chapter. <b>Mock</b> = the chapter's mock-paper picks only (high-yield, mid-level). "
+     'Number in ( ) = question count.</div>'
      +"".join(rows)+'</div></body></html>')
     open(os.path.join(OUT,"Chapter_Index.html"),"w",encoding="utf-8").write(html)
-    print("WROTE ChapterPapers/Chapter_Index.html")
+    print("WROTE ChapterPapers/Chapter_Index.html (%d chapters)"%len(found))
 
 if __name__=="__main__":
     if len(sys.argv)>1:
-        build(sys.argv[1])
+        for ch in sys.argv[1:]: build(ch)
+        build_index()
     else:
-        stats={}
+        n=0
         for s,chs in SUBJ.items():
-            for ch in chs: stats[ch]=build(ch)
-        build_index(stats)
-        print("TOTAL files:", len(stats)*2+1)
+            for ch in chs: build(ch); n+=1
+        build_index()
+        print("TOTAL files:", n*2+1)

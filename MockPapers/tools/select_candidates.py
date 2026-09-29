@@ -18,12 +18,20 @@ EXAMS = {
  # CAT-5 (28-09-2026), 6 sets -> 150/subject. Pair test: weight by lectures + pool size.
  # P7 4 lec/206Q vs P8 8 lec/403Q -> 1:2 (matches CAT-4's P5/P6 8:17). C5 is the only Chem chapter.
  # M8A and M8B are structural twins (3 lec, ~200Q, same level spread) -> near-even, mild GP lean.
+ # RT-4 (12-10-2026), 10 sets -> 250/subject. Cumulative: newest chapters anchor,
+ # BMT tool chapters (P1/P2) suppressed - they appear embedded in other chapters' problems.
+ "RT4": {"nsets":10, "out":"rankings/rt4", "quota":{
+   "PHY": {"P1":8,"P2":16,"P3":30,"P4":60,"P5":15,"P6":36,"P7":30,"P8":55},
+   "CHEM":{"C1":50,"C2":50,"C3":55,"C4":30,"C5":65},
+   "MATH":{"M1":12,"M2":19,"M3":19,"M4":25,"M5":48,"M6":31,"M7":24,
+           "M8A":30,"M8B":30,"M8C":12}}},
  "CAT5": {"nsets":6, "out":"rankings/cat5", "quota":{
    "PHY": {"P7":54,"P8":96},
    "CHEM":{"C5":150},
    "MATH":{"M8A":72,"M8B":78}}},
 }
 EXAM = sys.argv[1].upper() if len(sys.argv) > 1 else "RT3"
+ONLY = sys.argv[2].upper() if len(sys.argv) > 2 else None   # regenerate just this subject
 CFG  = EXAMS[EXAM]; QUOTA = CFG["quota"]
 SUBJ_CH = {s: list(q) for s, q in QUOTA.items()}
 # Shortlist band mix. Strict level-preference ordering starved the hard bands: a lecture
@@ -32,6 +40,16 @@ SUBJ_CH = {s: list(q) for s, q in QUOTA.items()}
 # explicit share of each lecture's slots instead, so the agent can choose the hard end.
 LEVELPREF = {"3":0,"4":1,"2":2,"5":3,"Board":4,"1":5,"6":6,"Sugg":7,"Recap":8}
 BANDMIX   = {"4":.30,"3":.22,"5":.22,"6":.10,"2":.06,"Sugg":.06,"Board":.04}
+# default shortlist is 1.5x the quota. Figure-heavy chapters lose so many candidates to
+# undescribed-figure / truncated-composite rejects that the agent ends up with no real choice
+# (P6 had 16 of 56 unusable, leaving 1.11x). Widen those so clustering is a genuine selection.
+WIDEN     = {"P5":2.5,"P6":2.5,"C1":2.0,"C2":2.0,"C3":2.0,"C4":2.0,"M5":2.0}
+# Chapters whose first pass came out >50% Level-5/6. The default BANDMIX hands the agent a ~43%-hard
+# shortlist, so "take at least 22% hard" turned into "took nearly all of them" and the mid-level band
+# - which is where this student actually loses marks - had almost nothing left to choose between.
+# These get a mid-weighted mix AND a wider list, so the L3/L4 selection is a real one.
+MIDMIX    = {"4":.32,"3":.26,"5":.18,"6":.10,"2":.06,"Sugg":.05,"Board":.03}
+MIDCHAP   = {"C1","C2","C3","C4","M5"}
 
 def chap_of_lec(lec):
     m = re.match(r"([A-Z]+\d+[A-C]?)", lec); base = m.group(1)
@@ -50,8 +68,13 @@ def load_chapter(chap):
             r["chap"]=chap; rows.append(r)
     return rows
 
-def rank_chapter(chap, need):
+UNUSABLE_ANS = re.compile(r"^[\s—–\-?]*$")   # "", "-", em/en dash: the book prints no key
+
+def rank_chapter(chap, need):   # chap drives WIDEN
     rows=load_chapter(chap)
+    # a question with no printed answer cannot go in a mock paper - drop before the agent sees it.
+    # 412 of the 7113 pooled questions are like this (mostly Board); three slipped into RT-4's first build.
+    rows=[r for r in rows if not UNUSABLE_ANS.match(r.get("answer") or "")]
     # dedup cross-lecture by normalized stem
     seen={}; uniq=[]
     for r in rows:
@@ -62,23 +85,34 @@ def rank_chapter(chap, need):
     bylec=collections.defaultdict(lambda: collections.defaultdict(list))
     for r in uniq: bylec[r["lec"]][r["sec"]].append(r)
     order=sorted(bylec)
-    target=int(need*1.5)+2
+    target=int(need*WIDEN.get(chap,1.5))+2
     per_lec=-(-target//max(1,len(order)))          # ceil: slots this lecture may contribute
+
+    def alloc_bands(avail, slots, chap=None):
+        MIX = MIDMIX if chap in MIDCHAP else BANDMIX
+        """largest-remainder split of `slots` across BANDMIX; small shares must not vanish"""
+        want={b:MIX[b]*slots for b in MIX}
+        base={b:int(w) for b,w in want.items()}
+        short=slots-sum(base.values())
+        for b in sorted(want,key=lambda b:-(want[b]-base[b]))[:max(0,short)]: base[b]+=1
+        return {b:min(n,len(avail.get(b,[]))) for b,n in base.items()}
 
     ranked={}
     for lec,bands in bylec.items():
         for b in bands: bands[b].sort(key=lambda r: r["stem"][:30])
+        quota=alloc_bands(bands, per_lec, chap)
         take=[]
-        for b,share in sorted(BANDMIX.items(), key=lambda kv:-kv[1]):
-            n=int(round(share*per_lec))
-            take += bands.get(b,[])[:n]
-        got={id(r) for r in take}                  # top up from preference order if a band was thin
-        for b in sorted(bands, key=lambda b: LEVELPREF.get(b,9)):
-            for r in bands[b]:
+        for b,n in quota.items():
+            for pos,r in enumerate(bands.get(b,[])[:n]): take.append((pos,LEVELPREF.get(b,9),r))
+        got={id(t[2]) for t in take}
+        for b in sorted(bands, key=lambda b: LEVELPREF.get(b,9)):   # top up a thin band
+            for pos,r in enumerate(bands[b]):
                 if len(take)>=per_lec: break
-                if id(r) not in got: take.append(r); got.add(id(r))
-        take.sort(key=lambda r:(LEVELPREF.get(r["sec"],9), r["stem"][:30]))
-        ranked[lec]=take
+                if id(r) not in got: take.append((99,LEVELPREF.get(b,9),r)); got.add(id(r))
+        # interleave by position-within-band, NOT by level preference: a plain preference sort
+        # pushes every L5/L6 to the tail, and the round-robin below truncates before reaching them
+        take.sort(key=lambda t:(t[0],t[1]))
+        ranked[lec]=[t[2] for t in take]
 
     # round-robin across lectures (breadth first = ladder)
     picks=[]; idx={l:0 for l in order}; guard=0
@@ -97,6 +131,7 @@ def rank_chapter(chap, need):
 OUT = os.path.join(ROOT, "MockPapers", *CFG["out"].split("/")); os.makedirs(OUT, exist_ok=True)
 print(f"exam {EXAM}: {CFG['nsets']} sets -> {OUT}")
 for subj,chs in SUBJ_CH.items():
+    if ONLY and subj!=ONLY: continue
     out={"subject":subj,"quota":QUOTA[subj],"candidates":{}}
     for ch in chs:
         need=QUOTA[subj][ch]

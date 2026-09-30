@@ -329,6 +329,14 @@ def has_choices(code):
     return bool(re.search(r"\(a\)", s) or s.count(" / ") >= 2 or code in OPTIONS_IN_FIGURE)
 
 
+def missing_options():
+    """Part A questions that the paper will print WITHOUT choices although their key is an option
+       letter. Questions whose key is a bare value are numerical items - they print a write-in box
+       and are not a defect. build_index.py reuses this, so both files judge "ready" the same way."""
+    return [c for v in SETS.values() for c in v["A"]
+            if re.match(r"^[a-dA-D][\s\).:]", META[c]["answer"].strip()) and not has_choices(c)]
+
+
 def repartition(codes):
     """Part A prints as "single correct" and Part B as "numerical value", but the set builder
        allocated questions by chapter, not by type - leaving option-less questions stranded under
@@ -385,10 +393,9 @@ open(pk, "w", encoding="utf-8").write(keyhtml)
 nq = sum(len(v["A"]) + len(v["B"]) for v in SETS.values())
 figs = [c for v in SETS.values() for c in v["A"] + v["B"]
         if os.path.exists(os.path.join(FIGDIR, c + ".png"))]
-noopt = [c for v in SETS.values() for c in v["A"]          # Part B needs no choices
-         if re.match(r"^[a-dA-D][\s\).:]", META[c]["answer"].strip()) and not has_choices(c)]
 print("WROTE %-28s %6.0f KB  (%d questions, %d figures)"
       % (os.path.basename(pq), os.path.getsize(pq) / 1024, nq, len(figs)))
 print("WROTE %-28s %6.0f KB" % (os.path.basename(pk), os.path.getsize(pk) / 1024))
+noopt = missing_options()
 print("options recovered from scans : %d" % len(OPTS))
 print("MCQs printing with no options: %d %s" % (len(noopt), noopt or ""))

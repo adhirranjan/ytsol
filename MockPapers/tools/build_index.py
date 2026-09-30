@@ -6,37 +6,32 @@ Reads what is actually on disk rather than a hardcoded list, so re-running it pi
 completed sets. A set counts as ready-to-sit when its question paper carries at least one figure
 and every MCQ prints its options; otherwise it is listed as still needing the figure/options pass.
 """
-import glob, json, os, re, sys
+import glob, io, json, os, re, sys
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 MP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-POOL = {}
-for f in os.listdir(os.path.join(MP, "pool")):
-    for r in json.load(open(os.path.join(MP, "pool", f), encoding="utf-8")):
-        POOL[r["code"]] = r
-OPTS = set()
-for f in glob.glob(os.path.join(MP, "options_*.json")):
-    for k, v in json.load(open(f, encoding="utf-8")).items():
-        if isinstance(v, dict) and v.get("options"): OPTS.add(k)
+# Ask the paper builder itself which questions print choices, rather than re-deriving it here -
+# this file guessed from the rendered HTML and got five questions wrong: the two whose options ARE
+# the cropped figure, and three numerical items whose answer merely starts with "a = ...".
+_BQ = os.path.join(MP, "tools", "build_questions.py")
+# everything above the render step: META, SETS, stem(), has_choices(), repartition()
+_SRC = io.open(_BQ, encoding="utf-8").read().split(chr(10) + "paper = (")[0]
+
+def _builder(exam, n):
+    g = {"__file__": _BQ}
+    sys.argv = ["build_questions", exam, str(n)]
+    exec(compile(_SRC, _BQ, "exec"), g)
+    return g
 
 def set_state(exam, n):
-    """(questions_file, key_file, figures, mcqs_without_options) or None if not built"""
+    """(questions_file, key_file, figures, part-A questions with no printed choices), or None"""
     q = os.path.join(MP, "%s-Set%d-Questions.html" % (exam, n))
     if not os.path.exists(q): return None
     k = "%s-Set%d-Key.html" % (exam, n)
-    h = open(q, encoding="utf-8").read()
-    figs = h.count('class="fig"')
-    noopt = 0
-    for blk in re.findall(r'<div class="q">.*?</div></div>', h, re.S):
-        m = re.search(r'<span class="tag">([^<]+)</span>', blk)
-        s = re.sub(r"<[^>]+>", "", re.search(r'<div class="b">(.*?)</div>', blk, re.S).group(1))
-        c = m.group(1) if m else ""
-        r = POOL.get(c)
-        if not r: continue
-        if re.match(r"^[a-dA-D][\s\).:]", r["answer"].strip()) and not (
-                re.search(r"\(a\)", s) or s.count(" / ") >= 2 or c in OPTS or c == "M4L1V3Q4"):
-            noopt += 1
+    figs = io.open(q, encoding="utf-8").read().count('class="fig"')
+    g = _builder(exam, n)
+    noopt = len(g["missing_options"]())
     return (os.path.basename(q), k if os.path.exists(os.path.join(MP, k)) else None, figs, noopt)
 
 EXAMS = [

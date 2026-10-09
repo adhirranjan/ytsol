@@ -1,6 +1,6 @@
 """Render one mock set as a PRINTABLE question paper, plus a separate answer key.
 
-    python build_questions.py RT4 1
+    python build_questions.py RT4 1          (or RT4 Final-A for a build_final.py set)
       -> MockPapers/RT4-Set1-Questions.html   blank answer sheet (page 1) + 75 questions + figures
       -> MockPapers/RT4-Set1-Key.html         the answer key, separate so it need not be printed
 
@@ -13,7 +13,13 @@ import base64, io, json, os, re, sys, glob, html as H
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 MP   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXAM = (sys.argv[1] if len(sys.argv) > 1 else "RT4").upper()
-SETN = int(sys.argv[2]) if len(sys.argv) > 2 else 1
+SETN = sys.argv[2] if len(sys.argv) > 2 else "1"
+# a number is a mock set (card s<N> of <EXAM>-Mock-Sets.html); "Final-A" is a remediation set
+# from build_final.py (card s1 of <EXAM>-Final-A.html)
+FINAL = not SETN.isdigit()
+SRC   = "%s-%s.html" % (EXAM, SETN) if FINAL else "%s-Mock-Sets.html" % EXAM
+LABEL = "Final Set %s" % SETN.split("-")[-1] if FINAL else "Set %s" % SETN
+STEM_ = "%s-%s" % (EXAM, SETN if FINAL else "Set" + SETN)
 DATE = {"RT4": "12-10-2026", "CAT5": "28-09-2026", "RT3": "21-09-2026"}.get(EXAM, "")
 NICE = EXAM.replace("RT", "RT-").replace("CAT", "CAT-")
 FIGDIR = os.path.join(MP, "figures")
@@ -189,9 +195,9 @@ _tf = os.path.join(MP, "tag_fix.json")
 TAG_FIX = json.load(open(_tf, encoding="utf-8")) if os.path.exists(_tf) else {}
 tag = lambda c: TAG_FIX.get(c, c)
 
-h = open(os.path.join(MP, "%s-Mock-Sets.html" % EXAM), encoding="utf-8").read()
-card = re.split(r'<div class="setcard" id="s(\d+)">', h)
-qpart = dict(zip(card[1::2], card[2::2]))[str(SETN)].split("<details")[0]
+h = open(os.path.join(MP, SRC), encoding="utf-8").read()
+card = re.split(r'<div class="setcard" id="s(\d+)"[^>]*>', h)
+qpart = dict(zip(card[1::2], card[2::2]))["1" if FINAL else SETN].split("<details")[0]
 SETS = {}
 subs = re.split(r'<h3>(Physics|Chemistry|Mathematics)</h3>', qpart)
 for j in range(1, len(subs), 2):
@@ -309,12 +315,12 @@ def sheet():
         for i in range(21, 26):
             rows.append('<div class="row"><b>%d</b><span class="box"></span></div>' % i)
         cols.append("".join(rows) + '</div>')
-    return ('<div class="sheet"><h1>ICAD %s &#183; Set %d &#8212; Answer Sheet</h1>'
+    return ('<div class="sheet"><h1>ICAD %s &#183; %s &#8212; Answer Sheet</h1>'
             '<p class="sub">Exam %s &#183; 75 Q &#183; 300 marks &#183; 3 hours &#183; '
             '+4 correct, &#8722;1 wrong, 0 blank</p>'
             '<div class="ident">Name <span></span> Roll No <span></span> Date <span></span></div>'
             '<div class="grid3">%s</div>'
-            '<p class="nvt">Bubbles &#8212; single correct &#183; Box &#8212; write the value &#183; each subject out of 100</p></div>' % (NICE, SETN, DATE, "".join(cols)))
+            '<p class="nvt">Bubbles &#8212; single correct &#183; Box &#8212; write the value &#183; each subject out of 100</p></div>' % (NICE, LABEL, DATE, "".join(cols)))
 
 # the only question whose four choices ARE the diagram (four graphs labelled a-d)
 OPTIONS_IN_FIGURE = {"M4L1V3Q4",   # four graphs labelled a-d
@@ -373,21 +379,21 @@ for subj in ("Physics", "Chemistry", "Mathematics"):
     key.append('</div>')
 
 paper = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-         '<title>ICAD %s Set %d</title>' % (NICE, SETN) + CSS +
+         '<title>ICAD %s %s</title>' % (NICE, LABEL) + CSS +
          '</head><body><div class="wrap">' + sheet() +
-         '<h1>ICAD %s &#183; Set %d</h1>' % (NICE, SETN) +
+         '<h1>ICAD %s &#183; %s</h1>' % (NICE, LABEL) +
          '<p class="sub">Exam %s &#183; 25 Physics &#183; 25 Chemistry &#183; 25 Mathematics '
          '&#183; 300 marks &#183; 3 hours &#183; +4 / &#8722;1</p>' % DATE +
          "".join(body) + '</div></body></html>')
-pq = os.path.join(MP, "%s-Set%d-Questions.html" % (EXAM, SETN))
+pq = os.path.join(MP, STEM_ + "-Questions.html")
 open(pq, "w", encoding="utf-8").write(paper)
 
 keyhtml = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-           '<title>ICAD %s Set %d Key</title>' % (NICE, SETN) + CSS +
-           '</head><body><div class="wrap"><h1>ICAD %s &#183; Set %d &#8212; Answer Key</h1>'
+           '<title>ICAD %s %s Key</title>' % (NICE, LABEL) + CSS +
+           '</head><body><div class="wrap"><h1>ICAD %s &#183; %s &#8212; Answer Key</h1>'
            '<p class="sub">Book key &#8212; re-verify, ICAD keys are ~1-in-14 defective</p>'
-           '<div class="grid3 keyrow">%s</div></div></body></html>' % (NICE, SETN, "".join(key)))
-pk = os.path.join(MP, "%s-Set%d-Key.html" % (EXAM, SETN))
+           '<div class="grid3 keyrow">%s</div></div></body></html>' % (NICE, LABEL, "".join(key)))
+pk = os.path.join(MP, STEM_ + "-Key.html")
 open(pk, "w", encoding="utf-8").write(keyhtml)
 
 nq = sum(len(v["A"]) + len(v["B"]) for v in SETS.values())

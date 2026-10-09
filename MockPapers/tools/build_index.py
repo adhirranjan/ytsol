@@ -26,16 +26,19 @@ def _builder(exam, n):
 
 def set_state(exam, n):
     """(questions_file, key_file, figures, part-A questions with no printed choices), or None"""
-    q = os.path.join(MP, "%s-Set%d-Questions.html" % (exam, n))
+    stem = "%s-%s" % (exam, n if isinstance(n, str) else "Set%d" % n)   # n = 3 or "Final-A"
+    q = os.path.join(MP, stem + "-Questions.html")
     if not os.path.exists(q): return None
-    k = "%s-Set%d-Key.html" % (exam, n)
+    k = stem + "-Key.html"
     figs = io.open(q, encoding="utf-8").read().count('class="fig"')
     g = _builder(exam, n)
     noopt = len(g["missing_options"]())
     return (os.path.basename(q), k if os.path.exists(os.path.join(MP, k)) else None, figs, noopt)
 
 EXAMS = [
-    ("RT-4",  "RT4",  "12-10-2026", "current", "RT4-Mock-Sets.html",  []),
+    ("RT-4",  "RT4",  "12-10-2026", "current", "RT4-Mock-Sets.html",
+     [("RT4-Final-A.html", "Final Set A - your top-priority wrong/blank questions from Sets 1-9"),
+      ("RT4-Final-B.html", "Final Set B - the next tier of misses plus Set 10's, no repeats of A")]),
     ("CAT-5", "CAT5", "28-09-2026", "past",    "CAT5-Mock-Sets.html", []),
     ("RT-3",  "RT3",  "21-09-2026", "past",    "RT3-Mock-Sets.html",
      [("RT3-Final-Set.html", "Final Set - one last paper built from the wrong/blank questions of "
@@ -67,14 +70,14 @@ body = []
 for name, pre, date, when, master, extras in EXAMS:
     if not os.path.exists(os.path.join(MP, master)): continue
     rows = []
-    for n in range(1, 11):
+    for n in list(range(1, 11)) + ["Final-A", "Final-B"]:
         st = set_state(pre, n)
         if not st: continue
         q, k, figs, noopt = st
         ready = figs > 0 and noopt == 0
-        rows.append('<tr><td class="n">%d</td><td><a href="%s">Question paper</a></td>'
+        rows.append('<tr><td class="n">%s</td><td><a href="%s">Question paper</a></td>'
                     '<td>%s</td><td class="%s">%s</td><td class="meta">%s</td></tr>'
-                    % (n, q, '<a href="%s">Key</a>' % k if k else "&#8212;",
+                    % (n if isinstance(n, int) else n.replace("Final-", "Final "), q, '<a href="%s">Key</a>' % k if k else "&#8212;",
                        "ready" if ready else "pending",
                        "ready to sit" if ready else "needs figures / options",
                        "%d figures" % figs if figs else ""))
@@ -85,7 +88,7 @@ for name, pre, date, when, master, extras in EXAMS:
                 % (name, date, "now" if when == "current" else "past",
                    "current" if when == "current" else "past", master, master,
                    "".join('<p class="master"><a href="%s">%s</a> <span class="meta">&#8212; %s</span></p>'
-                           % (f, f, d) for f, d in extras),
+                           % (f, f, d) for f, d in extras if os.path.exists(os.path.join(MP, f))),
                    ('<table><tr><th>Set</th><th>Paper</th><th>Key</th><th>State</th><th></th></tr>%s</table>'
                     % "".join(rows)) if rows else ""))
 

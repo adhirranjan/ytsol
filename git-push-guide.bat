@@ -35,6 +35,7 @@ git pull origin main --allow-unrelated-histories
 if %errorlevel% neq 0 (
     echo.
     echo WARNING: Pull failed or had conflicts. Please resolve manually before continuing.
+    git status
     pause
     exit /b 1
 )

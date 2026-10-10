@@ -13,11 +13,13 @@ def strip(s):
 
 def parse(p):
     t = p.read_text(encoding="utf-8")
-    m = re.match(r"(\w+?)-Set(\d+)-", p.name)
+    # RT4-Set10-... or a remediation paper RT4-Final-Set-A-... (sorts after the numbered sets)
+    m = re.match(r"(\w+?)-(?:Set(\d+)|Final-(?:Set-)?([A-Z]))-", p.name)
     total = re.search(r"<b>([\d.]+)</b><span class=\"of\">/\s*([\d.]+)", t)
     subs = re.findall(r'subj-score">([\d.]+) <small>/ ([\d.]+)', t)
     sub = re.search(r'<p class="sub">(.*?)</p>', t, re.S)
-    return dict(mtime=p.stat().st_mtime, file=p.name, exam=m[1], set=int(m[2]),
+    return dict(mtime=p.stat().st_mtime, file=p.name, exam=m[1], set=(0, int(m[2])) if m[2] else (1, m[3]),
+                label=f"Set {m[2]}" if m[2] else f"Final {m[3]}",
                 title=strip(re.search(r"<h1>(.*?)</h1>", t, re.S)[1]),
                 got=float(total[1]), out=float(total[2]), subs=subs,
                 sub=strip(sub[1]) if sub else "")
@@ -39,7 +41,7 @@ for e in exams:
     for r in sets:
         pct = 100 * r["got"] / r["out"]
         cells = "".join(f"<td>{a}<small>/{b}</small></td>" for a, b in r["subs"])
-        out.append(f'<tr><td><a href="{r["file"]}" target="_blank" rel="noopener">Set {r["set"]}</a>'
+        out.append(f'<tr><td><a href="{r["file"]}" target="_blank" rel="noopener">{r["label"]}</a>'
                    f'<span class="d">{html.escape(r["sub"])}</span></td>'
                    f'<td class="t">{n(r["got"])}<small>/{n(r["out"])}</small>'
                    f'<span class="bar"><i style="width:{pct:.0f}%"></i></span></td>{cells}</tr>')

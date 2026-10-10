@@ -50,18 +50,19 @@ PRIOR = collections.Counter(CHAP(c) for c in ANS)
 
 # ---- misses, oldest sheet first so the last one read is the newest
 def sheet_order(p):
-    n = re.search(r"-(Set(\d+)|Final-([A-H]))-Result", p)
-    return (1, n.group(3)) if n.group(3) else (0, "%03d" % int(n.group(2)))
+    n = re.search(r"-(?:Set(\d+)|Final-(?:Set-)?([A-H]))-Result", p)   # Final-A or Final-Set-A
+    return (1, n.group(2)) if n.group(2) else (0, "%03d" % int(n.group(1)))
 sheets = sorted(glob.glob(os.path.join(MP, "mock-papers-result", "%s-*-Result-Sheet.html" % EXAM)),
                 key=sheet_order)
 MISS = {}                                   # code -> (blank, sheet)
 FLAG = set()
-for p in sheets:
+hits = collections.Counter()                # lecture -> miss EVENTS: a question missed again in a
+for p in sheets:                            # Final counts twice, lifting its lecture's siblings
     src = os.path.basename(p).replace("-Result-Sheet.html", "")
     for code, cls, key in ROW.findall(io.open(p, encoding="utf-8").read()):
         if "flagged" in key or "⚠" in key: FLAG.add(code)
         MISS[code] = ("blank" in cls, src)  # a later re-miss overwrites with the newer sheet
-hits = collections.Counter(LEC(c) for c in MISS)
+        hits[LEC(code)] += 1
 
 used, seen = set(), set()
 for L in LETTERS:
@@ -139,7 +140,8 @@ legend = ("Codes are book pointers <code>{Lecture}V{Level}Q{Number}</code> (<cod
           "lecture that beat you four or more times is guaranteed a slot (%d of them); %d flagged "
           "keys are excluded. Chapter weighting = your error density blended with the %s exam prior. "
           "Answers are the book key (re-verify — ICAD keys are ~1-in-14 defective)."
-          % (75 - nblank, nblank, ", ".join("%s %d" % (k.replace("Set", "Set "), v)
+          % (75 - nblank, nblank, ", ".join("%s: %d" % (re.sub(r"^\w+?-|Set-", "", k).replace("-", " ")
+                                                       .replace("Set", "Set "), v)
                                            for k, v in sorted(srcs.items(), key=lambda x: nat(x[0]))),
              "" if WHICH == "A" else "; none of Final-%s's questions repeat" % "/".join(LETTERS),
              len(lecs), len(seeded), len(FLAG), NICE))

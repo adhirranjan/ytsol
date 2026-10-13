@@ -10,6 +10,7 @@ GROUPS = [
  ("Mathematics · Volume 2", ["M8A","M8B","M8C","M8D","M9","M10"]),
  ("Physics · Volume 1", ["P1","P2","P3","P4","P5"]),
  ("Physics · Volume 2", ["P6","P7","P8","P9","P10"]),
+ ("Physics · Volume 3", ["P11"]),
 ]
 
 def parse(code):
@@ -146,7 +147,7 @@ for label, codes in GROUPS:
   </a>''')
 
 html.append('''
-  <p class="soon"><b>32 chapters live · more on the way.</b> Remaining to build: Mathematics M-11. Every answer is re-derived and numerically checked rather than transcribed, and a few questions deliberately surface printing errors found in the modules themselves.</p>
+  <p class="soon"><b>'''+str(nchap)+''' chapters live · more on the way.</b> Remaining to build: Mathematics M-11. Every answer is re-derived and numerically checked rather than transcribed, and a few questions deliberately surface printing errors found in the modules themselves.</p>
 
   <div class="foot">ICAD · chapter mastery quizzes · built from the lecture PDFs and their YouTube solutions · every answer re-derived, not transcribed.</div>
 </div>

@@ -36,7 +36,10 @@ def set_state(exam, n):
     return (os.path.basename(q), k if os.path.exists(os.path.join(MP, k)) else None, figs, noopt)
 
 EXAMS = [
-    ("RT-4",  "RT4",  "12-10-2026", "current", "RT4-Mock-Sets.html",
+    ("CAT-6", "CAT6", "26-10-2026", "current", "CAT6-Mock-Sets.html",
+     [("CAT6-Final-A.html", "Final Set A - your top-priority wrong/blank questions from Sets 1-6"),
+      ("CAT6-Final-B.html", "Final Set B - the next tier of misses plus Final-A's, no repeats of A")]),
+    ("RT-4",  "RT4",  "12-10-2026", "past",    "RT4-Mock-Sets.html",
      [("RT4-Final-A.html", "Final Set A - your top-priority wrong/blank questions from Sets 1-9"),
       ("RT4-Final-B.html", "Final Set B - the next tier of misses plus Set 10's, no repeats of A")]),
     ("CAT-5", "CAT5", "28-09-2026", "past",    "CAT5-Mock-Sets.html", []),

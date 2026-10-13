@@ -25,6 +25,12 @@ EXAMS = {
    "CHEM":{"C1":50,"C2":50,"C3":55,"C4":30,"C5":65},
    "MATH":{"M1":12,"M2":19,"M3":19,"M4":25,"M5":48,"M6":31,"M7":24,
            "M8A":30,"M8B":30,"M8C":12}}},
+ # CAT-6 (26-10-2026), 6 sets in the student's last 7 days -> 150/subject. Every question was
+ # book-checked first (tools/pool_check.py). P10 has the most lectures (6 units, 296 Q) -> slight lead.
+ "CAT6": {"nsets":6, "out":"rankings/cat6", "quota":{        # user asked for 6 sets (was 5)
+   "PHY": {"P9":48,"P10":54,"P11":48},
+   "CHEM":{"C6":150},
+   "MATH":{"M8D":60,"M9":90}}},
  "CAT5": {"nsets":6, "out":"rankings/cat5", "quota":{
    "PHY": {"P7":54,"P8":96},
    "CHEM":{"C5":150},
@@ -52,7 +58,7 @@ MIDMIX    = {"4":.32,"3":.26,"5":.18,"6":.10,"2":.06,"Sugg":.05,"Board":.03}
 MIDCHAP   = {"C1","C2","C3","C4","M5"}
 
 def chap_of_lec(lec):
-    m = re.match(r"([A-Z]+\d+[A-C]?)", lec); base = m.group(1)
+    m = re.match(r"([A-Z]+\d+[A-D]?)", lec); base = m.group(1)
     if base.startswith("M5"): return "M5"      # M5A/B/C are one chapter; M8A/M8B are not
     return base
 
@@ -75,6 +81,12 @@ def rank_chapter(chap, need):   # chap drives WIDEN
     # a question with no printed answer cannot go in a mock paper - drop before the agent sees it.
     # 412 of the 7113 pooled questions are like this (mostly Board); three slipped into RT-4's first build.
     rows=[r for r in rows if not UNUSABLE_ANS.match(r.get("answer") or "")]
+    # book-checked pools (pool_check.py merge) carry a verdict. Keep only questions a paper can ask
+    # as printed: never a corrected key (the pool is big enough not to need one), never a Quick Recap
+    # item, and only an MCQ with printed options (Part A) or an integer answer (Part B box).
+    if any("verified" in r for r in rows):
+        rows=[r for r in rows if r.get("verified")=="ok" and r["sec"]!="Recap"
+              and (r.get("has_opts") or r.get("integer"))]
     # dedup cross-lecture by normalized stem
     seen={}; uniq=[]
     for r in rows:
@@ -139,7 +151,9 @@ for subj,chs in SUBJ_CH.items():
         out["candidates"][ch]={"need":need,"list":[
             {"code":r["code"],"lec":r["lec"],"sec":r["sec"],"style":r["format"],
              "numeric":r["numeric"],"chap_rank":r["chap_rank"],
-             "answer":r["answer"][:40],"stem":r["stem"]} for r in picks]}
+             "answer":r["answer"][:40],"stem":r["stem"],
+             **({"has_opts":r.get("has_opts"),"integer":r.get("integer"),"type":r.get("format"),
+                 "figure":bool(r.get("figure"))} if "verified" in r else {})} for r in picks]}
     json.dump(out, open(OUT+f"/{subj}_candidates.json","w",encoding="utf-8"),
               ensure_ascii=False, indent=1)
     tot=sum(len(v["list"]) for v in out["candidates"].values())

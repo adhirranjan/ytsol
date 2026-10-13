@@ -1,11 +1,18 @@
-"""Merge the per-chapter agent outputs into the <SUBJ>_final.json shape build_sets.py expects."""
+"""Merge the per-chapter agent outputs (CAT5 default; pass CAT6) into the <SUBJ>_final.json shape build_sets.py expects."""
 import json, os, sys, collections
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-R = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "rankings", "cat5")
-SRC = {"PHY": {"P7": ["final_P7.json"], "P8": ["final_P8.json"]},
-       "CHEM": {"C5": ["final_C5a.json", "final_C5b.json"]},
-       "MATH": {"M8A": ["final_M8A.json"], "M8B": ["final_M8B.json"]}}
-NEED = {"P7": 54, "P8": 96, "C5": 150, "M8A": 72, "M8B": 78}
+EXAM = (sys.argv[1] if len(sys.argv) > 1 else "CAT5").lower()     # python merge_cat5.py CAT6
+R = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "rankings", EXAM)
+SRC, NEED = {
+ "cat5": ({"PHY": {"P7": ["final_P7.json"], "P8": ["final_P8.json"]},
+           "CHEM": {"C5": ["final_C5a.json", "final_C5b.json"]},
+           "MATH": {"M8A": ["final_M8A.json"], "M8B": ["final_M8B.json"]}},
+          {"P7": 54, "P8": 96, "C5": 150, "M8A": 72, "M8B": 78}),
+ "cat6": ({"PHY": {"P9": ["final_P9.json"], "P10": ["final_P10.json"], "P11": ["final_P11.json"]},
+           "CHEM": {"C6": ["final_C6a.json", "final_C6b.json"]},
+           "MATH": {"M8D": ["final_M8D.json"], "M9": ["final_M9.json"]}},
+          {"P9": 48, "P10": 54, "P11": 48, "C6": 150, "M8D": 60, "M9": 90}),
+}[EXAM]
 ok = True
 for subj, chs in SRC.items():
     out = {"subject": subj, "chapters": {}}

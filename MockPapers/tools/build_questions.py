@@ -20,7 +20,7 @@ FINAL = not SETN.isdigit()
 SRC   = "%s-%s.html" % (EXAM, SETN) if FINAL else "%s-Mock-Sets.html" % EXAM
 LABEL = "Final Set %s" % SETN.split("-")[-1] if FINAL else "Set %s" % SETN
 STEM_ = "%s-%s" % (EXAM, SETN if FINAL else "Set" + SETN)
-DATE = {"RT4": "12-10-2026", "CAT5": "28-09-2026", "RT3": "21-09-2026"}.get(EXAM, "")
+DATE = {"CAT6": "26-10-2026", "RT4": "12-10-2026", "CAT5": "28-09-2026", "RT3": "21-09-2026"}.get(EXAM, "")
 NICE = EXAM.replace("RT", "RT-").replace("CAT", "CAT-")
 FIGDIR = os.path.join(MP, "figures")
 
@@ -351,6 +351,9 @@ def repartition(codes):
     yes = sorted(c for c in codes if has_choices(c))
     no  = sorted(c for c in codes if not has_choices(c))
     # pick Part B by code, not by position, so re-running this on its own output is a no-op
+    # topping Part B up from option-printing questions: integer answers first (book-checked pools
+    # carry the flag; older pools do not, so their order - and every built RT/CAT paper - is unchanged)
+    yes = sorted(yes, key=lambda c: (not META[c].get("integer"), c))
     b = set(no[:5]) | set(yes[:max(0, 5 - len(no))])
     return [c for c in codes if c not in b], [c for c in codes if c in b]
 

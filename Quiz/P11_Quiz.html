@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-11 Centre of Mass — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Physics · Chapter Mastery Quiz</p>
+    <h1>P-11 · Centre of Mass</h1>
+    <p id="heroSub">Lectures L-1 to L-4 + Strong Box · 82 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">82 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-11 Centre of Mass · mastery quiz built from lectures L-1 to L-4 and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<script>
+/* ============================================================
+   P-11 CENTRE OF MASS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · COM of Particle Systems",
+   desc:"the two-particle COM with distances in the inverse ratio of the masses (m₁r₁ = m₂r₂), the n-particle weighted average r⃗cm = Σmᵢr⃗ᵢ/Σmᵢ in component and vector form, the CO molecule and Earth–Moon barycentre, masses on squares, triangles and rectangles, placing a mass to fix the COM, unknown masses from a given COM, grouping sub-systems, the first moment about the COM being zero, and why the COM need not lie in the body"},
+  {key:"L-2", name:"L-2 · COM of Rigid Bodies (Integration)",
+   desc:"x<sub>cm</sub> = ∫x dm/∫dm with dm = λdx, σdA, ρdV; non-uniform rods (λ ∝ x², λ = α + βx), the uniform arc 2R sin(φ/2)/φ (semicircular ring 2R/π, quarter ring), the sector 2R sinθ/3θ (semicircular disc 4R/3π, quarter disc 4√2R/3π), the half annulus, a parabolic lamina, the solid hemisphere 3R/8, bent and U-shaped wires, and symmetry shortcuts"},
+  {key:"L-3", name:"L-3 · COM of Remaining Body (Cavity)",
+   desc:"the negative-mass method x<sub>cm</sub> = (A₁x₁ − A₂x₂)/(A₁ − A₂), discs with edge, off-centre and square holes, two cavities, a sphere with a spherical cavity (volume ratio), the L-shaped and notched plates, a thick hemispherical bowl, cut-and-rejoin pieces, removed particles on a cube or hexagon, composite bodies, and the rule that the COM moves away from the hole along the line of centres"},
+  {key:"L-4", name:"L-4 · Motion of the COM",
+   desc:"Δr⃗cm = ΣmᵢΔr⃗ᵢ/M and ΣmᵢΔxᵢ = 0 when F<sub>ext</sub> = 0 (man on plank or boat), v⃗cm and P⃗ = Mv⃗cm, a⃗cm and F⃗ext = Ma⃗cm with internal forces cancelling, the Atwood machine's a<sub>cm</sub> = g/9, explosions (KE ratio m₂/m₁, COM parabola unchanged), recoil, mutual attraction meeting at the COM, a block on a fixed wedge, and rocket thrust"},
+  {key:"SB", name:"Strong Box · Mixed PYQ",
+   desc:"previous-year problems: the JEE Advanced 2024 spring-coupled pair struck elastically (amplitude 4b²/a² = 4.25 and v<sub>cm</sub>/aω = 0.75), the 2017 mass sliding in a block's quarter-circle (speeds and displacements), the 2007 torque-versus-v<sub>cm</sub> assertion, the JEE Main 2025 angular momentum about another particle (L = 90) and plate with σ ∝ x, and the 2022 keep-the-COM-fixed shift"}
+];
+
+const QUIZ = [
+
+/* ===== P11_L1.js ===== */
+{id:1, lec:"L-1", blk:"Two-particle COM", topic:"x<sub>cm</sub> on a line",
+ q:"Particles of mass 1 kg and 2 kg sit at x = 0 and x = 3 m. The centre of mass is at:",
+ opts:["x = 1 m", "x = 1.5 m", "x = 2 m", "x = 3 m"],
+ ans:2,
+ why:["swapped the weights — put the 2 kg weight on x = 0 and the 1 kg weight on x = 3, so the COM drifted toward the lighter particle","took the plain midpoint, which is only right for equal masses","correct: x<sub>cm</sub> = (1·0 + 2·3)/(1 + 2) = 6/3 = 2 m","divided the first moment 6 kg·m by the 2 kg mass alone instead of the total 3 kg — that lands the COM on top of the heavy particle"],
+ sol:"Weighted average: x<sub>cm</sub> = (m₁x₁ + m₂x₂)/(m₁ + m₂) = (1·0 + 2·3)/3 = 6/3 = 2 m. Lever check: distances from the COM are r₁ = 2 m and r₂ = 1 m, and m₁r₁ = 1·2 = 2 = m₂r₂ = 2·1 ✓. The COM is 1 m from the 2 kg particle — nearer the heavier one, as it must be. Final: <b>x = 2 m</b>."},
+
+{id:2, lec:"L-1", blk:"Two-particle COM", topic:"Inverse ratio of distances",
+ q:"Two particles of mass m and 3m are a distance d apart. How far is their centre of mass from the particle of mass m?",
+ opts:["d/4", "3d/4", "d/3", "d/2"],
+ ans:1,
+ why:["d/4 is the distance from the heavier 3m particle, not from m","correct: r<sub>m</sub> = (3m)d/(m + 3m) = 3d/4 — the COM sits far from the light particle","used the mass ratio 1:3 as a fraction of d instead of dividing d in the inverse ratio 3:1 over the total 4 parts","midpoint — only true when the two masses are equal"],
+ sol:"Distances from the COM are inversely proportional to the masses: r₁/r₂ = m₂/m₁ = 3m/m = 3, so d is split into 3 + 1 = 4 parts. From m: r₁ = m₂d/(m₁ + m₂) = 3m·d/4m = 3d/4; from 3m: r₂ = m·d/4m = d/4. Check m₁r₁ = m(3d/4) = 3m(d/4) = m₂r₂ ✓. Final: <b>3d/4 from m</b>."},
+
+{id:3, lec:"L-1", blk:"Two-particle COM", topic:"CO molecule",
+ q:"In a CO molecule the C (12 u) and O (16 u) nuclei are 1.2 × 10⁻¹⁰ m apart. The distance of the centre of mass from the carbon atom is about:",
+ opts:["0.51 × 10⁻¹⁰ m", "0.60 × 10⁻¹⁰ m", "0.69 × 10⁻¹⁰ m", "1.6 × 10⁻¹⁰ m"],
+ ans:2,
+ why:["used m<sub>C</sub>d/(m<sub>C</sub> + m<sub>O</sub>) = 12(1.2)/28 — that is the distance from the oxygen atom","took the midpoint, ignoring that O is heavier","correct: r<sub>C</sub> = m<sub>O</sub>d/(m<sub>C</sub> + m<sub>O</sub>) = 16(1.2 × 10⁻¹⁰)/28 ≈ 0.686 × 10⁻¹⁰ m","divided by m<sub>C</sub> = 12 instead of the total 28 u — the answer exceeds the bond length itself, which is impossible"],
+ sol:"r<sub>C</sub> = m<sub>O</sub>d/(m<sub>C</sub> + m<sub>O</sub>) = (16 × 1.2 × 10⁻¹⁰)/28 = 19.2 × 10⁻¹⁰/28 ≈ 0.686 × 10⁻¹⁰ m. Then r<sub>O</sub> = 1.2 − 0.686 = 0.514 × 10⁻¹⁰ m, and 12(0.686) ≈ 16(0.514) ≈ 8.23 ✓. The COM is nearer the heavier O, so its distance from C exceeds half the bond (0.6). Final: <b>≈ 0.69 × 10⁻¹⁰ m from C</b>."},
+
+{id:4, lec:"L-1", blk:"n-particle COM", topic:"Vector form",
+ q:"Masses 1 kg, 2 kg and 3 kg have position vectors (î + 4ĵ + k̂), (î + ĵ + k̂) and (2î − ĵ − 2k̂) m. The position vector of their centre of mass is:",
+ opts:["(9î + 3ĵ − 3k̂) m", "(3î + ĵ − k̂) m", "(1/2)(3î + ĵ − k̂) m", "(1/3)(4î + 4ĵ) m"],
+ ans:2,
+ why:["this is the first moment Σmᵢr⃗ᵢ — forgot to divide by the total mass 6 kg","divided by the number of particles (3) instead of the total mass (6 kg)","correct: Σmᵢr⃗ᵢ = 9î + 3ĵ − 3k̂, divided by Σmᵢ = 6 kg gives (1/2)(3î + ĵ − k̂)","the unweighted average (r⃗₁ + r⃗₂ + r⃗₃)/3 — ignores the different masses"],
+ sol:"Σmᵢr⃗ᵢ = 1(î + 4ĵ + k̂) + 2(î + ĵ + k̂) + 3(2î − ĵ − 2k̂) = (1 + 2 + 6)î + (4 + 2 − 3)ĵ + (1 + 2 − 6)k̂ = 9î + 3ĵ − 3k̂. Total mass = 6 kg, so r⃗<sub>cm</sub> = (9î + 3ĵ − 3k̂)/6 = (1.5î + 0.5ĵ − 0.5k̂) m. Final: <b>(1/2)(3î + ĵ − k̂) m</b>."},
+
+{id:5, lec:"L-1", blk:"n-particle COM", topic:"Masses on a square (book misprint)",
+ q:"Masses m, 2m, 3m, 4m sit at A(0, 0), B(a, 0), C(a, a), D(0, a) of a square. The centre of mass is at:",
+ opts:["(7a/10, a/2)", "(a/2, 7a/10)", "(a/2, a/2)", "(a/2, 3a/10)"],
+ ans:1,
+ why:["⚠ this is the module's misprint — it writes the x-sum (2a + 3a)/10 under y<sub>cm</sub> and the y-sum (3a + 4a)/10 under x<sub>cm</sub>, swapping the labels; the heavy masses C, D are on the top edge, not the right edge","correct: x<sub>cm</sub> = (2m·a + 3m·a)/10m = a/2, y<sub>cm</sub> = (3m·a + 4m·a)/10m = 7a/10","the geometric centre — only for four equal masses","used only the bottom-edge masses (m + 2m) in the y-sum, i.e. y = 3a/10 — that pulls the COM toward the light edge"],
+ sol:"Total 10m. x<sub>cm</sub> = [m(0) + 2m(a) + 3m(a) + 4m(0)]/10m = 5ma/10m = a/2. y<sub>cm</sub> = [m(0) + 2m(0) + 3m(a) + 4m(a)]/10m = 7a/10. Sanity: the right edge (B + C = 5m) equals the left (A + D = 5m) ⇒ x = a/2; the top edge (C + D = 7m) beats the bottom (3m) ⇒ y above a/2. ⚠ The module prints (7a/10, a/2) by swapping labels. Final: <b>(a/2, 7a/10)</b>."},
+
+{id:6, lec:"L-1", blk:"Meaning of COM", topic:"Where the COM can lie",
+ q:"Which statement about the centre of mass is correct?",
+ opts:["It always lies within the material of the body", "For any body it coincides with the geometric centre", "Its location as a physical point depends on where the origin is chosen", "For a uniform ring it lies at the centre, where there is no material"],
+ ans:3,
+ why:["false — a ring, an L-shape or a boomerang has its COM in empty space","false — only for uniform symmetric bodies; a non-uniform rod's COM is off-centre","false — only its coordinates change with the origin; the point itself is fixed in the body","correct: by symmetry the ring's COM is its centre, which is empty space"],
+ sol:"The COM is the mass-weighted average position. For a uniform ring every element at r⃗ has a partner at −r⃗ about the centre, so Σmᵢr⃗ᵢ = 0 there: COM at the centre, where there is no mass. It coincides with the geometric centre only for uniform symmetric bodies, and changing the origin changes its coordinates but not the point. Final: <b>a ring's COM is at its empty centre</b>."},
+
+{id:7, lec:"L-1", blk:"First moment of mass", topic:"Moment about the COM",
+ q:"For a system of particles, Σmᵢr⃗ᵢ′, where r⃗ᵢ′ are positions measured from the centre of mass itself, equals:",
+ opts:["the zero vector", "Σmᵢ|r⃗ᵢ′|, the sum of mass × distance", "Mr⃗<sub>cm</sub>, with r⃗<sub>cm</sub> measured from the original origin O", "a value that depends on the orientation of the axes through the COM"],
+ ans:0,
+ why:["correct: r⃗ᵢ′ = r⃗ᵢ − r⃗<sub>cm</sub> ⇒ Σmᵢr⃗ᵢ′ = Mr⃗<sub>cm</sub> − Mr⃗<sub>cm</sub> = 0","added magnitudes — the first moment is a vector sum, and directions cancel","that is the first moment about O, not about the COM; about O it is generally non-zero","the zero vector is zero in every orientation — rotating the axes cannot change it"],
+ sol:"Put r⃗ᵢ′ = r⃗ᵢ − r⃗<sub>cm</sub>. Then Σmᵢr⃗ᵢ′ = Σmᵢr⃗ᵢ − (Σmᵢ)r⃗<sub>cm</sub> = Mr⃗<sub>cm</sub> − Mr⃗<sub>cm</sub> = 0. This is the defining property of the COM: the first moment of mass about it vanishes, which is also why a body balances on a knife edge through it. Final: <b>zero</b>."},
+
+{id:8, lec:"L-1", blk:"Placing a mass", topic:"Fix the COM at the origin",
+ q:"A 1 kg mass is at the origin and a 2 kg mass at x = 3 m. Where must a 3 kg mass be placed so that the COM of all three is at the origin?",
+ opts:["x = +2 m", "x = −1 m", "x = −2 m", "x = −3 m"],
+ ans:2,
+ why:["right size, wrong side — on the +x side the moments add instead of cancelling","divided the 6 kg·m moment by the total 6 kg instead of by the 3 kg being placed","correct: 2(3) + 3x = 0 ⇒ x = −2 m","mirrored the 2 kg position, ignoring that the new mass is heavier (3 kg)"],
+ sol:"COM at origin ⇒ Σmᵢxᵢ = 0: 1(0) + 2(3) + 3x = 0 ⇒ 3x = −6 ⇒ x = −2 m. Check x<sub>cm</sub> = (0 + 6 − 6)/6 = 0 ✓. The heavier 3 kg mass needs a shorter lever arm (2 m) than the 2 kg mass (3 m). Final: <b>x = −2 m</b>."},
+
+{id:9, lec:"L-1", blk:"Inverse problem", topic:"Unknown mass from the COM",
+ q:"A 2 kg particle is at x = 0 and a particle of unknown mass m is at x = 4 m. Their centre of mass is at x = 3 m. Then m is:",
+ opts:["2/3 kg", "2 kg", "1.5 kg", "6 kg"],
+ ans:3,
+ why:["inverted the lever rule: wrote 2·1 = m·3 instead of 2·3 = m·1","algebra slip: from 4m = 3(2 + m) wrote 4m = 6 + m, dropping the 3 on m","used the COM's coordinate 4 m (from the origin) as m's lever arm: 2·3 = 4m — its arm is 4 − 3 = 1 m","correct: 4m/(2 + m) = 3 ⇒ 4m = 6 + 3m ⇒ m = 6 kg"],
+ sol:"x<sub>cm</sub> = (2·0 + m·4)/(2 + m) = 3 ⇒ 4m = 6 + 3m ⇒ m = 6 kg. Lever check: the 2 kg is 3 m from the COM, the 6 kg is 1 m from it; 2·3 = 6·1 ✓. Final: <b>m = 6 kg</b>."},
+
+{id:10, lec:"L-1", blk:"n-particle COM", topic:"Equal masses on an equilateral triangle",
+ q:"Three equal masses sit at (0, 0), (a, 0) and (a/2, √3a/2). Their centre of mass is at:",
+ opts:["(a/2, √3a/4)", "(a/2, a/(2√3))", "(a/2, a/√3)", "(a/3, a/(2√3))"],
+ ans:1,
+ why:["halfway up the altitude — the centroid is one-third of the way up, not half","correct: x = (0 + a + a/2)/3 = a/2, y = (0 + 0 + √3a/2)/3 = √3a/6 = a/(2√3)","two-thirds of the altitude measured from the base — that is the distance from the apex","dropped the a/2 term in the x-sum, (0 + a)/3"],
+ sol:"Equal masses ⇒ the COM is the centroid (simple average). x = (0 + a + a/2)/3 = a/2; y = (0 + 0 + √3a/2)/3 = √3a/6 = a/(2√3) ≈ 0.289a, i.e. one-third of the altitude √3a/2 above the base. Final: <b>(a/2, a/(2√3))</b>."},
+
+{id:11, lec:"L-1", blk:"n-particle COM", topic:"3–4–5 right triangle",
+ q:"Equal masses are placed at the vertices (0, 0), (4, 0) and (0, 3) m of a right triangle. Their centre of mass is at:",
+ opts:["(2, 1.5) m", "(1, 4/3) m", "(4/3, 1) m", "(8/3, 2) m"],
+ ans:2,
+ why:["the midpoint of the hypotenuse (centre of the bounding box), not the centroid of three points","swapped x and y — the 4 m leg lies on the x-axis","correct: x = (0 + 4 + 0)/3 = 4/3 m, y = (0 + 0 + 3)/3 = 1 m","took two-thirds instead of one-third of each sum"],
+ sol:"For equal masses r⃗<sub>cm</sub> is the average of the vertices: x = (0 + 4 + 0)/3 = 4/3 m, y = (0 + 0 + 3)/3 = 1 m. Final: <b>(4/3, 1) m</b>."},
+
+{id:12, lec:"L-1", blk:"Grouping sub-systems", topic:"Masses at rectangle corners",
+ q:"1 kg masses sit at (0, 0) and (2, 0) m; 2 kg masses sit at (0, 2) and (2, 2) m. The centre of mass is at:",
+ opts:["(1, 4/3) m", "(1, 1) m", "(4/3, 1) m", "(1, 2/3) m"],
+ ans:0,
+ why:["correct: group the bottom pair (2 kg at (1, 0)) and top pair (4 kg at (1, 2)); y = (2·0 + 4·2)/6 = 4/3","geometric centre — ignores that the top masses are twice as heavy","shifted the x-coordinate; left–right is symmetric, so x must stay 1","weighted toward the light bottom edge — swapped the 2 kg and 4 kg group weights"],
+ sol:"Replace each pair by its total mass at its own COM: bottom pair → 2 kg at (1, 0), top pair → 4 kg at (1, 2). Then x = 1 by symmetry and y = (2·0 + 4·2)/(2 + 4) = 8/6 = 4/3 m. Final: <b>(1, 4/3) m</b>."},
+
+{id:13, lec:"L-1", blk:"n-particle COM", topic:"Mass ladder",
+ q:"Masses 1, 2, 3, …, n kg are placed at x = 1, 2, 3, …, n m respectively. The x-coordinate of their centre of mass is:",
+ opts:["(n + 1)/2 m", "(2n + 1)/3 m", "n(n + 1)/2 m", "2n/3 m"],
+ ans:1,
+ why:["the unweighted average of positions — ignores that the far masses are heavier","correct: Σk·k / Σk = [n(n + 1)(2n + 1)/6] / [n(n + 1)/2] = (2n + 1)/3","that is Σmᵢ alone — forgot to form the ratio Σmᵢxᵢ/Σmᵢ","dropped the +1 from (2n + 1); fails n = 1, which must give x = 1"],
+ sol:"Σmᵢxᵢ = Σk² = n(n + 1)(2n + 1)/6, Σmᵢ = Σk = n(n + 1)/2. Ratio = (2n + 1)/3. Checks: n = 1 → 1 ✓; n = 2 → (1·1 + 2·2)/3 = 5/3 ✓. Final: <b>(2n + 1)/3 m</b>."},
+
+{id:14, lec:"L-1", blk:"Choice of axes", topic:"Shifting the origin",
+ q:"The origin is moved to the point whose old position vector is a⃗. The centre of mass's position vector relative to the new origin is:",
+ opts:["r⃗<sub>cm</sub> + a⃗", "r⃗<sub>cm</sub>, unchanged", "r⃗<sub>cm</sub> − a⃗", "r⃗<sub>cm</sub> − a⃗/n, n = number of particles"],
+ ans:2,
+ why:["wrong sign — every new position vector is r⃗ᵢ − a⃗, not r⃗ᵢ + a⃗","the point is unchanged, but its position vector from a different origin is not","correct: r⃗ᵢ′ = r⃗ᵢ − a⃗ ⇒ Σmᵢ(r⃗ᵢ − a⃗)/M = r⃗<sub>cm</sub> − a⃗","the shift is common to every particle, so it comes out whole: Σmᵢa⃗/M = a⃗, not a⃗/n"],
+ sol:"Each particle's new position vector is r⃗ᵢ′ = r⃗ᵢ − a⃗. So r⃗<sub>cm</sub>′ = Σmᵢ(r⃗ᵢ − a⃗)/M = r⃗<sub>cm</sub> − (Σmᵢ/M)a⃗ = r⃗<sub>cm</sub> − a⃗. The COM is the same physical point; only its coordinates change. Final: <b>r⃗<sub>cm</sub> − a⃗</b>."},
+
+{id:15, lec:"L-1", blk:"Two-particle COM", topic:"Earth–Moon barycentre",
+ q:"The Earth is 81 times as massive as the Moon and their centres are 3.84 × 10⁵ km apart. The distance of the Earth–Moon centre of mass from the Earth's centre is about:",
+ opts:["4.68 × 10³ km", "4.74 × 10³ km", "1.92 × 10⁵ km", "3.79 × 10⁵ km"],
+ ans:0,
+ why:["correct: r<sub>E</sub> = m<sub>M</sub>d/(m<sub>E</sub> + m<sub>M</sub>) = d/82 ≈ 4.68 × 10³ km — inside the Earth (R ≈ 6400 km)","divided by the mass ratio 81 instead of the total 82 parts","the midpoint — ignores the 81:1 mass ratio","81d/82 is the distance from the Moon's centre, not the Earth's"],
+ sol:"With m<sub>E</sub> = 81m<sub>M</sub>: r<sub>E</sub> = m<sub>M</sub>d/(81m<sub>M</sub> + m<sub>M</sub>) = d/82 = 3.84 × 10⁵/82 ≈ 4.68 × 10³ km. That is less than the Earth's radius, so the barycentre lies inside the Earth. Final: <b>≈ 4.68 × 10³ km</b>."},
+
+{id:16, lec:"L-1", blk:"Two-particle COM", topic:"Touching spheres",
+ q:"Two uniform solid spheres of the same material, radii R and 2R, touch each other. The distance of their centre of mass from the centre of the larger sphere is:",
+ opts:["3R/2", "3R/5", "R", "R/3"],
+ ans:3,
+ why:["the midpoint of the line of centres — assumes equal masses","took mass ∝ R² (as if they were discs) — masses are 1 : 4, not the true 1 : 8","took mass ∝ R — masses 1 : 2","correct: mass ∝ R³ ⇒ m and 8m; centres 3R apart ⇒ m(3R)/9m = R/3"],
+ sol:"Same density ⇒ mass ∝ volume ∝ R³: small m, large 8m. The centres are R + 2R = 3R apart. From the large centre: r = m(3R)/(m + 8m) = R/3. That point is inside the large sphere, 2R − R/3 = 5R/3 from the contact point. Final: <b>R/3</b>."},
+
+{id:17, lec:"L-1", blk:"n-particle COM", topic:"Bent triatomic (H₂O)",
+ q:"In H₂O each O–H bond is 0.96 Å long and the bond angle is 104.5°. Taking O = 16 u, H = 1 u, the centre of mass lies on the bisector at a distance from the O atom of about:",
+ opts:["0.033 Å", "0.065 Å", "0.107 Å", "0.59 Å"],
+ ans:1,
+ why:["included only one H atom","correct: 2·1·(0.96 cos 52.25°)/18 = 2(0.588)/18 ≈ 0.065 Å","forgot to project the bonds onto the bisector (dropped cos 52.25°)","took the unweighted bond projection 0.96 cos 52.25° — ignores that O carries 16/18 of the mass"],
+ sol:"Put O at the origin with the bisector as the x-axis. Each H is at x = 0.96 cos 52.25° ≈ 0.588 Å; the y-components cancel. x<sub>cm</sub> = (16·0 + 1·0.588 + 1·0.588)/18 = 1.175/18 ≈ 0.065 Å. Final: <b>≈ 0.065 Å from O</b>."},
+
+{id:18, lec:"L-1", blk:"Balancing moments", topic:"Knife-edge balance",
+ q:"A non-uniform rod balances on a knife edge at P and is cut there. Piece A has its own centre of mass 10 cm from P; piece B has its own 30 cm from P. The ratio m<sub>A</sub>/m<sub>B</sub> is:",
+ opts:["1/3", "1", "3", "9"],
+ ans:2,
+ why:["inverted the lever rule — the piece whose COM is nearer P must be heavier","balance means equal moments about P, not equal masses","correct: m<sub>A</sub>(10) = m<sub>B</sub>(30) ⇒ m<sub>A</sub>/m<sub>B</sub> = 3","squared the ratio of distances — the moment is linear in distance"],
+ sol:"Balancing at P means P is the COM of the whole rod, so the first moments of the two pieces about P cancel: m<sub>A</sub>·10 = m<sub>B</sub>·30 ⇒ m<sub>A</sub>/m<sub>B</sub> = 3. This is why the short thick end of a bat outweighs the long thin end. Final: <b>3</b>."},
+
+/* ===== P11_L2.js ===== */
+{id:19, lec:"L-2", blk:"Non-uniform rod", topic:"λ = kx²/L",
+ q:"A rod of length L has linear mass density λ = kx²/L, x measured from one end. Its centre of mass is at x =",
+ opts:["L/2", "2L/3", "3L/4", "L/4"],
+ ans:2,
+ why:["the uniform-rod answer — ignores that the far end is much denser","the result for λ ∝ x; here λ ∝ x², which pushes the COM further out","correct: ∫x³dx/∫x²dx over 0 → L = (L⁴/4)/(L³/3) = 3L/4","measured from the heavy end — from x = 0 the COM is at 3L/4"],
+ sol:"dm = (kx²/L)dx. x<sub>cm</sub> = ∫₀<sup>L</sup> x(kx²/L)dx / ∫₀<sup>L</sup>(kx²/L)dx = (k/L)(L⁴/4) / (k/L)(L³/3) = 3L/4. Pattern: λ ∝ xⁿ gives x<sub>cm</sub> = (n + 1)L/(n + 2); n = 0 → L/2, n = 1 → 2L/3, n = 2 → 3L/4. Final: <b>3L/4 from the light end</b>."},
+
+{id:20, lec:"L-2", blk:"Linear mass density", topic:"Mass of a non-uniform rod",
+ q:"A rod lying from x = 0 to x = L has λ = λ₀(1 + x/L). Its total mass is:",
+ opts:["λ₀L", "3λ₀L/2", "2λ₀L", "λ₀L/2"],
+ ans:1,
+ why:["used the density at x = 0 for the whole rod","correct: ∫₀<sup>L</sup>λ₀(1 + x/L)dx = λ₀(L + L/2) = 3λ₀L/2","used the density at x = L (2λ₀) for the whole rod","kept only the x/L part of the integral and dropped the constant term"],
+ sol:"M = ∫dm = ∫₀<sup>L</sup> λ₀(1 + x/L)dx = λ₀[x + x²/2L]₀<sup>L</sup> = λ₀(L + L/2) = 3λ₀L/2. Because λ is linear in x, this equals the average density 1.5λ₀ times L. Final: <b>3λ₀L/2</b>."},
+
+{id:21, lec:"L-2", blk:"Non-uniform rod", topic:"λ = α + βx",
+ q:"A rod from x = 0 to x = L has λ = α + βx. Its centre of mass is at:",
+ opts:["L(α + βL)/(2α + βL)", "L(3α + 2βL)/[3(2α + βL)]", "L(2α + 3βL)/[3(α + 2βL)]", "L/2, since λ is linear in x"],
+ ans:1,
+ why:["integrated βx² as βx³/2 instead of βx³/3 — at α = 0 it gives L, not 2L/3","correct: (αL²/2 + βL³/3)/(αL + βL²/2) = L(3α + 2βL)/[3(2α + βL)]","swapped the coefficients — at β = 0 it gives 2L/3 instead of L/2","linear density still loads one end more, so the COM is not the midpoint unless β = 0"],
+ sol:"∫x dm = ∫₀<sup>L</sup>(αx + βx²)dx = αL²/2 + βL³/3 = L²(3α + 2βL)/6. ∫dm = αL + βL²/2 = L(2α + βL)/2. Ratio: x<sub>cm</sub> = L(3α + 2βL)/[3(2α + βL)]. Checks: β = 0 → L/2 ✓; α = 0 → 2L/3 ✓. Final: <b>L(3α + 2βL)/[3(2α + βL)]</b>."},
+
+{id:22, lec:"L-2", blk:"Arc", topic:"Semicircular ring",
+ q:"A thin uniform semicircular ring has radius R. Its centre of mass is at a distance from the centre of curvature of:",
+ opts:["4R/3π", "R/2", "2R/π", "R/π"],
+ ans:2,
+ why:["that is the semicircular disc (lamina), whose mass is spread toward the centre","R/2 is a guess with no integral behind it; the arc's mass is all at distance R","correct: 2R sin(φ/2)/φ with φ = π gives 2R/π ≈ 0.637R","dropped the factor 2 from 2R sin(φ/2)/φ"],
+ sol:"Arc of total angle φ symmetric about the x-axis: x<sub>cm</sub> = ∫R cosθ·λR dθ / ∫λR dθ over −φ/2 → φ/2 = R·2sin(φ/2)/φ. For a semicircle φ = π: x<sub>cm</sub> = 2R(1)/π = 2R/π ≈ 0.637R. Final: <b>2R/π</b>."},
+
+{id:23, lec:"L-2", blk:"Arc", topic:"Arc subtending π/3",
+ q:"A uniform arc of radius R subtends π/3 at its centre. Its centre of mass lies on the bisector at a distance from the centre of:",
+ opts:["3R/π", "2R/π", "3√3R/π", "3R/(2π)"],
+ ans:0,
+ why:["correct: 2R sin(π/6)/(π/3) = 2R(1/2)(3/π) = 3R/π ≈ 0.955R","used the sector (lamina) formula 2R sinθ/3θ with θ = π/6 — wrong body","used sin φ instead of sin(φ/2); gives ≈ 1.65R, outside the arc's radius — impossible","dropped the factor 2 in 2R sin(φ/2)/φ"],
+ sol:"Arc formula with full angle φ = π/3: x<sub>cm</sub> = 2R sin(φ/2)/φ = 2R sin(π/6)/(π/3) = 2R(1/2)(3/π) = 3R/π ≈ 0.955R. A short arc's COM must lie just inside radius R, and 0.955R fits. Final: <b>3R/π</b>."},
+
+{id:24, lec:"L-2", blk:"Sector", topic:"Quarter disc (book misprint)",
+ q:"A uniform sector of a disc of radius R has its ends subtending π/2 at the centre (a quarter disc). Using x<sub>cm</sub> = 2R sinθ/3θ with 2θ = total angle, its centre of mass is at a distance from the centre of:",
+ opts:["4R/3π", "4√2R/3π", "2√2R/π", "2√2R/3π"],
+ ans:1,
+ why:["⚠ the module's misprint: it substitutes θ = π/2 (the semicircular disc) and prints 4R/3π; for a total angle of π/2 the half-angle is θ = π/4","correct: θ = π/4 ⇒ 2R(1/√2)/(3π/4) = 8R/(3√2π) = 4√2R/3π ≈ 0.600R","that is the quarter RING (arc formula), not the lamina — a lamina's mass sits closer to the centre","dropped a factor 2 in the substitution; gives ≈ 0.30R"],
+ sol:"With 2θ = π/2 the half-angle is θ = π/4. x<sub>cm</sub> = 2R sinθ/(3θ) = 2R(1/√2)/(3π/4) = 8R/(3√2π) = 4√2R/3π ≈ 0.600R. Check: each Cartesian coordinate is then 0.600R/√2 = 4R/3π ≈ 0.424R, the familiar quarter-disc result. ⚠ The module plugs in θ = π/2 and prints 4R/3π, which is the semicircular disc. Final: <b>4√2R/3π</b>."},
+
+{id:25, lec:"L-2", blk:"Arc", topic:"Quarter ring coordinates",
+ q:"A uniform quarter ring of radius R lies in the first quadrant, centred at the origin. The coordinates of its centre of mass are:",
+ opts:["(2√2R/π, 2√2R/π)", "(4R/3π, 4R/3π)", "(R/√2, R/√2)", "(2R/π, 2R/π)"],
+ ans:3,
+ why:["2√2R/π is the distance from the origin along the bisector — putting it on each axis overshoots by √2","these are the quarter DISC (lamina) coordinates","the midpoint of the arc itself; the COM lies inside the arc","correct: x<sub>cm</sub> = ∫R cosθ dθ/(π/2) over 0 → π/2 = 2R/π, and y<sub>cm</sub> = 2R/π by symmetry"],
+ sol:"Directly: x<sub>cm</sub> = ∫₀<sup>π/2</sup> R cosθ·λR dθ / (λRπ/2) = R(1)/(π/2) = 2R/π, and y<sub>cm</sub> = 2R/π likewise. Distance from O = √2·2R/π = 2√2R/π, matching 2R sin(π/4)/(π/2). Final: <b>(2R/π, 2R/π)</b>."},
+
+{id:26, lec:"L-2", blk:"Arc", topic:"Limit of a short arc",
+ q:"Using x<sub>cm</sub> = 2R sin(φ/2)/φ for a uniform arc, as the arc angle φ → 0 the centre of mass approaches a distance from the centre of:",
+ opts:["0", "R", "2R/π", "R/2"],
+ ans:1,
+ why:["0 is the full-ring limit (φ = 2π, sin π = 0), the opposite end","correct: sin(φ/2) ≈ φ/2 ⇒ 2R(φ/2)/φ = R — a tiny arc is almost a point on the circle","that is the value at φ = π, not the limit φ → 0","there is no physical reason for R/2; a vanishing arc collapses onto the circle"],
+ sol:"For small φ, sin(φ/2) ≈ φ/2, so x<sub>cm</sub> ≈ 2R(φ/2)/φ = R. Across the range: φ → 0 gives R, φ = π gives 2R/π ≈ 0.64R, and φ = 2π gives 0. Final: <b>R</b>."},
+
+{id:27, lec:"L-2", blk:"Sector", topic:"120° sector",
+ q:"A uniform sector of a disc of radius R has a total angle of 120°. Its centre of mass is at a distance from the centre of:",
+ opts:["√3R/(2π)", "3√3R/(2π)", "2R/π", "√3R/π"],
+ ans:3,
+ why:["put the full angle 2θ in the denominator instead of θ","used the arc (ring) formula 2R sin(φ/2)/φ — that is for a wire, not a lamina","quoted the semicircular-ring value without substituting","correct: θ = π/3 ⇒ 2R(√3/2)/(3·π/3) = √3R/π ≈ 0.551R"],
+ sol:"Total angle 2θ = 2π/3 ⇒ θ = π/3. x<sub>cm</sub> = 2R sinθ/(3θ) = 2R(√3/2)/(π) = √3R/π ≈ 0.551R. The wire arc of the same angle would be at 3√3R/(2π) ≈ 0.827R — the lamina's COM sits nearer the centre because area grows toward the rim more slowly than the arc's. Final: <b>√3R/π</b>."},
+
+{id:28, lec:"L-2", blk:"Annulus", topic:"Half annulus",
+ q:"A uniform half-annulus has inner radius R₁ and outer radius R₂. Its centre of mass is at a distance from the centre of:",
+ opts:["4(R₂³ − R₁³)/[3π(R₂² − R₁²)]", "4(R₂ − R₁)/3π", "(R₁ + R₂)/π", "4(R₂² − R₁²)/[3π(R₂ − R₁)]"],
+ ans:0,
+ why:["correct: ∫(2x/π)σπx dx / ∫σπx dx over R₁ → R₂ = 4(R₂³ − R₁³)/[3π(R₂² − R₁²)]","subtracted the two disc results 4R₂/3π − 4R₁/3π without weighting by their areas","treated it as a thin half-ring at the mean radius — fine only when R₂ ≈ R₁","lowered each power by one; this equals 4(R₁ + R₂)/3π, which passes the R₁ → 0 check but at R₁ = R₂ = R gives 8R/3π instead of the thin half-ring's 2R/π"],
+ sol:"Element: a half-ring of radius x, width dx: dm = σπx dx, its COM at 2x/π. y<sub>cm</sub> = ∫(2x/π)σπx dx / ∫σπx dx = 2σ[x³/3] / σπ[x²/2] = 4(R₂³ − R₁³)/[3π(R₂² − R₁²)]. Checks: R₁ → 0 gives 4R₂/3π ✓; R₁ → R₂ = R gives 4(3R²)/(3π·2R) = 2R/π ✓. Final: <b>4(R₂³ − R₁³)/[3π(R₂² − R₁²)]</b>."},
+
+{id:29, lec:"L-2", blk:"Choice of element", topic:"Half-ring strips",
+ q:"To find the COM of a uniform semicircular disc (surface density σ) by integration, the natural mass element is a thin half-ring of radius x and width dx. Its mass dm is:",
+ opts:["2πσx dx", "σπx dx", "σπx² dx", "σx dx"],
+ ans:1,
+ why:["that is a full ring; only half the circumference belongs to a semicircular disc","correct: area = (half-circumference πx) × width dx ⇒ dm = σπx dx","x² dx has dimensions of length³, so σπx² dx is not even a mass — a strip's area is length πx × width dx","dropped the π — the half-ring's length is πx, not x"],
+ sol:"A half-ring of radius x has length πx; with width dx its area is πx dx, so dm = σπx dx. Its own COM sits at 2x/π. Then y<sub>cm</sub> = ∫(2x/π)σπx dx / ∫σπx dx = (2R³/3)/(πR²/2) = 4R/3π ✓. Final: <b>dm = σπx dx</b>."},
+
+{id:30, lec:"L-2", blk:"Bent rod", topic:"L-shaped rod",
+ q:"A uniform rod of length 2L is bent at its midpoint into an L shape, the two arms lying along the +x and +y axes from the corner at the origin. Its centre of mass is at:",
+ opts:["(L/2, L/2)", "(L/4, L/4)", "(L/3, L/3)", "(L/(2√2), L/(2√2))"],
+ ans:1,
+ why:["those are the two arms' own centres used as coordinates — each arm contributes to only one axis","correct: arms at (L/2, 0) and (0, L/2), equal mass ⇒ (L/4, L/4)","the centroid of a triangle — there is no mass on the hypotenuse","took the distance from the corner, L/(2√2), as each coordinate"],
+ sol:"Each arm has mass M/2 at its midpoint: arm on x at (L/2, 0), arm on y at (0, L/2). r⃗<sub>cm</sub> = [(M/2)(L/2, 0) + (M/2)(0, L/2)]/M = (L/4, L/4). The COM lies outside the wire, L/(2√2) from the corner. Final: <b>(L/4, L/4)</b>."},
+
+{id:31, lec:"L-2", blk:"Composite wire", topic:"U-shaped wire",
+ q:"A uniform wire is bent into a U: a base from (0, 0) to (L, 0) and two vertical arms of length L rising from its ends. The centre of mass is at:",
+ opts:["(L/2, L/2)", "(L/2, L/4)", "(L/2, L/3)", "(L/2, 2L/3)"],
+ ans:2,
+ why:["ignored the base, which has mass at y = 0","counted the base twice in the total, dividing by 4L instead of 3L","correct: y = [L·0 + L(L/2) + L(L/2)]/3L = L/3","measured from the open top instead of the base"],
+ sol:"Three equal segments of mass ∝ L: base COM at (L/2, 0), arms at (0, L/2) and (L, L/2). x<sub>cm</sub> = L/2 by symmetry; y<sub>cm</sub> = (0 + L/2 + L/2)/3 = L/3. Final: <b>(L/2, L/3)</b>."},
+
+{id:32, lec:"L-2", blk:"Two-body COM", topic:"Ladder + man",
+ q:"A uniform ladder of mass 20 kg and length 5 m leans on a wall. A 60 kg man stands on it 4 m from the bottom (along the ladder). Measured along the ladder from the bottom, the COM of ladder + man is at:",
+ opts:["3.25 m", "3.625 m", "4.25 m", "1.375 m"],
+ ans:1,
+ why:["took the unweighted mean of 2.5 m and 4 m","correct: (20·2.5 + 60·4)/80 = 290/80 = 3.625 m","put the ladder's mass at its top (5 m) instead of its midpoint","that is the distance from the top end, not the bottom"],
+ sol:"The ladder acts as 20 kg at its midpoint, 2.5 m up. x<sub>cm</sub> = (20·2.5 + 60·4)/(20 + 60) = (50 + 240)/80 = 3.625 m from the bottom. Final: <b>3.625 m</b>."},
+
+{id:33, lec:"L-2", blk:"Integration", topic:"Parabolic lamina",
+ q:"A uniform lamina occupies 0 ≤ x ≤ a, 0 ≤ y ≤ kx². Writing h = ka², its centre of mass is at:",
+ opts:["(2a/3, h/3)", "(3a/4, 3h/5)", "(a/2, 3h/10)", "(3a/4, 3h/10)"],
+ ans:3,
+ why:["the centroid of a triangle — the region under a parabola is not a triangle","forgot that a vertical strip's own COM is at half its height, y/2","took x<sub>cm</sub> as the midpoint; the area is concentrated toward x = a","correct: x = (ka⁴/4)/(ka³/3) = 3a/4; y = ∫(kx²/2)kx²dx/(ka³/3) = (k²a⁵/10)/(ka³/3) = 3h/10"],
+ sol:"Vertical strips of height kx²: dA = kx² dx, A = ka³/3. x<sub>cm</sub> = ∫x·kx² dx / A = (ka⁴/4)/(ka³/3) = 3a/4. Each strip's COM is at y = kx²/2, so y<sub>cm</sub> = ∫(kx²/2)·kx² dx / A = (k²a⁵/10)/(ka³/3) = 3ka²/10 = 3h/10. Final: <b>(3a/4, 3h/10)</b>."},
+
+{id:34, lec:"L-2", blk:"Standard solids", topic:"Solid hemisphere",
+ q:"The centre of mass of a uniform solid hemisphere of radius R lies on its axis at a distance from the flat face of:",
+ opts:["3R/8", "R/2", "4R/3π", "3R/4"],
+ ans:0,
+ why:["correct: discs of radius √(R² − y²): ∫y·π(R² − y²)dy / (2πR³/3) = (πR⁴/4)/(2πR³/3) = 3R/8","R/2 is the hollow hemispherical SHELL","4R/3π is the semicircular disc (2-D lamina), not the 3-D solid","3R/4 puts the COM near the dome's top, but most of the volume lies near the flat face (it is 1 − 1/4, the cone's h/4 mis-applied)"],
+ sol:"Slice into discs at height y: dV = π(R² − y²)dy. ∫₀<sup>R</sup> y·π(R² − y²)dy = π(R⁴/2 − R⁴/4) = πR⁴/4; V = 2πR³/3. y<sub>cm</sub> = (πR⁴/4)/(2πR³/3) = 3R/8. Compare: shell R/2, semicircular disc 4R/3π ≈ 0.42R. Final: <b>3R/8</b>."},
+
+{id:35, lec:"L-2", blk:"Symmetry", topic:"COM on symmetry axes",
+ q:"For a uniform body that has an axis of symmetry, which statement is always true?",
+ opts:["The COM lies on the axis of symmetry", "The COM lies at the geometric middle of that axis inside the body", "The COM lies on the material of the body", "The COM lies at the intersection of the axis with the body's boundary"],
+ ans:0,
+ why:["correct: each element has a mirror partner, so their moments about the axis cancel","false — a semicircular disc's COM is at 4R/3π along the axis, not at its middle (R/2)","false — a ring or semicircular wire has its COM in empty space","no such rule; the COM is generally an interior point of the axis segment"],
+ sol:"Mirror symmetry pairs every element at perpendicular distance +d from the axis with an equal one at −d, so the first moment perpendicular to the axis is zero: the COM is on the axis. Where along it requires an integral (e.g. 2R/π for a semicircular ring, 4R/3π for a semicircular disc). Final: <b>on the axis of symmetry</b>."},
+
+{id:36, lec:"L-2", blk:"Composite", topic:"Semicircular plate + ring",
+ q:"A uniform semicircular plate and a uniform semicircular ring, each of mass m and radius R, share the same centre and diameter, lying on the same side. The COM of the pair is at a distance from the centre of:",
+ opts:["10R/3π", "2R/3π", "5R/3π", "R/π"],
+ ans:2,
+ why:["added the two distances but forgot to divide by the total mass 2m","subtracted the distances instead of averaging them","correct: [m(4R/3π) + m(2R/π)]/2m = (4R/3π + 6R/3π)/2 = 5R/3π","halved only the ring's 2R/π and dropped the plate entirely"],
+ sol:"Plate COM at 4R/3π, ring COM at 2R/π = 6R/3π, both on the same axis. Equal masses ⇒ simple average: (4R/3π + 6R/3π)/2 = 10R/6π = 5R/3π ≈ 0.53R. Final: <b>5R/3π</b>."},
+
+/* ===== P11_L3.js ===== */
+{id:37, lec:"L-3", blk:"Cavity method", topic:"Disc with an edge hole",
+ q:"From a uniform disc of radius a centred at the origin, a disc of radius a/2 whose centre is at (a/2, 0) is cut out. The centre of mass of the remaining lamina is at:",
+ opts:["(−a/8, 0)", "(+a/6, 0)", "(−a/6, 0)", "(−a/2, 0)"],
+ ans:2,
+ why:["forgot to subtract the hole in the denominator: divided by πa² instead of 3πa²/4","right size, wrong side — the COM moves away from the hole","correct: [0 − (πa²/4)(a/2)]/(πa² − πa²/4) = (−πa³/8)/(3πa²/4) = −a/6","took mass ∝ radius (ratio 1/2) instead of ∝ area (ratio 1/4)"],
+ sol:"A₁ = πa² at x₁ = 0; A₂ = π(a/2)² = πa²/4 at x₂ = a/2. x<sub>cm</sub> = (A₁x₁ − A₂x₂)/(A₁ − A₂) = (0 − πa³/8)/(3πa²/4) = −a/6. Both centres lie on the x-axis, so y<sub>cm</sub> = 0. Final: <b>(−a/6, 0)</b>."},
+
+{id:38, lec:"L-3", blk:"Cavity method", topic:"L-shaped block",
+ q:"A uniform square plate of side L has its corner at the origin. The top-right square of side L/2 is removed. The centre of mass of the remaining L-shape is at:",
+ opts:["(5L/12, 5L/12)", "(5L/16, 5L/16)", "(11L/20, 11L/20)", "(L/2, L/2)"],
+ ans:0,
+ why:["correct: [L²(L/2) − (L²/4)(3L/4)]/(L² − L²/4) = (5L³/16)/(3L²/4) = 5L/12","divided by the full area L² instead of the remaining 3L²/4","added the removed piece instead of subtracting it","the centre of the original square — ignores the removal"],
+ sol:"A₁ = L² at (L/2, L/2); A₂ = L²/4 at (3L/4, 3L/4). x<sub>cm</sub> = (L³/2 − 3L³/16)/(3L²/4) = (5L³/16)(4/3L²) = 5L/12. Symmetry about y = x gives y<sub>cm</sub> = 5L/12. The COM moves from L/2 toward the bottom-left, away from the cut. Final: <b>(5L/12, 5L/12)</b>."},
+
+{id:39, lec:"L-3", blk:"Cavity method", topic:"Square hole in a disc",
+ q:"From a uniform disc of radius R centred at the origin, a square of side R centred at (R/2, 0) is removed. The x-coordinate of the centre of mass of the remainder is:",
+ opts:["−R/(2π)", "+R/[2(π − 1)]", "−R/[2(π + 1)]", "−R/[2(π − 1)]"],
+ ans:3,
+ why:["did not subtract the square's area R² from the denominator","right size, wrong side — the COM moves away from the hole","added the square's area in the denominator instead of subtracting it","correct: −R²(R/2)/(πR² − R²) = −R/[2(π − 1)]"],
+ sol:"A₁ = πR² at 0; A₂ = R² at R/2. x<sub>cm</sub> = (0 − R²·R/2)/(πR² − R²) = −(R³/2)/[R²(π − 1)] = −R/[2(π − 1)] ≈ −0.233R. Final: <b>−R/[2(π − 1)]</b>."},
+
+{id:40, lec:"L-3", blk:"Cavity method", topic:"Two holes, vector COM",
+ q:"From a uniform disc of radius R centred at O, two holes of radius R/4 are cut, centred at (R/2, 0) and (0, R/2). The centre of mass of the remainder is at:",
+ opts:["(−R/28, −R/28)", "(−R/30, −R/30)", "(−R/32, −R/32)", "(+R/28, +R/28)"],
+ ans:0,
+ why:["correct: each hole has area πR²/16; x = −(πR²/16)(R/2)/(πR² − 2πR²/16) = −(R/32)/(7/8) = −R/28","subtracted only one hole in the denominator (15/16 instead of 14/16)","forgot to subtract the holes in the denominator at all","right size, wrong side — the COM moves away from both holes"],
+ sol:"Each hole: A = π(R/4)² = πR²/16. Remaining area = πR²(1 − 2/16) = 7πR²/8. x<sub>cm</sub> = [0 − (πR²/16)(R/2) − (πR²/16)(0)]/(7πR²/8) = −(R/32)(8/7) = −R/28, and y<sub>cm</sub> = −R/28 by the same working. Final: <b>(−R/28, −R/28)</b>."},
+
+{id:41, lec:"L-3", blk:"Cavity method", topic:"Sphere with a spherical cavity",
+ q:"A uniform solid sphere of radius R has a spherical cavity of radius R/2 whose surface touches the outer surface (cavity centre at distance R/2 from O). The COM of the remaining solid is, from O:",
+ opts:["R/6, away from the cavity", "R/14, away from the cavity", "R/16, away from the cavity", "R/14, toward the cavity"],
+ ans:1,
+ why:["used area ratio 1/4 (a disc problem) instead of volume ratio 1/8","correct: V₂ = V₁/8 ⇒ x = −(1/8)(R/2)/(7/8) = −R/14","forgot to subtract the cavity's volume in the denominator","right size, wrong side — a hole pushes the COM away from itself"],
+ sol:"For solids mass ∝ volume ∝ r³, so V₂/V₁ = (1/2)³ = 1/8. x<sub>cm</sub> = (V₁·0 − V₂·R/2)/(V₁ − V₂) = −(1/8)(R/2)/(7/8) = −R/14. Final: <b>R/14 from O, on the side opposite the cavity</b>."},
+
+{id:42, lec:"L-3", blk:"Negative-mass idea", topic:"Direction of the shift",
+ q:"A hole is cut in a uniform lamina whose original centre of mass is at O. The centre of mass of the remainder:",
+ opts:["moves toward the hole along the line of centres", "moves perpendicular to the line joining O and the hole's centre", "moves away from the hole, along the line joining O and the hole's centre", "stays at O as long as the hole lies inside the lamina"],
+ ans:2,
+ why:["opposite — removing mass on one side leaves more mass on the other","the removed piece's moment is along the line of centres, so the shift is too","correct: with O as origin, x<sub>cm</sub> = −A₂x₂/(A₁ − A₂) — opposite in sign to the hole's position","only a hole centred at O leaves the COM at O"],
+ sol:"Treat the hole as negative mass. With origin at O (x₁ = 0): r⃗<sub>cm</sub> = −A₂r⃗₂/(A₁ − A₂). This vector is anti-parallel to r⃗₂, so the COM moves along the line of centres, away from the hole. Final: <b>away from the hole, along the line of centres</b>."},
+
+{id:43, lec:"L-3", blk:"Cut-and-rejoin", topic:"Rod segment moved",
+ q:"A uniform rod lies from x = 0 to x = L. Its last quarter (3L/4 to L) is cut off and rejoined at the other end, now occupying −L/4 to 0. The centre of mass shifts by:",
+ opts:["L/8 toward −x", "L toward −x", "zero — no mass was removed", "L/4 toward −x"],
+ ans:3,
+ why:["multiplied the mass fraction 1/4 by L/2 instead of by L, the distance the piece's centre actually moved","that is how far the piece's centre moved; the whole-rod COM shifts by (M/4)(L)/M","mass was relocated, and relocating mass moves the COM","correct: Δx<sub>cm</sub> = (M/4)(−L)/M = −L/4; the new rod spans −L/4 → 3L/4 with centre L/4"],
+ sol:"Remove at the old place, add at the new: the M/4 piece's centre moves from 7L/8 to −L/8, a change of −L. Δx<sub>cm</sub> = (M/4)(−L)/M = −L/4, so the COM goes from L/2 to L/4. Check: the rejoined rod is still a uniform rod from −L/4 to 3L/4, whose centre is L/4 ✓. Final: <b>L/4 toward −x</b>."},
+
+{id:44, lec:"L-3", blk:"Cavity method", topic:"Notched rectangle",
+ q:"A uniform plate occupies 0 ≤ x ≤ 4a, 0 ≤ y ≤ 2a. The rectangle 2a ≤ x ≤ 4a, a ≤ y ≤ 2a is cut away. The centre of mass of the rest is at:",
+ opts:["(5a/4, 5a/8)", "(2a, a)", "(11a/5, 11a/10)", "(5a/3, 5a/6)"],
+ ans:3,
+ why:["divided by the full area 8a² instead of the remaining 6a²","the centre of the uncut plate","added the cut-out piece instead of subtracting it","correct: x = (8·2 − 2·3)a/6 = 5a/3, y = (8·1 − 2·1.5)a/6 = 5a/6"],
+ sol:"Whole: A₁ = 8a² at (2a, a). Removed: A₂ = 2a² at (3a, 1.5a). x<sub>cm</sub> = (16a³ − 6a³)/(6a²) = 5a/3; y<sub>cm</sub> = (8a³ − 3a³)/(6a²) = 5a/6. Both are below the uncut centre (2a, a), i.e. away from the notch. Final: <b>(5a/3, 5a/6)</b>."},
+
+{id:45, lec:"L-3", blk:"Removing particles", topic:"Cube vertices",
+ q:"Equal masses sit at the 8 corners of a cube of side a with one corner at the origin and edges along the axes. The masses at (0, 0, 0) and (a, 0, 0) are removed. The COM of the remaining six is at:",
+ opts:["(a/2, 2a/3, 2a/3)", "(a/2, a/2, a/2)", "(a/2, a/3, a/3)", "(2a/3, 2a/3, 2a/3)"],
+ ans:0,
+ why:["correct: x-sum 4a − a = 3a ⇒ a/2; y-sum 4a − 0 = 4a ⇒ 4a/6 = 2a/3; z likewise 2a/3","the full cube's centre — two masses were removed, both with y = z = 0","moved toward the removed corners instead of away from them","treated x like y and z; the removed pair is symmetric in x (x = 0 and x = a), so x stays a/2"],
+ sol:"For all 8, each coordinate sums to 4a. Removing (0, 0, 0) and (a, 0, 0) subtracts a from the x-sum and 0 from the y- and z-sums. Six masses remain: x = 3a/6 = a/2, y = 4a/6 = 2a/3, z = 2a/3. Final: <b>(a/2, 2a/3, 2a/3)</b>."},
+
+{id:46, lec:"L-3", blk:"Cavity method", topic:"Thick hemispherical bowl",
+ q:"A thick hemispherical bowl is a uniform solid hemisphere of radius 2R with a concentric solid hemisphere of radius R removed. Its centre of mass lies on the axis at a distance from the flat face of:",
+ opts:["3R/4", "9R/16", "45R/56", "6R/7"],
+ ans:2,
+ why:["the solid hemisphere of radius 2R, ignoring the cavity","the plain average of 3(2R)/8 and 3R/8 — ignores the 8 : 1 volume ratio","correct: (8·6R/8 − 1·3R/8)/(8 − 1) = (45R/8)/7 = 45R/56","subtracted the cavity in the denominator but forgot its moment in the numerator"],
+ sol:"Solid hemisphere COM is 3r/8 from the flat face. Volumes 8V and V (∝ r³). y<sub>cm</sub> = [8V(3·2R/8) − V(3R/8)]/(8V − V) = (6R − 3R/8)/7 = (45R/8)/7 = 45R/56 ≈ 0.80R. General: 3(R₂⁴ − R₁⁴)/[8(R₂³ − R₁³)] = 3(15)/(8·7)R ✓. Final: <b>45R/56</b>."},
+
+{id:47, lec:"L-3", blk:"Removing particles", topic:"Hexagon with one mass missing",
+ q:"Equal masses sit at the six vertices of a regular hexagon of side a. One mass is removed. The COM of the remaining five is:",
+ opts:["at the centre", "a/5 from the centre, toward the empty vertex", "a/6 from the centre, away from the empty vertex", "a/5 from the centre, away from the empty vertex"],
+ ans:3,
+ why:["true only for all six; removing one breaks the symmetry","wrong direction — removing mass pushes the COM away from the gap","divided by 6 masses instead of the 5 that remain","correct: −m(a)/(5m) = −a/5, since the hexagon's circumradius equals its side a"],
+ sol:"Six masses: COM at the centre, Σmᵢr⃗ᵢ = 0. Removing m at r⃗ (|r⃗| = a for a regular hexagon) leaves Σ = −mr⃗ over 5m: r⃗<sub>cm</sub> = −r⃗/5. Final: <b>a/5 from the centre, opposite the removed vertex</b>."},
+
+{id:48, lec:"L-3", blk:"Cavity method", topic:"Off-centre circular hole",
+ q:"A uniform disc of radius 6 cm has a circular hole of radius 2 cm whose centre is 3 cm from the disc's centre. The COM of the remainder is displaced from the disc's centre by:",
+ opts:["0.375 cm, away from the hole", "0.333 cm, away from the hole", "1.5 cm, away from the hole", "0.375 cm, toward the hole"],
+ ans:0,
+ why:["correct: A₂/A₁ = 4/36; x = −(4π)(3)/(36π − 4π) = −12/32 = −0.375 cm","divided by the full area 36π instead of 32π","used radii (2/(6 − 2)·3) instead of areas","right size, wrong side"],
+ sol:"A₁ = 36π at 0, A₂ = 4π at 3 cm. x<sub>cm</sub> = (0 − 4π·3)/(36π − 4π) = −12/32 = −0.375 cm. Final: <b>0.375 cm, on the side away from the hole</b>."},
+
+{id:49, lec:"L-3", blk:"Cavity method", topic:"Quarter-disc centroid",
+ q:"A uniform quarter disc of radius R lies in the first quadrant with its corner at the origin. Its centre of mass is at:",
+ opts:["(2R/π, 2R/π)", "(4√2R/3π, 4√2R/3π)", "(4R/3π, 4R/3π)", "(R/2, R/2)"],
+ ans:2,
+ why:["the quarter RING — a lamina's mass sits nearer the centre than a wire's","put the sector distance 4√2R/3π along each axis — overshoots by √2","correct: a quarter disc is half of a semicircular disc about each axis, so each coordinate is 4R/3π","the centre of the enclosing square; the curved edge removes mass from the far corner"],
+ sol:"The quarter disc is the half of the upper semicircular disc with x ≥ 0, so its y<sub>cm</sub> is the semicircular-disc value 4R/3π; by symmetry about y = x, x<sub>cm</sub> = 4R/3π too. Distance from O = √2·4R/3π = 4√2R/3π, matching the sector formula. Final: <b>(4R/3π, 4R/3π)</b>."},
+
+{id:50, lec:"L-3", blk:"Composite body", topic:"Disc + radial rod",
+ q:"A uniform rod of mass M and length 2R is fixed radially to the rim of a uniform disc of mass M and radius R, so the rod runs from x = R to x = 3R (disc centred at the origin). The COM of the combination is at:",
+ opts:["x = 2R", "x = R/2", "x = R", "x = 3R/2"],
+ ans:2,
+ why:["that is the rod's own centre; the disc's mass pulls the COM back","halved the disc radius instead of the rod-centre distance","correct: [M·0 + M·2R]/2M = R — exactly at the joint","averaged R and 2R rather than 0 and 2R"],
+ sol:"Composite rule: disc as M at x = 0, rod as M at its midpoint x = 2R. x<sub>cm</sub> = (M·0 + M·2R)/(2M) = R — the point where the rod meets the rim. Final: <b>x = R</b>."},
+
+{id:51, lec:"L-3", blk:"Cavity method", topic:"Formula check",
+ q:"For a uniform lamina of area A₁ (COM at x₁) with a part of area A₂ (COM at x₂) removed, the remainder's centre of mass is:",
+ opts:["(A₁x₁ − A₂x₂)/A₁", "(A₁x₁ − A₂x₂)/(A₁ − A₂)", "(A₁x₁ + A₂x₂)/(A₁ + A₂)", "(x₁ − x₂)/2"],
+ ans:1,
+ why:["forgot to subtract the removed area in the denominator — the remaining mass is A₁ − A₂","correct: negative-mass method for both numerator and denominator","that is the composite rule for ADDING a piece, not removing it","not mass-weighted, and does not even reduce to x₁ when A₂ → 0"],
+ sol:"Whole = remainder + removed piece, so A₁x₁ = (A₁ − A₂)x<sub>r</sub> + A₂x₂ ⇒ x<sub>r</sub> = (A₁x₁ − A₂x₂)/(A₁ − A₂). Treat the hole as negative mass in both sums. Final: <b>(A₁x₁ − A₂x₂)/(A₁ − A₂)</b>."},
+
+{id:52, lec:"L-3", blk:"Cavity method", topic:"Semicircular cut from a disc",
+ q:"From a uniform disc of radius R centred at O, the half lying in y &gt; 0 is cut away. Using the cavity formula, the COM of the remaining half-disc is at y =",
+ opts:["−4R/3π", "−2R/π", "+4R/3π", "−2R/3π"],
+ ans:0,
+ why:["correct: A₂ = πR²/2 at y = +4R/3π; y = −(πR²/2)(4R/3π)/(πR²/2) = −4R/3π — the cavity formula reproduces the lower semicircle's centroid","the semicircular RING value, not a lamina","the removed half's centroid — the remainder is on the other side","divided by the full area πR² instead of the remaining πR²/2"],
+ sol:"A₁ = πR² at 0; A₂ = πR²/2 at y = +4R/3π. y<sub>cm</sub> = [0 − (πR²/2)(4R/3π)]/(πR² − πR²/2) = −4R/3π. This agrees with the direct semicircular-disc result, a good self-check of the method. Final: <b>y = −4R/3π</b>."},
+
+/* ===== P11_L4.js ===== */
+{id:53, lec:"L-4", blk:"Displacement of COM", topic:"One particle moved",
+ q:"Particles of 2 kg and 1 kg are some distance apart. The 2 kg particle is moved 1 m toward the other while the 1 kg stays put. The centre of mass shifts by:",
+ opts:["1/3 m toward the 1 kg particle", "2/3 m toward the 1 kg particle", "1 m toward the 1 kg particle", "2/3 m away from the 1 kg particle"],
+ ans:1,
+ why:["weighted the 1 m move by the other particle's mass (1 kg) instead of the mover's (2 kg)","correct: Δx<sub>cm</sub> = (2·1 + 1·0)/3 = 2/3 m, in the direction the 2 kg moved","the COM moves only by the mass-weighted share of the displacement, not the full 1 m","the COM follows the moving particle, so it shifts toward the 1 kg one"],
+ sol:"Δx<sub>cm</sub> = (m₁Δx₁ + m₂Δx₂)/(m₁ + m₂) = (2·1 + 1·0)/3 = 2/3 m. The 2 kg moved toward the 1 kg, so the COM moves the same way. Final: <b>2/3 m toward the 1 kg particle</b>."},
+
+{id:54, lec:"L-4", blk:"Man on plank", topic:"Girl walks a plank",
+ q:"A 40 kg girl walks from one end to the other of an 80 kg, 3 m plank lying on a smooth floor. The plank moves by:",
+ opts:["2 m", "1.5 m", "3 m", "1 m"],
+ ans:3,
+ why:["2 m is the girl's displacement relative to the ground, not the plank's","assumed both share the 3 m equally — ignores the 1 : 2 mass ratio","the plank does not slide its full length; the girl moves too","correct: 40(3 − d) = 80d ⇒ d = 1 m (= mL/(m + M))"],
+ sol:"No horizontal external force ⇒ the COM stays fixed: m<sub>g</sub>Δx<sub>g</sub> + m<sub>p</sub>Δx<sub>p</sub> = 0. If the plank moves d backward, the girl moves (3 − d) forward: 40(3 − d) = 80d ⇒ 120 = 120d ⇒ d = 1 m. Formula: d = mL/(m + M) = 40·3/120 = 1 m. Final: <b>1 m, opposite to the girl</b>."},
+
+{id:55, lec:"L-4", blk:"Velocity of COM", topic:"Position after 2 s",
+ q:"A 1 kg block at x = 10 m moves along −x at 6 m/s; a 2 kg block at x = 12 m moves along +x at 4 m/s. The x-coordinate of their centre of mass 2 s later is:",
+ opts:["34/3 m ≈ 11.33 m", "62/3 m ≈ 20.67 m", "38/3 m ≈ 12.67 m", "9 m"],
+ ans:2,
+ why:["the initial COM — forgot that v<sub>cm</sub> ≠ 0","dropped the sign of the −6 m/s velocity, giving v<sub>cm</sub> = 14/3","correct: x<sub>cm,0</sub> = 34/3, v<sub>cm</sub> = (−6 + 8)/3 = 2/3 ⇒ 34/3 + 4/3 = 38/3 m","unweighted average of the final positions (−2 and 20)"],
+ sol:"x<sub>cm,0</sub> = (1·10 + 2·12)/3 = 34/3 m. v<sub>cm</sub> = (1(−6) + 2(4))/3 = 2/3 m/s. No external force ⇒ x<sub>cm</sub>(2) = 34/3 + (2/3)(2) = 38/3 m. Check: blocks at −2 m and 20 m ⇒ (−2 + 40)/3 = 38/3 ✓. Final: <b>38/3 ≈ 12.67 m</b>."},
+
+{id:56, lec:"L-4", blk:"Explosion", topic:"KE ratio of fragments",
+ q:"A body at rest explodes into fragments of 1 kg and 3 kg. The 3 kg fragment gets 12 J of kinetic energy. The 1 kg fragment gets:",
+ opts:["4 J", "12 J", "36 J", "108 J"],
+ ans:2,
+ why:["inverted the ratio — the lighter fragment gets MORE kinetic energy","equal momenta do not mean equal kinetic energies","correct: equal |p| ⇒ K = p²/2m ⇒ K₁/K₃ = 3/1 ⇒ 36 J","squared the mass ratio — K ∝ 1/m at fixed p, not 1/m²"],
+ sol:"From rest: m₁v₁ = −m₂v₂ ⇒ equal momentum magnitudes p. K = p²/2m ⇒ K₁/K₂ = m₂/m₁ = 3. So K₁ = 3 × 12 = 36 J. Final: <b>36 J</b>."},
+
+{id:57, lec:"L-4", blk:"Acceleration of COM", topic:"Atwood machine (book misprint)",
+ q:"Blocks A (2 kg) and B (1 kg) hang over a light frictionless pulley. The acceleration of the centre of mass of the two blocks is:",
+ opts:["g/9, upward (A rising, B falling)", "g/3, downward", "zero, since one block rises as the other falls", "g/9, downward"],
+ ans:3,
+ why:["⚠ follows the module's misprinted text, which says A moves up — with m<sub>A</sub> = 2 kg &gt; m<sub>B</sub> = 1 kg, A moves DOWN, so a<sub>cm</sub> points down","that is each block's acceleration, not the COM's","equal and opposite accelerations cancel only for equal masses","correct: a = g/3; a<sub>cm</sub> = (2a − a)/3 = g/9, downward (heavier A descends)"],
+ sol:"a = (m<sub>A</sub> − m<sub>B</sub>)g/(m<sub>A</sub> + m<sub>B</sub>) = g/3, A down, B up. Downward +ve: a<sub>cm</sub> = (2·(g/3) − 1·(g/3))/3 = g/9. Check via Newton II: T = 2m<sub>A</sub>m<sub>B</sub>g/(m<sub>A</sub> + m<sub>B</sub>) = 4g/3; net external = 3g − 2T = g/3 ⇒ a<sub>cm</sub> = (g/3)/3 = g/9 ✓. ⚠ The module's text has A moving up; the number g/9 (downward) is unaffected. Final: <b>g/9, downward</b>."},
+
+{id:58, lec:"L-4", blk:"Newton II for systems", topic:"Several forces on a body",
+ q:"A 2.5 kg body is acted on by 5 N at 37° above +x, 6 N at 53° below +x, 4 N at 60° above +x and 6 N along −x. The x-component of its acceleration is (sin37° = 0.6):",
+ opts:["1.44 m/s²", "3.84 m/s²", "6.24 m/s²", "2.11 m/s²"],
+ ans:0,
+ why:["correct: F<sub>x</sub> = 4 + 3.6 + 2 − 6 = 3.6 N ⇒ a<sub>x</sub> = 3.6/2.5 = 1.44 m/s²","left out the 6 N force along −x","added the −x force instead of subtracting it","took sines for the x-components instead of cosines"],
+ sol:"F<sub>x</sub> = 5cos37° + 6cos53° + 4cos60° − 6 = 5(0.8) + 6(0.6) + 4(0.5) − 6 = 3.6 N. a<sub>x</sub> = 3.6/2.5 = 1.44 m/s². (F<sub>y</sub> = 3 − 4.8 + 2√3 ≈ 1.66 N ⇒ a<sub>y</sub> ≈ 0.67 m/s².) Final: <b>1.44 m/s²</b>."},
+
+{id:59, lec:"L-4", blk:"Velocity of COM", topic:"Vector average",
+ q:"A 1 kg particle moves with velocity 2î m/s and a 2 kg particle with 3ĵ m/s. The velocity of their centre of mass is:",
+ opts:["(2î + 3ĵ)/2 m/s", "(2î + 6ĵ)/3 m/s", "(2î + 6ĵ) m/s", "(4î + 3ĵ)/3 m/s"],
+ ans:1,
+ why:["unweighted average of the two velocities","correct: v⃗<sub>cm</sub> = (1·2î + 2·3ĵ)/3 = (2î + 6ĵ)/3","that is the total momentum P⃗ — forgot to divide by M = 3 kg","attached each mass to the other particle's velocity"],
+ sol:"v⃗<sub>cm</sub> = Σmᵢv⃗ᵢ/M = (1·2î + 2·3ĵ)/3 = (2î + 6ĵ)/3 m/s, magnitude √40/3 ≈ 2.11 m/s. Also P⃗ = Mv⃗<sub>cm</sub> = 2î + 6ĵ kg m/s. Final: <b>(2î + 6ĵ)/3 m/s</b>."},
+
+{id:60, lec:"L-4", blk:"Internal forces", topic:"Spring released on smooth floor",
+ q:"Two blocks held at rest on a smooth floor compress a light spring between them and are then released. During the motion, which quantity stays constant?",
+ opts:["The kinetic energy of the system", "The momentum of each block", "The velocity of the centre of mass (zero)", "The acceleration of each block"],
+ ans:2,
+ why:["spring PE converts to KE, so KE grows from zero","each block's momentum changes; only their sum is fixed","correct: spring forces are internal, F<sub>ext</sub> = 0 ⇒ v<sub>cm</sub> stays 0","the spring force changes with compression, so each acceleration varies"],
+ sol:"The spring forces are an action–reaction pair, so ΣF<sub>int</sub> = 0, and on a smooth floor F<sub>ext</sub> (horizontal) = 0. Hence Ma⃗<sub>cm</sub> = 0, v⃗<sub>cm</sub> stays at its initial value 0 and P⃗ = 0 throughout. Final: <b>v<sub>cm</sub> stays zero</b>."},
+
+{id:61, lec:"L-4", blk:"Explosion in flight", topic:"One piece falls vertically",
+ q:"A projectile of range R explodes at its highest point into two equal pieces. One piece falls vertically (zero velocity just after the explosion). Ignoring air drag, the other piece lands at a distance from the launch point of:",
+ opts:["3R/2", "2R", "R", "5R/4"],
+ ans:0,
+ why:["correct: the COM still lands at R; pieces land together, one at R/2 ⇒ (R/2 + x)/2 = R ⇒ x = 3R/2","doubled the total range — the doubled speed only applies after the top, over the second half","that is where the COM lands, not the second piece","no mass weighting gives this; it would need unequal pieces"],
+ sol:"Internal explosion forces do not alter the COM's path: it still lands at R. Both pieces start the fall from the same height with zero vertical velocity, so they land together. Piece 1 lands at R/2. Equal masses: (R/2 + x)/2 = R ⇒ x = 3R/2. (Momentum: the second piece moves at 2u<sub>x</sub>, covering R in the descent: R/2 + R = 3R/2 ✓.) Final: <b>3R/2</b>."},
+
+{id:62, lec:"L-4", blk:"Explosion in flight", topic:"COM path",
+ q:"A shell explodes in mid-air into several fragments. Until the first fragment hits the ground, the centre of mass of the fragments:",
+ opts:["stops and falls vertically", "follows the path of the heaviest fragment", "moves along a straight line at the explosion velocity", "continues on the original parabola"],
+ ans:3,
+ why:["the explosion is internal and cannot destroy the COM's momentum","the COM is a weighted average of ALL fragments, not the heaviest one","gravity still acts, so the COM still accelerates at g","correct: the only external force is still gravity, so a<sub>cm</sub> = g as before"],
+ sol:"Explosion forces are internal; the net external force remains Mg, so a⃗<sub>cm</sub> = g⃗ and the COM continues on the same parabola. Once a fragment lands, the ground's normal force is a new external force and the rule stops applying. Final: <b>continues on the original parabola</b>."},
+
+{id:63, lec:"L-4", blk:"Man on boat", topic:"Ground displacement of the man",
+ q:"A 60 kg man walks 4 m (relative to the boat) on a 140 kg boat floating at rest on still water (no drag). His displacement relative to the shore is:",
+ opts:["4 m", "1.2 m", "2.8 m", "2.29 m"],
+ ans:2,
+ why:["that is relative to the boat — the boat moves backward","that is the boat's displacement, mL/(m + M)","correct: boat moves 60·4/200 = 1.2 m back ⇒ man 4 − 1.2 = 2.8 m","used M instead of m + M for the boat shift (240/140 ≈ 1.71 m)"],
+ sol:"COM fixed: m(x<sub>man</sub>) = M(x<sub>boat</sub>) with x<sub>man</sub> + x<sub>boat</sub> = 4. Boat: mL/(m + M) = 60·4/200 = 1.2 m back. Man: ML/(m + M) = 140·4/200 = 2.8 m forward. Check 60·2.8 = 168 = 140·1.2 ✓. Final: <b>2.8 m</b>."},
+
+{id:64, lec:"L-4", blk:"Internal forces", topic:"Meeting point = COM",
+ q:"A 2 kg particle at x = 0 and a 6 kg particle at x = 8 m are released from rest and attract each other (no other forces). They meet at:",
+ opts:["x = 4 m", "x = 6 m", "x = 2 m", "x = 8 m"],
+ ans:1,
+ why:["midpoint — true only for equal masses","correct: COM stays fixed at (2·0 + 6·8)/8 = 6 m, and they must meet there","weighted the positions with the masses swapped","the heavy particle does move — mutual forces accelerate both"],
+ sol:"Only internal forces act and both start at rest, so the COM stays at x<sub>cm</sub> = (2·0 + 6·8)/8 = 6 m. When they meet they are at the same point, which must be the COM. Final: <b>x = 6 m</b>."},
+
+{id:65, lec:"L-4", blk:"Acceleration of COM", topic:"Perpendicular accelerations",
+ q:"A 2 kg particle accelerates at 3 m/s² along +x and a 1 kg particle at 3 m/s² along +y. The magnitude of the acceleration of their centre of mass is:",
+ opts:["3/√2 ≈ 2.12 m/s²", "√45 ≈ 6.71 m/s²", "3 m/s²", "√5 ≈ 2.24 m/s²"],
+ ans:3,
+ why:["unweighted average (3î + 3ĵ)/2","forgot to divide Σmᵢa⃗ᵢ by the total mass","took the common magnitude 3 as the answer, ignoring direction and mass","correct: a⃗<sub>cm</sub> = (6î + 3ĵ)/3 = 2î + ĵ ⇒ √5 m/s²"],
+ sol:"a⃗<sub>cm</sub> = Σmᵢa⃗ᵢ/M = (2·3î + 1·3ĵ)/3 = 2î + ĵ ⇒ |a<sub>cm</sub>| = √(4 + 1) = √5 ≈ 2.24 m/s². Final: <b>√5 m/s²</b>."},
+
+{id:66, lec:"L-4", blk:"Momentum conservation", topic:"Gun recoil",
+ q:"A 4 kg gun fires a 10 g bullet at 400 m/s. The recoil speed of the gun is:",
+ opts:["4 m/s", "0.1 m/s", "1 m/s", "10 m/s"],
+ ans:2,
+ why:["that is the bullet's momentum (kg m/s), not divided by the gun's mass","used 1 g instead of 10 g for the bullet","correct: 0.01·400 = 4 v ⇒ v = 1 m/s","used 0.1 kg (100 g) for the bullet"],
+ sol:"Initial momentum 0 ⇒ m<sub>b</sub>v<sub>b</sub> = Mv<sub>g</sub>: 0.010 × 400 = 4v ⇒ v = 1 m/s, opposite to the bullet. Final: <b>1 m/s</b>."},
+
+{id:67, lec:"L-4", blk:"Newton II for systems", topic:"Internal forces drop out",
+ q:"Three particles of total mass 3 kg pull on each other with internal forces of 10 N per pair. A single external force of 6 N acts on one of them. The acceleration of the centre of mass is:",
+ opts:["2 m/s²", "12 m/s²", "6 m/s²", "it depends on the internal forces"],
+ ans:0,
+ why:["correct: F<sub>ext</sub> = Ma<sub>cm</sub> ⇒ 6/3 = 2 m/s²","added the internal forces (6 + 3·10 = 36 N) to the external force","forgot to divide by the total mass","internal forces cancel in pairs (Newton III), so they never affect a<sub>cm</sub>"],
+ sol:"Σmᵢa⃗ᵢ = ΣF⃗<sub>ext</sub> + ΣF⃗<sub>int</sub>, and ΣF⃗<sub>int</sub> = 0 by Newton's third law. So a<sub>cm</sub> = F<sub>ext</sub>/M = 6/3 = 2 m/s², whatever the internal forces. Final: <b>2 m/s²</b>."},
+
+{id:68, lec:"L-4", blk:"Acceleration of COM", topic:"Block on a fixed 45° wedge",
+ q:"A block of mass m slides down the smooth 45° face of a wedge of mass M that is held fixed on the floor. The horizontal component of the acceleration of the COM of block + wedge is:",
+ opts:["mg/[2(M + m)]", "g/2", "mg/[√2(M + m)]", "zero, since there is no horizontal force on the system"],
+ ans:0,
+ why:["correct: block a = g sin45° along the incline ⇒ horizontal g/2; a<sub>cm,x</sub> = m(g/2)/(M + m)","that is the block's own horizontal acceleration, not the system's","used the full along-incline acceleration g/√2 instead of its horizontal part","the wedge is held fixed — whatever holds it supplies a horizontal external force"],
+ sol:"Block: a = g sin45° = g/√2 along the incline; horizontal part = (g/√2)cos45° = g/2. Wedge: 0. a<sub>cm,x</sub> = (m·g/2 + M·0)/(M + m) = mg/[2(M + m)]. That non-zero value proves a horizontal external force (the stop/friction holding the wedge) acts: F<sub>x</sub> = (M + m)a<sub>cm,x</sub> = mg/2. Final: <b>mg/[2(M + m)]</b>."},
+
+{id:69, lec:"L-4", blk:"Variable mass", topic:"Rocket thrust",
+ q:"A rocket ejects gas at 2 kg/s with speed 500 m/s relative to the rocket. The thrust on the rocket is:",
+ opts:["250 N", "500 N", "2000 N", "1000 N"],
+ ans:3,
+ why:["divided u by the mass rate instead of multiplying","quoted the exhaust speed as a force","doubled the product — no factor 2 enters","correct: F = u(dm/dt) = 500 × 2 = 1000 N"],
+ sol:"Thrust = u<sub>rel</sub> × |dm/dt| = 500 × 2 = 1000 N, directed opposite to the exhaust. Final: <b>1000 N</b>."},
+
+{id:70, lec:"L-4", blk:"Explosion", topic:"What is conserved",
+ q:"A body at rest explodes into fragments. Across the explosion:",
+ opts:["momentum and kinetic energy are both conserved", "momentum is conserved and kinetic energy increases", "kinetic energy is conserved but momentum is not", "neither momentum nor kinetic energy is conserved"],
+ ans:1,
+ why:["KE rises from zero — chemical energy is converted, so KE is not conserved","correct: internal forces ⇒ P⃗ = 0 conserved; stored chemical energy becomes KE","momentum is the quantity that IS conserved (no external impulse)","momentum is conserved because the explosion forces are internal"],
+ sol:"The explosive forces are internal, so total momentum stays 0 (fragments fly apart with Σmᵢv⃗ᵢ = 0). Kinetic energy goes from 0 to a positive value, supplied by stored chemical energy. Final: <b>P conserved, KE increases</b>."},
+
+{id:71, lec:"L-4", blk:"Man on plank", topic:"General result",
+ q:"A man of mass m walks the full length L of a plank of mass M lying on a smooth floor. His displacement relative to the ground is:",
+ opts:["mL/(m + M)", "L", "ML/(m + M)", "mL/M"],
+ ans:2,
+ why:["that is the plank's displacement","the plank slides back, so he covers less than L over the ground","correct: m·x = M(L − x) ⇒ x = ML/(m + M)","not derived from Σmᵢ∆xᵢ = 0; it can even exceed L"],
+ sol:"COM fixed: m·x<sub>man</sub> = M·x<sub>plank</sub>, with x<sub>man</sub> + x<sub>plank</sub> = L. So x<sub>man</sub> = ML/(m + M) and x<sub>plank</sub> = mL/(m + M). Final: <b>ML/(m + M)</b>."},
+
+{id:72, lec:"L-4", blk:"Newton II for systems", topic:"Spring pulled by a constant force",
+ q:"Blocks m₁ and m₂ joined by a light spring rest on a smooth floor. A constant force F pulls m₂ away from m₁. The acceleration of the system's centre of mass is:",
+ opts:["F/m₂", "F/(m₁ + m₂)", "zero until the spring is fully stretched", "it oscillates as the spring stretches and relaxes"],
+ ans:1,
+ why:["that is m₂'s acceleration only at the very first instant, before the spring stretches","correct: the spring force is internal ⇒ a<sub>cm</sub> = F/(m₁ + m₂), constant","F is external from the start, so the COM accelerates at once","the blocks oscillate relative to each other, but a<sub>cm</sub> sees only F"],
+ sol:"Only F is external (the spring forces are an internal pair), so (m₁ + m₂)a<sub>cm</sub> = F ⇒ a<sub>cm</sub> = F/(m₁ + m₂), constant. The individual blocks oscillate about the accelerating COM. Final: <b>F/(m₁ + m₂)</b>."},
+
+{id:73, lec:"L-4", blk:"Momentum", topic:"P = Mv<sub>cm</sub>",
+ q:"The total linear momentum of a system of particles equals:",
+ opts:["Mv⃗<sub>cm</sub>", "Σ(1/2)mᵢvᵢ²", "Mv⃗ of the fastest particle", "Σmᵢ|v⃗ᵢ| (sum of magnitudes)"],
+ ans:0,
+ why:["correct: differentiating Mr⃗<sub>cm</sub> = Σmᵢr⃗ᵢ gives Σmᵢv⃗ᵢ = Mv⃗<sub>cm</sub>","that is the total kinetic energy, a scalar","no single particle's velocity represents the system","momentum is a vector sum; adding magnitudes ignores cancellation"],
+ sol:"Mr⃗<sub>cm</sub> = Σmᵢr⃗ᵢ; differentiate: Mv⃗<sub>cm</sub> = Σmᵢv⃗ᵢ = P⃗. So the system's momentum is that of a single particle of mass M moving with the COM. Final: <b>P⃗ = Mv⃗<sub>cm</sub></b>."},
+
+/* ===== P11_SB.js ===== */
+{id:74, lec:"SB", blk:"JEE Adv 2024", topic:"Spring pair, collision at t₀ = π/(2ω)",
+ q:"Particles 1 and 2 (mass m each), joined by a light spring on a smooth plane, oscillate about their COM x₀: x₁ = (x₀ + d) + a sinωt, x₂ = (x₀ − d) − a sinωt. Particle 3 (mass m), moving at u₀ = aω/2 toward +x, collides elastically with particle 2 at t₀ = π/(2ω). Afterwards 1 and 2 oscillate with amplitude b (each, about their COM). The value of 4b²/a² is:",
+ opts:["3.25", "3.50", "4.25", "4.50"],
+ ans:2,
+ why:["below 4 is impossible: at t₀ the relative coordinate is already at s = 2a with the kick adding a velocity term, so S² ≥ 4a² ⇒ 4b²/a² ≥ 4","same objection — a value under 4 would mean the collision shrank the oscillation, but it only adds kinetic energy of relative motion","correct: s = 2a, ṡ = 0 − aω/2 ⇒ S² = 4a² + a²/4 = 17a²/4, b = S/2 ⇒ 4b²/a² = 17/4","would need (ṡ/ω)² = a²/2, i.e. a relative speed aω/√2 — no velocity in the problem gives that"],
+ sol:"At t₀ = π/(2ω): sinωt₀ = 1, cosωt₀ = 0 ⇒ v₁ = v₂ = 0 (maximum stretch). Equal-mass elastic collision swaps velocities: v₂′ = aω/2, v₃′ = 0. Relative coordinate s = x₁ − x₂ − 2d = 2a, ṡ = v₁ − v₂′ = −aω/2. New relative amplitude S² = s² + (ṡ/ω)² = 4a² + a²/4 = 17a²/4. Each particle's amplitude about the COM is b = S/2 ⇒ b² = 17a²/16 ⇒ 4b²/a² = 17/4 = 4.25. Final: <b>4.25</b>."},
+
+{id:75, lec:"SB", blk:"JEE Adv 2024", topic:"Spring pair, collision at t₀ = 0",
+ q:"Same system: particles 1 and 2 (mass m each) with x₁ = (x₀ + d) + a sinωt, x₂ = (x₀ − d) − a sinωt; particle 3 (mass m) moving at u₀ = aω/2 collides elastically with particle 2, this time at t₀ = 0. The COM speed of particles 1 and 2 afterwards, v<sub>cm</sub>/(aω), is:",
+ opts:["0", "0.25", "0.75", "1.5"],
+ ans:2,
+ why:["the pair's COM was at rest before, but the collision is an external impulse on the pair","took v₁ = 0, which is the extreme-position case t₀ = π/(2ω), not t₀ = 0","correct: v₁ = +aω, v₂′ = +aω/2 ⇒ v<sub>cm</sub> = (aω + aω/2)/2 = 3aω/4","forgot to divide the pair's momentum by 2m"],
+ sol:"At t = 0: v₁ = aω cos0 = +aω, v₂ = −aω (spring at natural length, both at maximum speed). Elastic, equal masses ⇒ velocities swap: v₂′ = u₀ = aω/2, v₃′ = −aω. Pair COM: v<sub>cm</sub> = (v₁ + v₂′)/2 = (aω + aω/2)/2 = 3aω/4. Final: <b>0.75</b>."},
+
+{id:76, lec:"SB", blk:"JEE Adv 2017", topic:"Mass sliding in a block's quarter-circle",
+ q:"A block M with a frictionless quarter-circle cut of radius R rests on a smooth table, its right edge at x = 0. A point mass m is released from rest at the top of the cut (at x = −R) and leaves the block at the bottom with velocity v at position x. Statements: (a) v = √(2gR/(1 + m/M)); (b) velocity of M = −(m/M)√(2gR); (c) x = −√2·mR/(m + M); (d) x-displacement of M's COM = −mR/(m + M). Which are correct?",
+ opts:["(a) and (b)", "(c) and (d)", "(a) and (d)", "(b) and (c)"],
+ ans:2,
+ why:["(b) is false: V = −(m/M)v with the reduced v = √(2gR/(1 + m/M)), not √(2gR)","(c) is false: x = −R + MR/(m + M) = −mR/(m + M), with no √2","correct: energy + momentum give (a); Σmᵢ∆xᵢ = 0 with Δx<sub>m</sub> − Δx<sub>M</sub> = R gives (d)","both are false — (b) uses the fixed-block speed √(2gR); (c) inserts a spurious √2"],
+ sol:"No horizontal external force ⇒ horizontal momentum 0 and x<sub>cm</sub> fixed. At the bottom m moves horizontally: mv + MV = 0. Energy: mgR = (1/2)mv² + (1/2)MV² = (1/2)mv²(1 + m/M) ⇒ v = √(2gR/(1 + m/M)) ⇒ (a) ✓; V = −(m/M)v ⇒ (b) ✗. Displacements: Δx<sub>m</sub> − Δx<sub>M</sub> = R and mΔx<sub>m</sub> + MΔx<sub>M</sub> = 0 ⇒ Δx<sub>M</sub> = −mR/(m + M) ⇒ (d) ✓; x = −R + MR/(m + M) = −mR/(m + M) ⇒ (c) ✗. Final: <b>(a) and (d)</b>."},
+
+{id:77, lec:"SB", blk:"JEE Adv 2017 variant", topic:"Block displacement, numbers",
+ q:"In the quarter-circle set-up above, take m = 1 kg, M = 3 kg, R = 0.8 m. By the time the small mass leaves the block, the block has moved:",
+ opts:["0.6 m, to the left", "0.2 m, to the left", "0.27 m, to the left", "0.8 m, to the left"],
+ ans:1,
+ why:["that is the small mass's displacement MR/(m + M), and it moves right","correct: Δx<sub>M</sub> = mR/(m + M) = 0.8/4 = 0.2 m, opposite to m","used mR/M — dropped m from the denominator (the two displacements must add to R)","the block moves only its mass-weighted share of R, not all of it"],
+ sol:"Relative slide R = 0.8 m; COM fixed ⇒ m·Δx<sub>m</sub> = M·|Δx<sub>M</sub>| with Δx<sub>m</sub> + |Δx<sub>M</sub>| = R. |Δx<sub>M</sub>| = mR/(m + M) = 1(0.8)/4 = 0.2 m to the left; Δx<sub>m</sub> = 0.6 m to the right. Check 1(0.6) = 3(0.2) ✓. Final: <b>0.2 m to the left</b>."},
+
+{id:78, lec:"SB", blk:"JEE Adv 2017 variant", topic:"Block speed, numbers",
+ q:"Same set-up: m = 1 kg, M = 3 kg, R = 0.8 m, g = 10 m/s². When the small mass leaves the block, the block's speed is about:",
+ opts:["1.15 m/s", "1.33 m/s", "3.46 m/s", "4.00 m/s"],
+ ans:0,
+ why:["correct: v = √(2gR/(1 + m/M)) = √12 ≈ 3.46 m/s, V = (m/M)v = 3.46/3 ≈ 1.15 m/s","used statement (b)'s (m/M)√(2gR) = 4/3 — the fixed-block speed, ignoring the block's KE","that is the small mass's speed, not the block's","√(2gR) = 4 m/s is the small mass's speed if the block were held fixed"],
+ sol:"Energy: mgR = (1/2)mv²(1 + m/M) ⇒ v² = 2(10)(0.8)/(4/3) = 12 ⇒ v ≈ 3.46 m/s. Momentum: MV = mv ⇒ V = 3.46/3 ≈ 1.15 m/s. Check energy: (1/2)(1)(12) + (1/2)(3)(1.333) = 6 + 2 = 8 J = mgR ✓. Final: <b>≈ 1.15 m/s</b>."},
+
+{id:79, lec:"SB", blk:"JEE Adv 2007", topic:"Torque vs v<sub>cm</sub>",
+ q:"Statement I: If there is no external torque on a body about its centre of mass, the velocity of the centre of mass remains constant. Statement II: The linear momentum of an isolated system remains constant.",
+ opts:["Both true, and II is the correct explanation of I", "Both true, but II does not explain I", "I true, II false", "I false, II true"],
+ ans:3,
+ why:["I is false, so it cannot be explained","I is false — a falling ball has zero torque about its COM yet accelerates","II is a direct consequence of F<sub>ext</sub> = dP⃗/dt = 0, so it is true","correct: v<sub>cm</sub> is governed by F<sub>ext</sub> = Ma<sub>cm</sub>, not by torque; an isolated system has constant P⃗"],
+ sol:"Statement I: gravity acts at the COM, so a freely falling ball has zero torque about its COM, yet a<sub>cm</sub> = g and v<sub>cm</sub> changes ⇒ false. Statement II: isolated ⇒ F<sub>ext</sub> = 0 ⇒ dP⃗/dt = 0 ⇒ true. Final: <b>I false, II true</b>."},
+
+{id:80, lec:"SB", blk:"JEE Main 2025", topic:"Angular momentum about another particle",
+ q:"Two 1 kg particles have r⃗<sub>A</sub> = (t²î + 3nt ĵ + 2t k̂) m and r⃗<sub>B</sub> = (2t î − t² ĵ + 4pt k̂) m. At t = 1 s, |v⃗<sub>A</sub>| = |v⃗<sub>B</sub>| and v⃗<sub>A</sub> ⟂ v⃗<sub>B</sub>. The angular momentum of A about the position of B at t = 1 s is √L kg m² s⁻¹. L =",
+ opts:["5", "45", "90", "9.49"],
+ ans:2,
+ why:["took the angular momentum about the origin, r⃗<sub>A</sub> × v⃗<sub>A</sub> = (0, 2, −1)","crossed with v⃗<sub>B</sub> instead of v⃗<sub>A</sub> — it is A's momentum that counts","correct: n = 1/3, p = −1/4; (r⃗<sub>A</sub> − r⃗<sub>B</sub>) × v⃗<sub>A</sub> = (−1, 2, 3) × (2, 1, 2) = (1, 8, −5) ⇒ |L⃗|² = 90","that is |L⃗| = √90 itself; the question asks for L under the root"],
+ sol:"At t = 1: v⃗<sub>A</sub> = (2, 3n, 2), v⃗<sub>B</sub> = (2, −2, 4p). Equal speeds: 9n² = 16p². Perpendicular: 4 − 6n + 8p = 0 ⇒ 3n = 2 + 4p ⇒ (2 + 4p)² = 16p² ⇒ p = −1/4, n = 1/3. So v⃗<sub>A</sub> = (2, 1, 2), v⃗<sub>B</sub> = (2, −2, −1) (dot = 0 ✓). r⃗<sub>A</sub> = (1, 1, 2), r⃗<sub>B</sub> = (2, −1, −1), r⃗<sub>A</sub> − r⃗<sub>B</sub> = (−1, 2, 3). L⃗ = (−1, 2, 3) × (2, 1, 2) = (4 − 3, 6 + 2, −1 − 4) = (1, 8, −5) ⇒ |L⃗|² = 1 + 64 + 25 = 90. Final: <b>L = 90</b>."},
+
+{id:81, lec:"SB", blk:"JEE Main 2025", topic:"Plate with σ ∝ x",
+ q:"A thin rectangular plate occupies 0 ≤ x ≤ a, 0 ≤ y ≤ b with surface density σ = σ₀x/(ab). Its centre of mass is at:",
+ opts:["(a/2, b/2)", "(a/3, b/2)", "(2a/3, 2b/3)", "(2a/3, b/2)"],
+ ans:3,
+ why:["the uniform-plate centre — ignores that σ grows with x","measured from the dense edge x = a instead of from x = 0","σ does not depend on y, so y<sub>cm</sub> stays at the midpoint b/2","correct: vertical strips dm ∝ x dx ⇒ x<sub>cm</sub> = (a³/3)/(a²/2) = 2a/3; y<sub>cm</sub> = b/2"],
+ sol:"σ is independent of y ⇒ y<sub>cm</sub> = b/2 by symmetry. Vertical strip: dm = σb dx = (σ₀/a)x dx ⇒ x<sub>cm</sub> = ∫₀<sup>a</sup>x² dx / ∫₀<sup>a</sup>x dx = (a³/3)/(a²/2) = 2a/3. Final: <b>(2a/3, b/2)</b>."},
+
+{id:82, lec:"SB", blk:"JEE Main 2022", topic:"Keeping the COM fixed",
+ q:"Blocks of 10 kg and 30 kg sit at (0, 0) cm and (x, 0) cm. The 10 kg block is moved 6 cm toward the other. To keep the centre of mass where it was, the 30 kg block must move:",
+ opts:["4 cm toward the 10 kg block", "2 cm away from the 10 kg block", "2 cm toward the 10 kg block", "4 cm away from the 10 kg block"],
+ ans:2,
+ why:["over-corrects: 10(+6) + 30(−4) = −60 ≠ 0, so the COM would shift 1.5 cm toward the 10 kg block","right size, wrong direction — moving away would add to the 10 kg block's +x shift","correct: 10(+6) + 30Δx₂ = 0 ⇒ Δx₂ = −2 cm, i.e. toward the 10 kg block","wrong size and direction: 10(+6) + 30(+4) = 180 ≠ 0, shifting the COM 4.5 cm"],
+ sol:"COM fixed ⇒ m₁Δx₁ + m₂Δx₂ = 0 ⇒ 10(+6) + 30Δx₂ = 0 ⇒ Δx₂ = −2 cm. Negative x is toward the origin, i.e. toward the 10 kg block (the unknown x drops out). Final: <b>2 cm toward the 10 kg block</b>."}
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  nextRound();
+}
+function backToIntro(){
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  picked = {}; order = {};
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "Chapter P-11 mastered" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+  show("done");
+}
+
+renderPicker();
+</script>
+</body>
+</html>

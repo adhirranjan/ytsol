@@ -13,13 +13,13 @@ def strip(s):
 
 def parse(p):
     t = p.read_text(encoding="utf-8")
-    # RT4-Set10-... or a remediation paper RT4-Final-Set-A-... (sorts after the numbered sets)
-    m = re.match(r"(\w+?)-(?:Set(\d+)|Final-(?:Set-)?([A-Z]))-", p.name)
+    # RT4-Set10-..., a remediation paper RT4-Final-Set-A-..., or the real paper RT4-Exam-... (sorts last)
+    m = re.match(r"(\w+?)-(?:Set(\d+)|Final-(?:Set-)?([A-Z])|Exam)-", p.name)
     total = re.search(r"<b>([\d.]+)</b><span class=\"of\">/\s*([\d.]+)", t)
     subs = re.findall(r'subj-score">([\d.]+) <small>/ ([\d.]+)', t)
     sub = re.search(r'<p class="sub">(.*?)</p>', t, re.S)
-    return dict(mtime=p.stat().st_mtime, file=p.name, exam=m[1], set=(0, int(m[2])) if m[2] else (1, m[3]),
-                label=f"Set {m[2]}" if m[2] else f"Final {m[3]}",
+    return dict(mtime=p.stat().st_mtime, file=p.name, exam=m[1], set=(0, int(m[2])) if m[2] else (1, m[3]) if m[3] else (2, ""),
+                label=f"Set {m[2]}" if m[2] else f"Final {m[3]}" if m[3] else "Real exam",
                 title=strip(re.search(r"<h1>(.*?)</h1>", t, re.S)[1]),
                 got=float(total[1]), out=float(total[2]), subs=subs,
                 sub=strip(sub[1]) if sub else "")
@@ -46,6 +46,9 @@ for e in exams:
                    f'<td class="t">{n(r["got"])}<small>/{n(r["out"])}</small>'
                    f'<span class="bar"><i style="width:{pct:.0f}%"></i></span></td>{cells}</tr>')
     out.append("</tbody></table>")
+    # hand-written analysis for this exam, if any: <EXAM>-Analysis.part.html sits beside the sheets
+    ana = HERE / f"{e}-Analysis.part.html"
+    if ana.exists(): out.append(ana.read_text(encoding="utf-8"))
 
 page = f"""<!DOCTYPE html>
 <html lang="en">
@@ -72,6 +75,9 @@ page = f"""<!DOCTYPE html>
   td.t{{width:9em;font-weight:600}}
   .bar{{display:block;height:6px;background:#edeff3;margin-top:5px}}
   .bar i{{display:block;height:100%;background:var(--ink)}}
+  .ana{{margin:18px 0 0;padding:14px 16px;border:1px solid var(--rule);background:#fff;font-size:15px}}
+  .ana h3{{margin:0 0 8px;font-size:16px;font-weight:600}}
+  .ana p,.ana ul,.ana ol{{margin:8px 0}} .ana li{{margin:3px 0}} .ana table{{margin:10px 0;font-size:14px}}
   footer{{margin-top:40px;padding-top:12px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink-soft)}}
   @media (max-width:560px){{body{{padding:20px 14px 48px}} td .d{{display:none}} th,td{{padding:6px 4px;font-size:13.5px}} td.t{{width:auto}}}}
 </style>

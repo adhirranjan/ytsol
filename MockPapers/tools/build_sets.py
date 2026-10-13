@@ -18,6 +18,10 @@ EXAMS={
             "MATH":["M1","M2","M3","M4","M5","M6","M7","M8A","M8B","M8C"]},
    "tiers":["Core must-do","+ variants","Depth","Harder variants","Depth","+ variants",
             "Depth","Harder","Depth","Full mock"]},
+ "CAT6":{"nsets":6,"rank":"rankings/cat6","out":"CAT6-Mock-Sets.html","date":"26-10-2026",
+   "title":"ICAD CAT-6 Mock Sets", "verified":True,
+   "chord":{"PHY":["P9","P10","P11"],"CHEM":["C6"],"MATH":["M8D","M9"]},
+   "tiers":["Core must-do","+ variants","Depth","Harder variants","Depth","Full mock"]},
  "CAT5":{"nsets":6,"rank":"rankings/cat5","out":"CAT5-Mock-Sets.html","date":"28-09-2026",
    "title":"ICAD CAT-5 Mock Sets",
    "chord":{"PHY":["P7","P8"],"CHEM":["C5"],"MATH":["M8A","M8B"]},
@@ -35,7 +39,7 @@ for f in os.listdir(POOL):
         META[r["code"]]=r
 
 def chap_of(code):
-    m=re.match(r"([A-Z]+\d+[A-C]?)",code); b=m.group(1)
+    m=re.match(r"([A-Z]+\d+[A-D]?)",code); b=m.group(1)
     return "M5" if b.startswith("M5") else b   # M5A/B/C are one chapter; M8A/M8B are not
 def lvl(code):
     s=META.get(code,{}).get("sec","9"); return LVLORD.get(s,int(s) if s.isdigit() else 9)
@@ -182,7 +186,9 @@ html=('<!doctype html><html lang="en"><head><meta charset="utf-8">'
  '<div class="legend">Codes are book pointers <code>{Lecture}V{Level}Q{Number}</code> '
  '(<code>VBoard</code>/<code>VSugg</code> = Board/Suggested). Sets are a priority ladder: '
  'Set 1 = the core must-do archetype of every concept; later sets add depth &amp; harder variants. '
- 'Answers are the book key (re-verify — ICAD keys are ~1-in-14 defective).</div>'
+ + ('Every question was checked against the printed book and every answer re-derived independently '
+    '(wrong book keys corrected or left out).</div>' if CFG.get("verified") else
+    'Answers are the book key (re-verify — ICAD keys are ~1-in-14 defective).</div>')
  +"".join(body)+'</div></body></html>')
 open(os.path.join(ROOT,"MockPapers",CFG["out"]),"w",encoding="utf-8").write(html)
 print("WROTE MockPapers/%s  (%d bytes)"%(CFG["out"],len(html)))

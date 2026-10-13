@@ -26,10 +26,10 @@ NICE = EXAM.replace("RT", "RT-").replace("CAT", "CAT-")
 LETTERS = "ABCDEFGH"[:"ABCDEFGH".index(WHICH)]          # earlier Finals: their picks are excluded
 
 ROW = re.compile(r'<td class="q">\d+<span class="tag">([^<]+)</span></td>'
-                 r'<td class="you([^"]*)">[^<]*</td><td class="key">([^<]*)</td>')
+                 r'<td class="you([^"]*)">[^<]*</td><td class="key">(.*?)</td>')   # key may hold <sub>
 CELL = re.compile(r'<span class="code">([^<]+)</span><span class="ans">([^<]*)</span>')
 CHAP = lambda c: re.match(r"[PCM]\d+", c).group(0)               # M5A/B/C -> M5, M8A/B/C -> M8
-LEC = lambda c: re.match(r"[PCM]\d+[A-C]?(?:L\d+)+", c).group(0)
+LEC = lambda c: re.match(r"[PCM]\d+[A-D]?(?:L\d+)+", c).group(0)
 LEVEL = lambda c: re.search(r"V(\w+?)Q\d+$", c).group(1)
 nat = lambda c: [int(t) if t.isdigit() else t for t in re.findall(r"\d+|\D+", c)]
 

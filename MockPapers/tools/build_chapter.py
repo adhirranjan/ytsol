@@ -28,7 +28,7 @@ CHNAME={"P1":"BMT-1","P2":"BMT-2","P3":"Vectors","P4":"Motion in 1D & 2D","P5":"
  "P7":"Friction","P8":"Work, Energy & Power","C5":"Chemical Bonding",
  "M8A":"Sequence & Series — AP","M8B":"Sequence & Series — GP"}
 def chap(lec):
-    b=re.match(r'([A-Z]+\d+[A-C]?)',lec).group(1)
+    b=re.match(r'([A-Z]+\d+[A-D]?)',lec).group(1)
     return 'M5' if b.startswith('M5') else b      # M5A/B/C are one chapter; M8A/M8B are not
 def qnum(c):
     m=re.search(r'Q(\d+)$',c); return int(m.group(1)) if m else 0
@@ -126,7 +126,7 @@ def build_index(_=None):
     """Scan ChapterPapers/ for whatever has been built - never drops chapters built in an earlier run."""
     found={}
     for f in os.listdir(OUT):
-        m=re.match(r"([A-Z]+\d+[A-C]?)-(Coverage|Mock)\.html$",f)
+        m=re.match(r"([A-Z]+\d+[A-D]?)-(Coverage|Mock)\.html$",f)
         if not m: continue
         t=open(os.path.join(OUT,f),encoding="utf-8").read()
         n=re.search(r"·\s*(\d+) questions",t)

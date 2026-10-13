@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-11 Centre of Mass — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+  <nav class="toc">
+    <h3>Chapter P-11</h3>
+    <a class="top" href="#top">↑ Overview &amp; Key Facts</a>
+    <a href="#l1">L-1 · COM of Particle Systems</a>
+    <a href="#l2">L-2 · COM of Rigid Bodies (Integration)</a>
+    <a href="#l3">L-3 · COM of Remaining Body (Cavity)</a>
+    <a href="#l4">L-4 · Motion of the COM</a>
+    <a href="#strongbox">★ Strong Box (PYQs)</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD · JEE Physics · Revision Notes</p>
+      <h1>P-11 · Centre of Mass</h1>
+      <p>Lectures L-1 to L-4 + Strong Box · two- &amp; n-particle COM, continuous bodies (rod, arc, sector, annulus), cut-out laminae, displacement / velocity / acceleration of the COM &amp; Newton's 2nd law for systems</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- KEY FACTS -->
+    <section class="lec" id="keyfacts">
+      <div class="lec-head"><span class="lec-tag">★ MEMORIZE</span><h2>Key Facts &amp; Formula Sheet</h2></div>
+      <div class="twrap"><table>
+        <tr><th>Quantity / Idea</th><th>Result</th></tr>
+        <tr><td>Two particles (separation d)</td><td><code>m₁r₁ = m₂r₂</code> · <code>r₁ = m₂d/(m₁+m₂)</code> · <code>r₂ = m₁d/(m₁+m₂)</code> &nbsp;(COM nearer the heavier mass)</td></tr>
+        <tr><td>n particles</td><td><code>r&#8407;<sub>cm</sub> = Σm<sub>i</sub>r&#8407;<sub>i</sub> / Σm<sub>i</sub></code> &nbsp;·&nbsp; component-wise <code>x<sub>cm</sub> = Σm<sub>i</sub>x<sub>i</sub>/Σm<sub>i</sub></code>, same for y, z</td></tr>
+        <tr><td>Continuous body</td><td><code>x<sub>cm</sub> = ∫x dm / ∫dm</code> &nbsp;with <code>dm = λdx</code> (line) · <code>σdA</code> (area) · <code>ρdV</code> (volume)</td></tr>
+        <tr><td>Uniform rod (length L)</td><td>at the midpoint <code>L/2</code></td></tr>
+        <tr><td>Uniform arc (radius R, total angle φ)</td><td><code>2R sin(φ/2) / φ</code> from the centre · semicircular ring (φ = π): <code>2R/π</code></td></tr>
+        <tr><td>Uniform sector (radius R, total angle 2θ)</td><td><code>2R sinθ / 3θ</code> from the centre · semicircular disc (2θ = π): <code>4R/3π</code></td></tr>
+        <tr><td>Half annulus (R₁ to R₂)</td><td><code>4(R₂³ − R₁³) / 3π(R₂² − R₁²)</code></td></tr>
+        <tr><td>Cut-out / remaining body</td><td><code>x<sub>cm</sub> = (A₁x₁ − A₂x₂)/(A₁ − A₂)</code> &nbsp;(use masses / volumes the same way)</td></tr>
+        <tr><td>Displacement of COM</td><td><code>Δr&#8407;<sub>cm</sub> = Σm<sub>i</sub>Δr&#8407;<sub>i</sub> / Σm<sub>i</sub></code> &nbsp;·&nbsp; COM fixed ⇒ <code>Σm<sub>i</sub>Δx<sub>i</sub> = 0</code></td></tr>
+        <tr><td>Velocity &amp; momentum</td><td><code>v&#8407;<sub>cm</sub> = Σm<sub>i</sub>v&#8407;<sub>i</sub>/M</code> &nbsp;·&nbsp; <code>P&#8407; = Σp&#8407;<sub>i</sub> = Mv&#8407;<sub>cm</sub></code></td></tr>
+        <tr><td>Acceleration &amp; Newton II</td><td><code>a&#8407;<sub>cm</sub> = Σm<sub>i</sub>a&#8407;<sub>i</sub>/M</code> &nbsp;·&nbsp; <code>F&#8407;<sub>ext</sub> = Ma&#8407;<sub>cm</sub></code> (internal forces cancel)</td></tr>
+        <tr><td>Man on plank / boat (smooth)</td><td>plank shifts <code>d = mL/(m + M)</code> opposite to the man</td></tr>
+        <tr><td>Explosion from rest (2 pieces)</td><td><code>m₁v₁ = −m₂v₂</code> &nbsp;·&nbsp; <code>K₁/K₂ = m₂/m₁</code> (lighter piece gets more KE)</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">★ Core idea</span>The COM is the <b>mass-weighted average position</b>. Internal forces (springs, explosions, a man walking on a plank) can never move it — only a <b>net external force</b> accelerates it, as if the whole mass were a single particle there. If F<sub>ext</sub> = 0 and the system starts at rest, the COM stays put: <code>Σm<sub>i</sub>Δx<sub>i</sub> = 0</code>.</div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Centre of Mass of a Two-Particle &amp; n-Particle System</h2></div>
+      <ul>
+        <li>The <b>centre of mass</b> is the point that represents the average position of all the mass; the whole mass may be treated as concentrated there.</li>
+        <li>It need <b>not</b> lie inside the body — it can be on its surface or even outside (ring, L-shape, boomerang).</li>
+        <li>For symmetric uniform bodies (sphere, cylinder, cuboid) it coincides with the <b>geometric centre</b>.</li>
+        <li class="det">Under external forces the COM moves as a single particle would: a spinning cricket ball wobbles on its surface but its COM follows a smooth path.</li>
+      </ul>
+      <h3 class="sub">Two-particle system</h3>
+      <div class="formula"><span class="lbl">distances inversely proportional to masses</span>r₁/r₂ = m₂/m₁ &nbsp;⇒&nbsp; m₁r₁ = m₂r₂ &nbsp;·&nbsp; r₁ = m₂d/(m₁+m₂), r₂ = m₁d/(m₁+m₂)</div>
+      <ul>
+        <li>m₁ = m₂ ⇒ COM at the midpoint. m₁ &lt; m₂ ⇒ r₁ &gt; r₂ — the COM sits <b>closer to the heavier</b> particle.</li>
+      </ul>
+      <h3 class="sub">n-particle system</h3>
+      <div class="formula"><span class="lbl">mass-weighted average of position vectors</span>r&#8407;<sub>cm</sub> = (m₁r&#8407;₁ + m₂r&#8407;₂ + … + m<sub>n</sub>r&#8407;<sub>n</sub>)/(m₁ + m₂ + … + m<sub>n</sub>) = Σm<sub>i</sub>r&#8407;<sub>i</sub> / Σm<sub>i</sub></div>
+      <div class="formula"><span class="lbl">component form</span>x<sub>cm</sub> = Σm<sub>i</sub>x<sub>i</sub>/Σm<sub>i</sub> &nbsp;·&nbsp; y<sub>cm</sub> = Σm<sub>i</sub>y<sub>i</sub>/Σm<sub>i</sub> &nbsp;·&nbsp; z<sub>cm</sub> = Σm<sub>i</sub>z<sub>i</sub>/Σm<sub>i</sub></div>
+      <div class="det-block det"><div class="dh">Terminology</div><b>Σm<sub>i</sub>r&#8407;<sub>i</sub></b> is the <b>first moment of mass</b> (a vector) about the chosen origin. r&#8407;<sub>cm</sub> = first moment ÷ total mass. The COM is a physical point — its location does not depend on the choice of axes, only its coordinates do. About the COM itself, the first moment Σm<sub>i</sub>r&#8407;<sub>i</sub>′ is always zero.</div>
+      <div class="call tip"><span class="h">💡 Speed trick</span>Put the origin on the heaviest particle (or on a symmetry line) so that its term vanishes; handle x and y separately — each axis is an independent weighted average.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 · L-1</span>
+        <div class="q">Two particles of masses 1 kg and 2 kg are located at x = 0 and x = 3 m. Find the position of their centre of mass.</div>
+        <div class="s">Let the COM be at x: r₁ = x, r₂ = 3 − x. r₁/r₂ = m₂/m₁ ⇒ x/(3 − x) = 2/1 ⇒ x = 6 − 2x ⇒ 3x = 6.</div>
+        <div class="s">Check: x<sub>cm</sub> = (1·0 + 2·3)/(1 + 2) = 6/3 = 2.</div>
+        <div class="ans">x<sub>cm</sub> = 2 m (1 m from the 2 kg particle)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 · L-1</span>
+        <div class="q">In a carbon monoxide molecule the C and O atoms are 1.2 × 10⁻¹⁰ m apart. Find the distance of the centre of mass from the carbon atom.</div>
+        <div class="s">m<sub>C</sub> = 12 u, m<sub>O</sub> = 16 u, d = 1.2 × 10⁻¹⁰ m.</div>
+        <div class="s">r<sub>C</sub> = m<sub>O</sub>d/(m<sub>C</sub> + m<sub>O</sub>) = (16 × 1.2 × 10⁻¹⁰)/28 = 0.686 × 10⁻¹⁰ m.</div>
+        <div class="ans">≈ 0.68 × 10⁻¹⁰ m from the carbon atom (closer to the heavier O)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 3 · L-1</span>
+        <div class="q">Particles of masses 1 kg, 2 kg, 3 kg have position vectors r&#8407;₁ = (î + 4ĵ + k̂) m, r&#8407;₂ = (î + ĵ + k̂) m, r&#8407;₃ = (2î − ĵ − 2k̂) m. Find the position vector of their centre of mass.</div>
+        <div class="s">Σm<sub>i</sub>r&#8407;<sub>i</sub> = 1(î + 4ĵ + k̂) + 2(î + ĵ + k̂) + 3(2î − ĵ − 2k̂) = (1 + 2 + 6)î + (4 + 2 − 3)ĵ + (1 + 2 − 6)k̂ = 9î + 3ĵ − 3k̂.</div>
+        <div class="s">r&#8407;<sub>cm</sub> = (9î + 3ĵ − 3k̂)/6.</div>
+        <div class="ans">r&#8407;<sub>cm</sub> = ½(3î + ĵ − k̂) m</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 4 · L-1</span>
+        <div class="q">Particles A, B, C, D of masses m, 2m, 3m, 4m are placed in order at the corners of a square of side a (A at the origin, B = (a, 0), C = (a, a), D = (0, a)). Locate the centre of mass.</div>
+        <div class="s">x<sub>cm</sub> = Σm<sub>i</sub>x<sub>i</sub>/Σm<sub>i</sub> = [m(0) + 2m(a) + 3m(a) + 4m(0)]/10m = 5a/10 = a/2.</div>
+        <div class="s">y<sub>cm</sub> = Σm<sub>i</sub>y<sub>i</sub>/Σm<sub>i</sub> = [m(0) + 2m(0) + 3m(a) + 4m(a)]/10m = 7a/10.</div>
+        <div class="ans">COM = (a/2, 7a/10)</div>
+        <div class="call trap det"><span class="h">⚠ Book misprint</span>The module swaps the labels: it writes the x-coordinate sum (0 + 2a + 3a + 0)/10 under “y<sub>COM</sub> = a/2” and the y-coordinate sum (3a + 4a)/10 under “x<sub>COM</sub> = 7a/10”, i.e. it effectively prints (7a/10, a/2). Correct: <b>x<sub>cm</sub> = a/2, y<sub>cm</sub> = 7a/10</b> — the COM is pulled toward the heavy top edge (C, D = 7m), not the right edge.</div>
+      </div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Centre of Mass of a Rigid Body · Rod, Arc &amp; Sector of a Disc</h2></div>
+      <ul>
+        <li>For a continuous body replace the sum by an integral over small mass elements dm located at (x, y, z).</li>
+      </ul>
+      <div class="formula"><span class="lbl">continuous mass distribution</span>x<sub>cm</sub> = ∫x dm / ∫dm &nbsp;·&nbsp; y<sub>cm</sub> = ∫y dm / ∫dm &nbsp;·&nbsp; z<sub>cm</sub> = ∫z dm / ∫dm</div>
+      <div class="formula"><span class="lbl">choice of element</span>line: dm = λ dx &nbsp;·&nbsp; area: dm = σ dA &nbsp;·&nbsp; volume: dm = ρ dV &nbsp;(λ, σ, ρ may vary with position)</div>
+      <h3 class="sub">Standard results (derived in the module)</h3>
+      <div class="formula"><span class="lbl">uniform rod, 0 → L, λ = M/L</span>x<sub>cm</sub> = (1/M)∫₀<sup>L</sup>(M/L)x dx = L/2 &nbsp;·&nbsp; y<sub>cm</sub> = z<sub>cm</sub> = 0</div>
+      <div class="formula"><span class="lbl">uniform arc, radius R, total angle φ, symmetric about x-axis</span>x<sub>cm</sub> = ∫R cosθ·λR dθ / ∫λR dθ (−φ/2 → φ/2) = 2R sin(φ/2) / φ</div>
+      <div class="formula"><span class="lbl">uniform sector of a disc, radius R, total angle 2θ</span>strips = arcs of radius r, mass 2σrθ dr, COM r sinθ/θ ⇒ x<sub>cm</sub> = 2R sinθ / 3θ</div>
+      <div class="twrap"><table>
+        <tr><th>Body (from the centre of curvature)</th><th>COM distance</th></tr>
+        <tr><td>Semicircular ring (φ = π)</td><td><code>2R/π</code></td></tr>
+        <tr><td>Quarter ring (φ = π/2)</td><td><code>2√2R/π</code></td></tr>
+        <tr><td>Semicircular disc (2θ = π)</td><td><code>4R/3π</code></td></tr>
+        <tr><td>Quarter disc (2θ = π/2)</td><td><code>4√2R/3π</code></td></tr>
+        <tr><td>Full ring / full disc (φ = 2π)</td><td><code>0</code> (at the centre — sin π = 0)</td></tr>
+      </table></div>
+      <div class="call trap"><span class="h">⚠ Trap</span>The arc formula uses the <b>full</b> angle φ with sin(φ/2); the sector formula is written with the <b>half</b>-angle θ. Before substituting, decide which one the question gives you — mixing them turns a quarter-disc answer into a semicircle answer (see Example 4).</div>
+      <div class="call tip"><span class="h">💡 Symmetry first</span>Any axis of symmetry contains the COM — for arcs and sectors set the symmetry line as the x-axis so only one integral is needed. For a density that depends only on x, use full-height strips so the y-integral collapses.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 · L-2</span>
+        <div class="q">Find the centre of mass of a non-uniform rod of length L whose mass per unit length is λ = kx²/L, x measured from one end.</div>
+        <div class="s">dm = λ dx = (kx²/L) dx.</div>
+        <div class="s">x<sub>cm</sub> = ∫₀<sup>L</sup> x·(kx²/L)dx / ∫₀<sup>L</sup>(kx²/L)dx = (k/L)(L⁴/4) / (k/L)(L³/3) = 3L/4.</div>
+        <div class="ans">x<sub>cm</sub> = 3L/4 from the light end</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 · L-2</span>
+        <div class="q">Find the centre of mass of a uniform annular half-disc of inner radius R₁ and outer radius R₂.</div>
+        <div class="s">Element: half-ring of radius x, width dx ⇒ dm = σπx dx; its COM is at 2x/π on the symmetry axis.</div>
+        <div class="s">y<sub>cm</sub> = ∫(2x/π)σπx dx / ∫σπx dx = 2σ[x³/3]<sub>R₁</sub><sup>R₂</sup> / σπ[x²/2]<sub>R₁</sub><sup>R₂</sup> = 4(R₂³ − R₁³)/3π(R₂² − R₁²).</div>
+        <div class="s">Check: R₁ → 0 gives 4R₂/3π (semicircular disc) ✓.</div>
+        <div class="ans">y<sub>cm</sub> = 4(R₂³ − R₁³) / [3π(R₂² − R₁²)]</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 3 · L-2</span>
+        <div class="q">Find the centre of mass of a uniform arc of radius R whose ends subtend an angle π/3 at the centre.</div>
+        <div class="s">Arc of total angle φ = π/3: x<sub>cm</sub> = 2R sin(φ/2)/φ = 2R sin(π/6)/(π/3) = 2R(½)·(3/π).</div>
+        <div class="ans">x<sub>cm</sub> = 3R/π (≈ 0.955R) from the centre, on the bisector</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 4 · L-2</span>
+        <div class="q">Find the centre of mass of a uniform sector (segment) of a disc whose ends subtend an angle π/2 at the centre.</div>
+        <div class="s">Total angle 2θ = π/2 ⇒ half-angle θ = π/4.</div>
+        <div class="s">x<sub>cm</sub> = 2R sinθ/(3θ) = 2R sin(π/4)/(3π/4) = 2R(1/√2)(4/3π) = 8R/(3√2π) = 4√2R/3π.</div>
+        <div class="ans">x<sub>cm</sub> = 4√2R/3π ≈ 0.600R from the centre, on the bisector (quarter disc)</div>
+        <div class="call trap det"><span class="h">⚠ Book misprint</span>The module substitutes θ = π/2 (sin π/2 over 3π/2) and prints <b>4R/3π</b> — but with its own definition (2θ = total angle) θ = π/2 describes a <b>semicircular</b> disc. For ends subtending π/2, θ = π/4 and the correct answer is <b>4√2R/3π ≈ 0.600R</b>.</div>
+      </div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Centre of Mass of a Composite / Remaining Body</h2></div>
+      <ul>
+        <li>For a uniform lamina, mass ∝ area, so areas can replace masses in the COM formula (volumes for uniform solids).</li>
+      </ul>
+      <div class="formula"><span class="lbl">composite body (pieces added)</span>r&#8407;<sub>cm</sub> = (A₁r&#8407;₁ + A₂r&#8407;₂ + … + A<sub>n</sub>r&#8407;<sub>n</sub>)/(A₁ + A₂ + … + A<sub>n</sub>)</div>
+      <div class="formula"><span class="lbl">portion removed (cavity / cut-out)</span>x<sub>cm</sub> = (A₁x₁ − A₂x₂)/(A₁ − A₂) &nbsp;·&nbsp; y<sub>cm</sub> = (A₁y₁ − A₂y₂)/(A₁ − A₂)</div>
+      <ul>
+        <li>A₁, (x₁, y₁) belong to the <b>whole</b> body; A₂, (x₂, y₂) to the <b>removed</b> part. Treat the hole as a piece of <b>negative mass</b>.</li>
+      </ul>
+      <div class="call tip"><span class="h">💡 Shortcut</span>Put the origin at the centre of the whole body (x₁ = 0). Then x<sub>cm</sub> = −A₂x₂/(A₁ − A₂): the COM shifts <b>away</b> from the hole, along the line joining the two centres.</div>
+      <div class="call trap"><span class="h">⚠ Trap</span>Subtract in the <b>denominator</b> too — (A₁ − A₂), not A₁. And if the removed piece is re-attached elsewhere, treat it as “remove at old place + add at new place”.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 · L-3</span>
+        <div class="q">From a uniform disc of radius a (centre O at the origin), a disc of radius a/2 touching the rim is cut out, its centre at (a/2, 0). Find the centre of mass of the remaining lamina.</div>
+        <div class="s">A₁ = πa² at (0, 0); A₂ = π(a/2)² = πa²/4 at (a/2, 0).</div>
+        <div class="s">x<sub>cm</sub> = (A₁x₁ − A₂x₂)/(A₁ − A₂) = [0 − (πa²/4)(a/2)] / (πa² − πa²/4) = (−πa³/8)/(3πa²/4) = −a/6.</div>
+        <div class="s">Both centres lie on the x-axis ⇒ y<sub>cm</sub> = 0.</div>
+        <div class="ans">COM = (−a/6, 0) — a/6 from O, on the side opposite the hole</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 · L-3</span>
+        <div class="q">Find the centre of mass of the uniform L-shaped block: a square of side L (corner at the origin) from which the top-right square of side L/2 has been removed.</div>
+        <div class="s">A₁ = L² at (L/2, L/2); A₂ = L²/4 at (3L/4, 3L/4).</div>
+        <div class="s">x<sub>cm</sub> = [L²(L/2) − (L²/4)(3L/4)] / (L² − L²/4) = (L³/2 − 3L³/16)/(3L²/4) = (5L³/16)(4/3L²) = 5L/12.</div>
+        <div class="s">By symmetry about the line y = x, y<sub>cm</sub> = x<sub>cm</sub> = 5L/12.</div>
+        <div class="ans">COM = (5L/12, 5L/12)</div>
+      </div>
+    </section>
+
+    <!-- L4 -->
+    <section class="lec" id="l4">
+      <div class="lec-head"><span class="lec-tag">L-4</span><h2>Motion of the Centre of Mass · Momentum · Newton's 2nd Law for Systems</h2></div>
+      <ul>
+        <li>The COM's motion is decided by <b>external</b> forces only. A shell that explodes in flight: the fragments scatter, but their COM continues on the original parabola (until a fragment lands).</li>
+      </ul>
+      <h3 class="sub">Displacement of the COM</h3>
+      <div class="formula"><span class="lbl">mass-weighted displacements</span>Δr&#8407;<sub>cm</sub> = (m₁Δr&#8407;₁ + m₂Δr&#8407;₂ + … + m<sub>n</sub>Δr&#8407;<sub>n</sub>)/(m₁ + m₂ + … + m<sub>n</sub>)</div>
+      <ul>
+        <li>If F<sub>ext</sub> = 0 and the system starts from rest, Δr&#8407;<sub>cm</sub> = 0 ⇒ <b>Σm<sub>i</sub>Δx<sub>i</sub> = 0</b> (man–plank, boat, block-on-wedge problems).</li>
+      </ul>
+      <h3 class="sub">Velocity of COM &amp; total linear momentum</h3>
+      <div class="formula"><span class="lbl">differentiate Mr&#8407;<sub>cm</sub> = Σm<sub>i</sub>r&#8407;<sub>i</sub></span>v&#8407;<sub>cm</sub> = Σm<sub>i</sub>v&#8407;<sub>i</sub>/M &nbsp;·&nbsp; P&#8407; = p&#8407;₁ + p&#8407;₂ + … + p&#8407;<sub>n</sub> = Mv&#8407;<sub>cm</sub></div>
+      <h3 class="sub">Acceleration of COM &amp; Newton's 2nd law for a system</h3>
+      <div class="formula"><span class="lbl">differentiate once more</span>a&#8407;<sub>cm</sub> = Σm<sub>i</sub>a&#8407;<sub>i</sub>/M &nbsp;·&nbsp; F&#8407;<sub>net,ext</sub> = Σm<sub>i</sub>a&#8407;<sub>i</sub> = Ma&#8407;<sub>cm</sub></div>
+      <div class="det-block det"><div class="dh">Why internal forces drop out</div>Σm<sub>i</sub>a&#8407;<sub>i</sub> = ΣF&#8407;<sub>i</sub> = ΣF&#8407;<sub>ext</sub> + ΣF&#8407;<sub>int</sub>. Internal forces come in Newton's-third-law pairs, so ΣF&#8407;<sub>int</sub> = 0, leaving F&#8407;<sub>ext</sub> = Ma&#8407;<sub>cm</sub>. Consequently F&#8407;<sub>ext</sub> = 0 ⇒ v&#8407;<sub>cm</sub> constant ⇒ P&#8407; conserved.</div>
+      <div class="call star"><span class="h">★ Explosion from rest</span>0 = m₁v&#8407;₁ + m₂v&#8407;₂ ⇒ equal and opposite momenta ⇒ K = p²/2m ⇒ <b>K₁/K₂ = m₂/m₁</b>: the lighter fragment carries more kinetic energy.</div>
+      <div class="call trap"><span class="h">⚠ Trap</span>Zero external <b>torque</b> does not mean constant v<sub>cm</sub> — gravity acting at the COM gives zero torque about it yet accelerates it. Only zero external <b>force</b> keeps v<sub>cm</sub> constant.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 · L-4</span>
+        <div class="q">Particles of mass 2 kg and 1 kg are some distance apart. If the 2 kg particle is moved 1 m towards the other particle, find the shift of the centre of mass.</div>
+        <div class="s">Only the 2 kg particle moves: Δx<sub>cm</sub> = (m₁Δx₁ + m₂Δx₂)/(m₁ + m₂) = (1·0 + 2·1)/(1 + 2).</div>
+        <div class="ans">Δx<sub>cm</sub> = 2/3 m, towards the 1 kg particle</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 · L-4</span>
+        <div class="q">A girl of mass 40 kg walks from one end to the other of a plank of mass 80 kg (length 3 m) lying on a smooth surface. Find the displacement of the plank.</div>
+        <div class="s">No external horizontal force ⇒ COM stays fixed: m<sub>g</sub>Δx<sub>g</sub> + m<sub>p</sub>Δx<sub>p</sub> = 0.</div>
+        <div class="s">Let the plank move d backward; the girl moves (3 − d) forward relative to ground: 40(3 − d) − 80d = 0 ⇒ 120 = 120d.</div>
+        <div class="ans">d = 1 m (opposite to the girl); general result d = mL/(m + M)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 3 · L-4</span>
+        <div class="q">A 1 kg block at x = 10 m moves in −x at 6 m/s; a 2 kg block at x = 12 m moves in +x at 4 m/s at the same instant. Find the position of their centre of mass after 2 s.</div>
+        <div class="s">v<sub>cm</sub> = (1(−6) + 2(4))/(1 + 2) = 2/3 m/s (+x).</div>
+        <div class="s">x<sub>cm,i</sub> = (1·10 + 2·12)/3 = 34/3 m ⇒ x<sub>cm,f</sub> = 34/3 + (2/3)(2) = 38/3 m.</div>
+        <div class="ans">x<sub>cm</sub> = 38/3 ≈ 12.67 m</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 4 · L-4</span>
+        <div class="q">A stationary particle explodes into two fragments of masses m₁ and m₂ moving in opposite directions with speeds v₁ and v₂. Find the ratio of their kinetic energies K₁ : K₂.</div>
+        <div class="s">Momentum: 0 = m₁v₁ + m₂v₂ ⇒ |m₁v₁| = |m₂v₂| = p.</div>
+        <div class="s">K₁/K₂ = (p²/2m₁)/(p²/2m₂) = m₂/m₁.</div>
+        <div class="ans">K₁ : K₂ = m₂ : m₁</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 5 · L-4</span>
+        <div class="q">Blocks A (2 kg) and B (1 kg) hang over a light frictionless pulley by a light inextensible string. Find the acceleration of the centre of mass of the two blocks.</div>
+        <div class="s">A is heavier ⇒ A moves down, B up: a = (m<sub>A</sub> − m<sub>B</sub>)g/(m<sub>A</sub> + m<sub>B</sub>) = (2 − 1)g/3 = g/3.</div>
+        <div class="s">Taking downward +ve: a<sub>cm</sub> = (m<sub>A</sub>a − m<sub>B</sub>a)/(m<sub>A</sub> + m<sub>B</sub>) = (2a − a)/3 = a/3 = g/9.</div>
+        <div class="s">Check via Newton II for the system: external forces = 3g (down) − 2T (up), T = 2m<sub>A</sub>m<sub>B</sub>g/(m<sub>A</sub>+m<sub>B</sub>) = 4g/3 ⇒ a<sub>cm</sub> = (3g − 8g/3)/3 = g/9 ✓.</div>
+        <div class="ans">a<sub>cm</sub> = g/9, directed downward</div>
+        <div class="call trap det"><span class="h">⚠ Book misprint</span>The module's text says “block A moving up and B moving down”, yet uses (m<sub>A</sub>g − m<sub>B</sub>g) — with m<sub>A</sub> = 2 kg &gt; m<sub>B</sub> = 1 kg, <b>A moves down and B moves up</b>. The numerical answer g/9 (downward) is unaffected.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 6 · L-4</span>
+        <div class="q">A body of mass 2.5 kg is acted on by 5 N at 37° (up-right), 6 N at 53° below +x, 4 N at 60° (up-right) and 6 N along −x. Find the acceleration of its centre of mass.</div>
+        <div class="s">F<sub>x</sub> = 5cos37° + 6cos53° + 4cos60° − 6 = 4 + 3.6 + 2 − 6 = 3.6 N.</div>
+        <div class="s">F<sub>y</sub> = 5sin37° − 6sin53° + 4sin60° = 3 − 4.8 + 2√3 = 1.66 N.</div>
+        <div class="s">a&#8407;<sub>cm</sub> = F&#8407;/M = (3.6î + 1.66ĵ)/2.5 = 1.44î + 0.67ĵ; |a| ≈ 1.59 m/s².</div>
+        <div class="ans">a&#8407;<sub>cm</sub> ≈ (1.44î + 0.67ĵ) m s⁻² (book rounds F<sub>y</sub> to 1.7 N ⇒ 0.68ĵ)</div>
+      </div>
+    </section>
+
+    <!-- STRONG BOX -->
+    <section class="lec" id="strongbox">
+      <div class="lec-head"><span class="lec-tag">★ STRONG BOX</span><h2>Previous-Year Questions — fully worked</h2></div>
+      <div class="call star"><span class="h">★ Scope</span>All <b>7 Previous Year Questions (JEE Main &amp; Advanced)</b> in the module's Strong Box, re-solved from first principles (the module prints no answers for these).</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ 1 · JEE Advanced 2024 P2</span>
+        <div class="q">Particles 1 and 2 (mass m each), joined by a light spring on a smooth plane, oscillate about their COM x₀: x₁(t) = (x₀ + d) + a sinωt, x₂(t) = (x₀ − d) − a sinωt (d &gt; 2a). Particle 3 (mass m) moving at u₀ = aω/2 collides elastically with particle 2 at t₀. Afterwards 1 and 2 have COM speed v<sub>cm</sub> and oscillate with amplitude b at the same ω. If t₀ = π/(2ω), find 4b²/a². Options: 4.25, 3.25, 4.50, 3.50.</div>
+        <div class="s">At t₀ = π/2ω: sinωt₀ = 1, cosωt₀ = 0 ⇒ v₁ = aωcosωt = 0, v₂ = −aωcosωt = 0; spring at maximum stretch.</div>
+        <div class="s">Equal-mass elastic collision exchanges velocities: v₂′ = u₀ = aω/2, v₃′ = 0. Positions unchanged.</div>
+        <div class="s">Relative coordinate s = x₁ − x₂ − 2d = 2a sinωt ⇒ just after: s = 2a, ṡ = v₁ − v₂′ = −aω/2.</div>
+        <div class="s">New relative amplitude S² = s² + (ṡ/ω)² = 4a² + a²/4 = 17a²/4. Each particle's amplitude about the COM is b = S/2 ⇒ b² = 17a²/16.</div>
+        <div class="ans">4b²/a² = 17/4 = 4.25 — option (a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ 2 · JEE Advanced 2024 P2</span>
+        <div class="q">Same system as PYQ 1. If the collision occurs at t₀ = 0, find v<sub>cm</sub>/(aω). Options: 0.75, 0.71, 0.79, 0.77.</div>
+        <div class="s">At t = 0: v₁ = aωcos0 = +aω, v₂ = −aω (spring passing through natural length, both at maximum speed).</div>
+        <div class="s">Elastic, equal masses ⇒ exchange: v₂′ = u₀ = +aω/2, v₃′ = −aω.</div>
+        <div class="s">v<sub>cm</sub> = (v₁ + v₂′)/2 = (aω + aω/2)/2 = 3aω/4.</div>
+        <div class="ans">v<sub>cm</sub>/(aω) = 0.75 — option (a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ 3 · JEE Advanced 2017 P1 (multiple correct)</span>
+        <div class="q">A block M with a frictionless quarter-circle cut (radius R) rests on a smooth table, its right edge at x = 0. A point mass m is released from rest at the top of the cut and slides down; when it leaves the block its position is x and velocity v. Which are correct? (a) v = √(2gR/(1 + m/M)) (b) velocity of M = −(m/M)√(2gR) (c) x = −√2·mR/(m + M) (d) x-displacement of the COM of M = −mR/(m + M).</div>
+        <div class="s">No horizontal external force ⇒ horizontal momentum 0 and x<sub>cm</sub> fixed. m leaves at the bottom of the arc moving horizontally: mv + MV = 0.</div>
+        <div class="s">Energy: mgR = ½mv² + ½MV² = ½mv²(1 + m/M) ⇒ v = √(2gR/(1 + m/M)) ⇒ (a) ✓.</div>
+        <div class="s">V = −(m/M)v = −(m/M)√(2gR/(1 + m/M)) ≠ −(m/M)√(2gR) ⇒ (b) ✗.</div>
+        <div class="s">m moves R relative to M: Δx<sub>m</sub> − Δx<sub>M</sub> = R and mΔx<sub>m</sub> + MΔx<sub>M</sub> = 0 ⇒ Δx<sub>M</sub> = −mR/(m + M) ⇒ (d) ✓.</div>
+        <div class="s">x of m: starts at −R, Δx<sub>m</sub> = MR/(m + M) ⇒ x = −R + MR/(m + M) = −mR/(m + M), no √2 ⇒ (c) ✗.</div>
+        <div class="ans">Correct: (a) and (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ 4 · JEE Advanced 2007 P2</span>
+        <div class="q">Statement I: If there is no external torque on a body about its centre of mass, the velocity of the centre of mass remains constant. Statement II: The linear momentum of an isolated system remains constant.</div>
+        <div class="s">Statement I: a freely falling ball has zero torque about its COM (gravity acts there) but a<sub>cm</sub> = g ⇒ v<sub>cm</sub> changes ⇒ <b>false</b>. v<sub>cm</sub> is governed by F<sub>ext</sub> = Ma<sub>cm</sub>, not by torque.</div>
+        <div class="s">Statement II: isolated ⇒ F<sub>ext</sub> = 0 ⇒ dP&#8407;/dt = 0 ⇒ <b>true</b>.</div>
+        <div class="ans">Option (d) — Statement I false, Statement II true</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ 5 · JEE Main 2025 (Shift 1)</span>
+        <div class="q">Two 1 kg particles: r&#8407;<sub>A</sub> = (α₁t²î + α₂tĵ + α₃tk̂) m, r&#8407;<sub>B</sub> = (β₁tî + β₂t²ĵ + β₃tk̂) m with α₁ = 1, α₂ = 3n, α₃ = 2, β₁ = 2, β₂ = −1, β₃ = 4p (SI). At t = 1 s, |v&#8407;<sub>A</sub>| = |v&#8407;<sub>B</sub>| and v&#8407;<sub>A</sub> ⟂ v&#8407;<sub>B</sub>. The angular momentum of A about the position of B at t = 1 s is √L kg m² s⁻¹. Find L.</div>
+        <div class="s">At t = 1: v&#8407;<sub>A</sub> = (2α₁t, α₂, α₃) = (2, 3n, 2); v&#8407;<sub>B</sub> = (β₁, 2β₂t, β₃) = (2, −2, 4p).</div>
+        <div class="s">Equal speeds: 8 + 9n² = 8 + 16p² ⇒ 9n² = 16p². Perpendicular: 4 − 6n + 8p = 0 ⇒ 3n = 2 + 4p.</div>
+        <div class="s">(2 + 4p)² = 16p² ⇒ 4 + 16p = 0 ⇒ p = −1/4, n = 1/3 ⇒ v&#8407;<sub>A</sub> = (2, 1, 2), v&#8407;<sub>B</sub> = (2, −2, −1) (check: 4 − 2 − 2 = 0 ✓).</div>
+        <div class="s">r&#8407;<sub>A</sub>(1) = (1, 1, 2), r&#8407;<sub>B</sub>(1) = (2, −1, −1) ⇒ r&#8407;<sub>A</sub> − r&#8407;<sub>B</sub> = (−1, 2, 3).</div>
+        <div class="s">L&#8407; = (r&#8407;<sub>A</sub> − r&#8407;<sub>B</sub>) × m v&#8407;<sub>A</sub> = (−1, 2, 3) × (2, 1, 2) = (4 − 3, 6 + 2, −1 − 4) = (1, 8, −5) ⇒ |L&#8407;|² = 1 + 64 + 25.</div>
+        <div class="ans">L = 90</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ 6 · JEE Main 2025 (Shift 1)</span>
+        <div class="q">A thin rectangular plate occupies 0 ≤ x ≤ a, 0 ≤ y ≤ b, with mass per unit area σ = σ₀x/(ab). Its centre of mass is: (a) (2a/3, b/2) (b) (a/2, b/2) (c) (a/3, b/2) (d) (2a/3, 2b/3).</div>
+        <div class="s">σ is independent of y ⇒ y<sub>cm</sub> = b/2 by symmetry.</div>
+        <div class="s">Vertical strip: dm = σ b dx = (σ₀/a)x dx ⇒ x<sub>cm</sub> = ∫₀<sup>a</sup>x² dx / ∫₀<sup>a</sup>x dx = (a³/3)/(a²/2) = 2a/3.</div>
+        <div class="ans">(2a/3, b/2) — option (a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ 7 · JEE Main 2022 (Shift 1)</span>
+        <div class="q">Blocks of 10 kg and 30 kg are at (0, 0) cm and (x, 0) cm. The 10 kg block is moved 6 cm towards the other. How far must the 30 kg block move to keep the COM unchanged? (a) 4 cm towards the 10 kg block (b) 2 cm away from it (c) 2 cm towards it (d) 4 cm away from it.</div>
+        <div class="s">COM fixed ⇒ m₁Δx₁ + m₂Δx₂ = 0 ⇒ 10(+6) + 30Δx₂ = 0 ⇒ Δx₂ = −2 cm.</div>
+        <div class="s">Negative x is toward the origin, i.e. toward the 10 kg block (x itself drops out).</div>
+        <div class="ans">2 cm towards the 10 kg block — option (c)</div>
+      </div>
+      <div class="call star"><span class="h">★ Recurring tricks</span>No horizontal external force ⇒ <code>Σm<sub>i</sub>Δx<sub>i</sub> = 0</code> (block-on-wedge, plank, boat). Equal-mass elastic collision ⇒ velocities swap. Spring-coupled pair: v<sub>cm</sub> from the instant's velocities; amplitude from <code>S² = s² + (ṡ/ω)²</code> of the relative coordinate. Density varying in x only ⇒ y<sub>cm</sub> is the geometric midpoint.</div>
+    </section>
+
+    <div class="foot">ICAD · P-11 Centre of Mass · Revision Notes (L-1 to L-4 + Strong Box) · Quick + Detailed views. Built from the module's theory and every printed <b>solved example</b> (L-1…L-4) plus all <b>7 Previous-Year Questions</b> from the Strong Box; every result was re-worked from first principles. The unsolved Suggested Problems / Level sets and Quick Recaps are intentionally omitted. Book misprints flagged: L-1 Example 4 (x/y labels swapped — correct COM (a/2, 7a/10)), L-2 Example 4 (quarter-disc sector printed 4R/3π, correct 4√2R/3π), L-4 Example 5 (block directions reversed in the text; answer g/9 unaffected).</div>
+  </div>
+</div>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

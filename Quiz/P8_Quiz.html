@@ -57,6 +57,14 @@
 
   .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
   .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
   .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
   .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
   .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
@@ -200,6 +208,16 @@
   <div class="foot">ICAD · P-8 Work, Energy and Power · mastery quiz built from lectures L-1 to L-8 and the chapter Strong Box · every answer re-derived, not transcribed.</div>
 </div>
 
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    P-8 WORK, ENERGY AND POWER — lecture units
@@ -252,7 +270,7 @@ const QUIZ = [
  sol:"First convert the force: 5 kg-wt = 5 × 9.8 = 49 N. Then W = FS cos θ = 49 × 10 × cos 60° = 49 × 10 × 0.5 = <b>245 J</b>. Skipping the kg-wt conversion (25 J) or dropping cos 60° (490 J) are the two standard slips."},
 
 {id:3, lec:"L-1", blk:"Dot product", topic:"F·S from components",
- q:"A constant force F⃗ = (2î − 3ĵ + 4k̂) N acts on a particle that undergoes a displacement S⃗ = (3î + 2ĵ − k̂) m. The work done by the force is:",
+ q:"A constant force F̄ = (2î − 3ĵ + 4k̂) N acts on a particle that undergoes a displacement S̄ = (3î + 2ĵ − k̂) m. The work done by the force is:",
  opts:["4 J","−4 J","8 J","16 J"],
  ans:1,
  why:[
@@ -260,7 +278,7 @@ const QUIZ = [
   "Correct: (2)(3) + (−3)(2) + (4)(−1) = 6 − 6 − 4 = −4 J.",
   "8 J arises from mishandling (−3)(2) as +6, i.e. dropping the sign of the force's ĵ component.",
   "16 J adds the magnitudes 6 + 6 + 4 while ignoring signs; a dot product must keep every sign."],
- sol:"Work for a constant force is the dot product W = F⃗·S⃗ = F_x S_x + F_y S_y + F_z S_z = (2)(3) + (−3)(2) + (4)(−1) = 6 − 6 − 4 = <b>−4 J</b>. The negative total means the force, on balance, opposes this particular displacement."},
+ sol:"Work for a constant force is the dot product W = F̄·S̄ = F_x S_x + F_y S_y + F_z S_z = (2)(3) + (−3)(2) + (4)(−1) = 6 − 6 − 4 = <b>−4 J</b>. The negative total means the force, on balance, opposes this particular displacement."},
 
 {id:4, lec:"L-1", blk:"Zero work", topic:"Which force does non-zero work",
  q:"In which of the following cases is the work done by the SPECIFIED force NOT zero?",
@@ -337,7 +355,7 @@ const QUIZ = [
   "Correct: force is invariant between inertial frames but displacement is not, so W = F·S differs by frame.",
   "The force being frame-independent is not enough; the displacement factor S in W = F·S is frame-dependent.",
   "Kinetic energy is itself frame-dependent (it uses v²), so this reasoning and its premise are both wrong."],
- sol:"In Newtonian mechanics a force is the same in every inertial frame, but the displacement of the body over a time interval is not — a block on a moving train travels different distances as seen from the train and from the ground. Since W = F⃗·S⃗, <b>work is frame-dependent</b>. Kinetic energy is likewise frame-dependent."},
+ sol:"In Newtonian mechanics a force is the same in every inertial frame, but the displacement of the body over a time interval is not — a block on a moving train travels different distances as seen from the train and from the ground. Since W = F̄·S̄, <b>work is frame-dependent</b>. Kinetic energy is likewise frame-dependent."},
 
 {id:11, lec:"L-1", blk:"Work on an incline", topic:"Slow push up smooth incline",
  q:"A block of weight 50 N is pushed slowly up a frictionless incline of inclination 30° through 4 m along the incline by a force directed parallel to the incline. The work done by the applied force is:",
@@ -1013,7 +1031,7 @@ const QUIZ = [
 
 /* ===== P8_SB.js ===== */
 {id:93, lec:"SB", blk:"Work of a central force along a path", topic:"Central force, equal-radius endpoints",
- q:"An attractive central force F&#8407; = &minus;(k/r&sup2;) r&#770; (k = 18 N&middot;m&sup2;), directed toward the origin, acts on a particle. The particle is carried from A = (3 m, 0) to B = (0, 3 m) along the straight chord AB. The work done by this force is:",
+ q:"An attractive central force F&#772; = &minus;(k/r&sup2;) r&#770; (k = 18 N&middot;m&sup2;), directed toward the origin, acts on a particle. The particle is carried from A = (3 m, 0) to B = (0, 3 m) along the straight chord AB. The work done by this force is:",
  opts:["0","&minus;6 J","+6 J","&minus;12 J"],
  ans:0,
  why:["An inverse-square central force is conservative with U(r) = &minus;k/r; A and B are equidistant (r = 3 m), so &Delta;U = 0 and W = 0 on ANY path.","&minus;6 J = &minus;k/r_A alone mistakes the potential at A for the work, dropping the &minus;U(B) term.","+6 J flips the sign of the &minus;k/r_A slip; still ignores that U(B) cancels U(A).","&minus;12 J adds |U(A)|+|U(B)| instead of subtracting equal potentials that cancel."],
@@ -1031,7 +1049,7 @@ const QUIZ = [
  opts:["(&minus;1 &icirc; + 4 &jcirc; + 6 k&#770;) N","(&minus;2 &icirc; &minus; 4 &jcirc; &minus; 6 k&#770;) N","(1 &icirc; &minus; 4 &jcirc; &minus; 6 k&#770;) N","(1 &icirc; &minus; 4 &jcirc; &minus; 3 k&#770;) N"],
  ans:2,
  why:["This is +&nabla;U: it drops the overall minus sign in F = &minus;&nabla;U, reversing every component.","F_x here forgets that &part;(&minus;3x)/&part;x = &minus;3, using &minus;2y = &minus;2 instead of &minus;(2y&minus;3) = +1.","Correct: F_x = &minus;(2y&minus;3) = +1, F_y = &minus;2x = &minus;4, F_z = &minus;2z = &minus;6.","F_z mis-differentiates z&sup2; as z, giving &minus;3 instead of &minus;2z = &minus;6."],
- sol:"F = &minus;&nabla;U. F_x = &minus;&part;U/&part;x = &minus;(2y &minus; 3) = &minus;(2&minus;3) = +1 N; F_y = &minus;&part;U/&part;y = &minus;2x = &minus;4 N; F_z = &minus;&part;U/&part;z = &minus;2z = &minus;6 N. So F&#8407; = <b>(1 &icirc; &minus; 4 &jcirc; &minus; 6 k&#770;) N</b>."},
+ sol:"F = &minus;&nabla;U. F_x = &minus;&part;U/&part;x = &minus;(2y &minus; 3) = &minus;(2&minus;3) = +1 N; F_y = &minus;&part;U/&part;y = &minus;2x = &minus;4 N; F_z = &minus;&part;U/&part;z = &minus;2z = &minus;6 N. So F&#772; = <b>(1 &icirc; &minus; 4 &jcirc; &minus; 6 k&#770;) N</b>."},
 
 {id:96, lec:"SB", blk:"Constant-power kinematics", topic:"s &prop; t^(3/2) from rest at constant power",
  q:"A body of mass 2 kg, initially at rest on a frictionless surface, is driven by a machine delivering constant power 9 W. The distance travelled in the first 4 s is:",
@@ -1076,7 +1094,7 @@ const QUIZ = [
  sol:"Break-off (N = 0): mg cos&theta; = mv&sup2;/R &rArr; v&sup2; = gR cos&theta;. Energy from the top: &frac12;v&sup2; = gR(1&minus;cos&theta;) &rArr; v&sup2; = 2gR(1&minus;cos&theta;). Equate: cos&theta; = 2/3, so v&sup2; = 2gR/3 = 2&middot;10&middot;1.5/3 = 10 &rArr; v = <b>&radic;10 &asymp; 3.2 m/s</b>."},
 
 {id:102, lec:"SB", blk:"Work by an inverse-square force", topic:"Integrating F = k/r&sup2; outward",
- q:"A particle is acted on by a repulsive radial force F&#8407; = (k/r&sup2;) r&#770; with k = 12 N&middot;m&sup2;. The work done by this force as the particle moves radially outward from r = 2 m to r = 6 m is:",
+ q:"A particle is acted on by a repulsive radial force F&#772; = (k/r&sup2;) r&#770; with k = 12 N&middot;m&sup2;. The work done by this force as the particle moves radially outward from r = 2 m to r = 6 m is:",
  opts:["&minus;4 J","4 J","6 J","8 J"],
  ans:1,
  why:["Sign error: the repulsive force points along the outward displacement, so the work is positive, not negative.","Correct: W = k(1/2 &minus; 1/6) = 12&middot;(1/3) = 4 J.","6 J keeps only the 1/r&#8321; term (12&middot;&frac12;), dropping the &minus;1/r&#8322; contribution.","8 J adds 1/r&#8321; + 1/r&#8322; instead of subtracting them."],
@@ -1161,9 +1179,11 @@ function startQuiz(){
   if (!selIds.length) return;
   round = 0; pool = selIds.slice(); attempts = {}; history = [];
   $("pSel").textContent = selIds.length;
+  examStart();
   nextRound();
 }
 function backToIntro(){
+  examStop();
   round = 0; pool = []; picked = {}; order = {};
   wrongIds = []; leftIds = []; attempts = {}; history = [];
   renderPicker();
@@ -1172,9 +1192,12 @@ function backToIntro(){
 
 function nextRound(){
   round++;
-  picked = {}; order = {};
   pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
 
+function renderPool(){
+  picked = {}; order = {};
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
@@ -1218,6 +1241,7 @@ function nextRound(){
 }
 
 function pick(id, orig){
+  dirty = true;
   picked[id] = orig;
   BY_ID[id].opts.forEach((_, k) => {
     const el = $("o" + id + "_" + k);
@@ -1311,9 +1335,96 @@ function finish(){
   t += '</table>';
   const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
   $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+  examStop();
   show("done");
 }
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
 
 renderPicker();
 </script>

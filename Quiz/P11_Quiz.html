@@ -57,6 +57,14 @@
 
   .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
   .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
   .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
   .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
   .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
@@ -200,19 +208,29 @@
   <div class="foot">ICAD · P-11 Centre of Mass · mastery quiz built from lectures L-1 to L-4 and the chapter Strong Box · every answer re-derived, not transcribed.</div>
 </div>
 
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    P-11 CENTRE OF MASS — lecture units
    ============================================================ */
 const LECTURES = [
   {key:"L-1", name:"L-1 · COM of Particle Systems",
-   desc:"the two-particle COM with distances in the inverse ratio of the masses (m₁r₁ = m₂r₂), the n-particle weighted average r⃗cm = Σmᵢr⃗ᵢ/Σmᵢ in component and vector form, the CO molecule and Earth–Moon barycentre, masses on squares, triangles and rectangles, placing a mass to fix the COM, unknown masses from a given COM, grouping sub-systems, the first moment about the COM being zero, and why the COM need not lie in the body"},
+   desc:"the two-particle COM with distances in the inverse ratio of the masses (m₁r₁ = m₂r₂), the n-particle weighted average r̄cm = Σmᵢr̄ᵢ/Σmᵢ in component and vector form, the CO molecule and Earth–Moon barycentre, masses on squares, triangles and rectangles, placing a mass to fix the COM, unknown masses from a given COM, grouping sub-systems, the first moment about the COM being zero, and why the COM need not lie in the body"},
   {key:"L-2", name:"L-2 · COM of Rigid Bodies (Integration)",
    desc:"x<sub>cm</sub> = ∫x dm/∫dm with dm = λdx, σdA, ρdV; non-uniform rods (λ ∝ x², λ = α + βx), the uniform arc 2R sin(φ/2)/φ (semicircular ring 2R/π, quarter ring), the sector 2R sinθ/3θ (semicircular disc 4R/3π, quarter disc 4√2R/3π), the half annulus, a parabolic lamina, the solid hemisphere 3R/8, bent and U-shaped wires, and symmetry shortcuts"},
   {key:"L-3", name:"L-3 · COM of Remaining Body (Cavity)",
    desc:"the negative-mass method x<sub>cm</sub> = (A₁x₁ − A₂x₂)/(A₁ − A₂), discs with edge, off-centre and square holes, two cavities, a sphere with a spherical cavity (volume ratio), the L-shaped and notched plates, a thick hemispherical bowl, cut-and-rejoin pieces, removed particles on a cube or hexagon, composite bodies, and the rule that the COM moves away from the hole along the line of centres"},
   {key:"L-4", name:"L-4 · Motion of the COM",
-   desc:"Δr⃗cm = ΣmᵢΔr⃗ᵢ/M and ΣmᵢΔxᵢ = 0 when F<sub>ext</sub> = 0 (man on plank or boat), v⃗cm and P⃗ = Mv⃗cm, a⃗cm and F⃗ext = Ma⃗cm with internal forces cancelling, the Atwood machine's a<sub>cm</sub> = g/9, explosions (KE ratio m₂/m₁, COM parabola unchanged), recoil, mutual attraction meeting at the COM, a block on a fixed wedge, and rocket thrust"},
+   desc:"Δr̄cm = ΣmᵢΔr̄ᵢ/M and ΣmᵢΔxᵢ = 0 when F<sub>ext</sub> = 0 (man on plank or boat), v̄cm and P̄ = Mv̄cm, ācm and F̄ext = Mācm with internal forces cancelling, the Atwood machine's a<sub>cm</sub> = g/9, explosions (KE ratio m₂/m₁, COM parabola unchanged), recoil, mutual attraction meeting at the COM, a block on a fixed wedge, and rocket thrust"},
   {key:"SB", name:"Strong Box · Mixed PYQ",
    desc:"previous-year problems: the JEE Advanced 2024 spring-coupled pair struck elastically (amplitude 4b²/a² = 4.25 and v<sub>cm</sub>/aω = 0.75), the 2017 mass sliding in a block's quarter-circle (speeds and displacements), the 2007 torque-versus-v<sub>cm</sub> assertion, the JEE Main 2025 angular momentum about another particle (L = 90) and plate with σ ∝ x, and the 2022 keep-the-COM-fixed shift"}
 ];
@@ -245,8 +263,8 @@ const QUIZ = [
  q:"Masses 1 kg, 2 kg and 3 kg have position vectors (î + 4ĵ + k̂), (î + ĵ + k̂) and (2î − ĵ − 2k̂) m. The position vector of their centre of mass is:",
  opts:["(9î + 3ĵ − 3k̂) m", "(3î + ĵ − k̂) m", "(1/2)(3î + ĵ − k̂) m", "(1/3)(4î + 4ĵ) m"],
  ans:2,
- why:["this is the first moment Σmᵢr⃗ᵢ — forgot to divide by the total mass 6 kg","divided by the number of particles (3) instead of the total mass (6 kg)","correct: Σmᵢr⃗ᵢ = 9î + 3ĵ − 3k̂, divided by Σmᵢ = 6 kg gives (1/2)(3î + ĵ − k̂)","the unweighted average (r⃗₁ + r⃗₂ + r⃗₃)/3 — ignores the different masses"],
- sol:"Σmᵢr⃗ᵢ = 1(î + 4ĵ + k̂) + 2(î + ĵ + k̂) + 3(2î − ĵ − 2k̂) = (1 + 2 + 6)î + (4 + 2 − 3)ĵ + (1 + 2 − 6)k̂ = 9î + 3ĵ − 3k̂. Total mass = 6 kg, so r⃗<sub>cm</sub> = (9î + 3ĵ − 3k̂)/6 = (1.5î + 0.5ĵ − 0.5k̂) m. Final: <b>(1/2)(3î + ĵ − k̂) m</b>."},
+ why:["this is the first moment Σmᵢr̄ᵢ — forgot to divide by the total mass 6 kg","divided by the number of particles (3) instead of the total mass (6 kg)","correct: Σmᵢr̄ᵢ = 9î + 3ĵ − 3k̂, divided by Σmᵢ = 6 kg gives (1/2)(3î + ĵ − k̂)","the unweighted average (r̄₁ + r̄₂ + r̄₃)/3 — ignores the different masses"],
+ sol:"Σmᵢr̄ᵢ = 1(î + 4ĵ + k̂) + 2(î + ĵ + k̂) + 3(2î − ĵ − 2k̂) = (1 + 2 + 6)î + (4 + 2 − 3)ĵ + (1 + 2 − 6)k̂ = 9î + 3ĵ − 3k̂. Total mass = 6 kg, so r̄<sub>cm</sub> = (9î + 3ĵ − 3k̂)/6 = (1.5î + 0.5ĵ − 0.5k̂) m. Final: <b>(1/2)(3î + ĵ − k̂) m</b>."},
 
 {id:5, lec:"L-1", blk:"n-particle COM", topic:"Masses on a square (book misprint)",
  q:"Masses m, 2m, 3m, 4m sit at A(0, 0), B(a, 0), C(a, a), D(0, a) of a square. The centre of mass is at:",
@@ -260,14 +278,14 @@ const QUIZ = [
  opts:["It always lies within the material of the body", "For any body it coincides with the geometric centre", "Its location as a physical point depends on where the origin is chosen", "For a uniform ring it lies at the centre, where there is no material"],
  ans:3,
  why:["false — a ring, an L-shape or a boomerang has its COM in empty space","false — only for uniform symmetric bodies; a non-uniform rod's COM is off-centre","false — only its coordinates change with the origin; the point itself is fixed in the body","correct: by symmetry the ring's COM is its centre, which is empty space"],
- sol:"The COM is the mass-weighted average position. For a uniform ring every element at r⃗ has a partner at −r⃗ about the centre, so Σmᵢr⃗ᵢ = 0 there: COM at the centre, where there is no mass. It coincides with the geometric centre only for uniform symmetric bodies, and changing the origin changes its coordinates but not the point. Final: <b>a ring's COM is at its empty centre</b>."},
+ sol:"The COM is the mass-weighted average position. For a uniform ring every element at r̄ has a partner at −r̄ about the centre, so Σmᵢr̄ᵢ = 0 there: COM at the centre, where there is no mass. It coincides with the geometric centre only for uniform symmetric bodies, and changing the origin changes its coordinates but not the point. Final: <b>a ring's COM is at its empty centre</b>."},
 
 {id:7, lec:"L-1", blk:"First moment of mass", topic:"Moment about the COM",
- q:"For a system of particles, Σmᵢr⃗ᵢ′, where r⃗ᵢ′ are positions measured from the centre of mass itself, equals:",
- opts:["the zero vector", "Σmᵢ|r⃗ᵢ′|, the sum of mass × distance", "Mr⃗<sub>cm</sub>, with r⃗<sub>cm</sub> measured from the original origin O", "a value that depends on the orientation of the axes through the COM"],
+ q:"For a system of particles, Σmᵢr̄ᵢ′, where r̄ᵢ′ are positions measured from the centre of mass itself, equals:",
+ opts:["the zero vector", "Σmᵢ|r̄ᵢ′|, the sum of mass × distance", "Mr̄<sub>cm</sub>, with r̄<sub>cm</sub> measured from the original origin O", "a value that depends on the orientation of the axes through the COM"],
  ans:0,
- why:["correct: r⃗ᵢ′ = r⃗ᵢ − r⃗<sub>cm</sub> ⇒ Σmᵢr⃗ᵢ′ = Mr⃗<sub>cm</sub> − Mr⃗<sub>cm</sub> = 0","added magnitudes — the first moment is a vector sum, and directions cancel","that is the first moment about O, not about the COM; about O it is generally non-zero","the zero vector is zero in every orientation — rotating the axes cannot change it"],
- sol:"Put r⃗ᵢ′ = r⃗ᵢ − r⃗<sub>cm</sub>. Then Σmᵢr⃗ᵢ′ = Σmᵢr⃗ᵢ − (Σmᵢ)r⃗<sub>cm</sub> = Mr⃗<sub>cm</sub> − Mr⃗<sub>cm</sub> = 0. This is the defining property of the COM: the first moment of mass about it vanishes, which is also why a body balances on a knife edge through it. Final: <b>zero</b>."},
+ why:["correct: r̄ᵢ′ = r̄ᵢ − r̄<sub>cm</sub> ⇒ Σmᵢr̄ᵢ′ = Mr̄<sub>cm</sub> − Mr̄<sub>cm</sub> = 0","added magnitudes — the first moment is a vector sum, and directions cancel","that is the first moment about O, not about the COM; about O it is generally non-zero","the zero vector is zero in every orientation — rotating the axes cannot change it"],
+ sol:"Put r̄ᵢ′ = r̄ᵢ − r̄<sub>cm</sub>. Then Σmᵢr̄ᵢ′ = Σmᵢr̄ᵢ − (Σmᵢ)r̄<sub>cm</sub> = Mr̄<sub>cm</sub> − Mr̄<sub>cm</sub> = 0. This is the defining property of the COM: the first moment of mass about it vanishes, which is also why a body balances on a knife edge through it. Final: <b>zero</b>."},
 
 {id:8, lec:"L-1", blk:"Placing a mass", topic:"Fix the COM at the origin",
  q:"A 1 kg mass is at the origin and a 2 kg mass at x = 3 m. Where must a 3 kg mass be placed so that the COM of all three is at the origin?",
@@ -295,7 +313,7 @@ const QUIZ = [
  opts:["(2, 1.5) m", "(1, 4/3) m", "(4/3, 1) m", "(8/3, 2) m"],
  ans:2,
  why:["the midpoint of the hypotenuse (centre of the bounding box), not the centroid of three points","swapped x and y — the 4 m leg lies on the x-axis","correct: x = (0 + 4 + 0)/3 = 4/3 m, y = (0 + 0 + 3)/3 = 1 m","took two-thirds instead of one-third of each sum"],
- sol:"For equal masses r⃗<sub>cm</sub> is the average of the vertices: x = (0 + 4 + 0)/3 = 4/3 m, y = (0 + 0 + 3)/3 = 1 m. Final: <b>(4/3, 1) m</b>."},
+ sol:"For equal masses r̄<sub>cm</sub> is the average of the vertices: x = (0 + 4 + 0)/3 = 4/3 m, y = (0 + 0 + 3)/3 = 1 m. Final: <b>(4/3, 1) m</b>."},
 
 {id:12, lec:"L-1", blk:"Grouping sub-systems", topic:"Masses at rectangle corners",
  q:"1 kg masses sit at (0, 0) and (2, 0) m; 2 kg masses sit at (0, 2) and (2, 2) m. The centre of mass is at:",
@@ -312,11 +330,11 @@ const QUIZ = [
  sol:"Σmᵢxᵢ = Σk² = n(n + 1)(2n + 1)/6, Σmᵢ = Σk = n(n + 1)/2. Ratio = (2n + 1)/3. Checks: n = 1 → 1 ✓; n = 2 → (1·1 + 2·2)/3 = 5/3 ✓. Final: <b>(2n + 1)/3 m</b>."},
 
 {id:14, lec:"L-1", blk:"Choice of axes", topic:"Shifting the origin",
- q:"The origin is moved to the point whose old position vector is a⃗. The centre of mass's position vector relative to the new origin is:",
- opts:["r⃗<sub>cm</sub> + a⃗", "r⃗<sub>cm</sub>, unchanged", "r⃗<sub>cm</sub> − a⃗", "r⃗<sub>cm</sub> − a⃗/n, n = number of particles"],
+ q:"The origin is moved to the point whose old position vector is ā. The centre of mass's position vector relative to the new origin is:",
+ opts:["r̄<sub>cm</sub> + ā", "r̄<sub>cm</sub>, unchanged", "r̄<sub>cm</sub> − ā", "r̄<sub>cm</sub> − ā/n, n = number of particles"],
  ans:2,
- why:["wrong sign — every new position vector is r⃗ᵢ − a⃗, not r⃗ᵢ + a⃗","the point is unchanged, but its position vector from a different origin is not","correct: r⃗ᵢ′ = r⃗ᵢ − a⃗ ⇒ Σmᵢ(r⃗ᵢ − a⃗)/M = r⃗<sub>cm</sub> − a⃗","the shift is common to every particle, so it comes out whole: Σmᵢa⃗/M = a⃗, not a⃗/n"],
- sol:"Each particle's new position vector is r⃗ᵢ′ = r⃗ᵢ − a⃗. So r⃗<sub>cm</sub>′ = Σmᵢ(r⃗ᵢ − a⃗)/M = r⃗<sub>cm</sub> − (Σmᵢ/M)a⃗ = r⃗<sub>cm</sub> − a⃗. The COM is the same physical point; only its coordinates change. Final: <b>r⃗<sub>cm</sub> − a⃗</b>."},
+ why:["wrong sign — every new position vector is r̄ᵢ − ā, not r̄ᵢ + ā","the point is unchanged, but its position vector from a different origin is not","correct: r̄ᵢ′ = r̄ᵢ − ā ⇒ Σmᵢ(r̄ᵢ − ā)/M = r̄<sub>cm</sub> − ā","the shift is common to every particle, so it comes out whole: Σmᵢā/M = ā, not ā/n"],
+ sol:"Each particle's new position vector is r̄ᵢ′ = r̄ᵢ − ā. So r̄<sub>cm</sub>′ = Σmᵢ(r̄ᵢ − ā)/M = r̄<sub>cm</sub> − (Σmᵢ/M)ā = r̄<sub>cm</sub> − ā. The COM is the same physical point; only its coordinates change. Final: <b>r̄<sub>cm</sub> − ā</b>."},
 
 {id:15, lec:"L-1", blk:"Two-particle COM", topic:"Earth–Moon barycentre",
  q:"The Earth is 81 times as massive as the Moon and their centres are 3.84 × 10⁵ km apart. The distance of the Earth–Moon centre of mass from the Earth's centre is about:",
@@ -429,7 +447,7 @@ const QUIZ = [
  opts:["(L/2, L/2)", "(L/4, L/4)", "(L/3, L/3)", "(L/(2√2), L/(2√2))"],
  ans:1,
  why:["those are the two arms' own centres used as coordinates — each arm contributes to only one axis","correct: arms at (L/2, 0) and (0, L/2), equal mass ⇒ (L/4, L/4)","the centroid of a triangle — there is no mass on the hypotenuse","took the distance from the corner, L/(2√2), as each coordinate"],
- sol:"Each arm has mass M/2 at its midpoint: arm on x at (L/2, 0), arm on y at (0, L/2). r⃗<sub>cm</sub> = [(M/2)(L/2, 0) + (M/2)(0, L/2)]/M = (L/4, L/4). The COM lies outside the wire, L/(2√2) from the corner. Final: <b>(L/4, L/4)</b>."},
+ sol:"Each arm has mass M/2 at its midpoint: arm on x at (L/2, 0), arm on y at (0, L/2). r̄<sub>cm</sub> = [(M/2)(L/2, 0) + (M/2)(0, L/2)]/M = (L/4, L/4). The COM lies outside the wire, L/(2√2) from the corner. Final: <b>(L/4, L/4)</b>."},
 
 {id:31, lec:"L-2", blk:"Composite wire", topic:"U-shaped wire",
  q:"A uniform wire is bent into a U: a base from (0, 0) to (L, 0) and two vertical arms of length L rising from its ends. The centre of mass is at:",
@@ -514,7 +532,7 @@ const QUIZ = [
  opts:["moves toward the hole along the line of centres", "moves perpendicular to the line joining O and the hole's centre", "moves away from the hole, along the line joining O and the hole's centre", "stays at O as long as the hole lies inside the lamina"],
  ans:2,
  why:["opposite — removing mass on one side leaves more mass on the other","the removed piece's moment is along the line of centres, so the shift is too","correct: with O as origin, x<sub>cm</sub> = −A₂x₂/(A₁ − A₂) — opposite in sign to the hole's position","only a hole centred at O leaves the COM at O"],
- sol:"Treat the hole as negative mass. With origin at O (x₁ = 0): r⃗<sub>cm</sub> = −A₂r⃗₂/(A₁ − A₂). This vector is anti-parallel to r⃗₂, so the COM moves along the line of centres, away from the hole. Final: <b>away from the hole, along the line of centres</b>."},
+ sol:"Treat the hole as negative mass. With origin at O (x₁ = 0): r̄<sub>cm</sub> = −A₂r̄₂/(A₁ − A₂). This vector is anti-parallel to r̄₂, so the COM moves along the line of centres, away from the hole. Final: <b>away from the hole, along the line of centres</b>."},
 
 {id:43, lec:"L-3", blk:"Cut-and-rejoin", topic:"Rod segment moved",
  q:"A uniform rod lies from x = 0 to x = L. Its last quarter (3L/4 to L) is cut off and rejoined at the other end, now occupying −L/4 to 0. The centre of mass shifts by:",
@@ -549,7 +567,7 @@ const QUIZ = [
  opts:["at the centre", "a/5 from the centre, toward the empty vertex", "a/6 from the centre, away from the empty vertex", "a/5 from the centre, away from the empty vertex"],
  ans:3,
  why:["true only for all six; removing one breaks the symmetry","wrong direction — removing mass pushes the COM away from the gap","divided by 6 masses instead of the 5 that remain","correct: −m(a)/(5m) = −a/5, since the hexagon's circumradius equals its side a"],
- sol:"Six masses: COM at the centre, Σmᵢr⃗ᵢ = 0. Removing m at r⃗ (|r⃗| = a for a regular hexagon) leaves Σ = −mr⃗ over 5m: r⃗<sub>cm</sub> = −r⃗/5. Final: <b>a/5 from the centre, opposite the removed vertex</b>."},
+ sol:"Six masses: COM at the centre, Σmᵢr̄ᵢ = 0. Removing m at r̄ (|r̄| = a for a regular hexagon) leaves Σ = −mr̄ over 5m: r̄<sub>cm</sub> = −r̄/5. Final: <b>a/5 from the centre, opposite the removed vertex</b>."},
 
 {id:48, lec:"L-3", blk:"Cavity method", topic:"Off-centre circular hole",
  q:"A uniform disc of radius 6 cm has a circular hole of radius 2 cm whose centre is 3 cm from the disc's centre. The COM of the remainder is displaced from the disc's centre by:",
@@ -633,15 +651,15 @@ const QUIZ = [
  q:"A 1 kg particle moves with velocity 2î m/s and a 2 kg particle with 3ĵ m/s. The velocity of their centre of mass is:",
  opts:["(2î + 3ĵ)/2 m/s", "(2î + 6ĵ)/3 m/s", "(2î + 6ĵ) m/s", "(4î + 3ĵ)/3 m/s"],
  ans:1,
- why:["unweighted average of the two velocities","correct: v⃗<sub>cm</sub> = (1·2î + 2·3ĵ)/3 = (2î + 6ĵ)/3","that is the total momentum P⃗ — forgot to divide by M = 3 kg","attached each mass to the other particle's velocity"],
- sol:"v⃗<sub>cm</sub> = Σmᵢv⃗ᵢ/M = (1·2î + 2·3ĵ)/3 = (2î + 6ĵ)/3 m/s, magnitude √40/3 ≈ 2.11 m/s. Also P⃗ = Mv⃗<sub>cm</sub> = 2î + 6ĵ kg m/s. Final: <b>(2î + 6ĵ)/3 m/s</b>."},
+ why:["unweighted average of the two velocities","correct: v̄<sub>cm</sub> = (1·2î + 2·3ĵ)/3 = (2î + 6ĵ)/3","that is the total momentum P̄ — forgot to divide by M = 3 kg","attached each mass to the other particle's velocity"],
+ sol:"v̄<sub>cm</sub> = Σmᵢv̄ᵢ/M = (1·2î + 2·3ĵ)/3 = (2î + 6ĵ)/3 m/s, magnitude √40/3 ≈ 2.11 m/s. Also P̄ = Mv̄<sub>cm</sub> = 2î + 6ĵ kg m/s. Final: <b>(2î + 6ĵ)/3 m/s</b>."},
 
 {id:60, lec:"L-4", blk:"Internal forces", topic:"Spring released on smooth floor",
  q:"Two blocks held at rest on a smooth floor compress a light spring between them and are then released. During the motion, which quantity stays constant?",
  opts:["The kinetic energy of the system", "The momentum of each block", "The velocity of the centre of mass (zero)", "The acceleration of each block"],
  ans:2,
  why:["spring PE converts to KE, so KE grows from zero","each block's momentum changes; only their sum is fixed","correct: spring forces are internal, F<sub>ext</sub> = 0 ⇒ v<sub>cm</sub> stays 0","the spring force changes with compression, so each acceleration varies"],
- sol:"The spring forces are an action–reaction pair, so ΣF<sub>int</sub> = 0, and on a smooth floor F<sub>ext</sub> (horizontal) = 0. Hence Ma⃗<sub>cm</sub> = 0, v⃗<sub>cm</sub> stays at its initial value 0 and P⃗ = 0 throughout. Final: <b>v<sub>cm</sub> stays zero</b>."},
+ sol:"The spring forces are an action–reaction pair, so ΣF<sub>int</sub> = 0, and on a smooth floor F<sub>ext</sub> (horizontal) = 0. Hence Mā<sub>cm</sub> = 0, v̄<sub>cm</sub> stays at its initial value 0 and P̄ = 0 throughout. Final: <b>v<sub>cm</sub> stays zero</b>."},
 
 {id:61, lec:"L-4", blk:"Explosion in flight", topic:"One piece falls vertically",
  q:"A projectile of range R explodes at its highest point into two equal pieces. One piece falls vertically (zero velocity just after the explosion). Ignoring air drag, the other piece lands at a distance from the launch point of:",
@@ -655,7 +673,7 @@ const QUIZ = [
  opts:["stops and falls vertically", "follows the path of the heaviest fragment", "moves along a straight line at the explosion velocity", "continues on the original parabola"],
  ans:3,
  why:["the explosion is internal and cannot destroy the COM's momentum","the COM is a weighted average of ALL fragments, not the heaviest one","gravity still acts, so the COM still accelerates at g","correct: the only external force is still gravity, so a<sub>cm</sub> = g as before"],
- sol:"Explosion forces are internal; the net external force remains Mg, so a⃗<sub>cm</sub> = g⃗ and the COM continues on the same parabola. Once a fragment lands, the ground's normal force is a new external force and the rule stops applying. Final: <b>continues on the original parabola</b>."},
+ sol:"Explosion forces are internal; the net external force remains Mg, so ā<sub>cm</sub> = ḡ and the COM continues on the same parabola. Once a fragment lands, the ground's normal force is a new external force and the rule stops applying. Final: <b>continues on the original parabola</b>."},
 
 {id:63, lec:"L-4", blk:"Man on boat", topic:"Ground displacement of the man",
  q:"A 60 kg man walks 4 m (relative to the boat) on a 140 kg boat floating at rest on still water (no drag). His displacement relative to the shore is:",
@@ -675,8 +693,8 @@ const QUIZ = [
  q:"A 2 kg particle accelerates at 3 m/s² along +x and a 1 kg particle at 3 m/s² along +y. The magnitude of the acceleration of their centre of mass is:",
  opts:["3/√2 ≈ 2.12 m/s²", "√45 ≈ 6.71 m/s²", "3 m/s²", "√5 ≈ 2.24 m/s²"],
  ans:3,
- why:["unweighted average (3î + 3ĵ)/2","forgot to divide Σmᵢa⃗ᵢ by the total mass","took the common magnitude 3 as the answer, ignoring direction and mass","correct: a⃗<sub>cm</sub> = (6î + 3ĵ)/3 = 2î + ĵ ⇒ √5 m/s²"],
- sol:"a⃗<sub>cm</sub> = Σmᵢa⃗ᵢ/M = (2·3î + 1·3ĵ)/3 = 2î + ĵ ⇒ |a<sub>cm</sub>| = √(4 + 1) = √5 ≈ 2.24 m/s². Final: <b>√5 m/s²</b>."},
+ why:["unweighted average (3î + 3ĵ)/2","forgot to divide Σmᵢāᵢ by the total mass","took the common magnitude 3 as the answer, ignoring direction and mass","correct: ā<sub>cm</sub> = (6î + 3ĵ)/3 = 2î + ĵ ⇒ √5 m/s²"],
+ sol:"ā<sub>cm</sub> = Σmᵢāᵢ/M = (2·3î + 1·3ĵ)/3 = 2î + ĵ ⇒ |a<sub>cm</sub>| = √(4 + 1) = √5 ≈ 2.24 m/s². Final: <b>√5 m/s²</b>."},
 
 {id:66, lec:"L-4", blk:"Momentum conservation", topic:"Gun recoil",
  q:"A 4 kg gun fires a 10 g bullet at 400 m/s. The recoil speed of the gun is:",
@@ -690,7 +708,7 @@ const QUIZ = [
  opts:["2 m/s²", "12 m/s²", "6 m/s²", "it depends on the internal forces"],
  ans:0,
  why:["correct: F<sub>ext</sub> = Ma<sub>cm</sub> ⇒ 6/3 = 2 m/s²","added the internal forces (6 + 3·10 = 36 N) to the external force","forgot to divide by the total mass","internal forces cancel in pairs (Newton III), so they never affect a<sub>cm</sub>"],
- sol:"Σmᵢa⃗ᵢ = ΣF⃗<sub>ext</sub> + ΣF⃗<sub>int</sub>, and ΣF⃗<sub>int</sub> = 0 by Newton's third law. So a<sub>cm</sub> = F<sub>ext</sub>/M = 6/3 = 2 m/s², whatever the internal forces. Final: <b>2 m/s²</b>."},
+ sol:"Σmᵢāᵢ = ΣF̄<sub>ext</sub> + ΣF̄<sub>int</sub>, and ΣF̄<sub>int</sub> = 0 by Newton's third law. So a<sub>cm</sub> = F<sub>ext</sub>/M = 6/3 = 2 m/s², whatever the internal forces. Final: <b>2 m/s²</b>."},
 
 {id:68, lec:"L-4", blk:"Acceleration of COM", topic:"Block on a fixed 45° wedge",
  q:"A block of mass m slides down the smooth 45° face of a wedge of mass M that is held fixed on the floor. The horizontal component of the acceleration of the COM of block + wedge is:",
@@ -710,8 +728,8 @@ const QUIZ = [
  q:"A body at rest explodes into fragments. Across the explosion:",
  opts:["momentum and kinetic energy are both conserved", "momentum is conserved and kinetic energy increases", "kinetic energy is conserved but momentum is not", "neither momentum nor kinetic energy is conserved"],
  ans:1,
- why:["KE rises from zero — chemical energy is converted, so KE is not conserved","correct: internal forces ⇒ P⃗ = 0 conserved; stored chemical energy becomes KE","momentum is the quantity that IS conserved (no external impulse)","momentum is conserved because the explosion forces are internal"],
- sol:"The explosive forces are internal, so total momentum stays 0 (fragments fly apart with Σmᵢv⃗ᵢ = 0). Kinetic energy goes from 0 to a positive value, supplied by stored chemical energy. Final: <b>P conserved, KE increases</b>."},
+ why:["KE rises from zero — chemical energy is converted, so KE is not conserved","correct: internal forces ⇒ P̄ = 0 conserved; stored chemical energy becomes KE","momentum is the quantity that IS conserved (no external impulse)","momentum is conserved because the explosion forces are internal"],
+ sol:"The explosive forces are internal, so total momentum stays 0 (fragments fly apart with Σmᵢv̄ᵢ = 0). Kinetic energy goes from 0 to a positive value, supplied by stored chemical energy. Final: <b>P conserved, KE increases</b>."},
 
 {id:71, lec:"L-4", blk:"Man on plank", topic:"General result",
  q:"A man of mass m walks the full length L of a plank of mass M lying on a smooth floor. His displacement relative to the ground is:",
@@ -729,10 +747,10 @@ const QUIZ = [
 
 {id:73, lec:"L-4", blk:"Momentum", topic:"P = Mv<sub>cm</sub>",
  q:"The total linear momentum of a system of particles equals:",
- opts:["Mv⃗<sub>cm</sub>", "Σ(1/2)mᵢvᵢ²", "Mv⃗ of the fastest particle", "Σmᵢ|v⃗ᵢ| (sum of magnitudes)"],
+ opts:["Mv̄<sub>cm</sub>", "Σ(1/2)mᵢvᵢ²", "Mv̄ of the fastest particle", "Σmᵢ|v̄ᵢ| (sum of magnitudes)"],
  ans:0,
- why:["correct: differentiating Mr⃗<sub>cm</sub> = Σmᵢr⃗ᵢ gives Σmᵢv⃗ᵢ = Mv⃗<sub>cm</sub>","that is the total kinetic energy, a scalar","no single particle's velocity represents the system","momentum is a vector sum; adding magnitudes ignores cancellation"],
- sol:"Mr⃗<sub>cm</sub> = Σmᵢr⃗ᵢ; differentiate: Mv⃗<sub>cm</sub> = Σmᵢv⃗ᵢ = P⃗. So the system's momentum is that of a single particle of mass M moving with the COM. Final: <b>P⃗ = Mv⃗<sub>cm</sub></b>."},
+ why:["correct: differentiating Mr̄<sub>cm</sub> = Σmᵢr̄ᵢ gives Σmᵢv̄ᵢ = Mv̄<sub>cm</sub>","that is the total kinetic energy, a scalar","no single particle's velocity represents the system","momentum is a vector sum; adding magnitudes ignores cancellation"],
+ sol:"Mr̄<sub>cm</sub> = Σmᵢr̄ᵢ; differentiate: Mv̄<sub>cm</sub> = Σmᵢv̄ᵢ = P̄. So the system's momentum is that of a single particle of mass M moving with the COM. Final: <b>P̄ = Mv̄<sub>cm</sub></b>."},
 
 /* ===== P11_SB.js ===== */
 {id:74, lec:"SB", blk:"JEE Adv 2024", topic:"Spring pair, collision at t₀ = π/(2ω)",
@@ -774,15 +792,15 @@ const QUIZ = [
  q:"Statement I: If there is no external torque on a body about its centre of mass, the velocity of the centre of mass remains constant. Statement II: The linear momentum of an isolated system remains constant.",
  opts:["Both true, and II is the correct explanation of I", "Both true, but II does not explain I", "I true, II false", "I false, II true"],
  ans:3,
- why:["I is false, so it cannot be explained","I is false — a falling ball has zero torque about its COM yet accelerates","II is a direct consequence of F<sub>ext</sub> = dP⃗/dt = 0, so it is true","correct: v<sub>cm</sub> is governed by F<sub>ext</sub> = Ma<sub>cm</sub>, not by torque; an isolated system has constant P⃗"],
- sol:"Statement I: gravity acts at the COM, so a freely falling ball has zero torque about its COM, yet a<sub>cm</sub> = g and v<sub>cm</sub> changes ⇒ false. Statement II: isolated ⇒ F<sub>ext</sub> = 0 ⇒ dP⃗/dt = 0 ⇒ true. Final: <b>I false, II true</b>."},
+ why:["I is false, so it cannot be explained","I is false — a falling ball has zero torque about its COM yet accelerates","II is a direct consequence of F<sub>ext</sub> = dP̄/dt = 0, so it is true","correct: v<sub>cm</sub> is governed by F<sub>ext</sub> = Ma<sub>cm</sub>, not by torque; an isolated system has constant P̄"],
+ sol:"Statement I: gravity acts at the COM, so a freely falling ball has zero torque about its COM, yet a<sub>cm</sub> = g and v<sub>cm</sub> changes ⇒ false. Statement II: isolated ⇒ F<sub>ext</sub> = 0 ⇒ dP̄/dt = 0 ⇒ true. Final: <b>I false, II true</b>."},
 
 {id:80, lec:"SB", blk:"JEE Main 2025", topic:"Angular momentum about another particle",
- q:"Two 1 kg particles have r⃗<sub>A</sub> = (t²î + 3nt ĵ + 2t k̂) m and r⃗<sub>B</sub> = (2t î − t² ĵ + 4pt k̂) m. At t = 1 s, |v⃗<sub>A</sub>| = |v⃗<sub>B</sub>| and v⃗<sub>A</sub> ⟂ v⃗<sub>B</sub>. The angular momentum of A about the position of B at t = 1 s is √L kg m² s⁻¹. L =",
+ q:"Two 1 kg particles have r̄<sub>A</sub> = (t²î + 3nt ĵ + 2t k̂) m and r̄<sub>B</sub> = (2t î − t² ĵ + 4pt k̂) m. At t = 1 s, |v̄<sub>A</sub>| = |v̄<sub>B</sub>| and v̄<sub>A</sub> ⟂ v̄<sub>B</sub>. The angular momentum of A about the position of B at t = 1 s is √L kg m² s⁻¹. L =",
  opts:["5", "45", "90", "9.49"],
  ans:2,
- why:["took the angular momentum about the origin, r⃗<sub>A</sub> × v⃗<sub>A</sub> = (0, 2, −1)","crossed with v⃗<sub>B</sub> instead of v⃗<sub>A</sub> — it is A's momentum that counts","correct: n = 1/3, p = −1/4; (r⃗<sub>A</sub> − r⃗<sub>B</sub>) × v⃗<sub>A</sub> = (−1, 2, 3) × (2, 1, 2) = (1, 8, −5) ⇒ |L⃗|² = 90","that is |L⃗| = √90 itself; the question asks for L under the root"],
- sol:"At t = 1: v⃗<sub>A</sub> = (2, 3n, 2), v⃗<sub>B</sub> = (2, −2, 4p). Equal speeds: 9n² = 16p². Perpendicular: 4 − 6n + 8p = 0 ⇒ 3n = 2 + 4p ⇒ (2 + 4p)² = 16p² ⇒ p = −1/4, n = 1/3. So v⃗<sub>A</sub> = (2, 1, 2), v⃗<sub>B</sub> = (2, −2, −1) (dot = 0 ✓). r⃗<sub>A</sub> = (1, 1, 2), r⃗<sub>B</sub> = (2, −1, −1), r⃗<sub>A</sub> − r⃗<sub>B</sub> = (−1, 2, 3). L⃗ = (−1, 2, 3) × (2, 1, 2) = (4 − 3, 6 + 2, −1 − 4) = (1, 8, −5) ⇒ |L⃗|² = 1 + 64 + 25 = 90. Final: <b>L = 90</b>."},
+ why:["took the angular momentum about the origin, r̄<sub>A</sub> × v̄<sub>A</sub> = (0, 2, −1)","crossed with v̄<sub>B</sub> instead of v̄<sub>A</sub> — it is A's momentum that counts","correct: n = 1/3, p = −1/4; (r̄<sub>A</sub> − r̄<sub>B</sub>) × v̄<sub>A</sub> = (−1, 2, 3) × (2, 1, 2) = (1, 8, −5) ⇒ |L̄|² = 90","that is |L̄| = √90 itself; the question asks for L under the root"],
+ sol:"At t = 1: v̄<sub>A</sub> = (2, 3n, 2), v̄<sub>B</sub> = (2, −2, 4p). Equal speeds: 9n² = 16p². Perpendicular: 4 − 6n + 8p = 0 ⇒ 3n = 2 + 4p ⇒ (2 + 4p)² = 16p² ⇒ p = −1/4, n = 1/3. So v̄<sub>A</sub> = (2, 1, 2), v̄<sub>B</sub> = (2, −2, −1) (dot = 0 ✓). r̄<sub>A</sub> = (1, 1, 2), r̄<sub>B</sub> = (2, −1, −1), r̄<sub>A</sub> − r̄<sub>B</sub> = (−1, 2, 3). L̄ = (−1, 2, 3) × (2, 1, 2) = (4 − 3, 6 + 2, −1 − 4) = (1, 8, −5) ⇒ |L̄|² = 1 + 64 + 25 = 90. Final: <b>L = 90</b>."},
 
 {id:81, lec:"SB", blk:"JEE Main 2025", topic:"Plate with σ ∝ x",
  q:"A thin rectangular plate occupies 0 ≤ x ≤ a, 0 ≤ y ≤ b with surface density σ = σ₀x/(ab). Its centre of mass is at:",
@@ -862,9 +880,11 @@ function startQuiz(){
   if (!selIds.length) return;
   round = 0; pool = selIds.slice(); attempts = {}; history = [];
   $("pSel").textContent = selIds.length;
+  examStart();
   nextRound();
 }
 function backToIntro(){
+  examStop();
   round = 0; pool = []; picked = {}; order = {};
   wrongIds = []; leftIds = []; attempts = {}; history = [];
   renderPicker();
@@ -873,9 +893,12 @@ function backToIntro(){
 
 function nextRound(){
   round++;
-  picked = {}; order = {};
   pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
 
+function renderPool(){
+  picked = {}; order = {};
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
@@ -919,6 +942,7 @@ function nextRound(){
 }
 
 function pick(id, orig){
+  dirty = true;
   picked[id] = orig;
   BY_ID[id].opts.forEach((_, k) => {
     const el = $("o" + id + "_" + k);
@@ -1012,9 +1036,96 @@ function finish(){
   t += '</table>';
   const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
   $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+  examStop();
   show("done");
 }
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
 
 renderPicker();
 </script>

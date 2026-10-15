@@ -57,6 +57,14 @@
 
   .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
   .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
   .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
   .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
   .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
@@ -200,6 +208,16 @@
   <div class="foot">ICAD · P-9 Collision · mastery quiz built from lectures L-1 to L-5 and the chapter Strong Box · every answer re-derived, not transcribed.</div>
 </div>
 
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    P-9 COLLISION — lecture units
@@ -283,7 +301,7 @@ const QUIZ = [
   "Right speed but wrong direction: 45° points along the resultant of the two, whereas the third fragment must point opposite to it.",
   "Correct: the two perpendicular momenta combine to 9m√2, so v₃ = 9m√2/(3m) = 3√2 m/s, directed opposite the resultant, i.e. 135° from each.",
   "Adds the two speeds arithmetically (9 + 9 = 18) instead of combining by Pythagoras, then divides by 3."],
- sol:"Take the two equal fragments along x and y: p⃗₁ = 9m x̂, p⃗₂ = 9m ŷ, perpendicular. Their resultant has magnitude √((9m)²+(9m)²) = 9m√2 at 45° between them. The third fragment must cancel this: |p⃗₃| = 9m√2, so v₃ = 9m√2/(3m) = <b>3√2 m/s ≈ 4.24 m/s</b>, pointing opposite the 45° bisector — i.e. at 135° from each of the two fragments."},
+ sol:"Take the two equal fragments along x and y: p̄₁ = 9m x̂, p̄₂ = 9m ŷ, perpendicular. Their resultant has magnitude √((9m)²+(9m)²) = 9m√2 at 45° between them. The third fragment must cancel this: |p̄₃| = 9m√2, so v₃ = 9m√2/(3m) = <b>3√2 m/s ≈ 4.24 m/s</b>, pointing opposite the 45° bisector — i.e. at 135° from each of the two fragments."},
 {id:7, lec:"L-1", blk:"Velocity of centre of mass", topic:"v of c.o.m.",
  q:"A 4 kg particle moves east at 6 m/s and a 2 kg particle moves west at 3 m/s. Find the velocity of the centre of mass of the two-particle system.",
  opts:["3 m/s east","5 m/s east","1.5 m/s east","4.5 m/s east"],
@@ -335,15 +353,15 @@ const QUIZ = [
   "Correct: with the reversal, Δv = 10 − (−15) = 25 m/s, so J = 0.2·25 = 5 N·s."],
  sol:"Take the rebound direction as positive: v_i = −15 m/s, v_f = +10 m/s. The velocity change spans the full reversal: Δv = v_f − v_i = 10 − (−15) = 25 m/s. Impulse J = m·Δv = 0.2·25 = <b>5 N·s</b>, directed away from the wall. The speeds must be added (opposite directions), not subtracted."},
 {id:12, lec:"L-1", blk:"Impulse from v(t)", topic:"Vector components",
- q:"A particle of mass 3 kg has velocity v⃗ = (3t² î + 6 ĵ) m/s, with t in seconds. Find the impulse imparted to it between t = 0 and t = 2 s.",
+ q:"A particle of mass 3 kg has velocity v̄ = (3t² î + 6 ĵ) m/s, with t in seconds. Find the impulse imparted to it between t = 0 and t = 2 s.",
  opts:["12 N·s along +î","36 N·s directed along +î","40.2 N·s","18 N·s"],
  ans:1,
  why:[
-  "Gives the magnitude of Δv⃗ (12 m/s) but forgets to multiply by the mass 3 kg.",
-  "Correct: Δv⃗ = 12 î, so J⃗ = 3·12 î = 36 î, magnitude 36 N·s along +î.",
+  "Gives the magnitude of Δv̄ (12 m/s) but forgets to multiply by the mass 3 kg.",
+  "Correct: Δv̄ = 12 î, so J̄ = 3·12 î = 36 î, magnitude 36 N·s along +î.",
   "Fails to cancel the constant 6 ĵ term (keeps it only at t = 2), giving |36 î + 18 ĵ| ≈ 40.2 N·s.",
   "Applies a ½ factor as if computing kinetic energy: ½·3·12 = 18."],
- sol:"With mass constant, J⃗ = m·Δv⃗ = m(v⃗(2) − v⃗(0)). Here v⃗(0) = 6 ĵ and v⃗(2) = 3·(2²) î + 6 ĵ = 12 î + 6 ĵ. The constant 6 ĵ cancels: Δv⃗ = 12 î. So J⃗ = 3·12 î = 36 î, i.e. <b>36 N·s directed along +î</b>. Any velocity component with no t in it is constant and drops out of Δv⃗."},
+ sol:"With mass constant, J̄ = m·Δv̄ = m(v̄(2) − v̄(0)). Here v̄(0) = 6 ĵ and v̄(2) = 3·(2²) î + 6 ĵ = 12 î + 6 ĵ. The constant 6 ĵ cancels: Δv̄ = 12 î. So J̄ = 3·12 î = 36 î, i.e. <b>36 N·s directed along +î</b>. Any velocity component with no t in it is constant and drops out of Δv̄."},
 
 
 /* ===== P9_L2.js ===== */
@@ -859,9 +877,11 @@ function startQuiz(){
   if (!selIds.length) return;
   round = 0; pool = selIds.slice(); attempts = {}; history = [];
   $("pSel").textContent = selIds.length;
+  examStart();
   nextRound();
 }
 function backToIntro(){
+  examStop();
   round = 0; pool = []; picked = {}; order = {};
   wrongIds = []; leftIds = []; attempts = {}; history = [];
   renderPicker();
@@ -870,9 +890,12 @@ function backToIntro(){
 
 function nextRound(){
   round++;
-  picked = {}; order = {};
   pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
 
+function renderPool(){
+  picked = {}; order = {};
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
@@ -916,6 +939,7 @@ function nextRound(){
 }
 
 function pick(id, orig){
+  dirty = true;
   picked[id] = orig;
   BY_ID[id].opts.forEach((_, k) => {
     const el = $("o" + id + "_" + k);
@@ -1009,9 +1033,96 @@ function finish(){
   t += '</table>';
   const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
   $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.</p>';
+    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+  examStop();
   show("done");
 }
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
 
 renderPicker();
 </script>

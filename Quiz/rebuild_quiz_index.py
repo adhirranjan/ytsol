@@ -7,10 +7,10 @@ GROUPS = [
  ("Chemistry · Volume 2", ["C4","C5","C6"]),
  ("Chemistry · Volume 3", ["C7"]),
  ("Mathematics · Volume 1", ["M1","M2","M3","M4","M5A","M5B","M5C","M6","M7"]),
- ("Mathematics · Volume 2", ["M8A","M8B","M8C","M8D","M9","M10"]),
+ ("Mathematics · Volume 2", ["M8A","M8B","M8C","M8D","M9","M10","M11"]),
  ("Physics · Volume 1", ["P1","P2","P3","P4","P5"]),
  ("Physics · Volume 2", ["P6","P7","P8","P9","P10"]),
- ("Physics · Volume 3", ["P11"]),
+ ("Physics · Volume 3", ["P11","P12","P13"]),
 ]
 
 def parse(code):
@@ -28,7 +28,7 @@ def parse(code):
     # short descriptions: strip "L-n · " / "Strong Box · " prefixes
     shorts=[]
     for n in lec_names:
-        n2 = re.sub(r'^(L-[0-9A-Za-z]+|Strong Box)\s*·\s*', '', n)
+        n2 = re.sub(r'^(L-[0-9A-Za-z]+|Strong Box)\s*(?:·|&middot;)\s*', '', n)
         shorts.append(n2)
     ds = " · ".join(shorts)
     return dict(tag=tag,name=name,qs=qs,units=units,ds=ds)

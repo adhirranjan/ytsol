@@ -21,11 +21,20 @@ CSS = """  /* --- PYQ provenance tag (pyq_tags/add_pyq_tags.py) --- */
   @media (prefers-color-scheme: dark){ .pyq .paper{background:rgba(129,140,248,.18);color:#a5b4fc} }
   /* --- end PYQ tag --- */
 """
-LEGEND = ('<span class="pyq" style="margin:0"><span class="paper">📝 JEE Main / Advanced paper</span></span>'
-          '<span class="pyqlegend" style="color:var(--muted);font-size:.82rem">real JEE question, with ExamGoal&rsquo;s worked solution</span>')
-LEGEND_MATH = '<span class="pyqlegend">📝 JEE paper — real JEE question, with ExamGoal&rsquo;s worked solution</span>'
+# Legend goes on every checked page (even with 0 tags) so "checked, none found" is visible.
+# Wrapped in display:contents + an end comment so strip() can find any older version.
+LEGEND = ('<span class="pyqleg" style="display:contents"><span class="pyq" style="margin:0"><span class="paper">📝 JEE Main / Advanced paper</span></span>'
+          '<span class="pyqlegend" style="color:var(--muted);font-size:.82rem">real JEE question, with ExamGoal&rsquo;s worked solution &middot; <b>{n}</b> on this page</span></span><!--/pyqleg-->')
+LEGEND_MATH = ('<span class="pyqleg" style="display:contents"><span class="pyqlegend">📝 JEE paper — real JEE question, with ExamGoal&rsquo;s worked solution'
+               ' &middot; <b>{n}</b> on this page</span></span><!--/pyqleg-->')
+LEGEND_BADGE = ('<span class="pyqleg" style="display:contents"><span class="badge" style="background:#eef2ff;color:#4338ca">📝 JEE paper — real JEE question,'
+                ' ExamGoal solution &middot; <b>{n}</b> on this page</span></span><!--/pyqleg-->')
+OLD_LEGENDS = ['<span class="pyq" style="margin:0"><span class="paper">📝 JEE Main / Advanced paper</span></span>'
+               '<span class="pyqlegend" style="color:var(--muted);font-size:.82rem">real JEE question, with ExamGoal&rsquo;s worked solution</span>',
+               '<span class="pyqlegend">📝 JEE paper — real JEE question, with ExamGoal&rsquo;s worked solution</span>']
 LEGEND_AFTER = [(r'<span class="badge sim">[^<]*Similar</span><span[^>]*>[^<]*</span>', LEGEND),  # Phy/Chem pages
-                (r'<span><span class="dot similar"></span>[^<]*</span>', LEGEND_MATH)]           # Math pages (on blue header)
+                (r'<span><span class="dot similar"></span>[^<]*</span>', LEGEND_MATH),           # Math pages (on blue header)
+                (r'<span class="badge sim">[^<]*Similar[^<]*</span>', LEGEND_BADGE)]              # badge-only legends (C1, C2, early Maths)
 
 
 def section_key(h2):
@@ -35,7 +44,9 @@ def section_key(h2):
 
 def strip(h):
     h = re.sub(r"  /\* --- PYQ provenance tag.*?/\* --- end PYQ tag --- \*/\n", "", h, flags=re.S)
-    h = h.replace(LEGEND, "").replace(LEGEND_MATH, "")
+    h = re.sub(r'<span class="pyqleg".*?<!--/pyqleg-->', "", h, flags=re.S)
+    for old in OLD_LEGENDS:
+        h = h.replace(old, "")
     return re.sub(r'<div class="pyq">.*?</div>', "", h)
 
 
@@ -44,7 +55,7 @@ def tag(path, rows):
     want = {(r["section"], str(r["num"])): r for r in rows}
     h = h.replace("</style>", CSS + "</style>", 1)
     for pat, legend in LEGEND_AFTER:
-        h, n = re.subn(f"({pat})", lambda m: m[1] + legend, h, count=1)
+        h, n = re.subn(f"({pat})", lambda m: m[1] + legend.format(n=len(rows)), h, count=1)
         if n:
             break
     parts = re.split(r"(<h2[^>]*>.*?</h2>)", h, flags=re.S)
@@ -58,7 +69,7 @@ def tag(path, rows):
             if not r:
                 return m[0]
             done += 1
-            return (m[0][:-5] + f'<div class="pyq"><span class="paper">📝 {r["paper"]}</span>'
+            return (m[0][:-5] + f'<div class="pyq"><span class="paper">📝 PYQ: {r["paper"]}</span>'
                     f'<a href="{r["url"]}" target="_blank" rel="noopener">Solution ↗</a></div></td>')
 
         parts[i + 1] = re.sub(r'<tr><td class="num">([^<]+)</td><td class="q">.*?</td>', add, parts[i + 1], flags=re.S)
@@ -69,8 +80,11 @@ def tag(path, rows):
 if __name__ == "__main__":
     for ch in sys.argv[1:]:
         rows = json.load(open(os.path.join(HERE, ch + ".json"), encoding="utf-8"))
-        for page in sorted({r["page"] for r in rows}):
-            [path] = glob.glob(os.path.join(ROOT, "**", f"{page}_YouTube_Solutions.html"), recursive=True)
+        # every page of the chapter (or the one exam page), tagged or not
+        paths = (glob.glob(os.path.join(ROOT, "*", f"{ch}_YouTube_Solutions", "*_YouTube_Solutions.html"))
+                 or glob.glob(os.path.join(ROOT, "**", f"{ch}_YouTube_Solutions.html"), recursive=True))
+        for path in sorted(paths):
+            page = os.path.basename(path).replace("_YouTube_Solutions.html", "")
             n = sum(r["page"] == page for r in rows)
             got = tag(path, [r for r in rows if r["page"] == page])
             print(f"{page}: tagged {got}/{n}")

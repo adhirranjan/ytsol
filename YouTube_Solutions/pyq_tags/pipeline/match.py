@@ -1,7 +1,7 @@
 """Usage: python match.py P10 P11 C6 M8D M9  -> pyq/<Ch>/candidates.json + crops"""
 import fitz, glob, html, json, os, pickle, re, sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-EG = r"E:\Adhir\AdWinUser\Desktop\icad-dps\ICAD\ThirdPartySolutions-ExamGoal"
+EG = r"E:\Adhir\AdWinUser\Desktop\icad-dps\ICAD\PYQs\ExamGoal"
 YT = r"E:\Adhir\AdWinUser\Desktop\icad-dps\ICAD\BooksScanned\YouTube_Solutions"
 HERE = os.path.dirname(os.path.abspath(__file__))
 SUBJ = {"P": "Physics", "C": "Chemistry", "M": "Mathematics"}

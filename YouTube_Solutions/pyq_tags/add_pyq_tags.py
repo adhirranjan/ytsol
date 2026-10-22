@@ -18,6 +18,7 @@ CSS = """  /* --- PYQ provenance tag (pyq_tags/add_pyq_tags.py) --- */
   .pyq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:7px;font-size:.76rem;font-weight:600}
   .pyq .paper{display:inline-block;padding:2px 10px;border-radius:999px;background:rgba(99,102,241,.13);color:#4f46e5;white-space:nowrap}
   .pyq a{white-space:nowrap}
+  tr:target td{background:rgba(99,102,241,.10)}
   @media (prefers-color-scheme: dark){ .pyq .paper{background:rgba(129,140,248,.18);color:#a5b4fc} }
   /* --- end PYQ tag --- */
 """
@@ -42,12 +43,18 @@ def section_key(h2):
     return re.sub(r"\s*\d+\s*Q$", "", t)
 
 
+def anchor(sec, num):
+    """Row anchor used by PYQ_Index.html's Book links."""
+    return "pyq-" + re.sub(r"[^a-z0-9]+", "-", f"{sec} {num}".lower()).strip("-")
+
+
 def strip(h):
     h = re.sub(r"  /\* --- PYQ provenance tag.*?/\* --- end PYQ tag --- \*/\n", "", h, flags=re.S)
     h = re.sub(r'<span class="pyqleg".*?<!--/pyqleg-->', "", h, flags=re.S)
     for old in OLD_LEGENDS:
         h = h.replace(old, "")
-    return re.sub(r'<div class="pyq">.*?</div>', "", h)
+    h = re.sub(r'<tr id="pyq-[^"]*">', "<tr>", h)
+    return re.sub(r'<div class="pyq"[^>]*>.*?</div>', "", h)
 
 
 def tag(path, rows):
@@ -69,7 +76,7 @@ def tag(path, rows):
             if not r:
                 return m[0]
             done += 1
-            return (m[0][:-5] + f'<div class="pyq"><span class="paper">📝 PYQ: {r["paper"]}</span>'
+            return (f'<tr id="{anchor(sec, m[1])}">' + m[0][4:-5] + f'<div class="pyq"><span class="paper">📝 PYQ: {r["paper"]}</span>'
                     f'<a href="{r["url"]}" target="_blank" rel="noopener">Solution ↗</a></div></td>')
 
         parts[i + 1] = re.sub(r'<tr><td class="num">([^<]+)</td><td class="q">.*?</td>', add, parts[i + 1], flags=re.S)

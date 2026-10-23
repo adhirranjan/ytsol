@@ -34,7 +34,7 @@ for sn in SETNS:
     for code in re.findall(r'<span class="code">([^<]+)</span>',
                            cards[str(sn)].split("<details")[0]):
         m = META[code]
-        lec, sec, num = re.match(r"([A-Z]+\d+[A-D]?L\d+(?:L\d+)?)V(.+?)Q(\d+)$", code).groups()
+        lec, sec, num = re.match(r"([A-Z]+\d+[A-D]?(?:L\d+(?:L\d+)?|SB))V(.+?)Q(\d+)$", code).groups()
         ch = re.match(r"([A-Z]+\d+)", code).group(1)
         grp = next(g for g, chs in GROUP.items() if ch in chs)
         ans = m["answer"].strip()

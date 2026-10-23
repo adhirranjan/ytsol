@@ -3,7 +3,8 @@
     python tools/pool_check.py manifest P9 P10 P11 C6 M8D M9   -> pool_check/manifest/<LEC>.json
     python tools/pool_check.py status                         -> rows written vs manifest, per lecture
     python tools/pool_check.py missing P10L3                  -> codes still to check in one lecture
-    python tools/pool_check.py merge                          -> pool/<LEC>.json from verified rows only
+    python tools/pool_check.py merge [LEC...]                 -> pool/<LEC>.json from verified rows only
+    python tools/pool_check.py sbmanifest P9 P10 ...          -> manifest/<CH>SB.json (Strong Box pages)
 
 The manifest carries the FULL stem (extract_pool caps it at 400 chars, and agents comparing the book
 against a truncated stem report false truncations). Checking agents write ONE file per question,
@@ -63,6 +64,33 @@ def manifest(chapters):
         print("  %-8s %3d questions" % (lec, len(out)))
 
 
+def sbmanifest(chapters):
+    """Strong Box pages (<CH>SB_YouTube_Solutions.html) -> manifest/<CH>SB.json, codes <CH>SBV<7..11|PYQ>Q<n>.
+       extract_pool's parse() does not read these pages: their rows sit under plain Level-n h2s."""
+    g = load_extractor()
+    for f in glob.glob(os.path.join(g["ROOT"], "YouTube_Solutions", "**", "*SB_YouTube_Solutions.html"),
+                       recursive=True):
+        ch = os.path.basename(f).replace("SB_YouTube_Solutions.html", "")
+        if ch not in chapters: continue
+        t = io.open(f, encoding="utf-8").read()
+        out = []
+        parts = re.split(r"<h2[^>]*>", t)[1:]
+        for p in parts:
+            h = g["strip"](p.split("</h2>")[0]).upper()
+            lv = re.search(r"LEVEL[\s-]*(\d+)", h)
+            sec = lv.group(1) if lv else "PYQ" if "PREVIOUS" in h else None
+            if not sec: continue
+            for num, q, rest in re.findall(r'<td class="num">([^<]*)</td><td class="q">(.*?)</td>(.*?)</tr>', p, re.S):
+                a = re.search(r'<td class="ans">(.*?)</td>', rest, re.S)
+                out.append({"code": "%sSBV%sQ%s" % (ch, sec, re.sub(r"\D", "", num)), "sec": sec,
+                            "num": re.sub(r"\D", "", num), "key": g["strip"](a.group(1)) if a else "",
+                            "stem": g["clean_q"](re.sub(r"\(\s*\d{4}\s+Level[\s-]*\d+\s*\)", "",
+                                    g["strip"](re.sub(r'<div class="pyq">.*?</div>', "", q, flags=re.S))))})
+        json.dump(out, io.open(os.path.join(CK, "manifest", ch + "SB.json"), "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=1)
+        print("  %-8s %3d questions  %s" % (ch + "SB", len(out), dict(collections.Counter(r["sec"] for r in out))))
+
+
 def rows_of(lec):
     d = os.path.join(CK, "rows", lec)
     out = {}
@@ -97,15 +125,21 @@ def missing(lec):
     print(" ".join(c["code"] for c in man(lec) if c["code"] not in r))
 
 
-def merge():
+def merge(only=()):
     """pool/<LEC>.json from verified rows: stem_book replaces a wrong stem, correct_answer replaces a
-       wrong key, unusable / out-of-scope questions are left out. Refuses while any row is missing."""
-    gaps = [(l, len(man(l)) - sum(c["code"] in rows_of(l) for c in man(l))) for l in lectures()]
+       wrong key, unusable / out-of-scope questions are left out. Refuses while any row is missing.
+       With lecture names, only those pool files are (re)written; the rest of pool/ seeds the dedup."""
+    lecs = [l for l in lectures() if not only or l in only]
+    gaps = [(l, len(man(l)) - sum(c["code"] in rows_of(l) for c in man(l))) for l in lecs]
     gaps = [g for g in gaps if g[1]]
     if gaps: raise SystemExit("not merging - unchecked questions remain: %s" % gaps)
     kept = dropped = 0
     seen = set()                 # across ALL lectures - the book repeats questions between lectures too
-    for lec in lectures():
+    for p in glob.glob(os.path.join(MP, "pool", "*.json")) if only else ():
+        if os.path.basename(p)[:-5] in only: continue
+        for q in json.load(io.open(p, encoding="utf-8")):
+            seen |= {q["code"], re.sub(r"[^a-z0-9]", "", (q["stem"] or "").lower())[:120]}
+    for lec in lecs:
         r, out = rows_of(lec), []
         for c in man(lec):
             x = r[c["code"]]
@@ -145,6 +179,7 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if not a: print(__doc__)
     elif a[0] == "manifest": manifest(set(a[1:]))
+    elif a[0] == "sbmanifest": sbmanifest(set(a[1:]))
     elif a[0] == "status": status()
     elif a[0] == "missing": missing(a[1])
-    elif a[0] == "merge": merge()
+    elif a[0] == "merge": merge(set(a[1:]))

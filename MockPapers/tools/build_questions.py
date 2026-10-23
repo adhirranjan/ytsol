@@ -124,6 +124,9 @@ STEM_REPLACE = {
 
 # editorial notes the extractor left inside stems - these must never reach a printed paper
 EDITORIAL = re.compile(r"\s*\[(?:off-topic|note|sic|unclear|missing|todo)[^\]]*\]", re.I)
+# the book's own source tag on a PYQ - "(JEE Main 2025, 28 Jan Shift 1, Level-6)", "[JEE Main 2025
+# (24 Jan Shift-1)]" - the real paper prints none
+SOURCE = re.compile(r"\s*[—–-]?\s*[(\[]\s*(?:JEE|AIEEE|IIT)[^()\[\]]*(?:\([^()]*\)[^()\[\]]*)*[)\]]")
 
 # Stems stored as a one-line shorthand where the book prints the real question. Assertion-Reason
 # items suffer most: the paraphrase leaves the paper showing an A/R question with no A and no R.
@@ -229,7 +232,10 @@ def stem(code):
     s = EDITORIAL.sub("", s).strip()
     # a bare [12] left at the end is the extractor echoing the answer, not an interval
     s = re.sub(r"\s*\[\s*-?[\d.]+\s*\]\s*$", "", s).strip()
-    s = re.sub(r"\s*\[\s*MULTIPLE CORRECT\s*\]", " (one or more options may be correct)", s, flags=re.I)
+    s = SOURCE.sub("", s)
+    s = re.sub(r"\s*\[\s*MULTI(?:PLE)? CORRECT\s*\]", " (one or more options may be correct)", s, flags=re.I)
+    if META[code].get("format") == "multi" and "one or more" not in s:   # book-checked type
+        s = re.sub(r"\s\(a\)", " (one or more options may be correct) (a)", s, count=1)
     s = re.sub(r"\s*[—–]\s*$", "", s).strip()   # stray trailing dash left by extraction
     for old, new in STEM_REPLACE.get(code, []): s = s.replace(old, new)
     m = re.search(r"\s+\(([^()]{1,60})\)\s*$", s)

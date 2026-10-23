@@ -25,7 +25,7 @@ os.makedirs(PAGES, exist_ok=True)
 os.makedirs(FIGS, exist_ok=True)
 
 def chapter_of(lec):
-    return re.match(r"([A-Z]+\d+[A-D]?)L", lec).group(1)
+    return re.match(r"([A-Z]+\d+[A-D]?)(?:L|SB)", lec).group(1)
 
 def find_pdf(lec):
     """lecture files are named either '<CH>L<n>.pdf' or plain 'L<n>.pdf' depending on the chapter"""
@@ -34,7 +34,10 @@ def find_pdf(lec):
     if not base:
         raise SystemExit("no source folder for chapter " + ch)
     base = base[0]
-    tail = lec[len(ch):]                      # "L5"
+    tail = lec[len(ch):]                      # "L5", or "SB" for the Strong Box
+    if tail == "SB":
+        sb = glob.glob(os.path.join(base, "*Strong Box*.pdf"))
+        if sb: return sorted(sb)[0]
     for cand in ("%s.pdf" % lec, "%s.pdf" % tail):
         p = os.path.join(base, cand)
         if os.path.exists(p):
@@ -62,7 +65,7 @@ def cmd_pages(lec, dpi=130):
 
 def cmd_crop(code, page, x0, y0, x1, y1, dpi=220):
     """crop by page fractions; re-renders that page at high dpi so the figure stays sharp"""
-    lec = re.match(r"([A-Z]+\d+[A-D]?L\d+(?:L\d+)?)V", code).group(1)
+    lec = re.match(r"([A-Z]+\d+[A-D]?(?:L\d+(?:L\d+)?|SB))V", code).group(1)
     d = fitz.open(find_pdf(lec))
     pg = d[int(page) - 1]
     r = pg.rect

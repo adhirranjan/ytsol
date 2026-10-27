@@ -91,6 +91,37 @@ def sbmanifest(chapters):
         print("  %-8s %3d questions  %s" % (ch + "SB", len(out), dict(collections.Counter(r["sec"] for r in out))))
 
 
+def pastmanifest():
+    """the real ICAD papers (ExamPapers_YouTube_Solutions/<EXAM>-<date>*.html) -> manifest/<CH>X.json,
+       codes <CH>XV<EXAM>Q<n> (chapter from the page's bookref, P0/C0/M0 when untagged), plus
+       past_meta.json: code -> exam, question number, the student's result (c/w/u/x), bookref."""
+    g = load_extractor()
+    bylec, meta = collections.defaultdict(list), {}
+    for f in sorted(glob.glob(os.path.join(g["ROOT"], "YouTube_Solutions", "ExamPapers_YouTube_Solutions", "*.html"))):
+        exam = os.path.basename(f).split("-")[0]
+        t = io.open(f, encoding="utf-8").read()
+        for tr in re.findall(r'<tr([^>]*)>\s*<td class="num">(\d+).*?</td>\s*<td class="q">(.*?)</td>(.*?)</tr>', t, re.S):
+            st, n, q, rest = tr
+            st = (re.search(r'data-st="(\w*)"', st) or [None, ""])[1]
+            pyq = re.search(r'<span class="paper">(.*?)</span>', q, re.S)
+            q = re.sub(r'<div class="pyq">.*?</div>', "", q, flags=re.S)
+            a = re.search(r'<td class="ans">(.*?)</td>', rest, re.S)
+            ref = g["strip"]((re.search(r'<td class="bookref">(.*?)</td>', rest, re.S) or [None, ""])[1])
+            ch = re.search(r"([PCM]\d+[A-D]?)\s*·", ref)
+            ch = ch.group(1) if ch else "PCM"[(int(n) - 1) // 25] + "0"
+            code = "%sXV%sQ%s" % (ch, exam, n)
+            bylec[ch + "X"].append({"code": code, "sec": exam, "num": n,
+                                    "key": g["strip"](a.group(1)) if a else "", "stem": g["strip"](q)})
+            meta[code] = {"exam": exam, "q": int(n), "st": st, "bookref": ref,
+                          "pyq": g["strip"](pyq.group(1)).replace("📝 PYQ:", "").strip() if pyq else ""}
+    for lec, rows in sorted(bylec.items(), key=lambda x: nat(x[0])):
+        json.dump(rows, io.open(os.path.join(CK, "manifest", lec + ".json"), "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=1)
+    json.dump(meta, io.open(os.path.join(CK, "past_meta.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+    print("%d past questions in %d chapter manifests · %s" % (len(meta), len(bylec),
+          dict(collections.Counter(m["exam"] for m in meta.values()))))
+
+
 def rows_of(lec):
     d = os.path.join(CK, "rows", lec)
     out = {}
@@ -175,11 +206,73 @@ def merge(only=()):
     print("pool: %d verified questions written, %d dropped (unusable / out of scope)" % (kept, dropped))
 
 
+def pastfix():
+    """past-paper rows whose checker gave a different `chapter` than the code carries (P0/C0/M0 = the
+       solution page had no book reference) move to <NEWCH>XV<EXAM>Q<n>: row file, manifest entry and
+       past_meta key. Idempotent."""
+    mp = os.path.join(CK, "past_meta.json")
+    meta = json.load(io.open(mp, encoding="utf-8"))
+    mans = {l: man(l) for l in lectures() if l.endswith("X")}
+    moved = 0
+    for lec in list(mans):
+        for code, x in rows_of(lec).items():
+            old, new = code.split("XV")[0], (x.get("chapter") or "").strip()
+            if not re.fullmatch(r"[PCM]\d+[A-D]?", new) or new == old: continue
+            nc = new + code[len(old):]
+            x["code"] = nc
+            os.makedirs(os.path.join(CK, "rows", new + "X"), exist_ok=True)
+            json.dump(x, io.open(os.path.join(CK, "rows", new + "X", nc + ".json"), "w", encoding="utf-8"),
+                      ensure_ascii=False, indent=1)
+            os.remove(os.path.join(CK, "rows", lec, code + ".json"))
+            e = next(m for m in mans[lec] if m["code"] == code)
+            mans[lec].remove(e); e["code"] = nc
+            mans.setdefault(new + "X", []).append(e)
+            meta[nc] = meta.pop(code)
+            moved += 1
+    for l, rows in mans.items():
+        p = os.path.join(CK, "manifest", l + ".json")
+        if rows: json.dump(sorted(rows, key=lambda r: nat(r["code"])), io.open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        elif os.path.exists(p): os.remove(p)
+    json.dump(meta, io.open(mp, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
+    print("moved %d past questions to their checked chapter" % moved)
+
+
+def patch(only=()):
+    """older, unchecked pools: write the verdicts for the shortlisted codes in manifest_patch/<LEC>.json
+       back INTO pool/<LEC>.json, leaving every other row alone (merge would drop them). Unusable or
+       out-of-scope rows stay in the file, marked, so no selector picks them again."""
+    d = os.path.join(CK, "manifest_patch")
+    lecs = [os.path.basename(p)[:-5] for p in glob.glob(os.path.join(d, "*.json"))]
+    lecs = sorted((l for l in lecs if not only or l in only), key=nat)
+    want = {l: [c["code"] for c in json.load(io.open(os.path.join(d, l + ".json"), encoding="utf-8"))] for l in lecs}
+    gaps = {l: [c for c in want[l] if c not in rows_of(l)] for l in lecs}
+    gaps = {l: g for l, g in gaps.items() if g}
+    if gaps: raise SystemExit("not patching - unchecked: %d codes in %s" % (sum(map(len, gaps.values())), sorted(gaps, key=nat)))
+    v = collections.Counter()
+    for l in lecs:
+        p = os.path.join(MP, "pool", l + ".json")
+        pool, r = json.load(io.open(p, encoding="utf-8")), rows_of(l)
+        for q in pool:
+            x = r.get(q["code"])
+            if not x or q["code"] not in want[l]: continue
+            bad = x.get("verdict") == "unusable" or x.get("in_scope") is False
+            q.update({"stem": x.get("stem_book") or q["stem"], "answer": x.get("correct_answer") or q["answer"],
+                      "format": x.get("type"), "has_opts": bool(x.get("options_printed")),
+                      "verified": "unusable" if bad else x.get("verdict"), "integer": x.get("integer"),
+                      "figure": x.get("figure"), "book_key": q.get("book_key") or q["answer"]})
+            v[q["verified"]] += 1
+        json.dump(pool, io.open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    print("patched %d lectures: %s" % (len(lecs), dict(v)))
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
     if not a: print(__doc__)
     elif a[0] == "manifest": manifest(set(a[1:]))
     elif a[0] == "sbmanifest": sbmanifest(set(a[1:]))
+    elif a[0] == "pastmanifest": pastmanifest()
+    elif a[0] == "patch": patch(set(a[1:]))
+    elif a[0] == "pastfix": pastfix()
     elif a[0] == "status": status()
     elif a[0] == "missing": missing(a[1])
     elif a[0] == "merge": merge(set(a[1:]))

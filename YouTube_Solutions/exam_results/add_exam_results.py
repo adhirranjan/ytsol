@@ -147,9 +147,11 @@ if __name__ == "__main__":
     if len(sys.argv) == 3:
         run(*sys.argv[1:3])
     else:
-        for pdf in sorted(glob.glob(os.path.join(ROOT, "ExamPapers", "*-Result.pdf"))):
-            exam = os.path.basename(pdf)[: -len("-Result.pdf")]  # e.g. RT4-20261012
-            js = os.path.join(os.path.dirname(os.path.abspath(__file__)), exam + "-Result.json")
+        here = os.path.dirname(os.path.abspath(__file__))
+        found = glob.glob(os.path.join(ROOT, "ExamPapers", "*-Result.pdf")) + glob.glob(os.path.join(here, "*-Result.json"))
+        for exam in sorted({re.sub(r"-Result\.(pdf|json)$", "", os.path.basename(f)) for f in found}):  # e.g. RT4-20261012
+            pdf = os.path.join(ROOT, "ExamPapers", exam + "-Result.pdf")
+            js = os.path.join(here, exam + "-Result.json")  # a hand-transcribed result (e.g. from a photo) has no PDF
             pages = glob.glob(os.path.join(PAGES, exam + "*_YouTube_Solutions.html"))
             if len(pages) != 1:
                 print(f"{exam}: skipped, {len(pages)} matching pages")

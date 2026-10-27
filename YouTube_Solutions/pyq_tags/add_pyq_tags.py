@@ -53,7 +53,7 @@ def strip(h):
     h = re.sub(r'<span class="pyqleg".*?<!--/pyqleg-->', "", h, flags=re.S)
     for old in OLD_LEGENDS:
         h = h.replace(old, "")
-    h = re.sub(r'<tr id="pyq-[^"]*">', "<tr>", h)
+    h = re.sub(r'<tr id="pyq-[^"]*"', "<tr", h)
     return re.sub(r'<div class="pyq"[^>]*>.*?</div>', "", h)
 
 
@@ -72,14 +72,16 @@ def tag(path, rows):
 
         def add(m):
             nonlocal done
-            r = want.get((sec, m[1]))
+            r = want.get((sec, m[2]))
             if not r:
                 return m[0]
             done += 1
-            return (f'<tr id="{anchor(sec, m[1])}">' + m[0][4:-5] + f'<div class="pyq"><span class="paper">📝 PYQ: {r["paper"]}</span>'
+            return (f'<tr id="{anchor(sec, m[2])}"{m[1]}>' + m[0][len(m[1]) + 4:-5] + f'<div class="pyq"><span class="paper">📝 PYQ: {r["paper"]}</span>'
                     f'<a href="{r["url"]}" target="_blank" rel="noopener">Solution ↗</a></div></td>')
 
-        parts[i + 1] = re.sub(r'<tr><td class="num">([^<]+)</td><td class="q">.*?</td>', add, parts[i + 1], flags=re.S)
+        # exam pages may already carry the result overlay (exam_results/add_exam_results.py)
+        parts[i + 1] = re.sub(r'<tr((?: data-st="[cwux]")?)><td class="num">([^<]+)(?:<!--r-->.*?<!--/r-->)?</td><td class="q">.*?</td>',
+                              add, parts[i + 1], flags=re.S)
     open(path, "w", encoding="utf-8").write("".join(parts))
     return done
 

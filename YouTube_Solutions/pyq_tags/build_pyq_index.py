@@ -24,7 +24,7 @@ CHAPTERS = {
     "M9": "Complex Numbers", "M10": "Quadratic Equations", "M11": "Trig Equations", "M12": "Properties of Triangle",
 }
 SUBJ = {"C": "Chemistry", "P": "Physics", "M": "Maths"}
-EXAMS = {"RT1": "13 Jul", "CAT3": "27 Jul", "RT2": "10 Aug", "CAT4": "31 Aug", "RT3": "21 Sep", "CAT5": "28 Sep", "RT4": "12 Oct"}
+EXAMS = {"RT1": "13 Jul", "CAT3": "27 Jul", "RT2": "10 Aug", "CAT4": "31 Aug", "RT3": "21 Sep", "CAT5": "28 Sep", "RT4": "12 Oct", "CAT6": "26 Oct"}
 
 
 def text(s):
@@ -53,7 +53,8 @@ for path in glob.glob(os.path.join(ROOT, "**", "*_YouTube_Solutions.html"), recu
     parts = re.split(r"(<h2[^>]*>.*?</h2>)", open(path, encoding="utf-8").read(), flags=re.S)
     for i in range(1, len(parts), 2):
         sec = re.sub(r"\s*\d+\s*Q$", "", text(parts[i]))
-        for aid, num, row in re.findall(r'<tr id="(pyq-[^"]+)"><td class="num">([^<]+)</td><td class="q">(.*?)</tr>', parts[i + 1], flags=re.S):
+        # exam pages carry the result overlay: data-st="…" on the row, <!--r-->✓<!--/r--> in the # cell
+        for aid, num, row in re.findall(r'<tr id="(pyq-[^"]+)"[^>]*><td class="num">([^<]+)(?:<!--r-->.*?<!--/r-->)?</td><td class="q">(.*?)</tr>', parts[i + 1], flags=re.S):
             q, paper, url = re.search(r'(.*?)<div class="pyq"><span class="paper">📝 PYQ: ([^<]+)</span><a href="([^"]+)"', row, flags=re.S).groups()
             q = text(q)
             yr = int(re.search(r"\d{4}", paper)[0])

@@ -4,6 +4,7 @@ The book PDFs are image-only (no text layer), so a question is located by RENDER
 and looking at them, not by searching text.
 
     python figtool.py pages P6L5              # render every page of that lecture -> PNGs, prints paths
+                                              # (P6SB = its Strong Box, RT4 = the real RT-4 paper)
     python figtool.py crop P6L5V3Q2 7 0.12 0.34 0.88 0.61
                                               # crop page 7 using FRACTIONS of page width/height
                                               # (x0 y0 x1 y1, 0-1 from top-left) -> figures/<CODE>.png
@@ -27,7 +28,14 @@ os.makedirs(FIGS, exist_ok=True)
 def chapter_of(lec):
     return re.match(r"([A-Z]+\d+[A-D]?)(?:L|SB)", lec).group(1)
 
+def exam_pdf(exam):
+    """a real ICAD paper, e.g. RT4 -> ExamPapers/RT4-20261012-AnswerKey-Question-Paper.pdf"""
+    p = [p for p in glob.glob(os.path.join(ROOT, "ExamPapers", exam + "-*-AnswerKey-Question-Paper.pdf"))]
+    if not p: raise SystemExit("no exam paper for " + exam)
+    return p[0]
+
 def find_pdf(lec):
+    if re.fullmatch(r"(?:RT|CAT)\d+", lec): return exam_pdf(lec)      # past-paper codes <CH>XV<EXAM>Q<n>
     """lecture files are named either '<CH>L<n>.pdf' or plain 'L<n>.pdf' depending on the chapter"""
     ch = chapter_of(lec)
     base = [p for p in glob.glob(os.path.join(ROOT, "*", ch)) if os.path.isdir(p)]
@@ -36,7 +44,7 @@ def find_pdf(lec):
     base = base[0]
     tail = lec[len(ch):]                      # "L5", or "SB" for the Strong Box
     if tail == "SB":
-        sb = glob.glob(os.path.join(base, "*Strong Box*.pdf"))
+        sb = glob.glob(os.path.join(base, "*Strong*Box*.pdf"))
         if sb: return sorted(sb)[0]
     for cand in ("%s.pdf" % lec, "%s.pdf" % tail):
         p = os.path.join(base, cand)
@@ -65,9 +73,14 @@ def cmd_pages(lec, dpi=130):
 
 def cmd_crop(code, page, x0, y0, x1, y1, dpi=220):
     """crop by page fractions; re-renders that page at high dpi so the figure stays sharp"""
-    lec = re.match(r"([A-Z]+\d+[A-D]?(?:L\d+(?:L\d+)?|SB))V", code).group(1)
-    d = fitz.open(find_pdf(lec))
-    pg = d[int(page) - 1]
+    x = re.match(r"[A-Z]+\d+[A-D]?XV((?:RT|CAT)\d+)Q\d+$", code)
+    lec = x.group(1) if x else re.match(r"([A-Z]+\d+[A-D]?(?:L\d+(?:L\d+)?|SB))V", code).group(1)
+    d, page = fitz.open(find_pdf(lec)), int(page)
+    if lec.endswith("SB"):        # a Strong Box split over "Strong Box 1.pdf", "... 2.pdf": pages run on
+        rest = sorted(glob.glob(os.path.join(os.path.dirname(find_pdf(lec)), "*Strong*Box*.pdf")))[1:]
+        while page > d.page_count and rest:
+            page -= d.page_count; d = fitz.open(rest.pop(0))
+    pg = d[page - 1]
     r = pg.rect
     clip = fitz.Rect(r.x0 + float(x0) * r.width, r.y0 + float(y0) * r.height,
                      r.x0 + float(x1) * r.width, r.y0 + float(y1) * r.height)

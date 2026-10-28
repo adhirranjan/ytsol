@@ -20,7 +20,7 @@ FINAL = not SETN.isdigit()
 SRC   = "%s-%s.html" % (EXAM, SETN) if FINAL else "%s-Mock-Sets.html" % EXAM
 LABEL = "Final Set %s" % SETN.split("-")[-1] if FINAL else "Set %s" % SETN
 STEM_ = "%s-%s" % (EXAM, SETN if FINAL else "Set" + SETN)
-DATE = {"RT5": "16-11-2026", "CAT6": "26-10-2026", "RT4": "12-10-2026", "CAT5": "28-09-2026", "RT3": "21-09-2026"}.get(EXAM, "")
+DATE = {"CAT7": "30-11-2026", "RT5": "16-11-2026", "CAT6": "26-10-2026", "RT4": "12-10-2026", "CAT5": "28-09-2026", "RT3": "21-09-2026"}.get(EXAM, "")
 NICE = EXAM.replace("RT", "RT-").replace("CAT", "CAT-")
 FIGDIR = os.path.join(MP, "figures")
 

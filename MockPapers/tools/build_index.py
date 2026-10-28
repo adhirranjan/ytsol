@@ -36,6 +36,9 @@ def set_state(exam, n):
     return (os.path.basename(q), k if os.path.exists(os.path.join(MP, k)) else None, figs, noopt)
 
 EXAMS = [
+    ("CAT-7", "CAT7", "30-11-2026", "next",    "CAT7-Mock-Sets.html",
+     [("CAT7-Final-A.html", "Final Set A - your top-priority wrong/blank questions from Sets 1-8"),
+      ("CAT7-Final-B.html", "Final Set B - the next tier of misses plus Final-A's, no repeats of A")]),
     ("RT-5",  "RT5",  "16-11-2026", "current", "RT5-Mock-Sets.html",
      [("RT5-Final-A.html", "Final Set A - your top-priority wrong/blank questions from Sets 1-10"),
       ("RT5-Final-B.html", "Final Set B - the next tier of misses plus Final-A's, no repeats of A")]),
@@ -91,8 +94,7 @@ for name, pre, date, when, master, extras in EXAMS:
                 '<span class="badge %s">%s</span></h2>'
                 '<p class="master">Master sheet: <a href="%s">%s</a> '
                 '<span class="meta">&#8212; all sets as book-code grids with a collapsible key</span></p>%s%s</div>'
-                % (name, date, "now" if when == "current" else "past",
-                   "current" if when == "current" else "past", master, master,
+                % (name, date, "past" if when == "past" else "now", when, master, master,
                    "".join('<p class="master"><a href="%s">%s</a> <span class="meta">&#8212; %s</span></p>'
                            % (f, f, d) for f, d in extras if os.path.exists(os.path.join(MP, f))),
                    ('<table><tr><th>Set</th><th>Paper</th><th>Key</th><th>State</th><th></th></tr>%s</table>'

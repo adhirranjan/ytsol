@@ -21,7 +21,7 @@ CHAPTERS = {
     "M5A": "Compound Angles", "M5B": "Transformation Formulae", "M5C": "Multiple & Submultiple Angles",
     "M6": "Inequalities", "M7": "Exp & Log Equations", "M8A": "Arithmetic Progressions",
     "M8B": "Geometric Progressions", "M8C": "Harmonic Progressions", "M8D": "Special Series",
-    "M9": "Complex Numbers", "M10": "Quadratic Equations", "M11": "Trig Equations", "M12": "Properties of Triangle",
+    "M9": "Complex Numbers", "M10": "Quadratic Equations", "M11": "Trig Equations", "M12": "Properties of Triangle", "M13": "Cartesian Coordinates",
 }
 SUBJ = {"C": "Chemistry", "P": "Physics", "M": "Maths"}
 EXAMS = {"RT1": "13 Jul", "CAT3": "27 Jul", "RT2": "10 Aug", "CAT4": "31 Aug", "RT3": "21 Sep", "CAT5": "28 Sep", "RT4": "12 Oct", "CAT6": "26 Oct"}

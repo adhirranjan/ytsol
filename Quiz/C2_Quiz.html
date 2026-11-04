@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -253,7 +279,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (10) ---------------- */
-{id:1, lec:"L-1", blk:"Sub-atomic particles", topic:"Discovery of the electron",
+{id:1, lec:"L-1", blk:"Sub-atomic particles", topic:"Discovery of the electron", t:60,
  q:"The electron was discovered by J. J. Thomson from his study of",
  opts:["cathode rays","anode (canal) rays","α-particle scattering","X-rays"],
  ans:0,
@@ -264,7 +290,7 @@ const QUIZ = [
   "X-rays were discovered by Roentgen and are electromagnetic radiation, not a stream of particles."],
  sol:"<b>Electron — J. J. Thomson (cathode rays). Proton — Goldstein (anode/canal rays). Neutron — Chadwick (α on Be/B).</b> These three attributions are asked directly almost every year."},
 
-{id:2, lec:"L-1", blk:"Sub-atomic particles", topic:"Charge on cathode rays",
+{id:2, lec:"L-1", blk:"Sub-atomic particles", topic:"Charge on cathode rays", t:60,
  q:"In an electric field, cathode rays are deflected towards the positive plate. This shows that they",
  opts:["carry a negative charge","carry a positive charge","are electrically neutral","are electromagnetic waves"],
  ans:0,
@@ -275,7 +301,7 @@ const QUIZ = [
   "Cathode rays also rotate a light mica paddle-wheel, which proves they are <b>material particles</b> with momentum."],
  sol:"Cathode-ray evidence: they travel in straight lines, cast sharp shadows, turn a paddle wheel (matter), and bend towards the <b>+</b> plate (negative charge). They are identical whatever gas or electrode is used — so electrons are universal to all atoms."},
 
-{id:3, lec:"L-1", blk:"Sub-atomic particles", topic:"Discovery of the neutron",
+{id:3, lec:"L-1", blk:"Sub-atomic particles", topic:"Discovery of the neutron", t:60,
  q:"Chadwick discovered the neutron by bombarding beryllium or boron with",
  opts:["α-particles","cathode rays","X-rays","protons"],
  ans:0,
@@ -286,7 +312,7 @@ const QUIZ = [
   "Proton bombardment is not the classic Chadwick experiment; he used the α-rays from a polonium source."],
  sol:"<b>⁹Be + ⁴He → ¹²C + ¹n.</b> The neutron carries <b>no charge</b> and has mass ≈ that of the proton (1.6749 × 10⁻²⁷ kg)."},
 
-{id:4, lec:"L-1", blk:"Atomic models", topic:"Thomson's model",
+{id:4, lec:"L-1", blk:"Atomic models", topic:"Thomson's model", t:60,
  q:"Thomson's 1904 model pictured the atom as",
  opts:[
   "a sphere of positive charge with electrons embedded in it",
@@ -301,7 +327,7 @@ const QUIZ = [
   "That is the modern quantum-mechanical picture, decades later than Thomson."],
  sol:"<b>Thomson → raisin pudding.</b> Its fatal flaw: a uniformly spread positive charge could never turn an α-particle through a large angle, so it cannot explain Rutherford's scattering."},
 
-{id:5, lec:"L-1", blk:"Atomic models", topic:"What the α-scattering bounce-back proved",
+{id:5, lec:"L-1", blk:"Atomic models", topic:"What the α-scattering bounce-back proved", t:60,
  q:"In Rutherford's gold-foil experiment about 1 in 20,000 α-particles bounced straight back. This proved that",
  opts:[
   "the positive charge and nearly all the mass sit in a tiny dense nucleus",
@@ -316,7 +342,7 @@ const QUIZ = [
   "Neutrons were not detected until Chadwick, twenty years later."],
  sol:"Read the three observations separately: <b>most pass through</b> → mostly empty space; <b>a few deflect</b> → they came near a positive body; <b>1 in 20,000 rebounds</b> → that body is tiny, heavy and concentrated — the <b>nucleus</b>."},
 
-{id:6, lec:"L-1", blk:"Atomic models", topic:"Rutherford's drawback",
+{id:6, lec:"L-1", blk:"Atomic models", topic:"Rutherford's drawback", t:60,
  q:"The main drawback of Rutherford's model is that it cannot explain",
  opts:[
   "the stability of the atom",
@@ -331,7 +357,7 @@ const QUIZ = [
   "Empty space is also part of what the model successfully accounts for."],
  sol:"Rutherford's failures: <b>stability</b> (radiating electron spirals in), the <b>arrangement</b> of electrons, and the <b>line</b> spectrum (a spiralling electron would radiate a continuous range of frequencies). Bohr's quantized orbits were the fix."},
 
-{id:7, lec:"L-1", blk:"Isotopes, isobars, isotones", topic:"Identifying isobars",
+{id:7, lec:"L-1", blk:"Isotopes, isobars, isotones", topic:"Identifying isobars", t:60,
  q:"The species ⁴⁰Ar, ⁴⁰K and ⁴⁰Ca are examples of",
  opts:["isobars","isotopes","isotones","isoelectronic species"],
  ans:0,
@@ -342,7 +368,7 @@ const QUIZ = [
   "Isoelectronic means the same number of <b>electrons</b>; neutral Ar, K and Ca have 18, 19 and 20."],
  sol:"<b>Isotopes — same Z</b> (¹H, ²H, ³H). <b>Isobars — same A</b> (⁴⁰Ar, ⁴⁰K, ⁴⁰Ca). <b>Isotones — same number of neutrons</b> (¹⁴C, ¹⁵N, ¹⁶O all have 8)."},
 
-{id:8, lec:"L-1", blk:"Isotopes, isobars, isotones", topic:"The nucleus of protium",
+{id:8, lec:"L-1", blk:"Isotopes, isobars, isotones", topic:"The nucleus of protium", t:90,
  q:"Which of the following statements is correct?",
  opts:[
   "The nucleus of ordinary hydrogen contains no neutron",
@@ -357,7 +383,7 @@ const QUIZ = [
   "Isotopes differ in <b>neutrons</b> (and hence in A); the proton count is what makes them the same element."],
  sol:"For ¹H: Z = 1, A = 1, so n = A − Z = <b>0</b>. Deuterium ²H has 1 neutron and tritium ³H has 2."},
 
-{id:9, lec:"L-1", blk:"Counting p, n, e", topic:"Two atoms with the same atomic number",
+{id:9, lec:"L-1", blk:"Counting p, n, e", topic:"Two atoms with the same atomic number", t:90,
  q:"Two atoms X and Y have the same atomic number, with mass numbers 208 and 210. X has 126 neutrons. The number of neutrons in Y is",
  opts:["128","126","127","130"],
  ans:0,
@@ -368,7 +394,7 @@ const QUIZ = [
   "130 adds four rather than two. Since Z is fixed, ΔA = Δn exactly."],
  sol:"Same Z means <b>isotopes</b>, so every extra unit of A is an extra neutron. Z = A(X) − n(X) = 208 − 126 = <b>82</b> (lead), and n(Y) = 210 − 82 = <b>128</b>."},
 
-{id:10, lec:"L-1", blk:"Counting p, n, e", topic:"An ion from a percentage clue",
+{id:10, lec:"L-1", blk:"Counting p, n, e", topic:"An ion from a percentage clue", t:180,
  q:"An ion of mass number 37 carries one unit of negative charge and has 11.1 % more neutrons than electrons. The ion is",
  opts:["³⁷₁₇Cl⁻","³⁷₁₈Ar⁻","³⁷₁₉K⁻","³⁷₁₆S⁻"],
  ans:0,
@@ -380,7 +406,7 @@ const QUIZ = [
  sol:"Work in electrons. Charge −1 ⇒ p = e − 1. Neutrons = 1.111e. Since A = p + n: (e − 1) + 1.111e = 37 ⇒ 2.111e = 38 ⇒ <b>e = 18, p = 17, n = 20</b>. Check: 20/18 = 1.111 ✓ The species is <b>³⁷₁₇Cl⁻</b>."},
 
 /* ---------------- L-2 (10) ---------------- */
-{id:11, lec:"L-2", blk:"Wave relations", topic:"The basic wave equation",
+{id:11, lec:"L-2", blk:"Wave relations", topic:"The basic wave equation", t:90,
  q:"For electromagnetic radiation travelling in vacuum,",
  opts:["c = νλ","c = ν/λ","c = λ/ν","c = ν²λ"],
  ans:0,
@@ -391,7 +417,7 @@ const QUIZ = [
   "There is no square in the relation; c = νλ is exact for every electromagnetic wave in vacuum."],
  sol:"<b>c = νλ</b>, with c = 3 × 10⁸ m s⁻¹ in vacuum for <b>all</b> electromagnetic radiation, from γ-rays to radio waves. Also ν̄ = 1/λ, ν = cν̄ and T = 1/ν."},
 
-{id:12, lec:"L-2", blk:"Wave relations", topic:"Wave number",
+{id:12, lec:"L-2", blk:"Wave relations", topic:"Wave number", t:60,
  q:"The wave number ν̄ of a radiation is defined as",
  opts:["1/λ","1/ν","c/λ","λ/c"],
  ans:0,
@@ -402,7 +428,7 @@ const QUIZ = [
   "λ/c is again the period T — the time for one wave to pass."],
  sol:"<b>ν̄ = 1/λ</b> (units cm⁻¹ or m⁻¹) and <b>ν = cν̄</b>. ⚠ Do not confuse ν̄ (wave number) with ν (frequency); the bar matters."},
 
-{id:13, lec:"L-2", blk:"EM spectrum", topic:"Ordering by wavelength",
+{id:13, lec:"L-2", blk:"EM spectrum", topic:"Ordering by wavelength", t:60,
  q:"Which of the following has the <b>longest</b> wavelength?",
  opts:["Microwaves","X-rays","Ultraviolet","γ-rays"],
  ans:0,
@@ -413,7 +439,7 @@ const QUIZ = [
   "γ-rays are the shortest and most energetic of the four."],
  sol:"Increasing λ: <b>cosmic &lt; γ &lt; X-ray &lt; UV &lt; visible &lt; IR &lt; microwave &lt; radio.</b> Energy runs the other way, since E = hc/λ. Visible light is VIBGYOR, violet ≈ 400 nm to red ≈ 700 nm."},
 
-{id:14, lec:"L-2", blk:"Atomic spectrum", topic:"Emission versus absorption",
+{id:14, lec:"L-2", blk:"Atomic spectrum", topic:"Emission versus absorption", t:60,
  q:"An <b>absorption</b> spectrum appears as",
  opts:[
   "dark lines on an otherwise continuous bright background",
@@ -428,7 +454,7 @@ const QUIZ = [
   "Atomic spectra always show a whole set of lines, one for each allowed transition."],
  sol:"<b>Emission</b> — bright lines, dark background. <b>Absorption</b> — dark lines, bright background. The dark lines fall at <b>exactly</b> the wavelengths of the bright ones, which is why the pattern is an atomic fingerprint (sodium always at 589 and 589.6 nm)."},
 
-{id:15, lec:"L-2", blk:"Atomic spectrum", topic:"Why the spectrum is discontinuous",
+{id:15, lec:"L-2", blk:"Atomic spectrum", topic:"Why the spectrum is discontinuous", t:60,
  q:"Atomic spectra are line (discontinuous) spectra rather than continuous ones because",
  opts:[
   "an electron can occupy only certain allowed energy levels, so only certain ΔE values are possible",
@@ -443,7 +469,7 @@ const QUIZ = [
   "A single atom can emit repeatedly, and any real sample contains vast numbers of atoms."],
  sol:"Quantized levels ⇒ quantized jumps ⇒ discrete frequencies. This is the observation Rutherford's model could not explain and Bohr's could."},
 
-{id:16, lec:"L-2", blk:"Planck's theory", topic:"Energy of a quantum",
+{id:16, lec:"L-2", blk:"Planck's theory", topic:"Energy of a quantum", t:90,
  q:"The energy of one quantum of radiation of wavelength λ is",
  opts:["hc/λ","hλ/c","hcλ","c/hλ"],
  ans:0,
@@ -454,7 +480,7 @@ const QUIZ = [
   "This is a reciprocal energy, so its units are J⁻¹."],
  sol:"<b>E = hν = hc/λ = hcν̄.</b> So <b>E ∝ ν</b> and <b>E ∝ 1/λ</b>. For n photons, E = nhν."},
 
-{id:17, lec:"L-2", blk:"Planck's theory", topic:"One Einstein",
+{id:17, lec:"L-2", blk:"Planck's theory", topic:"One Einstein", t:60,
  q:"One Einstein of radiation is the energy of",
  opts:[
   "one mole of photons",
@@ -469,7 +495,7 @@ const QUIZ = [
   "The Einstein is not tied to any particular wavelength — its value depends on the ν of the radiation concerned."],
  sol:"<b>1 Einstein = N<sub>A</sub> × hν</b> = the energy of one mole of photons. Useful when a per-atom photon energy has to be converted to kJ mol⁻¹."},
 
-{id:18, lec:"L-2", blk:"Calculations", topic:"Frequency from wavelength",
+{id:18, lec:"L-2", blk:"Calculations", topic:"Frequency from wavelength", t:90,
  q:"The frequency of radiation of wavelength 480 nm is",
  opts:["6.25 × 10¹⁴ Hz","6.25 × 10¹⁵ Hz","1.6 × 10⁻¹⁵ Hz","2.08 × 10⁶ Hz"],
  ans:0,
@@ -480,7 +506,7 @@ const QUIZ = [
   "2.08 × 10⁶ m⁻¹ is the <b>wave number</b> ν̄ = 1/λ for this radiation, not its frequency."],
  sol:"λ = 480 nm = 4.80 × 10⁻⁷ m. <b>ν = c/λ = (3 × 10⁸)/(4.80 × 10⁻⁷) = 6.25 × 10¹⁴ Hz.</b> For the same light ν̄ = 1/λ = 2.08 × 10⁶ m⁻¹ — a different quantity with different units."},
 
-{id:19, lec:"L-2", blk:"Calculations", topic:"Wavelength of a radio broadcast",
+{id:19, lec:"L-2", blk:"Calculations", topic:"Wavelength of a radio broadcast", t:90,
  q:"A radio station broadcasts at 1000 kHz. The wavelength of its radiation is",
  opts:["300 m","300 cm","3 × 10⁻⁴ m","3 × 10⁵ m"],
  ans:0,
@@ -491,7 +517,7 @@ const QUIZ = [
   "3 × 10⁵ m is a thousand times too long — kHz has been read as Hz."],
  sol:"1000 kHz = 10⁶ Hz. <b>λ = c/ν = 3 × 10⁸ / 10⁶ = 3 × 10² m.</b> Long wavelength ⇒ low frequency ⇒ low photon energy, which is why radio waves are harmless."},
 
-{id:20, lec:"L-2", blk:"Calculations", topic:"Counting photons for a given energy",
+{id:20, lec:"L-2", blk:"Calculations", topic:"Counting photons for a given energy", t:90,
  q:"How many photons of wavelength 4000 pm together carry 1 J of energy?",
  opts:["2.01 × 10¹⁶","4.97 × 10⁻¹⁷","2.01 × 10¹⁹","6.02 × 10²³"],
  ans:0,
@@ -503,7 +529,7 @@ const QUIZ = [
  sol:"λ = 4000 pm = 4 × 10⁻⁹ m. E<sub>photon</sub> = hc/λ = <b>4.97 × 10⁻¹⁷ J</b>. Number = total energy ÷ energy per photon = 1/(4.97 × 10⁻¹⁷) = <b>2.01 × 10¹⁶ photons</b>."},
 
 /* ---------------- L-3 (10) ---------------- */
-{id:21, lec:"L-3", blk:"Observations", topic:"What intensity controls",
+{id:21, lec:"L-3", blk:"Observations", topic:"What intensity controls", t:60,
  q:"In the photoelectric effect, increasing the <b>intensity</b> of the incident light (at fixed frequency above ν₀) increases",
  opts:[
   "the number of photoelectrons ejected per second",
@@ -518,7 +544,7 @@ const QUIZ = [
   "W₀ = hν₀ is likewise a property of the metal surface, not of the illumination."],
  sol:"<b>Intensity → how many. Frequency → how fast.</b> This split is the whole reason the photoelectric effect proves light is particulate: a wave theory would let a bright, low-frequency beam gradually pump enough energy into an electron, and it never does."},
 
-{id:22, lec:"L-3", blk:"Observations", topic:"Below the threshold",
+{id:22, lec:"L-3", blk:"Observations", topic:"Below the threshold", t:60,
  q:"A very intense beam of light with frequency below the threshold frequency ν₀ of a metal will",
  opts:[
   "eject no electrons at all, however long it shines",
@@ -533,7 +559,7 @@ const QUIZ = [
   "A weak beam above ν₀ ejects electrons; an intense beam below ν₀ ejects none. Frequency is the gate, not brightness."],
  sol:"<b>ν &gt; ν₀ or nothing happens.</b> The all-or-nothing frequency threshold, the absence of a time lag, and the intensity-independence of K.E. are the three observations that classical wave theory cannot explain."},
 
-{id:23, lec:"L-3", blk:"Einstein's equation", topic:"The photoelectric equation",
+{id:23, lec:"L-3", blk:"Einstein's equation", topic:"The photoelectric equation", t:90,
  q:"Einstein's photoelectric equation is",
  opts:["hν = W₀ + ½mv²","hν = W₀ − ½mv²","hν₀ = hν + ½mv²","½mv² = hν + W₀"],
  ans:0,
@@ -544,7 +570,7 @@ const QUIZ = [
   "Adding W₀ to hν would mean the metal <b>gives</b> the electron energy rather than holding it back."],
  sol:"<b>hν = W₀ + ½mv²<sub>max</sub></b>, i.e. <b>½mv² = h(ν − ν₀)</b> with <b>W₀ = hν₀</b>. Energy in = energy to escape + energy left over."},
 
-{id:24, lec:"L-3", blk:"Einstein's equation", topic:"Reading the K.E.–ν graph",
+{id:24, lec:"L-3", blk:"Einstein's equation", topic:"Reading the K.E.–ν graph", t:90,
  q:"A graph of maximum kinetic energy against frequency for a metal is a straight line whose slope equals",
  opts:[
   "Planck's constant h",
@@ -559,7 +585,7 @@ const QUIZ = [
   "e appears only if the vertical axis is stopping potential V₀ rather than energy, and even then it divides the slope."],
  sol:"½mv² = <b>h</b>ν − W₀ is y = mx + c. Slope = <b>h</b> (universal), ν-intercept = <b>ν₀</b>, energy-intercept = <b>−W₀</b>. Different metals give <b>parallel</b> lines."},
 
-{id:25, lec:"L-3", blk:"Stopping potential", topic:"Stopping potential relation",
+{id:25, lec:"L-3", blk:"Stopping potential", topic:"Stopping potential relation", t:60,
  q:"If V₀ is the stopping potential for photoelectrons of maximum speed v, then",
  opts:["½mv² = eV₀","½mv² = V₀/e","mv = eV₀","½mv² = eV₀²"],
  ans:0,
@@ -570,7 +596,7 @@ const QUIZ = [
   "The potential enters linearly, not squared; work done = charge × potential difference."],
  sol:"<b>½mv²<sub>max</sub> = eV₀.</b> Combined with Einstein's equation: eV₀ = h(ν − ν₀), so a plot of V₀ against ν has slope h/e."},
 
-{id:26, lec:"L-3", blk:"Calculations", topic:"Ionization energy from a wavelength",
+{id:26, lec:"L-3", blk:"Calculations", topic:"Ionization energy from a wavelength", t:90,
  q:"Radiation of wavelength 242 nm is just sufficient to ionize a sodium atom. The ionization energy of sodium is about",
  opts:["495 kJ mol⁻¹","8.21 × 10⁻¹⁹ kJ mol⁻¹","495 J mol⁻¹","242 kJ mol⁻¹"],
  ans:0,
@@ -581,7 +607,7 @@ const QUIZ = [
   "242 is the wavelength in nm, not an energy. Wavelength and energy are inversely related, not equal."],
  sol:"E per atom = hc/λ = (6.626 × 10⁻³⁴ × 3 × 10⁸)/(242 × 10⁻⁹) = <b>8.214 × 10⁻¹⁹ J</b>. Per mole: × 6.022 × 10²³ = 4.946 × 10⁵ J = <b>≈ 494.6 kJ mol⁻¹</b>. Always check whether the question wants per atom or per mole."},
 
-{id:27, lec:"L-3", blk:"Calculations", topic:"Work function from threshold frequency",
+{id:27, lec:"L-3", blk:"Calculations", topic:"Work function from threshold frequency", t:90,
  q:"The threshold frequency of cesium is 4.6 × 10¹⁴ s⁻¹. The minimum energy needed to eject an electron from cesium is",
  opts:["3.05 × 10⁻¹⁹ J","3.05 × 10⁻²⁰ J","6.94 × 10⁻²¹ J","4.6 × 10⁻¹⁴ J"],
  ans:0,
@@ -592,7 +618,7 @@ const QUIZ = [
   "The frequency has simply been given a negative exponent; h has not been used."],
  sol:"<b>W₀ = hν₀</b> = 6.626 × 10⁻³⁴ × 4.6 × 10¹⁴ = <b>3.05 × 10⁻¹⁹ J</b> ≈ 1.90 eV. Dividing by 1.602 × 10⁻¹⁹ converts joules to electron-volts."},
 
-{id:28, lec:"L-3", blk:"Calculations", topic:"Kinetic energy of photoelectrons",
+{id:28, lec:"L-3", blk:"Calculations", topic:"Kinetic energy of photoelectrons", t:90,
  q:"Light of wavelength 5000 Å (photon energy 2.486 eV) falls on a metal of work function 1.9 eV. The kinetic energy of the photoelectrons is",
  opts:["0.586 eV","4.386 eV","1.9 eV","2.486 eV"],
  ans:0,
@@ -603,7 +629,7 @@ const QUIZ = [
   "2.486 eV is the whole photon energy, which would only all become kinetic energy if the work function were zero."],
  sol:"E = hc/λ = (6.63 × 10⁻³⁴ × 3 × 10⁸)/(5 × 10⁻⁷) = 3.978 × 10⁻¹⁹ J = 2.486 eV. <b>K.E. = 2.486 − 1.9 = 0.586 eV</b>, and the stopping potential would be 0.586 V."},
 
-{id:29, lec:"L-3", blk:"Work function", topic:"What the work function depends on",
+{id:29, lec:"L-3", blk:"Work function", topic:"What the work function depends on", t:60,
  q:"The work function W₀ of a surface depends on",
  opts:[
   "the nature of the metal only",
@@ -618,7 +644,7 @@ const QUIZ = [
   "The K.E. is what is <b>left after</b> paying W₀, so it depends on W₀ rather than the other way round."],
  sol:"<b>W₀ = hν₀</b> is a constant of the metal. Cesium (≈1.9 eV) ejects electrons in visible light; a high-W₀ metal like platinum needs ultraviolet."},
 
-{id:30, lec:"L-3", blk:"Observations", topic:"What the photoelectric effect proves",
+{id:30, lec:"L-3", blk:"Observations", topic:"What the photoelectric effect proves", t:60,
  q:"The photoelectric effect is regarded as evidence for",
  opts:[
   "the particle nature of light",
@@ -634,7 +660,7 @@ const QUIZ = [
  sol:"Light is <b>dual</b>: interference and diffraction show waves, the photoelectric effect and the Compton effect show particles. The photon is the particle."},
 
 /* ---------------- L-4 (9) ---------------- */
-{id:31, lec:"L-4", blk:"Bohr's postulates", topic:"Quantization of angular momentum",
+{id:31, lec:"L-4", blk:"Bohr's postulates", topic:"Quantization of angular momentum", t:60,
  q:"Bohr postulated that the angular momentum of the orbiting electron is",
  opts:["nh/2π","nh/4π","n²h/2π","h/2πn"],
  ans:0,
@@ -645,7 +671,7 @@ const QUIZ = [
   "This decreases as n grows, whereas angular momentum increases with the orbit number."],
  sol:"<b>mvr = nh/2π.</b> Combined with the balance of Coulomb attraction against centripetal force it yields every Bohr result. de Broglie later showed it is just 2πr = nλ — a standing wave fitting the orbit."},
 
-{id:32, lec:"L-4", blk:"Bohr's postulates", topic:"Why stationary orbits solve the stability problem",
+{id:32, lec:"L-4", blk:"Bohr's postulates", topic:"Why stationary orbits solve the stability problem", t:60,
  q:"According to Bohr, an electron moving in a stationary orbit",
  opts:[
   "does not radiate energy",
@@ -660,7 +686,7 @@ const QUIZ = [
   "Nothing flows from the nucleus; the nucleus simply supplies the attractive force."],
  sol:"Bohr's postulates: (i) fixed circular orbits with Coulomb attraction supplying the centripetal force; (ii) angular momentum = nh/2π; (iii) <b>no radiation within an orbit</b>; (iv) on a jump, <b>ΔE = hν</b>."},
 
-{id:33, lec:"L-4", blk:"Radius", topic:"The radius formula",
+{id:33, lec:"L-4", blk:"Radius", topic:"The radius formula", t:60,
  q:"The radius of the n-th Bohr orbit of a hydrogen-like species of atomic number Z is",
  opts:["0.529 × n²/Z Å","0.529 × Z/n² Å","0.529 × n/Z² Å","0.529 × Z²/n Å"],
  ans:0,
@@ -671,7 +697,7 @@ const QUIZ = [
   "This grows with Z, but greater nuclear charge must contract the orbit, not expand it."],
  sol:"<b>rₙ = 0.529 × n²/Z Å.</b> Contrast the energy, which goes as <b>Z²/n²</b>, and the velocity, which goes as <b>Z/n</b> — the three powers are all different and are routinely mixed up."},
 
-{id:34, lec:"L-4", blk:"Radius", topic:"Radius of the second orbit of He⁺",
+{id:34, lec:"L-4", blk:"Radius", topic:"Radius of the second orbit of He⁺", t:90,
  q:"The radius of the second orbit of He⁺ is",
  opts:["1.058 Å","0.529 Å","2.116 Å","0.265 Å"],
  ans:0,
@@ -682,7 +708,7 @@ const QUIZ = [
   "0.265 Å = 0.529/2 is the <b>first</b> orbit of He⁺, using n = 1 instead of n = 2."],
  sol:"He⁺ has Z = 2. <b>r₂ = 0.529 × 2²/2 = 0.529 × 2 = 1.058 Å.</b>"},
 
-{id:35, lec:"L-4", blk:"Radius", topic:"Radius of the third orbit of Li²⁺",
+{id:35, lec:"L-4", blk:"Radius", topic:"Radius of the third orbit of Li²⁺", t:90,
  q:"The radius of Bohr's third orbit in Li²⁺ is",
  opts:["1.587 Å","4.761 Å","0.529 Å","1.058 Å"],
  ans:0,
@@ -693,7 +719,7 @@ const QUIZ = [
   "1.058 Å is the second orbit of He⁺, a different species and a different n."],
  sol:"Li²⁺ has Z = 3. <b>r₃ = 0.529 × 3²/3 = 0.529 × 3 = 1.587 Å.</b> Note the neat coincidence that n²/Z = n when n = Z."},
 
-{id:36, lec:"L-4", blk:"Radius", topic:"Ratio of radii at equal n",
+{id:36, lec:"L-4", blk:"Radius", topic:"Ratio of radii at equal n", t:90,
  q:"The ratio of the radii of the fifth orbits of He⁺ and Li²⁺ is",
  opts:["3 : 2","2 : 3","9 : 4","1 : 1"],
  ans:0,
@@ -704,7 +730,7 @@ const QUIZ = [
   "The radii are equal only if the two species have the same Z, and 2 ≠ 3."],
  sol:"r ∝ n²/Z, and n = 5 for both. So <b>r(He⁺)/r(Li²⁺) = Z(Li²⁺)/Z(He⁺) = 3/2</b>. Whenever a quantity varies as 1/Z, the ratio comes out flipped — a very common sign of a lost mark."},
 
-{id:37, lec:"L-4", blk:"Radius", topic:"Matching the hydrogen ground-state radius",
+{id:37, lec:"L-4", blk:"Radius", topic:"Matching the hydrogen ground-state radius", t:90,
  q:"Which of these orbits has the same radius as the ground-state orbit of hydrogen?",
  opts:[
   "n = 2 of Be³⁺",
@@ -719,7 +745,7 @@ const QUIZ = [
   "Li²⁺ at n = 2 gives 4/3 ≈ 1.33, close but not equal."],
  sol:"Radii match when <b>n²/Z</b> matches. Hydrogen's ground state has n²/Z = 1, and <b>Be³⁺ with n = 2</b> gives 4/4 = 1. This n² = Z trick appears often — check the ratio, never the individual numbers."},
 
-{id:38, lec:"L-4", blk:"Bohr's postulates", topic:"Energy of an emitted photon",
+{id:38, lec:"L-4", blk:"Bohr's postulates", topic:"Energy of an emitted photon", t:60,
  q:"When an electron falls from a higher orbit to a lower one, the frequency of the emitted radiation is given by",
  opts:["ν = (E_high − E_low)/h","ν = (E_high − E_low)·h","ν = h/(E_high − E_low)","ν = (E_high + E_low)/h"],
  ans:0,
@@ -730,7 +756,7 @@ const QUIZ = [
   "Adding the two energies is meaningless; only the <b>difference</b> is released. Both are negative, so the sum would even have the wrong sign."],
  sol:"<b>ΔE = E<sub>high</sub> − E<sub>low</sub> = hν.</b> Emission on falling, absorption on climbing — and only the difference matters, never the individual levels."},
 
-{id:39, lec:"L-4", blk:"Radius", topic:"Which orbit is largest",
+{id:39, lec:"L-4", blk:"Radius", topic:"Which orbit is largest", t:60,
  q:"Among H (n = 3), He⁺ (n = 3), Li²⁺ (n = 3) and Be³⁺ (n = 3), the largest orbit belongs to",
  opts:["H","He⁺","Li²⁺","Be³⁺"],
  ans:0,
@@ -742,7 +768,7 @@ const QUIZ = [
  sol:"r = 0.529 n²/Z. All four have n = 3, so the radii go as 9/1, 9/2, 9/3, 9/4 — <b>hydrogen is the largest</b>. More nuclear charge always means a tighter, lower-energy orbit."},
 
 /* ---------------- L-5 (10) ---------------- */
-{id:40, lec:"L-5", blk:"Energy formula", topic:"The working formula",
+{id:40, lec:"L-5", blk:"Energy formula", topic:"The working formula", t:90,
  q:"The energy of an electron in the n-th orbit of a hydrogen-like species is",
  opts:["−13.6 Z²/n² eV","−13.6 n²/Z² eV","−13.6 Z/n eV","+13.6 Z²/n² eV"],
  ans:0,
@@ -753,7 +779,7 @@ const QUIZ = [
   "The sign must be negative for a bound electron; a positive value would describe a free particle."],
  sol:"<b>Eₙ = −13.6 Z²/n² eV = −21.79 × 10⁻¹⁹ Z²/n² J = −1312 Z²/n² kJ mol⁻¹.</b> Also Eₙ = E₁ × Z²/n², handy when E₁ is given in odd units."},
 
-{id:41, lec:"L-5", blk:"Energy formula", topic:"Why the energy is negative",
+{id:41, lec:"L-5", blk:"Energy formula", topic:"Why the energy is negative", t:60,
  q:"The energy of an electron in a Bohr orbit is negative because",
  opts:[
   "the electron is bound to the nucleus, and the zero of energy is taken at n = ∞",
@@ -768,7 +794,7 @@ const QUIZ = [
   "Kinetic energy is ½mv² and is always positive. It is the potential energy, and hence the total, that is negative."],
  sol:"E → 0 as n → ∞, where the electron is just free. So a bound electron has E &lt; 0, and <b>|E| is the energy needed to set it free</b>. The deeper the level, the more negative the energy."},
 
-{id:42, lec:"L-5", blk:"Ionization energy", topic:"Ionization energy of hydrogen",
+{id:42, lec:"L-5", blk:"Ionization energy", topic:"Ionization energy of hydrogen", t:90,
  q:"The ionization energy of a hydrogen atom in its ground state is",
  opts:["13.6 eV","−13.6 eV","3.4 eV","54.4 eV"],
  ans:0,
@@ -779,7 +805,7 @@ const QUIZ = [
   "54.4 eV is the ionization energy of <b>He⁺</b>, which has Z = 2 and hence a factor of 4."],
  sol:"IE = E<sub>∞</sub> − E₁ = 0 − (−13.6) = <b>13.6 eV</b>. Ionization energy, separation energy and excitation energy are all defined as positive quantities."},
 
-{id:43, lec:"L-5", blk:"Ionization energy", topic:"Which species has energy −54.4 eV",
+{id:43, lec:"L-5", blk:"Ionization energy", topic:"Which species has energy −54.4 eV", t:90,
  q:"A hydrogen-like species has a ground-state energy of −54.4 eV. The species is",
  opts:["He⁺","H","Li²⁺","Be³⁺"],
  ans:0,
@@ -790,7 +816,7 @@ const QUIZ = [
   "Be³⁺ has Z = 4, giving −13.6 × 16 = −217.6 eV."],
  sol:"Set −13.6Z² = −54.4 ⇒ Z² = 4 ⇒ <b>Z = 2, He⁺</b>. The ground-state energies run −13.6, −54.4, −122.4, −217.6 eV for H, He⁺, Li²⁺, Be³⁺ — the 1 : 4 : 9 : 16 pattern of Z²."},
 
-{id:44, lec:"L-5", blk:"Excitation energy", topic:"Energy of the first excited state",
+{id:44, lec:"L-5", blk:"Excitation energy", topic:"Energy of the first excited state", t:90,
  q:"The energy of the electron in the first excited state of hydrogen is",
  opts:["−3.4 eV","−13.6 eV","−6.8 eV","−1.51 eV"],
  ans:0,
@@ -801,7 +827,7 @@ const QUIZ = [
   "−1.51 eV is E₃ = −13.6/9 — that is the <b>second</b> excited state."],
  sol:"⚠ <b>First excited state = n = 2</b>, not n = 1. E₂ = −13.6/2² = <b>−3.4 eV</b>. The levels run −13.6, −3.4, −1.51, −0.85 eV for n = 1, 2, 3, 4."},
 
-{id:45, lec:"L-5", blk:"Excitation energy", topic:"Energy for the n = 1 to n = 2 jump",
+{id:45, lec:"L-5", blk:"Excitation energy", topic:"Energy for the n = 1 to n = 2 jump", t:90,
  q:"The energy required to excite a hydrogen atom from n = 1 to n = 2 is",
  opts:["10.2 eV","13.6 eV","3.4 eV","17.0 eV"],
  ans:0,
@@ -812,7 +838,7 @@ const QUIZ = [
   "17.0 eV adds the two magnitudes instead of subtracting; the excitation energy can never exceed the ionization energy."],
  sol:"ΔE = 13.6(1/1² − 1/2²) = 13.6 × 3/4 = <b>10.2 eV</b>. Note how much of the total 13.6 eV the very first jump consumes — the levels crowd together rapidly after that."},
 
-{id:46, lec:"L-5", blk:"K.E., P.E., T.E.", topic:"Potential energy in terms of total energy",
+{id:46, lec:"L-5", blk:"K.E., P.E., T.E.", topic:"Potential energy in terms of total energy", t:90,
  q:"If the total energy of an electron in a Bohr orbit is E, its potential energy is",
  opts:["2E","−E","E/2","−2E"],
  ans:0,
@@ -823,7 +849,7 @@ const QUIZ = [
   "−2E would be positive, but the potential energy of an attracted electron must be negative."],
  sol:"<b>P.E. = 2·T.E., K.E. = −T.E., P.E. = −2·K.E.</b> For hydrogen's ground state: T.E. = −13.6 eV, K.E. = +13.6 eV, P.E. = −27.2 eV."},
 
-{id:47, lec:"L-5", blk:"Calculations", topic:"Scaling a given first-orbit energy",
+{id:47, lec:"L-5", blk:"Calculations", topic:"Scaling a given first-orbit energy", t:90,
  q:"The energy of the first orbit of hydrogen is −2.17 × 10⁻¹⁸ J. The energy of the fifth orbit is",
  opts:["−8.68 × 10⁻²⁰ J","−4.34 × 10⁻¹⁹ J","−1.09 × 10⁻¹⁷ J","−2.17 × 10⁻¹⁹ J"],
  ans:0,
@@ -834,7 +860,7 @@ const QUIZ = [
   "Dividing by 10 corresponds to no valid n at all."],
  sol:"<b>Eₙ = E₁ × Z²/n²</b>, and Z = 1 here. E₅ = −2.17 × 10⁻¹⁸ / 25 = <b>−8.68 × 10⁻²⁰ J</b>. Using the given E₁ avoids any need for the constants."},
 
-{id:48, lec:"L-5", blk:"Calculations", topic:"Energy and radius of He⁺ together",
+{id:48, lec:"L-5", blk:"Calculations", topic:"Energy and radius of He⁺ together", t:90,
  q:"For the first orbit of He⁺ (taking E₁ of H as −2.18 × 10⁻¹⁸ J), the energy and radius are",
  opts:[
   "−8.72 × 10⁻¹⁸ J and 0.2646 Å",
@@ -849,7 +875,7 @@ const QUIZ = [
   "Both are wrong: this multiplies the energy by 2 and leaves the radius unscaled by Z."],
  sol:"For He⁺, Z = 2, n = 1. <b>E = −2.18 × 10⁻¹⁸ × 4 = −8.72 × 10⁻¹⁸ J</b> (energy scales <b>up</b> by Z²) and <b>r = 0.529/2 = 0.2646 Å</b> (radius scales <b>down</b> by Z). The two go in opposite directions."},
 
-{id:49, lec:"L-5", blk:"Calculations", topic:"Longest wavelength that ionizes from n = 2",
+{id:49, lec:"L-5", blk:"Calculations", topic:"Longest wavelength that ionizes from n = 2", t:90,
  q:"For hydrogen E = −21.7 × 10⁻¹²/n² erg. The longest wavelength able to remove the electron from the n = 2 orbit is about",
  opts:["3.7 × 10⁻⁵ cm","9.2 × 10⁻⁶ cm","1.5 × 10⁻⁴ cm","3.7 × 10⁻⁷ cm"],
  ans:0,
@@ -861,7 +887,7 @@ const QUIZ = [
  sol:"“Longest wavelength that just ionizes” means the <b>minimum</b> energy, i.e. exactly ΔE = |E₂|. E₂ = −21.7 × 10⁻¹²/4 = −5.425 × 10⁻¹² erg. <b>λ = hc/ΔE ≈ 3.7 × 10⁻⁵ cm</b> — with cgs, use h = 6.625 × 10⁻²⁷ erg s and c = 3 × 10¹⁰ cm s⁻¹."},
 
 /* ---------------- L-6 (9) ---------------- */
-{id:50, lec:"L-6", blk:"Velocity", topic:"The velocity formula",
+{id:50, lec:"L-6", blk:"Velocity", topic:"The velocity formula", t:60,
  q:"The velocity of an electron in the n-th Bohr orbit of a species of atomic number Z is",
  opts:[
   "2.18 × 10⁶ (Z/n) m s⁻¹",
@@ -876,7 +902,7 @@ const QUIZ = [
   "Z/n² is neither the velocity nor any other standard Bohr quantity; the radius uses n²/Z."],
  sol:"<b>v = 2.18 × 10⁶ (Z/n) m s⁻¹.</b> The three key powers: <b>r ∝ n²/Z, v ∝ Z/n, E ∝ Z²/n².</b> Note v²  ∝ Z²/n², matching K.E. ∝ Z²/n²."},
 
-{id:51, lec:"L-6", blk:"Velocity", topic:"Ground-state speed of the electron in H",
+{id:51, lec:"L-6", blk:"Velocity", topic:"Ground-state speed of the electron in H", t:60,
  q:"The speed of the electron in the ground state of hydrogen is about",
  opts:["2.18 × 10⁶ m s⁻¹","3 × 10⁸ m s⁻¹","2.18 × 10⁸ m s⁻¹","1.09 × 10⁶ m s⁻¹"],
  ans:0,
@@ -887,7 +913,7 @@ const QUIZ = [
   "1.09 × 10⁶ m s⁻¹ is the speed in the <b>second</b> orbit, since v ∝ 1/n."],
  sol:"<b>v₁(H) = 2.18 × 10⁶ m s⁻¹.</b> The ratio v₁/c = 1/137 is the fine-structure constant — worth remembering as a sanity check on any speed you calculate."},
 
-{id:52, lec:"L-6", blk:"Frequency &amp; period", topic:"Orbital frequency dependence",
+{id:52, lec:"L-6", blk:"Frequency &amp; period", topic:"Orbital frequency dependence", t:90,
  q:"The frequency of revolution f of an electron in a Bohr orbit varies as",
  opts:["Z²/n³","Z/n","Z²/n²","n³/Z²"],
  ans:0,
@@ -898,7 +924,7 @@ const QUIZ = [
   "This is the dependence of the time <b>period</b> T = 1/f, which is the reciprocal of the frequency."],
  sol:"<b>f = v/2πr ∝ Z²/n³</b> and <b>T = 2πr/v ∝ n³/Z².</b> The n³ makes outer electrons orbit dramatically more slowly — from n = 1 to n = 2 the frequency drops by a factor of 8."},
 
-{id:53, lec:"L-6", blk:"Calculations", topic:"Velocity in another orbit",
+{id:53, lec:"L-6", blk:"Calculations", topic:"Velocity in another orbit", t:90,
  q:"The velocity of an electron in the second Bohr orbit of hydrogen is 1.1 × 10⁶ m s⁻¹. Its velocity in the third orbit is",
  opts:["7.33 × 10⁵ m s⁻¹","1.65 × 10⁶ m s⁻¹","3.67 × 10⁵ m s⁻¹","2.2 × 10⁶ m s⁻¹"],
  ans:0,
@@ -909,7 +935,7 @@ const QUIZ = [
   "2.2 × 10⁶ m s⁻¹ is v₁, the intermediate value if you first scale back to the ground state."],
  sol:"v ∝ Z/n with Z fixed, so <b>v₃/v₂ = 2/3</b>. v₃ = 1.1 × 10⁶ × 2/3 = <b>7.33 × 10⁵ m s⁻¹</b>. Equivalently v₁ = 2 × 1.1 × 10⁶ = 2.2 × 10⁶, then v₃ = v₁/3."},
 
-{id:54, lec:"L-6", blk:"Calculations", topic:"Frequency from a given time period",
+{id:54, lec:"L-6", blk:"Calculations", topic:"Frequency from a given time period", t:90,
  q:"The time period of revolution of the electron in the ground state of hydrogen is 1.6 × 10⁻¹⁶ s. The frequency of revolution in the first excited state is",
  opts:["7.81 × 10¹⁴ s⁻¹","6.25 × 10¹⁵ s⁻¹","5.0 × 10¹⁶ s⁻¹","3.13 × 10¹⁵ s⁻¹"],
  ans:0,
@@ -920,7 +946,7 @@ const QUIZ = [
   "This divides by 2 rather than by 2³ = 8; the dependence is on n³."],
  sol:"f = 1/T, so f₁ = <b>6.25 × 10¹⁵ s⁻¹</b>. Then <b>f ∝ Z²/n³</b> with the first excited state at n = 2: f₂ = 6.25 × 10¹⁵ / 8 = <b>7.81 × 10¹⁴ s⁻¹</b>."},
 
-{id:55, lec:"L-6", blk:"Calculations", topic:"Frequency in the next orbit",
+{id:55, lec:"L-6", blk:"Calculations", topic:"Frequency in the next orbit", t:60,
  q:"If the frequency of revolution of the electron in the first Bohr orbit of hydrogen is 6.6 × 10¹⁵ Hz, the frequency in the second orbit is",
  opts:["8.25 × 10¹⁴ Hz","3.3 × 10¹⁵ Hz","1.65 × 10¹⁵ Hz","5.28 × 10¹⁶ Hz"],
  ans:0,
@@ -931,7 +957,7 @@ const QUIZ = [
   "This multiplies by 8; higher orbits revolve more slowly, so the frequency must fall."],
  sol:"<b>f ∝ Z²/n³.</b> Same Z, n going 1 → 2 gives a factor of 1/8: f₂ = 6.6 × 10¹⁵/8 = <b>8.25 × 10¹⁴ Hz</b>."},
 
-{id:56, lec:"L-6", blk:"Time period", topic:"How the time period scales",
+{id:56, lec:"L-6", blk:"Time period", topic:"How the time period scales", t:60,
  q:"The time period of revolution of the electron in a Bohr orbit varies as",
  opts:["n³/Z²","n²/Z","Z²/n³","n/Z"],
  ans:0,
@@ -942,7 +968,7 @@ const QUIZ = [
   "n/Z is the reciprocal of the velocity dependence and ignores the radius entirely."],
  sol:"<b>T = 2πr/v ∝ (n²/Z) ÷ (Z/n) = n³/Z².</b> Combining a radius power with a velocity power like this is the fastest route to any of these scalings."},
 
-{id:57, lec:"L-6", blk:"Kinetic energy", topic:"Kinetic energy dependence",
+{id:57, lec:"L-6", blk:"Kinetic energy", topic:"Kinetic energy dependence", t:90,
  q:"The kinetic energy of the electron in a Bohr orbit varies as",
  opts:["Z²/n²","Z/n","Z²/n³","n²/Z²"],
  ans:0,
@@ -953,7 +979,7 @@ const QUIZ = [
   "This is inverted, and would make distant electrons the fastest ones."],
  sol:"K.E. = ½mv² ∝ (Z/n)² = <b>Z²/n²</b>. Consistent with <b>K.E. = −T.E. = +13.6 Z²/n² eV</b>."},
 
-{id:58, lec:"L-6", blk:"Velocity", topic:"Fastest electron among four species",
+{id:58, lec:"L-6", blk:"Velocity", topic:"Fastest electron among four species", t:90,
  q:"In which of these is the electron moving fastest?",
  opts:["Be³⁺ in n = 1","H in n = 1","He⁺ in n = 2","Li²⁺ in n = 3"],
  ans:0,
@@ -965,7 +991,7 @@ const QUIZ = [
  sol:"Compare <b>Z/n</b>: Be³⁺ 4/1 = <b>4</b>, H 1/1 = 1, He⁺ 2/2 = 1, Li²⁺ 3/3 = 1. Note that the last three are all equal — whenever Z = n the speed is the hydrogen ground-state value."},
 
 /* ---------------- L-7 (10) ---------------- */
-{id:59, lec:"L-7", blk:"Rydberg formula", topic:"The formula",
+{id:59, lec:"L-7", blk:"Rydberg formula", topic:"The formula", t:90,
  q:"The Rydberg formula for the wave number of a spectral line of a hydrogen-like species is",
  opts:[
   "ν̄ = R Z² (1/n₁² − 1/n₂²)",
@@ -980,7 +1006,7 @@ const QUIZ = [
   "The reciprocals must be of the <b>squares</b> of the quantum numbers, since energy goes as 1/n²."],
  sol:"<b>ν̄ = 1/λ = R Z² (1/n₁² − 1/n₂²)</b> with <b>n₁ &lt; n₂</b> and R = 109677 cm⁻¹. It is just ΔE/hc written out."},
 
-{id:60, lec:"L-7", blk:"The series", topic:"Which series is visible",
+{id:60, lec:"L-7", blk:"The series", topic:"Which series is visible", t:90,
  q:"The series of hydrogen lines that falls in the <b>visible</b> region is",
  opts:["Balmer","Lyman","Paschen","Pfund"],
  ans:0,
@@ -991,7 +1017,7 @@ const QUIZ = [
   "Pfund has n₁ = 5 and lies far into the infrared, with the lowest energies of all."],
  sol:"<b>Lyman n₁=1 UV · Balmer n₁=2 visible · Paschen n₁=3 IR · Brackett n₁=4 IR · Pfund n₁=5 IR · Humphrey n₁=6 far IR.</b> Only Balmer is visible — remember it by “Balmer is the one you can see”."},
 
-{id:61, lec:"L-7", blk:"The series", topic:"Series limit",
+{id:61, lec:"L-7", blk:"The series", topic:"Series limit", t:90,
  q:"The <b>series limit</b> of any spectral series corresponds to",
  opts:[
   "n₂ = ∞, giving the shortest wavelength of that series",
@@ -1006,7 +1032,7 @@ const QUIZ = [
   "This describes the first line correctly, but that is not the series limit."],
  sol:"<b>Series limit: n₂ = ∞ ⇒ λ<sub>min</sub>, ν<sub>max</sub>, E<sub>max</sub>. First line: n₂ = n₁ + 1 ⇒ λ<sub>max</sub>, lowest energy.</b> Read the question carefully — “limit” and “first” sit at opposite ends of the series."},
 
-{id:62, lec:"L-7", blk:"Calculations", topic:"A Lyman-series wavelength",
+{id:62, lec:"L-7", blk:"Calculations", topic:"A Lyman-series wavelength", t:90,
  q:"The wavelength of the Lyman line with n₂ = 3 (R = 109677 cm⁻¹) is about",
  opts:["102.6 nm","121.6 nm","91.2 nm","656 nm"],
  ans:0,
@@ -1017,7 +1043,7 @@ const QUIZ = [
   "656 nm is the red H<sub>α</sub> line of the <b>Balmer</b> series (n₁ = 2, n₂ = 3) — visible, not ultraviolet."],
  sol:"1/λ = R(1/1² − 1/3²) = 109677 × 8/9 = 97490 cm⁻¹ ⇒ λ = 1.026 × 10⁻⁵ cm = <b>102.6 nm</b>. All Lyman lines lie between 91.2 nm (limit) and 121.6 nm (first line)."},
 
-{id:63, lec:"L-7", blk:"Calculations", topic:"Shortest wavelength in the Balmer series",
+{id:63, lec:"L-7", blk:"Calculations", topic:"Shortest wavelength in the Balmer series", t:90,
  q:"The wave number of the shortest-wavelength transition in the Balmer series is",
  opts:["27419 cm⁻¹","109677 cm⁻¹","15233 cm⁻¹","12186 cm⁻¹"],
  ans:0,
@@ -1028,7 +1054,7 @@ const QUIZ = [
   "12186 cm⁻¹ = 109677 × (1/9 − 0) is the Paschen series limit."],
  sol:"Shortest λ ⇒ biggest ΔE ⇒ <b>n₂ = ∞</b>. For Balmer n₁ = 2: ν̄ = 109677 × 1/4 = <b>27419.25 cm⁻¹</b>, i.e. λ = 364.7 nm, just past the violet end."},
 
-{id:64, lec:"L-7", blk:"Counting lines", topic:"Lines from n = 6 to the ground state",
+{id:64, lec:"L-7", blk:"Counting lines", topic:"Lines from n = 6 to the ground state", t:90,
  q:"The maximum number of emission lines produced when hydrogen atoms excited to n = 6 fall to the ground state is",
  opts:["15","6","5","21"],
  ans:0,
@@ -1039,7 +1065,7 @@ const QUIZ = [
   "21 is 6 × 7/2, using n(n + 1)/2 instead of n(n − 1)/2."],
  sol:"<b>Lines = (n₂ − n₁)(n₂ − n₁ + 1)/2</b>; with n₂ = 6, n₁ = 1 that is 5 × 6/2 = <b>15</b>. Equivalently n(n − 1)/2 for a fall all the way to the ground state — it counts every pair of levels."},
 
-{id:65, lec:"L-7", blk:"Counting lines", topic:"Lines between two excited levels",
+{id:65, lec:"L-7", blk:"Counting lines", topic:"Lines between two excited levels", t:90,
  q:"How many spectral lines can be emitted when hydrogen atoms fall from n = 6 to n = 3?",
  opts:["6","15","3","10"],
  ans:0,
@@ -1050,7 +1076,7 @@ const QUIZ = [
   "10 is 4 × 5/2, which would need a gap of 4 between the levels rather than 3."],
  sol:"Use the <b>difference</b>, not the top level: Δ = 6 − 3 = 3, so lines = 3 × 4/2 = <b>6</b> (6→5, 6→4, 6→3, 5→4, 5→3, 4→3). The n(n−1)/2 shortcut only applies when the fall ends at n = 1."},
 
-{id:66, lec:"L-7", blk:"Calculations", topic:"Ratio of longest to shortest in Lyman",
+{id:66, lec:"L-7", blk:"Calculations", topic:"Ratio of longest to shortest in Lyman", t:90,
  q:"The ratio of the longest to the shortest wavelength in the Lyman series is",
  opts:["4 : 3","3 : 4","9 : 8","4 : 1"],
  ans:0,
@@ -1061,7 +1087,7 @@ const QUIZ = [
   "4 : 1 would be the ratio if the bracket for the first line were 1/4, which is the Balmer limit, not a Lyman line."],
  sol:"Longest λ: n₂ = 2, ν̄ = R(1 − 1/4) = 3R/4. Shortest λ: n₂ = ∞, ν̄ = R. Since λ = 1/ν̄, <b>λ<sub>max</sub>/λ<sub>min</sub> = R/(3R/4) = 4/3</b>. In numbers, 121.6/91.2 = 1.33 ✓"},
 
-{id:67, lec:"L-7", blk:"Bohr's drawbacks", topic:"What Bohr cannot explain",
+{id:67, lec:"L-7", blk:"Bohr's drawbacks", topic:"What Bohr cannot explain", t:60,
  q:"Bohr's model fails to explain",
  opts:[
   "the splitting of spectral lines in a magnetic field",
@@ -1076,7 +1102,7 @@ const QUIZ = [
   "Discrete levels are a postulate of the model, not something it fails at."],
  sol:"Bohr's failures: <b>multi-electron atoms</b>, the <b>fine structure</b> of lines, the <b>Zeeman</b> and <b>Stark</b> effects, and no justification for why mvr = nh/2π. It also mixes classical orbits with quantum jumps — philosophically uncomfortable, and superseded by quantum mechanics."},
 
-{id:68, lec:"L-7", blk:"The series", topic:"Highest-energy photon",
+{id:68, lec:"L-7", blk:"The series", topic:"Highest-energy photon", t:60,
  q:"Which of these transitions in a hydrogen atom emits the photon of highest energy?",
  opts:["n = 4 → n = 1","n = 4 → n = 2","n = 4 → n = 3","n = 3 → n = 2"],
  ans:0,
@@ -1088,7 +1114,7 @@ const QUIZ = [
  sol:"Energy depends on the <b>gap between the reciprocals of the squares</b>, and 1/n² collapses fast. Any transition ending at n = 1 dominates: the Lyman series carries far more energy than all the others."},
 
 /* ---------------- L-8 (9) ---------------- */
-{id:69, lec:"L-8", blk:"de Broglie", topic:"The de Broglie relation",
+{id:69, lec:"L-8", blk:"de Broglie", topic:"The de Broglie relation", t:90,
  q:"The de Broglie wavelength of a particle of mass m moving with velocity v is",
  opts:["h/mv","mv/h","h·mv","hv/m"],
  ans:0,
@@ -1099,7 +1125,7 @@ const QUIZ = [
   "This puts velocity in the numerator and mass in the denominator, so a heavier particle would have a longer wave."],
  sol:"<b>λ = h/mv = h/p</b>, and in terms of kinetic energy <b>λ = h/√(2E<sub>k</sub>m)</b>. Momentum and wavelength are inversely related: the more particle-like the momentum, the less wave-like the behaviour."},
 
-{id:70, lec:"L-8", blk:"de Broglie", topic:"Wavelength from kinetic energy",
+{id:70, lec:"L-8", blk:"de Broglie", topic:"Wavelength from kinetic energy", t:90,
  q:"In terms of kinetic energy E<sub>k</sub>, the de Broglie wavelength is",
  opts:["h/√(2E<sub>k</sub>m)","h/(2E<sub>k</sub>m)","h√(2E<sub>k</sub>m)","h/√(E<sub>k</sub>m)"],
  ans:0,
@@ -1110,7 +1136,7 @@ const QUIZ = [
   "The factor 2 is essential: it comes from E<sub>k</sub> = p²/2m."],
  sol:"p = mv and E<sub>k</sub> = ½mv² = p²/2m, so p = √(2mE<sub>k</sub>) and <b>λ = h/√(2mE<sub>k</sub>)</b>. For an electron accelerated through V volts, E<sub>k</sub> = eV and this becomes λ ≈ 12.27/√V Å."},
 
-{id:71, lec:"L-8", blk:"de Broglie", topic:"Why macroscopic waves are not seen",
+{id:71, lec:"L-8", blk:"de Broglie", topic:"Why macroscopic waves are not seen", t:90,
  q:"A ball of mass 0.1 kg moves at 10 m s⁻¹. Its de Broglie wavelength is",
  opts:[
   "6.63 × 10⁻³⁴ m — far too small to detect",
@@ -1125,7 +1151,7 @@ const QUIZ = [
   "Again the wrong exponent, and no diffraction experiment could ever resolve such a wavelength."],
  sol:"mv = 0.1 × 10 = 1 kg m s⁻¹, so <b>λ = h = 6.63 × 10⁻³⁴ m</b>. This is why matter waves never show up for everyday objects: h is tiny, and only when mv is also tiny — as for an electron — does λ become comparable to atomic dimensions."},
 
-{id:72, lec:"L-8", blk:"de Broglie", topic:"Comparing two particles",
+{id:72, lec:"L-8", blk:"de Broglie", topic:"Comparing two particles", t:90,
  q:"Particles A and B are in motion. The momentum of B is half that of A, and λ<sub>A</sub> = 5 × 10⁻⁸ m. Then λ<sub>B</sub> is",
  opts:["1 × 10⁻⁷ m","2.5 × 10⁻⁸ m","5 × 10⁻⁸ m","2 × 10⁻⁷ m"],
  ans:0,
@@ -1136,7 +1162,7 @@ const QUIZ = [
   "This quadruples the wavelength, as if the momentum had been quartered."],
  sol:"<b>λ = h/p ⇒ λ<sub>B</sub>/λ<sub>A</sub> = p<sub>A</sub>/p<sub>B</sub> = 2.</b> So λ<sub>B</sub> = <b>10⁻⁷ m</b>. Note that the masses are never needed — momentum alone fixes the wavelength."},
 
-{id:73, lec:"L-8", blk:"de Broglie", topic:"The standing-wave picture of Bohr's orbits",
+{id:73, lec:"L-8", blk:"de Broglie", topic:"The standing-wave picture of Bohr's orbits", t:60,
  q:"Bohr's condition mvr = nh/2π is equivalent to the de Broglie statement that",
  opts:[
   "the circumference of the orbit contains a whole number of wavelengths, 2πr = nλ",
@@ -1151,7 +1177,7 @@ const QUIZ = [
   "Only one electron orbits in a hydrogen-like species; the quantization concerns the wave, not a count of particles."],
  sol:"<b>2πr = nλ.</b> An orbit is allowed only if the electron wave closes on itself as a standing wave — otherwise it interferes destructively with itself and dies out. This finally <b>explained</b> Bohr's otherwise arbitrary postulate."},
 
-{id:74, lec:"L-8", blk:"Uncertainty", topic:"Heisenberg's principle",
+{id:74, lec:"L-8", blk:"Uncertainty", topic:"Heisenberg's principle", t:60,
  q:"Heisenberg's uncertainty principle states that",
  opts:["Δx·Δp ≥ h/4π","Δx·Δp ≤ h/4π","Δx·Δp = h/2π","Δx/Δp ≥ h/4π"],
  ans:0,
@@ -1162,7 +1188,7 @@ const QUIZ = [
   "The two uncertainties are <b>multiplied</b>, not divided. A quotient would carry no restriction at all."],
  sol:"<b>Δx·Δp ≥ h/4π</b>, equivalently <b>Δx·mΔv ≥ h/4π</b> and <b>ΔE·Δt ≥ h/4π</b>. Note h/4π here, against h/2π in Bohr's quantization — the two are constantly confused."},
 
-{id:75, lec:"L-8", blk:"Uncertainty", topic:"Uncertainty in position of a golf ball",
+{id:75, lec:"L-8", blk:"Uncertainty", topic:"Uncertainty in position of a golf ball", t:90,
  q:"A golf ball of mass 40 g moves at 45 m s⁻¹, measured to 2 % accuracy. The uncertainty in its position is about",
  opts:["1.5 × 10⁻³³ m","1.5 × 10⁻³¹ m","1.5 × 10⁻³⁵ m","0.9 m"],
  ans:0,
@@ -1173,7 +1199,7 @@ const QUIZ = [
   "0.9 m s⁻¹ is Δv, the uncertainty in <b>speed</b>, not in position, and its units are wrong for a length."],
  sol:"Δv = 45 × 2/100 = 0.9 m s⁻¹, m = 0.04 kg. <b>Δx = h/(4πmΔv) = 1.46 × 10⁻³³ m</b>. Utterly unmeasurable — which is precisely why the uncertainty principle never troubles macroscopic objects."},
 
-{id:76, lec:"L-8", blk:"Uncertainty", topic:"Why it matters only for small particles",
+{id:76, lec:"L-8", blk:"Uncertainty", topic:"Why it matters only for small particles", t:60,
  q:"The uncertainty principle is significant for an electron but negligible for a cricket ball because",
  opts:[
   "the ball's mass is enormous compared with h, so Δx comes out vanishingly small",
@@ -1188,7 +1214,7 @@ const QUIZ = [
   "Every moving body has an associated matter wave; the ball's is simply far too short to observe."],
  sol:"Δx·mΔv ≥ h/4π. With h ≈ 10⁻³⁴ and a macroscopic m, the bound is fantastically small — the principle is always true but only <b>noticeable</b> for particles of tiny mass."},
 
-{id:77, lec:"L-8", blk:"de Broglie", topic:"Wavelength of the ground-state electron",
+{id:77, lec:"L-8", blk:"de Broglie", topic:"Wavelength of the ground-state electron", t:90,
  q:"The de Broglie wavelength of the electron in the ground state of hydrogen (v = 2.18 × 10⁶ m s⁻¹, m = 9.11 × 10⁻³¹ kg) is about 3.3 Å. This value equals",
  opts:[
   "the circumference of the first Bohr orbit",
@@ -1204,7 +1230,7 @@ const QUIZ = [
  sol:"λ = h/mv = 6.626 × 10⁻³⁴/(9.11 × 10⁻³¹ × 2.18 × 10⁶) = 3.34 × 10⁻¹⁰ m = 3.34 Å, and <b>2πr₁ = 2π(0.529) = 3.32 Å</b>. Exactly one wavelength fits round the ground-state orbit — the standing wave that makes n = 1 allowed."},
 
 /* ---------------- L-9 (10) ---------------- */
-{id:78, lec:"L-9", blk:"Allowed values", topic:"Range of the azimuthal quantum number",
+{id:78, lec:"L-9", blk:"Allowed values", topic:"Range of the azimuthal quantum number", t:90,
  q:"For a given principal quantum number n, the azimuthal quantum number ℓ can take the values",
  opts:["0 to (n − 1)","1 to n","0 to n","−n to +n"],
  ans:0,
@@ -1215,7 +1241,7 @@ const QUIZ = [
   "That is the range of the <b>magnetic</b> quantum number m, which runs from −ℓ to +ℓ."],
  sol:"<b>ℓ = 0, 1, …, (n − 1)</b>, labelled s, p, d, f. So n = 1 has only 1s; n = 2 has 2s and 2p; n = 3 has 3s, 3p, 3d — and no 3f."},
 
-{id:79, lec:"L-9", blk:"Allowed values", topic:"Number of values of m",
+{id:79, lec:"L-9", blk:"Allowed values", topic:"Number of values of m", t:60,
  q:"For a subshell of azimuthal quantum number ℓ, the number of allowed values of the magnetic quantum number m is",
  opts:["2ℓ + 1","2ℓ","ℓ + 1","2ℓ + 2"],
  ans:0,
@@ -1226,7 +1252,7 @@ const QUIZ = [
   "2ℓ + 2 is the number of <b>electrons</b> in the subshell divided by… nothing standard; the electron count is 2(2ℓ+1)."],
  sol:"<b>Orbitals in a subshell = 2ℓ + 1</b>, so s has 1, p has 3, d has 5, f has 7. Each holds 2 electrons, giving max electrons = <b>2(2ℓ + 1)</b> — 2, 6, 10, 14."},
 
-{id:80, lec:"L-9", blk:"Allowed values", topic:"Possible ℓ for n = 5",
+{id:80, lec:"L-9", blk:"Allowed values", topic:"Possible ℓ for n = 5", t:90,
  q:"If the principal quantum number of an orbital is 5, the possible values of ℓ are",
  opts:["0, 1, 2, 3, 4","1, 2, 3, 4, 5","0, 1, 2, 3, 4, 5","−4 to +4"],
  ans:0,
@@ -1237,7 +1263,7 @@ const QUIZ = [
   "Negative values belong to m, not to ℓ. The azimuthal quantum number is never negative."],
  sol:"ℓ = 0 to (n − 1). For n = 5: <b>ℓ = 0, 1, 2, 3, 4</b> — exactly n = 5 subshells, which is the general rule."},
 
-{id:81, lec:"L-9", blk:"Counting", topic:"Subshells and orbitals",
+{id:81, lec:"L-9", blk:"Counting", topic:"Subshells and orbitals", t:90,
  q:"The number of sub-shells in the N shell and the number of orbitals in a d sub-shell are respectively",
  opts:["4 and 5","3 and 5","4 and 3","5 and 5"],
  ans:0,
@@ -1248,7 +1274,7 @@ const QUIZ = [
   "5 subshells would need n = 5, the O shell."],
  sol:"Shells are labelled <b>K, L, M, N</b> for n = 1, 2, 3, 4. Subshells in a shell = <b>n</b>. Orbitals in a subshell = <b>2ℓ + 1</b>, so d gives 5: d<sub>xy</sub>, d<sub>yz</sub>, d<sub>zx</sub>, d<sub>x²−y²</sub>, d<sub>z²</sub>."},
 
-{id:82, lec:"L-9", blk:"Counting", topic:"Maximum electrons for given quantum numbers",
+{id:82, lec:"L-9", blk:"Counting", topic:"Maximum electrons for given quantum numbers", t:90,
  q:"The maximum numbers of electrons for (a) ℓ = 3, (b) n = 3 and (c) m = +3 are respectively",
  opts:["14, 18, 2","14, 9, 2","7, 18, 1","14, 18, 6"],
  ans:0,
@@ -1259,7 +1285,7 @@ const QUIZ = [
   "The first two are right, but m = +3 fixes one orbital only — 6 is the capacity of a p subshell."],
  sol:"<b>ℓ = 3 → 2(2ℓ+1) = 14. n = 3 → 2n² = 18. m = +3 → one orbital → 2.</b> Read carefully whether the question asks for orbitals or electrons; the factor of 2 is the most common slip here."},
 
-{id:83, lec:"L-9", blk:"Counting", topic:"Orbitals in a shell",
+{id:83, lec:"L-9", blk:"Counting", topic:"Orbitals in a shell", t:90,
  q:"The total number of orbitals in the shell with principal quantum number n is",
  opts:["n²","2n²","2n","n"],
  ans:0,
@@ -1270,7 +1296,7 @@ const QUIZ = [
   "n is the number of <b>subshells</b> in the shell, not of orbitals."],
  sol:"<b>Orbitals in shell = n². Electrons in shell = 2n². Subshells in shell = n.</b> For n = 3: 3 subshells, 9 orbitals, 18 electrons."},
 
-{id:84, lec:"L-9", blk:"Angular momentum", topic:"Orbital angular momentum of a 3p electron",
+{id:84, lec:"L-9", blk:"Angular momentum", topic:"Orbital angular momentum of a 3p electron", t:60,
  q:"The orbital angular momentum of an electron in a 3p orbital is",
  opts:["√2 · h/2π","√6 · h/2π","3 · h/2π","zero"],
  ans:0,
@@ -1281,7 +1307,7 @@ const QUIZ = [
   "Zero angular momentum belongs to an <b>s</b> orbital, where ℓ = 0."],
  sol:"<b>Orbital angular momentum = √(ℓ(ℓ+1))·h/2π.</b> s: 0 · p: √2 · d: √6 · f: √12. ⚠ The “3” in 3p plays no part whatsoever."},
 
-{id:85, lec:"L-9", blk:"Allowed values", topic:"An impossible set of quantum numbers",
+{id:85, lec:"L-9", blk:"Allowed values", topic:"An impossible set of quantum numbers", t:60,
  q:"Which set of quantum numbers (n, ℓ, m, s) is <b>not</b> allowed?",
  opts:[
   "3, 3, 0, +½",
@@ -1296,7 +1322,7 @@ const QUIZ = [
   "A valid 2p electron: ℓ = 1 ≤ 1, and m = +1 is within range."],
  sol:"Check in order: <b>ℓ ≤ n − 1</b>, then <b>−ℓ ≤ m ≤ +ℓ</b>, then <b>s = ±½</b>. The first test kills (3, 3, 0, +½)."},
 
-{id:86, lec:"L-9", blk:"Degeneracy", topic:"Degeneracy of an f subshell",
+{id:86, lec:"L-9", blk:"Degeneracy", topic:"Degeneracy of an f subshell", t:60,
  q:"An f subshell is",
  opts:["7-fold degenerate","5-fold degenerate","3-fold degenerate","non-degenerate"],
  ans:0,
@@ -1307,7 +1333,7 @@ const QUIZ = [
   "Only the <b>s</b> subshell is non-degenerate, having a single orbital."],
  sol:"Degeneracy = 2ℓ + 1: <b>s non-degenerate · p 3-fold · d 5-fold · f 7-fold.</b> In a multi-electron atom the subshells of one shell order as s &lt; p &lt; d &lt; f."},
 
-{id:87, lec:"L-9", blk:"Quantum numbers", topic:"What each quantum number tells you",
+{id:87, lec:"L-9", blk:"Quantum numbers", topic:"What each quantum number tells you", t:60,
  q:"The <b>shape</b> of an orbital is determined by which quantum number?",
  opts:["ℓ","n","m","s"],
  ans:0,
@@ -1319,7 +1345,7 @@ const QUIZ = [
  sol:"<b>n → size and energy · ℓ → shape · m → orientation · s → spin.</b> A one-line summary worth memorizing verbatim; questions often just test this mapping."},
 
 /* ---------------- L-10 (9) ---------------- */
-{id:88, lec:"L-10", blk:"Aufbau", topic:"The (n+ℓ) rule",
+{id:88, lec:"L-10", blk:"Aufbau", topic:"The (n+ℓ) rule", t:60,
  q:"According to the (n + ℓ) rule, the subshell that fills first is the one with",
  opts:[
   "lower (n + ℓ); if equal, the lower n",
@@ -1334,7 +1360,7 @@ const QUIZ = [
   "This ignores (n + ℓ) altogether and would wrongly fill 3d before 4s — the exact case the rule exists to settle."],
  sol:"<b>Lower (n + ℓ) wins; on a tie, lower n wins.</b> This single rule generates the whole Aufbau order 1s, 2s, 2p, 3s, 3p, 4s, 3d, 4p, 5s, 4d, 5p, 6s, 4f, 5d, 6p, 7s."},
 
-{id:89, lec:"L-10", blk:"Aufbau", topic:"Ordering four subshells",
+{id:89, lec:"L-10", blk:"Aufbau", topic:"Ordering four subshells", t:90,
  q:"Arrange 4s, 3s, 3p and 4d in increasing order of energy.",
  opts:[
   "3s &lt; 3p &lt; 4s &lt; 4d",
@@ -1349,7 +1375,7 @@ const QUIZ = [
   "3s has (n + ℓ) = 3 and 3p has 4, so 3s is clearly lower — the two cannot be swapped."],
  sol:"(n + ℓ): 3s = <b>3</b>, 3p = <b>4</b>, 4s = <b>4</b>, 4d = <b>6</b>. Tie between 3p and 4s broken by lower n ⇒ <b>3s &lt; 3p &lt; 4s &lt; 4d</b>."},
 
-{id:90, lec:"L-10", blk:"Aufbau", topic:"Subshells with (n+ℓ) = 7",
+{id:90, lec:"L-10", blk:"Aufbau", topic:"Subshells with (n+ℓ) = 7", t:60,
  q:"For subshells with (n + ℓ) = 7, the increasing order of energy is",
  opts:[
   "4f &lt; 5d &lt; 6p &lt; 7s",
@@ -1364,7 +1390,7 @@ const QUIZ = [
   "4f has n = 4 and 5d has n = 5, so 4f comes first."],
  sol:"The subshells with (n + ℓ) = 7 are 4f (4+3), 5d (5+2), 6p (6+1) and 7s (7+0). With the sum tied, <b>order by n</b>: 4f &lt; 5d &lt; 6p &lt; 7s. This is precisely the filling order after 6s."},
 
-{id:91, lec:"L-10", blk:"Pauli", topic:"Pauli exclusion principle",
+{id:91, lec:"L-10", blk:"Pauli", topic:"Pauli exclusion principle", t:60,
  q:"The Pauli exclusion principle says that",
  opts:[
   "no two electrons in an atom can have all four quantum numbers the same",
@@ -1379,7 +1405,7 @@ const QUIZ = [
   "Extra stability of half-filled subshells is the exchange-energy argument, used to explain the Cr and Cu exceptions."],
  sol:"<b>Pauli:</b> no two electrons share all four quantum numbers ⇒ an orbital holds at most <b>2 electrons, with opposite spins</b> ⇒ subshell capacities 2, 6, 10, 14 and shell capacity 2n²."},
 
-{id:92, lec:"L-10", blk:"Hund", topic:"Why oxygen's 2p is written the way it is",
+{id:92, lec:"L-10", blk:"Hund", topic:"Why oxygen's 2p is written the way it is", t:60,
  q:"Oxygen's configuration is written 1s² 2s² 2p<sub>x</sub>² 2p<sub>y</sub>¹ 2p<sub>z</sub>¹ rather than 1s² 2s² 2p<sub>x</sub>² 2p<sub>y</sub>² because of",
  opts:["Hund's rule of maximum multiplicity","the Pauli exclusion principle","the Aufbau principle","the (n + ℓ) rule"],
  ans:0,
@@ -1390,7 +1416,7 @@ const QUIZ = [
   "The (n + ℓ) rule likewise orders subshells, and all three 2p orbitals have identical n and ℓ."],
  sol:"<b>Hund's rule:</b> within a set of degenerate orbitals, fill singly with parallel spins before pairing. Pairing costs repulsion energy, and parallel spins gain exchange energy — so oxygen has <b>2 unpaired</b> electrons and is paramagnetic."},
 
-{id:93, lec:"L-10", blk:"Exceptions", topic:"Configuration of chromium",
+{id:93, lec:"L-10", blk:"Exceptions", topic:"Configuration of chromium", t:60,
  q:"The ground-state configuration of chromium (Z = 24) is",
  opts:["[Ar] 3d⁵ 4s¹","[Ar] 3d⁴ 4s²","[Ar] 3d⁶ 4s⁰","[Ar] 3d⁵ 4s²"],
  ans:0,
@@ -1401,7 +1427,7 @@ const QUIZ = [
   "3d⁵ 4s² accounts for 25 electrons, one too many for Z = 24."],
  sol:"<b>Cr = [Ar] 3d⁵ 4s¹</b> and <b>Cu = [Ar] 3d¹⁰ 4s¹</b>. Exactly half-filled and completely filled subshells gain symmetry and <b>exchange energy</b>, so one 4s electron shifts across."},
 
-{id:94, lec:"L-10", blk:"Exceptions", topic:"Configuration of copper",
+{id:94, lec:"L-10", blk:"Exceptions", topic:"Configuration of copper", t:60,
  q:"The ground-state configuration of copper (Z = 29) is",
  opts:["[Ar] 3d¹⁰ 4s¹","[Ar] 3d⁹ 4s²","[Ar] 3d¹⁰ 4s²","[Ar] 3d⁸ 4s³"],
  ans:0,
@@ -1412,7 +1438,7 @@ const QUIZ = [
   "An s subshell can never hold 3 electrons; Pauli caps it at 2."],
  sol:"<b>Cu = [Ar] 3d¹⁰ 4s¹.</b> Together with Cr = [Ar] 3d⁵ 4s¹, these are the two first-row exceptions you are expected to know by heart."},
 
-{id:95, lec:"L-10", blk:"Exceptions", topic:"Exchange energy in a half-filled subshell",
+{id:95, lec:"L-10", blk:"Exceptions", topic:"Exchange energy in a half-filled subshell", t:90,
  q:"The number of possible exchanges among the five parallel-spin electrons of a d⁵ configuration is",
  opts:["10","5","20","25"],
  ans:0,
@@ -1423,7 +1449,7 @@ const QUIZ = [
   "25 is 5², which counts every ordered pair including an electron with itself."],
  sol:"Exchanges = <b>n(n − 1)/2 = 5 × 4/2 = 10</b>. More exchanges means more <b>exchange energy</b> and greater stability, which is why exactly half-filled and fully filled subshells are favoured."},
 
-{id:96, lec:"L-10", blk:"Aufbau", topic:"Which fills first, 4s or 3d",
+{id:96, lec:"L-10", blk:"Aufbau", topic:"Which fills first, 4s or 3d", t:60,
  q:"In building up a neutral atom, 4s is filled before 3d because",
  opts:[
   "4s has the lower (n + ℓ) value",
@@ -1439,7 +1465,7 @@ const QUIZ = [
  sol:"(n + ℓ): 4s = <b>4</b>, 3d = <b>5</b>. So 4s fills first — which is why potassium and calcium go into 4s before the 3d transition series begins at scandium."},
 
 /* ---------------- L-11 (10) ---------------- */
-{id:97, lec:"L-11", blk:"Nodes", topic:"Radial nodes",
+{id:97, lec:"L-11", blk:"Nodes", topic:"Radial nodes", t:90,
  q:"The number of radial nodes in an orbital with quantum numbers n and ℓ is",
  opts:["n − ℓ − 1","ℓ","n − 1","n − ℓ"],
  ans:0,
@@ -1450,7 +1476,7 @@ const QUIZ = [
   "n − ℓ is one too many — the formula subtracts an extra 1."],
  sol:"<b>Angular nodes = ℓ · Radial nodes = n − ℓ − 1 · Total nodes = n − 1.</b> Check the sum: ℓ + (n − ℓ − 1) = n − 1 ✓"},
 
-{id:98, lec:"L-11", blk:"Nodes", topic:"Nodes in a 4d orbital",
+{id:98, lec:"L-11", blk:"Nodes", topic:"Nodes in a 4d orbital", t:90,
  q:"A 4d orbital has how many radial nodes?",
  opts:["1","2","3","0"],
  ans:0,
@@ -1461,7 +1487,7 @@ const QUIZ = [
   "0 radial nodes would apply to 3d, where n − ℓ − 1 = 3 − 2 − 1 = 0."],
  sol:"4d: n = 4, ℓ = 2. <b>Radial = 4 − 2 − 1 = 1 · Angular = 2 · Total = 3.</b> Whenever a question just says “nodes”, work out all three and see which is being asked for."},
 
-{id:99, lec:"L-11", blk:"Orbitals", topic:"Meaning of ψ²",
+{id:99, lec:"L-11", blk:"Orbitals", topic:"Meaning of ψ²", t:60,
  q:"For an atomic orbital with wave function ψ, the quantity ψ² represents",
  opts:[
   "the probability density of finding the electron at a point",
@@ -1476,7 +1502,7 @@ const QUIZ = [
   "Distance from the nucleus is the coordinate r, an input to ψ rather than an output."],
  sol:"<b>ψ² = probability density.</b> The chance of finding the electron in a thin shell between r and r + dr is <b>4πr²ψ²·dr</b>, the radial probability — note the extra 4πr² factor, which is why this curve is zero at the nucleus even though ψ² is largest there for 1s."},
 
-{id:100, lec:"L-11", blk:"Orbitals", topic:"The radial probability maximum for 1s",
+{id:100, lec:"L-11", blk:"Orbitals", topic:"The radial probability maximum for 1s", t:60,
  q:"For the 1s orbital of hydrogen, the radial probability curve 4πr²ψ² has its maximum at",
  opts:["r = 0.529 Å","r = 0","r = ∞","r = 1.058 Å"],
  ans:0,
@@ -1487,7 +1513,7 @@ const QUIZ = [
   "1.058 Å is twice the Bohr radius, and is the radius of the second orbit of He⁺ — not the 1s maximum."],
  sol:"4πr²ψ² is a product of a rising r² and a falling ψ², so it peaks in between — at <b>r = a₀ = 0.529 Å</b> for hydrogen 1s. The curve has (n − ℓ − 1) minima, i.e. none for 1s."},
 
-{id:101, lec:"L-11", blk:"Configurations", topic:"Counting electrons by (n + ℓ)",
+{id:101, lec:"L-11", blk:"Configurations", topic:"Counting electrons by (n + ℓ)", t:90,
  q:"How many electrons in zinc (Z = 30) have (n + ℓ) equal to 4?",
  opts:["8","6","10","2"],
  ans:0,
@@ -1498,7 +1524,7 @@ const QUIZ = [
   "2 counts the 4s electrons only, forgetting 3p."],
  sol:"Write the configuration, then tag every subshell with its (n + ℓ): 1s=1, 2s=2, 2p=3, 3s=3, <b>3p=4</b>, 3d=5, <b>4s=4</b>. Sum the matching electrons: <b>6 + 2 = 8</b>."},
 
-{id:102, lec:"L-11", blk:"Configurations", topic:"Reading shell-wise electron data",
+{id:102, lec:"L-11", blk:"Configurations", topic:"Reading shell-wise electron data", t:90,
  q:"A neutral atom has 2 electrons in K, 8 in L, 9 in M and 2 in N. Its atomic number and number of p-electrons are",
  opts:["21 and 12","19 and 12","21 and 6","21 and 8"],
  ans:0,
@@ -1509,7 +1535,7 @@ const QUIZ = [
   "8 is the number of <b>s</b>-electrons (1s², 2s², 3s², 4s²), not p-electrons."],
  sol:"Z = 2 + 8 + 9 + 2 = <b>21</b> (scandium) ⇒ 1s² 2s² 2p⁶ 3s² 3p⁶ 3d¹ 4s². Then <b>s = 8, p = 12, d = 1</b>, and the valency is 3 (two 4s plus one 3d)."},
 
-{id:103, lec:"L-11", blk:"Ions", topic:"Which electrons leave first",
+{id:103, lec:"L-11", blk:"Ions", topic:"Which electrons leave first", t:90,
  q:"When a first-row transition metal atom is ionized, the electrons removed first come from",
  opts:["the 4s orbital","the 3d orbitals","the 3p orbitals","the 4p orbitals"],
  ans:0,
@@ -1520,7 +1546,7 @@ const QUIZ = [
   "4p is empty in these atoms, so there is nothing there to remove."],
  sol:"⚠ <b>Fill 4s first, but empty 4s first.</b> Fe = [Ar]3d⁶4s² → Fe²⁺ = 3d⁶ → Fe³⁺ = 3d⁵. This asymmetry catches people out constantly."},
 
-{id:104, lec:"L-11", blk:"Ions", topic:"Unpaired electrons in Fe³⁺",
+{id:104, lec:"L-11", blk:"Ions", topic:"Unpaired electrons in Fe³⁺", t:60,
  q:"The number of unpaired electrons in Fe³⁺ (Z = 26) is",
  opts:["5","3","4","6"],
  ans:0,
@@ -1531,7 +1557,7 @@ const QUIZ = [
   "6 exceeds the number of d orbitals, so it is impossible for a d subshell."],
  sol:"Fe³⁺ = 1s²2s²2p⁶3s²3p⁶<b>3d⁵</b>4s⁰. A half-filled d subshell with all spins parallel gives <b>5 unpaired electrons</b> — the maximum possible, and the reason Fe³⁺ is strongly paramagnetic."},
 
-{id:105, lec:"L-11", blk:"Ions", topic:"Unpaired electrons in Cr²⁺ and Zn²⁺",
+{id:105, lec:"L-11", blk:"Ions", topic:"Unpaired electrons in Cr²⁺ and Zn²⁺", t:90,
  q:"The numbers of unpaired electrons in Cr²⁺ (Z = 24) and Zn²⁺ (Z = 30) are respectively",
  opts:["4 and 0","5 and 0","4 and 2","6 and 0"],
  ans:0,
@@ -1542,7 +1568,7 @@ const QUIZ = [
   "6 unpaired is impossible in a d subshell, which has only five orbitals."],
  sol:"Cr = [Ar]3d⁵4s¹ ⇒ <b>Cr²⁺ = 3d⁴, 4 unpaired</b>. Zn = [Ar]3d¹⁰4s² ⇒ <b>Zn²⁺ = 3d¹⁰, 0 unpaired</b> (diamagnetic). Start from the neutral atom's real configuration, then strip 4s first."},
 
-{id:106, lec:"L-11", blk:"Orbitals", topic:"Shape of a p orbital",
+{id:106, lec:"L-11", blk:"Orbitals", topic:"Shape of a p orbital", t:90,
  q:"A p orbital is",
  opts:[
   "dumb-bell shaped, with one nodal plane through the nucleus",
@@ -1561,13 +1587,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter C-2 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1585,6 +1622,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1619,15 +1659,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1639,47 +1680,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1689,30 +1747,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1721,7 +1823,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1734,9 +1838,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1745,7 +1867,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1766,21 +1889,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter C-2 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

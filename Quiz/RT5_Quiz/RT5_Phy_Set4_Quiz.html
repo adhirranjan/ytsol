@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different chapters</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -239,25 +265,25 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- P-8 · Work, Energy and Power ---------------- */
-{id:1, lec:"P8", blk:"L-4 · Statement & validity", topic:"W_net = ΔKE holds always",
+{id:1, lec:"P8", blk:"L-4 · Statement & validity", topic:"W_net = ΔKE holds always", t:90,
  q:"For a particle acted on by any combination of forces, the work–energy theorem W_net = ΔKE is valid:",
  opts:["always, whatever the nature of the forces acting","only when every force acting is conservative","only when gravity is the sole force acting","only when the body travels in a straight line"],
  ans:0,
  why:["Correct — the theorem is Newton's 2nd law integrated over displacement, so it needs no assumption about the type of force.","Slip: this is the condition for mechanical-energy conservation (ΔKE+ΔPE=0), not for the work–energy theorem itself.","Slip: gravity is irrelevant; friction, tension or spring forces all obey the same integrated identity.","Slip: the derivation uses the vector line integral ∫F·dr, which is path-shape independent, so curvature does not matter."],
  sol:"From F_net = m dv/dt, multiply by dx and integrate: ∫F_net·dx = ∫mv dv = ½mv_f² − ½mv_i². No step assumes the force is conservative, gravitational, or the path straight, so the result is <b>valid always</b>."},
-{id:2, lec:"P8", blk:"L-8 · Average vs Instantaneous Power", topic:"Average power = rate of KE delivered",
+{id:2, lec:"P8", blk:"L-8 · Average vs Instantaneous Power", topic:"Average power = rate of KE delivered", t:90,
  q:"A machine accelerates a 2 kg body from rest to 30 m/s in 6 s along a straight line. The average power delivered to the body is:",
  opts:["150 W","300 W","900 W","75 W"],
  ans:0,
  why:["Correct: the body gains ½·2·30² = 900 J of KE, and average power is that energy divided by the 6 s.","300 W is the final instantaneous power F·v = (2·5)(30); it is twice the average, not the average itself.","900 W is the total kinetic energy in joules quoted as power — the division by time was skipped.","75 W comes from halving the true average, an unjustified extra factor of one-half."],
  sol:"Average power is the rate of KE delivery: ΔKE = ½mv² = ½·2·30² = 900 J, so P_avg = ΔKE/t = 900/6 = <b>150 W</b>. (Since power rises linearly from 0, the final instantaneous power F·v = 10·30 = 300 W is exactly twice this.)"},
-{id:3, lec:"P8", blk:"L-3 · KE & momentum", topic:"p = √(2mK), equal masses",
+{id:3, lec:"P8", blk:"L-3 · KE & momentum", topic:"p = √(2mK), equal masses", t:90,
  q:"Two bodies of equal mass have kinetic energies in the ratio 4 : 9. The ratio of their momenta is:",
  opts:["2 : 3","4 : 9","3 : 2","9 : 4"],
  ans:0,
  why:["Correct: at equal mass p ∝ √K, so the momentum ratio is √4 : √9 = 2 : 3.","Slip: took p ∝ K (linear) instead of p ∝ √K, so kept the energy ratio unchanged.","Slip: inverted the correct 2 : 3 ratio, pairing larger p with smaller K.","Slip: took p ∝ K and also inverted, doubling the error."],
  sol:"p = √(2mK); equal m ⇒ p ∝ √K, so p₁ : p₂ = √K₁ : √K₂ = √4 : √9 = <b>2 : 3</b>."},
-{id:4, lec:"P8", blk:"L-7 · Pendulum", topic:"Speed at lowest point",
+{id:4, lec:"P8", blk:"L-7 · Pendulum", topic:"Speed at lowest point", t:90,
  q:"A simple pendulum of length ℓ = 1.0 m is released from rest with the string making 60° with the vertical. Taking g = 10 m/s², the speed of the bob at the lowest point is:",
  opts:["4.47 m/s","3.16 m/s","2.24 m/s","5.48 m/s"],
  ans:1,
@@ -265,19 +291,19 @@ const QUIZ = [
  sol:"Height fallen h = ℓ(1−cosθ) = 1.0(1−cos60°) = 0.5 m. Energy: ½mv² = mgh ⇒ v = √(2gh) = √(2·10·0.5) = √10 = <b>3.16 m/s</b>."},
 
 /* ---------------- P-10 · Circular Motion ---------------- */
-{id:5, lec:"P10", blk:"L-4 · Critical speed", topic:"min speed at top",
+{id:5, lec:"P10", blk:"L-4 · Critical speed", topic:"min speed at top", t:90,
  q:"A particle of mass m is tied to a light string of length R and whirled in a vertical circle. What is the minimum speed it must have at the highest point to keep the string taut and complete the circle?",
  opts:["√(2gR)","√(gR)","√(5gR)","√(3gR)"],
  ans:1,
  why:["√(2gR) is the launch speed that just lifts a bob to the horizontal level from rest — not a top-point condition.","Correct: T=0 at the top gives mg = mv²/R, so v_min = √(gR).","√(5gR) is the minimum speed needed at the lowest point, not at the top.","√(3gR) is the speed at the horizontal (side) position during a critical loop, not at the top."],
  sol:"At the highest point the centre is below the particle, so tension and weight both point inward: T + mg = mv²/R. A string cannot push, so the least it supplies is T=0, leaving mg = mv²/R. Hence v²=gR and the minimum top speed is <b>√(gR)</b>."},
-{id:6, lec:"P10", blk:"L-1 · Linear from angular speed", topic:"v = ωr",
+{id:6, lec:"P10", blk:"L-1 · Linear from angular speed", topic:"v = ωr", t:90,
  q:"A point lies at radius r = 0.5 m on a disc turning at ω = 4 rad/s. Its linear (tangential) speed is:",
  opts:["8 m/s", "4 m/s", "2 m/s", "1 m/s"],
  ans:2,
  why:["used v = ω/r = 4/0.5 instead of the product ωr","quoted ω itself as the speed, ignoring the radius entirely","correct: v = ωr = 4 × 0.5 = 2 m/s","used ωr² = 4 × 0.25, squaring the radius by mistake"],
  sol:"The arc relation s = rθ differentiates to v = ωr, valid with ω in rad/s and r in metres. Here v = ωr = 4 × 0.5 = 2 m/s. Note ω must already be in rad/s (it is), and it is the radius, not the diameter, that enters. The common slip is v = ω/r, which even carries the wrong units (1/(m·s)). Final: <b>2 m/s</b>."},
-{id:7, lec:"P10", blk:"L-5 · Well of Death", topic:"v_min numeric",
+{id:7, lec:"P10", blk:"L-5 · Well of Death", topic:"v_min numeric", t:90,
  q:"In a Well of Death of radius r=5 m the tyre-wall friction coefficient is μ=0.5. Taking g=10 m/s², the minimum speed the rider needs to avoid slipping down is:",
  opts:["5 m/s","7.07 m/s","10 m/s","100 m/s"],
  ans:2,
@@ -285,7 +311,7 @@ const QUIZ = [
  sol:"Split the forces: horizontally N=mv²/r, vertically the wall friction must hold the weight so μN=mg at the minimum. Eliminating N gives v_min=√(gr/μ). Substituting: v_min=√(10·5/0.5)=√(50/0.5)=√100=<b>10 m/s</b>. Note the mass never enters, and dividing by μ (0.5) increases the requirement — a rougher wall (larger μ) would instead lower it."},
 
 /* ---------------- P-9 · Collision ---------------- */
-{id:8, lec:"P9", blk:"L-4 · Restitution from rebound height", topic:"e = √(h′/h)",
+{id:8, lec:"P9", blk:"L-4 · Restitution from rebound height", topic:"e = √(h′/h)", t:90,
  q:"A ball is dropped onto a floor from a height of 4 m and rebounds to a height of 1 m. The coefficient of restitution between ball and floor is:",
  opts:["0.25","0.5","0.75","2.0"],
  ans:1,
@@ -294,7 +320,7 @@ const QUIZ = [
       "This is 1 − h′/h = 0.75, the fraction of energy lost, not the restitution.",
       "This is the inverted root √(h/h′) = √4 = 2, which would need e greater than 1 — physically impossible."],
  sol:"On a fixed floor the speed ratio after/before is e, while heights scale as speed², so h′/h = e². Hence e = √(h′/h) = √(1/4) = <b>0.5</b>. The g and the ½ cancel because both fall and rise use v = √(2gh)."},
-{id:9, lec:"P9", blk:"L-2 · Equal-mass exchange", topic:"Velocity swap",
+{id:9, lec:"P9", blk:"L-2 · Equal-mass exchange", topic:"Velocity swap", t:90,
  q:"Two identical 2 kg blocks approach head-on and collide elastically: block A moves at +5 m/s and block B at −3 m/s. What is the final velocity of block A?",
  opts:["+5 m/s (unchanged)","−3 m/s","+1 m/s","+2 m/s"],
  ans:1,
@@ -302,19 +328,19 @@ const QUIZ = [
  sol:"For a 1-D elastic collision of equal masses the velocities are simply exchanged: v_A′ = u_B and v_B′ = u_A. Hence v_A′ = <b>−3 m/s</b> and v_B′ = +5 m/s. Check momentum: 2(−3)+2(5) = 4 = 2(5)+2(−3) ✓, and KE is unchanged since the same two speeds reappear."},
 
 /* ---------------- P-11 · Centre of Mass ---------------- */
-{id:10, lec:"P11", blk:"L-2 · Non-uniform rod", topic:"λ = kx²/L",
+{id:10, lec:"P11", blk:"L-2 · Non-uniform rod", topic:"λ = kx²/L", t:90,
  q:"A rod of length L has linear mass density λ = kx²/L, x measured from one end. Its centre of mass is at x =",
  opts:["L/2", "2L/3", "3L/4", "L/4"],
  ans:2,
  why:["the uniform-rod answer — ignores that the far end is much denser","the result for λ ∝ x; here λ ∝ x², which pushes the COM further out","correct: ∫x³dx/∫x²dx over 0 → L = (L⁴/4)/(L³/3) = 3L/4","measured from the heavy end — from x = 0 the COM is at 3L/4"],
  sol:"dm = (kx²/L)dx. x<sub>cm</sub> = ∫₀<sup>L</sup> x(kx²/L)dx / ∫₀<sup>L</sup>(kx²/L)dx = (k/L)(L⁴/4) / (k/L)(L³/3) = 3L/4. Pattern: λ ∝ xⁿ gives x<sub>cm</sub> = (n + 1)L/(n + 2); n = 0 → L/2, n = 1 → 2L/3, n = 2 → 3L/4. Final: <b>3L/4 from the light end</b>."},
-{id:11, lec:"P11", blk:"L-1 · Two-particle COM", topic:"Inverse ratio of distances",
+{id:11, lec:"P11", blk:"L-1 · Two-particle COM", topic:"Inverse ratio of distances", t:180,
  q:"Two particles of mass m and 3m are a distance d apart. How far is their centre of mass from the particle of mass m?",
  opts:["d/4", "3d/4", "d/3", "d/2"],
  ans:1,
  why:["d/4 is the distance from the heavier 3m particle, not from m","correct: r<sub>m</sub> = (3m)d/(m + 3m) = 3d/4 — the COM sits far from the light particle","used the mass ratio 1:3 as a fraction of d instead of dividing d in the inverse ratio 3:1 over the total 4 parts","midpoint — only true when the two masses are equal"],
  sol:"Distances from the COM are inversely proportional to the masses: r₁/r₂ = m₂/m₁ = 3m/m = 3, so d is split into 3 + 1 = 4 parts. From m: r₁ = m₂d/(m₁ + m₂) = 3m·d/4m = 3d/4; from 3m: r₂ = m·d/4m = d/4. Check m₁r₁ = m(3d/4) = 3m(d/4) = m₂r₂ ✓. Final: <b>3d/4 from m</b>."},
-{id:12, lec:"P11", blk:"SB · JEE Adv 2024", topic:"Spring pair, collision at t₀ = 0",
+{id:12, lec:"P11", blk:"SB · JEE Adv 2024", topic:"Spring pair, collision at t₀ = 0", t:180,
  q:"Same system: particles 1 and 2 (mass m each) with x₁ = (x₀ + d) + a sinωt, x₂ = (x₀ − d) − a sinωt; particle 3 (mass m) moving at u₀ = aω/2 collides elastically with particle 2, this time at t₀ = 0. The COM speed of particles 1 and 2 afterwards, v<sub>cm</sub>/(aω), is:",
  opts:["0", "0.25", "0.75", "1.5"],
  ans:2,
@@ -322,7 +348,7 @@ const QUIZ = [
  sol:"At t = 0: v₁ = aω cos0 = +aω, v₂ = −aω (spring at natural length, both at maximum speed). Elastic, equal masses ⇒ velocities swap: v₂′ = u₀ = aω/2, v₃′ = −aω. Pair COM: v<sub>cm</sub> = (v₁ + v₂′)/2 = (aω + aω/2)/2 = 3aω/4. Final: <b>0.75</b>."},
 
 /* ---------------- P-4 · Motion in 1D & 2D (Kinematics) ---------------- */
-{id:13, lec:"P4", blk:"L-4 · Vertical projection", topic:"Maximum height",
+{id:13, lec:"P4", blk:"L-4 · Vertical projection", topic:"Maximum height", t:90,
  q:"A body projected vertically upward with speed u rises to a maximum height of",
  opts:["u²/2g","u²/g","2u²/g","u/2g"],
  ans:0,
@@ -332,7 +358,7 @@ const QUIZ = [
   "2u²/g is four times too large.",
   "u/2g is not even dimensionally a length — it has units of time."],
  sol:"<b>h<sub>max</sub> = u²/2g · t<sub>ascent</sub> = u/g · t<sub>flight</sub> = 2u/g.</b> Note h ∝ u²: doubling the launch speed <b>quadruples</b> the height."},
-{id:14, lec:"P4", blk:"L-8 · Complementary angles", topic:"Why the ranges match",
+{id:14, lec:"P4", blk:"L-8 · Complementary angles", topic:"Why the ranges match", t:60,
  q:"Two projectiles are fired with the same speed at 30° and 60°. Their horizontal ranges are",
  opts:[
   "equal",
@@ -346,7 +372,7 @@ const QUIZ = [
   "1 : 3 is exactly the height ratio here, since H ∝ sin²θ and sin²60/sin²30 = 3.",
   "1 : √3 is the ratio of the <b>times of flight</b>, T₁/T₂ = tanθ = tan30° = 1/√3."],
  sol:"<b>θ and 90° − θ give the same range</b> because sin2θ is symmetric about 45°. Everything else differs: the steeper angle gives the greater height and the longer flight."},
-{id:15, lec:"P4", blk:"L-12 · River crossing", topic:"Minimum-time crossing",
+{id:15, lec:"P4", blk:"L-12 · River crossing", topic:"Minimum-time crossing", t:90,
  q:"To cross a river in the <b>minimum time</b>, a boat should be headed",
  opts:[
   "straight across, perpendicular to the bank",
@@ -362,7 +388,7 @@ const QUIZ = [
  sol:"<b>Minimum time: θ = 0, t<sub>min</sub> = d/v<sub>br</sub></b>, but you drift downstream by v<sub>r</sub>t. <b>Shortest path: sinθ = v<sub>r</sub>/v<sub>br</sub> upstream</b>, zero drift but a longer crossing. The two goals genuinely conflict."},
 
 /* ---------------- P-6 · Newton's Laws of Motion ---------------- */
-{id:16, lec:"P6", blk:"L-4 · Wedge constraint", topic:"The contact constraint",
+{id:16, lec:"P6", blk:"L-4 · Wedge constraint", topic:"The contact constraint", t:60,
  q:"For a block staying in contact with a moving wedge, the constraint is obtained by",
  opts:[
   "equating the components of the two accelerations along the common normal",
@@ -376,7 +402,7 @@ const QUIZ = [
   "The surface-parallel components are free to differ — that is exactly how the block slides along the wedge.",
   "The block accelerates in general; it is only its relative motion perpendicular to the surface that vanishes."],
  sol:"<b>Along the common normal, the accelerations must match</b> (giving a<sub>A</sub> = a<sub>B</sub> sin θ in the standard geometry). Perpendicular to that, the block is free to slide. This is the wedge analogue of a string constraint."},
-{id:17, lec:"P6", blk:"SB · Incline", topic:"Block on an incline with a horizontal force",
+{id:17, lec:"P6", blk:"SB · Incline", topic:"Block on an incline with a horizontal force", t:180,
  q:"A 5 kg block sits on a fixed smooth 53° incline. A 100 N force is applied <b>horizontally</b>, pressing it toward the incline (g = 10, sin53° = 0.8, cos53° = 0.6). Its acceleration is",
  opts:[
   "4 m s⁻² up the incline",
@@ -390,7 +416,7 @@ const QUIZ = [
   "12 m s⁻² would follow from using the full 100 N without resolving it along the incline.",
   "20 is the net force in newtons; it still has to be divided by the 5 kg mass."],
  sol:"⚠ The force is <b>horizontal</b>, not along the slope — resolve it. Along: 100cos53° − 50sin53° = 60 − 40 = 20 N ⇒ <b>a = 4 m s⁻² up the incline</b>. Perpendicular: N = 50cos53° + 100sin53° = 110 N &gt; 0, so contact is maintained ✓"},
-{id:18, lec:"P6", blk:"L-4 · Movable pulley", topic:"Block on a table via a movable pulley",
+{id:18, lec:"P6", blk:"L-4 · Movable pulley", topic:"Block on a table via a movable pulley", t:90,
  q:"A 2 kg block on a smooth table is joined through a movable pulley to a 1 kg hanging block, so that the table block feels 2T. With g = 10, the acceleration of the 1 kg block is",
  opts:["20/3 m s⁻²","10/3 m s⁻²","5 m s⁻²","10 m s⁻²"],
  ans:0,
@@ -402,7 +428,7 @@ const QUIZ = [
  sol:"Constraint: the table block moves at <b>half</b> the hanging block's rate. 1 kg: 10 − T = a. 2 kg: 2T = 2(a/2) ⇒ T = a/2. Substituting: 10 = 3a/2 ⇒ <b>a = 20/3 ≈ 6.67 m s⁻²</b>, T = 10/3 N."},
 
 /* ---------------- P-7 · Friction ---------------- */
-{id:19, lec:"P7", blk:"L-4 · belt slipping", topic:"Block dropped on a moving conveyor belt: kinetic friction accelerates it until speeds match; find the sliding distance.",
+{id:19, lec:"P7", blk:"L-4 · belt slipping", topic:"Block dropped on a moving conveyor belt: kinetic friction accelerates it until speeds match; find the sliding distance.", t:180,
  src:"L-4 · SUGGESTED PROBLEMS Q4 (Level-4)",
  q:"A conveyor belt is moving with a constant speed of 3 ms<sup>&minus;1</sup>. A block is gently placed on it. The coefficient of friction between the block and the belt is &mu; = 0.3. The distance travelled by the block on the belt before it starts moving with the belt (take g = 10 ms<sup>&minus;2</sup>) is",
  opts:["0.45 m",
@@ -415,7 +441,7 @@ const QUIZ = [
   "0.9 m &mdash; comes from multiplying v&sup2;/(2g) by &mu; instead of dividing by it; dimensionally fine but the wrong operation.",
   "0 m &mdash; would hold only if the block were placed already moving at belt speed, or if &mu; were infinite; here the block starts at rest so it must slide."],
  sol:"<b>Step 1.</b> Placed gently means the block starts at rest while the belt runs at v = 3 m/s, so the belt slides forward under the block and kinetic friction acts <b>forward</b> on the block.<br><b>Step 2.</b> a = &mu;g = (0.3)(10) = 3 m/s&sup2;, constant until the speeds match.<br><b>Step 3.</b> Time to match speeds: t = v/a = 3/3 = 1 s. After that instant there is no relative sliding, friction drops to zero and they travel together.<br><b>Step 4.</b> Distance covered by the block in that 1 s: s = (1/2)at&sup2; = (1/2)(3)(1)&sup2; = v&sup2;/(2&mu;g) = 9/6 = 1.5 m.<br><b>Step 5.</b> Cross-check the other reading of the question: the belt covers vt = 3(1) = 3 m, so the slip relative to the belt = 3 &minus; 1.5 = 1.5 m. Both readings give the same number, so the answer is unambiguous.<br>&#9888; ICAD key says (a) 0.45 m; working gives (b) 1.5 m because a = &mu;g = 3 m/s&sup2; forces t = 1 s, hence s = v&sup2;/(2&mu;g) = 1.5 m and the relative slip equals the same 1.5 m."},
-{id:20, lec:"P7", blk:"L-3 · Incline force balance", topic:"Which quantity falls as the inclination of the plane is increased",
+{id:20, lec:"P7", blk:"L-3 · Incline force balance", topic:"Which quantity falls as the inclination of the plane is increased", t:90,
  src:"L-3 · LEVEL-1 Q1",
  q:"Which factor decreases when the angle of inclination &theta; increases?",
  opts:["Driving force",
@@ -430,7 +456,7 @@ const QUIZ = [
  sol:"<b>Step 1 — Resolve the weight.</b> Along the plane mg sin&theta;, perpendicular to it mg cos&theta;.<br><b>Step 2 — Normal reaction.</b> N = mg cos&theta;; at &theta; = 0&deg; N = mg, at &theta; = 60&deg; N = mg/2, at &theta; = 90&deg; N = 0, so N steadily decreases.<br><b>Step 3 — Limiting friction follows N.</b> f<sub>L</sub> = &mu;N = &mu;mg cos&theta;, so it decreases along with N.<br><b>Step 4 — Driving force moves the other way.</b> F = mg sin&theta; increases, which is exactly why a crossing (the angle of repose) exists at tan&alpha; = &mu;.<br><b>Step 5 — Conclusion.</b> The only listed quantity that decreases is the normal reaction, option (b)."},
 
 /* ---------------- P-3 · Vectors ---------------- */
-{id:21, lec:"P3", blk:"L-5 · Resolution", topic:"Rectangular components",
+{id:21, lec:"P3", blk:"L-5 · Resolution", topic:"Rectangular components", t:60,
  q:"A vector V makes angle θ with the x-axis. Its components are",
  opts:[
   "V<sub>x</sub> = V cos θ, V<sub>y</sub> = V sin θ",
@@ -444,7 +470,7 @@ const QUIZ = [
   "Tangents are unbounded, so this would give a component larger than the vector itself for θ &gt; 45°.",
   "Equal halves hold for no angle at all; even at 45° each component is V/√2."],
  sol:"<b>Along the reference axis → cos. Perpendicular to it → sin.</b> ⚠ Always identify which axis the angle is stated from: “37° with the vertical” makes the <b>vertical</b> component A cos 37°."},
-{id:22, lec:"P3", blk:"L-2 · Resultant", topic:"The resultant formula",
+{id:22, lec:"P3", blk:"L-2 · Resultant", topic:"The resultant formula", t:90,
  q:"For two vectors of magnitudes A and B with angle θ between them, the magnitude of the resultant is",
  opts:[
   "√(A² + B² + 2AB cos θ)",
@@ -460,7 +486,7 @@ const QUIZ = [
  sol:"<b>|A + B| = √(A² + B² + 2AB cos θ)</b> and <b>|A − B| = √(A² + B² − 2AB cos θ)</b>. The only difference is the sign of the middle term — check with θ = 0 whenever you are unsure."},
 
 /* ---------------- P-5 · Force Systems ---------------- */
-{id:23, lec:"P5", blk:"L-1 · What a force is", topic:"Contact versus long-range forces",
+{id:23, lec:"P5", blk:"L-1 · What a force is", topic:"Contact versus long-range forces", t:60,
  q:"Which of these is a <b>non-contact</b> (long-range) force?",
  opts:["Gravitational attraction","Normal reaction","Tension in a rope","Friction"],
  ans:0,
@@ -472,7 +498,7 @@ const QUIZ = [
  sol:"<b>Contact:</b> normal, tension, friction, applied push. <b>Non-contact:</b> gravitational, electrostatic, magnetic. Only the second group can act through a vacuum."},
 
 /* ---------------- P-1 · Basic Mathematical Tools-I ---------------- */
-{id:24, lec:"P1", blk:"L-1 · Radian measure", topic:"Converting degrees to radians",
+{id:24, lec:"P1", blk:"L-1 · Radian measure", topic:"Converting degrees to radians", t:60,
  q:"45° expressed in radians is",
  opts:["π/4","π/2","π/3","45π"],
  ans:0,
@@ -484,7 +510,7 @@ const QUIZ = [
  sol:"<b>degree → radian: × π/180. radian → degree: × 180/π.</b> So 45° = π/4 rad, and 1 rad ≈ 57°."},
 
 /* ---------------- P-2 · Basic Mathematical Tools-II ---------------- */
-{id:25, lec:"P2", blk:"L-4 · Stationary points", topic:"Condition for an extremum",
+{id:25, lec:"P2", blk:"L-4 · Stationary points", topic:"Condition for an extremum", t:60,
  q:"At a maximum or a minimum of a smooth curve,",
  opts:[
   "dy/dx = 0",
@@ -503,13 +529,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "RT-5 Physics Set 4 complete";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -527,6 +564,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -561,15 +601,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -581,47 +622,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -631,30 +689,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -663,7 +765,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -676,9 +780,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -687,7 +809,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -708,21 +831,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "RT-5 Physics Set 4 complete" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

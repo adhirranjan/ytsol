@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -241,7 +267,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (22) ---------------- */
-{id:1, lec:"L-1", blk:"Ordered pairs", topic:"When two ordered pairs are equal",
+{id:1, lec:"L-1", blk:"Ordered pairs", topic:"When two ordered pairs are equal", t:90,
  q:"For an ordered pair, (a, b) = (b, a) holds",
  opts:["only when a = b","always","never","only when a and b are both zero"],
  ans:0,
@@ -252,7 +278,7 @@ const QUIZ = [
   "Zero is not special here — (7, 7) = (7, 7) just as well."],
  sol:"An <b>ordered pair</b> has a fixed first and second component, so (a, b) = (c, d) requires a = c and b = d. Hence (a, b) = (b, a) ⇔ <b>a = b</b>. Contrast with sets, where {1, 2} = {2, 1}."},
 
-{id:2, lec:"L-1", blk:"Cartesian products", topic:"Definition of A × B",
+{id:2, lec:"L-1", blk:"Cartesian products", topic:"Definition of A × B", t:60,
  q:"The Cartesian product A × B is",
  opts:[
   "{(a, b) : a ∈ A, b ∈ B}",
@@ -267,7 +293,7 @@ const QUIZ = [
   "The union merges the two sets; the product builds pairs from them."],
  sol:"<b>A × B = {(a, b) : a ∈ A, b ∈ B}</b>, with n(A × B) = n(A)·n(B)."},
 
-{id:3, lec:"L-1", blk:"Cartesian products", topic:"Counting the product",
+{id:3, lec:"L-1", blk:"Cartesian products", topic:"Counting the product", t:60,
  q:"For finite sets, n(A × B) equals",
  opts:["n(A) · n(B)","n(A) + n(B)","2^(n(A)·n(B))","n(A) − n(B)"],
  ans:0,
@@ -278,7 +304,7 @@ const QUIZ = [
   "A count of pairs can never come from subtraction."],
  sol:"<b>n(A × B) = n(A)·n(B)</b>, and likewise n(A×B×C) = n(A)·n(B)·n(C)."},
 
-{id:4, lec:"L-1", blk:"Cartesian products", topic:"A numerical product",
+{id:4, lec:"L-1", blk:"Cartesian products", topic:"A numerical product", t:60,
  q:"If n(A) = 3 and n(B) = 4, then n(A × B) is",
  opts:["12","7","4096","64"],
  ans:0,
@@ -289,7 +315,7 @@ const QUIZ = [
   "64 = 4³ inverts the roles of the two exponents and has no meaning here."],
  sol:"n(A × B) = 3 × 4 = <b>12</b>."},
 
-{id:5, lec:"L-1", blk:"Relations", topic:"Counting relations",
+{id:5, lec:"L-1", blk:"Relations", topic:"Counting relations", t:60,
  q:"If n(A) = p and n(B) = q, the number of possible relations from A to B is",
  opts:["2^(pq)","pq","2^(p+q)","p^q"],
  ans:0,
@@ -300,7 +326,7 @@ const QUIZ = [
   "p^q counts functions from B to A, a different object entirely."],
  sol:"Relations from A to B = subsets of A × B = <b>2^(pq)</b>."},
 
-{id:6, lec:"L-1", blk:"Relations", topic:"Definition of a relation",
+{id:6, lec:"L-1", blk:"Relations", topic:"Definition of a relation", t:60,
  q:"A relation R from A to B is",
  opts:[
   "any subset of A × B",
@@ -315,7 +341,7 @@ const QUIZ = [
   "A relation is a <b>set</b> of pairs, which may contain many pairs or none."],
  sol:"<b>R ⊆ A × B.</b> Dom(R) is the set of first components and Range(R) the set of second components."},
 
-{id:7, lec:"L-1", blk:"Relations", topic:"The inverse relation",
+{id:7, lec:"L-1", blk:"Relations", topic:"The inverse relation", t:90,
  q:"For a relation R, the inverse R⁻¹ is",
  opts:[
   "{(b, a) : (a, b) ∈ R}",
@@ -330,7 +356,7 @@ const QUIZ = [
   "R⁻¹ = R only in special symmetric cases."],
  sol:"<b>R⁻¹ = {(b, a) : (a, b) ∈ R}</b>, so Dom(R⁻¹) = Range(R) and Range(R⁻¹) = Dom(R)."},
 
-{id:8, lec:"L-1", blk:"Relations", topic:"Domain of the inverse",
+{id:8, lec:"L-1", blk:"Relations", topic:"Domain of the inverse", t:60,
  q:"For a relation R, Dom(R⁻¹) equals",
  opts:["Range(R)","Dom(R)","the whole of A","the empty set"],
  ans:0,
@@ -341,7 +367,7 @@ const QUIZ = [
   "R⁻¹ is empty only when R is."],
  sol:"Inverting swaps the two roles: <b>Dom(R⁻¹) = Range(R)</b> and <b>Range(R⁻¹) = Dom(R)</b>."},
 
-{id:9, lec:"L-1", blk:"Functions", topic:"What makes a relation a function",
+{id:9, lec:"L-1", blk:"Functions", topic:"What makes a relation a function", t:90,
  q:"A relation f from A to B is a <b>function</b> when",
  opts:[
   "every element of A has exactly one image in B",
@@ -356,7 +382,7 @@ const QUIZ = [
   "That is the definition of <b>one-one</b>. A function is allowed to send several inputs to the same output."],
  sol:"f: A → B is a function iff <b>every</b> a ∈ A has an image and that image is <b>unique</b>. Domain = A, co-domain = B, and Range = f(A) ⊆ B."},
 
-{id:10, lec:"L-1", blk:"Functions", topic:"Spotting a relation that is not a function",
+{id:10, lec:"L-1", blk:"Functions", topic:"Spotting a relation that is not a function", t:60,
  q:"On the set {1, 2, 3}, which relation is <b>not</b> a function?",
  opts:[
   "{(1, 4), (1, 5), (2, 6), (3, 7)}",
@@ -371,7 +397,7 @@ const QUIZ = [
   "This is the identity function on {1, 2, 3}."],
  sol:"The failure is <b>one input, two outputs</b>. Repeated <i>images</i> are fine (many-one); repeated <i>first components</i> with different second components are not."},
 
-{id:11, lec:"L-1", blk:"Functions", topic:"The vertical line test",
+{id:11, lec:"L-1", blk:"Functions", topic:"The vertical line test", t:60,
  q:"A curve in the plane is the graph of a function of x exactly when",
  opts:[
   "no vertical line meets it more than once",
@@ -386,7 +412,7 @@ const QUIZ = [
   "Functions may be wildly discontinuous; the greatest-integer function is a standard example."],
  sol:"<b>Vertical line test → is it a function?</b> Horizontal line test → is it one-one? A circle or a sideways parabola fails the vertical test."},
 
-{id:12, lec:"L-1", blk:"Functions", topic:"A curve that fails the test",
+{id:12, lec:"L-1", blk:"Functions", topic:"A curve that fails the test", t:60,
  q:"Which of the following is <b>not</b> the graph of a function of x?",
  opts:[
   "a circle centred at the origin",
@@ -401,7 +427,7 @@ const QUIZ = [
   "A horizontal line is a constant function — one output for every input."],
  sol:"The circle x² + y² = r² gives y = ±√(r² − x²) — <b>two</b> values per x, so it is a relation but not a function."},
 
-{id:13, lec:"L-1", blk:"Functions", topic:"Range versus co-domain",
+{id:13, lec:"L-1", blk:"Functions", topic:"Range versus co-domain", t:60,
  q:"For a function f: A → B, which statement is always true?",
  opts:["Range(f) ⊆ B","Range(f) = B","Range(f) ⊆ A","Range(f) = A"],
  ans:0,
@@ -412,7 +438,7 @@ const QUIZ = [
   "Same error, with equality claimed as well."],
  sol:"<b>Range(f) = f(A) ⊆ B.</b> Range equals co-domain precisely when the function is onto."},
 
-{id:14, lec:"L-1", blk:"Functions", topic:"Equality of two functions",
+{id:14, lec:"L-1", blk:"Functions", topic:"Equality of two functions", t:60,
  q:"Two functions f and g are <b>equal</b> when",
  opts:[
   "they have the same domain, the same co-domain, and f(x) = g(x) for every x",
@@ -427,7 +453,7 @@ const QUIZ = [
   "Two rules can simplify identically and still define different functions if their domains differ."],
  sol:"f = g requires <b>same domain, same co-domain, and the same value at every point</b>."},
 
-{id:15, lec:"L-1", blk:"Functions", topic:"The same-formula-different-domain trap",
+{id:15, lec:"L-1", blk:"Functions", topic:"The same-formula-different-domain trap", t:60,
  q:"Let f: ℝ − {3} → ℝ be f(x) = (x² − 9)/(x − 3) and g: ℝ → ℝ be g(x) = x + 3. Then",
  opts:[
   "f ≠ g, because their domains differ",
@@ -442,7 +468,7 @@ const QUIZ = [
   "The rules agree on the whole of ℝ − {3}, not merely on the positive reals."],
  sol:"(x² − 9)/(x − 3) = x + 3 <b>for x ≠ 3</b>. The cancellation hides a hole at x = 3, so <b>f ≠ g</b>."},
 
-{id:16, lec:"L-1", blk:"Functions", topic:"Image and pre-image",
+{id:16, lec:"L-1", blk:"Functions", topic:"Image and pre-image", t:60,
  q:"If a = f(2), then",
  opts:[
   "a is the image of 2, and 2 is a pre-image of a",
@@ -457,7 +483,7 @@ const QUIZ = [
   "Only a is an image here; 2 is the argument."],
  sol:"a = f(2): <b>a is the image of 2</b>, and <b>2 is a pre-image of a</b>. A value can have many pre-images (f(x) = x² sends both 3 and −3 to 9) or none."},
 
-{id:17, lec:"L-1", blk:"Functions", topic:"Pre-image sets",
+{id:17, lec:"L-1", blk:"Functions", topic:"Pre-image sets", t:60,
  q:"For f: ℝ → ℝ with f(x) = x² + 1, the set f⁻¹(26) is",
  opts:["{−5, 5}","{5}","φ","{−26, 26}"],
  ans:0,
@@ -468,7 +494,7 @@ const QUIZ = [
   "The 26 has not been passed through the inverse rule at all."],
  sol:"f⁻¹(y) is the <b>set</b> of all x with f(x) = y. Here x² = 25 gives <b>{−5, 5}</b>."},
 
-{id:18, lec:"L-1", blk:"Functions", topic:"An empty pre-image",
+{id:18, lec:"L-1", blk:"Functions", topic:"An empty pre-image", t:60,
  q:"For the same f(x) = x² + 1 on ℝ, the set f⁻¹(−5) is",
  opts:["φ","{−5}","{5}","{−√6, √6}"],
  ans:0,
@@ -479,7 +505,7 @@ const QUIZ = [
   "x² = −6 has no real solution; ±√6 would solve x² = 6, giving f = 7."],
  sol:"Since x² + 1 ≥ 1 for every real x, the value −5 is never attained: <b>f⁻¹(−5) = φ</b>. A pre-image set may perfectly well be empty."},
 
-{id:19, lec:"L-1", blk:"Domains", topic:"Domain of a polynomial",
+{id:19, lec:"L-1", blk:"Domains", topic:"Domain of a polynomial", t:60,
  q:"The domain of the polynomial function f(x) = x³ + 5x + 6 is",
  opts:["ℝ","[0, ∞)","ℝ − {0}","it depends on the degree"],
  ans:0,
@@ -490,7 +516,7 @@ const QUIZ = [
   "Every polynomial, of any degree, has domain ℝ."],
  sol:"<b>Every polynomial has domain ℝ.</b> Restrictions arise only from denominators, even roots and logarithms."},
 
-{id:20, lec:"L-1", blk:"Domains", topic:"Domain of an even root",
+{id:20, lec:"L-1", blk:"Domains", topic:"Domain of an even root", t:60,
  q:"For f(x) = √(g(x)) to take real values, one needs",
  opts:["g(x) ≥ 0","g(x) &gt; 0","g(x) ≠ 0","g(x) ≤ 0"],
  ans:0,
@@ -501,7 +527,7 @@ const QUIZ = [
   "This is exactly backwards."],
  sol:"<b>√g(x) needs g(x) ≥ 0</b>. Compare with 1/√g(x), which needs g(x) &gt; 0."},
 
-{id:21, lec:"L-1", blk:"Domains", topic:"Even root in a denominator",
+{id:21, lec:"L-1", blk:"Domains", topic:"Even root in a denominator", t:60,
  q:"For f(x) = 1/√(g(x)) to be defined, one needs",
  opts:["g(x) &gt; 0","g(x) ≥ 0","g(x) ≠ 0","g(x) &lt; 0"],
  ans:0,
@@ -512,7 +538,7 @@ const QUIZ = [
   "Negative radicands are exactly what must be excluded."],
  sol:"<b>1/√g(x) needs g(x) &gt; 0</b> — the strictness is what distinguishes it from a plain square root."},
 
-{id:22, lec:"L-1", blk:"Domains", topic:"Combining two conditions",
+{id:22, lec:"L-1", blk:"Domains", topic:"Combining two conditions", t:60,
  q:"The domain of f(x) = √(4 − x) + 1/√(x² − 1) is",
  opts:[
   "(−∞, −1) ∪ (1, 4]",
@@ -528,7 +554,7 @@ const QUIZ = [
  sol:"Need 4 − x ≥ 0 <b>and</b> x² − 1 &gt; 0. So x ≤ 4 and (x &lt; −1 or x &gt; 1), giving <b>(−∞, −1) ∪ (1, 4]</b>. Domains of sums are <b>intersections</b> of the individual domains."},
 
 /* ---------------- L-2 (20) ---------------- */
-{id:23, lec:"L-2", blk:"Finding the range", topic:"The standard range method",
+{id:23, lec:"L-2", blk:"Finding the range", topic:"The standard range method", t:60,
  q:"The standard way to find the range of y = f(x) is to",
  opts:[
   "solve for x in terms of y, then keep those y for which x is real and lies in the domain",
@@ -543,7 +569,7 @@ const QUIZ = [
   "Range equals co-domain only when the function is onto, which is precisely what is usually being asked."],
  sol:"<b>1)</b> put y = f(x) · <b>2)</b> solve x = φ(y) · <b>3)</b> find every y giving a real x inside Dom(f) · <b>4)</b> that y-set is the range."},
 
-{id:24, lec:"L-2", blk:"Finding the range", topic:"Range of a rational function",
+{id:24, lec:"L-2", blk:"Finding the range", topic:"Range of a rational function", t:90,
  q:"The range of f(x) = (x − 3)/(2 − x) is",
  opts:["ℝ − {−1}","ℝ − {2}","ℝ","ℝ − {3}"],
  ans:0,
@@ -554,7 +580,7 @@ const QUIZ = [
   "3 is a perfectly attainable output (take x = 9/4)."],
  sol:"y = (x−3)/(2−x) ⇒ x(1 + y) = 2y + 3 ⇒ x = (2y+3)/(y+1). Real x exists for all y except <b>y = −1</b>, so Range = <b>ℝ − {−1}</b>."},
 
-{id:25, lec:"L-2", blk:"Finding the range", topic:"A removable hole",
+{id:25, lec:"L-2", blk:"Finding the range", topic:"A removable hole", t:90,
  q:"For f(x) = (x² − 16)/(x − 4), the domain and range are",
  opts:[
   "Domain ℝ − {4}, Range ℝ − {8}",
@@ -569,7 +595,7 @@ const QUIZ = [
   "The <b>domain</b> loses 4; the <b>range</b> loses the corresponding image 4 + 4 = 8."],
  sol:"f(x) = x + 4 for x ≠ 4, so Domain = ℝ − {4} and Range = <b>ℝ − {8}</b>. A hole in the domain punches a hole in the range at its image."},
 
-{id:26, lec:"L-2", blk:"Finding the range", topic:"Range of a semicircle",
+{id:26, lec:"L-2", blk:"Finding the range", topic:"Range of a semicircle", t:60,
  q:"The range of f(x) = √(9 − x²) is",
  opts:["[0, 3]","[−3, 3]","[0, 9]","(0, 3)"],
  ans:0,
@@ -580,7 +606,7 @@ const QUIZ = [
   "Both endpoints are attained: f(±3) = 0 and f(0) = 3, so the interval is closed."],
  sol:"Domain: 9 − x² ≥ 0 ⇒ x ∈ [−3, 3]. Then 0 ≤ 9 − x² ≤ 9, so the root lies in <b>[0, 3]</b> — the upper half of a circle of radius 3."},
 
-{id:27, lec:"L-2", blk:"Finding the range", topic:"The squeeze trick",
+{id:27, lec:"L-2", blk:"Finding the range", topic:"The squeeze trick", t:60,
  q:"The range of f(x) = 1/(2 − cos 3x) is",
  opts:["[1/3, 1]","[1, 3]","(1/3, 1)","[−1, 1]"],
  ans:0,
@@ -591,7 +617,7 @@ const QUIZ = [
   "The function is always positive, since the denominator is at least 1."],
  sol:"−1 ≤ cos 3x ≤ 1 ⇒ 1 ≤ 2 − cos 3x ≤ 3 ⇒ <b>1/3 ≤ f(x) ≤ 1</b>. Domain is all of ℝ, since the denominator never vanishes."},
 
-{id:28, lec:"L-2", blk:"Finding the range", topic:"Why the squeeze works",
+{id:28, lec:"L-2", blk:"Finding the range", topic:"Why the squeeze works", t:60,
  q:"The fastest route to the range of an expression like 1/(2 − cos 3x) is to",
  opts:[
   "bound the denominator using the known range of the trigonometric term, then reciprocate",
@@ -606,7 +632,7 @@ const QUIZ = [
   "The bound on cos 3x is the <b>input</b> to the calculation, not the answer. The surrounding arithmetic shifts and inverts that interval."],
  sol:"Bound the inner function, propagate the bound through each operation, and reverse the inequality when you reciprocate a <b>positive</b> quantity."},
 
-{id:29, lec:"L-2", blk:"Standard functions", topic:"Range of the modulus",
+{id:29, lec:"L-2", blk:"Standard functions", topic:"Range of the modulus", t:60,
  q:"The range of f(x) = |x| is",
  opts:["[0, ∞)","ℝ","(0, ∞)","[−1, 1]"],
  ans:0,
@@ -617,7 +643,7 @@ const QUIZ = [
   "The modulus is unbounded above."],
  sol:"|x| has domain ℝ and range <b>[0, ∞)</b> — the familiar V-shape."},
 
-{id:30, lec:"L-2", blk:"Standard functions", topic:"The square root of a square",
+{id:30, lec:"L-2", blk:"Standard functions", topic:"The square root of a square", t:60,
  q:"For every real x, √(x²) equals",
  opts:["|x|","x","±x","x²"],
  ans:0,
@@ -628,7 +654,7 @@ const QUIZ = [
   "Squaring and rooting cancel one power, not none."],
  sol:"<b>√(x²) = |x|</b>, not x. This is the identity behind most modulus manipulations."},
 
-{id:31, lec:"L-2", blk:"Standard functions", topic:"Range of the signum",
+{id:31, lec:"L-2", blk:"Standard functions", topic:"Range of the signum", t:60,
  q:"The range of the signum function sgn(x) is",
  opts:["{−1, 0, 1}","[−1, 1]","{−1, 1}","ℝ"],
  ans:0,
@@ -639,7 +665,7 @@ const QUIZ = [
   "Only three values are ever attained."],
  sol:"sgn(x) = 1 (x &gt; 0), 0 (x = 0), −1 (x &lt; 0). Domain ℝ, Range <b>{−1, 0, 1}</b>."},
 
-{id:32, lec:"L-2", blk:"Standard functions", topic:"Greatest integer of a negative number",
+{id:32, lec:"L-2", blk:"Standard functions", topic:"Greatest integer of a negative number", t:60,
  q:"The value of [−4.99] (greatest integer function) is",
  opts:["−5","−4","4","5"],
  ans:0,
@@ -650,7 +676,7 @@ const QUIZ = [
   "Both wrong in sign and rounded the wrong way."],
  sol:"<b>[x] rounds down</b>, i.e. towards −∞. So [3.4] = 3 but <b>[−4.99] = −5</b>, not −4."},
 
-{id:33, lec:"L-2", blk:"Standard functions", topic:"Greatest integer of a positive number",
+{id:33, lec:"L-2", blk:"Standard functions", topic:"Greatest integer of a positive number", t:90,
  q:"The value of [3.4] is",
  opts:["3","4","0.4","−3"],
  ans:0,
@@ -661,7 +687,7 @@ const QUIZ = [
   "The sign is wrong — 3.4 is positive, so its floor cannot be negative."],
  sol:"[3.4] = <b>3</b>, and correspondingly {3.4} = 3.4 − 3 = 0.4, since x = [x] + {x}."},
 
-{id:34, lec:"L-2", blk:"Standard functions", topic:"Range of the greatest-integer function",
+{id:34, lec:"L-2", blk:"Standard functions", topic:"Range of the greatest-integer function", t:60,
  q:"The range of f(x) = [x] is",
  opts:["ℤ, the set of integers","ℝ","[0, ∞)","[0, 1)"],
  ans:0,
@@ -672,7 +698,7 @@ const QUIZ = [
   "[0, 1) is the range of the <b>fractional-part</b> function, not the floor."],
  sol:"[x] has domain ℝ and range <b>ℤ</b> — the step or staircase function."},
 
-{id:35, lec:"L-2", blk:"Standard functions", topic:"Fractional part of a negative number",
+{id:35, lec:"L-2", blk:"Standard functions", topic:"Fractional part of a negative number", t:90,
  q:"The value of {−2.75} (fractional part) is",
  opts:["0.25","−0.75","0.75","−0.25"],
  ans:0,
@@ -683,7 +709,7 @@ const QUIZ = [
   "The fractional part is never negative — it always lies in [0, 1)."],
  sol:"{x} = x − [x]. With [−2.75] = −3: {−2.75} = −2.75 + 3 = <b>0.25</b>. The fractional part is <b>always</b> in [0, 1), whatever the sign of x."},
 
-{id:36, lec:"L-2", blk:"Standard functions", topic:"Range of the fractional part",
+{id:36, lec:"L-2", blk:"Standard functions", topic:"Range of the fractional part", t:60,
  q:"The range of f(x) = {x} = x − [x] is",
  opts:["[0, 1)","(0, 1)","[0, 1]","ℝ"],
  ans:0,
@@ -694,7 +720,7 @@ const QUIZ = [
   "The fractional part is confined to a unit interval — this is the sawtooth graph."],
  sol:"<b>Range{x} = [0, 1)</b> — closed at 0, open at 1."},
 
-{id:37, lec:"L-2", blk:"Standard functions", topic:"The least-integer function",
+{id:37, lec:"L-2", blk:"Standard functions", topic:"The least-integer function", t:90,
  q:"The value of ⌈−7.2⌉ (least integer function) is",
  opts:["−7","−8","7","8"],
  ans:0,
@@ -705,7 +731,7 @@ const QUIZ = [
   "Wrong sign and wrong direction."],
  sol:"⌈x⌉ rounds <b>up</b> (towards +∞): ⌈3.7⌉ = 4 and <b>⌈−7.2⌉ = −7</b>. Contrast with [−7.2] = −8."},
 
-{id:38, lec:"L-2", blk:"Modulus inequalities", topic:"The bounded case",
+{id:38, lec:"L-2", blk:"Modulus inequalities", topic:"The bounded case", t:60,
  q:"For a &gt; 0, the inequality |x| ≤ a is equivalent to",
  opts:["x ∈ [−a, a]","x ∈ (−∞, −a] ∪ [a, ∞)","x ≥ a","x ∈ (−a, a)"],
  ans:0,
@@ -716,7 +742,7 @@ const QUIZ = [
   "The endpoints satisfy |±a| = a ≤ a, so they must be included."],
  sol:"<b>|x| ≤ a ⇔ −a ≤ x ≤ a.</b> Read |x| as the distance from 0."},
 
-{id:39, lec:"L-2", blk:"Modulus inequalities", topic:"The unbounded case",
+{id:39, lec:"L-2", blk:"Modulus inequalities", topic:"The unbounded case", t:60,
  q:"For a &gt; 0, the inequality |x| ≥ a is equivalent to",
  opts:["x ∈ (−∞, −a] ∪ [a, ∞)","x ∈ [−a, a]","x ≤ a","x ∈ ℝ"],
  ans:0,
@@ -727,7 +753,7 @@ const QUIZ = [
   "Values close to 0 fail the inequality, so it is not all of ℝ."],
  sol:"<b>|x| ≥ a ⇔ x ≤ −a or x ≥ a</b> — two rays, not an interval."},
 
-{id:40, lec:"L-2", blk:"Modulus inequalities", topic:"A shifted modulus",
+{id:40, lec:"L-2", blk:"Modulus inequalities", topic:"A shifted modulus", t:60,
  q:"For b &gt; 0, the inequality |x − a| &lt; b is equivalent to",
  opts:[
   "x ∈ (a − b, a + b)",
@@ -742,7 +768,7 @@ const QUIZ = [
   "This forgets the shift and centres the interval on 0."],
  sol:"<b>|x − a| &lt; b ⇔ a − b &lt; x &lt; a + b</b> — an open interval of radius b about a."},
 
-{id:41, lec:"L-2", blk:"Standard functions", topic:"Domain of the reciprocal",
+{id:41, lec:"L-2", blk:"Standard functions", topic:"Domain of the reciprocal", t:60,
  q:"The domain of f(x) = 1/x is",
  opts:["ℝ − {0}","ℝ","(0, ∞)","[0, ∞)"],
  ans:0,
@@ -753,7 +779,7 @@ const QUIZ = [
   "This both includes the forbidden 0 and excludes the legitimate negatives."],
  sol:"1/x has domain <b>ℝ − {0}</b> and range ℝ − {0} — the rectangular hyperbola."},
 
-{id:42, lec:"L-2", blk:"Standard functions", topic:"Range of the cube",
+{id:42, lec:"L-2", blk:"Standard functions", topic:"Range of the cube", t:60,
  q:"The range of f(x) = x³ on ℝ is",
  opts:["ℝ","[0, ∞)","ℝ − {0}","[−1, 1]"],
  ans:0,
@@ -765,7 +791,7 @@ const QUIZ = [
  sol:"<b>x³ has domain ℝ and range ℝ</b> — as does its inverse, the cube root. Contrast with x² and √x."},
 
 /* ---------------- L-3 (18) ---------------- */
-{id:43, lec:"L-3", blk:"Algebra of functions", topic:"Domain of a sum",
+{id:43, lec:"L-3", blk:"Algebra of functions", topic:"Domain of a sum", t:60,
  q:"The domain of f + g is",
  opts:["Dom(f) ∩ Dom(g)","Dom(f) ∪ Dom(g)","Dom(f)","ℝ"],
  ans:0,
@@ -776,7 +802,7 @@ const QUIZ = [
   "Neither function need be defined everywhere."],
  sol:"<b>Dom(f ± g) = Dom(fg) = Dom(f) ∩ Dom(g)</b>."},
 
-{id:44, lec:"L-3", blk:"Algebra of functions", topic:"Domain of a quotient",
+{id:44, lec:"L-3", blk:"Algebra of functions", topic:"Domain of a quotient", t:60,
  q:"The domain of f/g is",
  opts:[
   "Dom(f) ∩ Dom(g), with the points where g(x) = 0 removed",
@@ -791,7 +817,7 @@ const QUIZ = [
   "It is the zeros of the <b>denominator</b> g that matter, not those of f. Zeros of f simply make the quotient 0."],
  sol:"<b>Dom(f/g) = Dom(f) ∩ Dom(g) − {x : g(x) = 0}</b>."},
 
-{id:45, lec:"L-3", blk:"Algebra of functions", topic:"Computing a sum",
+{id:45, lec:"L-3", blk:"Algebra of functions", topic:"Computing a sum", t:90,
  q:"Let f(x) = 1/(x + 4) and g(x) = (x + 4)³. Then (f + g)(x) is",
  opts:[
   "[(x + 4)⁴ + 1]/(x + 4), on ℝ − {−4}",
@@ -806,7 +832,7 @@ const QUIZ = [
   "The denominator has been dropped."],
  sol:"Dom(f) = ℝ − {−4} and Dom(g) = ℝ, so the common domain is ℝ − {−4}. (f + g)(x) = <b>[(x+4)⁴ + 1]/(x+4)</b>."},
 
-{id:46, lec:"L-3", blk:"Algebra of functions", topic:"A product whose domain still has a hole",
+{id:46, lec:"L-3", blk:"Algebra of functions", topic:"A product whose domain still has a hole", t:60,
  q:"For the same f(x) = 1/(x + 4) and g(x) = (x + 4)³, the product (fg)(x) is",
  opts:[
   "(x + 4)², on ℝ − {−4}",
@@ -821,7 +847,7 @@ const QUIZ = [
   "The reciprocal has been applied to the wrong factor."],
  sol:"(fg)(x) = (x+4)³/(x+4) = (x + 4)², but on <b>ℝ − {−4}</b>. The domain is fixed <i>before</i> any simplification."},
 
-{id:47, lec:"L-3", blk:"Composition", topic:"A self-composition",
+{id:47, lec:"L-3", blk:"Composition", topic:"A self-composition", t:90,
  q:"If f(x) = (x − 1)/(x + 1) for x ≠ −1, then f(f(x)) equals",
  opts:["−1/x","1/x","x","−x"],
  ans:0,
@@ -832,7 +858,7 @@ const QUIZ = [
   "This has the right sign but the wrong power."],
  sol:"f(f(x)) = [(x−1)/(x+1) − 1] ÷ [(x−1)/(x+1) + 1] = [−2/(x+1)] ÷ [2x/(x+1)] = <b>−1/x</b>, valid for x ≠ 0, −1."},
 
-{id:48, lec:"L-3", blk:"Composition", topic:"Order matters",
+{id:48, lec:"L-3", blk:"Composition", topic:"Order matters", t:60,
  q:"For two functions f and g, the composition f(g(x))",
  opts:[
   "generally differs from g(f(x))",
@@ -847,7 +873,7 @@ const QUIZ = [
   "Nor is it addition — that is (f + g)(x), which adds the two outputs at the same input."],
  sol:"<b>f∘g ≠ g∘f</b> in general. Composition substitutes; the algebra of functions (f ± g, fg, f/g) combines outputs pointwise — quite different operations."},
 
-{id:49, lec:"L-3", blk:"Range practice", topic:"Domain with a fractional part",
+{id:49, lec:"L-3", blk:"Range practice", topic:"Domain with a fractional part", t:90,
  q:"The domain of f(x) = 1/√(x − [x]) is",
  opts:["ℝ − ℤ","ℝ","[0, ∞)","ℤ"],
  ans:0,
@@ -858,7 +884,7 @@ const QUIZ = [
   "The integers are exactly the points that must be <b>removed</b>."],
  sol:"x − [x] = {x} ∈ [0, 1), and {x} = 0 ⇔ x ∈ ℤ. Since the root sits in a denominator we need {x} &gt; 0, so Domain = <b>ℝ − ℤ</b>."},
 
-{id:50, lec:"L-3", blk:"Range practice", topic:"Range with a fractional part",
+{id:50, lec:"L-3", blk:"Range practice", topic:"Range with a fractional part", t:90,
  q:"The range of f(x) = 1/√(x − [x]) is",
  opts:["(1, ∞)","[1, ∞)","(0, 1)","(0, ∞)"],
  ans:0,
@@ -869,7 +895,7 @@ const QUIZ = [
   "Values in (0, 1] are never attained, for the same reason."],
  sol:"0 &lt; {x} &lt; 1 ⇒ 0 &lt; √{x} &lt; 1 ⇒ 1/√{x} &gt; 1. Range = <b>(1, ∞)</b>, open at 1."},
 
-{id:51, lec:"L-3", blk:"Range practice", topic:"Cancelling removes range values",
+{id:51, lec:"L-3", blk:"Range practice", topic:"Cancelling removes range values", t:60,
  q:"The range of f(x) = x(x − 1)(x − 2) / [(x − 1)(x − 2)] is",
  opts:["ℝ − {1, 2}","ℝ","ℝ − {0}","ℝ − {0, 1, 2}"],
  ans:0,
@@ -880,7 +906,7 @@ const QUIZ = [
   "0 is attainable; only the images of the two forbidden inputs are lost."],
  sol:"Cancelling gives f(x) = x for x ≠ 1, 2. Since the simplified rule is the identity, the missing inputs remove exactly the outputs 1 and 2: Range = <b>ℝ − {1, 2}</b>."},
 
-{id:52, lec:"L-3", blk:"Range practice", topic:"Why cancelling matters",
+{id:52, lec:"L-3", blk:"Range practice", topic:"Why cancelling matters", t:60,
  q:"Cancelling a common factor from a rational function",
  opts:[
   "may remove points from the domain, and hence values from the range",
@@ -895,7 +921,7 @@ const QUIZ = [
   "The formula's simplification is precisely what obscures the domain restriction."],
  sol:"Determine the domain from the <b>original</b> expression, then simplify. The lost inputs punch holes in the range at their images."},
 
-{id:53, lec:"L-3", blk:"Range practice", topic:"Completing the square",
+{id:53, lec:"L-3", blk:"Range practice", topic:"Completing the square", t:60,
  q:"The range of f(x) = x² + 4x + 5 on ℝ is",
  opts:["[1, ∞)","[5, ∞)","ℝ","[−1, ∞)"],
  ans:0,
@@ -906,7 +932,7 @@ const QUIZ = [
   "−1 is below the true minimum; the completed square gives +1."],
  sol:"Complete the square: <b>(x + 2)² + 1</b>. Since (x + 2)² ≥ 0, the range is <b>[1, ∞)</b>."},
 
-{id:54, lec:"L-3", blk:"Range practice", topic:"Range of a quadratic in vertex form",
+{id:54, lec:"L-3", blk:"Range practice", topic:"Range of a quadratic in vertex form", t:60,
  q:"For f(x) = a(x − h)² + k with a &gt; 0, the range is",
  opts:["[k, ∞)","(−∞, k]","[h, ∞)","ℝ"],
  ans:0,
@@ -917,7 +943,7 @@ const QUIZ = [
   "An upward parabola is bounded below by its vertex."],
  sol:"a &gt; 0 ⇒ range <b>[k, ∞)</b>; a &lt; 0 ⇒ range <b>(−∞, k]</b>. The vertex (h, k) supplies the endpoint."},
 
-{id:55, lec:"L-3", blk:"Range practice", topic:"A downward parabola",
+{id:55, lec:"L-3", blk:"Range practice", topic:"A downward parabola", t:60,
  q:"For f(x) = a(x − h)² + k with a &lt; 0, the range is",
  opts:["(−∞, k]","[k, ∞)","ℝ","[h, ∞)"],
  ans:0,
@@ -928,7 +954,7 @@ const QUIZ = [
   "h is an input coordinate, not an output."],
  sol:"a &lt; 0 ⇒ the vertex is a <b>maximum</b>, so the range is <b>(−∞, k]</b>."},
 
-{id:56, lec:"L-3", blk:"Standard functions", topic:"Cube root versus square root",
+{id:56, lec:"L-3", blk:"Standard functions", topic:"Cube root versus square root", t:60,
  q:"The domain and range of f(x) = x^(1/3) are",
  opts:[
   "both ℝ",
@@ -943,7 +969,7 @@ const QUIZ = [
   "Negative inputs are perfectly legal for a cube root."],
  sol:"<b>Odd</b> roots accept and produce every real: x^(1/3) has domain ℝ and range ℝ. <b>Even</b> roots are confined to [0, ∞) on both sides."},
 
-{id:57, lec:"L-3", blk:"Standard functions", topic:"Domain of the square root",
+{id:57, lec:"L-3", blk:"Standard functions", topic:"Domain of the square root", t:60,
  q:"The domain of f(x) = √x is",
  opts:["[0, ∞)","ℝ","(0, ∞)","ℝ − {0}"],
  ans:0,
@@ -954,7 +980,7 @@ const QUIZ = [
   "This excludes 0 while wrongly admitting negatives."],
  sol:"√x has domain <b>[0, ∞)</b> and range [0, ∞)."},
 
-{id:58, lec:"L-3", blk:"Standard functions", topic:"The reciprocal function",
+{id:58, lec:"L-3", blk:"Standard functions", topic:"The reciprocal function", t:60,
  q:"The domain and range of f(x) = 1/x are",
  opts:[
   "both ℝ − {0}",
@@ -969,7 +995,7 @@ const QUIZ = [
   "The input 0 is not permitted."],
  sol:"1/x: domain and range are <b>both ℝ − {0}</b> — a rectangular hyperbola with both axes as asymptotes."},
 
-{id:59, lec:"L-3", blk:"Algebra of functions", topic:"Scalar multiples",
+{id:59, lec:"L-3", blk:"Algebra of functions", topic:"Scalar multiples", t:90,
  q:"If f(x) = x/c with c ≠ 0, then (cf)(x) equals",
  opts:["x","x/c²","cx","c²x"],
  ans:0,
@@ -980,7 +1006,7 @@ const QUIZ = [
   "Two factors of c too many."],
  sol:"(cf)(x) = c·f(x). With f(x) = x/c this gives <b>x</b>; correspondingly (c²f)(x) = cx."},
 
-{id:60, lec:"L-3", blk:"Algebra of functions", topic:"Intersecting two different domains",
+{id:60, lec:"L-3", blk:"Algebra of functions", topic:"Intersecting two different domains", t:90,
  q:"If Dom(f) = [0, ∞) and Dom(g) = ℝ − {2}, then Dom(f + g) is",
  opts:[
   "[0, 2) ∪ (2, ∞)",
@@ -996,7 +1022,7 @@ const QUIZ = [
  sol:"Dom(f + g) = Dom(f) ∩ Dom(g) = [0, ∞) ∩ (ℝ − {2}) = <b>[0, 2) ∪ (2, ∞)</b>."},
 
 /* ---------------- L-4 (16) ---------------- */
-{id:61, lec:"L-4", blk:"Domains", topic:"Domain of the tangent",
+{id:61, lec:"L-4", blk:"Domains", topic:"Domain of the tangent", t:60,
  q:"The domain of y = tan x is",
  opts:[
   "ℝ − {(2n + 1)π/2 : n ∈ ℤ}",
@@ -1011,7 +1037,7 @@ const QUIZ = [
   "[−1, 1] is the <b>range</b> of sine and cosine, not a domain here."],
  sol:"<b>tan and sec are undefined at odd multiples of π/2</b> (where cos x = 0); <b>cot and cosec at multiples of π</b> (where sin x = 0)."},
 
-{id:62, lec:"L-4", blk:"Domains", topic:"Domain of the cotangent",
+{id:62, lec:"L-4", blk:"Domains", topic:"Domain of the cotangent", t:60,
  q:"The domain of y = cot x is",
  opts:[
   "ℝ − {nπ : n ∈ ℤ}",
@@ -1026,7 +1052,7 @@ const QUIZ = [
   "That is a range, not a domain."],
  sol:"<b>cot x is undefined at x = nπ</b> — the same points as cosec x."},
 
-{id:63, lec:"L-4", blk:"Ranges", topic:"Range of the tangent",
+{id:63, lec:"L-4", blk:"Ranges", topic:"Range of the tangent", t:60,
  q:"The range of y = tan x is",
  opts:["ℝ","[−1, 1]","(−∞, −1] ∪ [1, ∞)","ℝ − {0}"],
  ans:0,
@@ -1037,7 +1063,7 @@ const QUIZ = [
   "0 is attained, at every multiple of π."],
  sol:"<b>tan and cot both have range ℝ</b> — they are the two unbounded ratios that also take every value in between."},
 
-{id:64, lec:"L-4", blk:"Ranges", topic:"Range of the secant",
+{id:64, lec:"L-4", blk:"Ranges", topic:"Range of the secant", t:60,
  q:"The range of y = sec x is",
  opts:["(−∞, −1] ∪ [1, ∞)","[−1, 1]","ℝ","[1, ∞)"],
  ans:0,
@@ -1048,7 +1074,7 @@ const QUIZ = [
   "sec x is negative wherever cos x is, so the negative branch is real too."],
  sol:"<b>sec and cosec both have range (−∞, −1] ∪ [1, ∞)</b> — two branches with a forbidden gap between them."},
 
-{id:65, lec:"L-4", blk:"Ranges", topic:"Range of the cosecant",
+{id:65, lec:"L-4", blk:"Ranges", topic:"Range of the cosecant", t:60,
  q:"The range of y = cosec x is",
  opts:["(−∞, −1] ∪ [1, ∞)","[−1, 1]","ℝ","ℝ − {0}"],
  ans:0,
@@ -1059,7 +1085,7 @@ const QUIZ = [
   "Not only 0 but the whole open interval (−1, 1) is excluded."],
  sol:"<b>cosec x ∈ (−∞, −1] ∪ [1, ∞)</b>, matching sec x."},
 
-{id:66, lec:"L-4", blk:"Asymptotes", topic:"Where the secant blows up",
+{id:66, lec:"L-4", blk:"Asymptotes", topic:"Where the secant blows up", t:60,
  q:"sec x is undefined at",
  opts:[
   "odd multiples of π/2",
@@ -1074,7 +1100,7 @@ const QUIZ = [
   "At multiples of 2π, cos = 1 and sec = 1."],
  sol:"<b>sec x and tan x</b> blow up where cos x = 0, i.e. at <b>x = (2n + 1)π/2</b>."},
 
-{id:67, lec:"L-4", blk:"Asymptotes", topic:"Where the cosecant blows up",
+{id:67, lec:"L-4", blk:"Asymptotes", topic:"Where the cosecant blows up", t:60,
  q:"cosec x is undefined at",
  opts:[
   "multiples of π",
@@ -1089,7 +1115,7 @@ const QUIZ = [
   "sin x also vanishes at odd multiples of π, such as π and 3π, so 2π-multiples alone is too narrow."],
  sol:"<b>cosec x and cot x</b> blow up where sin x = 0, i.e. at <b>x = nπ</b>."},
 
-{id:68, lec:"L-4", blk:"Transformations", topic:"Adding a constant",
+{id:68, lec:"L-4", blk:"Transformations", topic:"Adding a constant", t:90,
  q:"The graph of y = sin x + k is obtained from y = sin x by",
  opts:[
   "shifting it k units vertically",
@@ -1104,7 +1130,7 @@ const QUIZ = [
   "The period is changed by a multiplier inside, as in sin(kx)."],
  sol:"<b>Outside + ⇒ vertical shift.</b> Inside + ⇒ horizontal shift. Outside × ⇒ amplitude. Inside × ⇒ period."},
 
-{id:69, lec:"L-4", blk:"Transformations", topic:"Multiplying by a constant",
+{id:69, lec:"L-4", blk:"Transformations", topic:"Multiplying by a constant", t:60,
  q:"The graph of y = k sin x (k &gt; 0) differs from y = sin x by",
  opts:[
   "having amplitude k, so its range becomes [−k, k]",
@@ -1119,7 +1145,7 @@ const QUIZ = [
   "A reflection would need k &lt; 0; for positive k the shape is merely stretched."],
  sol:"y = k sin(nx): <b>amplitude |k|</b>, <b>period 2π/n</b>, range <b>[−|k|, |k|]</b>."},
 
-{id:70, lec:"L-4", blk:"Transformations", topic:"Changing the period",
+{id:70, lec:"L-4", blk:"Transformations", topic:"Changing the period", t:60,
  q:"The graph of y = sin(kx) with k &gt; 0 has period",
  opts:["2π/k","2πk","2π","π/k"],
  ans:0,
@@ -1130,7 +1156,7 @@ const QUIZ = [
   "This is half the correct period — it would be right for |sin(kx)|, but not for sin(kx)."],
  sol:"<b>Period of sin(kx) = 2π/k.</b> For y = 3 sin 2x the period is π, so a full wave fits into [0, π]."},
 
-{id:71, lec:"L-4", blk:"Transformations", topic:"Shifting inside the bracket",
+{id:71, lec:"L-4", blk:"Transformations", topic:"Shifting inside the bracket", t:90,
  q:"Compared with y = sin x, the graph of y = sin(x + k) shows",
  opts:[
   "a horizontal shift",
@@ -1145,7 +1171,7 @@ const QUIZ = [
   "The period is still 2π, since nothing multiplies x."],
  sol:"<b>Inside the bracket ⇒ horizontal effect; outside ⇒ vertical effect.</b> sin(x + k) slides the graph to x = −k."},
 
-{id:72, lec:"L-4", blk:"Transformations", topic:"Reading amplitude and period",
+{id:72, lec:"L-4", blk:"Transformations", topic:"Reading amplitude and period", t:90,
  q:"For y = 3 sin 2x, the amplitude and period are",
  opts:[
   "amplitude 3, period π",
@@ -1160,7 +1186,7 @@ const QUIZ = [
   "6 would be the <b>peak-to-trough</b> distance (from −3 to 3), not the amplitude."],
  sol:"y = k sin(nx) ⇒ amplitude |k| = <b>3</b>, period 2π/n = <b>π</b>."},
 
-{id:73, lec:"L-4", blk:"Transformations", topic:"Maximum and minimum",
+{id:73, lec:"L-4", blk:"Transformations", topic:"Maximum and minimum", t:60,
  q:"For y = 3 sin 2x, the maximum and minimum values are",
  opts:[
   "max 3, min −3",
@@ -1175,7 +1201,7 @@ const QUIZ = [
   "These are the extremes of sin x before the factor 3 is applied."],
  sol:"Range = [−3, 3], so <b>max 3 and min −3</b>. The inner factor 2 affects only the period, never the height."},
 
-{id:74, lec:"L-4", blk:"Transformations", topic:"Range of a scaled cosine",
+{id:74, lec:"L-4", blk:"Transformations", topic:"Range of a scaled cosine", t:60,
  q:"The range of y = 3 cos 2x is",
  opts:["[−3, 3]","[−1, 1]","[0, 3]","[−2, 2]"],
  ans:0,
@@ -1186,7 +1212,7 @@ const QUIZ = [
   "2 is the inner factor, which sets the period rather than the height."],
  sol:"y = 3 cos 2x has amplitude 3 and period π, so its range is <b>[−3, 3]</b> — and the graph starts at its peak (0, 3)."},
 
-{id:75, lec:"L-4", blk:"Standard values", topic:"A value from the graphs",
+{id:75, lec:"L-4", blk:"Standard values", topic:"A value from the graphs", t:60,
  q:"The value of tan(π/4) + cot(π/4) is",
  opts:["2","1","0","√2"],
  ans:0,
@@ -1197,7 +1223,7 @@ const QUIZ = [
   "√2 is the value of sec(π/4) or cosec(π/4), not of this sum."],
  sol:"tan(π/4) = cot(π/4) = 1, so the sum is <b>2</b>. π/4 is the one angle where the two curves cross."},
 
-{id:76, lec:"L-4", blk:"Graph shapes", topic:"Sine versus cosine",
+{id:76, lec:"L-4", blk:"Graph shapes", topic:"Sine versus cosine", t:60,
  q:"Compared with y = sin x, the graph of y = cos x",
  opts:[
   "starts at its maximum when x = 0, rather than at zero",
@@ -1213,7 +1239,7 @@ const QUIZ = [
  sol:"cos x = sin(x + π/2) — the same wave, shifted a quarter-period to the left. Same amplitude, same period, different starting point."},
 
 /* ---------------- Strong Box (6) ---------------- */
-{id:77, lec:"SB", blk:"JEE Main 2026 (28 Jan Shift-1)", topic:"Recovering f from g(f(x))",
+{id:77, lec:"SB", blk:"JEE Main 2026 (28 Jan Shift-1)", topic:"Recovering f from g(f(x))", t:180,
  q:"If g(x) = 3x² + 2x − 3, f(0) = −3 and 4g(f(x)) = 3x² − 32x + 72, then f(g(2)) equals",
  opts:["7/2","−7/2","25/6","−25/6"],
  ans:0,
@@ -1224,7 +1250,7 @@ const QUIZ = [
   "Both errors at once."],
  sol:"Since g is quadratic and g(f(x)) is quadratic, f must be <b>linear</b>: f(x) = ax + b with b = f(0) = −3. Expanding 4g(f) = 12f² + 8f − 12 and matching x² gives 12a² = 3 ⇒ a = ±1/2; matching x gives −64a = −32 ⇒ <b>a = 1/2</b>. So f(x) = x/2 − 3, g(2) = 13, and f(13) = <b>7/2</b>."},
 
-{id:78, lec:"SB", blk:"JEE Main 2026", topic:"One-one and many-one statements",
+{id:78, lec:"SB", blk:"JEE Main 2026", topic:"One-one and many-one statements", t:90,
  q:"<b>Statement I:</b> f: ℝ → ℝ given by f(x) = x/(1 + |x|) is one-one. <b>Statement II:</b> f: ℝ → ℝ given by f(x) = (x² + 4x − 30)/(x² − 8x + 18) is many-one. Which is correct?",
  opts:[
   "Both Statement I and Statement II are true",
@@ -1239,7 +1265,7 @@ const QUIZ = [
   "Both are in fact true."],
  sol:"<b>I:</b> f(x) = x/(1+x) for x ≥ 0 and x/(1−x) for x &lt; 0; both pieces increase and join continuously at 0, so f is strictly increasing ⇒ <b>one-one</b>. <b>II:</b> the denominator (x−4)² + 2 never vanishes; setting f(x) = y gives (1−y)x² + (4+8y)x − (30+18y) = 0, whose discriminant −8y² + 16y + 136 is positive for a whole interval of y, giving two distinct x per y ⇒ <b>many-one</b>. So <b>both are true</b>."},
 
-{id:79, lec:"SB", blk:"Supporting technique", topic:"Why x/(1+|x|) is one-one",
+{id:79, lec:"SB", blk:"Supporting technique", topic:"Why x/(1+|x|) is one-one", t:90,
  q:"The function f(x) = x/(1 + |x|) on ℝ is one-one because",
  opts:[
   "it equals x/(1+x) for x ≥ 0 and x/(1−x) for x &lt; 0, both strictly increasing, and the pieces join continuously at 0",
@@ -1254,7 +1280,7 @@ const QUIZ = [
   "A non-vanishing denominator guarantees the function is <b>defined</b> everywhere, not that it is one-one."],
  sol:"<b>Strictly monotonic ⇒ one-one.</b> Splitting at x = 0 removes the modulus, and both branches are increasing, so the whole function is."},
 
-{id:80, lec:"SB", blk:"Supporting technique", topic:"Range of x/(1+|x|)",
+{id:80, lec:"SB", blk:"Supporting technique", topic:"Range of x/(1+|x|)", t:90,
  q:"The range of f(x) = x/(1 + |x|) on ℝ is",
  opts:["(−1, 1)","[−1, 1]","ℝ","(0, 1)"],
  ans:0,
@@ -1265,7 +1291,7 @@ const QUIZ = [
   "Negative inputs give negative outputs, so the whole interval (−1, 0) is attained too."],
  sol:"|f(x)| = |x|/(1 + |x|) &lt; 1 always, and every value in between is hit. Range = <b>(−1, 1)</b> — a one-one map of ℝ onto an open interval."},
 
-{id:81, lec:"SB", blk:"Supporting technique", topic:"Detecting many-one",
+{id:81, lec:"SB", blk:"Supporting technique", topic:"Detecting many-one", t:90,
  q:"A function f: ℝ → ℝ is <b>many-one</b> exactly when",
  opts:[
   "some horizontal line meets its graph more than once",
@@ -1280,7 +1306,7 @@ const QUIZ = [
   "Being undefined somewhere is a domain issue, unrelated to whether outputs repeat."],
  sol:"<b>Vertical line test → is it a function? Horizontal line test → is it one-one?</b> More than one horizontal crossing ⇒ many-one."},
 
-{id:82, lec:"SB", blk:"Supporting technique", topic:"Why f must be linear",
+{id:82, lec:"SB", blk:"Supporting technique", topic:"Why f must be linear", t:90,
  q:"In the 2026 question above, why can f be assumed linear?",
  opts:[
   "g is quadratic and g(f(x)) comes out quadratic, so f must have degree 1",
@@ -1299,13 +1325,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter M-4 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1323,6 +1360,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1357,15 +1397,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1377,47 +1418,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1427,30 +1485,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1459,7 +1561,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1472,9 +1576,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1483,7 +1605,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1504,21 +1627,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter M-4 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

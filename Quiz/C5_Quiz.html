@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -250,7 +276,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 · Ionic bond (11) ---------------- */
-{id:1, lec:"L-1", blk:"Nature of a bond", topic:"Cause of chemical combination",
+{id:1, lec:"L-1", blk:"Nature of a bond", topic:"Cause of chemical combination", t:60,
  q:"Atoms combine to form chemical bonds primarily to",
  opts:[
   "lower their energy and attain a stable, noble-gas-like electron configuration",
@@ -265,7 +291,7 @@ const QUIZ = [
   "Radioactivity is a nuclear property, unrelated to chemical bonding."],
  sol:"Chemical bonding is driven by an <b>energy decrease</b>: atoms achieve the stability of a filled valence shell (octet/duplet). A bond forms only when the combined state is lower in energy than the separate atoms."},
 
-{id:2, lec:"L-1", blk:"Electrovalency", topic:"Definition of electrovalency",
+{id:2, lec:"L-1", blk:"Electrovalency", topic:"Definition of electrovalency", t:60,
  q:"The electrovalency of an element is",
  opts:[
   "the number of electrons its atom loses or gains to form an ion",
@@ -280,7 +306,7 @@ const QUIZ = [
   "Energy released is the lattice or bond energy, not a valency."],
  sol:"<b>Electrovalency = number of electrons lost or gained</b> to reach a noble-gas configuration. Metals show positive electrovalency (lose e⁻); non-metals negative (gain e⁻)."},
 
-{id:3, lec:"L-1", blk:"Conditions for ionic bonding", topic:"When an ionic bond forms",
+{id:3, lec:"L-1", blk:"Conditions for ionic bonding", topic:"When an ionic bond forms", t:60,
  q:"An ionic bond is most favoured between two atoms when",
  opts:[
   "one has low ionisation energy and the other has high electron affinity, with a large electronegativity difference",
@@ -295,7 +321,7 @@ const QUIZ = [
   "ΔEN ≈ 0 gives a pure covalent bond, the opposite of ionic."],
  sol:"Ionic bonding needs an easy electron <i>donor</i> (low IE, electropositive metal) and an easy <i>acceptor</i> (high EA, electronegative non-metal), i.e. large ΔEN (&gt; ~1.7). NaCl is the type example."},
 
-{id:4, lec:"L-1", blk:"Lattice energy", topic:"Definition of lattice energy",
+{id:4, lec:"L-1", blk:"Lattice energy", topic:"Definition of lattice energy", t:60,
  q:"The lattice energy of an ionic solid is",
  opts:[
   "the energy released when one mole of the solid forms from its gaseous ions",
@@ -310,7 +336,7 @@ const QUIZ = [
   "That is ionisation energy."],
  sol:"<b>Lattice energy</b>: energy released as gaseous ions assemble into 1 mol of ionic solid (e.g. Na⁺(g) + Cl⁻(g) → NaCl(s)). Larger lattice energy ⇒ more stable, higher-melting ionic solid."},
 
-{id:5, lec:"L-1", blk:"Lattice energy", topic:"Factors affecting lattice energy",
+{id:5, lec:"L-1", blk:"Lattice energy", topic:"Factors affecting lattice energy", t:60,
  q:"Lattice energy is largest when the ions have",
  opts:[
   "high charges and small radii",
@@ -325,7 +351,7 @@ const QUIZ = [
   "Small radii help, but low charges keep the numerator small; MgO ≫ NaF."],
  sol:"U ∝ (q₊ × q₋)/r. So MgO (2+/2−, small ions) has a far larger lattice energy than NaCl (1+/1−). <b>High charge + small size</b> = maximum lattice energy."},
 
-{id:6, lec:"L-1", blk:"Lattice energy", topic:"Comparing lattice energies",
+{id:6, lec:"L-1", blk:"Lattice energy", topic:"Comparing lattice energies", t:60,
  q:"Which compound has the highest lattice energy?",
  opts:["MgO","NaCl","KCl","KBr"],
  ans:0,
@@ -336,7 +362,7 @@ const QUIZ = [
   "KBr has the largest ions of the set and unit charges — the smallest lattice energy."],
  sol:"Charge product dominates: MgO (2×2 = 4) ≫ the 1:1 salts. Among those, smaller ions win: NaCl &gt; KCl &gt; KBr. Highest overall = <b>MgO</b>."},
 
-{id:7, lec:"L-1", blk:"Conductivity", topic:"Conductivity of ionic solids",
+{id:7, lec:"L-1", blk:"Conductivity", topic:"Conductivity of ionic solids", t:60,
  q:"Ionic compounds conduct electricity",
  opts:[
   "in the molten state or in aqueous solution, but not as a solid",
@@ -351,7 +377,7 @@ const QUIZ = [
   "They conduct via mobile <i>ions</i> (not electrons) once the lattice is broken up."],
  sol:"Ionic conduction requires <b>free-moving ions</b>. Solid: ions fixed ⇒ non-conducting. Molten or aqueous: ions mobile ⇒ conducting. (Contrast metals, which conduct as solids via free electrons.)"},
 
-{id:8, lec:"L-1", blk:"Ionic character", topic:"Electronegativity difference and ionic character",
+{id:8, lec:"L-1", blk:"Ionic character", topic:"Electronegativity difference and ionic character", t:90,
  q:"As the electronegativity difference between two bonded atoms increases, the ionic character of the bond",
  opts:[
   "increases",
@@ -366,7 +392,7 @@ const QUIZ = [
   "The relationship is monotonic; it does not reverse."],
  sol:"Ionic character rises smoothly with ΔEN (Pauling: ΔEN &gt; 1.7 ⇒ &gt;50% ionic). Small ΔEN ⇒ covalent; large ΔEN ⇒ ionic."},
 
-{id:9, lec:"L-1", blk:"Configuration & electrovalency", topic:"Electrovalency from configuration",
+{id:9, lec:"L-1", blk:"Configuration & electrovalency", topic:"Electrovalency from configuration", t:90,
  q:"An element with valence configuration 3s²3p¹ forms an ion of charge",
  opts:["+3","−3","+1","−1"],
  ans:0,
@@ -377,7 +403,7 @@ const QUIZ = [
   "This element is metallic and forms a cation, not an anion."],
  sol:"3s²3p¹ = 3 valence electrons ⇒ loses all three → [Ne] core ⇒ <b>+3</b> ion (Al³⁺). Electrovalency equals the number of electrons transferred."},
 
-{id:10, lec:"L-1", blk:"Ionic character", topic:"Cation size vs ionic character",
+{id:10, lec:"L-1", blk:"Ionic character", topic:"Cation size vs ionic character", t:60,
  q:"For a series of chlorides of a +1 metal, the ionic character is greatest when the cation is",
  opts:[
   "large (e.g. Cs⁺), because a big cation polarises the anion least",
@@ -392,7 +418,7 @@ const QUIZ = [
   "A highly polarising cation makes the bond more covalent."],
  sol:"By Fajans' logic, a large, weakly-polarising cation keeps a bond ionic. So among alkali chlorides, CsCl is the most ionic and LiCl the most covalent. <b>Large cation ⇒ most ionic.</b>"},
 
-{id:11, lec:"L-1", blk:"Directionality", topic:"Directional character of the ionic bond",
+{id:11, lec:"L-1", blk:"Directionality", topic:"Directional character of the ionic bond", t:60,
  q:"The ionic bond is described as non-directional because",
  opts:[
   "the electric field of an ion is the same in all directions, so it attracts oppositely-charged ions from every side",
@@ -408,7 +434,7 @@ const QUIZ = [
  sol:"Ionic bonds are <b>non-directional</b>: the spherical field of each ion attracts counter-ions equally in all directions, building an extended crystal lattice. Covalent bonds, by contrast, are directional (fixed orbital overlap)."},
 
 /* ---------------- L-2 · Covalent, coordinate, octet, Fajans (11) ---------------- */
-{id:12, lec:"L-2", blk:"Covalency", topic:"Definition of a covalent bond",
+{id:12, lec:"L-2", blk:"Covalency", topic:"Definition of a covalent bond", t:60,
  q:"A covalent bond is formed by",
  opts:[
   "the mutual sharing of one or more electron pairs between two atoms",
@@ -423,7 +449,7 @@ const QUIZ = [
   "Nuclei repel; bonding is about the shared electron cloud, not overlapping nuclei."],
  sol:"<b>Covalent bond = shared electron pair(s)</b>. In H₂ each H shares its electron; in O₂ two pairs are shared (double bond). Sharing lets both atoms count the pair toward a full octet."},
 
-{id:13, lec:"L-2", blk:"Coordinate bond", topic:"Definition of a coordinate bond",
+{id:13, lec:"L-2", blk:"Coordinate bond", topic:"Definition of a coordinate bond", t:60,
  q:"A coordinate (dative) bond differs from a normal covalent bond in that",
  opts:[
   "both shared electrons come from the same atom",
@@ -438,7 +464,7 @@ const QUIZ = [
   "A bond pair is two electrons, not three."],
  sol:"<b>Coordinate bond</b>: one atom donates the whole shared pair (e.g. N→B in H₃N→BF₃, or the fourth N–H in NH₄⁺). It is drawn as an arrow but is otherwise an ordinary σ bond."},
 
-{id:14, lec:"L-2", blk:"Coordinate bond", topic:"Coordinate bond in the ammonium ion",
+{id:14, lec:"L-2", blk:"Coordinate bond", topic:"Coordinate bond in the ammonium ion", t:60,
  q:"In the ammonium ion NH₄⁺, the number of coordinate bonds is",
  opts:["1","0","2","4"],
  ans:0,
@@ -449,7 +475,7 @@ const QUIZ = [
   "All four N–H bonds become equivalent after formation, but only one <i>originated</i> as coordinate."],
  sol:"NH₃ + H⁺ → NH₄⁺: the lone pair on nitrogen bonds the incoming H⁺, giving <b>1 coordinate bond</b> (the other 3 are covalent). All four end up identical, but the count of dative origin is 1."},
 
-{id:15, lec:"L-2", blk:"Octet exceptions", topic:"Incomplete octet",
+{id:15, lec:"L-2", blk:"Octet exceptions", topic:"Incomplete octet", t:60,
  q:"Which molecule has a central atom with an incomplete octet (fewer than 8 electrons)?",
  opts:["BF₃","CH₄","NH₃","H₂O"],
  ans:0,
@@ -460,7 +486,7 @@ const QUIZ = [
   "Oxygen in H₂O has 2 bonds + 2 lone pairs = 8 electrons."],
  sol:"<b>BF₃</b>: B has 6 valence electrons (3 B–F bonds), an incomplete octet — which is why it acts as a Lewis acid and accepts a lone pair. BeCl₂ and AlCl₃ are similar."},
 
-{id:16, lec:"L-2", blk:"Octet exceptions", topic:"Expanded octet",
+{id:16, lec:"L-2", blk:"Octet exceptions", topic:"Expanded octet", t:60,
  q:"Which molecule shows an expanded octet (central atom with more than 8 electrons)?",
  opts:["SF₆","CCl₄","NH₃","H₂O"],
  ans:0,
@@ -471,7 +497,7 @@ const QUIZ = [
   "O in H₂O has 8 electrons."],
  sol:"<b>SF₆</b>: 6 S–F bonds = 12 electrons around sulfur (expanded octet). Only period-3+ atoms with available d orbitals (S, P, Cl, I…) can do this; PCl₅ (10 e) is another example."},
 
-{id:17, lec:"L-2", blk:"Octet exceptions", topic:"Odd-electron molecule",
+{id:17, lec:"L-2", blk:"Octet exceptions", topic:"Odd-electron molecule", t:60,
  q:"Which of the following is an odd-electron (free-radical) molecule that cannot satisfy the octet rule?",
  opts:["NO","N₂","CO₂","H₂O"],
  ans:0,
@@ -482,7 +508,7 @@ const QUIZ = [
   "H₂O has 8 valence electrons with complete octet on O."],
  sol:"<b>NO</b> (and NO₂, ClO₂) are odd-electron species: an odd total means one unpaired electron, so the octet rule is necessarily violated. They tend to be paramagnetic and reactive."},
 
-{id:18, lec:"L-2", blk:"Formal charge", topic:"Formal charge formula",
+{id:18, lec:"L-2", blk:"Formal charge", topic:"Formal charge formula", t:90,
  q:"The formal charge on an atom in a molecule is given by",
  opts:[
   "(valence electrons) − (non-bonding electrons) − ½(bonding electrons)",
@@ -497,7 +523,7 @@ const QUIZ = [
   "The terms are reversed in sign — this would flip every formal charge."],
  sol:"<b>FC = V − L − B/2</b>, where V = valence electrons, L = lone-pair (non-bonding) electrons, B = bonding electrons. Sum of formal charges = overall charge of the species."},
 
-{id:19, lec:"L-2", blk:"Formal charge", topic:"Formal charge of central O in ozone",
+{id:19, lec:"L-2", blk:"Formal charge", topic:"Formal charge of central O in ozone", t:90,
  q:"In ozone O₃, the formal charge on the central oxygen atom (one double bond, one single bond, one lone pair) is",
  opts:["+1","−1","0","+2"],
  ans:0,
@@ -508,7 +534,7 @@ const QUIZ = [
   "+2 would need only 4 electrons owned; the central O owns 5."],
  sol:"Central O in O₃ has 1 lone pair (L = 2) and 3 bonds' worth of shared electrons (B = 6): FC = 6 − 2 − 6/2 = <b>+1</b>. A terminal single-bonded O is −1, so the molecule is neutral overall."},
 
-{id:20, lec:"L-2", blk:"Fajans' rules", topic:"Covalent character — cation size",
+{id:20, lec:"L-2", blk:"Fajans' rules", topic:"Covalent character — cation size", t:60,
  q:"By Fajans' rules, covalent character in an ionic bond increases when the cation is",
  opts:[
   "small and highly charged",
@@ -523,7 +549,7 @@ const QUIZ = [
   "A weakly polarising cation gives an ionic bond, the opposite of what is asked."],
  sol:"Fajans: covalent character rises with (i) <b>small cation</b>, (ii) <b>large anion</b>, (iii) <b>high ionic charge</b>, and (iv) a pseudo-noble-gas (18-e) cation. All increase polarisation of the anion."},
 
-{id:21, lec:"L-2", blk:"Fajans' rules", topic:"Covalent character comparison",
+{id:21, lec:"L-2", blk:"Fajans' rules", topic:"Covalent character comparison", t:60,
  q:"Which chloride is the most covalent?",
  opts:["AlCl₃","NaCl","KCl","CsCl"],
  ans:0,
@@ -534,7 +560,7 @@ const QUIZ = [
   "Cs⁺ is the largest, weakest-polarising cation ⇒ the most ionic of the four."],
  sol:"Polarising power: Al³⁺ (small, 3+) ≫ Na⁺ &gt; K⁺ &gt; Cs⁺. So covalent character: <b>AlCl₃ &gt; NaCl &gt; KCl &gt; CsCl</b>. AlCl₃'s covalent nature shows in its low melting point and solubility in ether."},
 
-{id:22, lec:"L-2", blk:"Fajans' rules", topic:"Anion size and covalent character",
+{id:22, lec:"L-2", blk:"Fajans' rules", topic:"Anion size and covalent character", t:60,
  q:"Among LiF, LiCl, LiBr and LiI, the most covalent is",
  opts:["LiI","LiF","LiCl","LiBr"],
  ans:0,
@@ -546,7 +572,7 @@ const QUIZ = [
  sol:"Same small cation (Li⁺), so anion size decides: larger, softer anion ⇒ more polarisation ⇒ more covalent. Covalent order <b>LiI &gt; LiBr &gt; LiCl &gt; LiF</b>."},
 
 /* ---------------- L-3 · Overlap & hybridisation basics (11) ---------------- */
-{id:23, lec:"L-3", blk:"Overlap", topic:"σ vs π overlap",
+{id:23, lec:"L-3", blk:"Overlap", topic:"σ vs π overlap", t:60,
  q:"A σ bond and a π bond differ in that",
  opts:[
   "the σ bond forms by axial (head-on) overlap, the π bond by sidewise (lateral) overlap",
@@ -561,7 +587,7 @@ const QUIZ = [
   "The σ bond forms first; π bonds only form after a σ framework exists (in double/triple bonds)."],
  sol:"<b>σ = axial overlap</b> (s–s, s–p, p–p head-on), strong and free to rotate. <b>π = lateral overlap</b> of parallel p orbitals, weaker, and locks rotation. A single bond is σ; a double is σ+π; a triple is σ+2π."},
 
-{id:24, lec:"L-3", blk:"Overlap strength", topic:"Order of overlap strength",
+{id:24, lec:"L-3", blk:"Overlap strength", topic:"Order of overlap strength", t:60,
  q:"For σ overlap of orbitals along the bond axis, the usual order of increasing bond strength is",
  opts:[
   "s–s &lt; s–p &lt; p–p",
@@ -576,7 +602,7 @@ const QUIZ = [
   "Overlap effectiveness depends strongly on orbital shape and direction, so they are not equal."],
  sol:"Directional p orbitals give better axial overlap than diffuse s orbitals: <b>s–s &lt; s–p &lt; p–p</b>. Greater overlap ⇒ stronger σ bond."},
 
-{id:25, lec:"L-3", blk:"Hybridisation", topic:"BeCl₂ hybridisation",
+{id:25, lec:"L-3", blk:"Hybridisation", topic:"BeCl₂ hybridisation", t:60,
  q:"The hybridisation and shape of BeCl₂ (gas phase) are",
  opts:[
   "sp, linear",
@@ -591,7 +617,7 @@ const QUIZ = [
   "sp³d needs steric number 5."],
  sol:"BeCl₂: 2 bonding pairs, 0 lone pairs ⇒ steric number 2 ⇒ <b>sp, linear</b>. It has an incomplete octet (only 4 electrons on Be)."},
 
-{id:26, lec:"L-3", blk:"Hybridisation", topic:"BF₃ hybridisation",
+{id:26, lec:"L-3", blk:"Hybridisation", topic:"BF₃ hybridisation", t:60,
  q:"In BF₃ the boron atom is",
  opts:[
   "sp² hybridised, giving a trigonal planar molecule",
@@ -606,7 +632,7 @@ const QUIZ = [
   "sp³ needs steric number 4; BF₃ has three bonds."],
  sol:"BF₃: 3 bond pairs, 0 lone pairs ⇒ steric number 3 ⇒ <b>sp², trigonal planar</b>, 120° angles. Boron keeps an empty p orbital (incomplete octet)."},
 
-{id:27, lec:"L-3", blk:"Hybridisation", topic:"CH₄ hybridisation and equivalence",
+{id:27, lec:"L-3", blk:"Hybridisation", topic:"CH₄ hybridisation and equivalence", t:60,
  q:"Methane's four C–H bonds are identical because",
  opts:[
   "the carbon uses four equivalent sp³ hybrid orbitals directed to the corners of a tetrahedron",
@@ -621,7 +647,7 @@ const QUIZ = [
   "C–H bonds are covalent, not ionic."],
  sol:"Excitation (2s²2p² → 2s¹2p³) then <b>sp³ hybridisation</b> gives four identical orbitals pointing to tetrahedron corners ⇒ four equivalent C–H bonds at 109°28′."},
 
-{id:28, lec:"L-3", blk:"Hybridisation", topic:"NH₃ and lone-pair compression",
+{id:28, lec:"L-3", blk:"Hybridisation", topic:"NH₃ and lone-pair compression", t:60,
  q:"Ammonia has an H–N–H angle of about 107°, slightly less than the tetrahedral 109.5°, because",
  opts:[
   "the lone pair on nitrogen repels the bond pairs more strongly, compressing the angle",
@@ -636,7 +662,7 @@ const QUIZ = [
   "Nitrogen in NH₃ has exactly one lone pair, not two."],
  sol:"NH₃: sp³, 3 bp + 1 lp. Since lp–bp repulsion &gt; bp–bp, the bond angle drops from 109.5° to <b>~107°</b> (and H₂O, with 2 lone pairs, drops further to 104.5°)."},
 
-{id:29, lec:"L-3", blk:"σ/π counting", topic:"Bonds in ethene",
+{id:29, lec:"L-3", blk:"σ/π counting", topic:"Bonds in ethene", t:60,
  q:"The C=C double bond in ethene (C₂H₄) consists of",
  opts:[
   "one σ bond and one π bond",
@@ -651,7 +677,7 @@ const QUIZ = [
   "A double bond has two shared pairs, so it is more than a lone σ."],
  sol:"Double bond = <b>1 σ + 1 π</b>. In C₂H₄ each carbon is sp²; the σ comes from sp²–sp² overlap and the π from the unhybridised p orbitals above and below the plane."},
 
-{id:30, lec:"L-3", blk:"σ/π counting", topic:"Bonds in acetylene",
+{id:30, lec:"L-3", blk:"σ/π counting", topic:"Bonds in acetylene", t:90,
  q:"In acetylene (C₂H₂, H–C≡C–H), the total number of σ and π bonds is",
  opts:[
   "3 σ and 2 π",
@@ -666,7 +692,7 @@ const QUIZ = [
   "A triple bond has 2 π components, not 1."],
  sol:"C≡C = 1 σ + 2 π; each C–H = 1 σ. Total = 2 (C–H) + 1 (C–C σ) = <b>3 σ</b> and <b>2 π</b>. Each carbon is sp hybridised, so the molecule is linear."},
 
-{id:31, lec:"L-3", blk:"σ/π counting", topic:"Bonds in dinitrogen",
+{id:31, lec:"L-3", blk:"σ/π counting", topic:"Bonds in dinitrogen", t:60,
  q:"The bonding in N₂ (N≡N) comprises",
  opts:[
   "one σ and two π bonds",
@@ -681,7 +707,7 @@ const QUIZ = [
   "One σ + one π is a double bond (order 2), not the triple bond of N₂."],
  sol:"N≡N = <b>1 σ + 2 π</b> (bond order 3). This very strong triple bond (941 kJ/mol) is why N₂ is so unreactive."},
 
-{id:32, lec:"L-3", blk:"Excitation", topic:"Role of excitation before hybridisation",
+{id:32, lec:"L-3", blk:"Excitation", topic:"Role of excitation before hybridisation", t:60,
  q:"Carbon (ground state 2s²2p²) can form four bonds because",
  opts:[
   "one 2s electron is promoted to the empty 2p orbital, giving four half-filled orbitals to hybridise",
@@ -696,7 +722,7 @@ const QUIZ = [
   "An s orbital does not split; the electron is promoted to a p orbital."],
  sol:"Ground carbon has only 2 unpaired electrons. <b>Excitation</b> (2s → 2p) gives four singly-occupied orbitals; hybridising them (sp³) explains carbon's tetravalency. The small energy cost is repaid by forming two extra bonds."},
 
-{id:33, lec:"L-3", blk:"Coordinate + covalent", topic:"Counting bond types in HNO₃-type species",
+{id:33, lec:"L-3", blk:"Coordinate + covalent", topic:"Counting bond types in HNO₃-type species", t:60,
  q:"Which species contains a coordinate bond?",
  opts:["O₃ (ozone)","CH₄","H₂","Cl₂"],
  ans:0,
@@ -708,7 +734,7 @@ const QUIZ = [
  sol:"<b>Ozone</b> is the classic small-molecule coordinate-bond example: central O uses a lone pair to form one of its O–O bonds datively (shown as O→O). SO₂, SO₃ and the oxyacids also contain coordinate bonds."},
 
 /* ---------------- L-4 · Expanded hybridisation (11) ---------------- */
-{id:34, lec:"L-4", blk:"Definition", topic:"What hybridisation is",
+{id:34, lec:"L-4", blk:"Definition", topic:"What hybridisation is", t:60,
  q:"Hybridisation is best described as",
  opts:[
   "the mixing of atomic orbitals of similar energy to form new, equivalent hybrid orbitals",
@@ -723,7 +749,7 @@ const QUIZ = [
   "Overlap of orbitals from two atoms is bond formation, not hybridisation (which is within one atom)."],
  sol:"<b>Hybridisation = intermixing of an atom's own orbitals</b> of comparable energy to give the same number of equal-energy hybrids, oriented to minimise repulsion. The number of hybrids equals the number of orbitals mixed."},
 
-{id:35, lec:"L-4", blk:"Steric number rule", topic:"Hybridisation from steric number",
+{id:35, lec:"L-4", blk:"Steric number rule", topic:"Hybridisation from steric number", t:60,
  q:"An atom with a steric number of 5 (bond pairs + lone pairs = 5) is hybridised as",
  opts:["sp³d","sp³","sp³d²","sp²"],
  ans:0,
@@ -734,7 +760,7 @@ const QUIZ = [
   "sp² provides three hybrids (steric number 3)."],
  sol:"Steric-number → hybridisation: 2 sp, 3 sp², 4 sp³, 5 sp³d, 6 sp³d², 7 sp³d³. SN 5 ⇒ <b>sp³d</b> (basic geometry: trigonal bipyramidal, e.g. PCl₅)."},
 
-{id:36, lec:"L-4", blk:"sp³d²", topic:"SF₆ hybridisation",
+{id:36, lec:"L-4", blk:"sp³d²", topic:"SF₆ hybridisation", t:60,
  q:"The hybridisation and shape of SF₆ are",
  opts:[
   "sp³d², octahedral",
@@ -749,7 +775,7 @@ const QUIZ = [
   "sp³d³/pentagonal bipyramidal is steric number 7 (IF₇)."],
  sol:"SF₆: 6 bond pairs ⇒ SN 6 ⇒ <b>sp³d², octahedral</b>. It is a symmetric, non-polar, expanded-octet molecule."},
 
-{id:37, lec:"L-4", blk:"sp³d³", topic:"IF₇ hybridisation",
+{id:37, lec:"L-4", blk:"sp³d³", topic:"IF₇ hybridisation", t:60,
  q:"Iodine heptafluoride, IF₇, has iodine in which hybridisation?",
  opts:["sp³d³","sp³d²","sp³d","sp³"],
  ans:0,
@@ -760,7 +786,7 @@ const QUIZ = [
   "sp³ gives only four hybrid orbitals, far short of the seven positions IF₇ needs."],
  sol:"IF₇: 7 bond pairs ⇒ SN 7 ⇒ <b>sp³d³, pentagonal bipyramidal</b> — the standard example of seven-coordinate geometry."},
 
-{id:38, lec:"L-4", blk:"Lone-pair effect", topic:"ClF₃ hybridisation and shape",
+{id:38, lec:"L-4", blk:"Lone-pair effect", topic:"ClF₃ hybridisation and shape", t:60,
  q:"In ClF₃ the chlorine atom is sp³d hybridised. The molecular shape is",
  opts:[
   "T-shaped",
@@ -775,7 +801,7 @@ const QUIZ = [
   "Pyramidal describes AB₃L (like NH₃), not AB₃L₂."],
  sol:"ClF₃: AB₃L₂, sp³d. Lone pairs go equatorial (least repulsion), so the molecule is <b>T-shaped</b>. Bond angles are slightly under 90°."},
 
-{id:39, lec:"L-4", blk:"Lone-pair effect", topic:"ICl₄⁻ hybridisation and shape",
+{id:39, lec:"L-4", blk:"Lone-pair effect", topic:"ICl₄⁻ hybridisation and shape", t:60,
  q:"The ICl₄⁻ ion (iodine with 4 bonds and 2 lone pairs) is",
  opts:[
   "sp³d², square planar",
@@ -790,7 +816,7 @@ const QUIZ = [
   "Octahedral would require all six positions bonding (no lone pairs)."],
  sol:"ICl₄⁻: AB₄L₂, sp³d². The two lone pairs sit trans to each other, giving a <b>square planar</b> shape (like XeF₄)."},
 
-{id:40, lec:"L-4", blk:"Hybrid ↔ geometry", topic:"CO₂ hybridisation",
+{id:40, lec:"L-4", blk:"Hybrid ↔ geometry", topic:"CO₂ hybridisation", t:60,
  q:"The carbon in carbon dioxide, O=C=O, is",
  opts:[
   "sp hybridised, giving a linear molecule",
@@ -805,7 +831,7 @@ const QUIZ = [
   "There are only two σ domains on carbon, so sp², not applicable."],
  sol:"For hybridisation, count σ bonds + lone pairs only. CO₂ carbon: 2 σ + 0 lp ⇒ SN 2 ⇒ <b>sp, linear</b> (the π bonds do not change the hybridisation)."},
 
-{id:41, lec:"L-4", blk:"Conservation of orbitals", topic:"Number of hybrid orbitals",
+{id:41, lec:"L-4", blk:"Conservation of orbitals", topic:"Number of hybrid orbitals", t:90,
  q:"When one s and two p orbitals hybridise, the number of hybrid orbitals produced is",
  opts:["3","2","4","1"],
  ans:0,
@@ -816,7 +842,7 @@ const QUIZ = [
   "One would lose two orbitals; the count must be preserved."],
  sol:"<b>Number of hybrids = number of atomic orbitals mixed.</b> 1 s + 2 p ⇒ 3 sp² hybrids; 1 s + 3 p ⇒ 4 sp³; and so on. Orbitals are neither created nor destroyed by hybridisation."},
 
-{id:42, lec:"L-4", blk:"Hybrid ↔ geometry", topic:"PCl₅ hybridisation",
+{id:42, lec:"L-4", blk:"Hybrid ↔ geometry", topic:"PCl₅ hybridisation", t:60,
  q:"Phosphorus pentachloride, PCl₅, has phosphorus hybridised as",
  opts:[
   "sp³d, with a trigonal bipyramidal shape",
@@ -831,7 +857,7 @@ const QUIZ = [
   "sp² corresponds to steric number 3 (three domains); PCl₅ has five."],
  sol:"PCl₅: 5 P–Cl bonds ⇒ SN 5 ⇒ <b>sp³d, trigonal bipyramidal</b>. Its axial bonds are longer/weaker than the equatorial ones, which is why it readily ionises to PCl₄⁺ + PCl₆⁻ in the solid."},
 
-{id:43, lec:"L-4", blk:"Lone-pair effect", topic:"ICl₂⁻ hybridisation and shape",
+{id:43, lec:"L-4", blk:"Lone-pair effect", topic:"ICl₂⁻ hybridisation and shape", t:60,
  q:"The triiodide-like ion ICl₂⁻ (central I with 2 bonds and 3 lone pairs) is",
  opts:[
   "sp³d, linear",
@@ -846,7 +872,7 @@ const QUIZ = [
   "sp (SN 2) ignores the three lone pairs."],
  sol:"ICl₂⁻ / I₃⁻: AB₂L₃, sp³d. Three equatorial lone pairs push the two bonds to the axial positions ⇒ <b>linear</b> (180°). Same reasoning gives linear XeF₂."},
 
-{id:44, lec:"L-4", blk:"Hybrid ↔ geometry", topic:"Counting hybridisation from a formula",
+{id:44, lec:"L-4", blk:"Hybrid ↔ geometry", topic:"Counting hybridisation from a formula", t:60,
  q:"For the ion NH₄⁺, the hybridisation of nitrogen is",
  opts:[
   "sp³ (4 bond pairs, tetrahedral)",
@@ -862,7 +888,7 @@ const QUIZ = [
  sol:"NH₄⁺: N uses its lone pair to bond the 4th H, leaving 4 bond pairs and 0 lone pairs ⇒ SN 4 ⇒ <b>sp³, tetrahedral</b>, all H–N–H angles 109.5°."},
 
 /* ---------------- L-5 · VSEPR shapes (11) ---------------- */
-{id:45, lec:"L-5", blk:"VSEPR basis", topic:"Basis of VSEPR shape",
+{id:45, lec:"L-5", blk:"VSEPR basis", topic:"Basis of VSEPR shape", t:60,
  q:"VSEPR theory predicts molecular shape by assuming that electron pairs around the central atom",
  opts:[
   "arrange themselves to be as far apart as possible, minimising repulsion",
@@ -877,7 +903,7 @@ const QUIZ = [
   "Electron-pair repulsion is exactly what determines the shape."],
  sol:"<b>VSEPR</b>: electron domains (bond pairs + lone pairs) spread out to minimise mutual repulsion, giving the basic geometry; lone pairs then distort bond angles (lp–lp &gt; lp–bp &gt; bp–bp)."},
 
-{id:46, lec:"L-5", blk:"AB₂L", topic:"Shape of SO₂",
+{id:46, lec:"L-5", blk:"AB₂L", topic:"Shape of SO₂", t:60,
  q:"Sulfur dioxide, SO₂ (central S with 2 bond pairs and 1 lone pair), is",
  opts:[
   "bent (angular), ~119°",
@@ -892,7 +918,7 @@ const QUIZ = [
   "T-shape is AB₃L₂ (like ClF₃), not AB₂L."],
  sol:"SO₂: AB₂L, sp². The lone pair on S bends the molecule to <b>~119°</b> (angular), close to but below the ideal 120°."},
 
-{id:47, lec:"L-5", blk:"AB₂L₂", topic:"Shape of water",
+{id:47, lec:"L-5", blk:"AB₂L₂", topic:"Shape of water", t:60,
  q:"Water, H₂O (2 bond pairs, 2 lone pairs), has the shape",
  opts:[
   "bent, ~104.5°",
@@ -907,7 +933,7 @@ const QUIZ = [
   "Trigonal pyramidal is AB₃L (like NH₃), which has three bonds."],
  sol:"H₂O: AB₂L₂, sp³. Two lone pairs compress the angle from 109.5° to <b>~104.5°</b>, giving a bent molecule."},
 
-{id:48, lec:"L-5", blk:"AB₄L", topic:"Shape of SF₄",
+{id:48, lec:"L-5", blk:"AB₄L", topic:"Shape of SF₄", t:60,
  q:"Sulfur tetrafluoride, SF₄ (4 bond pairs, 1 lone pair), has the shape",
  opts:[
   "see-saw",
@@ -922,7 +948,7 @@ const QUIZ = [
   "A perfect trigonal bipyramid needs all five positions bonding (no lone pair)."],
  sol:"SF₄: AB₄L, sp³d. The equatorial lone pair distorts the TBP into a <b>see-saw</b> shape (two axial, two equatorial bonds)."},
 
-{id:49, lec:"L-5", blk:"AB₄L₂", topic:"Shape of XeF₄",
+{id:49, lec:"L-5", blk:"AB₄L₂", topic:"Shape of XeF₄", t:60,
  q:"Xenon tetrafluoride, XeF₄ (4 bond pairs, 2 lone pairs), is",
  opts:[
   "square planar",
@@ -937,7 +963,7 @@ const QUIZ = [
   "Octahedral needs all six positions bonded."],
  sol:"XeF₄: AB₄L₂, sp³d². Lone pairs trans to each other ⇒ <b>square planar</b>. ICl₄⁻ has the same shape."},
 
-{id:50, lec:"L-5", blk:"AB₅L", topic:"Shape of IF₅",
+{id:50, lec:"L-5", blk:"AB₅L", topic:"Shape of IF₅", t:60,
  q:"Iodine pentafluoride, IF₅ (5 bond pairs, 1 lone pair), has the shape",
  opts:[
   "square pyramidal",
@@ -952,7 +978,7 @@ const QUIZ = [
   "Pentagonal planar is not a VSEPR shape for this domain count."],
  sol:"IF₅ (and BrF₅): AB₅L, sp³d². Removing one vertex of an octahedron for the lone pair gives a <b>square pyramidal</b> shape."},
 
-{id:51, lec:"L-5", blk:"Lone-pair positions", topic:"Lone pairs in a trigonal bipyramid",
+{id:51, lec:"L-5", blk:"Lone-pair positions", topic:"Lone pairs in a trigonal bipyramid", t:60,
  q:"In a trigonal bipyramidal (sp³d) arrangement, lone pairs preferentially occupy",
  opts:[
   "equatorial positions, where repulsion is minimised",
@@ -967,7 +993,7 @@ const QUIZ = [
   "Lone pairs are part of the central atom's valence shell, not outside the molecule."],
  sol:"In a TBP, <b>lone pairs go equatorial</b> (2 neighbours at 90°) rather than axial (3 at 90°). This rule explains the see-saw (SF₄), T-shape (ClF₃) and linear (XeF₂) series."},
 
-{id:52, lec:"L-5", blk:"AB₆", topic:"Isostructural / isoelectronic species",
+{id:52, lec:"L-5", blk:"AB₆", topic:"Isostructural / isoelectronic species", t:60,
  q:"Which pair of species is isostructural (same shape)?",
  opts:[
   "SF₆ and PF₆⁻",
@@ -982,7 +1008,7 @@ const QUIZ = [
   "SF₄ is see-saw (one lone pair) while CH₄ is tetrahedral — different."],
  sol:"Isostructural = same number of bond pairs and lone pairs on the central atom. <b>SF₆ and PF₆⁻</b> are both AB₆, sp³d², octahedral."},
 
-{id:53, lec:"L-5", blk:"AB₃L", topic:"Shape of NH₃ vs planar AB₃",
+{id:53, lec:"L-5", blk:"AB₃L", topic:"Shape of NH₃ vs planar AB₃", t:60,
  q:"Why is NH₃ pyramidal while BF₃ is planar, even though both are AB₃-type?",
  opts:[
   "N has a lone pair (AB₃L) that pushes the bonds down; B has none (AB₃)",
@@ -997,7 +1023,7 @@ const QUIZ = [
   "Both have single bonds; bond order is not the cause."],
  sol:"NH₃: AB₃L, sp³, <b>trigonal pyramidal</b> (lone pair on N). BF₃: AB₃, sp², <b>trigonal planar</b> (no lone pair). The lone pair is the whole difference."},
 
-{id:54, lec:"L-5", blk:"AB₂L₃", topic:"Shape of XeF₂",
+{id:54, lec:"L-5", blk:"AB₂L₃", topic:"Shape of XeF₂", t:60,
  q:"Xenon difluoride, XeF₂ (2 bond pairs, 3 lone pairs), is",
  opts:[
   "linear",
@@ -1012,7 +1038,7 @@ const QUIZ = [
   "T-shape is AB₃L₂ (three bonds), not AB₂L₃."],
  sol:"XeF₂: AB₂L₃, sp³d. Three equatorial lone pairs ⇒ two axial bonds ⇒ <b>linear</b>. Same shape as I₃⁻ and ICl₂⁻."},
 
-{id:55, lec:"L-5", blk:"Bond angle vs ideal", topic:"Order of bond angles",
+{id:55, lec:"L-5", blk:"Bond angle vs ideal", topic:"Order of bond angles", t:60,
  q:"The correct order of bond angles is",
  opts:[
   "CH₄ (109.5°) > NH₃ (107°) > H₂O (104.5°)",
@@ -1028,7 +1054,7 @@ const QUIZ = [
  sol:"Same sp³ framework, growing lone-pair repulsion: 0 lp (CH₄, 109.5°) &gt; 1 lp (NH₃, 107°) &gt; 2 lp (H₂O, 104.5°). Lone pairs repel bond pairs more than bond pairs repel each other."},
 
 /* ---------------- L-6 · Bond angle comparisons (11) ---------------- */
-{id:56, lec:"L-6", blk:"Repulsion order", topic:"VSEPR repulsion hierarchy",
+{id:56, lec:"L-6", blk:"Repulsion order", topic:"VSEPR repulsion hierarchy", t:60,
  q:"The correct order of electron-pair repulsion strength is",
  opts:[
   "lone pair–lone pair > lone pair–bond pair > bond pair–bond pair",
@@ -1043,7 +1069,7 @@ const QUIZ = [
   "lp–lp is the strongest, so it cannot sit below lp–bp."],
  sol:"<b>lp–lp &gt; lp–bp &gt; bp–bp.</b> A lone pair, attracted by only one nucleus, is more diffuse and repels harder — the key to every bond-angle comparison."},
 
-{id:57, lec:"L-6", blk:"Central-atom EN", topic:"Group-15 hydride bond angles",
+{id:57, lec:"L-6", blk:"Central-atom EN", topic:"Group-15 hydride bond angles", t:60,
  q:"The bond angle decreases in the order NH₃ (107°) > PH₃ (94°) > AsH₃ (92°) mainly because",
  opts:[
   "down the group the central atom is less electronegative and larger, so the bonding pairs sit farther out and repel less",
@@ -1058,7 +1084,7 @@ const QUIZ = [
   "These are covalent hydrides, not ionic."],
  sol:"Down group 15, the central atom is bigger and less electronegative, so bond pairs are farther out and repel less: <b>NH₃ &gt; PH₃ &gt; AsH₃ &gt; SbH₃</b>. The heavier members approach 90° (little hybridisation)."},
 
-{id:58, lec:"L-6", blk:"Surrounding-atom EN", topic:"NH₃ vs NF₃ bond angle",
+{id:58, lec:"L-6", blk:"Surrounding-atom EN", topic:"NH₃ vs NF₃ bond angle", t:60,
  q:"The bond angle in NH₃ (107°) is larger than in NF₃ (102°) because",
  opts:[
   "F is more electronegative than H, pulling the bond pairs away from N and reducing their mutual repulsion",
@@ -1073,7 +1099,7 @@ const QUIZ = [
   "NF₃ is a covalent molecule, not ionic; the angle effect is due to electronegative F pulling the bond pairs away."],
  sol:"When the surrounding atom is more electronegative, it pulls the bond pair away from the central atom, weakening bp–bp repulsion and shrinking the angle: <b>NH₃ (107°) &gt; NF₃ (102°)</b>."},
 
-{id:59, lec:"L-6", blk:"Group-16 hydrides", topic:"Group-16 hydride bond angles",
+{id:59, lec:"L-6", blk:"Group-16 hydrides", topic:"Group-16 hydride bond angles", t:60,
  q:"The order of bond angles H₂O (104.5°) > H₂S (92°) > H₂Se (91°) arises because",
  opts:[
   "down the group the central atom uses almost pure p orbitals, giving angles near 90°",
@@ -1088,7 +1114,7 @@ const QUIZ = [
   "Hydrogen is unchanged across the series."],
  sol:"H₂O &gt; H₂S &gt; H₂Se &gt; H₂Te. Oxygen is sp³-like (104.5°); down the group hybridisation fades and bonding uses almost pure p orbitals ⇒ angles <b>near 90°</b>."},
 
-{id:60, lec:"L-6", blk:"Central-atom hybridisation", topic:"Bond angle vs hybridisation",
+{id:60, lec:"L-6", blk:"Central-atom hybridisation", topic:"Bond angle vs hybridisation", t:60,
  q:"For the same type of central atom with no lone pairs, bond angle increases with s-character in the order",
  opts:[
   "sp³ (109.5°) &lt; sp² (120°) &lt; sp (180°)",
@@ -1103,7 +1129,7 @@ const QUIZ = [
   "The angle depends on hybridisation; only sp³ is 109.5°."],
  sol:"Greater s-character ⇒ larger bond angle: <b>sp³ (109.5°) &lt; sp² (120°) &lt; sp (180°)</b>. This is why CH₄ (sp³) is 109.5° but CO₂ (sp) is linear."},
 
-{id:61, lec:"L-6", blk:"Cross comparison", topic:"BF₃ vs NF₃ angle",
+{id:61, lec:"L-6", blk:"Cross comparison", topic:"BF₃ vs NF₃ angle", t:60,
  q:"Which has the larger bond angle, BF₃ or NF₃?",
  opts:[
   "BF₃ (120°), because it is planar with no lone pair, while NF₃ is pyramidal",
@@ -1118,7 +1144,7 @@ const QUIZ = [
   "NF₃ is pyramidal, not planar; its angle is ~102°, not 120°."],
  sol:"<b>BF₃ (120°) &gt; NF₃ (~102°)</b>. BF₃ has no lone pair (planar); NF₃'s lone pair makes it pyramidal and compresses the angle."},
 
-{id:62, lec:"L-6", blk:"Central-atom EN", topic:"H₂O vs H₂S reason",
+{id:62, lec:"L-6", blk:"Central-atom EN", topic:"H₂O vs H₂S reason", t:60,
  q:"H₂O has a larger bond angle than H₂S primarily because",
  opts:[
   "oxygen is more electronegative and smaller, so it hybridises (sp³) and holds bond pairs closer, raising repulsion",
@@ -1133,7 +1159,7 @@ const QUIZ = [
   "Oxygen is more electronegative than sulfur, not the reverse."],
  sol:"O (small, EN) ⇒ sp³-like, 104.5°. S (larger, less EN) ⇒ near-pure-p bonding, ~92°. So <b>H₂O &gt; H₂S</b> in bond angle."},
 
-{id:63, lec:"L-6", blk:"Group-15 trichlorides", topic:"PCl₃ vs NCl₃ trend",
+{id:63, lec:"L-6", blk:"Group-15 trichlorides", topic:"PCl₃ vs NCl₃ trend", t:60,
  q:"Comparing the group-15 trichlorides, the bond angle order is",
  opts:[
   "NCl₃ > PCl₃ > AsCl₃",
@@ -1148,7 +1174,7 @@ const QUIZ = [
   "Lone-pair repulsion and decreasing hybridisation make the angles differ down the group."],
  sol:"Same argument as the hydrides: down group 15 the central atom is larger and less electronegative, so <b>NCl₃ &gt; PCl₃ &gt; AsCl₃</b>."},
 
-{id:64, lec:"L-6", blk:"Bond angle rules audit", topic:"Which factor widens a bond angle",
+{id:64, lec:"L-6", blk:"Bond angle rules audit", topic:"Which factor widens a bond angle", t:60,
  q:"Which change tends to <b>increase</b> a molecule's bond angle?",
  opts:[
   "greater electronegativity of the central atom",
@@ -1163,7 +1189,7 @@ const QUIZ = [
   "Less s-character (e.g. sp³ vs sp) gives a <i>smaller</i> angle."],
  sol:"Angle widens with: higher central-atom electronegativity, fewer lone pairs, lower surrounding-atom electronegativity, and higher s-character. Only the first option increases the angle."},
 
-{id:65, lec:"L-6", blk:"Definition", topic:"Definition of bond angle",
+{id:65, lec:"L-6", blk:"Definition", topic:"Definition of bond angle", t:60,
  q:"The bond angle in a molecule is",
  opts:[
   "the angle between two bonds (orbitals) at the central atom",
@@ -1178,7 +1204,7 @@ const QUIZ = [
   "That is a coordination count, not an angle."],
  sol:"<b>Bond angle</b> = the angle between two adjacent bonds at the central atom (e.g. 104.5° in H₂O). It is set by hybridisation and modified by lone-pair and electronegativity effects."},
 
-{id:66, lec:"L-6", blk:"Cross comparison", topic:"Five-way bond-angle ordering",
+{id:66, lec:"L-6", blk:"Cross comparison", topic:"Five-way bond-angle ordering", t:60,
  q:"Arrange by decreasing bond angle: CO₂, BF₃, CH₄, NH₃, H₂O.",
  opts:[
   "CO₂ > BF₃ > CH₄ > NH₃ > H₂O",
@@ -1194,7 +1220,7 @@ const QUIZ = [
  sol:"By decreasing s-character and increasing lone pairs: <b>CO₂ (180°) &gt; BF₃ (120°) &gt; CH₄ (109.5°) &gt; NH₃ (107°) &gt; H₂O (104.5°)</b>."},
 
 /* ---------------- L-7 · MOT foundations (11) ---------------- */
-{id:67, lec:"L-7", blk:"LCAO", topic:"Conditions for LCAO",
+{id:67, lec:"L-7", blk:"LCAO", topic:"Conditions for LCAO", t:60,
  q:"For two atomic orbitals to combine into molecular orbitals, they must",
  opts:[
   "have comparable energies, the same symmetry about the bond axis, and overlap significantly",
@@ -1209,7 +1235,7 @@ const QUIZ = [
   "Filled or half-filled — occupancy is not a condition for the orbitals to combine."],
  sol:"LCAO conditions: <b>similar energy, same symmetry, sufficient overlap.</b> Meeting these lets two AOs form one bonding and one antibonding MO."},
 
-{id:68, lec:"L-7", blk:"Bonding vs antibonding", topic:"Bonding MO character",
+{id:68, lec:"L-7", blk:"Bonding vs antibonding", topic:"Bonding MO character", t:90,
  q:"A bonding molecular orbital, compared with the atomic orbitals that formed it,",
  opts:[
   "is lower in energy and has increased electron density between the nuclei",
@@ -1224,7 +1250,7 @@ const QUIZ = [
   "A bonding MO can and usually does hold electrons."],
  sol:"<b>Bonding MO</b>: constructive interference ⇒ electron density concentrated between nuclei ⇒ lower energy (stabilising). <b>Antibonding MO</b>: destructive ⇒ node between nuclei ⇒ higher energy."},
 
-{id:69, lec:"L-7", blk:"Antibonding", topic:"Node in an antibonding MO",
+{id:69, lec:"L-7", blk:"Antibonding", topic:"Node in an antibonding MO", t:60,
  q:"An antibonding molecular orbital is characterised by",
  opts:[
   "a nodal plane between the two nuclei, where electron density is zero",
@@ -1239,7 +1265,7 @@ const QUIZ = [
   "Filling an antibonding MO lowers bond order, so it definitely has an effect."],
  sol:"<b>Antibonding MO (σ*, π*)</b>: a node between the nuclei, higher energy, destabilising. Electrons in antibonding MOs subtract from the bond order."},
 
-{id:70, lec:"L-7", blk:"Conservation", topic:"Number of MOs from AOs",
+{id:70, lec:"L-7", blk:"Conservation", topic:"Number of MOs from AOs", t:60,
  q:"When N atomic orbitals combine, the number of molecular orbitals formed is",
  opts:["N","N/2","2N","N − 1"],
  ans:0,
@@ -1250,7 +1276,7 @@ const QUIZ = [
   "None are lost, so N − 1 is one too few."],
  sol:"<b>MOs formed = AOs combined.</b> Two 1s orbitals give σ1s and σ*1s (2 MOs). Eight 2s/2p orbitals of a diatomic give eight MOs."},
 
-{id:71, lec:"L-7", blk:"Filling rules", topic:"Filling of molecular orbitals",
+{id:71, lec:"L-7", blk:"Filling rules", topic:"Filling of molecular orbitals", t:60,
  q:"Molecular orbitals are filled according to",
  opts:[
   "the Aufbau principle, Pauli exclusion, and Hund's rule — the same rules as atomic orbitals",
@@ -1265,7 +1291,7 @@ const QUIZ = [
   "The order is strictly by increasing MO energy."],
  sol:"Same three rules as for atoms: <b>Aufbau, Pauli, Hund</b>. Electrons enter the lowest MO first, pair only when forced, and give parallel spins in degenerate π orbitals (this is why O₂ is paramagnetic)."},
 
-{id:72, lec:"L-7", blk:"MO energy order", topic:"MO order up to nitrogen",
+{id:72, lec:"L-7", blk:"MO energy order", topic:"MO order up to nitrogen", t:60,
  q:"For the second-period diatomics up to and including N₂, the molecular-orbital energy order places",
  opts:[
   "the π2p orbitals below the σ2p orbital",
@@ -1280,7 +1306,7 @@ const QUIZ = [
   "Antibonding π*2p is always above the bonding π2p."],
  sol:"Up to N₂: σ1s &lt; σ*1s &lt; σ2s &lt; σ*2s &lt; <b>π2p(x,y) &lt; σ2p</b> &lt; π*2p &lt; σ*2p. From O₂ onward, σ2p drops below π2p (less s–p mixing)."},
 
-{id:73, lec:"L-7", blk:"Node & density", topic:"Electron density at a node",
+{id:73, lec:"L-7", blk:"Node & density", topic:"Electron density at a node", t:60,
  q:"At a nodal plane of a molecular orbital, the probability of finding an electron is",
  opts:["zero","maximum","exactly one-half","undefined"],
  ans:0,
@@ -1291,7 +1317,7 @@ const QUIZ = [
   "It is well defined and equals zero."],
  sol:"A <b>node</b> is where ψ = 0, so |ψ|² = 0 — no electron density. Antibonding MOs have a node between the nuclei; the more nodes, the higher the energy."},
 
-{id:74, lec:"L-7", blk:"Constructive interference", topic:"Origin of the bonding MO",
+{id:74, lec:"L-7", blk:"Constructive interference", topic:"Origin of the bonding MO", t:90,
  q:"The bonding molecular orbital arises from",
  opts:[
   "constructive interference (addition) of the atomic wavefunctions",
@@ -1306,7 +1332,7 @@ const QUIZ = [
   "No ionisation is involved in forming MOs."],
  sol:"ψ(bonding) = ψ_A + ψ_B (constructive) ⇒ density piled between nuclei, lower energy. ψ(antibonding) = ψ_A − ψ_B (destructive) ⇒ node, higher energy."},
 
-{id:75, lec:"L-7", blk:"Counting MOs", topic:"MOs from two 1s orbitals",
+{id:75, lec:"L-7", blk:"Counting MOs", topic:"MOs from two 1s orbitals", t:60,
  q:"Combining the 1s orbitals of two hydrogen atoms gives",
  opts:[
   "σ1s (bonding) and σ*1s (antibonding)",
@@ -1321,7 +1347,7 @@ const QUIZ = [
   "The symmetric combination gives one bonding and one antibonding MO, not two bonding."],
  sol:"Two 1s AOs ⇒ <b>σ1s + σ*1s</b>. In H₂ both electrons occupy σ1s (bond order 1); in He₂ the σ*1s also fills, giving bond order 0."},
 
-{id:76, lec:"L-7", blk:"Filling — odd one out", topic:"Invalid MO configuration",
+{id:76, lec:"L-7", blk:"Filling — odd one out", topic:"Invalid MO configuration", t:60,
  q:"Which statement about molecular orbitals is <b>false</b>?",
  opts:[
   "Antibonding orbitals fill before bonding orbitals of lower energy",
@@ -1336,7 +1362,7 @@ const QUIZ = [
   "True — the internuclear node is the hallmark of an antibonding MO."],
  sol:"The false claim is that antibonding fills first. Electrons obey Aufbau: <b>lower-energy bonding MOs fill before higher-energy antibonding MOs</b>. The other three statements are correct."},
 
-{id:77, lec:"L-7", blk:"Symmetry", topic:"Why some overlaps give no bond",
+{id:77, lec:"L-7", blk:"Symmetry", topic:"Why some overlaps give no bond", t:60,
  q:"If two atomic orbitals have the wrong symmetry (equal + and − overlap), the net result is",
  opts:[
   "zero net overlap, so no bonding molecular orbital forms",
@@ -1352,7 +1378,7 @@ const QUIZ = [
  sol:"Effective LCAO needs matching symmetry. If overlap is +on one lobe and − on the other by equal amounts, they cancel ⇒ <b>zero net overlap ⇒ non-bonding</b>. This is why an s orbital and a perpendicular p orbital do not bond."},
 
 /* ---------------- L-8 · MOT applications (12) ---------------- */
-{id:78, lec:"L-8", blk:"Bond order", topic:"Bond-order formula",
+{id:78, lec:"L-8", blk:"Bond order", topic:"Bond-order formula", t:60,
  q:"In molecular orbital theory, bond order is",
  opts:[
   "½(number of bonding electrons − number of antibonding electrons)",
@@ -1367,7 +1393,7 @@ const QUIZ = [
   "Antibonding electrons subtract, they do not add."],
  sol:"<b>Bond order = (N_b − N_a)/2.</b> A positive bond order means a stable molecule; zero means it does not form (He₂, Be₂)."},
 
-{id:79, lec:"L-8", blk:"N₂", topic:"Bond order of N₂",
+{id:79, lec:"L-8", blk:"N₂", topic:"Bond order of N₂", t:90,
  q:"The bond order of the nitrogen molecule N₂ is",
  opts:["3","2","2.5","1"],
  ans:0,
@@ -1378,7 +1404,7 @@ const QUIZ = [
   "1 is the bond order of F₂."],
  sol:"N₂ (14 electrons): N_b = 10, N_a = 4 ⇒ (10 − 4)/2 = <b>3</b>. The triple bond and all-paired electrons make N₂ very stable and diamagnetic."},
 
-{id:80, lec:"L-8", blk:"O₂", topic:"O₂ bond order and magnetism",
+{id:80, lec:"L-8", blk:"O₂", topic:"O₂ bond order and magnetism", t:90,
  q:"Molecular oxygen O₂ has",
  opts:[
   "bond order 2 and is paramagnetic (two unpaired electrons)",
@@ -1393,7 +1419,7 @@ const QUIZ = [
   "The two unpaired π* electrons make it paramagnetic, not diamagnetic — this was MOT's great triumph."],
  sol:"O₂ (16 e): N_b = 10, N_a = 6 ⇒ bond order 2. Two electrons singly fill π*2px and π*2py ⇒ <b>paramagnetic</b>, which Lewis structures could not explain."},
 
-{id:81, lec:"L-8", blk:"B₂", topic:"B₂ bond order and magnetism",
+{id:81, lec:"L-8", blk:"B₂", topic:"B₂ bond order and magnetism", t:60,
  q:"The B₂ molecule is",
  opts:[
   "paramagnetic with bond order 1",
@@ -1408,7 +1434,7 @@ const QUIZ = [
   "B₂ does exist with bond order 1."],
  sol:"B₂ (10 e), with the π2p-below-σ2p order: the final two electrons go singly into the degenerate π2p ⇒ <b>paramagnetic, bond order 1</b>. This is direct evidence for the s–p-mixed MO order."},
 
-{id:82, lec:"L-8", blk:"Non-existent species", topic:"Why He₂ does not exist",
+{id:82, lec:"L-8", blk:"Non-existent species", topic:"Why He₂ does not exist", t:90,
  q:"The helium molecule He₂ does not exist because its bond order is",
  opts:[
   "0 (equal bonding and antibonding electrons)",
@@ -1423,7 +1449,7 @@ const QUIZ = [
   "The antibonding electrons exactly cancel the bonding ones, giving 0, not 0.5."],
  sol:"He₂: σ1s² σ*1s² ⇒ bond order (2 − 2)/2 = <b>0</b>. No net bonding ⇒ He₂ does not form. Be₂ is the same story (bond order 0)."},
 
-{id:83, lec:"L-8", blk:"Ions", topic:"Bond order of NO⁺",
+{id:83, lec:"L-8", blk:"Ions", topic:"Bond order of NO⁺", t:60,
  q:"The nitrosyl cation NO⁺ has bond order",
  opts:["3","2.5","2","1.5"],
  ans:0,
@@ -1434,7 +1460,7 @@ const QUIZ = [
   "1.5 is the bond order of O₂⁻."],
  sol:"NO⁺ (14 e) is isoelectronic with N₂ ⇒ bond order <b>3</b>. Removing the single antibonding π* electron from NO (BO 2.5) raises the bond order and shortens the bond."},
 
-{id:84, lec:"L-8", blk:"Bond order ↔ length", topic:"Bond order and bond length",
+{id:84, lec:"L-8", blk:"Bond order ↔ length", topic:"Bond order and bond length", t:60,
  q:"As bond order increases, bond length",
  opts:[
   "decreases",
@@ -1449,7 +1475,7 @@ const QUIZ = [
   "The relationship is monotonic (inverse), not reversing."],
  sol:"Bond order ∝ 1/bond length: C–C (1) 154 pm &gt; C=C (2) 134 pm &gt; C≡C (3) 120 pm. Higher order ⇒ <b>shorter, stronger</b> bond."},
 
-{id:85, lec:"L-8", blk:"Bond order ↔ energy", topic:"Bond order and bond energy",
+{id:85, lec:"L-8", blk:"Bond order ↔ energy", topic:"Bond order and bond energy", t:60,
  q:"Bond dissociation energy generally ______ with increasing bond order.",
  opts:["increases","decreases","stays constant","becomes zero"],
  ans:0,
@@ -1460,7 +1486,7 @@ const QUIZ = [
   "A higher bond order raises bond energy well above zero."],
  sol:"Bond order ∝ bond energy: N≡N (BO 3, 941 kJ/mol) ≫ O=O (BO 2, 498) &gt; F–F (BO 1, 155). Higher order ⇒ <b>higher</b> dissociation energy."},
 
-{id:86, lec:"L-8", blk:"Diamagnetic species", topic:"Diamagnetism of CO",
+{id:86, lec:"L-8", blk:"Diamagnetic species", topic:"Diamagnetism of CO", t:90,
  q:"Carbon monoxide CO is diamagnetic and has bond order 3 because",
  opts:[
   "it is isoelectronic with N₂ (14 electrons), so all electrons are paired with bond order 3",
@@ -1475,7 +1501,7 @@ const QUIZ = [
   "14 is an even number of electrons."],
  sol:"CO (6 + 8 = 14 e) is isoelectronic with N₂ ⇒ σ and π filled, none unpaired ⇒ <b>diamagnetic, bond order 3</b>. This strong triple bond gives CO its very high bond energy."},
 
-{id:87, lec:"L-8", blk:"Counting", topic:"Species with bond order 1.5",
+{id:87, lec:"L-8", blk:"Counting", topic:"Species with bond order 1.5", t:60,
  q:"Which species has a bond order of 1.5?",
  opts:["O₂⁻ (superoxide)","N₂","O₂","F₂"],
  ans:0,
@@ -1486,7 +1512,7 @@ const QUIZ = [
   "F₂ has bond order 1."],
  sol:"O₂⁻ (17 e): adding an electron to O₂'s π* raises N_a to 7 ⇒ bond order <b>1.5</b>. The series O₂⁺ (2.5) &gt; O₂ (2) &gt; O₂⁻ (1.5) &gt; O₂²⁻ (1) shows each extra π* electron cutting bond order by 0.5."},
 
-{id:88, lec:"L-8", blk:"Isoelectronic", topic:"14-electron isoelectronic set",
+{id:88, lec:"L-8", blk:"Isoelectronic", topic:"14-electron isoelectronic set", t:60,
  q:"Which of the following is isoelectronic with N₂ (and therefore also has bond order 3)?",
  opts:["CO","O₂","NO","F₂"],
  ans:0,
@@ -1497,7 +1523,7 @@ const QUIZ = [
   "F₂ has 18 electrons (bond order 1)."],
  sol:"The 14-electron set — <b>N₂, CO, NO⁺, CN⁻</b> — is isoelectronic, all with bond order 3 and all diamagnetic."},
 
-{id:89, lec:"L-8", blk:"Magnetism test", topic:"Identifying paramagnetic species",
+{id:89, lec:"L-8", blk:"Magnetism test", topic:"Identifying paramagnetic species", t:60,
  q:"Which of these is paramagnetic?",
  opts:["O₂","N₂","CO","F₂"],
  ans:0,
@@ -1509,7 +1535,7 @@ const QUIZ = [
  sol:"Paramagnetism needs unpaired electrons. Among these, only <b>O₂</b> qualifies (two unpaired π* electrons); B₂ and NO are other common paramagnetic diatomics."},
 
 /* ---------------- L-9 · Dipole moment (11) ---------------- */
-{id:90, lec:"L-9", blk:"Definition", topic:"Definition and units of μ",
+{id:90, lec:"L-9", blk:"Definition", topic:"Definition and units of μ", t:60,
  q:"The dipole moment of a bond is defined as",
  opts:[
   "the product of the magnitude of the charge and the distance separating the charges, μ = Q × d",
@@ -1524,7 +1550,7 @@ const QUIZ = [
   "That expression has the wrong units and no physical meaning as a dipole."],
  sol:"<b>μ = Q × d</b>, unit debye (1 D = 3.336 × 10⁻³⁰ C·m). It is a vector; the molecular dipole is the vector sum of the bond dipoles."},
 
-{id:91, lec:"L-9", blk:"Geometry cancels μ", topic:"Why CO₂ is non-polar",
+{id:91, lec:"L-9", blk:"Geometry cancels μ", topic:"Why CO₂ is non-polar", t:90,
  q:"Carbon dioxide has polar C=O bonds yet zero dipole moment because",
  opts:[
   "it is linear and symmetric, so the two equal bond dipoles point opposite and cancel",
@@ -1539,7 +1565,7 @@ const QUIZ = [
   "Carbon in CO₂ has no lone pair (sp, linear)."],
  sol:"Molecular polarity = vector sum of bond dipoles. CO₂ is <b>linear and symmetric</b>, so the two C=O dipoles cancel ⇒ μ = 0, despite polar bonds."},
 
-{id:92, lec:"L-9", blk:"Geometry cancels μ", topic:"Non-polar symmetric molecules",
+{id:92, lec:"L-9", blk:"Geometry cancels μ", topic:"Non-polar symmetric molecules", t:90,
  q:"Which molecule has a non-zero dipole moment?",
  opts:["H₂O","CO₂","BF₃","CCl₄"],
  ans:0,
@@ -1550,7 +1576,7 @@ const QUIZ = [
   "CCl₄ is tetrahedral and symmetric ⇒ μ = 0."],
  sol:"Symmetric shapes (linear CO₂, planar BF₃, tetrahedral CCl₄) cancel their bond dipoles ⇒ μ = 0. <b>Bent H₂O</b> does not ⇒ μ ≠ 0."},
 
-{id:93, lec:"L-9", blk:"% ionic character", topic:"Percent ionic character",
+{id:93, lec:"L-9", blk:"% ionic character", topic:"Percent ionic character", t:60,
  q:"Percent ionic character of a bond is calculated as",
  opts:[
   "(observed dipole moment / dipole moment for 100% ionic bond) × 100",
@@ -1565,7 +1591,7 @@ const QUIZ = [
   "Adding the moments is meaningless for a percentage."],
  sol:"<b>% ionic character = (μ_observed / μ_100%-ionic) × 100</b>, where μ_100%-ionic = e × bond length. For HCl this gives ~17%."},
 
-{id:94, lec:"L-9", blk:"% ionic character", topic:"Numeric % ionic character",
+{id:94, lec:"L-9", blk:"% ionic character", topic:"Numeric % ionic character", t:60,
  q:"For HCl, μ_observed = 1.03 D and the calculated μ for a fully ionic bond is 6.12 D. The percent ionic character is about",
  opts:["17%","6%","60%","83%"],
  ans:0,
@@ -1576,7 +1602,7 @@ const QUIZ = [
   "83% inverts the ratio (6.12/... is impossible; and it confuses ionic with covalent character)."],
  sol:"% ionic = (1.03/6.12) × 100 ≈ <b>17%</b>. So the H–Cl bond is about 17% ionic and 83% covalent."},
 
-{id:95, lec:"L-9", blk:"Bond vs molecular polarity", topic:"Polar bonds, non-polar molecule",
+{id:95, lec:"L-9", blk:"Bond vs molecular polarity", topic:"Polar bonds, non-polar molecule", t:90,
  q:"A molecule can have polar bonds but zero net dipole moment when",
  opts:[
   "the bond dipoles are arranged symmetrically so their vector sum is zero",
@@ -1591,7 +1617,7 @@ const QUIZ = [
   "Physical state does not determine molecular polarity."],
  sol:"Net μ = vector sum of bond dipoles. <b>Symmetric geometry ⇒ cancellation ⇒ μ = 0</b> (CO₂, BF₃, CCl₄, SF₆, PCl₅). Asymmetry (H₂O, NH₃) leaves a net dipole."},
 
-{id:96, lec:"L-9", blk:"NH₃ vs NF₃", topic:"Comparing NH₃ and NF₃ dipoles",
+{id:96, lec:"L-9", blk:"NH₃ vs NF₃", topic:"Comparing NH₃ and NF₃ dipoles", t:60,
  q:"NH₃ has a larger dipole moment (1.47 D) than NF₃ (0.24 D), even though F is more electronegative than H, because",
  opts:[
   "in NH₃ the N–H bond dipoles and the lone-pair dipole point the same way and add, while in NF₃ the bond dipoles oppose the lone-pair dipole",
@@ -1606,7 +1632,7 @@ const QUIZ = [
   "NH₃ is pyramidal, not linear."],
  sol:"Both are pyramidal. In NH₃ bond and lone-pair dipoles <b>reinforce</b> (large μ); in NF₃ the electronegative F reverses the bond dipoles so they <b>oppose</b> the lone-pair dipole (small μ)."},
 
-{id:97, lec:"L-9", blk:"Chloromethane series", topic:"Dipole of CCl₄",
+{id:97, lec:"L-9", blk:"Chloromethane series", topic:"Dipole of CCl₄", t:60,
  q:"Among CH₃Cl, CH₂Cl₂, CHCl₃ and CCl₄, which has zero dipole moment?",
  opts:["CCl₄","CH₃Cl","CH₂Cl₂","CHCl₃"],
  ans:0,
@@ -1617,7 +1643,7 @@ const QUIZ = [
   "CHCl₃ is asymmetric ⇒ μ ≠ 0."],
  sol:"Only the fully symmetric <b>CCl₄</b> has cancelling dipoles (μ = 0). The mixed members CH₃Cl, CH₂Cl₂, CHCl₃ are all polar."},
 
-{id:98, lec:"L-9", blk:"Highest μ", topic:"Highest dipole moment",
+{id:98, lec:"L-9", blk:"Highest μ", topic:"Highest dipole moment", t:60,
  q:"Which molecule has the highest dipole moment?",
  opts:["H₂O","H₂S","CO₂","CCl₄"],
  ans:0,
@@ -1628,7 +1654,7 @@ const QUIZ = [
   "CCl₄ is tetrahedral and symmetric ⇒ μ = 0."],
  sol:"Bent shape + high O electronegativity ⇒ <b>H₂O</b> has the largest μ (~1.85 D). H₂S is smaller; CO₂ and CCl₄ are zero by symmetry."},
 
-{id:99, lec:"L-9", blk:"Unit conversion", topic:"Debye to C·m",
+{id:99, lec:"L-9", blk:"Unit conversion", topic:"Debye to C·m", t:60,
  q:"A dipole moment of 2.0 D expressed in C·m (1 D = 3.336 × 10⁻³⁰ C·m) is",
  opts:[
   "6.67 × 10⁻³⁰ C·m",
@@ -1643,7 +1669,7 @@ const QUIZ = [
   "The exponent must stay negative; 10³⁰ is wrong by 60 orders of magnitude."],
  sol:"μ = 2.0 D × 3.336 × 10⁻³⁰ C·m/D = <b>6.67 × 10⁻³⁰ C·m</b>."},
 
-{id:100, lec:"L-9", blk:"Geometry decides μ", topic:"Counting non-polar molecules",
+{id:100, lec:"L-9", blk:"Geometry decides μ", topic:"Counting non-polar molecules", t:60,
  q:"How many of the following are non-polar: CO₂, BF₃, NH₃, CCl₄, H₂O?",
  opts:["3 (CO₂, BF₃, CCl₄)","2 (CO₂, H₂O)","4","5"],
  ans:0,
@@ -1655,7 +1681,7 @@ const QUIZ = [
  sol:"Non-polar (symmetric): <b>CO₂, BF₃, CCl₄</b> = 3. Polar (asymmetric, lone pairs): NH₃, H₂O."},
 
 /* ---------------- L-10 · Bond parameters & H-bonding (11) ---------------- */
-{id:101, lec:"L-10", blk:"Bond length", topic:"Definition of bond length",
+{id:101, lec:"L-10", blk:"Bond length", topic:"Definition of bond length", t:60,
  q:"The bond length of a covalent bond is",
  opts:[
   "the equilibrium distance between the nuclei of the two bonded atoms",
@@ -1670,7 +1696,7 @@ const QUIZ = [
   "That describes the bond angle — the angle between two bonds at the central atom — not this quantity."],
  sol:"<b>Bond length</b> = equilibrium internuclear separation ≈ sum of covalent radii. It shortens as bond order rises and as the atoms get smaller."},
 
-{id:102, lec:"L-10", blk:"Bond length ↔ order", topic:"Ordering C–C bond lengths",
+{id:102, lec:"L-10", blk:"Bond length ↔ order", topic:"Ordering C–C bond lengths", t:60,
  q:"The order of increasing bond length is",
  opts:[
   "C≡C &lt; C=C &lt; C–C",
@@ -1685,7 +1711,7 @@ const QUIZ = [
   "Bond length depends on bond order, so they are not equal."],
  sol:"Bond order ∝ 1/length: C≡C (120 pm) &lt; C=C (134 pm) &lt; C–C (154 pm). So increasing length is <b>C≡C &lt; C=C &lt; C–C</b>."},
 
-{id:103, lec:"L-10", blk:"Additivity", topic:"Bond length from covalent radii",
+{id:103, lec:"L-10", blk:"Additivity", topic:"Bond length from covalent radii", t:60,
  q:"For a C–Cl bond, given covalent radii r(C) = 77 pm and r(Cl) = 99 pm, the estimated bond length is",
  opts:["176 pm","99 pm","77 pm","22 pm"],
  ans:0,
@@ -1696,7 +1722,7 @@ const QUIZ = [
   "22 pm is the difference of the radii, which has no physical meaning here."],
  sol:"Additivity of covalent radii: d(A–B) ≈ r_A + r_B = 77 + 99 = <b>176 pm</b>. (The Schomaker–Stevenson correction lowers this slightly for polar bonds.)"},
 
-{id:104, lec:"L-10", blk:"H-bond condition", topic:"Condition for hydrogen bonding",
+{id:104, lec:"L-10", blk:"H-bond condition", topic:"Condition for hydrogen bonding", t:60,
  q:"Hydrogen bonding occurs when hydrogen is covalently bonded to",
  opts:[
   "a small, highly electronegative atom — F, O or N",
@@ -1711,7 +1737,7 @@ const QUIZ = [
   "C is not electronegative enough; C–H bonds do not hydrogen-bond significantly."],
  sol:"H-bonding requires H attached to <b>F, O or N</b> (small, very electronegative). The δ+ H is then attracted to a lone pair on another F/O/N atom."},
 
-{id:105, lec:"L-10", blk:"Intermolecular vs intramolecular", topic:"Types of hydrogen bond",
+{id:105, lec:"L-10", blk:"Intermolecular vs intramolecular", topic:"Types of hydrogen bond", t:60,
  q:"An intramolecular hydrogen bond is one that forms",
  opts:[
   "within a single molecule (e.g. o-nitrophenol)",
@@ -1726,7 +1752,7 @@ const QUIZ = [
   "H-bonds form in liquid and solid phases too, not only gas."],
  sol:"<b>Intramolecular</b> H-bond = within one molecule (o-nitrophenol, salicylaldehyde). <b>Intermolecular</b> = between molecules (water, alcohols), which raises boiling point; intramolecular H-bonding tends to <i>lower</i> it."},
 
-{id:106, lec:"L-10", blk:"Boiling point", topic:"Water's anomalous boiling point",
+{id:106, lec:"L-10", blk:"Boiling point", topic:"Water's anomalous boiling point", t:60,
  q:"Water has a much higher boiling point than H₂S because",
  opts:[
   "water molecules form extensive intermolecular hydrogen bonds",
@@ -1741,7 +1767,7 @@ const QUIZ = [
   "Water is polar, and its polarity plus H-bonding are the reason for the high boiling point."],
  sol:"Despite its lower mass, <b>H₂O boils at 100 °C</b> while H₂S boils at −60 °C — the difference is water's strong <b>hydrogen bonding</b> (S is too large and weakly electronegative to H-bond)."},
 
-{id:107, lec:"L-10", blk:"Boiling point", topic:"HF anomaly in group 17 hydrides",
+{id:107, lec:"L-10", blk:"Boiling point", topic:"HF anomaly in group 17 hydrides", t:60,
  q:"Among the hydrogen halides, HF has an anomalously high boiling point because",
  opts:[
   "HF molecules are hydrogen-bonded, unlike HCl, HBr and HI",
@@ -1756,7 +1782,7 @@ const QUIZ = [
   "HF has the <b>strongest</b> intermolecular forces of the series (H-bonds), not the weakest."],
  sol:"Boiling points: HF &gt; HI &gt; HBr &gt; HCl. HCl→HI rise with mass, but <b>HF is lifted above all by hydrogen bonding</b> — the same anomaly seen in H₂O and NH₃."},
 
-{id:108, lec:"L-10", blk:"Bond enthalpy", topic:"Definition of bond enthalpy",
+{id:108, lec:"L-10", blk:"Bond enthalpy", topic:"Definition of bond enthalpy", t:90,
  q:"The bond enthalpy (bond dissociation energy) of a bond is",
  opts:[
   "the energy required to break one mole of that bond in the gaseous state",
@@ -1771,7 +1797,7 @@ const QUIZ = [
   "That describes the bond angle — the angle between two bonds at the central atom — not this quantity."],
  sol:"<b>Bond enthalpy</b> = energy to break 1 mol of a bond (gas phase). Higher bond order ⇒ higher bond enthalpy (N≡N 941 &gt; O=O 498 &gt; F–F 155 kJ/mol)."},
 
-{id:109, lec:"L-10", blk:"Effects of H-bonding", topic:"Consequences of hydrogen bonding",
+{id:109, lec:"L-10", blk:"Effects of H-bonding", topic:"Consequences of hydrogen bonding", t:60,
  q:"Which property is a direct consequence of hydrogen bonding in water?",
  opts:[
   "ice is less dense than liquid water",
@@ -1786,7 +1812,7 @@ const QUIZ = [
   "Water is polar; that polarity underlies the H-bonding."],
  sol:"Hydrogen bonding builds an open hexagonal lattice in ice ⇒ <b>ice is less dense than water</b> (floats). It also explains water's high boiling point, high specific heat and solvent power."},
 
-{id:110, lec:"L-10", blk:"Counting", topic:"Counting hydrogen-bond formers",
+{id:110, lec:"L-10", blk:"Counting", topic:"Counting hydrogen-bond formers", t:60,
  q:"How many of these can form intermolecular hydrogen bonds: HF, CH₄, NH₃, H₂O, PH₃?",
  opts:["3 (HF, NH₃, H₂O)","2 (HF, H₂O)","4","5"],
  ans:0,
@@ -1797,7 +1823,7 @@ const QUIZ = [
   "Neither CH₄ nor PH₃ H-bonds, so not all 5."],
  sol:"H-bonding needs H on F, O or N: <b>HF, NH₃, H₂O</b> qualify (3). CH₄ and PH₃ have H on less-electronegative C and P, so they cannot."},
 
-{id:111, lec:"L-10", blk:"Factors affecting bond length", topic:"What shortens a bond",
+{id:111, lec:"L-10", blk:"Factors affecting bond length", topic:"What shortens a bond", t:60,
  q:"Which change shortens a bond between two given atoms?",
  opts:[
   "increasing the bond order",
@@ -1813,7 +1839,7 @@ const QUIZ = [
  sol:"Bond length falls with <b>higher bond order</b> and with smaller atomic radii. C≡C &lt; C=C &lt; C–C is the standard illustration."},
 
 /* ---------------- SB · Mixed bonding (10) ---------------- */
-{id:112, lec:"SB", blk:"Shape + hybridisation", topic:"Hybridisation of XeF₄",
+{id:112, lec:"SB", blk:"Shape + hybridisation", topic:"Hybridisation of XeF₄", t:90,
  q:"XeF₄ is square planar. The hybridisation of xenon is",
  opts:["sp³d²","sp³d","sp³","dsp²"],
  ans:0,
@@ -1824,7 +1850,7 @@ const QUIZ = [
   "dsp² is used in coordination chemistry (inner-orbital complexes), not for main-group XeF₄."],
  sol:"XeF₄: AB₄L₂, SN 6 ⇒ <b>sp³d²</b>. Two axial lone pairs leave four F in a square plane. ICl₄⁻ is isostructural."},
 
-{id:113, lec:"SB", blk:"Bond order", topic:"Highest bond order",
+{id:113, lec:"SB", blk:"Bond order", topic:"Highest bond order", t:90,
  q:"Which species has the highest bond order?",
  opts:["N₂","O₂","O₂⁻","F₂"],
  ans:0,
@@ -1835,7 +1861,7 @@ const QUIZ = [
   "F₂ has bond order 1."],
  sol:"Bond orders: N₂ 3 &gt; O₂ 2 &gt; O₂⁻ 1.5 &gt; F₂ 1. Highest = <b>N₂</b>, which also has the shortest, strongest bond of the four."},
 
-{id:114, lec:"SB", blk:"Polarity", topic:"Odd one out for polarity",
+{id:114, lec:"SB", blk:"Polarity", topic:"Odd one out for polarity", t:90,
  q:"Which molecule is polar (the 'odd one out')?",
  opts:["NH₃","BF₃","CO₂","CH₄"],
  ans:0,
@@ -1846,7 +1872,7 @@ const QUIZ = [
   "CH₄ is tetrahedral and symmetric ⇒ non-polar."],
  sol:"Symmetric BF₃, CO₂ and CH₄ have μ = 0. Only <b>NH₃</b> (pyramidal, lone pair) is polar."},
 
-{id:115, lec:"SB", blk:"Isostructural", topic:"Identifying isostructural species",
+{id:115, lec:"SB", blk:"Isostructural", topic:"Identifying isostructural species", t:90,
  q:"Which pair has the same shape and hybridisation?",
  opts:[
   "CO₂ and BeCl₂",
@@ -1861,7 +1887,7 @@ const QUIZ = [
   "SF₄ is see-saw (sp³d, lone pair) while CF₄ is tetrahedral (sp³) — different."],
  sol:"Isostructural = same bond-pair/lone-pair count. <b>CO₂ and BeCl₂</b> are both AB₂, sp, linear."},
 
-{id:116, lec:"SB", blk:"Magnetism", topic:"Diamagnetic species identification",
+{id:116, lec:"SB", blk:"Magnetism", topic:"Diamagnetic species identification", t:90,
  q:"Which species is diamagnetic?",
  opts:["N₂","O₂","B₂","NO"],
  ans:0,
@@ -1872,7 +1898,7 @@ const QUIZ = [
   "NO has one unpaired electron ⇒ paramagnetic."],
  sol:"Only <b>N₂</b> (and CO) among these is fully paired ⇒ diamagnetic. O₂, B₂ and NO all have unpaired electrons ⇒ paramagnetic."},
 
-{id:117, lec:"SB", blk:"Fajans", topic:"Most covalent among alkaline-earth halides",
+{id:117, lec:"SB", blk:"Fajans", topic:"Most covalent among alkaline-earth halides", t:90,
  q:"Which is the most covalent?",
  opts:["BeCl₂","MgCl₂","CaCl₂","BaCl₂"],
  ans:0,
@@ -1883,7 +1909,7 @@ const QUIZ = [
   "Ba²⁺ is the largest ⇒ the most ionic of the four."],
  sol:"Polarising power: Be²⁺ (smallest) ≫ Mg²⁺ &gt; Ca²⁺ &gt; Ba²⁺. So covalent character <b>BeCl₂ &gt; MgCl₂ &gt; CaCl₂ &gt; BaCl₂</b>, by Fajans' rules."},
 
-{id:118, lec:"SB", blk:"Bond angle", topic:"Largest bond angle",
+{id:118, lec:"SB", blk:"Bond angle", topic:"Largest bond angle", t:90,
  q:"Which molecule has the largest bond angle?",
  opts:["BeCl₂","BF₃","H₂O","NH₃"],
  ans:0,
@@ -1894,7 +1920,7 @@ const QUIZ = [
   "NH₃ is pyramidal at 107°, smaller than BeCl₂'s 180° linear angle."],
  sol:"BeCl₂ (linear, sp) = 180° &gt; BF₃ (120°) &gt; NH₃ (107°) &gt; H₂O (104.5°). Largest = <b>BeCl₂</b>."},
 
-{id:119, lec:"SB", blk:"Coordinate bonds", topic:"Counting coordinate bonds in SO₃",
+{id:119, lec:"SB", blk:"Coordinate bonds", topic:"Counting coordinate bonds in SO₃", t:90,
  q:"Sulfur trioxide, SO₃, in its coordinate-bond representation contains how many coordinate bonds (with two S=O and remaining S→O drawn datively)?",
  opts:[
   "2 coordinate bonds (plus one normal double bond)",
@@ -1909,7 +1935,7 @@ const QUIZ = [
   "There are two coordinate bonds, not one, in this structure."],
  sol:"A standard octet-obeying structure of SO₃ draws one ordinary S=O and <b>two S→O coordinate bonds</b>. (In reality resonance makes all three S–O bonds equivalent.)"},
 
-{id:120, lec:"SB", blk:"Shape", topic:"Shape of I₃⁻",
+{id:120, lec:"SB", blk:"Shape", topic:"Shape of I₃⁻", t:90,
  q:"The triiodide ion I₃⁻ (central I: 2 bond pairs, 3 lone pairs) is",
  opts:["linear","bent","trigonal planar","T-shaped"],
  ans:0,
@@ -1920,7 +1946,7 @@ const QUIZ = [
   "T-shape is AB₃L₂ (three bonds), not AB₂L₃."],
  sol:"I₃⁻: AB₂L₃, sp³d ⇒ <b>linear</b>. Same shape and reasoning as XeF₂ and ICl₂⁻."},
 
-{id:121, lec:"SB", blk:"Bond order series", topic:"Effect of removing an antibonding electron",
+{id:121, lec:"SB", blk:"Bond order series", topic:"Effect of removing an antibonding electron", t:90,
  q:"Compared with O₂, the cation O₂⁺ has",
  opts:[
   "a higher bond order (2.5) and a shorter bond",
@@ -1939,13 +1965,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter C-5 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1963,6 +2000,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1997,15 +2037,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -2017,47 +2058,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -2067,30 +2125,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -2099,7 +2201,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -2112,9 +2216,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -2123,7 +2245,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -2144,21 +2267,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter C-5 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

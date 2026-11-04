@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -243,7 +269,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (12) ---------------- */
-{id:1, lec:"L-1", blk:"Scalars and vectors", topic:"What makes a quantity a vector",
+{id:1, lec:"L-1", blk:"Scalars and vectors", topic:"What makes a quantity a vector", t:60,
  q:"A physical quantity qualifies as a vector only if it has magnitude, direction and",
  opts:[
   "obeys the law of vector addition",
@@ -258,7 +284,7 @@ const QUIZ = [
   "A displacement vector is <b>free</b> — it can be slid anywhere — so no fixed point of application is required."],
  sol:"<b>Vector = magnitude + direction + obeys vector addition.</b> The third clause is the one people drop, and it is what keeps some directed quantities out of the club."},
 
-{id:2, lec:"L-1", blk:"Scalars and vectors", topic:"Identifying a vector",
+{id:2, lec:"L-1", blk:"Scalars and vectors", topic:"Identifying a vector", t:60,
  q:"Which of the following is a <b>vector</b> quantity?",
  opts:["Displacement","Speed","Volume","Temperature"],
  ans:0,
@@ -269,7 +295,7 @@ const QUIZ = [
   "Temperature is fully specified by one value; “30 °C towards the north” is meaningless."],
  sol:"<b>Scalars:</b> length, volume, speed, temperature, mass, energy. <b>Vectors:</b> displacement, velocity, acceleration, force, momentum. ⚠ Note the speed/velocity and distance/displacement pairings — one of each pair is a scalar."},
 
-{id:3, lec:"L-1", blk:"Types of vectors", topic:"Equal vectors",
+{id:3, lec:"L-1", blk:"Types of vectors", topic:"Equal vectors", t:60,
  q:"Two vectors are said to be <b>equal</b> if they have",
  opts:[
   "the same magnitude and the same direction",
@@ -284,7 +310,7 @@ const QUIZ = [
   "Same magnitude with opposite direction defines <b>negative</b> or opposite vectors: AB = −CD."],
  sol:"<b>Equal:</b> same magnitude, same direction. <b>Negative:</b> same magnitude, opposite direction. <b>Coinitial:</b> same starting point. <b>Collinear:</b> parallel to one common line."},
 
-{id:4, lec:"L-1", blk:"Types of vectors", topic:"Antiparallel vectors",
+{id:4, lec:"L-1", blk:"Types of vectors", topic:"Antiparallel vectors", t:60,
  q:"Two vectors pointing in exactly opposite directions are called",
  opts:["antiparallel","parallel","orthogonal","coinitial"],
  ans:0,
@@ -295,7 +321,7 @@ const QUIZ = [
   "Coinitial refers to a shared starting point and says nothing about the angle."],
  sol:"<b>Parallel 0° · Antiparallel 180° · Orthogonal 90°.</b> Note that both parallel and antiparallel vectors are <b>collinear</b>, and both give A×B = 0."},
 
-{id:5, lec:"L-1", blk:"Position and displacement", topic:"Fixed versus free vectors",
+{id:5, lec:"L-1", blk:"Position and displacement", topic:"Fixed versus free vectors", t:90,
  q:"Which statement correctly distinguishes a position vector from a displacement vector?",
  opts:[
   "A position vector is fixed, tied to the origin; a displacement vector is free",
@@ -310,7 +336,7 @@ const QUIZ = [
   "If position vectors were free, a point would have no unique address."],
  sol:"<b>Position vector r = xî + yĵ + zk̂</b> — <b>fixed</b>, tail at the origin. <b>Displacement PP′ = OP′ − OP = r₂ − r₁</b> — <b>free</b>, it only records final minus initial."},
 
-{id:6, lec:"L-1", blk:"Magnitude", topic:"Magnitude of a 3D vector",
+{id:6, lec:"L-1", blk:"Magnitude", topic:"Magnitude of a 3D vector", t:60,
  q:"The magnitude of A = 5î + ĵ − 2k̂ is",
  opts:["√30","√26","4","√20"],
  ans:0,
@@ -321,7 +347,7 @@ const QUIZ = [
   "√20 drops the ĵ component and mishandles a sign."],
  sol:"<b>|A| = √(A<sub>x</sub>² + A<sub>y</sub>² + A<sub>z</sub>²) = √30.</b> ⚠ Squaring removes every minus sign, so a negative component contributes exactly as much as a positive one."},
 
-{id:7, lec:"L-1", blk:"Unit vector", topic:"Constructing a unit vector",
+{id:7, lec:"L-1", blk:"Unit vector", topic:"Constructing a unit vector", t:60,
  q:"The unit vector in the direction of A = 5î + ĵ − 2k̂ is",
  opts:[
   "(5î + ĵ − 2k̂)/√30",
@@ -336,7 +362,7 @@ const QUIZ = [
   "4 is the raw component sum, which is not the magnitude."],
  sol:"<b>Â = A/|A|.</b> Divide by the <b>magnitude</b>, never by its square. Check by recomputing: (25 + 1 + 4)/30 = 1 ✓"},
 
-{id:8, lec:"L-1", blk:"Unit vector", topic:"Finding a missing component",
+{id:8, lec:"L-1", blk:"Unit vector", topic:"Finding a missing component", t:90,
  q:"If 0.5î + 0.8ĵ + c k̂ is a unit vector, then c is about",
  opts:["0.33","0.13","0.70","1.3"],
  ans:0,
@@ -347,7 +373,7 @@ const QUIZ = [
   "1.3 already exceeds 1 on its own, so the vector could not possibly have unit length."],
  sol:"A unit vector satisfies <b>the sum of the squares of its components = 1</b>. Here c² = 1 − 0.25 − 0.64 = 0.11 ⇒ <b>c ≈ 0.33</b> (either sign works)."},
 
-{id:9, lec:"L-1", blk:"Displacement", topic:"Displacement from a right-angled path",
+{id:9, lec:"L-1", blk:"Displacement", topic:"Displacement from a right-angled path", t:90,
  q:"A man walks 20 m north and then 15 m east. His displacement is",
  opts:[
   "25 m at 37° east of north",
@@ -362,7 +388,7 @@ const QUIZ = [
   "5 m is the difference of the two legs, which is not how perpendicular displacements combine."],
  sol:"Perpendicular legs combine by Pythagoras: <b>25 m</b> (a 3-4-5 triangle scaled by 5). The angle from north satisfies tan θ = opposite/adjacent = 15/20 = 3/4 ⇒ <b>37° east of north</b>. ⚠ Always name the axis the angle is measured from."},
 
-{id:10, lec:"L-1", blk:"Displacement", topic:"Average velocity from position vectors",
+{id:10, lec:"L-1", blk:"Displacement", topic:"Average velocity from position vectors", t:90,
  q:"An ion moves from r₁ = 5î − 6ĵ + 2k̂ m to r₂ = −2î + 8ĵ − 2k̂ m in 10 s. Its average velocity is",
  opts:[
   "−0.7î + 1.4ĵ − 0.4k̂ m s⁻¹",
@@ -377,7 +403,7 @@ const QUIZ = [
   "This is Δr itself, in metres — the division by the 10 s has been forgotten."],
  sol:"<b>v<sub>av</sub> = Δr/Δt = (r₂ − r₁)/t.</b> Δr = (−2−5)î + (8+6)ĵ + (−2−2)k̂ = −7î + 14ĵ − 4k̂, so v<sub>av</sub> = <b>−0.7î + 1.4ĵ − 0.4k̂ m s⁻¹</b>. Subtract componentwise, watching every sign."},
 
-{id:11, lec:"L-1", blk:"Magnitude", topic:"Magnitude of a position vector",
+{id:11, lec:"L-1", blk:"Magnitude", topic:"Magnitude of a position vector", t:60,
  q:"The distance of the point P(x, y, z) from the origin is",
  opts:[
   "√(x² + y² + z²)",
@@ -392,7 +418,7 @@ const QUIZ = [
   "Adding first and rooting afterwards fails dimensionally and gives the wrong answer for (3, 4, 0)."],
  sol:"<b>|OP| = √(x² + y² + z²).</b> Test on (3, 4, 0): √(9 + 16) = 5 ✓ Squares first, then sum, then root — in that order."},
 
-{id:12, lec:"L-1", blk:"Types of vectors", topic:"Collinear vectors",
+{id:12, lec:"L-1", blk:"Types of vectors", topic:"Collinear vectors", t:60,
  q:"Two vectors are <b>collinear</b> if they",
  opts:[
   "are parallel to the same straight line, whatever their magnitudes",
@@ -408,7 +434,7 @@ const QUIZ = [
  sol:"<b>Collinear</b> = parallel to one common line, so both parallel (0°) and antiparallel (180°) vectors qualify. The clean algebraic test is <b>A × B = 0</b>."},
 
 /* ---------------- L-2 (12) ---------------- */
-{id:13, lec:"L-2", blk:"Triangle law", topic:"Statement of the triangle law",
+{id:13, lec:"L-2", blk:"Triangle law", topic:"Statement of the triangle law", t:60,
  q:"By the triangle law of vector addition, if two vectors are represented by two sides of a triangle taken in the same order, the resultant is the third side taken",
  opts:[
   "in the opposite order",
@@ -423,7 +449,7 @@ const QUIZ = [
   "There is no factor of a half; the resultant is the full third side."],
  sol:"<b>AB + BC = AC</b> — head of the first joined to tail of the second, resultant from first tail to last head. Extending this to many vectors gives the <b>polygon law</b>."},
 
-{id:14, lec:"L-2", blk:"Resultant", topic:"The resultant formula",
+{id:14, lec:"L-2", blk:"Resultant", topic:"The resultant formula", t:90,
  q:"For two vectors of magnitudes A and B with angle θ between them, the magnitude of the resultant is",
  opts:[
   "√(A² + B² + 2AB cos θ)",
@@ -438,7 +464,7 @@ const QUIZ = [
   "This is the <b>component</b> of the resultant along A, not the full magnitude."],
  sol:"<b>|A + B| = √(A² + B² + 2AB cos θ)</b> and <b>|A − B| = √(A² + B² − 2AB cos θ)</b>. The only difference is the sign of the middle term — check with θ = 0 whenever you are unsure."},
 
-{id:15, lec:"L-2", blk:"Resultant", topic:"Maximum and minimum resultant",
+{id:15, lec:"L-2", blk:"Resultant", topic:"Maximum and minimum resultant", t:60,
  q:"Two vectors of magnitudes 6 and 8 units are added. The resultant can take any value between",
  opts:["2 and 14","0 and 14","6 and 8","2 and 10"],
  ans:0,
@@ -449,7 +475,7 @@ const QUIZ = [
   "10 is the value at θ = 90°, which is an intermediate case, not the maximum."],
  sol:"<b>|A − B| ≤ |A + B| ≤ A + B</b>, i.e. <b>2 to 14</b> here. The resultant of two vectors is zero only if they are equal and opposite."},
 
-{id:16, lec:"L-2", blk:"Resultant", topic:"Resultant at 60°",
+{id:16, lec:"L-2", blk:"Resultant", topic:"Resultant at 60°", t:90,
  q:"Two vectors of magnitudes 6 and 8 units have 60° between them. Their resultant is about",
  opts:["12.17 units","10 units","7.21 units","14 units"],
  ans:0,
@@ -460,7 +486,7 @@ const QUIZ = [
   "14 is the maximum, reached only at θ = 0°."],
  sol:"R = √(A² + B² + 2AB cos 60°) = √(100 + 48) = <b>√148 ≈ 12.17</b>. ⚠ Note that |A − B| at 120° is also 12.17, since cos 120° = −cos 60° — the sum and difference formulas swap results at supplementary angles."},
 
-{id:17, lec:"L-2", blk:"Direction", topic:"Direction of the resultant",
+{id:17, lec:"L-2", blk:"Direction", topic:"Direction of the resultant", t:90,
  q:"The angle α that the resultant makes with vector A satisfies",
  opts:[
   "tan α = B sin θ/(A + B cos θ)",
@@ -475,7 +501,7 @@ const QUIZ = [
   "This is the reciprocal, giving the angle measured from the perpendicular rather than from A."],
  sol:"<b>tan α = B sin θ/(A + B cos θ)</b> — perpendicular component over parallel component. Check θ = 0: tan α = 0, so the resultant lies along A ✓"},
 
-{id:18, lec:"L-2", blk:"Equal vectors", topic:"Resultant of two equal vectors",
+{id:18, lec:"L-2", blk:"Equal vectors", topic:"Resultant of two equal vectors", t:90,
  q:"Two vectors of equal magnitude A have angle θ between them. The magnitude of their resultant is",
  opts:["2A cos(θ/2)","2A sin(θ/2)","A cos θ","2A cos θ"],
  ans:0,
@@ -486,7 +512,7 @@ const QUIZ = [
   "2A cos θ gives 2A at θ = 0 correctly, but at θ = 90° it gives 0 instead of the true A√2."],
  sol:"<b>R = 2A cos(θ/2)</b>, directed at <b>α = θ/2</b> — the resultant of two equal vectors <b>bisects</b> the angle between them. Its companion: |A − B| = 2A sin(θ/2)."},
 
-{id:19, lec:"L-2", blk:"Equal vectors", topic:"Direction for two equal vectors",
+{id:19, lec:"L-2", blk:"Equal vectors", topic:"Direction for two equal vectors", t:60,
  q:"The resultant of two vectors of equal magnitude makes an angle with each of them equal to",
  opts:[
   "half the angle between them",
@@ -501,7 +527,7 @@ const QUIZ = [
   "Zero would mean the resultant lies along one of them, which happens only when θ = 0."],
  sol:"For <b>equal</b> magnitudes the resultant bisects: <b>α = θ/2</b>. Symmetry alone gives this away — there is nothing to distinguish the two vectors, so the resultant must lean equally towards each."},
 
-{id:20, lec:"L-2", blk:"Properties", topic:"Commutativity",
+{id:20, lec:"L-2", blk:"Properties", topic:"Commutativity", t:90,
  q:"Vector addition is commutative, meaning that",
  opts:[
   "A + B = B + A",
@@ -516,7 +542,7 @@ const QUIZ = [
   "|A + B| = |A| + |B| only when the vectors are <b>parallel</b>; in general the triangle inequality makes it strictly less."],
  sol:"Addition is <b>commutative</b> (A + B = B + A) and <b>associative</b>. ⚠ Subtraction is not: A − B = −(B − A). Neither is the cross product, where A×B = −B×A."},
 
-{id:21, lec:"L-2", blk:"Resultant", topic:"When the resultant is zero",
+{id:21, lec:"L-2", blk:"Resultant", topic:"When the resultant is zero", t:90,
  q:"The resultant of two vectors is zero. This means the vectors are",
  opts:[
   "equal in magnitude and opposite in direction",
@@ -531,7 +557,7 @@ const QUIZ = [
   "At 180° with unequal magnitudes the resultant is |A − B|, which is non-zero unless the magnitudes match."],
  sol:"<b>R = 0 ⇔ A = B and θ = 180°</b>, i.e. B = −A. This is why three vectors summing to zero must form a closed triangle."},
 
-{id:22, lec:"L-2", blk:"Calculations", topic:"Velocity from parametric coordinates",
+{id:22, lec:"L-2", blk:"Calculations", topic:"Velocity from parametric coordinates", t:60,
  q:"A particle moves with x = at² and y = bt³. Its velocity vector is",
  opts:[
   "2at î + 3bt² ĵ",
@@ -546,7 +572,7 @@ const QUIZ = [
   "These are the position coordinates themselves, undifferentiated."],
  sol:"<b>v = (dx/dt)î + (dy/dt)ĵ.</b> Differentiate each component independently — the î and ĵ directions never mix. Here <b>v = 2at î + 3bt² ĵ</b>."},
 
-{id:23, lec:"L-2", blk:"Resultant", topic:"Perpendicular vectors",
+{id:23, lec:"L-2", blk:"Resultant", topic:"Perpendicular vectors", t:90,
  q:"Two vectors of magnitudes 6 and 8 units are perpendicular. Their resultant is",
  opts:["10 units","14 units","2 units","√14 units"],
  ans:0,
@@ -557,7 +583,7 @@ const QUIZ = [
   "√14 adds the magnitudes and then takes a root, which no formula calls for."],
  sol:"At 90°, cos θ = 0 so <b>R = √(A² + B²) = 10</b>. This is also the one angle at which |A + B| and |A − B| are <b>equal</b>."},
 
-{id:24, lec:"L-2", blk:"Parallelogram law", topic:"Statement of the parallelogram law",
+{id:24, lec:"L-2", blk:"Parallelogram law", topic:"Statement of the parallelogram law", t:60,
  q:"By the parallelogram law, if two vectors are drawn as adjacent sides of a parallelogram, their resultant is",
  opts:[
   "the diagonal through their common point",
@@ -573,7 +599,7 @@ const QUIZ = [
  sol:"<b>Sum → diagonal from the common point. Difference → the other diagonal.</b> Both diagonals are equal exactly when the parallelogram is a rectangle, i.e. when the vectors are perpendicular."},
 
 /* ---------------- L-3 & 4 (12) ---------------- */
-{id:25, lec:"L-34", blk:"Polygon law", topic:"Adding several vectors",
+{id:25, lec:"L-34", blk:"Polygon law", topic:"Adding several vectors", t:60,
  q:"To add several vectors by the polygon law, they are placed",
  opts:[
   "head to tail, with the resultant running from the first tail to the last head",
@@ -588,7 +614,7 @@ const QUIZ = [
   "Magnitudes add arithmetically only when every vector points the same way."],
  sol:"<b>Polygon law:</b> head-to-tail, resultant from first tail to last head. If the polygon <b>closes</b> on itself, the resultant is zero. Extends the triangle law to any number of vectors."},
 
-{id:26, lec:"L-34", blk:"Subtraction", topic:"How subtraction is defined",
+{id:26, lec:"L-34", blk:"Subtraction", topic:"How subtraction is defined", t:60,
  q:"The vector difference A − B is defined as",
  opts:[
   "A + (−B)",
@@ -603,7 +629,7 @@ const QUIZ = [
   "The result of subtracting two vectors is a vector, not a number."],
  sol:"<b>A − B = A + (−B).</b> Hence <b>|A − B| = √(A² + B² − 2AB cos θ)</b> — the resultant formula with cos θ carrying a minus, since reversing B swaps the angle to 180° − θ."},
 
-{id:27, lec:"L-34", blk:"Subtraction", topic:"Magnitude of the difference",
+{id:27, lec:"L-34", blk:"Subtraction", topic:"Magnitude of the difference", t:60,
  q:"For two vectors of magnitudes 6 and 8 units at 120°, the magnitude of A − B is about",
  opts:["12.17 units","7.21 units","2 units","14 units"],
  ans:0,
@@ -614,7 +640,7 @@ const QUIZ = [
   "14 is |A − B| at θ = 180°, its maximum."],
  sol:"|A − B| = √(A² + B² − 2AB cos θ). At 120°, cos θ = −½ so the middle term <b>adds</b>: √148 ≈ <b>12.17</b>. ⚠ For the difference, large angles give large results — the reverse of the sum."},
 
-{id:28, lec:"L-34", blk:"Subtraction", topic:"Extremes of the difference",
+{id:28, lec:"L-34", blk:"Subtraction", topic:"Extremes of the difference", t:60,
  q:"|A − B| takes its <b>maximum</b> value when the angle between A and B is",
  opts:["180°","0°","90°","45°"],
  ans:0,
@@ -625,7 +651,7 @@ const QUIZ = [
   "45° gives something between the 0° and 90° cases, nowhere near the maximum."],
  sol:"The sum and difference are <b>mirror images</b>: |A + B| is greatest at 0° and least at 180°, while <b>|A − B| is greatest at 180°</b> and least at 0°. Both equal √(A² + B²) at 90°."},
 
-{id:29, lec:"L-34", blk:"Sum equals difference", topic:"When |A + B| = |A − B|",
+{id:29, lec:"L-34", blk:"Sum equals difference", topic:"When |A + B| = |A − B|", t:90,
  q:"The magnitudes |A + B| and |A − B| are equal when the angle between A and B is",
  opts:["90°","0°","180°","60°"],
  ans:0,
@@ -636,7 +662,7 @@ const QUIZ = [
   "At 60°, cos θ = ½ and the middle terms differ by 4AB(½) = 2AB, which is not zero."],
  sol:"Set A² + B² + 2AB cos θ = A² + B² − 2AB cos θ ⇒ <b>4AB cos θ = 0 ⇒ θ = 90°</b>. Geometrically: a parallelogram has equal diagonals precisely when it is a <b>rectangle</b>."},
 
-{id:30, lec:"L-34", blk:"Component method", topic:"Adding by components",
+{id:30, lec:"L-34", blk:"Component method", topic:"Adding by components", t:90,
  q:"Vectors A = 5 m at 37° above +x, B = 3 m along +x and C = 2 m along +y have resultant",
  opts:["7î + 5ĵ","4î + 3ĵ","10î + 2ĵ","3î + 7ĵ"],
  ans:0,
@@ -647,7 +673,7 @@ const QUIZ = [
   "The x and y totals have been swapped."],
  sol:"Resolve, add componentwise, recombine. A = 5cos37° î + 5sin37° ĵ = <b>4î + 3ĵ</b>; B = 3î; C = 2ĵ. So <b>R = 7î + 5ĵ</b>, |R| = √74 and φ = tan⁻¹(5/7). The component method beats the parallelogram law for three or more vectors."},
 
-{id:31, lec:"L-34", blk:"Component method", topic:"A three-leg journey",
+{id:31, lec:"L-34", blk:"Component method", topic:"A three-leg journey", t:90,
  q:"A person moves 30 m north, then 20 m east, then 30√2 m south-west. The displacement from the start is",
  opts:[
   "10 m due west",
@@ -662,7 +688,7 @@ const QUIZ = [
   "The x-components do not cancel, since 20 − 30 = −10."],
  sol:"South-west means 45° into the third quadrant: 30√2 × cos 45° = <b>30</b> in each of −x and −y. Summing: x = 20 − 30 = <b>−10</b>, y = 30 − 30 = 0 ⇒ <b>10 m due west</b>. Resolve every leg before adding anything."},
 
-{id:32, lec:"L-34", blk:"Component method", topic:"Recombining components",
+{id:32, lec:"L-34", blk:"Component method", topic:"Recombining components", t:60,
  q:"A resultant has components R<sub>x</sub> and R<sub>y</sub>. Its magnitude and direction are",
  opts:[
   "√(R<sub>x</sub>² + R<sub>y</sub>²) and tan⁻¹(R<sub>y</sub>/R<sub>x</sub>)",
@@ -677,7 +703,7 @@ const QUIZ = [
   "A product of components is not a magnitude, and the ratio R<sub>y</sub>/R<sub>x</sub> is a tangent, not a cosine."],
  sol:"<b>R = √(R<sub>x</sub>² + R<sub>y</sub>²), φ = tan⁻¹(R<sub>y</sub>/R<sub>x</sub>)</b> measured from the +x axis. ⚠ Check the signs of both components to place φ in the right quadrant — the calculator's tan⁻¹ only returns −90° to +90°."},
 
-{id:33, lec:"L-34", blk:"Properties", topic:"Associativity",
+{id:33, lec:"L-34", blk:"Properties", topic:"Associativity", t:60,
  q:"The statement (A + B) + C = A + (B + C) expresses that vector addition is",
  opts:["associative","commutative","distributive","anticommutative"],
  ans:0,
@@ -688,7 +714,7 @@ const QUIZ = [
   "Anticommutativity is A×B = −B×A, a property of the cross product, not of addition."],
  sol:"Vector addition is <b>commutative</b> and <b>associative</b>, with <b>A + 0 = A</b>. Together these make the polygon law order-independent."},
 
-{id:34, lec:"L-34", blk:"Subtraction", topic:"Direction of the difference",
+{id:34, lec:"L-34", blk:"Subtraction", topic:"Direction of the difference", t:60,
  q:"The angle α that A − B makes with A satisfies",
  opts:[
   "tan α = B sin θ/(A − B cos θ)",
@@ -703,7 +729,7 @@ const QUIZ = [
   "The sine and cosine have been swapped in both positions."],
  sol:"<b>tan α = B sin θ/(A − B cos θ).</b> Compare with the sum's <b>tan α = B sin θ/(A + B cos θ)</b> — reversing B changes the sign of the cos term only, since its perpendicular part is unaffected in magnitude."},
 
-{id:35, lec:"L-34", blk:"Subtraction", topic:"Subtraction is not commutative",
+{id:35, lec:"L-34", blk:"Subtraction", topic:"Subtraction is not commutative", t:60,
  q:"Which relation is correct?",
  opts:[
   "A − B = −(B − A)",
@@ -718,7 +744,7 @@ const QUIZ = [
   "Sum and difference are different vectors unless B = 0."],
  sol:"<b>A − B = −(B − A)</b>: same length, opposite direction. So |A − B| = |B − A| but the vectors themselves are not equal — a distinction that matters for relative-velocity problems."},
 
-{id:36, lec:"L-34", blk:"Polygon law", topic:"Closed polygon",
+{id:36, lec:"L-34", blk:"Polygon law", topic:"Closed polygon", t:60,
  q:"Several vectors placed head to tail form a <b>closed</b> polygon. Their resultant is",
  opts:[
   "zero",
@@ -734,7 +760,7 @@ const QUIZ = [
  sol:"<b>Closed polygon ⇒ resultant = 0.</b> This is the basis of every equilibrium problem: if three forces hold a body in equilibrium, their vectors form a closed triangle."},
 
 /* ---------------- L-5 (12) ---------------- */
-{id:37, lec:"L-5", blk:"Resolution", topic:"Rectangular components",
+{id:37, lec:"L-5", blk:"Resolution", topic:"Rectangular components", t:60,
  q:"A vector V makes angle θ with the x-axis. Its components are",
  opts:[
   "V<sub>x</sub> = V cos θ, V<sub>y</sub> = V sin θ",
@@ -749,7 +775,7 @@ const QUIZ = [
   "Equal halves hold for no angle at all; even at 45° each component is V/√2."],
  sol:"<b>Along the reference axis → cos. Perpendicular to it → sin.</b> ⚠ Always identify which axis the angle is stated from: “37° with the vertical” makes the <b>vertical</b> component A cos 37°."},
 
-{id:38, lec:"L-5", blk:"Resolution", topic:"Angle measured from the vertical",
+{id:38, lec:"L-5", blk:"Resolution", topic:"Angle measured from the vertical", t:90,
  q:"A force of 10.5 N acts along a direction making 37° with the vertical. Its vertical component is",
  opts:["8.4 N","6.3 N","10.5 N","4.2 N"],
  ans:0,
@@ -760,7 +786,7 @@ const QUIZ = [
   "4.2 N is half the answer and corresponds to no component of this force."],
  sol:"Angle from the vertical ⇒ <b>vertical = A cos 37° = 10.5 × 4/5 = 8.4 N</b>, horizontal = A sin 37° = 6.3 N. ⚠ This is the single most common resolution slip: the cosine always goes with the axis the angle is measured from."},
 
-{id:39, lec:"L-5", blk:"Resolution", topic:"Resolving at an obtuse angle",
+{id:39, lec:"L-5", blk:"Resolution", topic:"Resolving at an obtuse angle", t:90,
  q:"A vector of magnitude 20 units makes 120° with the +x axis. In component form it is",
  opts:[
   "−10î + 10√3 ĵ",
@@ -775,7 +801,7 @@ const QUIZ = [
   "The y-component must be positive, since sin is positive in the second quadrant."],
  sol:"<b>x = V cos θ = 20 cos 120° = −10 · y = V sin θ = 20 sin 120° = 10√3.</b> The formula handles obtuse angles automatically — no case-splitting needed, provided you keep the signs of the trig values. Check: √(100 + 300) = 20 ✓"},
 
-{id:40, lec:"L-5", blk:"Resolution", topic:"A force from the negative x-axis",
+{id:40, lec:"L-5", blk:"Resolution", topic:"A force from the negative x-axis", t:90,
  q:"A force of 15 N points 37° from the negative x-axis towards the +y axis. In î, ĵ form it is",
  opts:[
   "−12î + 9ĵ N",
@@ -790,7 +816,7 @@ const QUIZ = [
   "The y-component is positive, since the force tilts towards +y."],
  sol:"Convert to the standard angle first: 180° − 37° = <b>143° from +x</b>. Then F<sub>x</sub> = 15 cos 143° = −15 cos 37° = <b>−12 N</b> and F<sub>y</sub> = 15 sin 143° = 15 sin 37° = <b>9 N</b>. Check: √(144 + 81) = 15 ✓"},
 
-{id:41, lec:"L-5", blk:"Direction cosines", topic:"Definition",
+{id:41, lec:"L-5", blk:"Direction cosines", topic:"Definition", t:60,
  q:"The direction cosines of a vector A are defined as",
  opts:[
   "cos α = A<sub>x</sub>/A, cos β = A<sub>y</sub>/A, cos γ = A<sub>z</sub>/A",
@@ -805,7 +831,7 @@ const QUIZ = [
   "Ratios of two components give tangents of angles between components, not direction cosines."],
  sol:"<b>cos α = A<sub>x</sub>/A</b>, and likewise for β and γ. These are the components of the <b>unit vector</b> Â, which is why they satisfy l² + m² + n² = 1."},
 
-{id:42, lec:"L-5", blk:"Direction cosines", topic:"The fundamental identity",
+{id:42, lec:"L-5", blk:"Direction cosines", topic:"The fundamental identity", t:90,
  q:"For any vector, the direction cosines satisfy",
  opts:[
   "cos²α + cos²β + cos²γ = 1",
@@ -820,7 +846,7 @@ const QUIZ = [
   "A product of three numbers each at most 1 in magnitude can reach 1 only if all are ±1 — again impossible."],
  sol:"<b>l² + m² + n² = cos²α + cos²β + cos²γ = 1.</b> So the three direction cosines are never independent: knowing two fixes the third up to sign. It is just |Â| = 1 written out."},
 
-{id:43, lec:"L-5", blk:"Direction cosines", topic:"Computing direction cosines",
+{id:43, lec:"L-5", blk:"Direction cosines", topic:"Computing direction cosines", t:90,
  q:"For A = 3î − 4ĵ + 5k̂, the magnitude and the direction cosine with respect to the z-axis are",
  opts:[
   "5√2 and 1/√2",
@@ -835,7 +861,7 @@ const QUIZ = [
   "5/√2 ≈ 3.54 again exceeds 1, so it cannot be a cosine."],
  sol:"|A| = √50 = <b>5√2</b>. Then <b>cos γ = 5/(5√2) = 1/√2</b>, meaning γ = 45°. Check the identity: (3² + 4² + 5²)/50 = 1 ✓ Any “cosine” greater than 1 is an immediate sign of error."},
 
-{id:44, lec:"L-5", blk:"Resolution", topic:"Why perpendicular components",
+{id:44, lec:"L-5", blk:"Resolution", topic:"Why perpendicular components", t:60,
  q:"Rectangular resolution uses two <b>mutually perpendicular</b> components because such components are",
  opts:[
   "unique and independent of each other",
@@ -850,7 +876,7 @@ const QUIZ = [
   "Each perpendicular component is indeed smaller than the vector, but that is a consequence, not the reason for choosing them."],
  sol:"Only <b>mutually perpendicular</b> resolution is unique and independent — the x-motion tells you nothing about the y-motion. This is precisely what lets projectile motion split into two separate one-dimensional problems."},
 
-{id:45, lec:"L-5", blk:"Resolution", topic:"Components of a vector along its own direction",
+{id:45, lec:"L-5", blk:"Resolution", topic:"Components of a vector along its own direction", t:60,
  q:"A vector of magnitude V is resolved along a direction making 0° with it. That component is",
  opts:["V","0","V/2","V√2"],
  ans:0,
@@ -861,7 +887,7 @@ const QUIZ = [
   "No component can exceed the vector's own magnitude, and V√2 does."],
  sol:"Component = <b>V cos θ</b>, so it runs from V at 0° down to 0 at 90° and −V at 180°. A component can never exceed the vector's magnitude — a quick sanity check on any resolution."},
 
-{id:46, lec:"L-5", blk:"Direction cosines", topic:"Direction cosine for a 2D vector",
+{id:46, lec:"L-5", blk:"Direction cosines", topic:"Direction cosine for a 2D vector", t:90,
  q:"A vector lies entirely in the xy-plane. Its direction cosine with respect to the z-axis is",
  opts:["0","1","1/√2","undefined"],
  ans:0,
@@ -872,7 +898,7 @@ const QUIZ = [
   "It is perfectly well defined; the magnitude A is non-zero, so the division is valid."],
  sol:"A<sub>z</sub> = 0 ⇒ <b>cos γ = 0</b> ⇒ γ = 90°. The identity then reduces to cos²α + cos²β = 1, the familiar 2D relation between a vector's angles with the two axes."},
 
-{id:47, lec:"L-5", blk:"Resolution", topic:"Recovering the vector from its components",
+{id:47, lec:"L-5", blk:"Resolution", topic:"Recovering the vector from its components", t:90,
  q:"A vector has components 6 and 8 along two perpendicular axes. Its magnitude is",
  opts:["10","14","√14","2"],
  ans:0,
@@ -883,7 +909,7 @@ const QUIZ = [
   "2 is the difference of the components, which has no role here."],
  sol:"<b>V = √(V<sub>x</sub>² + V<sub>y</sub>²) = 10.</b> Resolution and recombination are exact inverses: 10 cos 53° = 6 and 10 sin 53° = 8 ✓"},
 
-{id:48, lec:"L-5", blk:"Resolution", topic:"Both components of a resolved vector",
+{id:48, lec:"L-5", blk:"Resolution", topic:"Both components of a resolved vector", t:90,
  q:"A velocity of 20 m s⁻¹ is directed at 37° above the horizontal. Its horizontal and vertical components are",
  opts:[
   "16 m s⁻¹ and 12 m s⁻¹",
@@ -899,7 +925,7 @@ const QUIZ = [
  sol:"With sin 37° = 3/5 and cos 37° = 4/5: <b>v<sub>x</sub> = 16, v<sub>y</sub> = 12 m s⁻¹</b>. Check: √(256 + 144) = 20 ✓ The 37–53 triangle turns this into mental arithmetic."},
 
 /* ---------------- L-6 & 7 (16) ---------------- */
-{id:49, lec:"L-67", blk:"Dot product", topic:"Definition of the dot product",
+{id:49, lec:"L-67", blk:"Dot product", topic:"Definition of the dot product", t:60,
  q:"The scalar product A·B equals",
  opts:[
   "AB cos θ, a scalar",
@@ -914,7 +940,7 @@ const QUIZ = [
   "That is the cross product, which is a vector perpendicular to both."],
  sol:"<b>A·B = AB cos θ = a₁b₁ + a₂b₂ + a₃b₃</b> — a <b>scalar</b>. The dot product carries the cos θ (parallel-ness); the cross product carries the sin θ (perpendicular-ness)."},
 
-{id:50, lec:"L-67", blk:"Dot product", topic:"Test for perpendicularity",
+{id:50, lec:"L-67", blk:"Dot product", topic:"Test for perpendicularity", t:90,
  q:"If A·B = 0 for two non-zero vectors, then A and B are",
  opts:["perpendicular","parallel","antiparallel","equal"],
  ans:0,
@@ -925,7 +951,7 @@ const QUIZ = [
   "Equal vectors give A·A = A², which is zero only for the zero vector."],
  sol:"<b>A·B = 0 ⇒ perpendicular. A×B = 0 ⇒ parallel or antiparallel.</b> The two null tests are complementary — memorize them as a pair."},
 
-{id:51, lec:"L-67", blk:"Dot product", topic:"Component form",
+{id:51, lec:"L-67", blk:"Dot product", topic:"Component form", t:90,
  q:"The dot product of a = 3î + 4ĵ + 5k̂ and b = 6î + 7ĵ + 8k̂ is",
  opts:["86","√86","18î + 28ĵ + 40k̂","0"],
  ans:0,
@@ -936,7 +962,7 @@ const QUIZ = [
   "Zero would mean the vectors are perpendicular, and 86 ≠ 0."],
  sol:"<b>a·b = a₁b₁ + a₂b₂ + a₃b₃ = 86.</b> Multiply matching components and add — the î, ĵ, k̂ cross terms all vanish because î·ĵ = 0."},
 
-{id:52, lec:"L-67", blk:"Dot product", topic:"Unit-vector dot products",
+{id:52, lec:"L-67", blk:"Dot product", topic:"Unit-vector dot products", t:90,
  q:"The values of î·î and î·ĵ are respectively",
  opts:["1 and 0","0 and 1","1 and 1","0 and 0"],
  ans:0,
@@ -947,7 +973,7 @@ const QUIZ = [
   "î·î = 1, not 0 — the vector is perfectly parallel to itself."],
  sol:"<b>î·î = ĵ·ĵ = k̂·k̂ = 1</b> and <b>î·ĵ = ĵ·k̂ = k̂·î = 0.</b> These are what collapse the component expansion to a₁b₁ + a₂b₂ + a₃b₃."},
 
-{id:53, lec:"L-67", blk:"Dot product", topic:"Work done by a force",
+{id:53, lec:"L-67", blk:"Dot product", topic:"Work done by a force", t:90,
  q:"A force F = 2î + 3ĵ + 4k̂ N displaces a body from r₁ = 2î + 3ĵ + k̂ m to r₂ = î + ĵ + k̂ m. The work done is",
  opts:["−8 J","8 J","−2 J","14 J"],
  ans:0,
@@ -958,7 +984,7 @@ const QUIZ = [
   "14 J would come from dotting F with r₁ rather than with the displacement."],
  sol:"<b>W = F·s</b>, where <b>s = r₂ − r₁</b>, not either position vector. s = −î − 2ĵ + 0k̂ gives W = −2 − 6 + 0 = <b>−8 J</b>. Negative work means the force acted against the motion."},
 
-{id:54, lec:"L-67", blk:"Dot product", topic:"Angle between two vectors",
+{id:54, lec:"L-67", blk:"Dot product", topic:"Angle between two vectors", t:60,
  q:"The angle between two vectors can be found from",
  opts:[
   "cos θ = A·B/(AB)",
@@ -973,7 +999,7 @@ const QUIZ = [
   "The dot product carries the cosine; the sine comes from the cross product."],
  sol:"<b>cos θ = A·B/(AB)</b> from the dot product, and <b>sin θ = |A×B|/(AB)</b> from the cross product. The dot route is usually easier since it needs no determinant."},
 
-{id:55, lec:"L-67", blk:"Dot product", topic:"Projection of one vector on another",
+{id:55, lec:"L-67", blk:"Dot product", topic:"Projection of one vector on another", t:60,
  q:"The projection of B on A is",
  opts:[
   "(A·B)/|A|",
@@ -988,7 +1014,7 @@ const QUIZ = [
   "This is the component of B <b>perpendicular</b> to A, which the cross product measures."],
  sol:"<b>Projection of B on A = (A·B)/|A| = B cos θ.</b> Equivalently, it is B·Â — dot with the <b>unit</b> vector along A."},
 
-{id:56, lec:"L-67", blk:"Cross product", topic:"Definition of the cross product",
+{id:56, lec:"L-67", blk:"Cross product", topic:"Definition of the cross product", t:60,
  q:"The magnitude of A×B is",
  opts:["AB sin θ","AB cos θ","AB tan θ","AB"],
  ans:0,
@@ -999,7 +1025,7 @@ const QUIZ = [
   "AB is the value only at θ = 90°, not in general."],
  sol:"<b>|A×B| = AB sin θ</b>, direction given by the right-hand rule perpendicular to both. Note <b>|A·B|² + |A×B|² = A²B²</b> — between them, the two products capture the whole of the angle."},
 
-{id:57, lec:"L-67", blk:"Cross product", topic:"Anticommutativity",
+{id:57, lec:"L-67", blk:"Cross product", topic:"Anticommutativity", t:60,
  q:"For the cross product,",
  opts:[
   "A×B = −B×A",
@@ -1014,7 +1040,7 @@ const QUIZ = [
   "The cross product returns a <b>vector</b>, perpendicular to both inputs."],
  sol:"<b>A×B = −B×A</b> (anticommutative) and <b>A×A = 0</b>. Contrast the dot product, which is fully commutative. Order matters everywhere the cross product appears — torque, angular momentum, magnetic force."},
 
-{id:58, lec:"L-67", blk:"Cross product", topic:"Unit-vector cross products",
+{id:58, lec:"L-67", blk:"Cross product", topic:"Unit-vector cross products", t:90,
  q:"The value of î×ĵ is",
  opts:["k̂","−k̂","0","1"],
  ans:0,
@@ -1025,7 +1051,7 @@ const QUIZ = [
   "The result is a unit <b>vector</b>, not the scalar 1. That value belongs to î·î."],
  sol:"Cyclic: <b>î×ĵ = k̂, ĵ×k̂ = î, k̂×î = ĵ</b>; reversing any of these introduces a minus sign, and <b>î×î = ĵ×ĵ = k̂×k̂ = 0</b>. Remember the cycle î → ĵ → k̂ → î: forward is positive, backward negative."},
 
-{id:59, lec:"L-67", blk:"Cross product", topic:"Computing a cross product",
+{id:59, lec:"L-67", blk:"Cross product", topic:"Computing a cross product", t:60,
  q:"The value of (î + ĵ + k̂) × (2î + 3ĵ + k̂) is",
  opts:[
   "−2î + ĵ + k̂",
@@ -1040,7 +1066,7 @@ const QUIZ = [
   "6 is the dot product of these two vectors; the cross product must be a vector."],
  sol:"<b>A×B = î(a₂b₃ − a₃b₂) − ĵ(a₁b₃ − a₃b₁) + k̂(a₁b₂ − a₂b₁)</b>. Here: î(1·1 − 1·3) − ĵ(1·1 − 1·2) + k̂(1·3 − 1·2) = <b>−2î + ĵ + k̂</b>. ⚠ The <b>ĵ term carries a minus sign</b> — the most common slip in the whole expansion."},
 
-{id:60, lec:"L-67", blk:"Cross product", topic:"Torque",
+{id:60, lec:"L-67", blk:"Cross product", topic:"Torque", t:60,
  q:"A force F = 2î − 3ĵ + 4k̂ N acts at r = 3î + 2ĵ + 3k̂ m from the origin. The torque about the origin is",
  opts:[
   "17î − 6ĵ − 13k̂ N m",
@@ -1055,7 +1081,7 @@ const QUIZ = [
   "Torque is a vector; a single number cannot describe it."],
  sol:"<b>τ = r × F</b>, in that order. Expanding: î(8 + 9) − ĵ(12 − 6) + k̂(−9 − 4) = <b>17î − 6ĵ − 13k̂ N m</b>. Reversing the order would flip the sense of rotation."},
 
-{id:61, lec:"L-67", blk:"Cross product", topic:"Angular momentum",
+{id:61, lec:"L-67", blk:"Cross product", topic:"Angular momentum", t:90,
  q:"A particle at r = î + ĵ + 3k̂ m has momentum p = î − 3ĵ + k̂ kg m s⁻¹. Its angular momentum about the origin is",
  opts:[
   "10î + 2ĵ − 4k̂",
@@ -1070,7 +1096,7 @@ const QUIZ = [
   "This computes the dot product, but angular momentum is a cross product and hence a vector."],
  sol:"<b>L = r × p.</b> The ĵ term: −[(1)(1) − (3)(1)] = −(−2) = <b>+2</b>. Result: <b>10î + 2ĵ − 4k̂ kg m² s⁻¹</b>. Two sign changes in a row (the determinant's minus and a negative bracket) is where this one is usually lost."},
 
-{id:62, lec:"L-67", blk:"Cross product", topic:"Area of a triangle",
+{id:62, lec:"L-67", blk:"Cross product", topic:"Area of a triangle", t:90,
  q:"The area of a triangle with two sides represented by vectors A and B is",
  opts:[
   "½|A×B|",
@@ -1085,7 +1111,7 @@ const QUIZ = [
   "½AB omits the sin θ and is correct only when the sides are perpendicular."],
  sol:"<b>Triangle = ½|A×B| · Parallelogram = |A×B|.</b> This is just ½ × base × height, since |A×B| = AB sin θ and B sin θ is the perpendicular height."},
 
-{id:63, lec:"L-67", blk:"Cross product", topic:"Test for parallel vectors",
+{id:63, lec:"L-67", blk:"Cross product", topic:"Test for parallel vectors", t:90,
  q:"If A×B = 0 for two non-zero vectors, then they are",
  opts:[
   "parallel or antiparallel",
@@ -1100,7 +1126,7 @@ const QUIZ = [
   "Magnitudes are irrelevant to the test; only the direction matters."],
  sol:"<b>A×B = 0 ⇒ collinear</b> (parallel at 0° or antiparallel at 180°). Contrast <b>A·B = 0 ⇒ perpendicular</b>. Note A×A = 0 always."},
 
-{id:64, lec:"L-67", blk:"Dot and cross", topic:"Direction of the cross product",
+{id:64, lec:"L-67", blk:"Dot and cross", topic:"Direction of the cross product", t:60,
  q:"The vector A×B is directed",
  opts:[
   "perpendicular to the plane containing A and B",
@@ -1115,7 +1141,7 @@ const QUIZ = [
   "The bisector lies in the plane of A and B, which the cross product does not."],
  sol:"<b>A×B ⊥ both A and B</b>, sense given by the right-hand rule. This is why torque and angular momentum point along the <b>rotation axis</b> rather than in the plane of the motion."},
 
-{id:65, lec:"L-67", blk:"Dot and cross", topic:"Angle from magnitudes",
+{id:65, lec:"L-67", blk:"Dot and cross", topic:"Angle from magnitudes", t:90,
  q:"If A, B and the magnitude R of their resultant are known, then cos θ equals",
  opts:[
   "(R² − A² − B²)/(2AB)",
@@ -1130,7 +1156,7 @@ const QUIZ = [
   "This is not dimensionless in the right way and fails whenever A and B are large."],
  sol:"From R² = A² + B² + 2AB cos θ: <b>cos θ = (R² − A² − B²)/(2AB)</b>. ⚠ Note the sign difference from the triangle cosine rule c² = a² + b² − 2ab cos C — the vector resultant and the triangle side measure different angles."},
 
-{id:66, lec:"L-67", blk:"Dot product", topic:"Dot product of a vector with itself",
+{id:66, lec:"L-67", blk:"Dot product", topic:"Dot product of a vector with itself", t:60,
  q:"For any vector A, the value of A·A is",
  opts:["A²","0","1","2A"],
  ans:0,
@@ -1141,7 +1167,7 @@ const QUIZ = [
   "2A is not even dimensionally consistent with a product of two vectors."],
  sol:"<b>A·A = A²</b> — the standard trick for turning |A + B|² into A² + B² + 2A·B. Compare <b>A×A = 0</b>: a vector is perfectly parallel to itself, so the cross product vanishes."},
 
-{id:67, lec:"L-67", blk:"Dot and cross", topic:"Combining the two products",
+{id:67, lec:"L-67", blk:"Dot and cross", topic:"Combining the two products", t:60,
  q:"For any two vectors, |A·B|² + |A×B|² equals",
  opts:["A²B²","(A + B)²","2A²B²","0"],
  ans:0,
@@ -1152,7 +1178,7 @@ const QUIZ = [
   "Both terms are non-negative and cannot both vanish for non-zero vectors."],
  sol:"<b>|A·B|² + |A×B|² = A²B².</b> The dot product captures cos θ and the cross product sin θ, and between them they account for the angle completely. A neat way to find one product's magnitude when you know the other."},
 
-{id:68, lec:"L-67", blk:"Dot product", topic:"Sign of the dot product",
+{id:68, lec:"L-67", blk:"Dot product", topic:"Sign of the dot product", t:60,
  q:"The dot product A·B is <b>negative</b> when the angle between the vectors is",
  opts:[
   "between 90° and 180°",
@@ -1168,7 +1194,7 @@ const QUIZ = [
  sol:"<b>A·B = +AB at 0° · 0 at 90° · −AB at 180°.</b> This is why work is negative when a force opposes the displacement — friction being the standard example."},
 
 /* ---------------- Strong Box (10) ---------------- */
-{id:69, lec:"SB", blk:"Axial vectors", topic:"Which vector survives inversion",
+{id:69, lec:"SB", blk:"Axial vectors", topic:"Which vector survives inversion", t:90,
  q:"When the position vector r changes to −r, which quantity does <b>not</b> reverse its sign?",
  opts:[
   "Angular momentum",
@@ -1183,7 +1209,7 @@ const QUIZ = [
   "Acceleration is the second derivative of r and likewise reverses."],
  sol:"<b>Polar (true) vectors</b> — r, v, p, a, F — reverse under inversion. <b>Axial (pseudo) vectors</b> — L = r×p, τ = r×F, ω — do <b>not</b>, since they are built from two polar vectors crossed together and the two sign flips cancel."},
 
-{id:70, lec:"SB", blk:"Perpendicularity", topic:"Equal magnitudes and right angles",
+{id:70, lec:"SB", blk:"Perpendicularity", topic:"Equal magnitudes and right angles", t:180,
  q:"A = 2î + 3nĵ + 2k̂ and B = 2î − 2ĵ + 4pk̂ are equidistant from the origin and mutually perpendicular. The value of n⁻¹ is",
  opts:["3","1/3","9","2"],
  ans:0,
@@ -1194,7 +1220,7 @@ const QUIZ = [
   "2 satisfies neither of the two conditions."],
  sol:"Two conditions. <b>|A| = |B|:</b> 4 + 9n² + 4 = 4 + 4 + 16p² ⇒ 9n² = 16p². <b>A·B = 0:</b> 4 − 6n + 8p = 0. Substituting p = −3n/4 gives 4 − 6n − 6n = 0 ⇒ <b>n = 1/3, so n⁻¹ = 3</b>. Check: A = 2î + ĵ + 2k̂ and B = 2î − 2ĵ − k̂, both of magnitude 3, with A·B = 4 − 2 − 2 = 0 ✓"},
 
-{id:71, lec:"SB", blk:"Resultant geometry", topic:"Resultant perpendicular to one vector",
+{id:71, lec:"SB", blk:"Resultant geometry", topic:"Resultant perpendicular to one vector", t:180,
  q:"The resultant of A and B is perpendicular to A and has magnitude B/2. The angle between A and B is",
  opts:["150°","120°","90°","60°"],
  ans:0,
@@ -1205,7 +1231,7 @@ const QUIZ = [
   "An acute angle gives a positive cos θ, but the relation cos θ = −A/B requires it to be negative."],
  sol:"<b>R ⊥ A ⇒ A·(A + B) = 0 ⇒ A² + AB cos θ = 0 ⇒ cos θ = −A/B.</b> Then R² = A² + B² + 2AB cos θ = B² − A². Setting that equal to (B/2)² gives A² = 3B²/4, so cos θ = −√3/2 and <b>θ = 150°</b>."},
 
-{id:72, lec:"SB", blk:"Sum and difference", topic:"Ratio of magnitudes from a condition",
+{id:72, lec:"SB", blk:"Sum and difference", topic:"Ratio of magnitudes from a condition", t:180,
  q:"Vectors a and b have angle cos⁻¹(5/9) between them. If |a + b| = √2 |a − b| and |a| = n|b|, the integer value of n is",
  opts:["3","2","9","5"],
  ans:0,
@@ -1216,7 +1242,7 @@ const QUIZ = [
   "5 is the numerator of the cosine; substituting it gives 75 − 50 + 3 = 28, not zero."],
  sol:"Square both sides: a² + b² + 2ab cos θ = 2(a² + b² − 2ab cos θ) ⇒ <b>6ab cos θ = a² + b²</b>. With cos θ = 5/9: (10/3)ab = a² + b². Put a = nb and divide by b²: <b>3n² − 10n + 3 = 0 ⇒ n = 3 or 1/3</b>. The integer root is <b>3</b>."},
 
-{id:73, lec:"SB", blk:"Scalar triple product", topic:"Coplanarity condition",
+{id:73, lec:"SB", blk:"Scalar triple product", topic:"Coplanarity condition", t:90,
  q:"For A = −xî − 6ĵ − 2k̂, B = −î + 4ĵ + 3k̂ and C = −8î − ĵ + 3k̂, the condition A·(B×C) = 0 gives x =",
  opts:["4","−4","0","15"],
  ans:0,
@@ -1227,7 +1253,7 @@ const QUIZ = [
   "15 is the coefficient of x in the expansion, not the solution."],
  sol:"<b>A·(B×C) = 0 means the three vectors are coplanar</b>, and the scalar triple product is the 3×3 determinant. Expanding: −x(12 + 3) + 6(−3 + 24) − 2(1 + 32) = −15x + 126 − 66 = 0 ⇒ <b>x = 4</b>."},
 
-{id:74, lec:"SB", blk:"Cross product", topic:"Unit vector along a cross product",
+{id:74, lec:"SB", blk:"Cross product", topic:"Unit vector along a cross product", t:180,
  q:"For P = 3î + √3ĵ + 2k̂ and Q = 4î + √3ĵ + 2.5k̂, the unit vector along P×Q is (1/x)(√3î + ĵ − 2√3k̂). The value of x is",
  opts:["4","2","8","16"],
  ans:0,
@@ -1238,7 +1264,7 @@ const QUIZ = [
   "16 is the square of the answer."],
  sol:"P×Q = 0.5√3 î + 0.5 ĵ − √3 k̂ = ½(√3î + ĵ − 2√3k̂). Since |√3î + ĵ − 2√3k̂| = √(3 + 1 + 12) = <b>4</b>, the unit vector is <b>¼(√3î + ĵ − 2√3k̂)</b>, so x = <b>4</b>. Note |P×Q| = ½ × 4 = 2, consistent."},
 
-{id:75, lec:"SB", blk:"Torque", topic:"Torque about a shifted pivot",
+{id:75, lec:"SB", blk:"Torque", topic:"Torque about a shifted pivot", t:180,
  q:"A force −Pk̂ acts at the origin. Its torque about the point (2, −3) is P(aî + bĵ). The ratio a/b is",
  opts:["3/2","2/3","−3/2","1"],
  ans:0,
@@ -1249,7 +1275,7 @@ const QUIZ = [
   "A ratio of 1 would need equal components, but they are −3 and −2."],
  sol:"⚠ <b>r runs from the pivot to the point of application</b>: r = (0,0) − (2,−3) = −2î + 3ĵ. Then τ = r×F with F = −Pk̂. Using î×k̂ = −ĵ and ĵ×k̂ = î: τ = <b>−3Pî − 2Pĵ</b>, so <b>a/b = (−3)/(−2) = 3/2</b>. Getting r's direction backwards flips the whole torque."},
 
-{id:76, lec:"SB", blk:"Kinematics with vectors", topic:"Force from a velocity field",
+{id:76, lec:"SB", blk:"Kinematics with vectors", topic:"Force from a velocity field", t:180,
  q:"A particle of mass m moves in the xy-plane with v = α(y x̂ + 2x ŷ), α constant. The force on it is",
  opts:[
   "2mα²(x x̂ + y ŷ)",
@@ -1264,7 +1290,7 @@ const QUIZ = [
   "The velocity depends on position, so the particle accelerates as it moves even though α is fixed."],
  sol:"Use the chain rule through the velocity components. <b>a<sub>x</sub> = dv<sub>x</sub>/dt = α ẏ = αv<sub>y</sub> = 2α²x</b> and <b>a<sub>y</sub> = 2α ẋ = 2αv<sub>x</sub> = 2α²y</b>. Hence <b>F = 2mα²(x x̂ + y ŷ)</b> — a force pointing radially outward, proportional to the position vector."},
 
-{id:77, lec:"SB", blk:"Dot product", topic:"Perpendicular vectors from a dot product",
+{id:77, lec:"SB", blk:"Dot product", topic:"Perpendicular vectors from a dot product", t:90,
  q:"For what value of λ are A = 2î + λĵ + k̂ and B = 4î − 2ĵ + 2k̂ perpendicular?",
  opts:["5","−5","0","1"],
  ans:0,
@@ -1275,7 +1301,7 @@ const QUIZ = [
   "λ = 1 gives A·B = 8, again non-zero."],
  sol:"Set <b>A·B = 0</b>: (2)(4) + (λ)(−2) + (1)(2) = 8 − 2λ + 2 = 0 ⇒ <b>λ = 5</b>. The standard route for any “find the constant that makes these perpendicular” question."},
 
-{id:78, lec:"SB", blk:"Resultant geometry", topic:"Equal vectors at 120°",
+{id:78, lec:"SB", blk:"Resultant geometry", topic:"Equal vectors at 120°", t:90,
  q:"Three vectors of equal magnitude A lie in a plane, each making 120° with the next. Their resultant is",
  opts:["zero","3A","A√3","A"],
  ans:0,
@@ -1290,13 +1316,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter P-3 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1314,6 +1351,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1348,15 +1388,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1368,47 +1409,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1418,30 +1476,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1450,7 +1552,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1463,9 +1567,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1474,7 +1596,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1495,21 +1618,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter P-3 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

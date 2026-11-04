@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -247,7 +273,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (12) ---------------- */
-{id:1, lec:"L-1", blk:"First law", topic:"What F_net = 0 implies",
+{id:1, lec:"L-1", blk:"First law", topic:"What F_net = 0 implies", t:60,
  q:"If the net external force on a body is zero, the body",
  opts:[
   "is either at rest or moving with constant velocity",
@@ -262,7 +288,7 @@ const QUIZ = [
   "Slowing down is an acceleration, which needs a net force to produce it."],
  sol:"<b>F<sub>net</sub> = 0 ⇔ a = 0.</b> Newton's first law makes no distinction between rest and uniform velocity — that is precisely its point, and the reason ‘natural state' means constant velocity, not stillness."},
 
-{id:2, lec:"L-1", blk:"Inertia", topic:"What inertia depends on",
+{id:2, lec:"L-1", blk:"Inertia", topic:"What inertia depends on", t:60,
  q:"The inertia of a body depends on its",
  opts:["mass only","weight only","velocity","shape and size"],
  ans:0,
@@ -273,7 +299,7 @@ const QUIZ = [
   "Two blocks of the same mass but different shapes need the same force for the same acceleration."],
  sol:"<b>Inertia ∝ mass.</b> That is what makes m the coefficient in F = ma. ⚠ Do not confuse inertia (a property) with momentum (a state of motion)."},
 
-{id:3, lec:"L-1", blk:"Frames", topic:"Inertial versus non-inertial",
+{id:3, lec:"L-1", blk:"Frames", topic:"Inertial versus non-inertial", t:60,
  q:"Which of these is an <b>inertial</b> frame?",
  opts:[
   "A train moving at a constant 60 km/h on a straight track",
@@ -288,7 +314,7 @@ const QUIZ = [
   "Steady rotation involves centripetal acceleration, which is why a rotating frame needs the centrifugal pseudo force."],
  sol:"<b>Inertial = non-accelerating.</b> Constant <b>velocity</b> (magnitude and direction) qualifies; constant speed alone does not. In every non-inertial frame you must add a pseudo force −ma₀ to use ΣF = ma."},
 
-{id:4, lec:"L-1", blk:"Third law", topic:"Why action and reaction never cancel",
+{id:4, lec:"L-1", blk:"Third law", topic:"Why action and reaction never cancel", t:60,
  q:"Action and reaction forces never cancel each other because they",
  opts:[
   "act on two different bodies",
@@ -303,7 +329,7 @@ const QUIZ = [
   "They are simultaneous. There is no delay between an action and its reaction."],
  sol:"<b>Equal, opposite, and on different bodies.</b> The last clause is the whole content of the law: a horse can pull a cart precisely because the horse's backward push on the ground and the ground's forward push on the horse act on different objects."},
 
-{id:5, lec:"L-1", blk:"FBD", topic:"The normal-force trap",
+{id:5, lec:"L-1", blk:"FBD", topic:"The normal-force trap", t:60,
  q:"For a block resting on a surface, the normal force N",
  opts:[
   "equals whatever the ΣF equation for the block requires",
@@ -318,7 +344,7 @@ const QUIZ = [
   "The normal is perpendicular to the <b>contact surface</b>, so on an incline it is tilted, not vertical."],
  sol:"⚠ <b>The normal force is never a formula to memorize.</b> Draw the FBD, resolve perpendicular to the surface, and solve. On an incline inside a lift accelerating upward, for instance, N = m(g + a₀)cos θ."},
 
-{id:6, lec:"L-1", blk:"FBD", topic:"Direction of tension",
+{id:6, lec:"L-1", blk:"FBD", topic:"Direction of tension", t:60,
  q:"The tension in a string attached to a block always",
  opts:[
   "pulls the block along the string, away from it",
@@ -333,7 +359,7 @@ const QUIZ = [
   "T = mg only for a single block hanging in equilibrium. In a lift, or with more bodies attached, it differs."],
  sol:"<b>Tension pulls, never pushes. Normal pushes, never pulls.</b> Both act along their own natural direction: tension along the string, normal perpendicular to the contact surface."},
 
-{id:7, lec:"L-1", blk:"FBD", topic:"What belongs on a free-body diagram",
+{id:7, lec:"L-1", blk:"FBD", topic:"What belongs on a free-body diagram", t:60,
  q:"On the free-body diagram of a single block, you should draw",
  opts:[
   "only the external forces acting on that block",
@@ -348,7 +374,7 @@ const QUIZ = [
   "Acceleration is the <b>result</b> of the forces, not a force. Adding ma to the diagram double-counts it."],
  sol:"FBD recipe: free the body, draw weight from the centre of mass, a normal ⊥ to each contact, a tension along each string, spring and applied forces, and friction along the surface. Then write <b>ΣF = ma</b> along and perpendicular to the motion."},
 
-{id:8, lec:"L-1", blk:"Contact forces", topic:"Contact force between two pushed blocks",
+{id:8, lec:"L-1", blk:"Contact forces", topic:"Contact force between two pushed blocks", t:90,
  q:"Blocks of 4 kg and 2 kg sit side by side on a smooth horizontal surface. A 20 N horizontal force is applied to the 4 kg block. The contact force between the blocks is",
  opts:["20/3 N","20 N","40/3 N","10 N"],
  ans:0,
@@ -359,7 +385,7 @@ const QUIZ = [
   "10 N would be the answer if the force simply split in half, which ignores the unequal masses."],
  sol:"Two steps. <b>(1)</b> Whole system: a = F/ΣM = 20/6 = 10/3 m s⁻². <b>(2)</b> Isolate the <b>rear</b> block: N = m₂a = 2 × 10/3 = <b>20/3 N ≈ 6.67 N</b>. Always isolate the block that the contact force alone is pushing."},
 
-{id:9, lec:"L-1", blk:"Forces", topic:"Internal versus external",
+{id:9, lec:"L-1", blk:"Forces", topic:"Internal versus external", t:60,
  q:"Whether a force counts as internal or external depends on",
  opts:[
   "which system you have chosen",
@@ -374,7 +400,7 @@ const QUIZ = [
   "The classification is fixed by the system boundary, not by the state of motion."],
  sol:"<b>Draw the system boundary first.</b> Forces crossing it are external; forces between members inside it are internal and cancel in pairs. Choosing the boundary well is what turns a hard problem into an easy one."},
 
-{id:10, lec:"L-1", blk:"Equilibrium", topic:"Forces on a block on a smooth incline",
+{id:10, lec:"L-1", blk:"Equilibrium", topic:"Forces on a block on a smooth incline", t:60,
  q:"A block rests in equilibrium on a smooth incline of angle θ, held by a string running up the slope. The forces on it are",
  opts:[
   "weight, normal reaction and tension",
@@ -389,7 +415,7 @@ const QUIZ = [
   "The surface is in contact with the block, so it must exert a normal force N = mg cos θ."],
  sol:"Resolve along and perpendicular to the incline: <b>along: T = mg sin θ</b> and <b>perpendicular: N = mg cos θ</b>. Note that N is <b>not</b> mg here — the classic trap."},
 
-{id:11, lec:"L-1", blk:"Second law", topic:"The general form of the second law",
+{id:11, lec:"L-1", blk:"Second law", topic:"The general form of the second law", t:60,
  q:"The most general statement of Newton's second law is",
  opts:["F_net = dp/dt","F_net = mv","F_net = ma always","F_net = p/t"],
  ans:0,
@@ -400,7 +426,7 @@ const QUIZ = [
   "Dividing momentum by elapsed time gives an average force at best, not the instantaneous law."],
  sol:"<b>F<sub>net</sub> = dp/dt = d(mv)/dt.</b> With m constant this reduces to <b>ma</b>; with m varying it picks up an extra v(dm/dt) term, which is what drives a rocket."},
 
-{id:12, lec:"L-1", blk:"First law", topic:"Identifying a non-inertial effect",
+{id:12, lec:"L-1", blk:"First law", topic:"Identifying a non-inertial effect", t:60,
  q:"A passenger in a bus lurches forward when the bus brakes suddenly. In the <b>ground</b> frame this happens because",
  opts:[
   "the passenger tends to continue moving forward, while the bus slows beneath them",
@@ -416,7 +442,7 @@ const QUIZ = [
  sol:"Inertia, not force. ⚠ The <b>frame matters</b>: in the ground frame the explanation is the first law; in the bus's non-inertial frame you add a forward pseudo force −ma₀ and call it the cause. Both give the same motion — never mix the two accounts."},
 
 /* ---------------- L-2 (12) ---------------- */
-{id:13, lec:"L-2", blk:"Equilibrium", topic:"Condition for concurrent equilibrium",
+{id:13, lec:"L-2", blk:"Equilibrium", topic:"Condition for concurrent equilibrium", t:90,
  q:"For a point acted on by several concurrent forces to be in equilibrium,",
  opts:[
   "ΣF_x = 0 and ΣF_y = 0",
@@ -431,7 +457,7 @@ const QUIZ = [
   "Three unequal forces at suitable angles can perfectly well balance — as in the 37°/53° cord problem."],
  sol:"<b>ΣF<sub>x</sub> = 0 and ΣF<sub>y</sub> = 0.</b> For exactly three concurrent forces, <b>Lami's theorem</b> is often quicker: F₁/sin α = F₂/sin β = F₃/sin γ, where each angle is the one <b>opposite</b> its force."},
 
-{id:14, lec:"L-2", blk:"Equilibrium", topic:"Three cords supporting a load",
+{id:14, lec:"L-2", blk:"Equilibrium", topic:"Three cords supporting a load", t:90,
  q:"A 40 kg load hangs from a junction held by three cords: one at 37° and one at 53° to the horizontal, the third vertical (g = 10). The tension in the vertical cord is",
  opts:["400 N","240 N","320 N","560 N"],
  ans:0,
@@ -442,7 +468,7 @@ const QUIZ = [
   "560 N is T₁ + T₂, which is not a force acting anywhere in the system."],
  sol:"Start at the load: <b>T₃ = mg = 400 N</b>. Then at the junction, T₁ = 240 N and T₂ = 320 N. Note 37° + 53° = 90°, so those two cords are perpendicular — and indeed 240² + 320² = 400² ✓"},
 
-{id:15, lec:"L-2", blk:"Equilibrium", topic:"The other two tensions",
+{id:15, lec:"L-2", blk:"Equilibrium", topic:"The other two tensions", t:90,
  q:"In the same 40 kg problem, the tensions in the 37° and 53° cords are respectively",
  opts:["240 N and 320 N","320 N and 240 N","200 N and 200 N","400 N and 400 N"],
  ans:0,
@@ -453,7 +479,7 @@ const QUIZ = [
   "400 N is the load itself; neither slanted cord carries the full weight."],
  sol:"Two equations at the junction: <b>0.8T₁ = 0.6T₂</b> and <b>0.6T₁ + 0.8T₂ = 400</b> ⇒ <b>T₁ = 240 N, T₂ = 320 N</b>. Check with Pythagoras, since the cords are perpendicular: √(240² + 320²) = 400 ✓"},
 
-{id:16, lec:"L-2", blk:"Blocks in a row", topic:"Net force on a middle block",
+{id:16, lec:"L-2", blk:"Blocks in a row", topic:"Net force on a middle block", t:90,
  q:"Blocks of 3 kg, 2 kg and 1 kg are in contact on a smooth surface and a 12 N force is applied to the 3 kg block. The net force on the 2 kg block is",
  opts:["4 N","12 N","2 N","6 N"],
  ans:0,
@@ -464,7 +490,7 @@ const QUIZ = [
   "6 N would be the net force on a 3 kg block at this acceleration."],
  sol:"The <b>net</b> force on any block in a train is simply <b>its own ma</b>. a = ΣF/ΣM = 12/6 = 2 ⇒ net force on the 2 kg block = <b>4 N</b>. (That net figure is the difference of the two contact forces acting on its faces.)"},
 
-{id:17, lec:"L-2", blk:"Blocks in a row", topic:"Opposing forces on a train of blocks",
+{id:17, lec:"L-2", blk:"Blocks in a row", topic:"Opposing forces on a train of blocks", t:90,
  q:"Blocks of 1 kg, 4 kg and 2 kg lie in contact. A 120 N force pushes from the left and a 50 N force opposes from the right. The acceleration of the system is",
  opts:["10 m s⁻²","24.3 m s⁻²","170/7 m s⁻²","70 m s⁻²"],
  ans:0,
@@ -475,7 +501,7 @@ const QUIZ = [
   "70 N is the net force, not the acceleration — it still has to be divided by the total mass."],
  sol:"<b>a = F<sub>net</sub>/M<sub>total</sub> = (120 − 50)/7 = 10 m s⁻².</b> Take the whole train as one system first; only then isolate a block for an internal force."},
 
-{id:18, lec:"L-2", blk:"Blocks in a row", topic:"Contact force inside the train",
+{id:18, lec:"L-2", blk:"Blocks in a row", topic:"Contact force inside the train", t:90,
  q:"For the same system (1 kg, 4 kg, 2 kg with 120 N left and 50 N right, a = 10 m s⁻²), the contact force between the 1 kg and 4 kg blocks is",
  opts:["110 N","10 N","60 N","70 N"],
  ans:0,
@@ -486,7 +512,7 @@ const QUIZ = [
   "70 N is the net force on the whole system."],
  sol:"Isolate the <b>1 kg</b> block: the 120 N pushes it forward and the contact force N pushes back. <b>120 − N = (1)(10) ⇒ N = 110 N.</b> Cross-check from the other side: (4 + 2)(10) + 50 = 110 ✓"},
 
-{id:19, lec:"L-2", blk:"Blocks in a row", topic:"Contact force with a small applied force",
+{id:19, lec:"L-2", blk:"Blocks in a row", topic:"Contact force with a small applied force", t:90,
  q:"Blocks of 3 kg and 4 kg are in contact on a smooth floor and a 5 N horizontal force pushes the 3 kg block. The contact force between them is",
  opts:["20/7 N","5 N","15/7 N","35/7 N"],
  ans:0,
@@ -497,7 +523,7 @@ const QUIZ = [
   "35/7 = 5 N, the applied force again."],
  sol:"a = 5/7 m s⁻². Isolate the <b>rear</b> block: <b>N = m₂a = 4 × 5/7 = 20/7 N</b>. The transmitted force is always (mass beyond the junction) × a."},
 
-{id:20, lec:"L-2", blk:"Blocks in a row", topic:"Which block the force is applied to",
+{id:20, lec:"L-2", blk:"Blocks in a row", topic:"Which block the force is applied to", t:90,
  q:"Two blocks of 2 kg and 3 kg are in contact on a smooth floor and a 10 N force is applied. The contact force between them is",
  opts:[
   "6 N if F is applied to the 2 kg block, but 4 N if applied to the 3 kg block",
@@ -512,7 +538,7 @@ const QUIZ = [
   "10 N is the applied force, and the contact force is always less than it here."],
  sol:"The acceleration is the same either way, but the <b>internal</b> force is not: it equals the mass it still has to accelerate. <b>Push the 2 kg → N = 3a = 6 N. Push the 3 kg → N = 2a = 4 N.</b> Pushing the lighter block puts more load on the junction."},
 
-{id:21, lec:"L-2", blk:"Method", topic:"Why the transmitted force is less than the applied force",
+{id:21, lec:"L-2", blk:"Method", topic:"Why the transmitted force is less than the applied force", t:60,
  q:"When a force F is applied to the first block of a train of blocks, the force transmitted across a junction is",
  opts:[
   "(total mass beyond the junction) × a, which is less than F",
@@ -527,7 +553,7 @@ const QUIZ = [
   "It is the mass on the <b>far</b> side of the junction that the transmitted force must accelerate, not the near side."],
  sol:"<b>Contact force at a junction = (mass on the far side) × a.</b> This is why the last block in a train feels the least force, and why a coupling near the engine of a train carries the greatest load."},
 
-{id:22, lec:"L-2", blk:"Method", topic:"The two-step recipe",
+{id:22, lec:"L-2", blk:"Method", topic:"The two-step recipe", t:60,
  q:"The standard method for a system of blocks pushed in contact is to",
  opts:[
   "find the common acceleration from the whole system, then isolate one block for any internal force",
@@ -542,7 +568,7 @@ const QUIZ = [
   "Equal division ignores the masses and gives the wrong contact forces."],
  sol:"<b>(1) Whole system → a = F<sub>net</sub>/M<sub>total</sub>. (2) One block → the internal force.</b> Taking the largest possible system first is the single biggest labour-saver in mechanics."},
 
-{id:23, lec:"L-2", blk:"Equilibrium", topic:"Lami's theorem",
+{id:23, lec:"L-2", blk:"Equilibrium", topic:"Lami's theorem", t:60,
  q:"Lami's theorem, F₁/sin α = F₂/sin β = F₃/sin γ, applies to",
  opts:[
   "three concurrent coplanar forces in equilibrium",
@@ -557,7 +583,7 @@ const QUIZ = [
   "Equilibrium is essential; the theorem is just the sine rule applied to the closed triangle of forces."],
  sol:"Lami works because three balanced concurrent forces form a <b>closed triangle</b>, and the theorem is the sine rule for that triangle. Restricted to three forces, but very fast when it applies."},
 
-{id:24, lec:"L-2", blk:"Blocks in a row", topic:"Rear block of a train",
+{id:24, lec:"L-2", blk:"Blocks in a row", topic:"Rear block of a train", t:90,
  q:"Three identical 2 kg blocks are pushed in contact by a 30 N force applied to the first. The contact force between the second and third blocks is",
  opts:["10 N","20 N","30 N","15 N"],
  ans:0,
@@ -569,7 +595,7 @@ const QUIZ = [
  sol:"a = 30/6 = 5 m s⁻². Beyond the 2–3 junction there is <b>one</b> block: N = 2 × 5 = <b>10 N</b>. Across the 1–2 junction it would be 4 × 5 = 20 N — the force falls off down the train."},
 
 /* ---------------- L-3 (10) ---------------- */
-{id:25, lec:"L-3", blk:"Method", topic:"Where a constraint relation comes from",
+{id:25, lec:"L-3", blk:"Method", topic:"Where a constraint relation comes from", t:90,
  q:"A constraint relation between the accelerations of connected bodies is obtained by",
  opts:[
   "writing the total string length in terms of position coordinates and differentiating twice",
@@ -584,7 +610,7 @@ const QUIZ = [
   "Equal accelerations hold only for bodies rigidly attached; over a movable pulley they differ by a factor."],
  sol:"<b>Length = constant ⇒ d(length)/dt = 0 ⇒ d²(length)/dt² = 0.</b> Each ΣF = ma equation plus the constraint gives just enough equations to close the system."},
 
-{id:26, lec:"L-3", blk:"Movable pulley", topic:"The standard constraint",
+{id:26, lec:"L-3", blk:"Movable pulley", topic:"The standard constraint", t:90,
  q:"For a movable pulley supported by two string segments, with y₁ + 2y₂ = constant, the accelerations satisfy",
  opts:["a₁ = −2a₂","a₂ = −2a₁","a₁ = a₂","a₁ = −a₂/2"],
  ans:0,
@@ -595,7 +621,7 @@ const QUIZ = [
   "This halves the wrong quantity — the factor of 2 belongs to the pulley's coordinate in the constraint, so it multiplies a₂."],
  sol:"<b>y₁ + 2y₂ = const ⇒ a₁ = −2a₂.</b> The <b>body on the movable pulley moves at half</b> the speed and half the acceleration of the body on the free end. The factor equals the number of string segments supporting the pulley."},
 
-{id:27, lec:"L-3", blk:"Movable pulley", topic:"Which body moves faster",
+{id:27, lec:"L-3", blk:"Movable pulley", topic:"Which body moves faster", t:60,
  q:"In a movable-pulley system, the body hanging from the movable pulley moves",
  opts:[
   "at half the speed of the body on the free string end",
@@ -610,7 +636,7 @@ const QUIZ = [
   "One quarter corresponds to four supporting segments, not two."],
  sol:"<b>The factor equals the number of supporting segments.</b> Two segments → half the speed and twice the force. Three segments → one third the speed and three times the force. Speed down, force up — energy is conserved either way."},
 
-{id:28, lec:"L-3", blk:"Standard result", topic:"Acceleration in the movable-pulley system",
+{id:28, lec:"L-3", blk:"Standard result", topic:"Acceleration in the movable-pulley system", t:90,
  q:"For m₁ on the free string end and m₂ on the movable pulley, the acceleration of the movable pulley is",
  opts:[
   "(2m₁ − m₂)g /(4m₁ + m₂)",
@@ -625,7 +651,7 @@ const QUIZ = [
   "The factor of 2 is attached to the wrong mass — it multiplies m₁ in the numerator, because m₁ carries the doubled acceleration."],
  sol:"Set up with a₁ = 2a₂ = 2a: <b>m₁g − T = 2m₁a</b> and <b>2T − m₂g = m₂a</b>. Eliminating T gives <b>a = (2m₁ − m₂)g/(4m₁ + m₂)</b> and <b>T = 3m₁m₂g/(4m₁ + m₂)</b>. The system stays at rest when m₂ = 2m₁."},
 
-{id:29, lec:"L-3", blk:"Standard result", topic:"Tension in the movable-pulley system",
+{id:29, lec:"L-3", blk:"Standard result", topic:"Tension in the movable-pulley system", t:90,
  q:"For the same system, the string tension is",
  opts:[
   "3m₁m₂g /(4m₁ + m₂)",
@@ -640,7 +666,7 @@ const QUIZ = [
   "The 4 belongs in the denominator with m₁, and the numerator coefficient is 3."],
  sol:"<b>T = 3m₁m₂g/(4m₁ + m₂).</b> Sanity check at m₂ = 2m₁ (equilibrium): T = 3m₁(2m₁)g/(6m₁) = m₁g ✓ — exactly what a stationary m₁ requires."},
 
-{id:30, lec:"L-3", blk:"Three segments", topic:"A pulley with three supporting segments",
+{id:30, lec:"L-3", blk:"Three segments", topic:"A pulley with three supporting segments", t:90,
  q:"If a movable pulley is supported by <b>three</b> string segments, the free end moves",
  opts:[
   "three times as fast as the pulley",
@@ -655,7 +681,7 @@ const QUIZ = [
   "The factor is the number of segments, not its square."],
  sol:"<b>Speed factor = number of supporting segments.</b> With y₁ + 3y₂ = const, a₁ = 3a₂ and the standard result becomes <b>a = (3m − M)g/(9m + M)</b>, <b>T = 4mMg/(9m + M)</b>. Note how the 3 becomes a 9 in the denominator — the same squaring that turned 2 into 4."},
 
-{id:31, lec:"L-3", blk:"Multi-pulley", topic:"Chaining several constraints",
+{id:31, lec:"L-3", blk:"Multi-pulley", topic:"Chaining several constraints", t:90,
  q:"A multi-pulley system gives the constraints a₁ + a₂ = 0, a₁ + a₃ − 2a₂ = 0 and a₁ − 2a₃ + a₄ = 0. Then a₄ equals",
  opts:["−7a₁","−3a₁","7a₁","−5a₁"],
  ans:0,
@@ -666,7 +692,7 @@ const QUIZ = [
   "−5a₁ would follow from taking a₃ = −2a₁ rather than −3a₁."],
  sol:"Substitute forward, one constraint at a time: a₂ = −a₁ ⇒ a₃ = 2a₂ − a₁ = −3a₁ ⇒ <b>a₄ = 2a₃ − a₁ = −7a₁</b>. Big factors like 7 are perfectly normal in stacked-pulley systems — the multiplications compound."},
 
-{id:32, lec:"L-3", blk:"Movable pulley", topic:"Force advantage",
+{id:32, lec:"L-3", blk:"Movable pulley", topic:"Force advantage", t:60,
  q:"In a movable-pulley system with two supporting segments, the force acting on the body attached to the pulley is",
  opts:[
   "2T, twice the string tension",
@@ -680,7 +706,7 @@ const QUIZ = [
   "4T would require four supporting segments."],
  sol:"<b>Force on the pulley = (number of segments) × T.</b> Combined with the halved acceleration, this is the classic trade: <b>half the speed, twice the force</b>. Power in equals power out."},
 
-{id:33, lec:"L-3", blk:"Method", topic:"How many equations you need",
+{id:33, lec:"L-3", blk:"Method", topic:"How many equations you need", t:60,
  q:"To solve a two-body system linked by a movable pulley you need",
  opts:[
   "one ΣF equation per body plus the constraint relation",
@@ -695,7 +721,7 @@ const QUIZ = [
   "Without the constraint you have three unknowns and only two equations — the system is underdetermined."],
  sol:"<b>Count unknowns, then count equations.</b> Two bodies: unknowns a₁, a₂, T. Equations: two ΣF plus one constraint. Whenever a movable pulley appears, the constraint is the equation students forget."},
 
-{id:34, lec:"L-3", blk:"Movable pulley", topic:"When the system stays at rest",
+{id:34, lec:"L-3", blk:"Movable pulley", topic:"When the system stays at rest", t:90,
  q:"For m₁ on the free end and m₂ on the movable pulley, the system remains at rest when",
  opts:["m₂ = 2m₁","m₂ = m₁","m₁ = 2m₂","m₂ = 4m₁"],
  ans:0,
@@ -707,7 +733,7 @@ const QUIZ = [
  sol:"Set the numerator to zero: <b>2m₁ − m₂ = 0 ⇒ m₂ = 2m₁</b>. The mechanical advantage means the pulley side can hold <b>twice</b> the mass — exactly why movable pulleys are used to lift heavy loads."},
 
 /* ---------------- L-4 (11) ---------------- */
-{id:35, lec:"L-4", blk:"Wedge constraint", topic:"The contact constraint",
+{id:35, lec:"L-4", blk:"Wedge constraint", topic:"The contact constraint", t:60,
  q:"For a block staying in contact with a moving wedge, the constraint is obtained by",
  opts:[
   "equating the components of the two accelerations along the common normal",
@@ -722,7 +748,7 @@ const QUIZ = [
   "The block accelerates in general; it is only its relative motion perpendicular to the surface that vanishes."],
  sol:"<b>Along the common normal, the accelerations must match</b> (giving a<sub>A</sub> = a<sub>B</sub> sin θ in the standard geometry). Perpendicular to that, the block is free to slide. This is the wedge analogue of a string constraint."},
 
-{id:36, lec:"L-4", blk:"Movable pulley", topic:"Block on a table via a movable pulley",
+{id:36, lec:"L-4", blk:"Movable pulley", topic:"Block on a table via a movable pulley", t:90,
  q:"A 2 kg block on a smooth table is joined through a movable pulley to a 1 kg hanging block, so that the table block feels 2T. With g = 10, the acceleration of the 1 kg block is",
  opts:["20/3 m s⁻²","10/3 m s⁻²","5 m s⁻²","10 m s⁻²"],
  ans:0,
@@ -733,7 +759,7 @@ const QUIZ = [
   "10 m s⁻² is g itself, which would require the string to be slack."],
  sol:"Constraint: the table block moves at <b>half</b> the hanging block's rate. 1 kg: 10 − T = a. 2 kg: 2T = 2(a/2) ⇒ T = a/2. Substituting: 10 = 3a/2 ⇒ <b>a = 20/3 ≈ 6.67 m s⁻²</b>, T = 10/3 N."},
 
-{id:37, lec:"L-4", blk:"Movable pulley", topic:"Incline plus movable pulley",
+{id:37, lec:"L-4", blk:"Movable pulley", topic:"Incline plus movable pulley", t:90,
  q:"A block M rests on a smooth 30° incline and is joined through a movable pulley to a hanging block 2M. The acceleration of M is",
  opts:["g/3","g/6","g/2","2g/3"],
  ans:0,
@@ -744,7 +770,7 @@ const QUIZ = [
   "2g/3 doubles the answer, as if the constraint factor had been applied the wrong way."],
  sol:"M: T − Mg/2 = Ma. 2M: 2Mg − 2T = 2M(a/2) ⇒ Mg − T = Ma/2. Adding: Mg/2 = 3Ma/2 ⇒ <b>a = g/3</b> for M, and <b>g/6</b> for the hanging block."},
 
-{id:38, lec:"L-4", blk:"Free wedge", topic:"Block on a free wedge of equal mass",
+{id:38, lec:"L-4", blk:"Free wedge", topic:"Block on a free wedge of equal mass", t:90,
  q:"A block of mass m rests on a smooth wedge of the <b>same</b> mass m (angle θ) that is free to slide on a smooth floor. The block's acceleration <b>relative to the wedge</b> is",
  opts:[
   "2g sin θ /(1 + sin²θ)",
@@ -759,7 +785,7 @@ const QUIZ = [
   "A minus sign in the denominator would make the acceleration blow up at θ = 90°, which is unphysical."],
  sol:"⚠ <b>This is the acceleration relative to the wedge</b>, along the incline surface. The block's acceleration relative to the <b>ground</b> is the vector sum of this and the wedge's own recoil A = g sin θ cos θ/(1 + sin²θ), which is a smaller number — at θ = 45° the two are 0.94g and 0.75g. The two agree only at θ = 90°, where the wedge does not move and a = g, correct free fall ✓"},
 
-{id:39, lec:"L-4", blk:"Free wedge", topic:"Fixed versus free wedge",
+{id:39, lec:"L-4", blk:"Free wedge", topic:"Fixed versus free wedge", t:60,
  q:"Compared with a block sliding on a <b>fixed</b> smooth incline of the same angle, a block on a smooth incline that is free to slide on a smooth floor has",
  opts:[
   "a different acceleration, because the wedge recoils",
@@ -774,7 +800,7 @@ const QUIZ = [
   "Free fall at g would need the incline to exert no force at all, which only happens at θ = 90°."],
  sol:"<b>Fixed wedge: a = g sin θ. Free wedge: the recoil changes it</b>, giving 2g sin θ/(1 + sin²θ) for equal masses. Momentum is the giveaway — with no horizontal external force, the system's horizontal momentum must stay zero, so the wedge must move."},
 
-{id:40, lec:"L-4", blk:"Free wedge", topic:"Displacement in the first second",
+{id:40, lec:"L-4", blk:"Free wedge", topic:"Displacement in the first second", t:90,
  q:"For that block on the free equal-mass wedge, the <b>vertical</b> distance it descends in the first second is",
  opts:[
   "g sin²θ /(1 + sin²θ)",
@@ -789,7 +815,7 @@ const QUIZ = [
   "⚠ This is the distance travelled <b>along the incline</b>. The question asks for its vertical component, which is one factor of sin θ smaller."],
  sol:"Two steps. <b>(1)</b> Along the incline: s = ½a<sub>rel</sub>t² = ½ × 2g sin θ/(1 + sin²θ) × 1² = <b>g sin θ/(1 + sin²θ)</b>. <b>(2)</b> Vertical drop = s sin θ = <b>g sin²θ/(1 + sin²θ)</b>. The vertical drop is the same in both frames, since the wedge moves only horizontally — which is exactly why it is the safer quantity to ask for."},
 
-{id:41, lec:"L-4", blk:"Wedge on floor", topic:"Wedge accelerated by a vertical rod",
+{id:41, lec:"L-4", blk:"Wedge on floor", topic:"Wedge accelerated by a vertical rod", t:90,
  q:"A rod pushed vertically by a wedge of mass M (angle α, rod mass m) gives the wedge an acceleration",
  opts:[
   "mg sin α cos α /(M cos²α + m sin²α)",
@@ -804,7 +830,7 @@ const QUIZ = [
   "The driving weight is the <b>rod's</b> mg, so the numerator carries m, not M."],
  sol:"Constraint: the rod descends as the wedge advances, so a<sub>rod</sub> = A tan α. Rod: mg − N cos α = m a<sub>rod</sub>. Wedge: MA = N sin α. Eliminating N gives <b>A = mg tan α/(M + m tan²α) = mg sin α cos α/(M cos²α + m sin²α)</b>, and <b>a<sub>rod</sub> = mg sin²α/(M cos²α + m sin²α)</b>. This is the same formula as the mass-ratio form a<sub>B</sub> = g tan α/(η + tan²α) with η = M/m."},
 
-{id:42, lec:"L-4", blk:"Method", topic:"What closes a wedge problem",
+{id:42, lec:"L-4", blk:"Method", topic:"What closes a wedge problem", t:60,
  q:"In a block-on-free-wedge problem, the equation that closes the system is",
  opts:[
   "the contact constraint relating the two accelerations",
@@ -819,7 +845,7 @@ const QUIZ = [
   "The two bodies move quite differently — the block slides down while the wedge recoils horizontally."],
  sol:"<b>ΣF equations + contact constraint.</b> The constraint a<sub>A</sub> = a<sub>B</sub> sin θ is the wedge analogue of a string relation, and forgetting it is the most common way these problems go wrong."},
 
-{id:43, lec:"L-4", blk:"Mass ratio", topic:"Wedge acceleration for a general mass ratio",
+{id:43, lec:"L-4", blk:"Mass ratio", topic:"Wedge acceleration for a general mass ratio", t:60,
  q:"For a wedge-to-rod mass ratio η, the wedge acceleration is a_B = g tan θ /(η + tan²θ). As η becomes very large, a_B",
  opts:[
   "tends to zero",
@@ -834,7 +860,7 @@ const QUIZ = [
   "The formula has η in the denominator, so a large η makes a_B small, not large."],
  sol:"<b>a<sub>B</sub> = g tan θ/(η + tan²θ).</b> As η → ∞ this → 0, recovering the <b>fixed-wedge</b> case. Checking limiting cases like this is the fastest way to test whether you have remembered a formula correctly."},
 
-{id:44, lec:"L-4", blk:"Movable pulley", topic:"Tension in the three-mass system",
+{id:44, lec:"L-4", blk:"Movable pulley", topic:"Tension in the three-mass system", t:60,
  q:"In the module's 1 kg / 2 kg / 3 kg movable-pulley system (g = 10), the tension T works out to about 8.3 N, so the tension acting on the 1 kg block is",
  opts:["16.6 N","8.3 N","4.15 N","10 N"],
  ans:0,
@@ -845,7 +871,7 @@ const QUIZ = [
   "10 N is the block's weight (1 × 10), not the tension."],
  sol:"<b>The block on a movable pulley feels 2T.</b> With T = 8.3 N, the 1 kg block feels 16.6 N and accelerates at (16.6 − 10)/1 = 6.6 m s⁻² upward — matching the module's 6.55 within rounding."},
 
-{id:45, lec:"L-4", blk:"Free wedge", topic:"Limiting case check",
+{id:45, lec:"L-4", blk:"Free wedge", topic:"Limiting case check", t:90,
  q:"The formula a = 2g sin θ /(1 + sin²θ) for a block on a free equal-mass wedge gives, at θ = 90°,",
  opts:[
   "a = g, correctly describing free fall",
@@ -861,7 +887,7 @@ const QUIZ = [
  sol:"<b>Always test a formula at θ = 0 and θ = 90°.</b> Here θ = 0 gives a = 0 ✓ and θ = 90° gives a = g ✓ Both limits behave, which is strong evidence the formula is right."},
 
 /* ---------------- L-5 (11) ---------------- */
-{id:46, lec:"L-5", blk:"Hooke's law", topic:"The spring force law",
+{id:46, lec:"L-5", blk:"Hooke's law", topic:"The spring force law", t:90,
  q:"For a spring of stiffness k deformed by x from its natural length, the force it exerts is",
  opts:[
   "F = −kx, directed so as to restore the natural length",
@@ -876,7 +902,7 @@ const QUIZ = [
   "Hooke's law is linear in x, and the spring pushes only when compressed — when stretched it pulls."],
  sol:"<b>F = −kx</b>, giving <b>a = −(k/m)x</b> — the defining equation of simple harmonic motion. A block hanging in equilibrium stretches the spring by <b>x = mg/k</b>."},
 
-{id:47, lec:"L-5", blk:"Static elongation", topic:"Hanging a mass on a spring",
+{id:47, lec:"L-5", blk:"Static elongation", topic:"Hanging a mass on a spring", t:90,
  q:"A 2 kg block hangs in equilibrium from a spring of k = 100 N m⁻¹ (g = 10). The elongation is",
  opts:["0.2 m","0.02 m","2 m","5 m"],
  ans:0,
@@ -887,7 +913,7 @@ const QUIZ = [
   "5 m inverts the ratio to k/mg."],
  sol:"At equilibrium the spring force balances the weight: <b>kx = mg ⇒ x = mg/k = 20/100 = 0.2 m.</b>"},
 
-{id:48, lec:"L-5", blk:"Spring balance", topic:"What a spring balance reads",
+{id:48, lec:"L-5", blk:"Spring balance", topic:"What a spring balance reads", t:60,
  q:"A light spring balance inserted into a string reads",
  opts:[
   "the tension in the string",
@@ -902,7 +928,7 @@ const QUIZ = [
   "For a light balance its own weight is negligible, and even a heavy one does not change the tension it reports."],
  sol:"⚠ <b>A spring balance reads tension, not weight.</b> Every ‘what does the balance read' question is really a ‘find the tension' question — write ΣF for a body on one side and solve."},
 
-{id:49, lec:"L-5", blk:"Spring balance", topic:"Two balances in series",
+{id:49, lec:"L-5", blk:"Spring balance", topic:"Two balances in series", t:60,
  q:"A 10 kg block hangs from two light spring balances connected in series, one below the other (g = 10). The readings are",
  opts:[
   "100 N on each",
@@ -917,7 +943,7 @@ const QUIZ = [
   "The upper balance carries the block, not the block plus a duplicate."],
  sol:"Balances in <b>series</b> all carry the same tension: <b>T = mg = 100 N on each</b>. It is only balances in <b>parallel</b> that share the load."},
 
-{id:50, lec:"L-5", blk:"Spring balance", topic:"Equal masses over two pulleys",
+{id:50, lec:"L-5", blk:"Spring balance", topic:"Equal masses over two pulleys", t:90,
  q:"A light spring balance connects two 20 kg blocks hanging over frictionless pulleys on either side (g = 10). It reads",
  opts:["200 N","400 N","0 N","100 N"],
  ans:0,
@@ -928,7 +954,7 @@ const QUIZ = [
   "100 N would correspond to a 10 kg load."],
  sol:"Equal masses ⇒ a = 0 ⇒ <b>T = mg = 200 N.</b> The reading is unchanged if the balance is heavy, because it still reports the tension passing through it."},
 
-{id:51, lec:"L-5", blk:"Spring balance", topic:"Unequal masses over two pulleys",
+{id:51, lec:"L-5", blk:"Spring balance", topic:"Unequal masses over two pulleys", t:90,
  q:"A spring balance is placed between a 5 kg and a 10 kg block hanging over two pulleys (g = 10). Its reading is",
  opts:["200/3 N","150 N","50 N","100 N"],
  ans:0,
@@ -939,7 +965,7 @@ const QUIZ = [
   "100 N is the 10 kg block's weight; that block accelerates downward, so the tension is less than it."],
  sol:"Atwood: a = (m₂ − m₁)g/(m₁ + m₂) = 10/3. Then <b>T = m₁(g + a) = 5(40/3) = 200/3 N ≈ 66.7 N</b>. Cross-check from the heavy side: m₂(g − a) = 10(20/3) = 200/3 ✓ Note the reading lies <b>between</b> the two weights."},
 
-{id:52, lec:"L-5", blk:"Cutting a spring", topic:"How stiffness scales with length",
+{id:52, lec:"L-5", blk:"Cutting a spring", topic:"How stiffness scales with length", t:60,
  q:"A spring of stiffness k is cut into two equal halves. Each half has stiffness",
  opts:["2k","k/2","k","4k"],
  ans:0,
@@ -950,7 +976,7 @@ const QUIZ = [
   "4k would follow from an inverse-square dependence, but the relation is inverse-first-power."],
  sol:"<b>k ∝ 1/L, so k<sub>piece</sub> = k × L/L<sub>piece</sub>.</b> Halves give 2k each; thirds give 3k each. Intuitively, a short spring has fewer coils to share the deformation, so each must stretch more for the same extension — meaning more force."},
 
-{id:53, lec:"L-5", blk:"Cutting a spring", topic:"Unequal pieces",
+{id:53, lec:"L-5", blk:"Cutting a spring", topic:"Unequal pieces", t:90,
  q:"A spring of stiffness k and length L is cut so that one piece is one-third of the original length. That piece has stiffness",
  opts:["3k","k/3","2k/3","3k/2"],
  ans:0,
@@ -961,7 +987,7 @@ const QUIZ = [
   "3k/2 is the stiffness of the remaining two-thirds piece, not the one asked for."],
  sol:"<b>k<sub>piece</sub> = k × (L/L<sub>piece</sub>).</b> A third of the length ⇒ <b>3k</b>; the remaining two-thirds ⇒ 3k/2. Check: putting them back in series gives 1/k<sub>eq</sub> = 1/3k + 2/3k = 1/k ✓"},
 
-{id:54, lec:"L-5", blk:"Spring force", topic:"Push or pull",
+{id:54, lec:"L-5", blk:"Spring force", topic:"Push or pull", t:60,
  q:"A spring exerts a push on the bodies at its ends when it is",
  opts:["compressed","stretched","at its natural length","in any state"],
  ans:0,
@@ -972,7 +998,7 @@ const QUIZ = [
   "The direction depends entirely on whether the deformation is a compression or an extension."],
  sol:"<b>Stretched → pulls in. Compressed → pushes out.</b> This is the one respect in which a spring beats a string: a string can only pull, whereas a spring can do both."},
 
-{id:55, lec:"L-5", blk:"Hooke's law", topic:"Acceleration from the spring force",
+{id:55, lec:"L-5", blk:"Hooke's law", topic:"Acceleration from the spring force", t:60,
  q:"A block of mass m attached to a spring of stiffness k has acceleration",
  opts:["a = −(k/m)x","a = −(m/k)x","a = −kmx","a = −kx"],
  ans:0,
@@ -983,7 +1009,7 @@ const QUIZ = [
   "−kx is the force, not the acceleration; it still has to be divided by the mass."],
  sol:"<b>a = −(k/m)x</b>, so the angular frequency is <b>ω = √(k/m)</b>. Acceleration proportional to displacement and opposite in sign is exactly the SHM condition."},
 
-{id:56, lec:"L-5", blk:"Spring balance", topic:"Does a heavy balance read differently",
+{id:56, lec:"L-5", blk:"Spring balance", topic:"Does a heavy balance read differently", t:60,
  q:"If the light spring balance in a two-block pulley system is replaced by a heavy one, the reading",
  opts:[
   "stays the same, because it reads the string tension",
@@ -999,7 +1025,7 @@ const QUIZ = [
  sol:"The reading is <b>the tension</b>, and that is fixed by the dynamics of the blocks. Making the instrument heavier does not change what it measures. (A heavy balance can change the <b>system's</b> acceleration if it is part of the moving mass — but the reading still equals whatever tension results.)"},
 
 /* ---------------- L-6 (12) ---------------- */
-{id:57, lec:"L-6", blk:"Combinations", topic:"Springs in series",
+{id:57, lec:"L-6", blk:"Combinations", topic:"Springs in series", t:60,
  q:"Two springs of stiffness k₁ and k₂ are joined in series. The equivalent stiffness satisfies",
  opts:[
   "1/k_eq = 1/k₁ + 1/k₂",
@@ -1014,7 +1040,7 @@ const QUIZ = [
   "A plain average matches neither combination."],
  sol:"<b>Series: 1/k<sub>eq</sub> = 1/k₁ + 1/k₂ (softer than either). Parallel: k<sub>eq</sub> = k₁ + k₂ (stiffer than either).</b> ⚠ Note that springs behave like <b>capacitors</b>, not resistors — series makes them weaker."},
 
-{id:58, lec:"L-6", blk:"Combinations", topic:"Two identical springs in series",
+{id:58, lec:"L-6", blk:"Combinations", topic:"Two identical springs in series", t:60,
  q:"Two identical springs of stiffness k are joined in series. The combination has stiffness",
  opts:["k/2","2k","k","4k"],
  ans:0,
@@ -1025,7 +1051,7 @@ const QUIZ = [
   "4k would need four springs in parallel."],
  sol:"Series halves it: <b>k/2</b>. Consistent with <b>k ∝ 1/L</b> — joining two springs end to end doubles the length, so the stiffness halves. The two rules are the same physics."},
 
-{id:59, lec:"L-6", blk:"Combinations", topic:"Which combination is stiffer",
+{id:59, lec:"L-6", blk:"Combinations", topic:"Which combination is stiffer", t:90,
  q:"Compared with a single spring of stiffness k, a parallel pair of such springs is",
  opts:[
   "stiffer, with k_eq = 2k",
@@ -1040,7 +1066,7 @@ const QUIZ = [
   "k² has the wrong dimensions; stiffnesses add, they do not multiply."],
  sol:"<b>Parallel: same extension, forces add ⇒ k<sub>eq</sub> = k₁ + k₂. Series: same force, extensions add ⇒ 1/k<sub>eq</sub> = 1/k₁ + 1/k₂.</b> Ask which quantity is shared and the rule follows."},
 
-{id:60, lec:"L-6", blk:"Sudden cutting", topic:"The central principle",
+{id:60, lec:"L-6", blk:"Sudden cutting", topic:"The central principle", t:60,
  q:"At the instant a support is suddenly cut,",
  opts:[
   "a spring's force is unchanged, but a cut string's tension becomes zero immediately",
@@ -1055,7 +1081,7 @@ const QUIZ = [
   "This is exactly backwards, and it is the most common error in these problems."],
  sol:"⚠ <b>Spring force is continuous; string tension is not.</b> Just after a cut: keep every spring at its pre-cut force, set every cut string tension to zero, then re-apply ΣF = ma to each body."},
 
-{id:61, lec:"L-6", blk:"Sudden cutting", topic:"Why a spring force cannot jump",
+{id:61, lec:"L-6", blk:"Sudden cutting", topic:"Why a spring force cannot jump", t:60,
  q:"A spring's force cannot change instantaneously because",
  opts:[
   "its length cannot change instantaneously",
@@ -1070,7 +1096,7 @@ const QUIZ = [
   "Springs in these problems are taken to be massless, which is a separate idealisation."],
  sol:"<b>F = kx, and x is a position.</b> Positions are continuous in time, so F is too. A string's tension, by contrast, depends on the forces at its ends and can change the instant those change."},
 
-{id:62, lec:"L-6", blk:"Extra load", topic:"Additional elongation",
+{id:62, lec:"L-6", blk:"Extra load", topic:"Additional elongation", t:90,
  q:"A 2 kg block hangs from a spring of k = 100 N m⁻¹ and a further 1 kg is added (g = 10). The <b>extra</b> elongation is",
  opts:["0.1 m","0.3 m","0.2 m","0.5 m"],
  ans:0,
@@ -1081,7 +1107,7 @@ const QUIZ = [
   "0.5 m adds the two elongations rather than taking their difference."],
  sol:"Δx = Δ(mg)/k = (1 × 10)/100 = <b>0.1 m</b>. Since the relation is linear, the extra elongation depends only on the <b>added</b> weight — the original load is irrelevant."},
 
-{id:63, lec:"L-6", blk:"Sudden cutting", topic:"Spring above, string below",
+{id:63, lec:"L-6", blk:"Sudden cutting", topic:"Spring above, string below", t:90,
  q:"A block 2m hangs from a spring; a block m hangs from the 2m by a string. The string is cut. Just after the cut, the acceleration of 2m is",
  opts:["g/2 upward","g downward","g/2 downward","zero"],
  ans:0,
@@ -1092,7 +1118,7 @@ const QUIZ = [
   "Zero would require the spring force to have dropped to 2mg instantly, which it cannot."],
  sol:"Before: spring force = (2m + m)g = <b>3mg</b>. Just after (spring force unchanged): 2m sees 3mg up and 2mg down ⇒ <b>a = g/2 upward</b>. The freed block m simply falls at <b>g</b>."},
 
-{id:64, lec:"L-6", blk:"Sudden cutting", topic:"Two springs, lower one cut",
+{id:64, lec:"L-6", blk:"Sudden cutting", topic:"Two springs, lower one cut", t:90,
  q:"A 10 kg block hangs from the ceiling by spring A; a 5 kg block hangs from the 10 kg by spring B (g = 10). Just after spring B is cut, the acceleration of the 10 kg block is",
  opts:["5 m s⁻² upward","5 m s⁻² downward","15 m s⁻² downward","zero"],
  ans:0,
@@ -1103,7 +1129,7 @@ const QUIZ = [
   "Zero would require spring A to drop to 100 N instantly, which a spring cannot do."],
  sol:"Before: T<sub>A</sub> = (10 + 5)(10) = <b>150 N</b>, T<sub>B</sub> = 50 N. After cutting B, spring A is unchanged at 150 N: <b>a = (150 − 100)/10 = 5 m s⁻² upward.</b>"},
 
-{id:65, lec:"L-6", blk:"Sudden cutting", topic:"Two springs, upper one cut",
+{id:65, lec:"L-6", blk:"Sudden cutting", topic:"Two springs, upper one cut", t:90,
  q:"For the same system (10 kg on spring A from the ceiling, 5 kg on spring B below it), just after spring <b>A</b> is cut the accelerations of the 5 kg and 10 kg blocks are",
  opts:[
   "0 and 15 m s⁻² downward",
@@ -1118,7 +1144,7 @@ const QUIZ = [
   "5 m s⁻² upward is the answer when spring <b>B</b> is cut instead."],
  sol:"Spring B is unchanged at 50 N. <b>5 kg:</b> 50 up, 50 down ⇒ <b>a = 0</b>. <b>10 kg:</b> 100 N weight + 50 N pulled down by B ⇒ <b>a = 150/10 = 15 m s⁻² down</b>. Note the freed block does <b>not</b> start at g."},
 
-{id:66, lec:"L-6", blk:"Sudden cutting", topic:"A body with nothing attached",
+{id:66, lec:"L-6", blk:"Sudden cutting", topic:"A body with nothing attached", t:60,
  q:"Immediately after being released with nothing attached to it, a body has acceleration",
  opts:[
   "g downward",
@@ -1133,7 +1159,7 @@ const QUIZ = [
   "Acceleration is set by the <b>current</b> forces, not by the previous state. Only velocity carries over."],
  sol:"<b>Nothing attached ⇒ free fall at g.</b> The contrast with the spring cases is the whole point: a body still connected to a stretched spring does <b>not</b> start at g, because the spring's force survives the cut."},
 
-{id:67, lec:"L-6", blk:"Sudden cutting", topic:"The method in one line",
+{id:67, lec:"L-6", blk:"Sudden cutting", topic:"The method in one line", t:60,
  q:"To find the accelerations just after a cut, you should",
  opts:[
   "keep every spring force at its pre-cut value, set cut string tensions to zero, then apply ΣF = ma",
@@ -1148,7 +1174,7 @@ const QUIZ = [
   "Different bodies generally get different accelerations once the connections change."],
  sol:"<b>Springs remember, strings forget.</b> Freeze every spring at its pre-cut force, zero out the cut string, redraw each FBD, and solve. Nothing else is needed."},
 
-{id:68, lec:"L-6", blk:"Combinations", topic:"Series and parallel compared",
+{id:68, lec:"L-6", blk:"Combinations", topic:"Series and parallel compared", t:90,
  q:"Three identical springs of stiffness k are used. The stiffest arrangement is",
  opts:[
   "all three in parallel, giving 3k",
@@ -1164,7 +1190,7 @@ const QUIZ = [
  sol:"<b>Parallel 3k &gt; mixed 2k/3 &gt; series k/3.</b> Check the mixed case: 1/k<sub>eq</sub> = 1/2k + 1/k = 3/2k, so k<sub>eq</sub> = 2k/3 ✓"},
 
 /* ---------------- L-7 (11) ---------------- */
-{id:69, lec:"L-7", blk:"Pseudo force", topic:"Definition of the pseudo force",
+{id:69, lec:"L-7", blk:"Pseudo force", topic:"Definition of the pseudo force", t:60,
  q:"To apply Newton's laws inside a frame accelerating with a₀, you must add to every body a pseudo force",
  opts:["−ma₀, opposite to the frame's acceleration","+ma₀, along the frame's acceleration","−mg, opposite to gravity","zero, since the laws always hold"],
  ans:0,
@@ -1175,7 +1201,7 @@ const QUIZ = [
   "Newton's laws fail in an accelerating frame; that failure is the whole reason the pseudo force exists."],
  sol:"<b>F<sub>pseudo</sub> = −ma₀</b> on every body, directed opposite to the frame's acceleration. Add it, then solve as though the frame were inertial — d'Alembert's method."},
 
-{id:70, lec:"L-7", blk:"Pseudo force", topic:"Centrifugal force",
+{id:70, lec:"L-7", blk:"Pseudo force", topic:"Centrifugal force", t:60,
  q:"Centrifugal force is",
  opts:[
   "a pseudo force that appears only in a rotating frame",
@@ -1190,7 +1216,7 @@ const QUIZ = [
   "The reaction to the centripetal force acts on a <b>different body</b> — on the string's anchor, say — and is not the centrifugal force."],
  sol:"<b>Centrifugal is a pseudo force.</b> Ground frame: only the inward centripetal force, and the body accelerates. Rotating frame: add the outward centrifugal force, and the body is in equilibrium. Both descriptions predict the same motion; never mix them."},
 
-{id:71, lec:"L-7", blk:"Inertial frames", topic:"When no pseudo force is needed",
+{id:71, lec:"L-7", blk:"Inertial frames", topic:"When no pseudo force is needed", t:90,
  q:"Inside a lift moving upward with <b>constant velocity</b>, the pseudo force on a body is",
  opts:["zero","mg upward","mg downward","mv, along the motion"],
  ans:0,
@@ -1201,7 +1227,7 @@ const QUIZ = [
   "The pseudo force depends on the frame's acceleration, not on its velocity."],
  sol:"<b>Pseudo force = −ma₀, and a₀ = 0 for constant velocity.</b> This is why a block slides down an incline inside a uniformly moving lift in exactly the same time as on the ground: <b>t = √(2ℓ/g sin θ)</b>."},
 
-{id:72, lec:"L-7", blk:"Lift", topic:"Effective gravity",
+{id:72, lec:"L-7", blk:"Lift", topic:"Effective gravity", t:90,
  q:"Inside a lift accelerating upward with a₀, the effective gravity is",
  opts:["g + a₀","g − a₀","g","a₀ − g"],
  ans:0,
@@ -1212,7 +1238,7 @@ const QUIZ = [
   "This reverses the roles and would be negative for a slowly accelerating lift."],
  sol:"<b>g<sub>eff</sub> = g + a₀ (lift accelerating up), g − a₀ (down).</b> Then every ground-based result carries over by swapping g → g<sub>eff</sub> — for inclines, pendulums and Atwood machines alike. In free fall a₀ = g gives g<sub>eff</sub> = 0, i.e. weightlessness."},
 
-{id:73, lec:"L-7", blk:"Pendulum", topic:"Pendulum in an accelerating car",
+{id:73, lec:"L-7", blk:"Pendulum", topic:"Pendulum in an accelerating car", t:60,
  q:"A pendulum hangs from the ceiling of a car accelerating at a₀. The string makes an angle with the vertical of",
  opts:["tan⁻¹(a₀/g)","tan⁻¹(g/a₀)","sin⁻¹(a₀/g)","a₀/g radians always"],
  ans:0,
@@ -1223,7 +1249,7 @@ const QUIZ = [
   "θ ≈ a₀/g holds only for very small angles; the exact relation involves the tangent."],
  sol:"In the car frame add the pseudo force ma₀ backward. Then <b>tan θ = a₀/g</b>, and the bob hangs along the direction of <b>g<sub>eff</sub> = √(g² + a₀²)</b> — a useful cross-check."},
 
-{id:74, lec:"L-7", blk:"Lift incline", topic:"Sliding inside an accelerating lift",
+{id:74, lec:"L-7", blk:"Lift incline", topic:"Sliding inside an accelerating lift", t:90,
  q:"A particle slides down a smooth incline of angle θ fixed inside a lift accelerating <b>upward</b> at a₀. Its acceleration along the incline is",
  opts:["(g + a₀) sin θ","(g − a₀) sin θ","g sin θ","(g + a₀) cos θ"],
  ans:0,
@@ -1234,7 +1260,7 @@ const QUIZ = [
   "The component along an incline uses sin θ, not cos θ — cos θ gives the perpendicular component."],
  sol:"<b>Swap g → g<sub>eff</sub> = g + a₀</b> and everything follows: a = (g + a₀)sin θ, N = m(g + a₀)cos θ. If the incline base is L, the slide time is <b>t = √[2L/((g + a₀) sin θ cos θ)]</b>."},
 
-{id:75, lec:"L-7", blk:"Lift incline", topic:"Uniform velocity case",
+{id:75, lec:"L-7", blk:"Lift incline", topic:"Uniform velocity case", t:90,
  q:"A block slides down a frictionless incline of angle θ and length ℓ inside a lift moving upward with <b>uniform velocity</b> v. The time to slide down is",
  opts:[
   "√(2ℓ / g sin θ)",
@@ -1249,7 +1275,7 @@ const QUIZ = [
   "ℓ/v treats the block as moving at the lift's speed, which is unrelated to its slide down the incline."],
  sol:"⚠ <b>Uniform velocity ⇒ inertial frame ⇒ no pseudo force.</b> So a = g sin θ and <b>t = √(2ℓ/g sin θ)</b>. The lift's speed is a deliberate distractor — only its acceleration could have mattered."},
 
-{id:76, lec:"L-7", blk:"Lift", topic:"Apparent weight in a lift",
+{id:76, lec:"L-7", blk:"Lift", topic:"Apparent weight in a lift", t:60,
  q:"A person of mass m stands on a scale in a lift accelerating downward at a₀. The scale reads",
  opts:["m(g − a₀)","m(g + a₀)","mg","ma₀"],
  ans:0,
@@ -1260,7 +1286,7 @@ const QUIZ = [
   "ma₀ is the net force on the person, not the normal force the scale measures."],
  sol:"<b>N = m(g − a₀) down, m(g + a₀) up.</b> In free fall (a₀ = g) the reading is <b>zero</b> — apparent weightlessness, which is exactly what an orbiting astronaut experiences."},
 
-{id:77, lec:"L-7", blk:"Pseudo force", topic:"Do the two frames agree",
+{id:77, lec:"L-7", blk:"Pseudo force", topic:"Do the two frames agree", t:60,
  q:"Solving a problem in the ground frame and in an accelerating frame with pseudo forces gives",
  opts:[
   "the same physical motion, described differently",
@@ -1275,7 +1301,7 @@ const QUIZ = [
   "It applies to every kind of motion, translational and rotational alike."],
  sol:"<b>Pick whichever frame makes the algebra easier, then stay in it.</b> The one fatal error is <b>mixing</b> the two — adding a pseudo force while also using ground-frame accelerations."},
 
-{id:78, lec:"L-7", blk:"Pseudo force", topic:"Direction of the pseudo force in a braking car",
+{id:78, lec:"L-7", blk:"Pseudo force", topic:"Direction of the pseudo force in a braking car", t:90,
  q:"A car decelerates while moving forward. In the car's frame, the pseudo force on a passenger acts",
  opts:["forward","backward","downward","upward"],
  ans:0,
@@ -1286,7 +1312,7 @@ const QUIZ = [
   "Nothing in the braking produces an upward push."],
  sol:"<b>Pseudo force is always opposite to the frame's acceleration.</b> Braking ⇒ a₀ backward ⇒ pseudo force <b>forward</b>. Accelerating ⇒ a₀ forward ⇒ pseudo force backward. Match it against your own experience in a car."},
 
-{id:79, lec:"L-7", blk:"Lift", topic:"Free fall",
+{id:79, lec:"L-7", blk:"Lift", topic:"Free fall", t:60,
  q:"Inside a lift in free fall (a₀ = g downward), the effective gravity is",
  opts:["zero","2g","g","g/2"],
  ans:0,
@@ -1298,7 +1324,7 @@ const QUIZ = [
  sol:"<b>Free fall ⇒ g<sub>eff</sub> = 0.</b> A pendulum inside will not swing, a spring balance reads zero, and a released ball simply hangs. This is precisely the situation aboard an orbiting spacecraft."},
 
 /* ---------------- Strong Box (12) ---------------- */
-{id:80, lec:"SB", blk:"Incline", topic:"Block on an incline with a horizontal force",
+{id:80, lec:"SB", blk:"Incline", topic:"Block on an incline with a horizontal force", t:180,
  q:"A 5 kg block sits on a fixed smooth 53° incline. A 100 N force is applied <b>horizontally</b>, pressing it toward the incline (g = 10, sin53° = 0.8, cos53° = 0.6). Its acceleration is",
  opts:[
   "4 m s⁻² up the incline",
@@ -1313,7 +1339,7 @@ const QUIZ = [
   "20 is the net force in newtons; it still has to be divided by the 5 kg mass."],
  sol:"⚠ The force is <b>horizontal</b>, not along the slope — resolve it. Along: 100cos53° − 50sin53° = 60 − 40 = 20 N ⇒ <b>a = 4 m s⁻² up the incline</b>. Perpendicular: N = 50cos53° + 100sin53° = 110 N &gt; 0, so contact is maintained ✓"},
 
-{id:81, lec:"SB", blk:"Incline", topic:"Three blocks on an incline with opposing forces",
+{id:81, lec:"SB", blk:"Incline", topic:"Three blocks on an incline with opposing forces", t:90,
  q:"Blocks of 10 kg, 8 kg and 7 kg lie in contact on a fixed smooth 37° incline. A 100 N force acts up the incline at the bottom and a 50 N force acts down the incline at the top (g = 10, sin37° = 0.6). The acceleration is",
  opts:[
   "4 m s⁻² down the incline",
@@ -1328,7 +1354,7 @@ const QUIZ = [
   "6 m s⁻² up misreads both the direction and the magnitude."],
  sol:"Take all three as one system (total 25 kg). Along the slope, taking up-slope positive: <b>100 − 50 − 150 = −100 N</b> ⇒ <b>a = 4 m s⁻² down the incline</b>. The whole-system step avoids ever computing the internal contact forces."},
 
-{id:82, lec:"SB", blk:"Atwood in a lift", topic:"Spring balance in an accelerating lift",
+{id:82, lec:"SB", blk:"Atwood in a lift", topic:"Spring balance in an accelerating lift", t:180,
  q:"A light pulley and string carry 1.5 kg and 3.0 kg inside a lift accelerating upward at g/10 (g = 10). A spring balance in the string reads",
  opts:["22 N","20 N","15 N","30 N"],
  ans:0,
@@ -1339,7 +1365,7 @@ const QUIZ = [
   "30 N is the weight of the 3.0 kg block."],
  sol:"⚠ Inside the lift, <b>swap g → g<sub>eff</sub> = g + a₀ = 11 m s⁻²</b>, then use the standard Atwood tension <b>T = 2m₁m₂g<sub>eff</sub>/(m₁+m₂)</b> = (2 × 1.5 × 3 × 11)/4.5 = <b>22 N</b>. Note the reading lies between 1.5g<sub>eff</sub> = 16.5 and 3g<sub>eff</sub> = 33 ✓"},
 
-{id:83, lec:"SB", blk:"Cutting chain", topic:"Cutting the top spring of a hanging chain",
+{id:83, lec:"SB", blk:"Cutting chain", topic:"Cutting the top spring of a hanging chain", t:180,
  q:"A chain hangs from the ceiling: spring → A → string → B → spring → C, all three masses equal to m. The <b>upper</b> spring is cut. Just after, the accelerations of A, B and C are",
  opts:[
   "A and B at 3g/2 down, C at zero",
@@ -1354,7 +1380,7 @@ const QUIZ = [
   "C is not accelerating at all, since the spring force on it exactly cancels its weight."],
  sol:"Before: lower spring = mg, string = 2mg, upper spring = 3mg. After cutting the top, the <b>lower spring stays at mg</b>. <b>C:</b> mg − mg ⇒ a = 0. <b>A + B:</b> 2mg (their weight) + mg (spring pulling B down) = 3mg over mass 2m ⇒ <b>a = 3g/2</b>. Check the total: 2m(3g/2) + 0 = 3mg ✓"},
 
-{id:84, lec:"SB", blk:"Cutting chain", topic:"Cutting the lower spring of the same chain",
+{id:84, lec:"SB", blk:"Cutting chain", topic:"Cutting the lower spring of the same chain", t:90,
  q:"For the same chain, if instead the <b>lower</b> spring (between B and C) is cut, the accelerations just after are",
  opts:[
   "A and B at g/2 up, C at g down",
@@ -1369,7 +1395,7 @@ const QUIZ = [
   "Zero would require the upper spring to drop to 2mg instantly, which it cannot."],
  sol:"Upper spring unchanged at <b>3mg</b>. <b>A + B:</b> 3mg up − 2mg down = mg over 2m ⇒ <b>a = g/2 upward</b>. <b>C:</b> nothing attached ⇒ <b>g downward</b>. Compare with the previous question — which spring you cut changes everything."},
 
-{id:85, lec:"SB", blk:"Just after", topic:"Removing a support under a spring",
+{id:85, lec:"SB", blk:"Just after", topic:"Removing a support under a spring", t:90,
  q:"A block of 3 kg rests on top of a light spring whose lower end sits on a 5 kg block resting on a support S. The support is suddenly removed (g = 10). Just after, the accelerations of the 3 kg and 5 kg blocks are",
  opts:[
   "0 and 16 m s⁻² downward",
@@ -1384,7 +1410,7 @@ const QUIZ = [
   "The 5 kg block feels the spring pushing down on it as well as its own weight, so it exceeds g."],
  sol:"Spring force stays at <b>30 N</b> (the upper block's weight). <b>3 kg:</b> 30 up, 30 down ⇒ <b>a = 0</b>. <b>5 kg:</b> 50 N weight + 30 N spring push down = 80 N over 5 kg ⇒ <b>a = 16 m s⁻² down</b>. A body can accelerate faster than g when something pushes it down."},
 
-{id:86, lec:"SB", blk:"Incline", topic:"Condition for a block to stay put",
+{id:86, lec:"SB", blk:"Incline", topic:"Condition for a block to stay put", t:180,
  q:"A 0.1 kg block rests on a fixed smooth incline of angle θ with a horizontal 1 N force applied through its centre of mass (g = 10). It stays stationary when θ equals",
  opts:["45°","30°","60°","0°"],
  ans:0,
@@ -1395,7 +1421,7 @@ const QUIZ = [
   "At 0° the surface is horizontal and the 1 N force would simply accelerate the block sideways."],
  sol:"Balance along the incline: <b>F cos θ = mg sin θ ⇒ tan θ = F/mg</b>. Here F = 1 N and mg = 1 N, so tan θ = 1 and <b>θ = 45°</b>. The neat coincidence F = mg is the whole point of the numbers chosen."},
 
-{id:87, lec:"SB", blk:"Lift", topic:"Sliding on a tilted lift floor",
+{id:87, lec:"SB", blk:"Lift", topic:"Sliding on a tilted lift floor", t:180,
  q:"A 1 kg block sits at the top of a 2.1 m incline of 37° forming the floor of a lift that accelerates <b>downward</b> at 3 m s⁻² (g = 10, sin37° = 0.6). Released from rest, it reaches the bottom in",
  opts:["1 s","0.7 s","1.4 s","2 s"],
  ans:0,
@@ -1406,7 +1432,7 @@ const QUIZ = [
   "2 s corresponds to a = 1.05 m s⁻², far too small."],
  sol:"Lift accelerating <b>down</b> ⇒ <b>g<sub>eff</sub> = g − a₀ = 7 m s⁻²</b>. Then a = 7 sin37° = <b>4.2 m s⁻²</b> and 2.1 = ½(4.2)t² ⇒ <b>t = 1 s</b>. Everything follows from swapping g for g<sub>eff</sub>."},
 
-{id:88, lec:"SB", blk:"Trolley", topic:"Man hauling himself up an incline",
+{id:88, lec:"SB", blk:"Trolley", topic:"Man hauling himself up an incline", t:90,
  q:"A man sits on a trolley on an incline and hauls himself up by pulling a rope that passes over a pulley at the top and attaches back to the trolley. He pulls with 250 N; the combined mass is 100 kg (sin15° = 0.26, g = 10). The acceleration is",
  opts:["2.4 m s⁻²","−0.1 m s⁻²","5 m s⁻²","0.9 m s⁻²"],
  ans:0,
@@ -1417,7 +1443,7 @@ const QUIZ = [
   "0.9 m s⁻² would follow from an incorrect resolution of the weight."],
  sol:"⚠ Take <b>man + trolley</b> as one system. Two segments of rope cross the boundary — one in his hands, one attached to the trolley — so the driving force is <b>2T = 500 N</b>. Then a = (500 − 260)/100 = <b>2.4 m s⁻²</b>. Missing the factor of 2 is the standard trap."},
 
-{id:89, lec:"SB", blk:"Double incline", topic:"Tension over a pulley on two inclines",
+{id:89, lec:"SB", blk:"Double incline", topic:"Tension over a pulley on two inclines", t:90,
  q:"A weightless pulley sits at the apex of a double frictionless incline. A 4 kg block lies on the 60° face and a 1 kg block on the 30° face (g = 10). The string tension is",
  opts:["4(1 + √3) N","20√3 N","10 N","5(1 + √3) N"],
  ans:0,
@@ -1428,7 +1454,7 @@ const QUIZ = [
   "5(1 + √3) ≈ 13.7 N uses the wrong coefficient — check it against the 4 kg block's equation and it fails."],
  sol:"a = (4g sin60° − 1g sin30°)/5 = <b>4√3 − 1 ≈ 5.93 m s⁻²</b>. Then from the 1 kg block: <b>T = 5 + a = 4(1 + √3) ≈ 10.93 N</b>. Cross-check from the 4 kg side: 20√3 − T = 4a gives the same ✓"},
 
-{id:90, lec:"SB", blk:"Hanging chain", topic:"Tension in the top rope of a hanging chain",
+{id:90, lec:"SB", blk:"Hanging chain", topic:"Tension in the top rope of a hanging chain", t:180,
  q:"Blocks of 4 kg, 6 kg and 10 kg hang in a vertical chain from a pulley, joined by ropes 1 (top), 2 and 3. The system moves upward at 2 m s⁻² (g = 10). The tension T₁ is",
  opts:["240 N","200 N","192 N","120 N"],
  ans:0,
@@ -1439,7 +1465,7 @@ const QUIZ = [
   "120 N would be the tension in a rope supporting only 10 kg at this acceleration."],
  sol:"The <b>top</b> rope carries everything below it: <b>T₁ = M<sub>total</sub>(g + a) = 20 × 12 = 240 N</b>. Lower ropes carry less — T₂ = 16 × 12 = 192 N and T₃ = 10 × 12 = 120 N."},
 
-{id:91, lec:"SB", blk:"Pseudo force", topic:"Bead on an accelerated parabolic wire",
+{id:91, lec:"SB", blk:"Pseudo force", topic:"Bead on an accelerated parabolic wire", t:180,
  q:"A wire bent into the parabola y = kx² (y vertical) carries a bead of mass m. The wire is accelerated along x with acceleration a. The bead's new equilibrium sits at a distance from the y-axis of",
  opts:["a/(2kg)","2ka/g","a/(kg)","ag/(2k)"],
  ans:0,
@@ -1454,13 +1480,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter P-6 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1478,6 +1515,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1512,15 +1552,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1532,47 +1573,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1582,30 +1640,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1614,7 +1716,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1627,9 +1731,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1638,7 +1760,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1659,21 +1782,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter P-6 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

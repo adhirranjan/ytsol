@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -242,7 +268,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (11) ---------------- */
-{id:1, lec:"L-1", blk:"Early classifications", topic:"Döbereiner's triad rule",
+{id:1, lec:"L-1", blk:"Early classifications", topic:"Döbereiner's triad rule", t:60,
  q:"In Döbereiner's triad of Ca (40), Sr and Ba (137), the atomic weight of Sr is predicted to be about",
  opts:["88.5","177","97","68.5"],
  ans:0,
@@ -253,7 +279,7 @@ const QUIZ = [
   "68.5 is the mean of 40 and 97 — the wrong pair of end weights."],
  sol:"Döbereiner's triad rule: the middle element's atomic weight ≈ (first + third)/2 = (40 + 137)/2 = <b>88.5</b>. Its properties are likewise intermediate. The rule only worked for a handful of triads, which was its main limitation."},
 
-{id:2, lec:"L-1", blk:"Early classifications", topic:"Newlands' law of octaves",
+{id:2, lec:"L-1", blk:"Early classifications", topic:"Newlands' law of octaves", t:60,
  q:"Newlands' law of octaves states that, arranged by increasing atomic weight,",
  opts:[
   "every eighth element resembles the first, like the eighth note of a musical scale",
@@ -268,7 +294,7 @@ const QUIZ = [
   "Triads are Döbereiner's grouping. Newlands arranged all known elements in one continuous list."],
  sol:"Newlands' <b>law of octaves</b>: every 8th element repeats properties. It broke down badly beyond calcium (heavier elements did not fit), because it left no room for elements yet to be discovered."},
 
-{id:3, lec:"L-1", blk:"Mendeleev's table", topic:"Mendeleev's periodic law",
+{id:3, lec:"L-1", blk:"Mendeleev's table", topic:"Mendeleev's periodic law", t:60,
  q:"Mendeleev's periodic law states that the properties of elements are a periodic function of their",
  opts:["atomic weights","atomic numbers","valence electrons only","number of neutrons"],
  ans:0,
@@ -279,7 +305,7 @@ const QUIZ = [
   "Neutron number was unknown in Mendeleev's time and is not periodic with properties."],
  sol:"Mendeleev's law: properties are a periodic function of <b>atomic weight</b>. His triumph was leaving gaps for undiscovered elements and predicting their properties; his flaw was a few weight-order anomalies, later fixed by ordering on atomic number."},
 
-{id:4, lec:"L-1", blk:"Modern periodic law", topic:"Moseley / modern periodic law",
+{id:4, lec:"L-1", blk:"Modern periodic law", topic:"Moseley / modern periodic law", t:60,
  q:"Moseley's work established that the fundamental property determining an element's place in the table is its",
  opts:[
   "atomic number, since √ν of its X-rays varies linearly with Z",
@@ -294,7 +320,7 @@ const QUIZ = [
   "Electron affinity is a periodic property but is not what orders the table."],
  sol:"Modern periodic law: properties are a periodic function of <b>atomic number</b>. Moseley's √ν ∝ (Z − b) relation gave the experimental proof, resolving Mendeleev's weight-order anomalies."},
 
-{id:5, lec:"L-1", blk:"Modern periodic law", topic:"Anomalous pairs",
+{id:5, lec:"L-1", blk:"Modern periodic law", topic:"Anomalous pairs", t:60,
  q:"Argon (39.9) is placed before potassium (39.1) in the modern table even though Ar is heavier. This is because",
  opts:[
   "placement follows atomic number (Ar = 18, K = 19), not atomic weight",
@@ -309,7 +335,7 @@ const QUIZ = [
   "The weights are correct — Ar genuinely is heavier. The anomaly is exactly why atomic number, not weight, must be the ordering rule."],
  sol:"The Ar–K, Co–Ni and Te–I pairs are 'anomalous' only on a weight basis. Ordering by <b>atomic number</b> (Moseley) puts each in its correct group and removes the anomaly."},
 
-{id:6, lec:"L-1", blk:"Mendeleev's predictions", topic:"Prediction of new elements",
+{id:6, lec:"L-1", blk:"Mendeleev's predictions", topic:"Prediction of new elements", t:90,
  q:"Mendeleev left a gap below silicon and called the missing element 'eka-silicon'. The element later found to fill it was",
  opts:["germanium","gallium","scandium","technetium"],
  ans:0,
@@ -320,7 +346,7 @@ const QUIZ = [
   "Technetium was a later gap-filler but not one of Mendeleev's named eka-predictions below silicon."],
  sol:"'Eka' meant 'one place below'. Eka-boron = Sc, eka-aluminium = Ga, <b>eka-silicon = Ge</b>. The close agreement between predicted and observed properties was Mendeleev's greatest success."},
 
-{id:7, lec:"L-1", blk:"s, p, d, f blocks", topic:"Block from configuration",
+{id:7, lec:"L-1", blk:"s, p, d, f blocks", topic:"Block from configuration", t:60,
  q:"An element has the ground-state configuration [Ar]3d⁵4s¹. It belongs to the",
  opts:["d-block","s-block","p-block","f-block"],
  ans:0,
@@ -331,7 +357,7 @@ const QUIZ = [
   "f-block elements fill (n−2)f; no f subshell is involved."],
  sol:"Block = subshell receiving the last electron. [Ar]3d⁵4s¹ has its distinguishing electron in 3d ⇒ <b>d-block</b>. (The 3d⁵4s¹ arrangement itself is the half-filled-stability exception for Cr.)"},
 
-{id:8, lec:"L-1", blk:"s, p, d, f blocks", topic:"Group from valence configuration",
+{id:8, lec:"L-1", blk:"s, p, d, f blocks", topic:"Group from valence configuration", t:90,
  q:"A main-group element has valence configuration ns²np⁴. Its group number in the modern (1–18) system is",
  opts:["16","6","14","4"],
  ans:0,
@@ -342,7 +368,7 @@ const QUIZ = [
   "4 is the number of p electrons plus... no consistent rule gives 4; the total valence count is 6."],
  sol:"p-block group number = 10 + total valence electrons. ns²np⁴ ⇒ 2 + 4 = 6 valence electrons ⇒ group <b>16</b>. (s-block: group = valence electrons; ns¹→1, ns²→2.)"},
 
-{id:9, lec:"L-1", blk:"Periods", topic:"Period from configuration",
+{id:9, lec:"L-1", blk:"Periods", topic:"Period from configuration", t:90,
  q:"The period number of a representative element is given by",
  opts:[
   "the highest principal quantum number n in its configuration",
@@ -357,7 +383,7 @@ const QUIZ = [
   "The block distinguishes s/p/d/f, not the period."],
  sol:"<b>Period = highest n</b> occupied. For 1s²2s²2p⁶3s²3p⁵ (Cl), n_max = 3 ⇒ period 3; the 7 valence electrons put it in group 17."},
 
-{id:10, lec:"L-1", blk:"Position from Z", topic:"Position of an element from atomic number",
+{id:10, lec:"L-1", blk:"Position from Z", topic:"Position of an element from atomic number", t:90,
  q:"The element with atomic number 35 is located in",
  opts:["period 4, group 17","period 3, group 17","period 4, group 15","period 5, group 17"],
  ans:0,
@@ -368,7 +394,7 @@ const QUIZ = [
   "Period 5 would need n = 5 occupied; the last electron here is in 4p."],
  sol:"Write the configuration: 35 = 1s²2s²2p⁶3s²3p⁶3d¹⁰4s²4p⁵. Highest n = 4 ⇒ <b>period 4</b>; 4s²4p⁵ = 7 valence electrons ⇒ 10 + 7 = <b>group 17</b>."},
 
-{id:11, lec:"L-1", blk:"Heavy elements", topic:"IUPAC naming for Z > 100",
+{id:11, lec:"L-1", blk:"Heavy elements", topic:"IUPAC naming for Z > 100", t:60,
  q:"By the IUPAC systematic rules for elements with Z > 100, the temporary name of element 105 is",
  opts:["Unnilpentium (Unp)","Unnilquadium (Unq)","Ununpentium (Uup)","Unnilhexium (Unh)"],
  ans:0,
@@ -380,7 +406,7 @@ const QUIZ = [
  sol:"Digit roots: 0 nil, 1 un, 2 bi, 3 tri, 4 quad, 5 pent, 6 hex, 7 sept, 8 oct, 9 enn. Read Z digit-by-digit and add '-ium'. 105 → un + nil + pent + ium = <b>Unnilpentium (Unp)</b>."},
 
 /* ---------------- L-2 (11) ---------------- */
-{id:12, lec:"L-2", blk:"Screening", topic:"Definition of shielding",
+{id:12, lec:"L-2", blk:"Screening", topic:"Definition of shielding", t:60,
  q:"The screening (shielding) effect refers to",
  opts:[
   "the reduction of the nucleus's pull on an outer electron by the inner electrons between them",
@@ -395,7 +421,7 @@ const QUIZ = [
   "That is electronegativity — a different property entirely."],
  sol:"Shielding: inner electrons stand between the nucleus and an outer electron, screening it from the full nuclear charge. The leftover pull the outer electron actually feels is the <b>effective nuclear charge Z*</b>."},
 
-{id:13, lec:"L-2", blk:"Effective nuclear charge", topic:"Z* = Z − σ",
+{id:13, lec:"L-2", blk:"Effective nuclear charge", topic:"Z* = Z − σ", t:60,
  q:"The effective nuclear charge experienced by an electron is",
  opts:["Z* = Z − σ, where σ is the screening constant","Z* = Z + σ","Z* = σ − Z","Z* = Z × σ"],
  ans:0,
@@ -406,7 +432,7 @@ const QUIZ = [
   "The relation is a difference, not a product."],
  sol:"<b>Z* = Z − σ.</b> σ is built up from the other electrons using Slater's rules; Z* is what actually governs size, ionisation energy and electronegativity."},
 
-{id:14, lec:"L-2", blk:"Slater's rules", topic:"Slater Z* for chlorine",
+{id:14, lec:"L-2", blk:"Slater's rules", topic:"Slater Z* for chlorine", t:90,
  q:"Using Slater's rules, the effective nuclear charge on a 3p electron of chlorine (Z = 17, [Ne]3s²3p⁵) is",
  opts:["6.10","4.20","10.90","2.10"],
  ans:0,
@@ -417,7 +443,7 @@ const QUIZ = [
   "2.10 is only the same-shell contribution; the inner shells were forgotten."],
  sol:"Group the electrons: same shell 3s3p has 7, so 6 others × 0.35 = 2.10; (n−1) = 2nd shell 8 × 0.85 = 6.80; deeper 1st shell 2 × 1.00 = 2.00. σ = <b>10.90</b>, Z* = 17 − 10.90 = <b>6.10</b>."},
 
-{id:15, lec:"L-2", blk:"Slater's rules", topic:"Slater σ for phosphorus",
+{id:15, lec:"L-2", blk:"Slater's rules", topic:"Slater σ for phosphorus", t:90,
  q:"For a 3p electron of phosphorus (Z = 15, [Ne]3s²3p³) the Slater screening constant σ is",
  opts:["10.20","10.90","11.25","4.80"],
  ans:0,
@@ -428,7 +454,7 @@ const QUIZ = [
   "4.80 is Z* = 15 − 10.20, not σ."],
  sol:"3s²3p³ = 5 electrons in n = 3, so 4 others × 0.35 = 1.40. Inner: 8 × 0.85 + 2 × 1.00 = 8.80. σ = 1.40 + 8.80 = <b>10.20</b> (and Z* = 4.80)."},
 
-{id:16, lec:"L-2", blk:"Slater's rules", topic:"Slater Z* for calcium 4s",
+{id:16, lec:"L-2", blk:"Slater's rules", topic:"Slater Z* for calcium 4s", t:90,
  q:"By Slater's rules the effective nuclear charge on a 4s electron of calcium (Z = 20) is",
  opts:["2.85","3.20","4.40","17.15"],
  ans:0,
@@ -439,7 +465,7 @@ const QUIZ = [
   "17.15 is the screening constant σ, not the effective nuclear charge Z*; you must still subtract it from Z."],
  sol:"Ca = 1s²2s²2p⁶3s²3p⁶4s². For a 4s electron: same shell 1 other × 0.35 = 0.35; (n−1) 3rd shell 8 × 0.85 = 6.80; deeper 10 × 1.00 = 10.00. σ = <b>17.15</b>, Z* = <b>2.85</b>."},
 
-{id:17, lec:"L-2", blk:"Slater's rules", topic:"Slater σ for neon",
+{id:17, lec:"L-2", blk:"Slater's rules", topic:"Slater σ for neon", t:90,
  q:"The Slater screening constant for a 2p electron of neon (Z = 10, 1s²2s²2p⁶) is",
  opts:["4.15","5.85","6.80","2.45"],
  ans:0,
@@ -450,7 +476,7 @@ const QUIZ = [
   "2.45 keeps only the same-shell part and forgets the 1s contribution."],
  sol:"n = 2 valence: 7 others × 0.35 = 2.45; (n−1) = 1st shell 2 × 0.85 = 1.70. σ = <b>4.15</b>; Z* = 10 − 4.15 = 5.85."},
 
-{id:18, lec:"L-2", blk:"Slater's rules", topic:"Slater contribution of the (n−1) shell",
+{id:18, lec:"L-2", blk:"Slater's rules", topic:"Slater contribution of the (n−1) shell", t:60,
  q:"For an electron in an ns or np orbital, each electron in the (n−1) shell contributes to σ an amount of",
  opts:["0.85","0.35","1.00","0.30"],
  ans:0,
@@ -461,7 +487,7 @@ const QUIZ = [
   "0.30 is the special same-shell value for the 1s orbital only."],
  sol:"Slater tiers for an ns/np electron: same shell 0.35 (1s uses 0.30); (n−1) shell <b>0.85</b>; (n−2) and deeper 1.00. For nd/nf electrons, everything to the left counts a full 1.00."},
 
-{id:19, lec:"L-2", blk:"Atomic radius trends", topic:"Period trend in atomic radius",
+{id:19, lec:"L-2", blk:"Atomic radius trends", topic:"Period trend in atomic radius", t:60,
  q:"Across a period from left to right, atomic radius generally",
  opts:[
   "decreases, because Z* rises while electrons enter the same shell",
@@ -476,7 +502,7 @@ const QUIZ = [
   "Nuclear charge <i>rises</i> across a period, not falls."],
  sol:"Left → right in a period: electrons fill the same n, but Z increases each step, so Z* grows and the radius <b>decreases</b>. This is why F is much smaller than Li."},
 
-{id:20, lec:"L-2", blk:"Atomic radius trends", topic:"Group trend in atomic radius",
+{id:20, lec:"L-2", blk:"Atomic radius trends", topic:"Group trend in atomic radius", t:60,
  q:"Down a group, atomic radius increases mainly because",
  opts:[
   "a new shell is added at each step and shielding by inner shells grows",
@@ -491,7 +517,7 @@ const QUIZ = [
   "No electrons are removed in a neutral atom going down a group."],
  sol:"Down a group: n increases (new shell) and shielding rises, so the outer electrons sit farther out and Z* barely changes. Radius <b>increases</b>: Li &lt; Na &lt; K &lt; Rb &lt; Cs."},
 
-{id:21, lec:"L-2", blk:"Covalent radius", topic:"Covalent radius from bond length",
+{id:21, lec:"L-2", blk:"Covalent radius", topic:"Covalent radius from bond length", t:90,
  q:"The Cl–Cl bond length in Cl₂ is 198 pm. The covalent radius of a chlorine atom is",
  opts:["99 pm","198 pm","396 pm","140 pm"],
  ans:0,
@@ -502,7 +528,7 @@ const QUIZ = [
   "140 pm is close to the <b>van der Waals</b> radius of Cl, a different (larger) quantity measured between non-bonded atoms."],
  sol:"Covalent radius = ½ × (homonuclear single-bond length) = ½ × 198 = <b>99 pm</b>. The van der Waals radius (≈180 pm for Cl) is always larger, since it is measured between atoms that are merely touching, not bonded."},
 
-{id:22, lec:"L-2", blk:"Radius types", topic:"Covalent vs van der Waals radius",
+{id:22, lec:"L-2", blk:"Radius types", topic:"Covalent vs van der Waals radius", t:60,
  q:"For the same element, how do the covalent and van der Waals radii compare?",
  opts:[
   "van der Waals radius > covalent radius",
@@ -518,7 +544,7 @@ const QUIZ = [
  sol:"<b>van der Waals &gt; covalent</b> for any element. Covalent radius comes from atoms sharing electrons (close approach); van der Waals radius from atoms merely in contact (weak forces, larger separation)."},
 
 /* ---------------- L-3 (10) ---------------- */
-{id:23, lec:"L-3", blk:"Isoelectronic species", topic:"Definition of isoelectronic",
+{id:23, lec:"L-3", blk:"Isoelectronic species", topic:"Definition of isoelectronic", t:60,
  q:"Two species are called isoelectronic when they have the same",
  opts:["number of electrons","number of protons","atomic radius","charge"],
  ans:0,
@@ -529,7 +555,7 @@ const QUIZ = [
   "Their charges differ; only the electron count is common."],
  sol:"<b>Isoelectronic = equal number of electrons.</b> Within such a set the size is decided entirely by nuclear charge Z: more protons pull the same electron cloud in tighter, so radius falls as Z rises."},
 
-{id:24, lec:"L-3", blk:"Cations", topic:"Why a cation is smaller than its atom",
+{id:24, lec:"L-3", blk:"Cations", topic:"Why a cation is smaller than its atom", t:60,
  q:"A cation is always smaller than its parent atom because",
  opts:[
   "it has fewer electrons than protons, so each remaining electron feels a larger Z* (and a whole shell may be lost)",
@@ -544,7 +570,7 @@ const QUIZ = [
   "The nucleus is untouched; only electrons are removed."],
  sol:"Cation: protons &gt; electrons ⇒ higher Z* per electron and frequently one fewer occupied shell (e.g. Na 1s²2s²2p⁶3s¹ → Na⁺ 1s²2s²2p⁶). Hence <b>cation &lt; atom</b>. Na is 186 pm; Na⁺ is 95 pm."},
 
-{id:25, lec:"L-3", blk:"Anions", topic:"Why an anion is larger than its atom",
+{id:25, lec:"L-3", blk:"Anions", topic:"Why an anion is larger than its atom", t:60,
  q:"An anion is larger than its parent atom mainly because",
  opts:[
   "added electrons increase electron–electron repulsion while Z stays the same, so the cloud expands",
@@ -559,7 +585,7 @@ const QUIZ = [
   "Z* per electron <i>falls</i>, it does not rise."],
  sol:"Anion: electrons &gt; protons ⇒ more repulsion, smaller Z* per electron ⇒ cloud expands. So <b>anion &gt; atom</b>: Cl is 99 pm but Cl⁻ is 181 pm."},
 
-{id:26, lec:"L-3", blk:"Isoelectronic ordering", topic:"Smallest of a 10-electron set",
+{id:26, lec:"L-3", blk:"Isoelectronic ordering", topic:"Smallest of a 10-electron set", t:60,
  q:"Among the isoelectronic ions N³⁻, O²⁻, F⁻, Na⁺, Mg²⁺, Al³⁺, the smallest is",
  opts:["Al³⁺","N³⁻","F⁻","Na⁺"],
  ans:0,
@@ -570,7 +596,7 @@ const QUIZ = [
   "Na⁺ (Z = 11) is smaller than the anions but larger than Mg²⁺ and Al³⁺."],
  sol:"Isoelectronic (10 e) ⇒ radius decreases with increasing Z: N³⁻ &gt; O²⁻ &gt; F⁻ &gt; Na⁺ &gt; Mg²⁺ &gt; <b>Al³⁺</b> (Z = 13, smallest)."},
 
-{id:27, lec:"L-3", blk:"Isoelectronic ordering", topic:"F⁻ vs Na⁺",
+{id:27, lec:"L-3", blk:"Isoelectronic ordering", topic:"F⁻ vs Na⁺", t:90,
  q:"F⁻ and Na⁺ are isoelectronic (10 electrons each). Which is larger, and why?",
  opts:[
   "F⁻, because it has fewer protons (Z = 9) holding the same 10 electrons",
@@ -585,7 +611,7 @@ const QUIZ = [
   "More protons (Na⁺, Z = 11) makes it <b>smaller</b>, not larger."],
  sol:"Both have 10 electrons. Z: F⁻ = 9, Na⁺ = 11. Fewer protons ⇒ weaker pull ⇒ bigger ion, so <b>F⁻ &gt; Na⁺</b> (136 pm vs 95 pm)."},
 
-{id:28, lec:"L-3", blk:"Isoelectronic ordering", topic:"Largest of a 10-electron set",
+{id:28, lec:"L-3", blk:"Isoelectronic ordering", topic:"Largest of a 10-electron set", t:60,
  q:"Which of these isoelectronic species has the largest radius: O²⁻, F⁻, Ne, Na⁺?",
  opts:["O²⁻","Na⁺","Ne","F⁻"],
  ans:0,
@@ -596,7 +622,7 @@ const QUIZ = [
   "F⁻ (Z = 9) is larger than Ne and Na⁺ but smaller than O²⁻."],
  sol:"10-electron set, radius decreases with Z: <b>O²⁻</b> (Z = 8) &gt; F⁻ (9) &gt; Ne (10) &gt; Na⁺ (11)."},
 
-{id:29, lec:"L-3", blk:"Argon-core set", topic:"18-electron isoelectronic ordering",
+{id:29, lec:"L-3", blk:"Argon-core set", topic:"18-electron isoelectronic ordering", t:60,
  q:"Order the isoelectronic ions S²⁻, Cl⁻, K⁺, Ca²⁺ (18 electrons each) from largest to smallest.",
  opts:[
   "S²⁻ > Cl⁻ > K⁺ > Ca²⁺",
@@ -611,7 +637,7 @@ const QUIZ = [
   "K⁺ (Z = 19) is smaller than both anions; it cannot be largest."],
  sol:"18-electron (Ar-core) set. Z increases S 16 → Cl 17 → K 19 → Ca 20, so radius decreases: <b>S²⁻ &gt; Cl⁻ &gt; K⁺ &gt; Ca²⁺</b>."},
 
-{id:30, lec:"L-3", blk:"Atom vs ion", topic:"Anion vs neutral atom size",
+{id:30, lec:"L-3", blk:"Atom vs ion", topic:"Anion vs neutral atom size", t:60,
  q:"The chlorine atom has radius 99 pm. The radius of the chloride ion Cl⁻ is closest to",
  opts:["181 pm","99 pm","50 pm","70 pm"],
  ans:0,
@@ -622,7 +648,7 @@ const QUIZ = [
   "70 pm is again smaller than the atom, which is wrong for an added-electron species."],
  sol:"Cl + e⁻ → Cl⁻: one more electron, same nucleus ⇒ more repulsion, expanded cloud. Cl⁻ ≈ <b>181 pm</b> vs Cl 99 pm. Anion is always larger than its atom."},
 
-{id:31, lec:"L-3", blk:"Isoelectronic ordering", topic:"Controlling variable",
+{id:31, lec:"L-3", blk:"Isoelectronic ordering", topic:"Controlling variable", t:60,
  q:"Within a set of isoelectronic species, the radius is controlled by",
  opts:[
   "the nuclear charge Z — more protons means a smaller ion",
@@ -637,7 +663,7 @@ const QUIZ = [
   "The charge sign correlates with Z within a set, but it is Z (proton count) that is the physical cause."],
  sol:"Isoelectronic ⇒ fixed electrons ⇒ size set by <b>nuclear charge Z</b>: radius ∝ 1/Z along the set. That single rule orders every isoelectronic problem."},
 
-{id:32, lec:"L-3", blk:"Group trend in ions", topic:"Group 1 cation sizes",
+{id:32, lec:"L-3", blk:"Group trend in ions", topic:"Group 1 cation sizes", t:60,
  q:"The correct order of ionic radii is",
  opts:[
   "Li⁺ &lt; Na⁺ &lt; K⁺ &lt; Rb⁺ &lt; Cs⁺",
@@ -653,7 +679,7 @@ const QUIZ = [
  sol:"Same +1 charge, so size follows the shell count: down group 1 a new shell is added each step ⇒ <b>Li⁺ &lt; Na⁺ &lt; K⁺ &lt; Rb⁺ &lt; Cs⁺</b>."},
 
 /* ---------------- L-4 (11) ---------------- */
-{id:33, lec:"L-4", blk:"IE trends", topic:"Period trend in ionisation energy",
+{id:33, lec:"L-4", blk:"IE trends", topic:"Period trend in ionisation energy", t:60,
  q:"Across a period from left to right, the first ionisation energy generally",
  opts:[
   "increases, because Z* rises and radius falls",
@@ -668,7 +694,7 @@ const QUIZ = [
   "Shielding barely changes across a period (same shell), so it cannot drive a decrease."],
  sol:"Left → right: Z* ↑, radius ↓ ⇒ outer electron held tighter ⇒ IE₁ <b>increases</b> (with the Be&gt;B and N&gt;O dips). Na → Ar rises overall."},
 
-{id:34, lec:"L-4", blk:"IE trends", topic:"Group trend in ionisation energy",
+{id:34, lec:"L-4", blk:"IE trends", topic:"Group trend in ionisation energy", t:60,
  q:"Down a group, first ionisation energy generally",
  opts:[
   "decreases, because the outer electron is farther out and better shielded",
@@ -683,7 +709,7 @@ const QUIZ = [
   "Atoms get <i>larger</i> down a group, not smaller."],
  sol:"Down a group: radius ↑ and shielding ↑ dominate the rising Z ⇒ outer electron less tightly held ⇒ IE₁ <b>decreases</b>. Li &gt; Na &gt; K &gt; Rb &gt; Cs."},
 
-{id:35, lec:"L-4", blk:"IE anomalies", topic:"Be > B anomaly",
+{id:35, lec:"L-4", blk:"IE anomalies", topic:"Be > B anomaly", t:60,
  q:"The first ionisation energy of beryllium is greater than that of boron because",
  opts:[
   "Be has a stable fully-filled 2s² shell, whereas B loses a higher-energy, less tightly held 2p electron",
@@ -698,7 +724,7 @@ const QUIZ = [
   "B's 2p¹ is only one electron — not a half-filled (2p³) subshell."],
  sol:"Be = [He]2s² (filled, extra-stable); B = [He]2s²2p¹ removes a 2p electron that is higher in energy and shielded by 2s. So <b>IE(Be) &gt; IE(B)</b> — a break in the normal left-to-right rise."},
 
-{id:36, lec:"L-4", blk:"IE anomalies", topic:"N > O anomaly",
+{id:36, lec:"L-4", blk:"IE anomalies", topic:"N > O anomaly", t:60,
  q:"Nitrogen has a higher first ionisation energy than oxygen because",
  opts:[
   "N has a stable half-filled 2p³, while O must lose an electron from a 2p⁴ where pairing repulsion helps it leave",
@@ -713,7 +739,7 @@ const QUIZ = [
   "O is 2p⁴, not a fully-filled (2p⁶) subshell."],
  sol:"N = [He]2s²2p³ (half-filled, stable); O = [He]2s²2p⁴ loses a paired electron whose repulsion aids removal. Hence <b>IE(N) &gt; IE(O)</b>, against the general period increase."},
 
-{id:37, lec:"L-4", blk:"Successive IE", topic:"Ordering of successive IE",
+{id:37, lec:"L-4", blk:"Successive IE", topic:"Ordering of successive IE", t:60,
  q:"For any element, the successive ionisation energies satisfy",
  opts:[
   "IE₁ &lt; IE₂ &lt; IE₃ &lt; …",
@@ -728,7 +754,7 @@ const QUIZ = [
   "The order is fixed and always increasing."],
  sol:"Removing an electron raises the positive charge, so <b>IE₁ &lt; IE₂ &lt; IE₃ &lt; …</b> always. An unusually large jump marks the point where a noble-gas core is broken into."},
 
-{id:38, lec:"L-4", blk:"Successive IE", topic:"The big jump and valence count",
+{id:38, lec:"L-4", blk:"Successive IE", topic:"The big jump and valence count", t:60,
  q:"An element shows IE₁ = 738, IE₂ = 1451, IE₃ = 7733 kJ/mol. The large jump between IE₂ and IE₃ tells you the element has",
  opts:[
   "2 valence electrons (it is a group-2 metal, e.g. Mg)",
@@ -743,7 +769,7 @@ const QUIZ = [
   "Seven valence electrons would keep IE rising gently through the 7th removal before any core jump."],
  sol:"The step where IE suddenly rockets is where you start removing core electrons. Jump after IE₂ ⇒ <b>2 valence electrons</b> ⇒ group 2 (this data is magnesium)."},
 
-{id:39, lec:"L-4", blk:"Unit conversion", topic:"eV/atom → kJ/mol",
+{id:39, lec:"L-4", blk:"Unit conversion", topic:"eV/atom → kJ/mol", t:60,
  q:"An ionisation energy of 5.0 eV/atom equals (1 eV/atom = 96.5 kJ/mol)",
  opts:["482.5 kJ/mol","19.3 kJ/mol","96.5 kJ/mol","5.0 kJ/mol"],
  ans:0,
@@ -754,7 +780,7 @@ const QUIZ = [
   "5.0 kJ/mol ignores the conversion factor entirely."],
  sol:"eV/atom → kJ/mol: multiply by 96.5. 5.0 × 96.5 = <b>482.5 kJ/mol</b>. (Going the other way, divide by 96.5.)"},
 
-{id:40, lec:"L-4", blk:"Unit conversion", topic:"kJ/mol → eV/atom",
+{id:40, lec:"L-4", blk:"Unit conversion", topic:"kJ/mol → eV/atom", t:60,
  q:"An ionisation energy of 737 kJ/mol is, in eV/atom (1 eV/atom = 96.5 kJ/mol), about",
  opts:["7.64 eV","71.1 eV","0.13 eV","96.5 eV"],
  ans:0,
@@ -765,7 +791,7 @@ const QUIZ = [
   "96.5 is the factor, not the answer."],
  sol:"kJ/mol → eV/atom: divide by 96.5. 737/96.5 ≈ <b>7.64 eV/atom</b> (this is roughly IE₁ of magnesium)."},
 
-{id:41, lec:"L-4", blk:"Factors", topic:"Factors affecting ionisation energy",
+{id:41, lec:"L-4", blk:"Factors", topic:"Factors affecting ionisation energy", t:60,
  q:"Which factor, on its own, tends to <b>lower</b> the ionisation energy of an atom?",
  opts:[
   "greater shielding by inner electrons",
@@ -780,7 +806,7 @@ const QUIZ = [
   "Extra stability of half/full subshells makes electrons harder to remove ⇒ raises IE."],
  sol:"IE rises with Z* and with decreasing radius, and with half/full-shell stability; it falls with greater <b>shielding</b> and larger size. Only shielding among the options lowers IE."},
 
-{id:42, lec:"L-4", blk:"IE anomalies", topic:"Group 2 vs group 13",
+{id:42, lec:"L-4", blk:"IE anomalies", topic:"Group 2 vs group 13", t:60,
  q:"Which has the higher first ionisation energy, magnesium or aluminium?",
  opts:[
   "magnesium, because Al loses a shielded 3p electron while Mg has a stable filled 3s²",
@@ -795,7 +821,7 @@ const QUIZ = [
   "Al is slightly smaller, yet its 3p electron still leaves more easily than Mg's 3s electron."],
  sol:"Same reasoning as Be&gt;B, one period down: <b>IE(Mg) &gt; IE(Al)</b> because Al gives up a shielded 3p electron whereas Mg must break a filled 3s²."},
 
-{id:43, lec:"L-4", blk:"IE trends", topic:"Lowest IE in a period",
+{id:43, lec:"L-4", blk:"IE trends", topic:"Lowest IE in a period", t:60,
  q:"In any given period, the element with the lowest first ionisation energy is the",
  opts:[
   "alkali metal (group 1), on the far left",
@@ -811,7 +837,7 @@ const QUIZ = [
  sol:"IE₁ is lowest for the <b>alkali metal</b> (loose ns¹ electron, big atom, low Z* felt) and highest for the noble gas. That is why group 1 metals are so reactive."},
 
 /* ---------------- L-5 (10) ---------------- */
-{id:44, lec:"L-5", blk:"Definition", topic:"Sign of electron gain enthalpy",
+{id:44, lec:"L-5", blk:"Definition", topic:"Sign of electron gain enthalpy", t:60,
  q:"When an atom releases energy on gaining an electron, its electron gain enthalpy (Δ<sub>eg</sub>H) is",
  opts:[
   "negative (the process is exothermic)",
@@ -826,7 +852,7 @@ const QUIZ = [
   "Many elements (halogens, O, S) have negative values; it is not always positive."],
  sol:"Energy released on adding an electron ⇒ <b>Δ<sub>eg</sub>H is negative</b>. Older 'electron affinity' quotes the released energy as a positive number, so watch which convention a problem uses."},
 
-{id:45, lec:"L-5", blk:"EA anomalies", topic:"Cl > F anomaly",
+{id:45, lec:"L-5", blk:"EA anomalies", topic:"Cl > F anomaly", t:60,
  q:"Chlorine has a more negative electron gain enthalpy than fluorine because",
  opts:[
   "F is very small, so adding an electron into its compact 2p shell causes strong electron–electron repulsion",
@@ -841,7 +867,7 @@ const QUIZ = [
   "Fluorine is <i>more</i> electronegative than chlorine — the EA reversal is a separate, size-driven effect."],
  sol:"Small, compact F ⇒ high electron–electron repulsion on electron gain, so |Δ<sub>eg</sub>H| is smaller than expected. Result: <b>Cl (−349) &gt; F (−328 kJ/mol)</b> in magnitude — Cl has the most negative Δ<sub>eg</sub>H of all elements."},
 
-{id:46, lec:"L-5", blk:"EA trends", topic:"Halogen EA order",
+{id:46, lec:"L-5", blk:"EA trends", topic:"Halogen EA order", t:60,
  q:"The correct order of magnitude of electron gain enthalpy (most negative first) for the halogens is",
  opts:[
   "Cl > F > Br > I",
@@ -856,7 +882,7 @@ const QUIZ = [
   "Br is not the most negative; Cl is."],
  sol:"Halogen |Δ<sub>eg</sub>H|: <b>Cl &gt; F &gt; Br &gt; I</b>. Cl is the peak; F sits below Cl because its small 2p shell repels the incoming electron."},
 
-{id:47, lec:"L-5", blk:"EA trends", topic:"Period trend in EA",
+{id:47, lec:"L-5", blk:"EA trends", topic:"Period trend in EA", t:60,
  q:"Across a period (left to right, up to the halogen), electron gain enthalpy generally becomes",
  opts:[
   "more negative, because rising Z* and smaller size make electron gain more favourable",
@@ -871,7 +897,7 @@ const QUIZ = [
   "Shielding is nearly unchanged across a period, so it does not drive the trend."],
  sol:"Left → right: Z* ↑, radius ↓ ⇒ atom accepts an electron more readily ⇒ Δ<sub>eg</sub>H <b>more negative</b>, peaking at the halogen, then jumping positive at the noble gas."},
 
-{id:48, lec:"L-5", blk:"Noble gases", topic:"Electron affinity of noble gases",
+{id:48, lec:"L-5", blk:"Noble gases", topic:"Electron affinity of noble gases", t:60,
  q:"The electron gain enthalpy of a noble gas such as neon is",
  opts:[
   "large and positive (endothermic), because the added electron must enter a new shell",
@@ -886,7 +912,7 @@ const QUIZ = [
   "It is not zero but distinctly positive (unfavourable)."],
  sol:"Closed octet ⇒ any added electron enters the next shell against a full inner shield. So noble-gas Δ<sub>eg</sub>H is <b>positive (endothermic)</b> — electron gain is unfavourable."},
 
-{id:49, lec:"L-5", blk:"EA anomalies", topic:"Low EA of filled/half-filled atoms",
+{id:49, lec:"L-5", blk:"EA anomalies", topic:"Low EA of filled/half-filled atoms", t:60,
  q:"Which element has a positive (unfavourable) electron gain enthalpy owing to a stable electron configuration?",
  opts:[
   "beryllium ([He]2s²)",
@@ -901,7 +927,7 @@ const QUIZ = [
   "Sulfur likewise has a favourable (negative) Δ<sub>eg</sub>H, larger in magnitude than oxygen's."],
  sol:"Elements with filled (ns², np⁶) or half-filled (np³) valence shells resist electron gain: Be, Mg, N and the noble gases show positive Δ<sub>eg</sub>H. <b>Be</b> is the group-2 example here."},
 
-{id:50, lec:"L-5", blk:"Second EA", topic:"Sign of the second electron affinity",
+{id:50, lec:"L-5", blk:"Second EA", topic:"Sign of the second electron affinity", t:60,
  q:"The second electron gain enthalpy of oxygen, O⁻ + e⁻ → O²⁻, is",
  opts:[
   "positive (endothermic), because an electron is forced onto an already-negative ion",
@@ -916,7 +942,7 @@ const QUIZ = [
   "It is much larger in magnitude and opposite in sign to the first, not equal."],
  sol:"First EA of O is exothermic (−); the <b>second is always endothermic (+)</b> because you push an electron onto an already negatively-charged O⁻. That is why forming O²⁻ overall costs energy (offset in solids by lattice energy)."},
 
-{id:51, lec:"L-5", blk:"Unit conversion", topic:"kJ/mol → eV for Cl",
+{id:51, lec:"L-5", blk:"Unit conversion", topic:"kJ/mol → eV for Cl", t:60,
  q:"Chlorine's electron gain enthalpy is −349 kJ/mol. In eV/atom (1 eV/atom = 96.5 kJ/mol) this is about",
  opts:["−3.62 eV","−33.7 eV","−0.28 eV","−349 eV"],
  ans:0,
@@ -927,7 +953,7 @@ const QUIZ = [
   "−349 eV ignores the conversion factor."],
  sol:"kJ/mol → eV/atom: divide by 96.5. −349/96.5 ≈ <b>−3.62 eV/atom</b>."},
 
-{id:52, lec:"L-5", blk:"EA ordering", topic:"Ordering O, S, F, Cl",
+{id:52, lec:"L-5", blk:"EA ordering", topic:"Ordering O, S, F, Cl", t:60,
  q:"Arrange O, S, F, Cl by electron gain enthalpy, most negative first.",
  opts:[
   "Cl > F > S > O",
@@ -942,7 +968,7 @@ const QUIZ = [
   "S and O should not outrank the halogens Cl and F."],
  sol:"Cl (−349) &gt; F (−328) &gt; S (−200) &gt; O (−141 kJ/mol). Both anomalies appear: <b>Cl &gt; F</b> and <b>S &gt; O</b>, because the compact 2p atoms (F, O) repel the incoming electron."},
 
-{id:53, lec:"L-5", blk:"Definition", topic:"Electron affinity vs ionisation energy",
+{id:53, lec:"L-5", blk:"Definition", topic:"Electron affinity vs ionisation energy", t:60,
  q:"Electron gain enthalpy differs from ionisation energy in that it refers to",
  opts:[
   "the energy change when a neutral atom gains an electron to form an anion",
@@ -958,7 +984,7 @@ const QUIZ = [
  sol:"<b>Δ<sub>eg</sub>H: X(g) + e⁻ → X⁻(g)</b> (gaining an electron). IE: X(g) → X⁺(g) + e⁻ (losing one). They are opposite processes."},
 
 /* ---------------- L-6 (11) ---------------- */
-{id:54, lec:"L-6", blk:"Trends", topic:"Most electronegative element",
+{id:54, lec:"L-6", blk:"Trends", topic:"Most electronegative element", t:60,
  q:"The most electronegative element in the periodic table is",
  opts:["fluorine","oxygen","chlorine","caesium"],
  ans:0,
@@ -969,7 +995,7 @@ const QUIZ = [
   "Caesium is one of the <b>least</b> electronegative (most electropositive) elements."],
  sol:"Electronegativity peaks at the top-right (excluding noble gases): <b>fluorine, 4.0</b> on Pauling's scale. It falls toward the bottom-left, where Cs/Fr are most electropositive."},
 
-{id:55, lec:"L-6", blk:"Trends", topic:"Period trend in electronegativity",
+{id:55, lec:"L-6", blk:"Trends", topic:"Period trend in electronegativity", t:60,
  q:"Across a period, electronegativity generally",
  opts:[
   "increases, because Z* rises and atomic size falls",
@@ -984,7 +1010,7 @@ const QUIZ = [
   "Shielding is roughly constant along a period, so it cannot cause a decrease."],
  sol:"Left → right: Z* ↑, size ↓ ⇒ stronger pull on shared electrons ⇒ electronegativity <b>increases</b> (Na ≈ 0.9 up to Cl ≈ 3.0 in period 3)."},
 
-{id:56, lec:"L-6", blk:"Trends", topic:"Group trend in electronegativity",
+{id:56, lec:"L-6", blk:"Trends", topic:"Group trend in electronegativity", t:60,
  q:"Down a group, electronegativity generally",
  opts:[
   "decreases, because the atom is larger and the bonding pair is farther from the nucleus",
@@ -999,7 +1025,7 @@ const QUIZ = [
   "Atoms get larger down a group, not smaller."],
  sol:"Down a group: radius ↑, shielding ↑ ⇒ weaker attraction for the shared pair ⇒ electronegativity <b>decreases</b> (F &gt; Cl &gt; Br &gt; I)."},
 
-{id:57, lec:"L-6", blk:"Mulliken scale", topic:"Mulliken electronegativity",
+{id:57, lec:"L-6", blk:"Mulliken scale", topic:"Mulliken electronegativity", t:60,
  q:"On the Mulliken scale, the electronegativity of an atom is taken as",
  opts:[
   "the average of its ionisation energy and its electron affinity, (IE + EA)/2",
@@ -1014,7 +1040,7 @@ const QUIZ = [
   "IE alone ignores the atom's tendency to gain electrons, which EA supplies."],
  sol:"<b>χ<sub>Mulliken</sub> = (IE + EA)/2.</b> Both a high IE (won't lose electrons) and a high EA (wants more) mean strong electron-attracting power. Dividing a Mulliken value (in eV) by ~2.8 gives the Pauling value."},
 
-{id:58, lec:"L-6", blk:"Bond character", topic:"ΔEN and ionic character",
+{id:58, lec:"L-6", blk:"Bond character", topic:"ΔEN and ionic character", t:60,
  q:"A bond is generally regarded as predominantly ionic (more than 50% ionic character) when the electronegativity difference between the two atoms is",
  opts:["greater than about 1.7","less than 0.4","exactly zero","between 0.4 and 1.0"],
  ans:0,
@@ -1025,7 +1051,7 @@ const QUIZ = [
   "0.4–1.0 is polar covalent, not predominantly ionic."],
  sol:"Guide: ΔEN = 0 nonpolar covalent; 0 &lt; ΔEN &lt; 1.7 polar covalent; <b>ΔEN &gt; 1.7 predominantly ionic</b> (&gt;50% ionic character)."},
 
-{id:59, lec:"L-6", blk:"ΔEN numerics", topic:"ΔEN of Na–Cl",
+{id:59, lec:"L-6", blk:"ΔEN numerics", topic:"ΔEN of Na–Cl", t:90,
  q:"Given χ(Na) = 0.9 and χ(Cl) = 3.0, the Na–Cl bond has ΔEN = and is best described as",
  opts:[
   "2.1 — predominantly ionic",
@@ -1040,7 +1066,7 @@ const QUIZ = [
   "0.9 is one of the electronegativities, not the difference."],
  sol:"ΔEN = |3.0 − 0.9| = 2.1 &gt; 1.7 ⇒ <b>predominantly ionic</b>. This matches the known ionic character of sodium chloride."},
 
-{id:60, lec:"L-6", blk:"ΔEN numerics", topic:"ΔEN of H–F",
+{id:60, lec:"L-6", blk:"ΔEN numerics", topic:"ΔEN of H–F", t:60,
  q:"With χ(H) = 2.1 and χ(F) = 4.0, the electronegativity difference in H–F is",
  opts:["1.9","6.1","0.5","2.9"],
  ans:0,
@@ -1051,7 +1077,7 @@ const QUIZ = [
   "2.9 would need χ(H) = 1.1, which is wrong."],
  sol:"ΔEN(H–F) = 4.0 − 2.1 = <b>1.9</b>. Being just over 1.7, H–F is strongly polar (and indeed the strongest hydrogen-bond donor among HX)."},
 
-{id:61, lec:"L-6", blk:"ΔEN numerics", topic:"ΔEN of C–O",
+{id:61, lec:"L-6", blk:"ΔEN numerics", topic:"ΔEN of C–O", t:90,
  q:"For χ(C) = 2.5 and χ(O) = 3.5, the C–O bond has ΔEN = and character",
  opts:[
   "1.0 — polar covalent",
@@ -1066,7 +1092,7 @@ const QUIZ = [
   "0.5 is the wrong difference; 3.5 − 2.5 = 1.0."],
  sol:"ΔEN(C–O) = 3.5 − 2.5 = 1.0 (&lt; 1.7) ⇒ <b>polar covalent</b>. C–O bonds are polar but share electrons, as in alcohols and CO₂."},
 
-{id:62, lec:"L-6", blk:"Bond character", topic:"Most ionic bond",
+{id:62, lec:"L-6", blk:"Bond character", topic:"Most ionic bond", t:60,
  q:"Using Pauling values χ: Li 1.0, H 2.1, C 2.5, F 4.0, which bond is the most ionic?",
  opts:["Li–F","H–F","C–F","H–C"],
  ans:0,
@@ -1077,7 +1103,7 @@ const QUIZ = [
   "ΔEN(H–C) = 0.4 — nearly nonpolar."],
  sol:"Most ionic = largest ΔEN. Li–F: 4.0 − 1.0 = <b>3.0</b>, beating H–F (1.9), C–F (1.5) and H–C (0.4). LiF is indeed a highly ionic solid."},
 
-{id:63, lec:"L-6", blk:"Trends", topic:"Period-2 electronegativity order",
+{id:63, lec:"L-6", blk:"Trends", topic:"Period-2 electronegativity order", t:60,
  q:"The correct order of increasing electronegativity for period-2 elements Li, B, N, F is",
  opts:[
   "Li &lt; B &lt; N &lt; F",
@@ -1092,7 +1118,7 @@ const QUIZ = [
   "Li is the least electronegative here, so it cannot sit above B."],
  sol:"Across period 2, χ increases: <b>Li &lt; B &lt; N &lt; F</b> (roughly 1.0, 2.0, 3.0, 4.0), tracking the rise in Z* and fall in radius."},
 
-{id:64, lec:"L-6", blk:"Mulliken scale", topic:"Mulliken → Pauling",
+{id:64, lec:"L-6", blk:"Mulliken scale", topic:"Mulliken → Pauling", t:60,
  q:"An atom has a Mulliken electronegativity of 8.4 eV. Its approximate Pauling electronegativity (χ<sub>P</sub> ≈ χ<sub>M</sub>/2.8, χ<sub>M</sub> in eV) is",
  opts:["3.0","23.5","5.6","2.8"],
  ans:0,
@@ -1104,7 +1130,7 @@ const QUIZ = [
  sol:"Convert a Mulliken value (in eV) to Pauling by dividing by ~2.8: 8.4/2.8 = <b>3.0</b>. The two scales run roughly parallel once scaled."},
 
 /* ---------------- SB (10) ---------------- */
-{id:65, lec:"SB", blk:"Combined trends", topic:"Property increasing down a group",
+{id:65, lec:"SB", blk:"Combined trends", topic:"Property increasing down a group", t:90,
  q:"Which property <b>increases</b> down a group while <b>decreasing</b> across a period (left to right)?",
  opts:[
   "atomic radius",
@@ -1119,7 +1145,7 @@ const QUIZ = [
   "Z* rises across a period and changes little down a group; it does not increase down and decrease across."],
  sol:"<b>Atomic (and ionic) radius</b> increases down and decreases across. IE, EA magnitude and electronegativity all move the opposite way, because they track Z* and 1/radius."},
 
-{id:66, lec:"SB", blk:"Diagonal relationship", topic:"Diagonal relationship",
+{id:66, lec:"SB", blk:"Diagonal relationship", topic:"Diagonal relationship", t:90,
  q:"Because of the diagonal relationship, beryllium most closely resembles which element?",
  opts:["aluminium","magnesium","boron","calcium"],
  ans:0,
@@ -1130,7 +1156,7 @@ const QUIZ = [
   "Calcium is two down in the same group, not the diagonal neighbour."],
  sol:"Diagonal pairs (first two short periods): <b>Li–Mg, Be–Al, B–Si</b>. Similar charge-to-size ratios give like chemistry — e.g. both Be and Al form amphoteric oxides and covalent, polymeric chlorides."},
 
-{id:67, lec:"SB", blk:"Identifying an element", topic:"Element from successive IE",
+{id:67, lec:"SB", blk:"Identifying an element", topic:"Element from successive IE", t:90,
  q:"An element's successive ionisation energies (kJ/mol) are 578, 1817, 2745, 11 578, 14 842. The element most likely belongs to group",
  opts:["13","2","1","14"],
  ans:0,
@@ -1141,7 +1167,7 @@ const QUIZ = [
   "Group 14 would remove 4 electrons before the jump, so the leap would come after IE₄→IE₅."],
  sol:"The steep jump appears between IE₃ and IE₄, so 3 electrons come off before the noble-gas core ⇒ <b>3 valence electrons ⇒ group 13</b> (Al)."},
 
-{id:68, lec:"SB", blk:"Lanthanide contraction", topic:"Cause of the lanthanide contraction",
+{id:68, lec:"SB", blk:"Lanthanide contraction", topic:"Cause of the lanthanide contraction", t:90,
  q:"The lanthanide contraction — the steady size decrease across the 4f series — arises because",
  opts:[
   "4f electrons shield the nuclear charge poorly, so Z* rises steadily across the series",
@@ -1156,7 +1182,7 @@ const QUIZ = [
   "Nuclear charge <i>increases</i> across the series."],
  sol:"Poor 4f shielding ⇒ Z* creeps up across the lanthanides ⇒ gradual size contraction. Its knock-on effect makes 2nd- and 3rd-row transition metals (e.g. Zr/Hf) nearly identical in size."},
 
-{id:69, lec:"SB", blk:"Metallic character", topic:"Trend in metallic character",
+{id:69, lec:"SB", blk:"Metallic character", topic:"Trend in metallic character", t:90,
  q:"Metallic (electropositive) character",
  opts:[
   "increases down a group and decreases across a period",
@@ -1171,7 +1197,7 @@ const QUIZ = [
   "It is a clear periodic property, strongly tied to position."],
  sol:"Metallic character ∝ ease of electron loss ∝ 1/IE. So it <b>increases down a group and decreases across a period</b> — Cs is strongly metallic, F strongly non-metallic."},
 
-{id:70, lec:"SB", blk:"Combined ordering", topic:"Largest atom in a mixed set",
+{id:70, lec:"SB", blk:"Combined ordering", topic:"Largest atom in a mixed set", t:90,
  q:"Which atom is the largest: Na, Mg, K, Al?",
  opts:["K","Na","Mg","Al"],
  ans:0,
@@ -1182,7 +1208,7 @@ const QUIZ = [
   "Al is the smallest here (furthest right in period 3)."],
  sol:"Radius grows down and to the left. Na, Mg, Al are all period 3 (Na largest of them), but <b>K</b> is period 4, group 1 — an added shell makes it the largest overall."},
 
-{id:71, lec:"SB", blk:"Isoelectronic", topic:"Smallest of a mixed isoelectronic set",
+{id:71, lec:"SB", blk:"Isoelectronic", topic:"Smallest of a mixed isoelectronic set", t:90,
  q:"Among P³⁻, S²⁻, Cl⁻, K⁺ (all with 18 electrons), the smallest species is",
  opts:["K⁺","P³⁻","S²⁻","Cl⁻"],
  ans:0,
@@ -1193,7 +1219,7 @@ const QUIZ = [
   "Cl⁻ (Z = 17) is intermediate, larger than K⁺."],
  sol:"18-electron set ⇒ size falls as Z rises: P³⁻ (15) &gt; S²⁻ (16) &gt; Cl⁻ (17) &gt; <b>K⁺</b> (19, smallest)."},
 
-{id:72, lec:"SB", blk:"Combined trends", topic:"Most non-metallic element in a period",
+{id:72, lec:"SB", blk:"Combined trends", topic:"Most non-metallic element in a period", t:90,
  q:"Ignoring the noble gas, the most non-metallic element in period 3 is",
  opts:["chlorine","sodium","aluminium","silicon"],
  ans:0,
@@ -1204,7 +1230,7 @@ const QUIZ = [
   "Silicon is a metalloid, less non-metallic than chlorine."],
  sol:"Across period 3, metallic → non-metallic: Na (most metallic) … Si (metalloid) … <b>Cl</b> (most non-metallic, apart from the noble gas Ar). Non-metallic character peaks at the halogen."},
 
-{id:73, lec:"SB", blk:"Mulliken numeric", topic:"Mulliken from IE and EA",
+{id:73, lec:"SB", blk:"Mulliken numeric", topic:"Mulliken from IE and EA", t:90,
  q:"For an atom with IE = 1310 kJ/mol and EA = 141 kJ/mol (magnitude), the Mulliken electronegativity in kJ/mol is",
  opts:["725.5","1169","1451","141"],
  ans:0,
@@ -1215,7 +1241,7 @@ const QUIZ = [
   "141 is just the EA value."],
  sol:"χ<sub>M</sub> = (IE + EA)/2 = (1310 + 141)/2 = <b>725.5 kJ/mol</b> (these are oxygen's values). Both terms are added, then halved."},
 
-{id:74, lec:"SB", blk:"Combined ordering", topic:"Ionisation energy ordering",
+{id:74, lec:"SB", blk:"Combined ordering", topic:"Ionisation energy ordering", t:90,
  q:"The correct order of first ionisation energy for the period-2 sequence B, C, N, O is",
  opts:[
   "B &lt; C &lt; O &lt; N",
@@ -1234,13 +1260,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter C-4 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1258,6 +1295,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1292,15 +1332,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1312,47 +1353,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1362,30 +1420,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1394,7 +1496,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1407,9 +1511,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1418,7 +1540,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1439,21 +1562,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter C-4 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -255,7 +281,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (10) ---------------- */
-{id:1, lec:"L-1", blk:"The mole", topic:"Routes to the mole",
+{id:1, lec:"L-1", blk:"The mole", topic:"Routes to the mole", t:90,
  q:"For a gas at STP, which set of expressions all give the number of moles?",
  opts:[
   "m/M, V/22.4 and N/N<sub>A</sub>",
@@ -270,7 +296,7 @@ const QUIZ = [
   "24.79 L is the molar volume at <b>SATP</b> (25 °C, 1 bar), not STP."],
  sol:"<b>n = m/M = V/22.4 (STP) = N/N<sub>A</sub>.</b> Note 22.4 L·mol⁻¹ is STP (0 °C, 1 atm); SATP gives 24.79 L·mol⁻¹."},
 
-{id:2, lec:"L-1", blk:"Pressure", topic:"The column-pressure formula",
+{id:2, lec:"L-1", blk:"Pressure", topic:"The column-pressure formula", t:60,
  q:"The pressure exerted by a liquid column of height h and density d is",
  opts:["h·d·g","h·d/g","h/(d·g)","h²·d·g"],
  ans:0,
@@ -281,7 +307,7 @@ const QUIZ = [
   "Pressure is linear in the height, not quadratic."],
  sol:"<b>P = h·d·g.</b> Because the area cancels, column pressure is <b>independent of the tube's cross-section</b> — a fact several Strong Box questions rely on."},
 
-{id:3, lec:"L-1", blk:"Pressure", topic:"The SI unit",
+{id:3, lec:"L-1", blk:"Pressure", topic:"The SI unit", t:90,
  q:"The SI unit of pressure is the",
  opts:["pascal","atmosphere","torr","bar"],
  ans:0,
@@ -292,7 +318,7 @@ const QUIZ = [
   "The bar is exactly 10⁵ Pa, a decimal convenience rather than the SI unit."],
  sol:"<b>SI unit = pascal (Pa).</b> 1 atm = 760 mm Hg = 760 torr = 1.01325 bar = 1.01325 × 10⁵ Pa."},
 
-{id:4, lec:"L-1", blk:"Unit conversions", topic:"The atmosphere chain",
+{id:4, lec:"L-1", blk:"Unit conversions", topic:"The atmosphere chain", t:90,
  q:"One atmosphere equals",
  opts:[
   "760 mm Hg = 1.01325 bar = 1.01325 × 10⁵ Pa",
@@ -307,7 +333,7 @@ const QUIZ = [
   "Neither figure is right."],
  sol:"<b>1 atm = 760 mm Hg = 76 cm Hg = 760 torr = 1.01325 bar = 1.01325 × 10⁵ Pa.</b> And 1 bar = 10⁵ Pa = 0.987 atm."},
 
-{id:5, lec:"L-1", blk:"Manometry", topic:"The closed-end manometer",
+{id:5, lec:"L-1", blk:"Manometry", topic:"The closed-end manometer", t:60,
  q:"In a closed-end manometer (vacuum above the mercury), the gas pressure equals",
  opts:[
   "the difference in the two mercury levels, read directly",
@@ -322,7 +348,7 @@ const QUIZ = [
   "760 mm Hg is P<sub>atm</sub> in disguise, and it does not belong."],
  sol:"⚠ <b>Closed-end: P<sub>gas</sub> = h, with no atmospheric term.</b> Only the open-end version involves P<sub>atm</sub>."},
 
-{id:6, lec:"L-1", blk:"Manometry", topic:"Open-end, gas limb lower",
+{id:6, lec:"L-1", blk:"Manometry", topic:"Open-end, gas limb lower", t:60,
  q:"In an open-end manometer where the mercury in the <b>gas</b> limb stands lower than in the open limb, the gas pressure is",
  opts:[
   "P<sub>atm</sub> + h",
@@ -337,7 +363,7 @@ const QUIZ = [
   "The level difference carries real information and cannot be dropped."],
  sol:"Mnemonic: <b>“gas low, pressure high (add); gas high, pressure low (subtract)”</b>. Here the gas limb is lower, so P = P<sub>atm</sub> + h."},
 
-{id:7, lec:"L-1", blk:"Manometry", topic:"A numerical manometer reading",
+{id:7, lec:"L-1", blk:"Manometry", topic:"A numerical manometer reading", t:90,
  q:"An open arm reads 43.7 cm and the arm connected to the gas bulb reads 15.6 cm, with barometric pressure 743 mm Hg. The gas pressure is about",
  opts:["1024 mm Hg","462 mm Hg","281 mm Hg","743 mm Hg"],
  ans:0,
@@ -348,7 +374,7 @@ const QUIZ = [
   "That is the barometric reading, ignoring the manometer entirely."],
  sol:"Level difference = 43.7 − 15.6 = 28.1 cm = 281 mm. Gas limb <b>lower</b> ⇒ add: <b>743 + 281 = 1024 mm Hg</b>."},
 
-{id:8, lec:"L-1", blk:"Manometry", topic:"The two-case ambiguity",
+{id:8, lec:"L-1", blk:"Manometry", topic:"The two-case ambiguity", t:60,
  q:"An open-end manometer shows a level difference of 60 mm with P<sub>atm</sub> = 760 mm Hg, but the diagram does not say which limb is higher. The gas pressure is",
  opts:[
   "either 820 or 700 mm Hg, depending on which limb is lower",
@@ -363,7 +389,7 @@ const QUIZ = [
   "The level difference is non-zero, so the gas pressure cannot equal the atmospheric one."],
  sol:"Case I (gas limb lower): 760 + 60 = <b>820 mm Hg</b>. Case II (gas limb higher): 760 − 60 = <b>700 mm Hg</b>. State both unless the figure resolves it."},
 
-{id:9, lec:"L-1", blk:"Pressure", topic:"Why the tube width does not matter",
+{id:9, lec:"L-1", blk:"Pressure", topic:"Why the tube width does not matter", t:90,
  q:"A barometer made from a wide tube reads the same as one made from a narrow tube because",
  opts:[
   "column pressure h·d·g does not involve the cross-sectional area",
@@ -378,7 +404,7 @@ const QUIZ = [
   "A wide tube does hold more mercury, but it also has more area to spread the weight over — which is precisely the cancellation."],
  sol:"Weight = (A·h·d)g and pressure = weight/A = <b>h·d·g</b>. The area cancels, so only the <b>height</b> matters."},
 
-{id:10, lec:"L-1", blk:"Unit conversions", topic:"The volume chain",
+{id:10, lec:"L-1", blk:"Unit conversions", topic:"The volume chain", t:90,
  q:"Which chain of volume equalities is correct?",
  opts:[
   "1 m³ = 10³ dm³ = 10³ L = 10⁶ cm³, and 1 mL = 1 cm³",
@@ -394,7 +420,7 @@ const QUIZ = [
  sol:"<b>1 m³ = 10³ dm³ = 10³ L = 10⁶ cm³ = 10⁶ mL</b>, with <b>1 dm³ = 1 L</b> and <b>1 mL = 1 cm³</b>."},
 
 /* ---------------- L-2 (10) ---------------- */
-{id:11, lec:"L-2", blk:"Temperature scales", topic:"Celsius to Kelvin",
+{id:11, lec:"L-2", blk:"Temperature scales", topic:"Celsius to Kelvin", t:60,
  q:"To convert a Celsius temperature to Kelvin you",
  opts:["add 273.15","subtract 273.15","multiply by 273.15","multiply by 9/5 and add 32"],
  ans:0,
@@ -405,7 +431,7 @@ const QUIZ = [
   "That is the Celsius-to-Fahrenheit conversion."],
  sol:"<b>T(K) = t(°C) + 273.15.</b> ⚠ Always convert to Kelvin before any gas-law calculation."},
 
-{id:12, lec:"L-2", blk:"Temperature scales", topic:"Where C and F agree",
+{id:12, lec:"L-2", blk:"Temperature scales", topic:"Where C and F agree", t:90,
  q:"The Celsius and Fahrenheit scales give the same numerical reading at",
  opts:["−40°","0°","32°","100°"],
  ans:0,
@@ -416,7 +442,7 @@ const QUIZ = [
   "100 °C is 212 °F — the two readings diverge as the temperature rises above −40°."],
  sol:"Solve C/5 = (C − 32)/9: 9C = 5C − 160 ⇒ <b>C = F = −40°</b>."},
 
-{id:13, lec:"L-2", blk:"Boyle's law", topic:"Statement of Boyle's law",
+{id:13, lec:"L-2", blk:"Boyle's law", topic:"Statement of Boyle's law", t:60,
  q:"Boyle's law, for a fixed amount of gas at constant temperature, states that",
  opts:["P₁V₁ = P₂V₂","V₁/T₁ = V₂/T₂","P₁/T₁ = P₂/T₂","V₁/n₁ = V₂/n₂"],
  ans:0,
@@ -427,7 +453,7 @@ const QUIZ = [
   "That is Avogadro's law, relating volume to amount."],
  sol:"<b>Boyle: PV = k, so P₁V₁ = P₂V₂</b> at constant T and n."},
 
-{id:14, lec:"L-2", blk:"Boyle's law", topic:"Which Boyle graph is straight",
+{id:14, lec:"L-2", blk:"Boyle's law", topic:"Which Boyle graph is straight", t:60,
  q:"For a gas obeying Boyle's law, which of these plots is a <b>straight line</b>?",
  opts:["P against 1/V","P against V","P against V²","1/P against 1/V"],
  ans:0,
@@ -438,7 +464,7 @@ const QUIZ = [
   "1/P = V/k, and plotting that against 1/V gives 1/P ∝ 1/(1/V) — a hyperbola again, not a line."],
  sol:"<b>P–V is a hyperbola; P–(1/V) is a straight line</b> through the origin. Also straight: (PV)–P and (PV)–V, both horizontal since PV is constant."},
 
-{id:15, lec:"L-2", blk:"Boyle's law", topic:"A Boyle calculation",
+{id:15, lec:"L-2", blk:"Boyle's law", topic:"A Boyle calculation", t:90,
  q:"A 120 mL vessel holds gas at 1.2 bar and 35 °C. Transferred to a 180 mL vessel at the same temperature, the pressure becomes",
  opts:["0.8 bar","1.8 bar","1.2 bar","0.6 bar"],
  ans:0,
@@ -449,7 +475,7 @@ const QUIZ = [
   "This would need a volume ratio of 2, but 180/120 = 1.5."],
  sol:"Constant T ⇒ P₁V₁ = P₂V₂ ⇒ P₂ = (1.2)(120)/180 = <b>0.8 bar</b>."},
 
-{id:16, lec:"L-2", blk:"Boyle's law", topic:"An additional-pressure question",
+{id:16, lec:"L-2", blk:"Boyle's law", topic:"An additional-pressure question", t:90,
  q:"A gas occupies 2.5 L at 9 × 10⁵ N m⁻². The <b>additional</b> pressure needed to compress it to 1.5 L at constant temperature is",
  opts:["6 × 10⁵ N m⁻²","15 × 10⁵ N m⁻²","9 × 10⁵ N m⁻²","5.4 × 10⁵ N m⁻²"],
  ans:0,
@@ -460,7 +486,7 @@ const QUIZ = [
   "This uses the ratio the wrong way round."],
  sol:"P₂ = P₁V₁/V₂ = 15 × 10⁵ N m⁻². <b>Additional</b> = P₂ − P₁ = <b>6 × 10⁵ N m⁻²</b>."},
 
-{id:17, lec:"L-2", blk:"Charles' law", topic:"Statement of Charles' law",
+{id:17, lec:"L-2", blk:"Charles' law", topic:"Statement of Charles' law", t:60,
  q:"Charles' law states that at constant pressure the volume of a fixed mass of gas is proportional to",
  opts:[
   "the absolute (Kelvin) temperature",
@@ -475,7 +501,7 @@ const QUIZ = [
   "That is the Boyle relation between P and V."],
  sol:"<b>V/T = k with T in kelvin.</b> To double the volume you must double the <b>Kelvin</b> temperature."},
 
-{id:18, lec:"L-2", blk:"Charles' law", topic:"A Charles calculation",
+{id:18, lec:"L-2", blk:"Charles' law", topic:"A Charles calculation", t:90,
  q:"At what Celsius temperature does a gas at 0 °C double its volume at constant pressure?",
  opts:["273 °C","546 °C","0 °C","136.5 °C"],
  ans:0,
@@ -486,7 +512,7 @@ const QUIZ = [
   "This halves the required increase."],
  sol:"V/273 = 2V/T₂ ⇒ T₂ = 546 K ⇒ <b>t = 273 °C</b>. ⚠ Work in kelvin, then convert back."},
 
-{id:19, lec:"L-2", blk:"Graphs", topic:"Isotherms",
+{id:19, lec:"L-2", blk:"Graphs", topic:"Isotherms", t:60,
  q:"On a P–V diagram, a Boyle isotherm at a <b>higher</b> temperature lies",
  opts:[
   "farther from the origin",
@@ -501,7 +527,7 @@ const QUIZ = [
   "It lies above, not below."],
  sol:"Each isotherm is PV = k with <b>k ∝ T</b>, so hotter isotherms are farther from the origin."},
 
-{id:20, lec:"L-2", blk:"Charles' law", topic:"Extrapolating to absolute zero",
+{id:20, lec:"L-2", blk:"Charles' law", topic:"Extrapolating to absolute zero", t:60,
  q:"A plot of V against t (°C) at constant pressure is a straight line that, extrapolated, meets V = 0 at",
  opts:["−273.15 °C","0 °C","−100 °C","+273.15 °C"],
  ans:0,
@@ -513,7 +539,7 @@ const QUIZ = [
  sol:"The V–t line extrapolates to zero volume at <b>−273.15 °C = 0 K</b>. The gas liquefies long before that, so the intercept is an extrapolation."},
 
 /* ---------------- L-3 (11) ---------------- */
-{id:21, lec:"L-3", blk:"Gay-Lussac", topic:"Constant-volume law",
+{id:21, lec:"L-3", blk:"Gay-Lussac", topic:"Constant-volume law", t:60,
  q:"Gay-Lussac's law, for a fixed amount of gas at constant volume, states that",
  opts:["P₁/T₁ = P₂/T₂","P₁V₁ = P₂V₂","V₁/T₁ = V₂/T₂","P₁/V₁ = P₂/V₂"],
  ans:0,
@@ -524,7 +550,7 @@ const QUIZ = [
   "Not a gas law at all."],
  sol:"<b>P/T = k at constant V and n.</b> The three simple laws each hold one variable fixed."},
 
-{id:22, lec:"L-3", blk:"Avogadro", topic:"Volume and amount",
+{id:22, lec:"L-3", blk:"Avogadro", topic:"Volume and amount", t:60,
  q:"Avogadro's law states that at the same temperature and pressure",
  opts:[
   "equal volumes of gases contain equal numbers of molecules",
@@ -539,7 +565,7 @@ const QUIZ = [
   "The proportionality is direct, not inverse."],
  sol:"<b>V ∝ n at fixed T and P</b>, so V₁/n₁ = V₂/n₂. This is what makes 22.4 L·mol⁻¹ universal at STP."},
 
-{id:23, lec:"L-3", blk:"Ideal gas equation", topic:"The equation itself",
+{id:23, lec:"L-3", blk:"Ideal gas equation", topic:"The equation itself", t:60,
  q:"The ideal gas equation is",
  opts:["PV = nRT","PV = nRT²","P/V = nRT","PVT = nR"],
  ans:0,
@@ -550,7 +576,7 @@ const QUIZ = [
   "The temperature belongs on the right-hand side."],
  sol:"<b>PV = nRT</b>, and for a fixed amount of gas the combined law P₁V₁/T₁ = P₂V₂/T₂."},
 
-{id:24, lec:"L-3", blk:"The gas constant", topic:"Matching R to the units",
+{id:24, lec:"L-3", blk:"The gas constant", topic:"Matching R to the units", t:60,
  q:"When pressure is in atmospheres and volume in litres, the appropriate value of R is",
  opts:[
   "0.0821 L·atm·K⁻¹·mol⁻¹",
@@ -565,7 +591,7 @@ const QUIZ = [
   "62.36 pairs with torr and litres."],
  sol:"⚠ <b>Match R to your units.</b> 0.0821 (atm·L) · 8.314 (SI/energy) · 0.083 (bar·dm³) · 62.36 (torr·L) · 2 (cal)."},
 
-{id:25, lec:"L-3", blk:"Density", topic:"Density of an ideal gas",
+{id:25, lec:"L-3", blk:"Density", topic:"Density of an ideal gas", t:60,
  q:"For an ideal gas, the density is given by",
  opts:["d = PM/RT","d = RT/PM","d = PRT/M","d = M/PRT"],
  ans:0,
@@ -576,7 +602,7 @@ const QUIZ = [
   "The molar mass belongs in the numerator."],
  sol:"<b>d = PM/RT</b>, so at fixed T and P density is proportional to molar mass, and for one gas <b>d ∝ P/T</b>."},
 
-{id:26, lec:"L-3", blk:"Density", topic:"Molar mass from density",
+{id:26, lec:"L-3", blk:"Density", topic:"Molar mass from density", t:90,
  q:"A gas has density 1.50 g L⁻¹ at 760 mm Hg and 60 °C. Its molar mass is about",
  opts:["41 g mol⁻¹","28 g mol⁻¹","55 g mol⁻¹","74 g mol⁻¹"],
  ans:0,
@@ -587,7 +613,7 @@ const QUIZ = [
   "74 is nearly double the correct value."],
  sol:"M = dRT/P with T = 60 + 273 = <b>333 K</b> and P = 1 atm: M = 1.50 × 0.0821 × 333 ≈ <b>41 g mol⁻¹</b>."},
 
-{id:27, lec:"L-3", blk:"Density", topic:"Density at a new state",
+{id:27, lec:"L-3", blk:"Density", topic:"Density at a new state", t:90,
  q:"A gas has density 5.46 g dm⁻³ at 27 °C and 2 bar. At STP its density is about",
  opts:["3.04 g dm⁻³","10.9 g dm⁻³","2.73 g dm⁻³","5.46 g dm⁻³"],
  ans:0,
@@ -598,7 +624,7 @@ const QUIZ = [
   "The state has changed, so the density must too."],
  sol:"d ∝ P/T ⇒ d₁T₁/P₁ = d₂T₂/P₂ ⇒ d₂ = (5.46 × 300 × 1.01325)/(273 × 2) ≈ <b>3.04 g dm⁻³</b>."},
 
-{id:28, lec:"L-3", blk:"Density", topic:"Equal densities of two gases",
+{id:28, lec:"L-3", blk:"Density", topic:"Equal densities of two gases", t:90,
  q:"A gaseous oxide at 1.5 bar and 27 °C has the same density as O₂ at 4.5 bar and 127 °C. The molar mass of the oxide is",
  opts:["72 g mol⁻¹","32 g mol⁻¹","96 g mol⁻¹","48 g mol⁻¹"],
  ans:0,
@@ -609,7 +635,7 @@ const QUIZ = [
   "48 would follow from a different mis-pairing of the ratios."],
  sol:"Set PM/RT equal for both: (1.5)M/300 = (4.5)(32)/400 ⇒ <b>M = 72 g mol⁻¹</b>. Remember to use kelvin: 300 K and 400 K."},
 
-{id:29, lec:"L-3", blk:"Ideal gas equation", topic:"The combined law",
+{id:29, lec:"L-3", blk:"Ideal gas equation", topic:"The combined law", t:90,
  q:"For a fixed amount of gas changing from state 1 to state 2, the correct relation is",
  opts:[
   "P₁V₁/T₁ = P₂V₂/T₂",
@@ -624,7 +650,7 @@ const QUIZ = [
   "P and T have swapped places."],
  sol:"<b>PV/T = nR = constant</b>, giving P₁V₁/T₁ = P₂V₂/T₂."},
 
-{id:30, lec:"L-3", blk:"Molar volume", topic:"STP versus SATP",
+{id:30, lec:"L-3", blk:"Molar volume", topic:"STP versus SATP", t:60,
  q:"The molar volume of an ideal gas is 22.4 L·mol⁻¹ at",
  opts:[
   "STP — 0 °C and 1 atm",
@@ -639,7 +665,7 @@ const QUIZ = [
   "At 0 °C and 1 bar the molar volume is 22.7 L, since a bar is slightly less than an atmosphere."],
  sol:"<b>STP (0 °C, 1 atm) ⇒ 22.4 L·mol⁻¹. SATP (25 °C, 1 bar) ⇒ 24.79 L·mol⁻¹.</b> Check which the question means."},
 
-{id:31, lec:"L-3", blk:"Density", topic:"Which gas is denser",
+{id:31, lec:"L-3", blk:"Density", topic:"Which gas is denser", t:60,
  q:"At the same temperature and pressure, the denser of two gases is the one with",
  opts:[
   "the larger molar mass",
@@ -655,7 +681,7 @@ const QUIZ = [
  sol:"<b>d ∝ M at fixed T and P.</b> So CO₂ (44) is denser than O₂ (32), which is denser than He (4)."},
 
 /* ---------------- L-4 (9) ---------------- */
-{id:32, lec:"L-4", blk:"Dalton's law", topic:"Statement",
+{id:32, lec:"L-4", blk:"Dalton's law", topic:"Statement", t:60,
  q:"Dalton's law of partial pressures states that the total pressure of a gas mixture equals",
  opts:[
   "the sum of the partial pressures of the components",
@@ -670,7 +696,7 @@ const QUIZ = [
   "Every component contributes, not just the dominant one."],
  sol:"<b>P<sub>total</sub> = ΣP<sub>i</sub></b>, and each partial pressure is P<sub>i</sub> = x<sub>i</sub>·P<sub>total</sub> where x<sub>i</sub> is the mole fraction."},
 
-{id:33, lec:"L-4", blk:"Dalton's law", topic:"When the law fails",
+{id:33, lec:"L-4", blk:"Dalton's law", topic:"When the law fails", t:60,
  q:"Dalton's law of partial pressures does <b>not</b> apply to",
  opts:[
   "gases that react with one another, such as NH₃ and HCl",
@@ -685,7 +711,7 @@ const QUIZ = [
   "High temperature makes gases <b>more</b> ideal, which helps rather than hinders."],
  sol:"⚠ <b>Valid only for non-reacting gases.</b> NH₃ + HCl and NO + O₂ are the standard counterexamples."},
 
-{id:34, lec:"L-4", blk:"Partial pressure", topic:"Mole fraction and partial pressure",
+{id:34, lec:"L-4", blk:"Partial pressure", topic:"Mole fraction and partial pressure", t:90,
  q:"A mixture contains 96 g O₂ and 140 g Ne at a total pressure of 25 bar. The partial pressure of O₂ is",
  opts:["7.5 bar","17.5 bar","12.5 bar","10 bar"],
  ans:0,
@@ -696,7 +722,7 @@ const QUIZ = [
   "10 bar corresponds to a mole fraction of 0.4."],
  sol:"Work in <b>moles</b>, not masses: n(O₂) = 3, n(Ne) = 7 ⇒ x(O₂) = 0.3 ⇒ <b>P(O₂) = 7.5 bar</b>, P(Ne) = 17.5 bar."},
 
-{id:35, lec:"L-4", blk:"Partial pressure", topic:"Combining gases into one vessel",
+{id:35, lec:"L-4", blk:"Partial pressure", topic:"Combining gases into one vessel", t:60,
  q:"0.5 L of H₂ at 0.8 bar and 2.0 L of O₂ at 0.7 bar are transferred into a 1 L vessel at constant temperature. The total pressure is",
  opts:["1.80 bar","1.50 bar","0.75 bar","2.50 bar"],
  ans:0,
@@ -707,7 +733,7 @@ const QUIZ = [
   "This over-counts one of the contributions."],
  sol:"Apply Boyle to each gas separately, then add: 0.40 + 1.40 = <b>1.80 bar</b>."},
 
-{id:36, lec:"L-4", blk:"Aqueous tension", topic:"Correcting for water vapour",
+{id:36, lec:"L-4", blk:"Aqueous tension", topic:"Correcting for water vapour", t:60,
  q:"For a gas collected over water, the pressure of the <b>dry</b> gas is",
  opts:[
   "P<sub>atm</sub> − (aqueous tension)",
@@ -722,7 +748,7 @@ const QUIZ = [
   "Ignoring the vapour overstates the amount of gas collected."],
  sol:"<b>P<sub>dry</sub> = P<sub>atm</sub> − P<sub>H₂O</sub>.</b> The aqueous tension is the vapour pressure of water."},
 
-{id:37, lec:"L-4", blk:"Aqueous tension", topic:"What aqueous tension depends on",
+{id:37, lec:"L-4", blk:"Aqueous tension", topic:"What aqueous tension depends on", t:60,
  q:"The aqueous tension in such an experiment depends on",
  opts:[
   "the temperature only",
@@ -737,7 +763,7 @@ const QUIZ = [
   "It is independent of the external pressure."],
  sol:"<b>Aqueous tension = vapour pressure of water, a function of temperature only.</b> Tables quote it per temperature."},
 
-{id:38, lec:"L-4", blk:"Aqueous tension", topic:"A molar mass over water",
+{id:38, lec:"L-4", blk:"Aqueous tension", topic:"A molar mass over water", t:90,
  q:"82.1 mL of a gas collected over water at 27 °C and 1.0317 atm weighs 0.160 g. With aqueous tension 0.0317 atm, the molar mass is about",
  opts:["48 g mol⁻¹","46 g mol⁻¹","50 g mol⁻¹","32 g mol⁻¹"],
  ans:0,
@@ -748,7 +774,7 @@ const QUIZ = [
   "32 would be O₂; the data give a heavier gas."],
  sol:"Subtract the aqueous tension first: <b>P<sub>dry</sub> = 1 atm</b>. Then M = mRT/(PV) = (0.160)(0.0821)(300)/(1)(0.0821) = <b>48 g mol⁻¹</b>."},
 
-{id:39, lec:"L-4", blk:"Partial pressure", topic:"Mole fraction of a component",
+{id:39, lec:"L-4", blk:"Partial pressure", topic:"Mole fraction of a component", t:60,
  q:"In a mixture the partial pressure of a gas is one quarter of the total pressure. Its mole fraction is",
  opts:["0.25","4","0.75","0.5"],
  ans:0,
@@ -759,7 +785,7 @@ const QUIZ = [
   "0.5 would correspond to half the total pressure."],
  sol:"<b>x<sub>i</sub> = P<sub>i</sub>/P<sub>total</sub></b>, so a quarter of the pressure means a mole fraction of <b>0.25</b>."},
 
-{id:40, lec:"L-4", blk:"Dalton's law", topic:"Why the law works",
+{id:40, lec:"L-4", blk:"Dalton's law", topic:"Why the law works", t:60,
  q:"Dalton's law follows from the ideal-gas picture because",
  opts:[
   "ideal gas molecules do not interact, so each contributes pressure independently of the others",
@@ -775,7 +801,7 @@ const QUIZ = [
  sol:"Non-interacting molecules contribute pressure <b>additively</b> — which is also why the law fails once the gases react."},
 
 /* ---------------- L-5 (9) ---------------- */
-{id:41, lec:"L-5", blk:"Graham's law", topic:"Statement",
+{id:41, lec:"L-5", blk:"Graham's law", topic:"Statement", t:90,
  q:"Graham's law states that the rate of diffusion or effusion of a gas is proportional to",
  opts:["1/√M","1/M","M","√M"],
  ans:0,
@@ -786,7 +812,7 @@ const QUIZ = [
   "This has the right root but the wrong direction."],
  sol:"<b>r ∝ 1/√M = 1/√d</b>, so r₁/r₂ = √(M₂/M₁) = √(d₂/d₁)."},
 
-{id:42, lec:"L-5", blk:"Graham's law", topic:"The square-root trap",
+{id:42, lec:"L-5", blk:"Graham's law", topic:"The square-root trap", t:60,
  q:"Gas A is four times as heavy as gas B. Under identical conditions, B effuses",
  opts:[
   "twice as fast as A",
@@ -801,7 +827,7 @@ const QUIZ = [
   "Different molar masses give different rates."],
  sol:"⚠ <b>A 4× mass ratio gives only a 2× rate ratio.</b> Take the square root."},
 
-{id:43, lec:"L-5", blk:"Definitions", topic:"Effusion versus diffusion",
+{id:43, lec:"L-5", blk:"Definitions", topic:"Effusion versus diffusion", t:60,
  q:"Effusion differs from diffusion in that effusion is",
  opts:[
   "escape through a tiny orifice",
@@ -816,7 +842,7 @@ const QUIZ = [
   "They are distinct processes, though both obey the same 1/√M dependence."],
  sol:"<b>Effusion = through a tiny orifice. Diffusion = spreading through space.</b> Graham's law governs both."},
 
-{id:44, lec:"L-5", blk:"Applications", topic:"Identifying an unknown gas",
+{id:44, lec:"L-5", blk:"Applications", topic:"Identifying an unknown gas", t:90,
  q:"An unknown gas diffuses four times as fast as O₂. Its molar mass is",
  opts:["2 g mol⁻¹","8 g mol⁻¹","128 g mol⁻¹","512 g mol⁻¹"],
  ans:0,
@@ -827,7 +853,7 @@ const QUIZ = [
   "Same objection, more extreme."],
  sol:"r<sub>x</sub>/r<sub>O₂</sub> = √(32/M<sub>x</sub>) = 4 ⇒ M<sub>x</sub> = 32/16 = <b>2 g mol⁻¹</b> — hydrogen."},
 
-{id:45, lec:"L-5", blk:"Applications", topic:"A volume-and-time calculation",
+{id:45, lec:"L-5", blk:"Applications", topic:"A volume-and-time calculation", t:90,
  q:"Relative densities of CO₂ and O₂ are 25 and 16. If 25 cc of CO₂ diffuses in 75 s, the volume of O₂ diffusing in 96 s under the same conditions is",
  opts:["40 cc","32 cc","25 cc","50 cc"],
  ans:0,
@@ -838,7 +864,7 @@ const QUIZ = [
   "50 cc over-applies the ratio."],
  sol:"r(O₂)/r(CO₂) = √(d<sub>CO₂</sub>/d<sub>O₂</sub>) = 5/4. Then V = 96 s × (25/75 cc s⁻¹) × 5/4 = <b>40 cc</b>."},
 
-{id:46, lec:"L-5", blk:"Extensions", topic:"Including pressure",
+{id:46, lec:"L-5", blk:"Extensions", topic:"Including pressure", t:60,
  q:"When two gases are at different pressures, the effusion-rate ratio becomes",
  opts:[
   "r₁/r₂ = (P₁/P₂)·√(M₂/M₁)",
@@ -853,7 +879,7 @@ const QUIZ = [
   "The pressure should not sit under a square root."],
  sol:"<b>r₁/r₂ = (P₁/P₂)·√(M₂/M₁)</b>. Pressure enters linearly, molar mass as an inverse square root."},
 
-{id:47, lec:"L-5", blk:"Applications", topic:"Composition of the effusing stream",
+{id:47, lec:"L-5", blk:"Applications", topic:"Composition of the effusing stream", t:90,
  q:"A 4 : 1 molar He : CH₄ mixture is at 20 bar. The initial composition of the gas effusing through a small hole is",
  opts:["He : CH₄ = 8 : 1","He : CH₄ = 4 : 1","He : CH₄ = 2 : 1","He : CH₄ = 16 : 1"],
  ans:0,
@@ -864,7 +890,7 @@ const QUIZ = [
   "16 : 1 would follow from using the mass ratio 4 instead of its square root 2."],
  sol:"r(He)/r(CH₄) = (P<sub>He</sub>/P<sub>CH₄</sub>)·√(M<sub>CH₄</sub>/M<sub>He</sub>) = 4 × √4 = <b>8 : 1</b>. This preferential escape is the basis of isotope separation."},
 
-{id:48, lec:"L-5", blk:"Extensions", topic:"Temperature dependence",
+{id:48, lec:"L-5", blk:"Extensions", topic:"Temperature dependence", t:60,
  q:"For a fixed gas, the rate of effusion varies with temperature as",
  opts:["r ∝ √T","r ∝ T","r ∝ 1/√T","r is independent of T"],
  ans:0,
@@ -875,7 +901,7 @@ const QUIZ = [
   "Temperature strongly affects molecular speeds."],
  sol:"<b>r ∝ u<sub>rms</sub> ∝ √(T/M)</b>, so for one gas r ∝ √T."},
 
-{id:49, lec:"L-5", blk:"Applications", topic:"Rate measured as volume per time",
+{id:49, lec:"L-5", blk:"Applications", topic:"Rate measured as volume per time", t:60,
  q:"If effusion rate is measured as volume per unit time, then for <b>equal volumes</b> of two gases the times satisfy",
  opts:[
   "t₁/t₂ = √(M₁/M₂)",
@@ -891,7 +917,7 @@ const QUIZ = [
  sol:"r = V/t, so with V fixed t ∝ 1/r ∝ √M. Hence <b>t₁/t₂ = √(M₁/M₂)</b> — the heavier gas is slower and takes longer."},
 
 /* ---------------- L-6 (9) ---------------- */
-{id:50, lec:"L-6", blk:"Kinetic equation", topic:"The kinetic gas equation",
+{id:50, lec:"L-6", blk:"Kinetic equation", topic:"The kinetic gas equation", t:90,
  q:"The kinetic gas equation is",
  opts:[
   "PV = ⅓ m N u²<sub>rms</sub>",
@@ -906,7 +932,7 @@ const QUIZ = [
   "½ appears in the kinetic-energy expression ½mu², not here."],
  sol:"<b>PV = ⅓mNu²<sub>rms</sub> = ⅔E<sub>k</sub></b>, since E<sub>k</sub> = ½mNu²<sub>rms</sub>."},
 
-{id:51, lec:"L-6", blk:"Kinetic energy", topic:"Total kinetic energy",
+{id:51, lec:"L-6", blk:"Kinetic energy", topic:"Total kinetic energy", t:60,
  q:"The total translational kinetic energy of n moles of an ideal gas is",
  opts:["(3/2)nRT","(2/3)nRT","(3/2)RT","(1/2)nRT"],
  ans:0,
@@ -917,7 +943,7 @@ const QUIZ = [
   "½ would apply to a single degree of freedom, not to all three."],
  sol:"<b>E<sub>k</sub> = (3/2)nRT</b> in total, and <b>(3/2)k<sub>B</sub>T</b> per molecule, where k<sub>B</sub> = R/N<sub>A</sub>."},
 
-{id:52, lec:"L-6", blk:"Kinetic energy", topic:"What average KE depends on",
+{id:52, lec:"L-6", blk:"Kinetic energy", topic:"What average KE depends on", t:60,
  q:"The average kinetic energy of the molecules of an ideal gas depends on",
  opts:[
   "the absolute temperature only",
@@ -932,7 +958,7 @@ const QUIZ = [
   "The identity is irrelevant — that is the striking content of the result."],
  sol:"<b>Average KE = (3/2)k<sub>B</sub>T — a function of absolute temperature alone.</b> Speed depends on M; energy does not."},
 
-{id:53, lec:"L-6", blk:"Postulates", topic:"The collision postulate",
+{id:53, lec:"L-6", blk:"Postulates", topic:"The collision postulate", t:60,
  q:"In the kinetic molecular theory, collisions between gas molecules are assumed to be",
  opts:[
   "perfectly elastic, conserving kinetic energy",
@@ -947,7 +973,7 @@ const QUIZ = [
   "Collisions certainly occur; the mean free path measures the distance between them."],
  sol:"<b>Perfectly elastic collisions</b> — total kinetic energy is conserved, so the temperature stays constant."},
 
-{id:54, lec:"L-6", blk:"Postulates", topic:"The volume postulate",
+{id:54, lec:"L-6", blk:"Postulates", topic:"The volume postulate", t:60,
  q:"The kinetic theory treats gas molecules as",
  opts:[
   "point masses of negligible volume, exerting no forces on one another",
@@ -962,7 +988,7 @@ const QUIZ = [
   "It drops the volume as well."],
  sol:"Ideal: <b>no volume, no forces</b>. The van der Waals corrections <b>nb</b> and <b>an²/V²</b> restore exactly these two omissions."},
 
-{id:55, lec:"L-6", blk:"Kinetic energy", topic:"A numerical KE calculation",
+{id:55, lec:"L-6", blk:"Kinetic energy", topic:"A numerical KE calculation", t:90,
  q:"The total kinetic energy of 32 g of methane at 27 °C (R = 8.314 J K⁻¹ mol⁻¹) is about",
  opts:["7483 J","3741 J","2494 J","14966 J"],
  ans:0,
@@ -973,7 +999,7 @@ const QUIZ = [
   "14966 J doubles the correct value."],
  sol:"n = 32/16 = <b>2 mol</b>, T = 300 K ⇒ E<sub>k</sub> = (3/2)(2)(8.314)(300) = <b>7483 J</b>."},
 
-{id:56, lec:"L-6", blk:"Kinetic energy", topic:"Energy per molecule",
+{id:56, lec:"L-6", blk:"Kinetic energy", topic:"Energy per molecule", t:60,
  q:"The average kinetic energy per molecule of an ideal gas is",
  opts:["(3/2)k<sub>B</sub>T","(3/2)RT","(3/2)nRT","k<sub>B</sub>T"],
  ans:0,
@@ -984,7 +1010,7 @@ const QUIZ = [
   "The factor 3/2 counts the three translational degrees of freedom."],
  sol:"<b>Per molecule: (3/2)k<sub>B</sub>T</b>, with k<sub>B</sub> = R/N<sub>A</sub> = 1.38 × 10⁻²³ J K⁻¹. At 300 K this is about 6.21 × 10⁻²¹ J."},
 
-{id:57, lec:"L-6", blk:"Applications", topic:"How empty a gas is",
+{id:57, lec:"L-6", blk:"Applications", topic:"How empty a gas is", t:60,
  q:"For 1 mol of N₂ at STP, the fraction of the molar volume actually occupied by the molecules is roughly",
  opts:[
   "0.1 %, so the gas is about 99.9 % empty space",
@@ -999,7 +1025,7 @@ const QUIZ = [
   "This is nearly the reverse of the truth."],
  sol:"Molecular volume ≈ 20 cm³ per mole versus 22 400 cm³ molar volume ⇒ <b>≈ 99.9 % empty</b>. This is exactly why the ideal gas model works so well at low pressure."},
 
-{id:58, lec:"L-6", blk:"Kinetic equation", topic:"Relating PV to energy",
+{id:58, lec:"L-6", blk:"Kinetic equation", topic:"Relating PV to energy", t:90,
  q:"The kinetic equation can be written PV = ⅔E<sub>k</sub> because",
  opts:[
   "E<sub>k</sub> = ½mNu²<sub>rms</sub>, and ⅓mNu² = ⅔(½mNu²)",
@@ -1015,7 +1041,7 @@ const QUIZ = [
  sol:"PV = ⅓mNu² = ⅔·(½mNu²) = <b>⅔E<sub>k</sub></b>. Equating to nRT then gives E<sub>k</sub> = (3/2)nRT."},
 
 /* ---------------- L-7 (10) ---------------- */
-{id:59, lec:"L-7", blk:"The three speeds", topic:"Root-mean-square speed",
+{id:59, lec:"L-7", blk:"The three speeds", topic:"Root-mean-square speed", t:90,
  q:"The root-mean-square speed of gas molecules is",
  opts:["√(3RT/M)","√(2RT/M)","√(8RT/πM)","√(RT/M)"],
  ans:0,
@@ -1026,7 +1052,7 @@ const QUIZ = [
   "Not one of the three standard speeds."],
  sol:"<b>u<sub>rms</sub> = √(3RT/M) = √(3P/d) = √(3PV/M).</b>"},
 
-{id:60, lec:"L-7", blk:"The three speeds", topic:"Most probable speed",
+{id:60, lec:"L-7", blk:"The three speeds", topic:"Most probable speed", t:60,
  q:"The most probable speed is",
  opts:["√(2RT/M)","√(3RT/M)","√(8RT/πM)","√(RT/2M)"],
  ans:0,
@@ -1037,7 +1063,7 @@ const QUIZ = [
   "Not a standard expression."],
  sol:"<b>u<sub>mp</sub> = √(2RT/M)</b> — the peak of the distribution curve."},
 
-{id:61, lec:"L-7", blk:"The three speeds", topic:"The ordering",
+{id:61, lec:"L-7", blk:"The three speeds", topic:"The ordering", t:60,
  q:"The three characteristic molecular speeds are ordered as",
  opts:[
   "u<sub>mp</sub> &lt; u<sub>av</sub> &lt; u<sub>rms</sub>",
@@ -1052,7 +1078,7 @@ const QUIZ = [
   "They differ because the distribution is asymmetric."],
  sol:"<b>u<sub>mp</sub> : u<sub>av</sub> : u<sub>rms</sub> = 1 : 1.128 : 1.224.</b> All three scale as √(T/M)."},
 
-{id:62, lec:"L-7", blk:"The three speeds", topic:"Speed from density",
+{id:62, lec:"L-7", blk:"The three speeds", topic:"Speed from density", t:60,
  q:"When the density is given instead of the temperature, the rms speed is best computed from",
  opts:["√(3P/d)","√(3RT/M)","√(2P/d)","√(3d/P)"],
  ans:0,
@@ -1063,7 +1089,7 @@ const QUIZ = [
   "This is inverted — a denser gas moves more slowly, so d belongs in the denominator."],
  sol:"<b>u<sub>rms</sub> = √(3P/d)</b> — the density form, useful whenever T and M are not both given."},
 
-{id:63, lec:"L-7", blk:"Calculations", topic:"An rms speed calculation",
+{id:63, lec:"L-7", blk:"Calculations", topic:"An rms speed calculation", t:90,
  q:"The rms speed of methane molecules at 27 °C is about",
  opts:["684 m s⁻¹","432 m s⁻¹","1368 m s⁻¹","68 m s⁻¹"],
  ans:0,
@@ -1074,7 +1100,7 @@ const QUIZ = [
   "68 m s⁻¹ is off by a factor of ten — check the unit of M."],
  sol:"u<sub>rms</sub> = √(3RT/M) = √(3 × 8.314 × 300 / 0.016) ≈ <b>684 m s⁻¹</b>. ⚠ Use M in <b>kg mol⁻¹</b> with R = 8.314."},
 
-{id:64, lec:"L-7", blk:"Calculations", topic:"Matching rms speeds of two gases",
+{id:64, lec:"L-7", blk:"Calculations", topic:"Matching rms speeds of two gases", t:90,
  q:"At what temperature does the rms speed of SO₂ equal that of methane at 27 °C?",
  opts:["1200 K","300 K","75 K","4800 K"],
  ans:0,
@@ -1085,7 +1111,7 @@ const QUIZ = [
   "4800 K would use a mass ratio of 16 rather than 4."],
  sol:"u<sub>rms</sub> equal ⇒ T/M equal ⇒ 300/16 = T/64 ⇒ <b>T = 1200 K</b> (= 927 °C). SO₂ is four times heavier, so it needs four times the temperature."},
 
-{id:65, lec:"L-7", blk:"Calculations", topic:"Converting between average and rms",
+{id:65, lec:"L-7", blk:"Calculations", topic:"Converting between average and rms", t:60,
  q:"If the average speed of a gas is 400 m s⁻¹, its rms speed is",
  opts:["434 m s⁻¹","4.34 m s⁻¹","368 m s⁻¹","800 m s⁻¹"],
  ans:0,
@@ -1096,7 +1122,7 @@ const QUIZ = [
   "800 m s⁻¹ doubles rather than scaling by 1.085."],
  sol:"<b>u<sub>rms</sub> = 1.085 × u<sub>av</sub></b> (from the ratio 1.224/1.128). So 400 × 1.085 = <b>434 m s⁻¹</b>."},
 
-{id:66, lec:"L-7", blk:"Distribution curve", topic:"Effect of raising the temperature",
+{id:66, lec:"L-7", blk:"Distribution curve", topic:"Effect of raising the temperature", t:60,
  q:"When the temperature of a gas is raised, the Maxwell–Boltzmann distribution curve",
  opts:[
   "shifts right, flattens and broadens, with the area unchanged",
@@ -1111,7 +1137,7 @@ const QUIZ = [
   "Both position and shape change."],
  sol:"Higher T ⇒ <b>peak moves right and down, curve broadens; total area stays constant</b> because the number of molecules is unchanged."},
 
-{id:67, lec:"L-7", blk:"Distribution curve", topic:"Effect of molar mass",
+{id:67, lec:"L-7", blk:"Distribution curve", topic:"Effect of molar mass", t:60,
  q:"At the same temperature, a heavier gas has a distribution curve that is",
  opts:[
   "narrower and shifted to lower speeds",
@@ -1126,7 +1152,7 @@ const QUIZ = [
   "The direction of the shift is wrong."],
  sol:"Speeds scale as <b>√(T/M)</b>, so a heavier gas at the same T is slower and its distribution is narrower."},
 
-{id:68, lec:"L-7", blk:"The three speeds", topic:"Ratio to the most probable speed",
+{id:68, lec:"L-7", blk:"The three speeds", topic:"Ratio to the most probable speed", t:60,
  q:"The ratio u<sub>rms</sub> : u<sub>mp</sub> equals",
  opts:["√3 : √2","√2 : √3","3 : 2","1 : 1"],
  ans:0,
@@ -1138,7 +1164,7 @@ const QUIZ = [
  sol:"<b>u<sub>rms</sub>/u<sub>mp</sub> = √(3/2) ≈ 1.225.</b> The full ordering is 1 : 1.128 : 1.224."},
 
 /* ---------------- L-8 (9) ---------------- */
-{id:69, lec:"L-8", blk:"Compressibility factor", topic:"Definition of Z",
+{id:69, lec:"L-8", blk:"Compressibility factor", topic:"Definition of Z", t:90,
  q:"The compressibility factor Z is defined as",
  opts:[
   "PV/nRT",
@@ -1153,7 +1179,7 @@ const QUIZ = [
   "The volume is missing."],
  sol:"<b>Z = PV/nRT = V<sub>real</sub>/V<sub>ideal</sub>.</b> For an ideal gas Z = 1 at every P and T."},
 
-{id:70, lec:"L-8", blk:"Compressibility factor", topic:"What Z &lt; 1 means",
+{id:70, lec:"L-8", blk:"Compressibility factor", topic:"What Z &lt; 1 means", t:60,
  q:"A gas with Z &lt; 1 is one in which",
  opts:[
   "attractive forces dominate, making it more compressible than an ideal gas",
@@ -1168,7 +1194,7 @@ const QUIZ = [
   "Z depends on both P and T; being above T<sub>c</sub> does not by itself fix the sign of the deviation."],
  sol:"<b>Z &lt; 1 ⇒ attractions dominate (more compressible). Z &gt; 1 ⇒ repulsions / finite size dominate (less compressible).</b>"},
 
-{id:71, lec:"L-8", blk:"Compressibility factor", topic:"Gases with Z > 1",
+{id:71, lec:"L-8", blk:"Compressibility factor", topic:"Gases with Z > 1", t:60,
  q:"Which pair of gases shows Z &gt; 1 at essentially all pressures?",
  opts:["H₂ and He","CO₂ and SO₂","NH₃ and H₂O","Cl₂ and Br₂"],
  ans:0,
@@ -1179,7 +1205,7 @@ const QUIZ = [
   "Large polarisable molecules with substantial dispersion attractions."],
  sol:"<b>H₂ and He rise above Z = 1 immediately</b>; most other gases dip below first and only rise at high pressure."},
 
-{id:72, lec:"L-8", blk:"Ideal behaviour", topic:"When gases are most ideal",
+{id:72, lec:"L-8", blk:"Ideal behaviour", topic:"When gases are most ideal", t:60,
  q:"Gases approach ideal behaviour most closely at",
  opts:[
   "low pressure and high temperature",
@@ -1194,7 +1220,7 @@ const QUIZ = [
   "Low temperature lets the attractions matter."],
  sol:"<b>Low P, high T.</b> The two conditions defeat the two van der Waals corrections respectively."},
 
-{id:73, lec:"L-8", blk:"Calculations", topic:"Computing Z",
+{id:73, lec:"L-8", blk:"Calculations", topic:"Computing Z", t:90,
  q:"One mole of SO₂ occupies 350 mL at 27 °C and 50 atm. Its compressibility factor is about",
  opts:["0.71","1.41","0.35","1.00"],
  ans:0,
@@ -1205,7 +1231,7 @@ const QUIZ = [
   "Z = 1 would mean ideal behaviour, but the value is clearly below 1."],
  sol:"Z = PV/nRT = (50)(0.35)/[(1)(0.0821)(300)] = <b>0.711</b> — attractions dominate, so SO₂ is more compressible than ideal."},
 
-{id:74, lec:"L-8", blk:"Calculations", topic:"Using Z to find an amount",
+{id:74, lec:"L-8", blk:"Calculations", topic:"Using Z to find an amount", t:90,
  q:"For N₂ at 800 atm and −50 °C the compressibility factor is 1.95. The mass of N₂ needed to fill a 500 mL flask is about",
  opts:["314 g","612 g","161 g","28 g"],
  ans:0,
@@ -1216,7 +1242,7 @@ const QUIZ = [
   "28 g is one mole — the molar mass, not the answer."],
  sol:"Z appears in the denominator: n = PV/(ZRT) = <b>11.2 mol</b> ⇒ mass = <b>≈ 314 g</b>."},
 
-{id:75, lec:"L-8", blk:"Boyle temperature", topic:"What the Boyle temperature is",
+{id:75, lec:"L-8", blk:"Boyle temperature", topic:"What the Boyle temperature is", t:60,
  q:"The Boyle temperature of a gas is the temperature at which",
  opts:[
   "the initial dip in the Z–P curve vanishes, so the gas behaves ideally over a range of pressure",
@@ -1231,7 +1257,7 @@ const QUIZ = [
   "Gases remain compressible at every temperature."],
  sol:"<b>T<sub>B</sub> = a/(Rb).</b> Below it the Z–P curve dips; <b>above it Z &gt; 1</b> from the start (positive deviation)."},
 
-{id:76, lec:"L-8", blk:"Boyle temperature", topic:"Behaviour above the Boyle temperature",
+{id:76, lec:"L-8", blk:"Boyle temperature", topic:"Behaviour above the Boyle temperature", t:60,
  q:"Above its Boyle temperature, a real gas shows",
  opts:[
   "Z &gt; 1 — a positive deviation",
@@ -1246,7 +1272,7 @@ const QUIZ = [
   "Deviations remain, they are simply positive."],
  sol:"<b>Above T<sub>B</sub>: Z &gt; 1 at all pressures.</b> Below T<sub>B</sub>: Z dips below 1 first, then rises."},
 
-{id:77, lec:"L-8", blk:"Compressibility factor", topic:"Physical reading of Z",
+{id:77, lec:"L-8", blk:"Compressibility factor", topic:"Physical reading of Z", t:60,
  q:"A compressibility factor of 0.8 means the gas occupies",
  opts:[
   "80 % of the volume an ideal gas would occupy at the same P and T",
@@ -1262,7 +1288,7 @@ const QUIZ = [
  sol:"<b>Z = V<sub>real</sub>/V<sub>ideal</sub></b>, so Z = 0.8 means the real gas is compressed to 80 % of the ideal volume — attractions are winning."},
 
 /* ---------------- L-9 (10) ---------------- */
-{id:78, lec:"L-9", blk:"The equation", topic:"The van der Waals equation",
+{id:78, lec:"L-9", blk:"The equation", topic:"The van der Waals equation", t:60,
  q:"The van der Waals equation for n moles is",
  opts:[
   "(P + an²/V²)(V − nb) = nRT",
@@ -1277,7 +1303,7 @@ const QUIZ = [
   "The co-volume must be subtracted — molecules take up space that is not available."],
  sol:"<b>(P + an²/V²)(V − nb) = nRT.</b> Add to P (attractions soften wall collisions), subtract from V (molecules occupy space)."},
 
-{id:79, lec:"L-9", blk:"The constants", topic:"What a measures",
+{id:79, lec:"L-9", blk:"The constants", topic:"What a measures", t:90,
  q:"The van der Waals constant a is a measure of",
  opts:[
   "intermolecular attraction",
@@ -1292,7 +1318,7 @@ const QUIZ = [
   "Z is a computed ratio, not a constant of the gas."],
  sol:"<b>a = attraction</b> (atm·L²·mol⁻²); <b>b = excluded volume</b> (L·mol⁻¹). Larger a ⇒ easier to liquefy."},
 
-{id:80, lec:"L-9", blk:"The constants", topic:"What b equals",
+{id:80, lec:"L-9", blk:"The constants", topic:"What b equals", t:60,
  q:"The van der Waals constant b equals",
  opts:[
   "four times the actual volume of the molecules in one mole",
@@ -1307,7 +1333,7 @@ const QUIZ = [
   "The molar volume is what the gas occupies overall, vastly larger than b."],
  sol:"<b>b = 4 × (actual molecular volume per mole).</b> Several Strong Box questions turn on remembering this factor of 4."},
 
-{id:81, lec:"L-9", blk:"Critical constants", topic:"Critical temperature",
+{id:81, lec:"L-9", blk:"Critical constants", topic:"Critical temperature", t:90,
  q:"In terms of the van der Waals constants, the critical temperature is",
  opts:["8a/27Rb","a/27b²","3b","a/Rb"],
  ans:0,
@@ -1318,7 +1344,7 @@ const QUIZ = [
   "That is the <b>Boyle</b> temperature T<sub>B</sub>."],
  sol:"<b>T<sub>c</sub> = 8a/27Rb · P<sub>c</sub> = a/27b² · V<sub>c</sub> = 3b · T<sub>B</sub> = a/Rb.</b>"},
 
-{id:82, lec:"L-9", blk:"Critical constants", topic:"The critical compressibility",
+{id:82, lec:"L-9", blk:"Critical constants", topic:"The critical compressibility", t:60,
  q:"For a van der Waals gas, the quantity P<sub>c</sub>V<sub>c</sub>/RT<sub>c</sub> equals",
  opts:["3/8","8/3","1","27/8"],
  ans:0,
@@ -1329,7 +1355,7 @@ const QUIZ = [
   "27/8 is the ratio T<sub>B</sub>/T<sub>c</sub>."],
  sol:"<b>P<sub>c</sub>V<sub>c</sub>/RT<sub>c</sub> = 3/8</b> for every van der Waals gas — a universal number, independent of a and b."},
 
-{id:83, lec:"L-9", blk:"Critical constants", topic:"Boyle versus critical temperature",
+{id:83, lec:"L-9", blk:"Critical constants", topic:"Boyle versus critical temperature", t:90,
  q:"For a van der Waals gas, the ratio T<sub>B</sub>/T<sub>c</sub> equals",
  opts:["27/8","8/27","3/8","1"],
  ans:0,
@@ -1340,7 +1366,7 @@ const QUIZ = [
   "The two temperatures are not equal."],
  sol:"T<sub>B</sub> = a/Rb and T<sub>c</sub> = 8a/27Rb ⇒ <b>T<sub>B</sub>/T<sub>c</sub> = 27/8</b>, so <b>T<sub>B</sub> &gt; T<sub>c</sub></b> always."},
 
-{id:84, lec:"L-9", blk:"Liquefaction", topic:"Which gas liquefies first",
+{id:84, lec:"L-9", blk:"Liquefaction", topic:"Which gas liquefies first", t:60,
  q:"Two gases are cooled from 500 K. NH₃ has T<sub>c</sub> = 405.5 K and CO₂ has T<sub>c</sub> = 304.1 K. On cooling,",
  opts:[
   "NH₃ liquefies first, because its critical temperature is higher",
@@ -1355,7 +1381,7 @@ const QUIZ = [
   "Both have critical temperatures below 500 K, so cooling will reach them."],
  sol:"<b>Higher T<sub>c</sub> ⇒ liquefies first on cooling.</b> And a higher T<sub>c</sub> reflects a larger a, i.e. stronger attractions."},
 
-{id:85, lec:"L-9", blk:"Calculations", topic:"Van der Waals constants from critical data",
+{id:85, lec:"L-9", blk:"Calculations", topic:"Van der Waals constants from critical data", t:90,
  q:"For NO, T<sub>c</sub> = 177 K and P<sub>c</sub> = 64.5 atm. The constant b is about",
  opts:["0.028 L mol⁻¹","0.28 L mol⁻¹","1.34 L mol⁻¹","0.0028 L mol⁻¹"],
  ans:0,
@@ -1366,7 +1392,7 @@ const QUIZ = [
   "0.0028 is ten times too small."],
  sol:"From V<sub>c</sub> = 3b and P<sub>c</sub>V<sub>c</sub>/RT<sub>c</sub> = 3/8: <b>b = RT<sub>c</sub>/(8P<sub>c</sub>) ≈ 0.0281 L mol⁻¹</b>, with a = 27(RT<sub>c</sub>)²/(64P<sub>c</sub>) ≈ 1.34."},
 
-{id:86, lec:"L-9", blk:"Limiting forms", topic:"The high-pressure limit",
+{id:86, lec:"L-9", blk:"Limiting forms", topic:"The high-pressure limit", t:90,
  q:"At very high pressure the van der Waals equation for one mole reduces approximately to",
  opts:[
   "P(V − b) = RT, giving Z = 1 + Pb/RT",
@@ -1381,7 +1407,7 @@ const QUIZ = [
   "Not a limiting form of the equation."],
  sol:"<b>High P: P(V − b) = RT ⇒ Z = 1 + Pb/RT &gt; 1</b> (size dominates). <b>Low P: Z = 1 − a/(RTV) &lt; 1</b> (attractions dominate)."},
 
-{id:87, lec:"L-9", blk:"Limiting forms", topic:"The low-pressure limit",
+{id:87, lec:"L-9", blk:"Limiting forms", topic:"The low-pressure limit", t:60,
  q:"At moderate-to-low pressure, where the volume is large, the dominant correction is",
  opts:[
   "the attraction term a/V², which pulls Z below 1",
@@ -1397,7 +1423,7 @@ const QUIZ = [
  sol:"<b>Large V ⇒ V − b ≈ V, so only a/V² matters ⇒ Z &lt; 1.</b> That is why most Z–P curves dip before rising."},
 
 /* ---------------- L-10 (9) ---------------- */
-{id:88, lec:"L-10", blk:"Properties", topic:"Defining features of a liquid",
+{id:88, lec:"L-10", blk:"Properties", topic:"Defining features of a liquid", t:60,
  q:"A liquid has",
  opts:[
   "a definite volume but no definite shape",
@@ -1412,7 +1438,7 @@ const QUIZ = [
   "That describes a gas."],
  sol:"<b>Liquid: definite volume, no definite shape, nearly incompressible.</b> Its intermolecular forces lie between those of gases and solids."},
 
-{id:89, lec:"L-10", blk:"Vapour pressure", topic:"What vapour pressure is",
+{id:89, lec:"L-10", blk:"Vapour pressure", topic:"What vapour pressure is", t:60,
  q:"The vapour pressure of a liquid is the pressure of its vapour when",
  opts:[
   "the rates of evaporation and condensation are equal",
@@ -1427,7 +1453,7 @@ const QUIZ = [
   "Vapour must be present for a vapour pressure to exist."],
  sol:"<b>Vapour pressure = pressure at dynamic equilibrium</b> between liquid and vapour. It rises with temperature and with weaker intermolecular forces."},
 
-{id:90, lec:"L-10", blk:"Boiling", topic:"The boiling condition",
+{id:90, lec:"L-10", blk:"Boiling", topic:"The boiling condition", t:60,
  q:"A liquid boils when its vapour pressure",
  opts:[
   "equals the external pressure",
@@ -1442,7 +1468,7 @@ const QUIZ = [
   "That is the ordinary situation below the boiling point."],
  sol:"<b>Boiling: vapour pressure = external pressure.</b> The <i>normal</i> boiling point uses 760 mm Hg."},
 
-{id:91, lec:"L-10", blk:"Boiling", topic:"Boiling at altitude",
+{id:91, lec:"L-10", blk:"Boiling", topic:"Boiling at altitude", t:60,
  q:"Water boils at a lower temperature on a mountain because",
  opts:[
   "the atmospheric pressure is lower, so a lower vapour pressure suffices",
@@ -1457,7 +1483,7 @@ const QUIZ = [
   "The vapour pressure depends only on temperature, not on altitude — it is the <b>external</b> pressure that changes."],
  sol:"Lower external pressure ⇒ the vapour pressure reaches it at a <b>lower temperature</b> ⇒ lower boiling point."},
 
-{id:92, lec:"L-10", blk:"Evaporation", topic:"Evaporative cooling",
+{id:92, lec:"L-10", blk:"Evaporation", topic:"Evaporative cooling", t:60,
  q:"Evaporation cools the remaining liquid because",
  opts:[
   "the most energetic molecules escape, lowering the average kinetic energy of those left",
@@ -1472,7 +1498,7 @@ const QUIZ = [
   "Evaporation is endothermic — it requires energy."],
  sol:"<b>The high-energy tail escapes</b>, so the average KE — and hence the temperature — of the remaining liquid falls."},
 
-{id:93, lec:"L-10", blk:"Surface tension", topic:"Units and meaning",
+{id:93, lec:"L-10", blk:"Surface tension", topic:"Units and meaning", t:60,
  q:"Surface tension and surface energy",
  opts:[
   "have the same dimensions and the same numerical value, but different names",
@@ -1487,7 +1513,7 @@ const QUIZ = [
   "There is no factor of 2 between them."],
  sol:"⚠ <b>Surface tension (N m⁻¹) and surface energy (J m⁻²) are dimensionally and numerically the same.</b> Only the name and the interpretation differ."},
 
-{id:94, lec:"L-10", blk:"Surface tension", topic:"Why drops are spherical",
+{id:94, lec:"L-10", blk:"Surface tension", topic:"Why drops are spherical", t:60,
  q:"Liquid drops are spherical because a sphere",
  opts:[
   "has the minimum surface area for a given volume, minimising surface energy",
@@ -1502,7 +1528,7 @@ const QUIZ = [
   "Shape does not change density."],
  sol:"Surface tension minimises <b>surface energy ∝ surface area</b>, and for a fixed volume the sphere has the least area."},
 
-{id:95, lec:"L-10", blk:"Temperature effects", topic:"Surface tension and temperature",
+{id:95, lec:"L-10", blk:"Temperature effects", topic:"Surface tension and temperature", t:60,
  q:"As temperature rises, the surface tension of a liquid",
  opts:[
   "decreases, reaching zero at the critical temperature",
@@ -1517,7 +1543,7 @@ const QUIZ = [
   "The trend is monotonically downward."],
  sol:"<b>Surface tension falls with T and vanishes at T<sub>c</sub></b>. Viscosity also falls with temperature, by roughly 2 % per °C."},
 
-{id:96, lec:"L-10", blk:"Viscosity", topic:"Comparing viscosities",
+{id:96, lec:"L-10", blk:"Viscosity", topic:"Comparing viscosities", t:60,
  q:"At the same temperature, which liquid is the more viscous?",
  opts:["glycerine","kerosene","water","ethanol"],
  ans:0,
@@ -1529,7 +1555,7 @@ const QUIZ = [
  sol:"<b>Stronger and more numerous intermolecular forces ⇒ higher viscosity.</b> Glycerine's three OH groups make it the standard example; castor oil beats coconut oil for the same reason."},
 
 /* ---------------- L-11 (10) ---------------- */
-{id:97, lec:"L-11", blk:"Types of force", topic:"Force between nonpolar molecules",
+{id:97, lec:"L-11", blk:"Types of force", topic:"Force between nonpolar molecules", t:60,
  q:"The only intermolecular force acting between nonpolar molecules such as CH₄ is",
  opts:[
   "London dispersion",
@@ -1544,7 +1570,7 @@ const QUIZ = [
   "Ion–dipole requires an ion and a polar molecule; neither is present."],
  sol:"<b>London dispersion acts between all molecules</b>, and it is the <b>only</b> force between nonpolar ones."},
 
-{id:98, lec:"L-11", blk:"Types of force", topic:"Which forces are van der Waals",
+{id:98, lec:"L-11", blk:"Types of force", topic:"Which forces are van der Waals", t:60,
  q:"Which force is <b>not</b> classified as a van der Waals force?",
  opts:[
   "ion–dipole",
@@ -1559,7 +1585,7 @@ const QUIZ = [
   "London dispersion is the third van der Waals force."],
  sol:"<b>van der Waals = dipole–dipole + dipole–induced dipole + dispersion.</b> ⚠ Ion–dipole and ion–induced dipole are <b>not</b> included."},
 
-{id:99, lec:"L-11", blk:"Dispersion", topic:"Distance dependence",
+{id:99, lec:"L-11", blk:"Dispersion", topic:"Distance dependence", t:60,
  q:"London dispersion forces vary with intermolecular separation as",
  opts:["1/r⁶","1/r","1/r²","1/r³"],
  ans:0,
@@ -1570,7 +1596,7 @@ const QUIZ = [
   "1/r³ applies to dipole–dipole interaction between <b>stationary</b> dipoles; freely rotating ones also give 1/r⁶."],
  sol:"<b>Dispersion ∝ 1/r⁶</b> — short-ranged, but present between all molecules and growing rapidly with size."},
 
-{id:100, lec:"L-11", blk:"Dispersion", topic:"Trend down a group",
+{id:100, lec:"L-11", blk:"Dispersion", topic:"Trend down a group", t:90,
  q:"The boiling points of CH₄, SiH₄ and GeH₄ increase in that order because",
  opts:[
   "larger electron clouds are more polarisable, strengthening dispersion forces",
@@ -1585,7 +1611,7 @@ const QUIZ = [
   "They become heavier, not lighter."],
  sol:"<b>Bigger, softer electron clouds ⇒ more polarisable ⇒ stronger dispersion ⇒ higher boiling point.</b> Hence CH₄ &lt; SiH₄ &lt; GeH₄ &lt; SnH₄."},
 
-{id:101, lec:"L-11", blk:"Dispersion", topic:"Shape and boiling point",
+{id:101, lec:"L-11", blk:"Dispersion", topic:"Shape and boiling point", t:60,
  q:"n-Pentane boils higher than neopentane because",
  opts:[
   "its linear shape gives a larger contact surface, strengthening dispersion forces",
@@ -1600,7 +1626,7 @@ const QUIZ = [
   "Neither has H on F, N or O."],
  sol:"<b>Linear &gt; branched (spherical) for boiling point</b>, because contact area — and hence dispersion — is greater. Same mass, different shape."},
 
-{id:102, lec:"L-11", blk:"Hydrogen bonding", topic:"When hydrogen bonding occurs",
+{id:102, lec:"L-11", blk:"Hydrogen bonding", topic:"When hydrogen bonding occurs", t:60,
  q:"Hydrogen bonding requires hydrogen to be bonded to",
  opts:["F, N or O","any halogen","carbon","any electronegative atom whatsoever"],
  ans:0,
@@ -1611,7 +1637,7 @@ const QUIZ = [
   "Electronegativity alone is not enough — small size is equally essential."],
  sol:"<b>H bonded to F, N or O</b> — the strongest intermolecular force. This is why HF &gt; HCl, H₂O &gt; H₂S and NH₃ &gt; PH₃ in boiling point."},
 
-{id:103, lec:"L-11", blk:"Hydrogen bonding", topic:"The anomalous hydrides",
+{id:103, lec:"L-11", blk:"Hydrogen bonding", topic:"The anomalous hydrides", t:60,
  q:"Water boils far higher than H₂S despite being the lighter molecule because",
  opts:[
   "water molecules hydrogen bond extensively while H₂S does not",
@@ -1626,7 +1652,7 @@ const QUIZ = [
   "H₂S is bent and slightly polar, but not hydrogen-bonded."],
  sol:"<b>H₂O, HF and NH₃ all boil anomalously high</b> for their size because of hydrogen bonding — the classic exceptions to the down-the-group trend."},
 
-{id:104, lec:"L-11", blk:"Hydrogen bonding", topic:"Intra versus inter",
+{id:104, lec:"L-11", blk:"Hydrogen bonding", topic:"Intra versus inter", t:60,
  q:"o-Nitrophenol boils lower than p-nitrophenol because",
  opts:[
   "o-nitrophenol forms an intramolecular hydrogen bond, leaving fewer to form between molecules",
@@ -1641,7 +1667,7 @@ const QUIZ = [
   "It does hydrogen bond — just <b>internally</b> rather than between molecules."],
  sol:"⚠ <b>Intramolecular H-bonding lowers the boiling point; intermolecular raises it.</b> The ortho isomer can close a ring internally; the para isomer cannot."},
 
-{id:105, lec:"L-11", blk:"Types of force", topic:"Identifying the force",
+{id:105, lec:"L-11", blk:"Types of force", topic:"Identifying the force", t:60,
  q:"The force operating between a helium atom and a polar molecule is",
  opts:[
   "dipole–induced dipole",
@@ -1656,7 +1682,7 @@ const QUIZ = [
   "Helium has no hydrogen and no lone-pair acceptor."],
  sol:"<b>Permanent dipole + nonpolar species ⇒ dipole–induced dipole</b> (the Debye force), one of the three van der Waals forces."},
 
-{id:106, lec:"L-11", blk:"Types of force", topic:"Two forces at once",
+{id:106, lec:"L-11", blk:"Types of force", topic:"Two forces at once", t:60,
  q:"Between HF molecules in the liquid state, the intermolecular forces present are",
  opts:[
   "dipole–dipole and hydrogen bonding",
@@ -1672,7 +1698,7 @@ const QUIZ = [
  sol:"HF is strongly polar and has H bonded to F, so <b>both dipole–dipole and hydrogen bonding</b> operate."},
 
 /* ---------------- Strong Box (10) ---------------- */
-{id:107, lec:"SB", blk:"Strong Box", topic:"Z for a size-only equation of state",
+{id:107, lec:"SB", blk:"Strong Box", topic:"Z for a size-only equation of state", t:90,
  q:"For a gas obeying P(V − nb) = nRT, the compressibility factor when the molar volume is 10b is",
  opts:["10/9","9/10","1","10"],
  ans:0,
@@ -1683,7 +1709,7 @@ const QUIZ = [
   "10 confuses V<sub>m</sub>/b with Z."],
  sol:"Z = V<sub>m</sub>/(V<sub>m</sub> − b). With V<sub>m</sub> = 10b: <b>Z = 10/9</b>. With no attraction term, Z must exceed 1."},
 
-{id:108, lec:"SB", blk:"Strong Box", topic:"Finding a from a pressure shortfall",
+{id:108, lec:"SB", blk:"Strong Box", topic:"Finding a from a pressure shortfall", t:180,
  q:"One mole of a gas in a 10 L vessel exerts 0.96 atm where an ideal gas would exert 1.00 atm. Taking the molecular volume as negligible, the van der Waals constant a is",
  opts:["4 atm L² mol⁻²","0.04 atm L² mol⁻²","0.4 atm L² mol⁻²","40 atm L² mol⁻²"],
  ans:0,
@@ -1694,7 +1720,7 @@ const QUIZ = [
   "40 applies one too many."],
  sol:"Ideal: PV = RT ⇒ RT = 1.00 × 10 = 10. van der Waals with b ≈ 0: (P + a/V²)V = RT ⇒ (0.96 + a/100)(10) = 10 ⇒ <b>a = 4 atm L² mol⁻²</b>."},
 
-{id:109, lec:"SB", blk:"Strong Box", topic:"Molecular volume from the Z–P slope",
+{id:109, lec:"SB", blk:"Strong Box", topic:"Molecular volume from the Z–P slope", t:180,
  q:"At very high pressure the Z-versus-P graph for one mole of a real gas at 273 K has slope 1/2.8 atm⁻¹. The volume actually occupied by the molecules in one mole is about",
  opts:["2 L","8 L","0.5 L","22.4 L"],
  ans:0,
@@ -1705,7 +1731,7 @@ const QUIZ = [
   "22.4 L is the molar volume of an ideal gas at STP, unrelated to the molecular volume."],
  sol:"High-P limit: Z = 1 + Pb/RT ⇒ dZ/dP = b/RT ⇒ b = (0.0821)(273)/2.8 ≈ 8 L mol⁻¹. Then <b>actual molecular volume = b/4 = 2 L</b>."},
 
-{id:110, lec:"SB", blk:"Strong Box", topic:"Speed ratio from partial pressures",
+{id:110, lec:"SB", blk:"Strong Box", topic:"Speed ratio from partial pressures", t:180,
  q:"1 g of ideal gas A in an evacuated vessel at 300 K gives 1 atm. Adding 2 g of ideal gas B raises the total to 1.5 atm. The ratio of the average speeds of A to B at the same temperature is",
  opts:["2 : 1","1 : 2","4 : 1","1 : 4"],
  ans:0,
@@ -1716,7 +1742,7 @@ const QUIZ = [
   "Both the direction and the root are wrong."],
  sol:"Same V and T ⇒ P ∝ n. n<sub>A</sub> = 1/M<sub>A</sub> gives 1 atm; n<sub>B</sub> = 2/M<sub>B</sub> gives 0.5 atm ⇒ <b>M<sub>B</sub> = 4M<sub>A</sub></b>. Then u<sub>A</sub>/u<sub>B</sub> = √(M<sub>B</sub>/M<sub>A</sub>) = <b>2 : 1</b>."},
 
-{id:111, lec:"SB", blk:"Strong Box", topic:"Finding a from Z",
+{id:111, lec:"SB", blk:"Strong Box", topic:"Finding a from Z", t:180,
  q:"One mole of a gas occupies 0.5 L at 27 °C with compressibility factor 0.8. Taking b = 0.04 L mol⁻¹ and R = 0.08 L atm K⁻¹ mol⁻¹, the constant a is about",
  opts:[
   "3.44 atm L² mol⁻²",
@@ -1731,7 +1757,7 @@ const QUIZ = [
   "38.4 is the pressure P in atm, not a."],
  sol:"P = ZRT/V = (0.8)(0.08)(300)/0.5 = 38.4 atm. Then (P + a/V²)(V − b) = RT: (38.4 + 4a)(0.46) = 24 ⇒ <b>a ≈ 3.44 atm L² mol⁻²</b>."},
 
-{id:112, lec:"SB", blk:"Strong Box", topic:"Density of a van der Waals gas",
+{id:112, lec:"SB", blk:"Strong Box", topic:"Density of a van der Waals gas", t:90,
  q:"A gas of molar mass 164.2 g mol⁻¹ has a = 4.105 atm L² mol⁻² and b = 0.1 L mol⁻¹. Its density at 2 atm and 500 K is about",
  opts:["8 kg m⁻³","4 kg m⁻³","16 kg m⁻³","80 kg m⁻³"],
  ans:0,
@@ -1742,7 +1768,7 @@ const QUIZ = [
   "80 is ten times too large — note 1 g L⁻¹ = 1 kg m⁻³."],
  sol:"Solve the van der Waals equation for V<sub>m</sub> ≈ 20.6 L mol⁻¹, then d = M/V<sub>m</sub> = 164.2/20.6 ≈ <b>8 g L⁻¹ = 8 kg m⁻³</b>. (The ideal-gas answer would be 164.2/20.5 ≈ 8.0 as well — the corrections nearly cancel here.)"},
 
-{id:113, lec:"SB", blk:"Strong Box", topic:"Expressing a via critical constants",
+{id:113, lec:"SB", blk:"Strong Box", topic:"Expressing a via critical constants", t:90,
  q:"Which expression does <b>not</b> equal the van der Waals constant a?",
  opts:[
   "(3/8)·P<sub>c</sub>V<sub>c</sub>/T<sub>c</sub>",
@@ -1757,7 +1783,7 @@ const QUIZ = [
   "Substituting both critical expressions again returns a."],
  sol:"Using T<sub>c</sub> = 8a/27Rb, P<sub>c</sub> = a/27b², V<sub>c</sub> = 3b, the last three all reduce to <b>a</b>. The first reduces to a multiple of <b>R</b>, because P<sub>c</sub>V<sub>c</sub>/T<sub>c</sub> is itself proportional to R."},
 
-{id:114, lec:"SB", blk:"The recurring technique", topic:"Reading a Z–P graph",
+{id:114, lec:"SB", blk:"The recurring technique", topic:"Reading a Z–P graph", t:90,
  q:"On a Z-versus-P plot for a real gas, the <b>high-pressure</b> slope gives access to",
  opts:[
   "b, since Z ≈ 1 + Pb/RT there",
@@ -1772,7 +1798,7 @@ const QUIZ = [
   "Molar mass does not appear in the compressibility factor."],
  sol:"<b>High P: Z = 1 + Pb/RT ⇒ slope = b/RT.</b> Low P: Z = 1 − a/(RTV), which is where a shows up."},
 
-{id:115, lec:"SB", blk:"The recurring technique", topic:"Why b carries a factor of 4",
+{id:115, lec:"SB", blk:"The recurring technique", topic:"Why b carries a factor of 4", t:90,
  q:"When a problem gives you b and asks for the actual volume of the molecules, you must",
  opts:[
   "divide b by 4, since b is the excluded volume",
@@ -1787,7 +1813,7 @@ const QUIZ = [
   "Dividing by N<sub>A</sub> converts per-mole to per-molecule, a separate step that does not address the factor of 4."],
  sol:"<b>b = 4 × (actual molecular volume per mole).</b> To reach the volume of a single molecule, divide by 4 <b>and</b> by N<sub>A</sub>."},
 
-{id:116, lec:"SB", blk:"The recurring technique", topic:"Choosing between Z and van der Waals",
+{id:116, lec:"SB", blk:"The recurring technique", topic:"Choosing between Z and van der Waals", t:90,
  q:"Given P, V, T and Z for a real gas, the quickest route to the amount of substance is",
  opts:[
   "n = PV/(ZRT), rearranging the definition of Z",
@@ -1806,13 +1832,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter C-1 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1830,6 +1867,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1864,15 +1904,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1884,47 +1925,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1934,30 +1992,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1966,7 +2068,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1979,9 +2083,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1990,7 +2112,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -2011,21 +2134,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter C-1 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

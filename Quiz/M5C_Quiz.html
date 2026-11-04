@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -241,7 +267,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (20) ---------------- */
-{id:1, lec:"L-1", blk:"Double angle", topic:"sin 2A",
+{id:1, lec:"L-1", blk:"Double angle", topic:"sin 2A", t:60,
  q:"sin 2A equals",
  opts:["2 sin A cos A","2 cos²A − 1","1 − 2 sin²A","sin²A − cos²A"],
  ans:0,
@@ -252,7 +278,7 @@ const QUIZ = [
   "That is −cos 2A, the primary form with every sign reversed."],
  sol:"<b>sin 2A = 2 sin A cos A</b>, and in terms of the tangent alone, sin 2A = 2tanA/(1 + tan²A)."},
 
-{id:2, lec:"L-1", blk:"Double angle", topic:"The three forms of cos 2A",
+{id:2, lec:"L-1", blk:"Double angle", topic:"The three forms of cos 2A", t:90,
  q:"Which of the following is <b>not</b> a valid form of cos 2A?",
  opts:[
   "2 sin²A − 1",
@@ -267,7 +293,7 @@ const QUIZ = [
   "Valid — substitute cos²A = 1 − sin²A instead."],
  sol:"<b>cos 2A = cos²A − sin²A = 2cos²A − 1 = 1 − 2sin²A = (1 − tan²A)/(1 + tan²A).</b> Note 2sin²A − 1 is <b>−</b>cos 2A."},
 
-{id:3, lec:"L-1", blk:"Double angle", topic:"Choosing the right form",
+{id:3, lec:"L-1", blk:"Double angle", topic:"Choosing the right form", t:60,
  q:"If you are given sin A and need cos 2A, the most efficient form is",
  opts:["1 − 2 sin²A","2 cos²A − 1","cos²A − sin²A","(1 − tan²A)/(1 + tan²A)"],
  ans:0,
@@ -278,7 +304,7 @@ const QUIZ = [
   "This needs tan A, requiring both sine and cosine first."],
  sol:"Match the form to what you are given: <b>have sin A → 1 − 2sin²A · have cos A → 2cos²A − 1 · have tan A → (1 − tan²A)/(1 + tan²A)</b>."},
 
-{id:4, lec:"L-1", blk:"Double angle", topic:"tan 2A",
+{id:4, lec:"L-1", blk:"Double angle", topic:"tan 2A", t:60,
  q:"tan 2A equals",
  opts:[
   "2 tan A/(1 − tan²A)",
@@ -293,7 +319,7 @@ const QUIZ = [
   "Doubling the angle is not doubling the tangent. Test A = 30°: tan 60° = √3 ≈ 1.73, but 2 tan30° ≈ 1.155."],
  sol:"<b>tan 2A = 2tanA/(1 − tan²A)</b>. Note the <b>minus</b> below, in contrast to sin 2A which has a plus."},
 
-{id:5, lec:"L-1", blk:"Double angle", topic:"sin 2A from tan A",
+{id:5, lec:"L-1", blk:"Double angle", topic:"sin 2A from tan A", t:60,
  q:"In terms of tan A alone, sin 2A equals",
  opts:[
   "2 tan A/(1 + tan²A)",
@@ -308,7 +334,7 @@ const QUIZ = [
   "This is the reciprocal of the answer."],
  sol:"<b>sin 2A = 2tanA/(1 + tan²A)</b> and <b>cos 2A = (1 − tan²A)/(1 + tan²A)</b> — the two “t-formulae”, both with 1 + tan²A below."},
 
-{id:6, lec:"L-1", blk:"Power reduction", topic:"1 − cos 2θ",
+{id:6, lec:"L-1", blk:"Power reduction", topic:"1 − cos 2θ", t:60,
  q:"The expression 1 − cos 2θ equals",
  opts:["2 sin²θ","2 cos²θ","sin²θ","1 + 2 sin²θ"],
  ans:0,
@@ -319,7 +345,7 @@ const QUIZ = [
   "Check θ = 0: this gives 1, but 1 − cos 0 = 0."],
  sol:"<b>1 − cos 2θ = 2 sin²θ</b> and <b>1 + cos 2θ = 2 cos²θ</b>. Whenever you see 1 ± cos(even angle), substitute immediately — it cracks most of this chapter."},
 
-{id:7, lec:"L-1", blk:"Power reduction", topic:"1 + cos 2θ",
+{id:7, lec:"L-1", blk:"Power reduction", topic:"1 + cos 2θ", t:60,
  q:"The expression 1 + cos 2θ equals",
  opts:["2 cos²θ","2 sin²θ","cos²θ","1 − 2 cos²θ"],
  ans:0,
@@ -330,7 +356,7 @@ const QUIZ = [
   "Check θ = 0: this gives −1, but 1 + cos 0 = 2."],
  sol:"<b>1 + cos 2θ = 2 cos²θ</b> — the “golden trick” of this chapter."},
 
-{id:8, lec:"L-1", blk:"Power reduction", topic:"Applying the golden trick",
+{id:8, lec:"L-1", blk:"Power reduction", topic:"Applying the golden trick", t:90,
  q:"The expression sin 2θ/(1 + cos 2θ) simplifies to",
  opts:["tan θ","cot θ","tan 2θ","sin θ"],
  ans:0,
@@ -341,7 +367,7 @@ const QUIZ = [
   "One cosine remains in the denominator, so the result is a tangent, not a sine."],
  sol:"sin2θ/(1 + cos2θ) = 2sinθcosθ/(2cos²θ) = <b>tan θ</b>. Correspondingly sin2θ/(1 − cos2θ) = cot θ."},
 
-{id:9, lec:"L-1", blk:"Half angle", topic:"sin²(A/2)",
+{id:9, lec:"L-1", blk:"Half angle", topic:"sin²(A/2)", t:60,
  q:"sin²(A/2) equals",
  opts:["(1 − cos A)/2","(1 + cos A)/2","(1 − cos A)/(1 + cos A)","(1 − sin A)/2"],
  ans:0,
@@ -352,7 +378,7 @@ const QUIZ = [
   "The half-angle formulas are built from the <b>cosine</b> of the full angle, never the sine."],
  sol:"<b>sin²(A/2) = (1 − cos A)/2</b> and <b>cos²(A/2) = (1 + cos A)/2</b>."},
 
-{id:10, lec:"L-1", blk:"Half angle", topic:"cos²(A/2)",
+{id:10, lec:"L-1", blk:"Half angle", topic:"cos²(A/2)", t:60,
  q:"cos²(A/2) equals",
  opts:["(1 + cos A)/2","(1 − cos A)/2","(1 + cos A)/(1 − cos A)","(1 + sin A)/2"],
  ans:0,
@@ -363,7 +389,7 @@ const QUIZ = [
   "Half-angle formulas use the cosine of the full angle."],
  sol:"<b>cos²(A/2) = (1 + cos A)/2.</b> Both half-angle squares come from the same power-reduction identities."},
 
-{id:11, lec:"L-1", blk:"Half angle", topic:"cot²(A/2)",
+{id:11, lec:"L-1", blk:"Half angle", topic:"cot²(A/2)", t:60,
  q:"cot²(A/2) equals",
  opts:[
   "(1 + cos A)/(1 − cos A)",
@@ -378,7 +404,7 @@ const QUIZ = [
   "That is cos²(A/2), missing the denominator."],
  sol:"<b>cot²(A/2) = (1 + cos A)/(1 − cos A)</b> — a clean ratio with no ± , because it is a square. Only the <b>unsquared</b> tan(A/2) carries a sign."},
 
-{id:12, lec:"L-1", blk:"Half angle", topic:"Where the ± sign comes from",
+{id:12, lec:"L-1", blk:"Half angle", topic:"Where the ± sign comes from", t:60,
  q:"In cos(A/2) = ±√((1 + cos A)/2), the sign is decided by",
  opts:[
   "the quadrant in which A/2 lies",
@@ -393,7 +419,7 @@ const QUIZ = [
   "Acuteness of A says nothing directly; what matters is where A/2 lands."],
  sol:"⚠ <b>Halve the range first, then read the quadrant of A/2.</b> Example: π &lt; A &lt; 3π/2 ⇒ π/2 &lt; A/2 &lt; 3π/4, which is QII, so cos(A/2) &lt; 0 and sin(A/2) &gt; 0."},
 
-{id:13, lec:"L-1", blk:"Half angle", topic:"A worked half-angle computation",
+{id:13, lec:"L-1", blk:"Half angle", topic:"A worked half-angle computation", t:90,
  q:"If tan x = 3/4 and x lies in the <b>third</b> quadrant, then cos(x/2) equals",
  opts:["−1/√10","1/√10","−3/√10","3/√10"],
  ans:0,
@@ -404,7 +430,7 @@ const QUIZ = [
   "That is sin(x/2), which is positive in QII."],
  sol:"tan x = 3/4 in QIII ⇒ cos x = −4/5. Then cos²(x/2) = (1 − 4/5)/2 = 1/10. Since π &lt; x &lt; 3π/2 gives π/2 &lt; x/2 &lt; 3π/4 (QII), <b>cos(x/2) = −1/√10</b> while sin(x/2) = +3/√10, so tan(x/2) = −3."},
 
-{id:14, lec:"L-1", blk:"Half angle", topic:"sin A in terms of A/2",
+{id:14, lec:"L-1", blk:"Half angle", topic:"sin A in terms of A/2", t:60,
  q:"sin A written in terms of A/2 is",
  opts:[
   "2 sin(A/2) cos(A/2)",
@@ -419,7 +445,7 @@ const QUIZ = [
   "The factor 2 is essential. Check A = 90°: sin90° = 1 but sin45°cos45° = 1/2."],
  sol:"<b>sin A = 2 sin(A/2) cos(A/2)</b> and <b>cos A = cos²(A/2) − sin²(A/2)</b> — the double-angle formulas read at half scale."},
 
-{id:15, lec:"L-1", blk:"Nested radicals", topic:"The collapsing chain",
+{id:15, lec:"L-1", blk:"Nested radicals", topic:"The collapsing chain", t:90,
  q:"For 0 &lt; θ &lt; π/8, the value of √(2 + √(2 + √(2 + 2cos 8θ))) is",
  opts:["2 cos θ","2 cos 2θ","cos θ","2 cos 4θ"],
  ans:0,
@@ -430,7 +456,7 @@ const QUIZ = [
   "That is the value after only one collapse."],
  sol:"Innermost: 2 + 2cos8θ = 4cos²4θ ⇒ √ = 2cos4θ. Then 2 + 2cos4θ = 4cos²2θ ⇒ 2cos2θ, and once more ⇒ <b>2 cos θ</b>. Three radicals, three halvings."},
 
-{id:16, lec:"L-1", blk:"Applying the identities", topic:"A squared-sum identity",
+{id:16, lec:"L-1", blk:"Applying the identities", topic:"A squared-sum identity", t:90,
  q:"The expression (cos A + cos B)² + (sin A − sin B)² equals",
  opts:[
   "4 cos²((A + B)/2)",
@@ -445,7 +471,7 @@ const QUIZ = [
   "Same error: the argument is the half-<b>sum</b>, not the half-difference."],
  sol:"Expand: 2 + 2(cosA cosB − sinA sinB) = 2 + 2cos(A + B) = 2[1 + cos(A+B)] = <b>4cos²((A + B)/2)</b>."},
 
-{id:17, lec:"L-1", blk:"Applying the identities", topic:"cos 4x in terms of x",
+{id:17, lec:"L-1", blk:"Applying the identities", topic:"cos 4x in terms of x", t:90,
  q:"cos 4x equals",
  opts:[
   "1 − 8 sin²x cos²x",
@@ -460,7 +486,7 @@ const QUIZ = [
   "Same check: 1 − 8(1/4) = −1 by coincidence, but at x = 30° the true value is cos120° = −1/2 while this gives 1 − 8/16 = 1/2."],
  sol:"cos4x = cos 2(2x) = 1 − 2sin²2x = 1 − 2(2sinx cosx)² = <b>1 − 8 sin²x cos²x</b>."},
 
-{id:18, lec:"L-1", blk:"Applying the identities", topic:"A fourth-power sum",
+{id:18, lec:"L-1", blk:"Applying the identities", topic:"A fourth-power sum", t:90,
  q:"The value of cos⁴(π/8) + cos⁴(3π/8) + cos⁴(5π/8) + cos⁴(7π/8) is",
  opts:["3/2","1","2","3/4"],
  ans:0,
@@ -471,7 +497,7 @@ const QUIZ = [
   "3/4 is half the answer, i.e. only one of the two identical pairs."],
  sol:"The four terms reduce to 2[cos⁴(π/8) + cos⁴(3π/8)] = ½[(1 + 1/√2)² + (1 − 1/√2)²] = ½[3] = <b>3/2</b>. The same value arises for the corresponding sin⁴ sum."},
 
-{id:19, lec:"L-1", blk:"Applying the identities", topic:"The sin⁴ companion",
+{id:19, lec:"L-1", blk:"Applying the identities", topic:"The sin⁴ companion", t:60,
  q:"The value of sin⁴(π/8) + sin⁴(3π/8) + sin⁴(5π/8) + sin⁴(7π/8) is",
  opts:["3/2","1","2","1/2"],
  ans:0,
@@ -482,7 +508,7 @@ const QUIZ = [
   "This is a third of the correct value."],
  sol:"2[sin⁴(π/8) + sin⁴(3π/8)] = ½[(1 − 1/√2)² + (1 + 1/√2)²] = <b>3/2</b> — identical to the cosine version, since the two brackets simply swap."},
 
-{id:20, lec:"L-1", blk:"Double angle", topic:"cos 2A from tan A",
+{id:20, lec:"L-1", blk:"Double angle", topic:"cos 2A from tan A", t:90,
  q:"In terms of tan A alone, cos 2A equals",
  opts:[
   "(1 − tan²A)/(1 + tan²A)",
@@ -498,7 +524,7 @@ const QUIZ = [
  sol:"<b>cos 2A = (1 − tan²A)/(1 + tan²A).</b> Together with sin2A = 2tanA/(1 + tan²A), this pair converts everything to a single variable t = tan A."},
 
 /* ---------------- L-2 (14) ---------------- */
-{id:21, lec:"L-2", blk:"22.5° values", topic:"sin 22.5°",
+{id:21, lec:"L-2", blk:"22.5° values", topic:"sin 22.5°", t:90,
  q:"The exact value of sin 22.5° is",
  opts:[
   "½√(2 − √2)",
@@ -513,7 +539,7 @@ const QUIZ = [
   "This uses cos 30° instead of cos 45°; it is the value of sin 15°."],
  sol:"sin²22.5° = (1 − cos45°)/2 = (2 − √2)/4 ⇒ <b>sin 22.5° = ½√(2 − √2)</b> ≈ 0.3827."},
 
-{id:22, lec:"L-2", blk:"22.5° values", topic:"cos 22.5°",
+{id:22, lec:"L-2", blk:"22.5° values", topic:"cos 22.5°", t:90,
  q:"The exact value of cos 22.5° is",
  opts:[
   "½√(2 + √2)",
@@ -528,7 +554,7 @@ const QUIZ = [
   "This uses cos 30°; it is the value of cos 15°."],
  sol:"cos²22.5° = (1 + cos45°)/2 = (2 + √2)/4 ⇒ <b>cos 22.5° = ½√(2 + √2)</b>. The two differ only in the internal sign."},
 
-{id:23, lec:"L-2", blk:"22.5° values", topic:"tan 22.5°",
+{id:23, lec:"L-2", blk:"22.5° values", topic:"tan 22.5°", t:90,
  q:"The exact value of tan 22.5° is",
  opts:["√2 − 1","√2 + 1","2 − √3","1/√2"],
  ans:0,
@@ -539,7 +565,7 @@ const QUIZ = [
   "1/√2 ≈ 0.707 is sin 45°, not a tangent of 22.5°."],
  sol:"<b>tan 22.5° = √2 − 1.</b> Note (√2 − 1)(√2 + 1) = 1, confirming tan 22.5° · tan 67.5° = 1."},
 
-{id:24, lec:"L-2", blk:"7.5° values", topic:"Building the 7.5° value",
+{id:24, lec:"L-2", blk:"7.5° values", topic:"Building the 7.5° value", t:90,
  q:"The exact value of sin 7.5° is derived by starting from",
  opts:[
   "cos 15° = 1 − 2 sin²7.5°",
@@ -554,7 +580,7 @@ const QUIZ = [
   "The tangent of 15° does not give a direct route to sin 7.5° through a half-angle formula."],
  sol:"cos 15° = 1 − 2sin²7.5° ⇒ sin²7.5° = (1 − cos15°)/2 = (4 − √6 − √2)/8, so <b>sin 7.5° = √((4 − √6 − √2)/8)</b> ≈ 0.1305."},
 
-{id:25, lec:"L-2", blk:"7.5° values", topic:"tan 7.5°",
+{id:25, lec:"L-2", blk:"7.5° values", topic:"tan 7.5°", t:60,
  q:"The exact value of tan 7.5° is",
  opts:[
   "√6 − √3 + √2 − 2",
@@ -569,7 +595,7 @@ const QUIZ = [
   "That is tan 22.5° ≈ 0.414, three times too large for a 7.5° tangent."],
  sol:"<b>tan 7.5° = √6 − √3 + √2 − 2</b> ≈ 0.1317, and <b>cot 7.5° = √6 + √3 + √2 + 2</b> ≈ 7.596. Their product is 1."},
 
-{id:26, lec:"L-2", blk:"Telescoping products", topic:"The chain formula",
+{id:26, lec:"L-2", blk:"Telescoping products", topic:"The chain formula", t:60,
  q:"The product cos A · cos 2A · cos 4A · … · cos 2<sup>n−1</sup>A equals",
  opts:[
   "sin(2ⁿA)/(2ⁿ sin A)",
@@ -584,7 +610,7 @@ const QUIZ = [
   "The denominator gathers 2<sup>n</sup>, not n — one factor of 2 per step."],
  sol:"<b>cos A·cos 2A·…·cos 2<sup>n−1</sup>A = sin(2<sup>n</sup>A)/(2<sup>n</sup> sin A).</b> Use it whenever the angles <b>double</b> each time — never expand term by term."},
 
-{id:27, lec:"L-2", blk:"Telescoping products", topic:"Why it telescopes",
+{id:27, lec:"L-2", blk:"Telescoping products", topic:"Why it telescopes", t:60,
  q:"The chain product telescopes because",
  opts:[
   "multiplying by 2 sin A creates 2 sin A cos A = sin 2A, which then pairs with cos 2A, and so on",
@@ -599,7 +625,7 @@ const QUIZ = [
   "No reciprocal relationship exists between consecutive factors."],
  sol:"Seed the chain with 2 sin A, then apply <b>2 sin θ cos θ = sin 2θ</b> repeatedly. Each step costs a factor of 2 in the denominator and doubles the angle upstairs."},
 
-{id:28, lec:"L-2", blk:"Telescoping products", topic:"A four-term chain",
+{id:28, lec:"L-2", blk:"Telescoping products", topic:"A four-term chain", t:90,
  q:"The value of cos 20°·cos 40°·cos 80° is",
  opts:["1/8","1/4","1/16","1/2"],
  ans:0,
@@ -610,7 +636,7 @@ const QUIZ = [
   "1/2 is the value of a single-term chain."],
  sol:"cos20°cos40°cos80° = sin(2³·20°)/(2³ sin20°) = sin160°/(8sin20°) = <b>1/8</b>, because sin160° = sin(180° − 20°) = sin20°."},
 
-{id:29, lec:"L-2", blk:"Telescoping products", topic:"Choosing to use the chain",
+{id:29, lec:"L-2", blk:"Telescoping products", topic:"Choosing to use the chain", t:60,
  q:"To evaluate a product of cosines whose angles <b>double</b> at each step, you should",
  opts:[
   "apply the telescoping chain formula rather than expanding term by term",
@@ -625,7 +651,7 @@ const QUIZ = [
   "Numerical multiplication gives a decimal but not the exact value the question wants."],
  sol:"<b>Doubling angles ⇒ reach for sin(2<sup>n</sup>A)/(2<sup>n</sup> sinA).</b> Look for the pattern A, 2A, 4A, 8A, … before doing anything else."},
 
-{id:30, lec:"L-2", blk:"Applying the identities", topic:"Recognising the golden trick",
+{id:30, lec:"L-2", blk:"Applying the identities", topic:"Recognising the golden trick", t:90,
  q:"When you see the expression 1 + cos 8θ inside a problem, the immediate substitution is",
  opts:["2 cos²4θ","2 sin²4θ","2 cos²8θ","cos 4θ"],
  ans:0,
@@ -636,7 +662,7 @@ const QUIZ = [
   "The factor 2 and the square are both essential."],
  sol:"<b>1 + cos 2φ = 2cos²φ</b> — the angle inside <b>halves</b>. So 1 + cos8θ = 2cos²4θ, and 1 − cos8θ = 2sin²4θ."},
 
-{id:31, lec:"L-2", blk:"Applying the identities", topic:"A ratio that collapses",
+{id:31, lec:"L-2", blk:"Applying the identities", topic:"A ratio that collapses", t:60,
  q:"The expression (1 − cos 2θ)/sin 2θ simplifies to",
  opts:["tan θ","cot θ","tan 2θ","1"],
  ans:0,
@@ -647,7 +673,7 @@ const QUIZ = [
   "The expression varies with θ, so it is not constant."],
  sol:"(1 − cos2θ)/sin2θ = 2sin²θ/(2sinθcosθ) = <b>tan θ</b>. Both this and sin2θ/(1 + cos2θ) give tan θ — two standard half-angle forms."},
 
-{id:32, lec:"L-2", blk:"22.5° values", topic:"Checking a surd value",
+{id:32, lec:"L-2", blk:"22.5° values", topic:"Checking a surd value", t:60,
  q:"Which check confirms that cos 22.5° = ½√(2 + √2) rather than ½√(2 − √2)?",
  opts:[
   "22.5° is less than 45°, so its cosine must exceed cos 45° ≈ 0.707 — and ½√(2 + √2) ≈ 0.924",
@@ -662,7 +688,7 @@ const QUIZ = [
   "It is the other way round — the plus belongs to the <b>cosine</b>, since cos²(A/2) = (1 + cos A)/2."],
  sol:"Use monotonicity as a sanity check: on (0°, 90°) <b>sine increases and cosine decreases</b>. That alone assigns the ± inside the surd."},
 
-{id:33, lec:"L-2", blk:"Telescoping products", topic:"A chain with a π denominator",
+{id:33, lec:"L-2", blk:"Telescoping products", topic:"A chain with a π denominator", t:60,
  q:"The value of cos(π/7)·cos(2π/7)·cos(4π/7) is",
  opts:["−1/8","1/8","1/4","−1/4"],
  ans:0,
@@ -673,7 +699,7 @@ const QUIZ = [
   "The magnitude is 1/8, not 1/4."],
  sol:"sin(8π/7)/(8 sin(π/7)); since 8π/7 = π + π/7, sin(8π/7) = −sin(π/7), so the product is <b>−1/8</b>. ⚠ Always check where 2<sup>n</sup>A lands before cancelling."},
 
-{id:34, lec:"L-2", blk:"7.5° values", topic:"cos 7.5°",
+{id:34, lec:"L-2", blk:"7.5° values", topic:"cos 7.5°", t:90,
  q:"The exact value of cos 7.5° is",
  opts:[
   "√((4 + √6 + √2)/8)",
@@ -689,7 +715,7 @@ const QUIZ = [
  sol:"cos²7.5° = (1 + cos15°)/2 with cos15° = (√6 + √2)/4 ⇒ <b>cos 7.5° = √((4 + √6 + √2)/8)</b> ≈ 0.9914."},
 
 /* ---------------- L-3 (18) ---------------- */
-{id:35, lec:"L-3", blk:"Triple angle", topic:"sin 3θ",
+{id:35, lec:"L-3", blk:"Triple angle", topic:"sin 3θ", t:60,
  q:"sin 3θ equals",
  opts:[
   "3 sin θ − 4 sin³θ",
@@ -704,7 +730,7 @@ const QUIZ = [
   "Same check: 1.5 + 0.5 = 2, impossible for a sine."],
  sol:"<b>sin 3θ = 3 sin θ − 4 sin³θ</b> — memory hook: <b>sine is 3 − 4</b> (minus first), <b>cosine is 4 − 3</b> (plus first)."},
 
-{id:36, lec:"L-3", blk:"Triple angle", topic:"cos 3θ",
+{id:36, lec:"L-3", blk:"Triple angle", topic:"cos 3θ", t:60,
  q:"cos 3θ equals",
  opts:[
   "4 cos³θ − 3 cos θ",
@@ -719,7 +745,7 @@ const QUIZ = [
   "Same check: 4 + 3 = 7, impossible for a cosine."],
  sol:"<b>cos 3θ = 4 cos³θ − 3 cos θ.</b> Both triple-angle formulas are cubics; only the order of 3 and 4 differs."},
 
-{id:37, lec:"L-3", blk:"Triple angle", topic:"tan 3θ",
+{id:37, lec:"L-3", blk:"Triple angle", topic:"tan 3θ", t:60,
  q:"tan 3θ equals",
  opts:[
   "(3 tan θ − tan³θ)/(1 − 3 tan²θ)",
@@ -734,7 +760,7 @@ const QUIZ = [
   "The tangent version is a <b>quotient</b>, not a polynomial — unlike sine and cosine."],
  sol:"<b>tan 3θ = (3tanθ − tan³θ)/(1 − 3tan²θ).</b>"},
 
-{id:38, lec:"L-3", blk:"Triple angle", topic:"Recognising a triple-angle form",
+{id:38, lec:"L-3", blk:"Triple angle", topic:"Recognising a triple-angle form", t:90,
  q:"If sin A = ½ with 0° &lt; A &lt; 90°, then 4 cos³A − 3 cos A equals",
  opts:["0","1","−1","√3/2"],
  ans:0,
@@ -745,7 +771,7 @@ const QUIZ = [
   "√3/2 is cos 30°, not cos 3A."],
  sol:"<b>Spot the pattern first.</b> 4cos³A − 3cosA = cos 3A, and A = 30° ⇒ cos 90° = <b>0</b>. Substituting cos30° = √3/2 directly works too but takes longer."},
 
-{id:39, lec:"L-3", blk:"Special values", topic:"sin 18°",
+{id:39, lec:"L-3", blk:"Special values", topic:"sin 18°", t:90,
  q:"The exact value of sin 18° is",
  opts:[
   "(√5 − 1)/4",
@@ -760,7 +786,7 @@ const QUIZ = [
   "That is sin 36° ≈ 0.588."],
  sol:"<b>sin 18° = (√5 − 1)/4</b> ≈ 0.309. It comes from 4sin²θ + 2sinθ − 1 = 0, derived by writing 5θ = 90° so that sin 2θ = cos 3θ."},
 
-{id:40, lec:"L-3", blk:"Special values", topic:"cos 36°",
+{id:40, lec:"L-3", blk:"Special values", topic:"cos 36°", t:60,
  q:"The exact value of cos 36° is",
  opts:[
   "(√5 + 1)/4",
@@ -775,7 +801,7 @@ const QUIZ = [
   "≈ 1.618 (the golden ratio) exceeds 1, so it cannot be a cosine."],
  sol:"<b>cos 36° = (√5 + 1)/4</b> ≈ 0.809 = sin 54°."},
 
-{id:41, lec:"L-3", blk:"Special values", topic:"The product that finishes proofs",
+{id:41, lec:"L-3", blk:"Special values", topic:"The product that finishes proofs", t:90,
  q:"The product sin 18° · cos 36° equals",
  opts:["1/4","1/8","1/16","1/2"],
  ans:0,
@@ -786,7 +812,7 @@ const QUIZ = [
   "1/2 is double the value."],
  sol:"<b>sin 18° · cos 36° = (5 − 1)/16 = 1/4.</b> This exact product finishes many “prove that = 1/8 or 1/16” problems — worth memorising."},
 
-{id:42, lec:"L-3", blk:"Special values", topic:"cos 72°",
+{id:42, lec:"L-3", blk:"Special values", topic:"cos 72°", t:60,
  q:"The exact value of cos 72° is",
  opts:[
   "(√5 − 1)/4",
@@ -801,7 +827,7 @@ const QUIZ = [
   "That is sin 36° = cos 54° ≈ 0.588."],
  sol:"Complementary angles swap sine and cosine: <b>cos 72° = sin 18° = (√5 − 1)/4</b>."},
 
-{id:43, lec:"L-3", blk:"Special values", topic:"cos 108° — a table to check",
+{id:43, lec:"L-3", blk:"Special values", topic:"cos 108° — a table to check", t:60,
  q:"The exact value of cos 108° is",
  opts:[
   "−(√5 − 1)/4",
@@ -816,7 +842,7 @@ const QUIZ = [
   "That is −sin 72° = −cos 18° ≈ −0.951."],
  sol:"cos 108° = −cos 72° = <b>−(√5 − 1)/4</b> ≈ −0.309. ⚠ The module's special-angle table misprints this as −(1 + √5)/4, which is cos 144°."},
 
-{id:44, lec:"L-3", blk:"Special values", topic:"Deriving sin 18°",
+{id:44, lec:"L-3", blk:"Special values", topic:"Deriving sin 18°", t:90,
  q:"The derivation of sin 18° starts by observing that, for θ = 18°,",
  opts:[
   "5θ = 90°, so 2θ = 90° − 3θ and hence sin 2θ = cos 3θ",
@@ -831,7 +857,7 @@ const QUIZ = [
   "27° is not standard either, so this split leads nowhere."],
  sol:"θ = 18° ⇒ 5θ = 90° ⇒ 2θ = 90° − 3θ ⇒ <b>sin 2θ = cos 3θ</b>. Expanding and cancelling cos θ gives <b>4sin²θ + 2sinθ − 1 = 0</b>, whose positive root is (√5 − 1)/4."},
 
-{id:45, lec:"L-3", blk:"Applying the values", topic:"A product of square differences",
+{id:45, lec:"L-3", blk:"Applying the values", topic:"A product of square differences", t:90,
  q:"The value of (sin²24° − sin²6°)(sin²42° − sin²12°) is",
  opts:["1/16","1/8","1/4","1/32"],
  ans:0,
@@ -842,7 +868,7 @@ const QUIZ = [
   "1/32 is half the value."],
  sol:"Convert both factors: ¼[cos12° − cos48°][cos24° − cos84°] = ¼[2sin30°sin18°][2sin54°sin30°] = ¼·sin18°·cos36° = ¼ · ¼ = <b>1/16</b>."},
 
-{id:46, lec:"L-3", blk:"Applying the values", topic:"A tangent combination",
+{id:46, lec:"L-3", blk:"Applying the values", topic:"A tangent combination", t:90,
  q:"The value of tan 9° − tan 27° − tan 63° + tan 81° is",
  opts:["4","2","0","√5"],
  ans:0,
@@ -853,7 +879,7 @@ const QUIZ = [
   "The surds cancel completely, leaving the integer 4."],
  sol:"tan81° = cot9° and tan63° = cot27°, so the sum is (tan9° + cot9°) − (tan27° + cot27°) = 2/sin18° − 2/sin54° = <b>4</b>. Numerically 0.158 − 0.510 − 1.963 + 6.314 = 4.000 ✓"},
 
-{id:47, lec:"L-3", blk:"Applying the values", topic:"The tan + cot bridge",
+{id:47, lec:"L-3", blk:"Applying the values", topic:"The tan + cot bridge", t:60,
  q:"The step tan θ + cot θ = 2/sin 2θ is useful in these problems because",
  opts:[
   "it converts a pair of complementary tangents into a single sine, which the 18°/54° values then evaluate",
@@ -868,7 +894,7 @@ const QUIZ = [
   "It works the other way round: tangents become a sine."],
  sol:"<b>tan θ + cot θ = 1/(sinθcosθ) = 2/sin 2θ.</b> Spot complementary pairs (9°/81°, 27°/63°) and this bridge does the rest."},
 
-{id:48, lec:"L-3", blk:"Special values", topic:"sin 54°",
+{id:48, lec:"L-3", blk:"Special values", topic:"sin 54°", t:60,
  q:"The exact value of sin 54° is",
  opts:[
   "(√5 + 1)/4",
@@ -883,7 +909,7 @@ const QUIZ = [
   "That is sin 72° = cos 18° ≈ 0.951."],
  sol:"<b>sin 54° = cos 36° = (√5 + 1)/4.</b> The 18°-family values come in just two shapes: (√5 ± 1)/4 and √(10 ± 2√5)/4."},
 
-{id:49, lec:"L-3", blk:"Triple angle", topic:"A cubic in disguise",
+{id:49, lec:"L-3", blk:"Triple angle", topic:"A cubic in disguise", t:90,
  q:"If cos θ = ½(a + 1/a), then cos 3θ equals",
  opts:[
   "½(a³ + 1/a³)",
@@ -898,7 +924,7 @@ const QUIZ = [
   "The <b>sum</b> of cubes survives, not the difference — cosine is an even function of this substitution."],
  sol:"With c = ½(a + 1/a): 4c³ − 3c = ½(a + 1/a)³ − (3/2)(a + 1/a) = ½[a³ + 1/a³ + 3(a + 1/a)] − (3/2)(a + 1/a) = <b>½(a³ + 1/a³)</b>, so λ = 1."},
 
-{id:50, lec:"L-3", blk:"Applying the values", topic:"A double-angle ratio",
+{id:50, lec:"L-3", blk:"Applying the values", topic:"A double-angle ratio", t:90,
  q:"The value of 2(sin 2θ + 2cos²θ − 1)/(cos θ − sin θ − cos 3θ + sin 3θ) is",
  opts:["cosec θ","sec θ","cos θ","sin θ"],
  ans:0,
@@ -909,7 +935,7 @@ const QUIZ = [
   "The result is the <b>reciprocal</b> of a sine."],
  sol:"Numerator = 2(sin2θ + cos2θ), using 2cos²θ − 1 = cos2θ. Denominator: (sin3θ − sinθ) − (cos3θ − cosθ) = 2sinθcos2θ + 2sinθsin2θ = 2sinθ(sin2θ + cos2θ). The brackets cancel, leaving <b>cosec θ</b>."},
 
-{id:51, lec:"L-3", blk:"Applying the values", topic:"A squared-sum identity",
+{id:51, lec:"L-3", blk:"Applying the values", topic:"A squared-sum identity", t:60,
  q:"The value of cos²A(3 − 4cos²A)² + sin²A(3 − 4sin²A)² is",
  opts:["1","cos 4A","sin 4A","0"],
  ans:0,
@@ -920,7 +946,7 @@ const QUIZ = [
   "A sum of two squares vanishes only if both terms do, which does not happen here."],
  sol:"Each term is a perfect square of a triple-angle expression: the sum is <b>cos²3A + sin²3A = 1</b>, independent of A."},
 
-{id:52, lec:"L-3", blk:"Applying the values", topic:"Half-angle from a double-angle condition",
+{id:52, lec:"L-3", blk:"Applying the values", topic:"Half-angle from a double-angle condition", t:90,
  q:"If α and β are acute and cos 2α = (3cos 2β − 1)/(3 − cos 2β), then tan α equals",
  opts:["√2 tan β","(1/√2) tan β","√2 cot β","(1/√2) cot β"],
  ans:0,
@@ -932,7 +958,7 @@ const QUIZ = [
  sol:"Substitute cos2α = (1 − t²)/(1 + t²) with t = tanα and similarly for β. Cross-multiplying and simplifying yields <b>tan²α = 2 tan²β</b>, so tan α = <b>√2 tan β</b> for acute angles."},
 
 /* ---------------- L-4 (16) ---------------- */
-{id:53, lec:"L-4", blk:"Tangent & cotangent", topic:"The tangent corollary",
+{id:53, lec:"L-4", blk:"Tangent & cotangent", topic:"The tangent corollary", t:60,
  q:"If A + B + C = π, then tan A + tan B + tan C equals",
  opts:[
   "tan A · tan B · tan C",
@@ -947,7 +973,7 @@ const QUIZ = [
   "For the equilateral triangle the cotangent sum is √3, not 3√3."],
  sol:"<b>tan A + tan B + tan C = tan A tan B tan C</b> whenever A + B + C = π."},
 
-{id:54, lec:"L-4", blk:"Tangent & cotangent", topic:"The cotangent corollary",
+{id:54, lec:"L-4", blk:"Tangent & cotangent", topic:"The cotangent corollary", t:60,
  q:"If A + B + C = π, then cot A cot B + cot B cot C + cot C cot A equals",
  opts:["1","0","−1","cot A cot B cot C"],
  ans:0,
@@ -958,7 +984,7 @@ const QUIZ = [
   "For the equilateral triangle that product is 1/(3√3) ≈ 0.192, not 1."],
  sol:"<b>cot A cot B + cot B cot C + cot C cot A = 1</b> for a triangle."},
 
-{id:55, lec:"L-4", blk:"Half-angle pair", topic:"The half-angle tangent identity",
+{id:55, lec:"L-4", blk:"Half-angle pair", topic:"The half-angle tangent identity", t:60,
  q:"If A + B + C = π, then tan(A/2)tan(B/2) + tan(B/2)tan(C/2) + tan(C/2)tan(A/2) equals",
  opts:["1","0","−1","tan(A/2)tan(B/2)tan(C/2)"],
  ans:0,
@@ -969,7 +995,7 @@ const QUIZ = [
   "That product is tan³30° = 1/(3√3) for the equilateral case, not 1."],
  sol:"<b>Σ tan(A/2)tan(B/2) = 1</b> when A + B + C = π — the half-angle mirror of the cotangent corollary."},
 
-{id:56, lec:"L-4", blk:"Half-angle pair", topic:"The half-angle cotangent identity",
+{id:56, lec:"L-4", blk:"Half-angle pair", topic:"The half-angle cotangent identity", t:60,
  q:"If A + B + C = π, then cot(A/2) + cot(B/2) + cot(C/2) equals",
  opts:[
   "cot(A/2)·cot(B/2)·cot(C/2)",
@@ -984,7 +1010,7 @@ const QUIZ = [
   "Same check: that product is 1/(3√3), not 3√3."],
  sol:"<b>cot(A/2) + cot(B/2) + cot(C/2) = cot(A/2)cot(B/2)cot(C/2).</b> Note how the half-angle version swaps tan ↔ cot relative to the full-angle one."},
 
-{id:57, lec:"L-4", blk:"Sum-to-product identities", topic:"sin 2A + sin 2B + sin 2C",
+{id:57, lec:"L-4", blk:"Sum-to-product identities", topic:"sin 2A + sin 2B + sin 2C", t:60,
  q:"If A + B + C = π, then sin 2A + sin 2B + sin 2C equals",
  opts:[
   "4 sin A sin B sin C",
@@ -999,7 +1025,7 @@ const QUIZ = [
   "That is cos 2A + cos 2B + cos 2C."],
  sol:"<b>sin 2A + sin 2B + sin 2C = 4 sin A sin B sin C</b> — no constant term."},
 
-{id:58, lec:"L-4", blk:"Sum-to-product identities", topic:"cos 2A + cos 2B + cos 2C",
+{id:58, lec:"L-4", blk:"Sum-to-product identities", topic:"cos 2A + cos 2B + cos 2C", t:60,
  q:"If A + B + C = π, then cos 2A + cos 2B + cos 2C equals",
  opts:[
   "−1 − 4 cos A cos B cos C",
@@ -1014,7 +1040,7 @@ const QUIZ = [
   "Wrong constant sign and wrong product."],
  sol:"<b>cos 2A + cos 2B + cos 2C = −1 − 4 cos A cos B cos C.</b> ⚠ The leading −1 is the mark most often dropped."},
 
-{id:59, lec:"L-4", blk:"Sum-to-product identities", topic:"sin A + sin B + sin C",
+{id:59, lec:"L-4", blk:"Sum-to-product identities", topic:"sin A + sin B + sin C", t:60,
  q:"If A + B + C = π, then sin A + sin B + sin C equals",
  opts:[
   "4 cos(A/2) cos(B/2) cos(C/2)",
@@ -1029,7 +1055,7 @@ const QUIZ = [
   "Full-angle sines belong to the sin 2A identity."],
  sol:"<b>sin A + sin B + sin C = 4 cos(A/2)cos(B/2)cos(C/2)</b> — no constant."},
 
-{id:60, lec:"L-4", blk:"Sum-to-product identities", topic:"cos A + cos B + cos C",
+{id:60, lec:"L-4", blk:"Sum-to-product identities", topic:"cos A + cos B + cos C", t:60,
  q:"If A + B + C = π, then cos A + cos B + cos C equals",
  opts:[
   "1 + 4 sin(A/2) sin(B/2) sin(C/2)",
@@ -1044,7 +1070,7 @@ const QUIZ = [
   "The signs are inverted; that shape belongs to the cos 2A identity."],
  sol:"<b>cos A + cos B + cos C = 1 + 4 sin(A/2)sin(B/2)sin(C/2).</b> ⚠ The +1 here and the −1 in the cos 2A identity are the two constants to lock in."},
 
-{id:61, lec:"L-4", blk:"The pairing rule", topic:"Full angles versus half angles",
+{id:61, lec:"L-4", blk:"The pairing rule", topic:"Full angles versus half angles", t:60,
  q:"Across the four conditional identities, the pattern is that",
  opts:[
   "full-angle sums produce products of full-angle ratios, while half-angle products arise from the plain sums sin A + sin B + sin C and cos A + cos B + cos C",
@@ -1059,7 +1085,7 @@ const QUIZ = [
   "The sine identities have no constant while the cosine ones do — they behave quite differently."],
  sol:"<b>Doubled sums → full-angle products, no constant. Plain sums → half-angle products, with a constant on the cosine one.</b>"},
 
-{id:62, lec:"L-4", blk:"The proving substitution", topic:"The one substitution behind them all",
+{id:62, lec:"L-4", blk:"The proving substitution", topic:"The one substitution behind them all", t:90,
  q:"When A + B + C = π, the substitution that proves every conditional identity is",
  opts:[
   "cos((A + B)/2) = sin(C/2) and sin((A + B)/2) = cos(C/2)",
@@ -1074,7 +1100,7 @@ const QUIZ = [
   "A + B = π − C, not C."],
  sol:"<b>(A + B)/2 = π/2 − C/2</b>, so cos((A+B)/2) = sin(C/2) and sin((A+B)/2) = cos(C/2). Convert a pair of terms to a product, apply this, and the third angle appears."},
 
-{id:63, lec:"L-4", blk:"Applying the identities", topic:"Finding an angle from a condition",
+{id:63, lec:"L-4", blk:"Applying the identities", topic:"Finding an angle from a condition", t:90,
  q:"In a triangle ABC, sin A − cos B = cos C. Then angle B equals",
  opts:["π/2","π/3","π/4","π/6"],
  ans:0,
@@ -1085,7 +1111,7 @@ const QUIZ = [
   "π/6 fails for the same reason — only 2B = π resolves the system."],
  sol:"sin A = cos B + cos C ⇒ 2sin(A/2)cos(A/2) = 2cos((B+C)/2)cos((B−C)/2) = 2sin(A/2)cos((B−C)/2). Cancelling gives A = B − C, and with A + B + C = π: 2B = π, so <b>B = π/2</b> — the triangle is right-angled at B."},
 
-{id:64, lec:"L-4", blk:"Applying the identities", topic:"A ratio of two identities",
+{id:64, lec:"L-4", blk:"Applying the identities", topic:"A ratio of two identities", t:60,
  q:"If A + B + C = π, then (sin 2A + sin 2B + sin 2C)/(cos A + cos B + cos C − 1) equals",
  opts:[
   "8 cos(A/2) cos(B/2) cos(C/2)",
@@ -1100,7 +1126,7 @@ const QUIZ = [
   "The expression depends on the triangle, so it is not a constant."],
  sol:"Numerator 4 sinA sinB sinC = 4·8·∏sin(A/2)cos(A/2); denominator 4∏sin(A/2). The sines cancel, leaving <b>8 cos(A/2)cos(B/2)cos(C/2)</b>."},
 
-{id:65, lec:"L-4", blk:"Applying the identities", topic:"An inequality from the half-angle identity",
+{id:65, lec:"L-4", blk:"Applying the identities", topic:"An inequality from the half-angle identity", t:60,
  q:"For the angles of a triangle, tan²(A/2) + tan²(B/2) + tan²(C/2) is",
  opts:[
   "always at least 1",
@@ -1115,7 +1141,7 @@ const QUIZ = [
   "It is bounded <b>below</b> by 1."],
  sol:"Σtan²(A/2) − 1 = Σtan²(A/2) − Σtan(A/2)tan(B/2) = ½Σ(tan(A/2) − tan(B/2))² ≥ 0, so the sum is <b>≥ 1</b>, with equality only when the triangle is equilateral."},
 
-{id:66, lec:"L-4", blk:"Applying the identities", topic:"A non-π angle sum",
+{id:66, lec:"L-4", blk:"Applying the identities", topic:"A non-π angle sum", t:90,
  q:"If A + B + C = 3π/2, then cos 2A + cos 2B + cos 2C equals",
  opts:[
   "1 − 4 sin A sin B sin C",
@@ -1130,7 +1156,7 @@ const QUIZ = [
   "Wrong constant sign and wrong product."],
  sol:"cos2A + cos2B = 2cos(A+B)cos(A−B) = −2 sinC cos(A−B). Adding cos2C and using sinC = −cos(A+B) gives <b>1 − 4 sinA sinB sinC</b>. ⚠ Conditional identities depend on the <b>exact</b> angle sum."},
 
-{id:67, lec:"L-4", blk:"The pairing rule", topic:"Which identities need a constant",
+{id:67, lec:"L-4", blk:"The pairing rule", topic:"Which identities need a constant", t:90,
  q:"Among the four standard conditional identities, the additive constants appear",
  opts:[
   "only in the two cosine identities: −1 with cos 2A + cos 2B + cos 2C, and +1 with cos A + cos B + cos C",
@@ -1145,7 +1171,7 @@ const QUIZ = [
   "Two of the four do carry constants: −1 and +1 respectively."],
  sol:"<b>sin2A + sin2B + sin2C = 4∏sin</b> (no constant) · <b>cos2A + cos2B + cos2C = −1 − 4∏cos</b> · <b>sinA + sinB + sinC = 4∏cos(half)</b> (no constant) · <b>cosA + cosB + cosC = 1 + 4∏sin(half)</b>."},
 
-{id:68, lec:"L-4", blk:"Applying the identities", topic:"A half-angle ratio identity",
+{id:68, lec:"L-4", blk:"Applying the identities", topic:"A half-angle ratio identity", t:60,
  q:"For a triangle ABC, the expression (cos A − cos B + cos C + 1)/(cos A + cos B + cos C − 1) equals",
  opts:[
   "cot(A/2)·cot(C/2)",
@@ -1161,7 +1187,7 @@ const QUIZ = [
  sol:"Denominator = 4∏sin(half). Numerator = 4 cos(A/2)sin(B/2)cos(C/2). Dividing cancels sin(B/2) and converts the other two into cotangents: <b>cot(A/2)cot(C/2)</b>."},
 
 /* ---------------- Strong Box (10) ---------------- */
-{id:69, lec:"SB", blk:"JEE Main 2025 (23 Jan Shift 1)", topic:"A cotangent product",
+{id:69, lec:"SB", blk:"JEE Main 2025 (23 Jan Shift 1)", topic:"A cotangent product", t:90,
  q:"The value of sin 70°·(cot 10°·cot 70° − 1) is",
  opts:["1","2/3","0","3/2"],
  ans:0,
@@ -1172,7 +1198,7 @@ const QUIZ = [
   "1.5 overshoots; the product is exactly 1."],
  sol:"cot10°cot70° − 1 = (cos10°cos70° − sin10°sin70°)/(sin10°sin70°) = cos80°/(sin10°sin70°) = sin10°/(sin10°sin70°) = 1/sin70°. Multiplying by sin70° gives <b>1</b>."},
 
-{id:70, lec:"SB", blk:"JEE Main 2022 (25 Jul Shift 2)", topic:"A five-factor sine product",
+{id:70, lec:"SB", blk:"JEE Main 2022 (25 Jul Shift 2)", topic:"A five-factor sine product", t:90,
  q:"The value of 2 sin(π/22)·sin(3π/22)·sin(5π/22)·sin(7π/22)·sin(9π/22) is",
  opts:["1/16","5/16","7/16","3/16"],
  ans:0,
@@ -1183,7 +1209,7 @@ const QUIZ = [
   "3/16 = 0.1875, three times too large."],
  sol:"The angles are the odd multiples of π/22 below π/2. The product of these five sines is 1/32, so twice it is <b>1/16</b>."},
 
-{id:71, lec:"SB", blk:"JEE Main 2024 (08 Apr Shift 2)", topic:"Rationalising an 18°/36° ratio",
+{id:71, lec:"SB", blk:"JEE Main 2024 (08 Apr Shift 2)", topic:"Rationalising an 18°/36° ratio", t:90,
  q:"If (3cos36° + 5sin18°)/(5cos36° − 3sin18°) = (a√5 − b)/c with a, b, c ∈ ℕ and gcd(a, c) = 1, then a + b + c is",
  opts:["52","40","50","54"],
  ans:0,
@@ -1194,7 +1220,7 @@ const QUIZ = [
   "54 overshoots by 2 — the triple is (17, 24, 11), summing to 52."],
  sol:"With cos36° = (√5+1)/4 and sin18° = (√5−1)/4: the ratio is (8√5 − 2)/(2√5 + 8) = (4√5 − 1)/(√5 + 4). Multiplying by (4 − √5)/(4 − √5) gives <b>(17√5 − 24)/11</b> ≈ 1.2739, so a + b + c = <b>52</b>."},
 
-{id:72, lec:"SB", blk:"JEE Main 2022 (26 June Shift 1)", topic:"A sine product with a remainder term",
+{id:72, lec:"SB", blk:"JEE Main 2022 (26 June Shift 1)", topic:"A sine product with a remainder term", t:90,
  q:"If sin²10°·sin20°·sin40°·sin50°·sin70° = α − (1/16)sin10°, then 16 + α<sup>−1</sup> equals",
  opts:["80","64","32","96"],
  ans:0,
@@ -1205,7 +1231,7 @@ const QUIZ = [
   "96 would require α = 1/80."],
  sol:"α = product + (1/16)sin10° = <b>1/64</b> exactly, so α<sup>−1</sup> = 64 and 16 + 64 = <b>80</b>."},
 
-{id:73, lec:"SB", blk:"JEE Main 2025 (28 Jan Shift 2)", topic:"A cot-telescoping sum",
+{id:73, lec:"SB", blk:"JEE Main 2025 (28 Jan Shift 2)", topic:"A cot-telescoping sum", t:180,
  q:"If Σ<sub>r=1..13</sub> 1/[sin(π/4 + (r−1)π/6)·sin(π/4 + rπ/6)] = a√3 + b with a, b ∈ ℤ, then a² + b² equals",
  opts:["8","2","4","10"],
  ans:0,
@@ -1216,7 +1242,7 @@ const QUIZ = [
   "10 would need 1 and 3."],
  sol:"Use 1/(sinA sin(A+d)) = [cot A − cot(A+d)]/sin d with d = π/6, so sin d = ½. The sum telescopes to 2[cot(π/4) − cot(75°)] = 2[1 − (2 − √3)] = <b>2√3 − 2</b>, giving a² + b² = 4 + 4 = <b>8</b>."},
 
-{id:74, lec:"SB", blk:"JEE Main 2025 (29 Jan Shift 2)", topic:"An expression that collapses to a cube",
+{id:74, lec:"SB", blk:"JEE Main 2025 (29 Jan Shift 2)", topic:"An expression that collapses to a cube", t:180,
  q:"If sin x + sin²x = 1 with x ∈ (0, π/2), then (cos¹²x + tan¹²x) + 3(cos¹⁰x + tan¹⁰x + cos⁸x + tan⁸x) + (cos⁶x + tan⁶x) equals",
  opts:["2","4","1","3"],
  ans:0,
@@ -1227,7 +1253,7 @@ const QUIZ = [
   "3 would need the bracket t(t+1) to be (3/2)^(1/3), but it is exactly 1."],
  sol:"sin x + sin²x = 1 ⇒ sin x = 1 − sin²x = cos²x, and hence <b>tan²x = cos²x = sin x</b>. Setting t = sin x turns the expression into 2t⁶ + 6t⁵ + 6t⁴ + 2t³ = 2t³(t+1)³ = 2[t(t+1)]³, and t(t+1) = t + t² = 1, so the value is <b>2</b>."},
 
-{id:75, lec:"SB", blk:"JEE Main 2023 (10 Apr Shift 1)", topic:"A doubling chain over 33",
+{id:75, lec:"SB", blk:"JEE Main 2023 (10 Apr Shift 1)", topic:"A doubling chain over 33", t:90,
  q:"The value of cos(π/33)·cos(2π/33)·cos(4π/33)·cos(8π/33)·cos(16π/33) is",
  opts:["1/32","1/16","−1/32","1/64"],
  ans:0,
@@ -1238,7 +1264,7 @@ const QUIZ = [
   "1/64 would need a sixth factor."],
  sol:"cosA·cos2A·cos4A·cos8A·cos16A = sin(32A)/(32 sinA) with A = π/33. Since 32π/33 = π − π/33, the sines cancel and the value is <b>1/32</b>."},
 
-{id:76, lec:"SB", blk:"Strong Box", topic:"A cotangent-difference product",
+{id:76, lec:"SB", blk:"Strong Box", topic:"A cotangent-difference product", t:90,
  q:"The value of (1 − cot 23°)(1 − cot 22°) is",
  opts:["2","1","0","−2"],
  ans:0,
@@ -1249,7 +1275,7 @@ const QUIZ = [
   "Both factors are negative, so their product is positive."],
  sol:"The identity (1 − cot A)(1 − cot B) = <b>2</b> holds whenever A + B = 45° + 180°k … here 23° + 22° = 45°, and both cotangents exceed 1, so the two negative factors multiply to +2."},
 
-{id:77, lec:"SB", blk:"Strong Box", topic:"A seventh-of-π combination",
+{id:77, lec:"SB", blk:"Strong Box", topic:"A seventh-of-π combination", t:90,
  q:"If α = π/7, then 1/cos α + 2cos α/cos 2α equals",
  opts:["4","2","1","8"],
  ans:0,
@@ -1260,7 +1286,7 @@ const QUIZ = [
   "8 is double the value."],
  sol:"Combining over a common denominator and using the doubling identity collapses the expression to exactly <b>4</b>. The π/7 angles are the signature of this family of problems."},
 
-{id:78, lec:"SB", blk:"Strong Box", topic:"A product of (1 + tan) factors",
+{id:78, lec:"SB", blk:"Strong Box", topic:"A product of (1 + tan) factors", t:90,
  q:"If (1 + tan 5°)(1 + tan 10°)(1 + tan 15°)···(1 + tan 45°) = 2<sup>k+1</sup>, then k equals",
  opts:["4","5","8","9"],
  ans:0,
@@ -1275,13 +1301,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter M-5C mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1299,6 +1336,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1333,15 +1373,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1353,47 +1394,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1403,30 +1461,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1435,7 +1537,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1448,9 +1552,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1459,7 +1581,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1480,21 +1603,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter M-5C mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

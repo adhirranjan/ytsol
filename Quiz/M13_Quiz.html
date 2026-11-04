@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -238,7 +264,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 · Distance, Section, Area & Collinearity (13) ---------------- */
-{id:1, lec:"L-1", blk:"Distance formula", topic:"Distance between two points",
+{id:1, lec:"L-1", blk:"Distance formula", topic:"Distance between two points", t:90,
  q:"The distance between the points A(2, 0) and B(0, 2) is",
  opts:["2√2","4","2","8"],
  ans:0,
@@ -249,7 +275,7 @@ const QUIZ = [
   "8 is AB² (the quantity under the root); the distance itself needs the square root taken."],
  sol:"Distance formula: AB = √[(x₂ − x₁)² + (y₂ − y₁)²] = √[(0 − 2)² + (2 − 0)²] = √(4 + 4) = √8 = <b>2√2</b>."},
 
-{id:2, lec:"L-1", blk:"Distance from the origin", topic:"Distance independent of a parameter",
+{id:2, lec:"L-1", blk:"Distance from the origin", topic:"Distance independent of a parameter", t:90,
  q:"The distance of the point (a cosα, a sinα) from the origin is",
  opts:["|a|","a²","1","a√2"],
  ans:0,
@@ -260,7 +286,7 @@ const QUIZ = [
   "a√2 wrongly assumes cos²α + sin²α = 2; the Pythagorean identity gives 1, not 2."],
  sol:"OP = √[(a cosα)² + (a sinα)²] = √[a²(cos²α + sin²α)] = √(a²·1) = <b>|a|</b> — independent of α."},
 
-{id:3, lec:"L-1", blk:"Distance from the origin", topic:"3-4-5 distance",
+{id:3, lec:"L-1", blk:"Distance from the origin", topic:"3-4-5 distance", t:90,
  q:"The distance of the point (−3, 4) from the origin is",
  opts:["5","7","25","√7"],
  ans:0,
@@ -271,7 +297,7 @@ const QUIZ = [
   "√7 subtracts the squares (16 − 9); the distance formula adds them."],
  sol:"OP = √[(−3)² + 4²] = √(9 + 16) = √25 = <b>5</b> (the classic 3-4-5 right triangle)."},
 
-{id:4, lec:"L-1", blk:"Distance formula", topic:"Distance between two points on a circle",
+{id:4, lec:"L-1", blk:"Distance formula", topic:"Distance between two points on a circle", t:90,
  q:"The distance between P(a cosα, a sinα) and Q(a cosβ, a sinβ), with a > 0, is",
  opts:["2a |sin((α − β)/2)|","a |sin((α − β)/2)|","2a |cos((α − β)/2)|","2a"],
  ans:0,
@@ -282,7 +308,7 @@ const QUIZ = [
   "2a is the greatest possible distance (a diameter, when α − β = π); in general PQ depends on α − β."],
  sol:"PQ² = a²[(cosα − cosβ)² + (sinα − sinβ)²] = a²[2 − 2cos(α − β)] = a²·4sin²((α−β)/2). So PQ = <b>2a |sin((α − β)/2)|</b>."},
 
-{id:5, lec:"L-1", blk:"Internal section formula", topic:"Point dividing a segment internally",
+{id:5, lec:"L-1", blk:"Internal section formula", topic:"Point dividing a segment internally", t:60,
  q:"The point dividing the segment from A(5, −2) to B(9, 6) internally in the ratio 3 : 1 is",
  opts:["(8, 4)","(7, 2)","(6, 0)","(4, 8)"],
  ans:0,
@@ -293,7 +319,7 @@ const QUIZ = [
   "(4, 8) swaps the computed x and y coordinates."],
  sol:"Internal division in m:n gives ((m x₂ + n x₁)/(m+n), (m y₂ + n y₁)/(m+n)) = ((27 + 5)/4, (18 − 2)/4) = <b>(8, 4)</b>."},
 
-{id:6, lec:"L-1", blk:"Mid-point formula", topic:"Mid-point of a segment",
+{id:6, lec:"L-1", blk:"Mid-point formula", topic:"Mid-point of a segment", t:90,
  q:"The mid-point of the segment joining (−3, 5) and (7, 1) is",
  opts:["(2, 3)","(4, 6)","(5, −2)","(3, 2)"],
  ans:0,
@@ -304,7 +330,7 @@ const QUIZ = [
   "(3, 2) swaps the mid-point's x and y values."],
  sol:"Mid-point = ((x₁ + x₂)/2, (y₁ + y₂)/2) = ((−3 + 7)/2, (5 + 1)/2) = <b>(2, 3)</b>."},
 
-{id:7, lec:"L-1", blk:"Area of a triangle", topic:"Area by the determinant",
+{id:7, lec:"L-1", blk:"Area of a triangle", topic:"Area by the determinant", t:90,
  q:"The area of the triangle with vertices (1, 2), (4, −6) and (3, 5) is",
  opts:["25/2","25","−25/2","1/2"],
  ans:0,
@@ -315,7 +341,7 @@ const QUIZ = [
   "1/2 drops the third term 3(y₁ − y₂) = 24 from the sum."],
  sol:"Δ = (1/2)|x₁(y₂−y₃) + x₂(y₃−y₁) + x₃(y₁−y₂)| = (1/2)|1(−11) + 4(3) + 3(8)| = (1/2)|25| = <b>25/2</b> sq units."},
 
-{id:8, lec:"L-1", blk:"Collinearity", topic:"Testing three points",
+{id:8, lec:"L-1", blk:"Collinearity", topic:"Testing three points", t:90,
  q:"The points (1, 4), (3, −2) and (−3, 16) are",
  opts:["collinear","the vertices of a right triangle","the vertices of an equilateral triangle","the vertices of an isosceles triangle"],
  ans:0,
@@ -326,7 +352,7 @@ const QUIZ = [
   "Any genuine triangle has positive area; a zero determinant means the three points lie on one line."],
  sol:"Area test: 1(−2−16) + 3(16−4) + (−3)(4+2) = −18 + 36 − 18 = 0. Zero area ⇒ the three points are <b>collinear</b>."},
 
-{id:9, lec:"L-1", blk:"Collinearity", topic:"Finding a parameter from collinearity",
+{id:9, lec:"L-1", blk:"Collinearity", topic:"Finding a parameter from collinearity", t:90,
  q:"The value of k for which (k, 2), (−3, 4) and (7, −1) are collinear is",
  opts:["1","23/5","−23/5","0"],
  ans:0,
@@ -337,7 +363,7 @@ const QUIZ = [
   "0 sets only the constant part (9 − 14) to zero and forgets the 5k term."],
  sol:"Collinear ⇒ area 0: k(4−(−1)) + (−3)(−1−2) + 7(2−4) = 5k + 9 − 14 = 5k − 5 = 0 ⇒ k = <b>1</b>."},
 
-{id:10, lec:"L-1", blk:"Section ratio at an axis", topic:"Ratio in which the y-axis cuts a segment",
+{id:10, lec:"L-1", blk:"Section ratio at an axis", topic:"Ratio in which the y-axis cuts a segment", t:90,
  q:"The y-axis divides the segment joining A(−3, −4) and B(1, −2) in the ratio",
  opts:["3 : 1","1 : 3","3 : 2","1 : 1"],
  ans:0,
@@ -348,7 +374,7 @@ const QUIZ = [
   "1 : 1 assumes the y-axis hits the mid-point, which it does not here."],
  sol:"Set the x-coordinate to 0 with ratio λ:1: (λ·1 + 1·(−3))/(λ + 1) = 0 ⇒ λ = 3. The y-axis cuts AB in <b>3 : 1</b> (λ > 0 ⇒ internal)."},
 
-{id:11, lec:"L-1", blk:"Section ratio at an axis", topic:"Ratio in which the x-axis cuts a segment",
+{id:11, lec:"L-1", blk:"Section ratio at an axis", topic:"Ratio in which the x-axis cuts a segment", t:90,
  q:"The x-axis divides the segment joining A(2, −3) and B(5, 6) in the ratio",
  opts:["1 : 2","2 : 1","1 : 1","3 : 2"],
  ans:0,
@@ -359,7 +385,7 @@ const QUIZ = [
   "3 : 2 is an arithmetic slip; the correct solution of 6λ = 3 is λ = 1/2."],
  sol:"Set the y-coordinate to 0 with ratio λ:1: (6λ + (−3))/(λ + 1) = 0 ⇒ λ = 1/2. Ratio = <b>1 : 2</b>."},
 
-{id:12, lec:"L-1", blk:"External section formula", topic:"External division of a segment",
+{id:12, lec:"L-1", blk:"External section formula", topic:"External division of a segment", t:60,
  q:"The point dividing the segment from A(1, 2) to B(4, 5) externally in the ratio 2 : 1 is",
  opts:["(7, 8)","(3, 4)","(7/3, 8/3)","(8, 7)"],
  ans:0,
@@ -370,7 +396,7 @@ const QUIZ = [
   "(8, 7) swaps the computed x and y coordinates."],
  sol:"External division: ((m x₂ − n x₁)/(m − n), (m y₂ − n y₁)/(m − n)) = ((8 − 1)/1, (10 − 2)/1) = <b>(7, 8)</b>."},
 
-{id:13, lec:"L-1", blk:"Parallelogram vertex", topic:"Fourth vertex from diagonals bisecting",
+{id:13, lec:"L-1", blk:"Parallelogram vertex", topic:"Fourth vertex from diagonals bisecting", t:90,
  q:"If A(1, 2), B(4, 3), C(6, 6) are three consecutive vertices of a parallelogram ABCD, the fourth vertex D is",
  opts:["(3, 5)","(9, 7)","(5, 3)","(3, 1)"],
  ans:0,
@@ -382,7 +408,7 @@ const QUIZ = [
  sol:"In parallelogram ABCD the diagonals AC and BD share a mid-point: (A + C)/2 = (B + D)/2 ⇒ D = A + C − B = (1 + 6 − 4, 2 + 6 − 3) = <b>(3, 5)</b>."},
 
 /* ---------------- L-2 · Centroid, Incentre, Circumcentre, Orthocentre (14) ---------------- */
-{id:14, lec:"L-2", blk:"Centroid", topic:"Centroid of a triangle",
+{id:14, lec:"L-2", blk:"Centroid", topic:"Centroid of a triangle", t:90,
  q:"The centroid of the triangle with vertices (0, 0), (2, 5) and (7, 4) is",
  opts:["(3, 3)","(9, 9)","(9/2, 9/2)","(3, 4)"],
  ans:0,
@@ -393,7 +419,7 @@ const QUIZ = [
   "(3, 4) has an arithmetic slip in y: (0 + 5 + 4)/3 = 3, not 4."],
  sol:"Centroid G = ((x₁+x₂+x₃)/3, (y₁+y₂+y₃)/3) = ((0+2+7)/3, (0+5+4)/3) = <b>(3, 3)</b>."},
 
-{id:15, lec:"L-2", blk:"Centroid", topic:"Ratio along a median",
+{id:15, lec:"L-2", blk:"Centroid", topic:"Ratio along a median", t:60,
  q:"The centroid divides each median, measured from the vertex to the mid-point of the opposite side, in the ratio",
  opts:["2 : 1","1 : 2","1 : 1","3 : 1"],
  ans:0,
@@ -404,7 +430,7 @@ const QUIZ = [
   "3 : 1 misremembers the fraction; the centroid is at 2/3, giving a 2 : 1 split, not 3 : 1."],
  sol:"The three medians are concurrent at G, which divides each from the <b>vertex</b> in the ratio <b>2 : 1</b> (vertex side longer)."},
 
-{id:16, lec:"L-2", blk:"Centroid", topic:"Third vertex from the centroid",
+{id:16, lec:"L-2", blk:"Centroid", topic:"Third vertex from the centroid", t:90,
  q:"Two vertices of a triangle are (2, 3) and (−4, 5), and its centroid is (2, 1). The third vertex is",
  opts:["(8, −5)","(4, −7)","(−5, 8)","(2, 1)"],
  ans:0,
@@ -415,7 +441,7 @@ const QUIZ = [
   "(2, 1) mistakes the given centroid itself for the missing vertex."],
  sol:"From G = (sum)/3: x₃ = 3·Gₓ − (x₁ + x₂) = 6 − (−2) = 8; y₃ = 3·G_y − (y₁ + y₂) = 3 − 8 = −5. Third vertex = <b>(8, −5)</b>."},
 
-{id:17, lec:"L-2", blk:"Incentre", topic:"Incentre with side-length weights",
+{id:17, lec:"L-2", blk:"Incentre", topic:"Incentre with side-length weights", t:90,
  q:"The incentre of the triangle with vertices A(−36, 7), B(20, 7), C(0, −8) is",
  opts:["(−1, 0)","(−16/3, 2)","(1, 0)","(0, −1)"],
  ans:0,
@@ -426,7 +452,7 @@ const QUIZ = [
   "(0, −1) swaps the x and y coordinates of the incentre."],
  sol:"Side lengths a = BC = 25, b = CA = 39, c = AB = 56. I = ((a x₁ + b x₂ + c x₃)/(a+b+c), …) = ((−900 + 780)/120, (175 + 273 − 448)/120) = <b>(−1, 0)</b>."},
 
-{id:18, lec:"L-2", blk:"Incentre", topic:"Incentre of a right triangle",
+{id:18, lec:"L-2", blk:"Incentre", topic:"Incentre of a right triangle", t:90,
  q:"The incentre of the triangle with vertices (0, 0), (3, 0) and (0, 4) is",
  opts:["(1, 1)","(1, 4/3)","(3/2, 2)","(2, 3/2)"],
  ans:0,
@@ -437,7 +463,7 @@ const QUIZ = [
   "(2, 3/2) swaps the x and y of the circumcentre; it is neither centre of the correct kind."],
  sol:"Right angle at the origin, legs 3 and 4, hypotenuse 5. Inradius r = (3 + 4 − 5)/2 = 1, and for legs along the axes the incentre is (r, r) = <b>(1, 1)</b>."},
 
-{id:19, lec:"L-2", blk:"Circumcentre", topic:"Circumcentre of a right triangle",
+{id:19, lec:"L-2", blk:"Circumcentre", topic:"Circumcentre of a right triangle", t:60,
  q:"The circumcentre of the triangle with vertices (0, 0), (6, 0) and (0, 8) is",
  opts:["(3, 4)","(2, 8/3)","(2, 2)","(0, 0)"],
  ans:0,
@@ -448,7 +474,7 @@ const QUIZ = [
   "(0, 0) is the orthocentre — the right-angle vertex — not the circumcentre."],
  sol:"For a right triangle the circumcentre is the <b>mid-point of the hypotenuse</b>. Hypotenuse joins (6,0) and (0,8), mid-point = <b>(3, 4)</b>."},
 
-{id:20, lec:"L-2", blk:"Orthocentre", topic:"Orthocentre of a right triangle",
+{id:20, lec:"L-2", blk:"Orthocentre", topic:"Orthocentre of a right triangle", t:60,
  q:"The orthocentre of the triangle with vertices (1, 2), (5, 2) and (1, 7) is",
  opts:["(1, 2)","(7/3, 11/3)","(3, 9/2)","(5, 7)"],
  ans:0,
@@ -459,7 +485,7 @@ const QUIZ = [
   "(5, 7) is the vertex opposite the right angle, which is not where the altitudes meet."],
  sol:"Sides (1,2)–(5,2) and (1,2)–(1,7) are perpendicular, so the right angle is at (1, 2). In a right triangle the orthocentre is the <b>right-angle vertex</b> = <b>(1, 2)</b>."},
 
-{id:21, lec:"L-2", blk:"Euler line", topic:"Ratio on the Euler line",
+{id:21, lec:"L-2", blk:"Euler line", topic:"Ratio on the Euler line", t:60,
  q:"On the Euler line of a triangle the centroid G divides the join of the circumcentre O and orthocentre H in the ratio OG : GH =",
  opts:["1 : 2","2 : 1","1 : 1","1 : 3"],
  ans:0,
@@ -470,7 +496,7 @@ const QUIZ = [
   "1 : 3 misremembers the split; the correct division is 1 : 2."],
  sol:"O, G, H are collinear (the Euler line) and <b>G divides OH with OG : GH = 1 : 2</b>, so H = 3G − 2O."},
 
-{id:22, lec:"L-2", blk:"Euler line", topic:"Orthocentre from G and O",
+{id:22, lec:"L-2", blk:"Euler line", topic:"Orthocentre from G and O", t:90,
  q:"If a triangle has centroid G(2, 3) and circumcentre O(1, 1), its orthocentre H is",
  opts:["(4, 7)","(5, 8)","(3, 5)","(−1, −3)"],
  ans:0,
@@ -481,7 +507,7 @@ const QUIZ = [
   "(−1, −3) uses 3O − 2G, swapping the roles of O and H."],
  sol:"From OG : GH = 1 : 2, H = 3G − 2O = (3·2 − 2·1, 3·3 − 2·1) = <b>(4, 7)</b>."},
 
-{id:23, lec:"L-2", blk:"Incentre", topic:"Meaning of the weights a, b, c",
+{id:23, lec:"L-2", blk:"Incentre", topic:"Meaning of the weights a, b, c", t:90,
  q:"In the incentre formula I = ((a x₁ + b x₂ + c x₃)/(a + b + c), …), the weights a, b, c are",
  opts:["the lengths of the sides opposite A, B, C (a = BC, b = CA, c = AB)","the three interior angles A, B, C","the lengths of the three medians","equal weights 1, 1, 1"],
  ans:0,
@@ -492,7 +518,7 @@ const QUIZ = [
   "Equal weights 1,1,1 give the centroid, not the incentre (unless the triangle is equilateral)."],
  sol:"The incentre is the side-length-weighted average of the vertices, where a, b, c are <b>the sides opposite A, B, C</b> (a = BC, b = CA, c = AB)."},
 
-{id:24, lec:"L-2", blk:"Ex-centre", topic:"Ex-centre from the incentre formula",
+{id:24, lec:"L-2", blk:"Ex-centre", topic:"Ex-centre from the incentre formula", t:60,
  q:"The ex-centre opposite vertex A is obtained from the incentre formula by",
  opts:["replacing a with −a (weights −a, b, c)","replacing b with −b","replacing all of a, b, c with their negatives","replacing a + b + c with a − b − c only in the numerator"],
  ans:0,
@@ -503,7 +529,7 @@ const QUIZ = [
   "The sign flip must apply consistently in numerator and denominator; changing only the numerator is wrong."],
  sol:"Ex-centre opposite A: flip the sign of the weight a. I₁ = ((−a x₁ + b x₂ + c x₃)/(−a + b + c), …), i.e. use weights <b>(−a, b, c)</b>."},
 
-{id:25, lec:"L-2", blk:"Orthocentre", topic:"Position for an obtuse triangle",
+{id:25, lec:"L-2", blk:"Orthocentre", topic:"Position for an obtuse triangle", t:60,
  q:"For an obtuse-angled triangle, the orthocentre lies",
  opts:["outside the triangle","inside the triangle","exactly on the longest side","at the centroid"],
  ans:0,
@@ -514,7 +540,7 @@ const QUIZ = [
   "The centroid is always inside; the orthocentre of an obtuse triangle is not the centroid."],
  sol:"The orthocentre is inside for an acute triangle, at the right-angle vertex for a right triangle, and <b>outside</b> for an obtuse triangle."},
 
-{id:26, lec:"L-2", blk:"Special triangles", topic:"Centres of an equilateral triangle",
+{id:26, lec:"L-2", blk:"Special triangles", topic:"Centres of an equilateral triangle", t:90,
  q:"In an equilateral triangle the centroid, incentre, circumcentre and orthocentre",
  opts:["all coincide at one point","form a smaller triangle","are collinear but distinct","coincide only in pairs"],
  ans:0,
@@ -525,7 +551,7 @@ const QUIZ = [
   "They do not merge in just pairs; all four land on the single centre."],
  sol:"Equilateral symmetry makes a = b = c and every cevian a line of symmetry, so centroid = incentre = circumcentre = orthocentre — <b>all coincide</b>."},
 
-{id:27, lec:"L-2", blk:"Medial triangle", topic:"Recovering a vertex from mid-points",
+{id:27, lec:"L-2", blk:"Medial triangle", topic:"Recovering a vertex from mid-points", t:90,
  q:"The mid-points of the sides of a triangle are D(1, 1), E(2, −3), F(3, 4). The vertex A (opposite the side whose mid-point is D) is",
  opts:["(4, 0)","(2, 2/3)","(−4, 0)","(6, 0)"],
  ans:0,
@@ -537,7 +563,7 @@ const QUIZ = [
  sol:"A vertex equals the sum of the two mid-points of the sides through it minus the opposite mid-point: A = E + F − D = (2 + 3 − 1, −3 + 4 − 1) = <b>(4, 0)</b>."},
 
 /* ---------------- L-3 · Polygon Area, Collinearity & Locus (13) ---------------- */
-{id:28, lec:"L-3", blk:"Shoelace area", topic:"Area of a quadrilateral",
+{id:28, lec:"L-3", blk:"Shoelace area", topic:"Area of a quadrilateral", t:90,
  q:"The area of the quadrilateral with vertices A(1, 1), B(7, −3), C(12, 2), D(7, 21) taken in order is",
  opts:["132","264","66","138"],
  ans:0,
@@ -548,7 +574,7 @@ const QUIZ = [
   "138 comes from a sign slip in one cross-product term, shifting the difference away from 264."],
  sol:"Shoelace A→B→C→D: downs = 1·(−3) + 7·2 + 12·21 + 7·1 = 270; ups = 1·7 + (−3)·12 + 2·7 + 21·1 = 6. Area = (1/2)|270 − 6| = <b>132</b> sq units."},
 
-{id:29, lec:"L-3", blk:"Area independent of a parameter", topic:"Parametric vertices",
+{id:29, lec:"L-3", blk:"Area independent of a parameter", topic:"Parametric vertices", t:90,
  q:"The area of the triangle with vertices (t, t − 2), (t + 2, t + 2) and (t + 3, t) is",
  opts:["4 (independent of t)","8","2","variable with t"],
  ans:0,
@@ -559,7 +585,7 @@ const QUIZ = [
   "The t-terms cancel in the determinant, so the area is constant, not variable."],
  sol:"Δ = (1/2)|t(2) + (t+2)(2) + (t+3)(−4)| = (1/2)|2t + 2t + 4 − 4t − 12| = (1/2)|−8| = <b>4</b> sq units — the t-terms cancel."},
 
-{id:30, lec:"L-3", blk:"Shoelace sign", topic:"Meaning of a negative stair sum",
+{id:30, lec:"L-3", blk:"Shoelace sign", topic:"Meaning of a negative stair sum", t:60,
  q:"If the shoelace (stair) sum for a polygon comes out negative, it means",
  opts:["the vertices were listed clockwise — take the absolute value","the polygon is invalid","the area is genuinely negative","the points are collinear"],
  ans:0,
@@ -570,7 +596,7 @@ const QUIZ = [
   "Collinearity shows up as a sum of exactly 0, not merely a negative value."],
  sol:"The shoelace sum is positive for anticlockwise order and negative for clockwise; its sign only tells direction, so you <b>take the absolute value</b> for the area."},
 
-{id:31, lec:"L-3", blk:"Collinearity", topic:"Collinearity as zero area",
+{id:31, lec:"L-3", blk:"Collinearity", topic:"Collinearity as zero area", t:60,
  q:"Three distinct points A, B, C are collinear if and only if",
  opts:["the area of triangle ABC is zero","the area of triangle ABC is maximum","AB = BC = CA","they are equidistant from the origin"],
  ans:0,
@@ -581,7 +607,7 @@ const QUIZ = [
   "Being equidistant from the origin places them on a circle, which generally are not collinear."],
  sol:"Collinear ⇔ Δ = (1/2)|det[[x₁,y₁,1],[x₂,y₂,1],[x₃,y₃,1]]| = 0, i.e. <b>the area of triangle ABC is zero</b>."},
 
-{id:32, lec:"L-3", blk:"Locus method", topic:"First step of finding a locus",
+{id:32, lec:"L-3", blk:"Locus method", topic:"First step of finding a locus", t:60,
  q:"The correct first step in finding the equation of a locus is to",
  opts:["let the moving point be (h, k)","plot several sample points and guess the curve","assume the locus is a circle","differentiate the given condition"],
  ans:0,
@@ -592,7 +618,7 @@ const QUIZ = [
   "Differentiation is not part of the locus method; the condition is translated algebraically."],
  sol:"Locus method: (1) <b>let the moving point be (h, k)</b>, (2) write the condition in h, k, (3) eliminate parameters, (4) replace h→x, k→y."},
 
-{id:33, lec:"L-3", blk:"Locus — perpendicular bisector", topic:"Locus equidistant from two points",
+{id:33, lec:"L-3", blk:"Locus — perpendicular bisector", topic:"Locus equidistant from two points", t:90,
  q:"The locus of a point equidistant from A(1, 3) and B(−2, 1) is",
  opts:["6x + 4y = 5","6x + 4y = −5","4x + 6y = 5","a circle through A and B"],
  ans:0,
@@ -603,7 +629,7 @@ const QUIZ = [
   "Equidistance from two points gives the perpendicular bisector — a straight line, not a circle."],
  sol:"Set AP² = BP²: (h−1)² + (k−3)² = (h+2)² + (k−1)² ⇒ −6h − 4k + 10 = 0 ⇒ <b>6x + 4y = 5</b> (the perpendicular bisector of AB)."},
 
-{id:34, lec:"L-3", blk:"Locus — parametric", topic:"Eliminating θ from an ellipse",
+{id:34, lec:"L-3", blk:"Locus — parametric", topic:"Eliminating θ from an ellipse", t:90,
  q:"The locus of the point (a cosθ, b sinθ) as θ varies is",
  opts:["x²/a² + y²/b² = 1","x² + y² = a² + b²","x²/a² − y²/b² = 1","x/a + y/b = 1"],
  ans:0,
@@ -614,7 +640,7 @@ const QUIZ = [
   "A linear relation x/a + y/b = 1 drops the squaring step entirely."],
  sol:"x = a cosθ, y = b sinθ ⇒ x/a = cosθ, y/b = sinθ. Square and add: x²/a² + y²/b² = cos²θ + sin²θ = <b>1</b> (an ellipse)."},
 
-{id:35, lec:"L-3", blk:"Locus — sliding rod", topic:"Mid-point of a sliding rod",
+{id:35, lec:"L-3", blk:"Locus — sliding rod", topic:"Mid-point of a sliding rod", t:90,
  q:"A rod of length ℓ slides with its ends on two perpendicular lines. The locus of its mid-point is",
  opts:["x² + y² = ℓ²/4","x² + y² = ℓ²","x² + y² = ℓ²/2","x + y = ℓ/2"],
  ans:0,
@@ -625,7 +651,7 @@ const QUIZ = [
   "A linear equation drops the squared distance condition a² + b² = ℓ²."],
  sol:"Take the lines as axes; ends A(a,0), B(0,b), mid-point (h,k) ⇒ a = 2h, b = 2k. Rod: a² + b² = ℓ² ⇒ 4h² + 4k² = ℓ² ⇒ <b>x² + y² = ℓ²/4</b> (a circle of radius ℓ/2)."},
 
-{id:36, lec:"L-3", blk:"Locus — parabola", topic:"Equidistant from a point and the x-axis",
+{id:36, lec:"L-3", blk:"Locus — parabola", topic:"Equidistant from a point and the x-axis", t:90,
  q:"The locus of a point whose distance from (0, 2) equals its distance from the x-axis is",
  opts:["x² = 4(y − 1)","x² = 4y","y² = 4(x − 1)","x² + y² = 4"],
  ans:0,
@@ -636,7 +662,7 @@ const QUIZ = [
   "A circle x² + y² = 4 would need a fixed distance from one point, not equality of two distances."],
  sol:"√(h² + (k−2)²) = |k| ⇒ h² + k² − 4k + 4 = k² ⇒ h² = 4k − 4 ⇒ <b>x² = 4(y − 1)</b> (a parabola)."},
 
-{id:37, lec:"L-3", blk:"Collinearity", topic:"Missing ordinate from collinearity",
+{id:37, lec:"L-3", blk:"Collinearity", topic:"Missing ordinate from collinearity", t:90,
  q:"If (1, 2), (3, k) and (5, 8) are collinear, then k =",
  opts:["5","6","0","10"],
  ans:0,
@@ -647,7 +673,7 @@ const QUIZ = [
   "10 adds the two known ordinates (2 + 8) but forgets to halve — valid only because the x's are equally spaced, and even then gives the mid-value 5."],
  sol:"Collinear ⇒ area 0: 1(k − 8) + 3(8 − 2) + 5(2 − k) = −4k + 20 = 0 ⇒ k = <b>5</b> (the x's are equally spaced, so k is the mean of 2 and 8)."},
 
-{id:38, lec:"L-3", blk:"Signed area", topic:"Keeping the modulus",
+{id:38, lec:"L-3", blk:"Signed area", topic:"Keeping the modulus", t:90,
  q:"The area of the triangle with vertices (3, 1), (1, 4) and (5, 2) is",
  opts:["4","−4","8","−8"],
  ans:0,
@@ -658,7 +684,7 @@ const QUIZ = [
   "−8 is the raw signed determinant itself, with neither the 1/2 nor the modulus applied."],
  sol:"x₁(y₂−y₃) + x₂(y₃−y₁) + x₃(y₁−y₂) = 3(4−2) + 1(2−1) + 5(1−4) = 6 + 1 − 15 = −8. Area = (1/2)|−8| = <b>4</b> sq units."},
 
-{id:39, lec:"L-3", blk:"Locus — circle", topic:"Fixed distance from a point",
+{id:39, lec:"L-3", blk:"Locus — circle", topic:"Fixed distance from a point", t:90,
  q:"The locus of a point at a constant distance 5 from the fixed point (2, −1) is",
  opts:["(x − 2)² + (y + 1)² = 25","(x − 2)² + (y + 1)² = 5","(x + 2)² + (y − 1)² = 25","x² + y² = 25"],
  ans:0,
@@ -669,7 +695,7 @@ const QUIZ = [
   "x² + y² = 25 centres the circle at the origin instead of at (2, −1)."],
  sol:"A fixed distance from a fixed point is a circle: √((h−2)² + (k+1)²) = 5 ⇒ <b>(x − 2)² + (y + 1)² = 25</b> (centre (2,−1), radius 5)."},
 
-{id:40, lec:"L-3", blk:"Locus — parabola", topic:"Equidistant from a point and a line",
+{id:40, lec:"L-3", blk:"Locus — parabola", topic:"Equidistant from a point and a line", t:90,
  q:"The locus of a point equidistant from the point (2, 0) and the line x = −2 is",
  opts:["y² = 8x","y² = 4x","x² = 8y","y² = −8x"],
  ans:0,
@@ -681,7 +707,7 @@ const QUIZ = [
  sol:"√((h−2)² + k²) = |h + 2| ⇒ (h−2)² + k² = (h+2)² ⇒ k² = 8h ⇒ <b>y² = 8x</b> (parabola, focus (2,0), directrix x = −2)."},
 
 /* ---------------- L-4 · Transformation of Axes (12) ---------------- */
-{id:41, lec:"L-4", blk:"Shift of origin", topic:"New coordinates after a shift",
+{id:41, lec:"L-4", blk:"Shift of origin", topic:"New coordinates after a shift", t:60,
  q:"When the origin is shifted to (1, −2) without rotation, the new coordinates of the point (4, 5) are",
  opts:["(3, 7)","(5, 3)","(5, 7)","(3, 3)"],
  ans:0,
@@ -692,7 +718,7 @@ const QUIZ = [
   "(3, 3) subtracts h correctly but adds k, using y + k instead of y − k."],
  sol:"Under a shift of origin to (h, k), an old point (x, y) has new coordinates (x − h, y − k) = (4 − 1, 5 − (−2)) = <b>(3, 7)</b>."},
 
-{id:42, lec:"L-4", blk:"Shift of origin", topic:"Shift that removes linear terms",
+{id:42, lec:"L-4", blk:"Shift of origin", topic:"Shift that removes linear terms", t:90,
  q:"The origin is shifted (no rotation) so the linear terms of x² + y² − 4x + 6y − 7 = 0 vanish. The new origin (h, k) is",
  opts:["(2, −3)","(−2, 3)","(2, 3)","(−4, 6)"],
  ans:0,
@@ -703,7 +729,7 @@ const QUIZ = [
   "(−4, 6) reads the shift straight off the linear coefficients without halving and negating."],
  sol:"Put x = X + h, y = Y + k; the linear part is X(2h − 4) + Y(2k + 6). No linear terms ⇒ 2h − 4 = 0, 2k + 6 = 0 ⇒ <b>(h, k) = (2, −3)</b> (the circle's centre)."},
 
-{id:43, lec:"L-4", blk:"Shift of origin", topic:"New equation of a conic after a shift",
+{id:43, lec:"L-4", blk:"Shift of origin", topic:"New equation of a conic after a shift", t:90,
  q:"When the origin is shifted to (1, −2), the equation 2x² + y² − 4x + 4y = 0 becomes",
  opts:["2X² + Y² = 6","2X² + Y² = 0","X² + Y² = 6","2X² + Y² + 6 = 0"],
  ans:0,
@@ -714,7 +740,7 @@ const QUIZ = [
   "2X² + Y² + 6 = 0 has the wrong sign on the constant; it should be −6."],
  sol:"x = X + 1, y = Y − 2: 2(X+1)² + (Y−2)² − 4(X+1) + 4(Y−2) = 2X² + Y² − 6 = 0 ⇒ <b>2X² + Y² = 6</b>."},
 
-{id:44, lec:"L-4", blk:"Rotation of axes", topic:"The rotation formula for x",
+{id:44, lec:"L-4", blk:"Rotation of axes", topic:"The rotation formula for x", t:60,
  q:"If the axes are rotated anticlockwise through an angle θ about the origin, then the old x equals",
  opts:["X cosθ − Y sinθ","X cosθ + Y sinθ","X sinθ + Y cosθ","X sinθ − Y cosθ"],
  ans:0,
@@ -725,7 +751,7 @@ const QUIZ = [
   "X sinθ − Y cosθ swaps both and flips a sign; it matches neither x nor y."],
  sol:"Rotating the axes by θ anticlockwise: <b>x = X cosθ − Y sinθ</b>, y = X sinθ + Y cosθ."},
 
-{id:45, lec:"L-4", blk:"Rotation of axes", topic:"Angle to remove the xy-term",
+{id:45, lec:"L-4", blk:"Rotation of axes", topic:"Angle to remove the xy-term", t:90,
  q:"The angle through which the axes must be rotated to remove the xy-term from 9x² − 2√3 xy + 7y² is",
  opts:["60°","30°","45°","15°"],
  ans:0,
@@ -736,7 +762,7 @@ const QUIZ = [
   "15° halves the angle a second time after finding 2θ = 120°."],
  sol:"With a = 9, b = 7, 2h = −2√3: tan 2θ = 2h/(a − b) = −2√3/2 = −√3 ⇒ 2θ = 120° ⇒ θ = <b>60°</b>."},
 
-{id:46, lec:"L-4", blk:"Invariants", topic:"What a rotation preserves",
+{id:46, lec:"L-4", blk:"Invariants", topic:"What a rotation preserves", t:60,
  q:"Under a pure rotation of the axes, which quantity for ax² + 2hxy + by² is invariant?",
  opts:["a + b (the sum of the x² and y² coefficients)","a − b","the xy-coefficient 2h","b − a"],
  ans:0,
@@ -747,7 +773,7 @@ const QUIZ = [
   "b − a is just −(a − b) and is equally non-invariant."],
  sol:"A rotation of the axes keeps the trace <b>a + b</b> (and the invariant h² − ab) fixed, which is why you can check the new coefficients sum to a + b."},
 
-{id:47, lec:"L-4", blk:"Invariants", topic:"Distance under a shift of origin",
+{id:47, lec:"L-4", blk:"Invariants", topic:"Distance under a shift of origin", t:60,
  q:"When the origin is shifted (translated) without rotation, the distance between two fixed points is",
  opts:["unchanged","scaled by √(h² + k²)","increased by the shift distance","reversed in sign"],
  ans:0,
@@ -758,7 +784,7 @@ const QUIZ = [
   "Distance is a non-negative magnitude; it has no sign to reverse."],
  sol:"A shift of origin relabels every point by (x − h, y − k); the difference (x₂ − x₁, y₂ − y₁) is untouched, so the distance is <b>unchanged</b> (it is a translation invariant)."},
 
-{id:48, lec:"L-4", blk:"Shift of origin", topic:"Reduction to a parabola",
+{id:48, lec:"L-4", blk:"Shift of origin", topic:"Reduction to a parabola", t:90,
  q:"When the origin is shifted to (1, −2), the equation y² − 4x + 4y + 8 = 0 becomes",
  opts:["Y² = 4X","Y² = −4X","X² = 4Y","Y² = 4X + 8"],
  ans:0,
@@ -769,7 +795,7 @@ const QUIZ = [
   "Y² = 4X + 8 keeps a leftover constant that actually cancels in the substitution."],
  sol:"x = X + 1, y = Y − 2: (Y−2)² − 4(X+1) + 4(Y−2) + 8 = Y² − 4X = 0 ⇒ <b>Y² = 4X</b> (a parabola with vertex at the new origin)."},
 
-{id:49, lec:"L-4", blk:"Shift of origin", topic:"Effect on second-degree terms",
+{id:49, lec:"L-4", blk:"Shift of origin", topic:"Effect on second-degree terms", t:60,
  q:"Shifting the origin (without rotation) of a second-degree curve",
  opts:["leaves the second-degree terms unchanged and only alters the linear and constant parts","changes every term of the equation","removes the xy-term automatically","changes only the x² coefficient"],
  ans:0,
@@ -780,7 +806,7 @@ const QUIZ = [
   "A shift does not single out the x² coefficient; it leaves all second-degree coefficients alone."],
  sol:"Substituting x = X + h, y = Y + k leaves the second-degree terms untouched and only reshuffles the <b>linear and constant parts</b> — that is why a shift can complete the square but not kill the xy-term."},
 
-{id:50, lec:"L-4", blk:"Rotation of axes", topic:"New coordinates after a 90° rotation",
+{id:50, lec:"L-4", blk:"Rotation of axes", topic:"New coordinates after a 90° rotation", t:90,
  q:"When the axes are rotated anticlockwise through 90°, the new coordinates of the point (3, 4) are",
  opts:["(4, −3)","(−4, 3)","(−3, 4)","(3, −4)"],
  ans:0,
@@ -791,7 +817,7 @@ const QUIZ = [
   "(3, −4) negates only y, a reflection rather than the required rotation."],
  sol:"With θ = 90°: X = x cosθ + y sinθ = y = 4, Y = −x sinθ + y cosθ = −x = −3. New coordinates = <b>(4, −3)</b>."},
 
-{id:51, lec:"L-4", blk:"Rotation of axes", topic:"Angle when a = b",
+{id:51, lec:"L-4", blk:"Rotation of axes", topic:"Angle when a = b", t:90,
  q:"To remove the xy-term from ax² + 2hxy + by² when a = b, the axes should be rotated through",
  opts:["45°","90°","0°","30°"],
  ans:0,
@@ -802,7 +828,7 @@ const QUIZ = [
   "30° would need tan 2θ = tan 60°, which requires a ≠ b, not the equal-coefficient case."],
  sol:"When a = b the denominator a − b in tan 2θ = 2h/(a − b) is zero, so 2θ = 90° and θ = <b>45°</b>."},
 
-{id:52, lec:"L-4", blk:"Shift of origin", topic:"Finding the shift point",
+{id:52, lec:"L-4", blk:"Shift of origin", topic:"Finding the shift point", t:90,
  q:"A point whose old coordinates are (4, 5) has new coordinates (3, 7) after a shift of origin. The new origin (h, k) is",
  opts:["(1, −2)","(−1, 2)","(7, 12)","(1, 2)"],
  ans:0,
@@ -814,7 +840,7 @@ const QUIZ = [
  sol:"From new = (x − h, y − k): h = x − X = 4 − 3 = 1, k = y − Y = 5 − 7 = −2. New origin = <b>(1, −2)</b>."},
 
 /* ---------------- SB · Strong Box — Mixed PYQ (10) ---------------- */
-{id:53, lec:"SB", blk:"JEE Main 2025 · inscribed parallelogram", topic:"Maximum area of an inscribed parallelogram",
+{id:53, lec:"SB", blk:"JEE Main 2025 · inscribed parallelogram", topic:"Maximum area of an inscribed parallelogram", t:90,
  q:"A(4, −2), B(1, 1), C(9, −3) are the vertices of △ABC. With D, E, F on sides BC, CA, AB, the maximum area of the parallelogram AFDE is",
  opts:["3","6","12","3/2"],
  ans:0,
@@ -825,7 +851,7 @@ const QUIZ = [
   "3/2 is a quarter of the triangle; the maximum is a half, i.e. 3."],
  sol:"[ABC] = (1/2)|4(1+3) + 1(−3+2) + 9(−2−1)| = (1/2)|16 − 1 − 27| = 6. The largest such inscribed parallelogram has area (1/2)[ABC] = <b>3</b> (D at the mid-point of BC)."},
 
-{id:54, lec:"SB", blk:"JEE Main 2025 · orthocentre & centroid", topic:"c + 2d from area and orthocentre",
+{id:54, lec:"SB", blk:"JEE Main 2025 · orthocentre & centroid", topic:"c + 2d from area and orthocentre", t:180,
  q:"△PQR has P(5, 4), Q(−2, 4), area 35, orthocentre (2, 14/5) and centroid (c, d). Then c + 2d equals",
  opts:["3","5","1","13/5"],
  ans:0,
@@ -836,7 +862,7 @@ const QUIZ = [
   "13/5 confuses the orthocentre's y with the centroid's and plugs it in directly."],
  sol:"PQ is horizontal, so the altitude from R is vertical ⇒ Rₓ = 2. The altitude slopes fix R(2, −6) (area (1/2)·7·10 = 35 ✓). Centroid: c = 5/3, d = 2/3 ⇒ c + 2d = 5/3 + 4/3 = <b>3</b>."},
 
-{id:55, lec:"SB", blk:"JEE Main 2025 · orthocentre", topic:"Area of △PBC with P the orthocentre",
+{id:55, lec:"SB", blk:"JEE Main 2025 · orthocentre", topic:"Area of △PBC with P the orthocentre", t:180,
  q:"△ABC has AB: 3y − x = 2 and AC: x + y = 2, with B, C on the x-axis. If P is the orthocentre, the area of △PBC is",
  opts:["6","3","12","4"],
  ans:0,
@@ -847,7 +873,7 @@ const QUIZ = [
   "4 uses the base BC = 4 as the area, dropping the height factor."],
  sol:"On y = 0: B(−2, 0), C(2, 0); A = (1, 1). BC is horizontal ⇒ altitude from A is x = 1; altitude from B (⊥ AC) is y = x + 2, meeting at P(1, 3). Area △PBC = (1/2)·4·3 = <b>6</b>."},
 
-{id:56, lec:"SB", blk:"JEE Main 2017 · orthocentre", topic:"Orthocentre from an area condition",
+{id:56, lec:"SB", blk:"JEE Main 2017 · orthocentre", topic:"Orthocentre from an area condition", t:180,
  q:"For an integer k, the triangle with vertices (k, −3k), (5, k), (−k, 2) has area 28. Its orthocentre is",
  opts:["(2, 1/2)","(2, −6)","(2, 2)","(1/2, 2)"],
  ans:0,
@@ -858,7 +884,7 @@ const QUIZ = [
   "(1/2, 2) swaps the orthocentre's x and y coordinates."],
  sol:"Area (1/2)|5k² + 13k + 10| = 28 ⇒ 5k² + 13k − 46 = 0 ⇒ k = 2. Vertices (2,−6), (5,2), (−2,2): side through (5,2),(−2,2) is horizontal ⇒ altitude x = 2; the other altitude meets it at <b>(2, 1/2)</b>."},
 
-{id:57, lec:"SB", blk:"JEE Main 2015 · lattice points", topic:"Interior lattice points of a triangle",
+{id:57, lec:"SB", blk:"JEE Main 2015 · lattice points", topic:"Interior lattice points of a triangle", t:180,
  q:"The number of points with both coordinates integers lying strictly inside the triangle with vertices (0, 0), (0, 41), (41, 0) is",
  opts:["780","820","861","210"],
  ans:0,
@@ -869,7 +895,7 @@ const QUIZ = [
   "210 = 20·21/2 counts only half the rows, a truncated sum."],
  sol:"Strict interior needs x ≥ 1, y ≥ 1, x + y ≤ 40 ⇒ count = Σ_{x=1}^{39}(40 − x) = Σ_{j=1}^{39} j = 39·40/2 = <b>780</b> (Pick's theorem confirms it)."},
 
-{id:58, lec:"SB", blk:"JEE Main 2013 · incentre", topic:"Incentre from the medial triangle",
+{id:58, lec:"SB", blk:"JEE Main 2013 · incentre", topic:"Incentre from the medial triangle", t:90,
  q:"The sides of a triangle have mid-points (0, 1), (1, 1), (1, 0). The x-coordinate of its incentre is",
  opts:["2 − √2","2 + √2","√2","2"],
  ans:0,
@@ -880,7 +906,7 @@ const QUIZ = [
   "2 ignores the hypotenuse weight 2√2 entirely, treating the point as a simple midpoint."],
  sol:"Recover vertices from the medial triangle: (0,2), (2,0), (0,0) — a right triangle with legs 2, 2 and hypotenuse 2√2. Iₓ = (2·0 + 2·2 + 2√2·0)/(2 + 2 + 2√2) = 4/(4 + 2√2) = <b>2 − √2</b>."},
 
-{id:59, lec:"SB", blk:"IIT-JEE 2007 · equal-area point", topic:"Point splitting a triangle into equal areas",
+{id:59, lec:"SB", blk:"IIT-JEE 2007 · equal-area point", topic:"Point splitting a triangle into equal areas", t:90,
  q:"O(0, 0), P(3, 4), Q(6, 0). A point R inside △OPQ makes △OPR, △PQR, △OQR equal in area. Then R is",
  opts:["(3, 4/3)","(3, 4)","(4/3, 3)","(3, 2)"],
  ans:0,
@@ -891,7 +917,7 @@ const QUIZ = [
   "(3, 2) misaverages the ordinates; (0 + 4 + 0)/3 = 4/3, not 2."],
  sol:"Equal areas of the three sub-triangles force R to be the centroid of △OPQ: R = ((0+3+6)/3, (0+4+0)/3) = <b>(3, 4/3)</b>."},
 
-{id:60, lec:"SB", blk:"AIEEE 2009 · Apollonius circle", topic:"Circumcentre via a distance-ratio locus",
+{id:60, lec:"SB", blk:"AIEEE 2009 · Apollonius circle", topic:"Circumcentre via a distance-ratio locus", t:90,
  q:"Three distinct points A, B, C each satisfy [distance from (1,0)] : [distance from (−1,0)] = 1 : 3. The circumcentre of △ABC is",
  opts:["(5/4, 0)","(5/2, 0)","(1, 0)","(−5/4, 0)"],
  ans:0,
@@ -902,7 +928,7 @@ const QUIZ = [
   "(−5/4, 0) has a sign error on the centre's x-coordinate."],
  sol:"9[(x−1)² + y²] = (x+1)² + y² ⇒ x² + y² − (5/2)x + 1 = 0. All three points lie on this Apollonius circle, so its centre is the circumcentre: <b>(5/4, 0)</b>."},
 
-{id:61, lec:"SB", blk:"AIEEE 2005 · centroid", topic:"Centroid from a vertex and two mid-points",
+{id:61, lec:"SB", blk:"AIEEE 2005 · centroid", topic:"Centroid from a vertex and two mid-points", t:180,
  q:"A vertex of a triangle is (1, 1), and the mid-points of the two sides through it are (−1, 2) and (3, 2). The centroid is",
  opts:["(1, 7/3)","(1, 2)","(7/3, 1)","(3, 7)"],
  ans:0,
@@ -913,7 +939,7 @@ const QUIZ = [
   "(3, 7) is the sum of coordinates without dividing by 3."],
  sol:"Other endpoints: B = 2(−1,2) − (1,1) = (−3, 3), C = 2(3,2) − (1,1) = (5, 3). Centroid = ((1 − 3 + 5)/3, (1 + 3 + 3)/3) = <b>(1, 7/3)</b>."},
 
-{id:62, lec:"SB", blk:"AIEEE 2007 · right triangle", topic:"Values of k for a right-angled triangle of given area",
+{id:62, lec:"SB", blk:"AIEEE 2007 · right triangle", topic:"Values of k for a right-angled triangle of given area", t:180,
  q:"A(h, k), B(1, 1), C(2, 1) form a right triangle with the right angle at B, AC as hypotenuse and area 1. The set of values of k is",
  opts:["{−1, 3}","{1, 3}","{−1, −3}","{0, 2}"],
  ans:0,
@@ -926,13 +952,24 @@ const QUIZ = [
 
 ];
 
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter M-13 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -950,6 +987,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -984,15 +1024,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1004,47 +1045,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1054,30 +1112,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1086,7 +1188,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1099,9 +1203,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1110,7 +1232,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1131,21 +1254,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter M-13 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

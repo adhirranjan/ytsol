@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -243,7 +269,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (16) ---------------- */
-{id:1, lec:"L-1", blk:"Terminology", topic:"Strict versus slack",
+{id:1, lec:"L-1", blk:"Terminology", topic:"Strict versus slack", t:60,
  q:"An inequality written with ≤ or ≥ is called",
  opts:["slack","strict","linear","double"],
  ans:0,
@@ -254,7 +280,7 @@ const QUIZ = [
   "“Double” describes a chain like a &lt; x &lt; b, regardless of whether the signs are strict."],
  sol:"<b>Strict:</b> &lt;, &gt; (endpoints excluded, open circles). <b>Slack:</b> ≤, ≥ (endpoints included, closed circles)."},
 
-{id:2, lec:"L-1", blk:"Operation rules", topic:"Adding to both sides",
+{id:2, lec:"L-1", blk:"Operation rules", topic:"Adding to both sides", t:60,
  q:"Adding the same number to both sides of an inequality",
  opts:[
   "leaves the direction unchanged",
@@ -269,7 +295,7 @@ const QUIZ = [
   "It is one of the safest operations available."],
  sol:"<b>p &lt; q ⇒ p + r &lt; q + r</b> for every r. Addition and subtraction never flip the sign."},
 
-{id:3, lec:"L-1", blk:"Operation rules", topic:"The sign flip",
+{id:3, lec:"L-1", blk:"Operation rules", topic:"The sign flip", t:60,
  q:"Multiplying or dividing both sides of an inequality by a <b>negative</b> number",
  opts:[
   "reverses the direction of the inequality",
@@ -284,7 +310,7 @@ const QUIZ = [
   "The flip applies to ≤ and ≥ just as much as to &lt; and &gt;."],
  sol:"⚠ <b>The single most expensive slip in this chapter.</b> −2x ≥ 20 ⇒ x ≤ −10 — divide by −2 and <b>flip</b>."},
 
-{id:4, lec:"L-1", blk:"Operation rules", topic:"Reciprocals of positives",
+{id:4, lec:"L-1", blk:"Operation rules", topic:"Reciprocals of positives", t:60,
  q:"If a &gt; b &gt; 0, then",
  opts:["1/a &lt; 1/b","1/a &gt; 1/b","1/a = 1/b","nothing can be said about 1/a and 1/b"],
  ans:0,
@@ -295,7 +321,7 @@ const QUIZ = [
   "The relation is fully determined, provided both are positive. (If the signs differ, the conclusion can change.)"],
  sol:"<b>a &gt; b &gt; 0 ⇒ 1/a &lt; 1/b.</b> The positivity matters — reciprocating across zero breaks the rule."},
 
-{id:5, lec:"L-1", blk:"Operation rules", topic:"The forbidden move",
+{id:5, lec:"L-1", blk:"Operation rules", topic:"The forbidden move", t:60,
  q:"Which operation on two inequalities is <b>never</b> valid?",
  opts:[
   "subtracting one inequality from another",
@@ -310,7 +336,7 @@ const QUIZ = [
   "Shifting both sides equally is safe."],
  sol:"⚠ <b>Never subtract or divide two inequalities.</b> Adding same-direction inequalities is fine; the other two operations are not."},
 
-{id:6, lec:"L-1", blk:"Powers and exponentials", topic:"Exponential comparison",
+{id:6, lec:"L-1", blk:"Powers and exponentials", topic:"Exponential comparison", t:60,
  q:"If x &gt; y &gt; 0 and 0 &lt; a &lt; 1, then",
  opts:["a<sup>x</sup> &lt; a<sup>y</sup>","a<sup>x</sup> &gt; a<sup>y</sup>","a<sup>x</sup> = a<sup>y</sup>","nothing can be concluded"],
  ans:0,
@@ -321,7 +347,7 @@ const QUIZ = [
   "The direction is fully determined once you know whether a exceeds 1."],
  sol:"<b>a &gt; 1 ⇒ a<sup>x</sup> &gt; a<sup>y</sup>; 0 &lt; a &lt; 1 ⇒ a<sup>x</sup> &lt; a<sup>y</sup></b> for x &gt; y. The base decides the direction."},
 
-{id:7, lec:"L-1", blk:"Solving linear inequalities", topic:"A basic solve",
+{id:7, lec:"L-1", blk:"Solving linear inequalities", topic:"A basic solve", t:60,
  q:"The solution of 2x + 3 ≤ 9 with x positive is",
  opts:["(0, 3]","[0, 3]","(−∞, 3]","(3, ∞)"],
  ans:0,
@@ -332,7 +358,7 @@ const QUIZ = [
   "The inequality points the other way; x ≤ 3, not x &gt; 3."],
  sol:"2x + 3 ≤ 9 ⇒ x ≤ 3. With x &gt; 0: <b>x ∈ (0, 3]</b>."},
 
-{id:8, lec:"L-1", blk:"Solving linear inequalities", topic:"A solve with a flip",
+{id:8, lec:"L-1", blk:"Solving linear inequalities", topic:"A solve with a flip", t:60,
  q:"The solution of 3 − 2x &lt; 1, where x is an integer less than 6, is",
  opts:["{2, 3, 4, 5}","{1, 2, 3, 4, 5}","{−1, 0, 1}","{2, 3, 4, 5, 6}"],
  ans:0,
@@ -343,7 +369,7 @@ const QUIZ = [
   "6 is excluded by the condition “less than 6”."],
  sol:"3 − 2x &lt; 1 ⇒ −2x &lt; −2 ⇒ <b>x &gt; 1</b> (divide by −2 and flip). Integers below 6: <b>{2, 3, 4, 5}</b>."},
 
-{id:9, lec:"L-1", blk:"Solving linear inequalities", topic:"Real versus integer solutions",
+{id:9, lec:"L-1", blk:"Solving linear inequalities", topic:"Real versus integer solutions", t:60,
  q:"The solution of 3x + 5 &lt; x − 7 over the <b>real</b> numbers is",
  opts:["(−∞, −6)","(−∞, −6]","(−6, ∞)","{…, −9, −8, −7}"],
  ans:0,
@@ -354,7 +380,7 @@ const QUIZ = [
   "That is the <b>integer</b> solution set. Over ℝ the answer is a full interval."],
  sol:"2x &lt; −12 ⇒ <b>x ∈ (−∞, −6)</b>. Over ℤ the same inequality gives {…, −9, −8, −7}. ⚠ Always check which number system the question wants."},
 
-{id:10, lec:"L-1", blk:"Solving linear inequalities", topic:"Clearing fractions",
+{id:10, lec:"L-1", blk:"Solving linear inequalities", topic:"Clearing fractions", t:60,
  q:"The solution of (2x − 3)/4 + 10 ≥ 4 + 4x/3 is",
  opts:["(−∞, 6.3]","[6.3, ∞)","(−∞, 6.3)","(−∞, −6.3]"],
  ans:0,
@@ -365,7 +391,7 @@ const QUIZ = [
   "A sign error: −63/−10 is +6.3, not −6.3."],
  sol:"Multiply through by the LCD 12, collect terms to get −10x ≥ −63, then <b>divide by −10 and flip</b>: x ≤ 63/10, i.e. <b>(−∞, 6.3]</b>."},
 
-{id:11, lec:"L-1", blk:"Double inequalities", topic:"Operating on all three parts",
+{id:11, lec:"L-1", blk:"Double inequalities", topic:"Operating on all three parts", t:60,
  q:"To solve a double inequality such as −3 &lt; 2x + 5 &lt; 17, you should",
  opts:[
   "perform each operation on all three parts simultaneously",
@@ -380,7 +406,7 @@ const QUIZ = [
   "Squaring is invalid here and would destroy the ordering when negatives are involved."],
  sol:"Treat all three parts together: −3 &lt; 2x + 5 &lt; 17 ⇒ −8 &lt; 2x &lt; 12 ⇒ <b>−4 &lt; x &lt; 6</b>."},
 
-{id:12, lec:"L-1", blk:"Double inequalities", topic:"A numerical double inequality",
+{id:12, lec:"L-1", blk:"Double inequalities", topic:"A numerical double inequality", t:60,
  q:"The solution of −1 ≤ ½x − 3 &lt; 1 is",
  opts:["[4, 8)","(4, 8]","[4, 8]","(−∞, 8)"],
  ans:0,
@@ -391,7 +417,7 @@ const QUIZ = [
   "This drops the lower bound entirely."],
  sol:"−1 ≤ ½x − 3 &lt; 1 ⇒ 2 ≤ ½x &lt; 4 ⇒ <b>4 ≤ x &lt; 8</b>. The bracket types are inherited directly from the original signs."},
 
-{id:13, lec:"L-1", blk:"Sign of products", topic:"Reading a product's sign",
+{id:13, lec:"L-1", blk:"Sign of products", topic:"Reading a product's sign", t:60,
  q:"If ab &gt; 0, then",
  opts:[
   "a and b have the same sign",
@@ -406,7 +432,7 @@ const QUIZ = [
   "Too narrow the other way: a = b = 2 works as well."],
  sol:"<b>ab &gt; 0 or a/b &gt; 0 ⇒ same sign. ab &lt; 0 or a/b &lt; 0 ⇒ opposite signs.</b> This is the whole basis of the wavy-curve method."},
 
-{id:14, lec:"L-1", blk:"Powers", topic:"Squaring an ordered triple",
+{id:14, lec:"L-1", blk:"Powers", topic:"Squaring an ordered triple", t:60,
  q:"If a ≤ b ≤ c and all three are <b>negative</b>, then",
  opts:["a² ≥ b² ≥ c²","a² ≤ b² ≤ c²","a² = b² = c²","no ordering of the squares can be determined"],
  ans:0,
@@ -417,7 +443,7 @@ const QUIZ = [
   "The ordering is fully determined once you know all three share a sign."],
  sol:"<b>All non-negative ⇒ squaring preserves the order. All negative ⇒ squaring reverses it.</b> Mixed signs need case work."},
 
-{id:15, lec:"L-1", blk:"Solving linear inequalities", topic:"Restricting to integers",
+{id:15, lec:"L-1", blk:"Solving linear inequalities", topic:"Restricting to integers", t:60,
  q:"When a question says “solve … where x is an integer”, the correct procedure is to",
  opts:[
   "solve over ℝ first, then keep only the integers in that range",
@@ -432,7 +458,7 @@ const QUIZ = [
   "The answer changes from an interval to a list, and boundary integers may or may not qualify."],
  sol:"<b>Solve over ℝ, then intersect with ℤ.</b> Pay particular attention to whether the boundary is included."},
 
-{id:16, lec:"L-1", blk:"Operation rules", topic:"Multiplying by a positive",
+{id:16, lec:"L-1", blk:"Operation rules", topic:"Multiplying by a positive", t:60,
  q:"Multiplying both sides of p &lt; q by a positive number r gives",
  opts:["pr &lt; qr","pr &gt; qr","pr = qr","no valid conclusion"],
  ans:0,
@@ -444,7 +470,7 @@ const QUIZ = [
  sol:"<b>r &gt; 0: p &lt; q ⇒ pr &lt; qr. r &lt; 0: p &lt; q ⇒ pr &gt; qr.</b> Only the sign of r matters."},
 
 /* ---------------- L-2 (12) ---------------- */
-{id:17, lec:"L-2", blk:"Systems in one variable", topic:"Combining solution sets",
+{id:17, lec:"L-2", blk:"Systems in one variable", topic:"Combining solution sets", t:60,
  q:"The solution of a <b>system</b> of inequalities in one variable is",
  opts:[
   "the intersection of the individual solution sets",
@@ -459,7 +485,7 @@ const QUIZ = [
   "The intersection can perfectly well be empty, or a union of pieces if the individual sets are."],
  sol:"<b>System ⇒ intersection.</b> Solve each inequality separately, then take the common part. Example: [2, ∞) ∩ (−∞, 4] = [2, 4]."},
 
-{id:18, lec:"L-2", blk:"Systems in one variable", topic:"A numerical system",
+{id:18, lec:"L-2", blk:"Systems in one variable", topic:"A numerical system", t:60,
  q:"The solution of the system 3x − 6 ≥ 0 and 4x − 10 ≤ 6 is",
  opts:["[2, 4]","(2, 4)","(−∞, 4]","[2, ∞)"],
  ans:0,
@@ -470,7 +496,7 @@ const QUIZ = [
   "This uses only the first condition."],
  sol:"3x ≥ 6 ⇒ x ≥ 2; 4x ≤ 16 ⇒ x ≤ 4. Intersection: <b>[2, 4]</b>."},
 
-{id:19, lec:"L-2", blk:"Systems in one variable", topic:"A three-part chain",
+{id:19, lec:"L-2", blk:"Systems in one variable", topic:"A three-part chain", t:60,
  q:"The solution of (2 − 3x)/5 &lt; (1 − x)/3 &lt; (3 + 4x)/2 is",
  opts:["(1/4, ∞)","(−1/2, ∞)","(−1/2, 1/4)","(−∞, 1/4)"],
  ans:0,
@@ -481,7 +507,7 @@ const QUIZ = [
   "The direction is wrong — both halves give lower bounds."],
  sol:"Left: 6 − 9x &lt; 5 − 5x ⇒ x &gt; 1/4. Right: 2 − 2x &lt; 9 + 12x ⇒ x &gt; −1/2. Intersection: <b>(1/4, ∞)</b>."},
 
-{id:20, lec:"L-2", blk:"Two variables", topic:"What counts as a solution",
+{id:20, lec:"L-2", blk:"Two variables", topic:"What counts as a solution", t:60,
  q:"For a linear inequality in two variables, a solution is",
  opts:[
   "an ordered pair (x, y) that makes the statement true",
@@ -496,7 +522,7 @@ const QUIZ = [
   "Boundary points qualify only for ≤ and ≥, not for strict &lt; and &gt;."],
  sol:"The solution set of a two-variable inequality is a <b>half-plane</b>, consisting of all ordered pairs satisfying the condition."},
 
-{id:21, lec:"L-2", blk:"Two variables", topic:"The origin test",
+{id:21, lec:"L-2", blk:"Two variables", topic:"The origin test", t:60,
  q:"To decide which half-plane 2x + y ≤ 4 describes, the quickest method is to",
  opts:[
   "substitute a convenient test point such as (0, 0) and see whether the statement holds",
@@ -511,7 +537,7 @@ const QUIZ = [
   "If the test fails — as (0,0) does in 3x + 4y ≥ 12, giving 0 ≥ 12 — the region is on the <b>opposite</b> side."],
  sol:"<b>Test one point.</b> Use the origin unless the boundary passes through it. True ⇒ shade that side; false ⇒ shade the other."},
 
-{id:22, lec:"L-2", blk:"Two variables", topic:"Solid versus dashed boundaries",
+{id:22, lec:"L-2", blk:"Two variables", topic:"Solid versus dashed boundaries", t:60,
  q:"The boundary line of a two-variable inequality is drawn <b>dashed</b> when the sign is",
  opts:["&lt; or &gt;","≤ or ≥","= only","any of these"],
  ans:0,
@@ -522,7 +548,7 @@ const QUIZ = [
   "The convention distinguishes the two cases precisely."],
  sol:"<b>Strict (&lt;, &gt;) ⇒ dashed, boundary excluded. Slack (≤, ≥) ⇒ solid, boundary included.</b>"},
 
-{id:23, lec:"L-2", blk:"Two variables", topic:"An empty feasible region",
+{id:23, lec:"L-2", blk:"Two variables", topic:"An empty feasible region", t:60,
  q:"The system x + 2y ≤ 3, 3x + 4y ≥ 12, x ≥ 0, y ≥ 1 has",
  opts:[
   "no solution — the feasible region is empty",
@@ -537,7 +563,7 @@ const QUIZ = [
   "There is no region, bounded or otherwise."],
  sol:"The half-planes point away from each other under the constraints x ≥ 0, y ≥ 1, so the intersection is <b>empty (∅)</b>. An empty feasible region is a legitimate answer."},
 
-{id:24, lec:"L-2", blk:"Word problems", topic:"Consecutive odd numbers",
+{id:24, lec:"L-2", blk:"Word problems", topic:"Consecutive odd numbers", t:60,
  q:"How many pairs of consecutive odd natural numbers, both larger than 10, have a sum less than 40?",
  opts:["4","3","5","infinitely many"],
  ans:0,
@@ -548,7 +574,7 @@ const QUIZ = [
   "The upper bound x &lt; 19 makes the count finite."],
  sol:"x &gt; 10 and 2x + 2 &lt; 40 ⇒ 10 &lt; x &lt; 19. Odd values: 11, 13, 15, 17, giving the pairs <b>(11,13), (13,15), (15,17), (17,19)</b> — <b>4</b> in all."},
 
-{id:25, lec:"L-2", blk:"Systems in one variable", topic:"When the intersection is empty",
+{id:25, lec:"L-2", blk:"Systems in one variable", topic:"When the intersection is empty", t:60,
  q:"If one inequality gives x &gt; 5 and another gives x &lt; 2, the system has",
  opts:[
   "no solution",
@@ -563,7 +589,7 @@ const QUIZ = [
   "Almost no number satisfies both."],
  sol:"A system demands <b>both</b> conditions. (5, ∞) ∩ (−∞, 2) = <b>∅</b>."},
 
-{id:26, lec:"L-2", blk:"Two variables", topic:"Shape of the feasible region",
+{id:26, lec:"L-2", blk:"Two variables", topic:"Shape of the feasible region", t:60,
  q:"The feasible region of a system of linear inequalities in two variables can be",
  opts:[
   "a bounded polygon, an unbounded region, or empty",
@@ -578,7 +604,7 @@ const QUIZ = [
   "A single point arises only in degenerate cases, not generally."],
  sol:"Shade every half-plane; the <b>overlap</b> is the feasible region — polygon, unbounded region, or empty."},
 
-{id:27, lec:"L-2", blk:"Systems in one variable", topic:"Reading bracket types",
+{id:27, lec:"L-2", blk:"Systems in one variable", topic:"Reading bracket types", t:60,
  q:"Intersecting [2, ∞) with (−∞, 4) gives",
  opts:["[2, 4)","(2, 4)","[2, 4]","(2, 4]"],
  ans:0,
@@ -589,7 +615,7 @@ const QUIZ = [
   "Both brackets have been flipped."],
  sol:"When intersecting, <b>each endpoint inherits its bracket from the set that bounds it there</b>: <b>[2, 4)</b>."},
 
-{id:28, lec:"L-2", blk:"Two variables", topic:"Choosing a different test point",
+{id:28, lec:"L-2", blk:"Two variables", topic:"Choosing a different test point", t:60,
  q:"If the boundary line of an inequality passes through the origin, the origin test should be replaced by",
  opts:[
   "testing any other convenient point not on the line, such as (1, 0)",
@@ -605,7 +631,7 @@ const QUIZ = [
  sol:"The origin is only a convenience. If the line passes through it, pick <b>any other point off the line</b> and test that instead."},
 
 /* ---------------- L-3 (18) ---------------- */
-{id:29, lec:"L-3", blk:"Definition", topic:"The piecewise definition",
+{id:29, lec:"L-3", blk:"Definition", topic:"The piecewise definition", t:60,
  q:"The modulus function is defined by",
  opts:[
   "|x| = x for x ≥ 0 and |x| = −x for x &lt; 0",
@@ -620,7 +646,7 @@ const QUIZ = [
   "|2| = 2 but 2² = 4; the modulus is not a square."],
  sol:"<b>|x| = x (x ≥ 0), −x (x &lt; 0).</b> Domain ℝ, range [0, ∞) — the familiar V-shape."},
 
-{id:30, lec:"L-3", blk:"Properties", topic:"The square-root identity",
+{id:30, lec:"L-3", blk:"Properties", topic:"The square-root identity", t:60,
  q:"For every real x, √(x²) equals",
  opts:["|x|","x","±x","x²"],
  ans:0,
@@ -631,7 +657,7 @@ const QUIZ = [
   "Squaring then rooting removes one power, not none."],
  sol:"<b>√(x²) = |x|</b> — the identity behind most modulus manipulations. Note also |x|² = x²."},
 
-{id:31, lec:"L-3", blk:"Properties", topic:"Modulus of a product",
+{id:31, lec:"L-3", blk:"Properties", topic:"Modulus of a product", t:60,
  q:"For all real x and y, |xy| equals",
  opts:["|x|·|y|","|x| + |y|","|x + y|","x·y"],
  ans:0,
@@ -642,7 +668,7 @@ const QUIZ = [
   "Fails when the product is negative: |2 × (−3)| = 6, not −6."],
  sol:"<b>|xy| = |x||y|</b> and <b>|x/y| = |x|/|y|</b>. The modulus does <b>not</b> distribute over sums."},
 
-{id:32, lec:"L-3", blk:"Solving equations", topic:"The basic split",
+{id:32, lec:"L-3", blk:"Solving equations", topic:"The basic split", t:90,
  q:"For p &gt; 0, the equation |X| = p is equivalent to",
  opts:["X = p or X = −p","X = p only","X = −p only","X = ±√p"],
  ans:0,
@@ -653,7 +679,7 @@ const QUIZ = [
   "Square roots play no part; the modulus is a distance, not a square."],
  sol:"<b>|X| = p ⇒ X = ±p</b> for p &gt; 0. Every modulus equation splits into two cases."},
 
-{id:33, lec:"L-3", blk:"Solving equations", topic:"Isolate before splitting",
+{id:33, lec:"L-3", blk:"Solving equations", topic:"Isolate before splitting", t:60,
  q:"To solve 2|5x − 1| − 3 = 9, the correct first step is to",
  opts:[
   "isolate the modulus, obtaining |5x − 1| = 6",
@@ -668,7 +694,7 @@ const QUIZ = [
   "Dividing by an expression that may be zero is invalid."],
  sol:"<b>Isolate |·| first, then split.</b> And if the isolated value comes out <b>negative</b>, stop — there is no solution."},
 
-{id:34, lec:"L-3", blk:"Solving equations", topic:"A modulus equal to a negative",
+{id:34, lec:"L-3", blk:"Solving equations", topic:"A modulus equal to a negative", t:60,
  q:"The equation |x + 2| = −3 has",
  opts:[
   "no solution",
@@ -683,7 +709,7 @@ const QUIZ = [
   "The solution set is empty."],
  sol:"⚠ <b>|X| = (negative) has no solution.</b> But note the contrast: <b>|X| ≥ (negative) is true for every real x</b>, since a non-negative quantity always exceeds a negative one."},
 
-{id:35, lec:"L-3", blk:"Solving equations", topic:"A worked modulus equation",
+{id:35, lec:"L-3", blk:"Solving equations", topic:"A worked modulus equation", t:90,
  q:"The solution of 2 − 7|x + 4| = −12 is",
  opts:["x = −6 or x = −2","x = −2 only","x = 2 or x = 6","x = −6 only"],
  ans:0,
@@ -694,7 +720,7 @@ const QUIZ = [
   "The other branch is missing."],
  sol:"2 − 7|x+4| = −12 ⇒ −7|x+4| = −14 ⇒ |x+4| = 2 ⇒ x + 4 = ±2 ⇒ <b>x = −2 or x = −6</b>."},
 
-{id:36, lec:"L-3", blk:"Solving equations", topic:"Modulus equals modulus",
+{id:36, lec:"L-3", blk:"Solving equations", topic:"Modulus equals modulus", t:90,
  q:"The equation |X| = |Y| is equivalent to",
  opts:["X = Y or X = −Y","X = Y only","X² = Y only","XY = 0"],
  ans:0,
@@ -705,7 +731,7 @@ const QUIZ = [
   "That would force one of them to vanish."],
  sol:"<b>|X| = |Y| ⇒ X = ±Y.</b> Equivalently X² = Y², which is how you square such equations safely."},
 
-{id:37, lec:"L-3", blk:"Solving equations", topic:"A two-modulus equation",
+{id:37, lec:"L-3", blk:"Solving equations", topic:"A two-modulus equation", t:90,
  q:"The solution of |x + 10| = |3x − 2| is",
  opts:["x = −2 or x = 6","x = 6 only","x = −2 only","no solution"],
  ans:0,
@@ -716,7 +742,7 @@ const QUIZ = [
   "Both branches produce genuine solutions; check x = 6: |16| = |16| ✓"],
  sol:"Set x + 10 = ±(3x − 2). The two cases give <b>x = 6</b> and <b>x = −2</b>."},
 
-{id:38, lec:"L-3", blk:"Inequalities", topic:"|x| ≤ a",
+{id:38, lec:"L-3", blk:"Inequalities", topic:"|x| ≤ a", t:60,
  q:"For a &gt; 0, the inequality |x| ≤ a is equivalent to",
  opts:["x ∈ [−a, a]","x ∈ (−∞, −a] ∪ [a, ∞)","x ≥ a","x ∈ (−a, a)"],
  ans:0,
@@ -727,7 +753,7 @@ const QUIZ = [
   "The endpoints satisfy |±a| = a ≤ a, so they belong."],
  sol:"<b>|x| ≤ a ⇔ −a ≤ x ≤ a.</b> Read |x| as distance from 0."},
 
-{id:39, lec:"L-3", blk:"Inequalities", topic:"|x| ≥ a",
+{id:39, lec:"L-3", blk:"Inequalities", topic:"|x| ≥ a", t:60,
  q:"For a &gt; 0, the inequality |x| ≥ a is equivalent to",
  opts:["x ∈ (−∞, −a] ∪ [a, ∞)","x ∈ [−a, a]","x ≤ a","x ∈ ℝ"],
  ans:0,
@@ -738,7 +764,7 @@ const QUIZ = [
   "Values near zero fail, so it is not all of ℝ."],
  sol:"<b>|x| ≥ a ⇔ x ≤ −a or x ≥ a</b> — two rays, not one interval."},
 
-{id:40, lec:"L-3", blk:"Inequalities", topic:"A shifted modulus inequality",
+{id:40, lec:"L-3", blk:"Inequalities", topic:"A shifted modulus inequality", t:60,
  q:"For b &gt; 0, the inequality |x − a| &lt; b is equivalent to",
  opts:["x ∈ (a − b, a + b)","x ∈ (b − a, b + a)","x ∈ [a − b, a + b]","x ∈ (−b, b)"],
  ans:0,
@@ -749,7 +775,7 @@ const QUIZ = [
   "This forgets the shift and centres on 0."],
  sol:"<b>|x − a| &lt; b ⇔ a − b &lt; x &lt; a + b</b> — an open interval of radius b about a."},
 
-{id:41, lec:"L-3", blk:"Inequalities", topic:"A worked modulus inequality",
+{id:41, lec:"L-3", blk:"Inequalities", topic:"A worked modulus inequality", t:60,
  q:"The solution of 4|x + 3| − 7 ≤ 5 is",
  opts:["[−6, 0]","(−6, 0)","(−∞, −6] ∪ [0, ∞)","[0, 6]"],
  ans:0,
@@ -760,7 +786,7 @@ const QUIZ = [
   "The centre is at −3, not +3, so the interval runs from −6 to 0."],
  sol:"4|x+3| ≤ 12 ⇒ |x+3| ≤ 3 ⇒ <b>x ∈ [−6, 0]</b>."},
 
-{id:42, lec:"L-3", blk:"Inequalities", topic:"The unbounded case worked",
+{id:42, lec:"L-3", blk:"Inequalities", topic:"The unbounded case worked", t:90,
  q:"The solution of 3 + 2|4x − 7| ≥ 13 is",
  opts:[
   "(−∞, 1/2] ∪ [3, ∞)",
@@ -775,7 +801,7 @@ const QUIZ = [
   "Wrong region and wrong brackets."],
  sol:"2|4x−7| ≥ 10 ⇒ |4x−7| ≥ 5 ⇒ 4x ≤ 2 or 4x ≥ 12 ⇒ <b>x ∈ (−∞, 1/2] ∪ [3, ∞)</b>."},
 
-{id:43, lec:"L-3", blk:"Properties", topic:"The triangle inequality",
+{id:43, lec:"L-3", blk:"Properties", topic:"The triangle inequality", t:60,
  q:"For all real x and y, |x + y| = |x| + |y| holds",
  opts:[
   "when x and y have the same sign, or one of them is zero",
@@ -790,7 +816,7 @@ const QUIZ = [
   "x = 2, y = 3 gives 5 = 5, so equality certainly occurs."],
  sol:"<b>|x + y| ≤ |x| + |y|</b> always (the triangle inequality), with equality exactly when x and y share a sign or one is zero."},
 
-{id:44, lec:"L-3", blk:"Properties", topic:"Comparing squares and moduli",
+{id:44, lec:"L-3", blk:"Properties", topic:"Comparing squares and moduli", t:60,
  q:"The statement a² &lt; b² is equivalent to",
  opts:["|a| &lt; |b|","a &lt; b","a &lt; |b|","|a| &lt; b"],
  ans:0,
@@ -801,7 +827,7 @@ const QUIZ = [
   "Test a = 1, b = −3: |a| = 1 is not less than b = −3, yet 1 &lt; 9."],
  sol:"<b>a² &lt; b² ⇔ |a| &lt; |b|.</b> Squares see only magnitudes."},
 
-{id:45, lec:"L-3", blk:"Inequalities", topic:"A modulus below a negative",
+{id:45, lec:"L-3", blk:"Inequalities", topic:"A modulus below a negative", t:60,
  q:"The inequality |x − 5| &lt; −2 has",
  opts:[
   "no solution",
@@ -816,7 +842,7 @@ const QUIZ = [
   "That would solve |x − 5| &gt; 2."],
  sol:"⚠ Check the sign of the right-hand side first. <b>|X| &lt; (negative) ⇒ no solution</b>, while <b>|X| &gt; (negative) ⇒ all real x</b>."},
 
-{id:46, lec:"L-3", blk:"Definition", topic:"Domain and range",
+{id:46, lec:"L-3", blk:"Definition", topic:"Domain and range", t:60,
  q:"The domain and range of f(x) = |x| are",
  opts:[
   "domain ℝ, range [0, ∞)",
@@ -832,7 +858,7 @@ const QUIZ = [
  sol:"|x| has <b>domain ℝ and range [0, ∞)</b>."},
 
 /* ---------------- L-4 (16) ---------------- */
-{id:47, lec:"L-4", blk:"The sign rule", topic:"Product greater than zero",
+{id:47, lec:"L-4", blk:"The sign rule", topic:"Product greater than zero", t:60,
  q:"For α &lt; β, the inequality (x − α)(x − β) &gt; 0 has solution",
  opts:[
   "(−∞, α) ∪ (β, ∞)",
@@ -847,7 +873,7 @@ const QUIZ = [
   "Wrong region and wrong brackets."],
  sol:"<b>Positive ⇒ outside the roots. Negative ⇒ between the roots.</b> With slack signs, include the endpoints."},
 
-{id:48, lec:"L-4", blk:"The sign rule", topic:"Product less than zero",
+{id:48, lec:"L-4", blk:"The sign rule", topic:"Product less than zero", t:60,
  q:"For α &lt; β, the inequality (x − α)(x − β) &lt; 0 has solution",
  opts:["(α, β)","(−∞, α) ∪ (β, ∞)","[α, β]","∅"],
  ans:0,
@@ -858,7 +884,7 @@ const QUIZ = [
   "The solution set is non-empty whenever the roots are distinct."],
  sol:"<b>(x − α)(x − β) &lt; 0 ⇒ x ∈ (α, β)</b> — “between the roots”."},
 
-{id:49, lec:"L-4", blk:"Standard form", topic:"Handling a negative leading coefficient",
+{id:49, lec:"L-4", blk:"Standard form", topic:"Handling a negative leading coefficient", t:60,
  q:"When the coefficient of x² is negative, the first step in solving the quadratic inequality is to",
  opts:[
   "multiply the whole inequality by −1 and flip the sign, so that a &gt; 0",
@@ -873,7 +899,7 @@ const QUIZ = [
   "Dividing by x is invalid, since x may be zero or negative."],
  sol:"⚠ <b>Force a &gt; 0 first</b> by multiplying by −1 and flipping, then apply “inside/outside the roots”."},
 
-{id:50, lec:"L-4", blk:"Solving", topic:"A basic quadratic inequality",
+{id:50, lec:"L-4", blk:"Solving", topic:"A basic quadratic inequality", t:60,
  q:"The solution of x² − 2x − 3 &lt; 0 is",
  opts:["(−1, 3)","(−∞, −1) ∪ (3, ∞)","[−1, 3]","(−3, 1)"],
  ans:0,
@@ -884,7 +910,7 @@ const QUIZ = [
   "The roots are −1 and 3, not −3 and 1 — check by substituting: (−1)² − 2(−1) − 3 = 0 ✓"],
  sol:"x² − 2x − 3 = (x + 1)(x − 3) &lt; 0 ⇒ <b>x ∈ (−1, 3)</b>."},
 
-{id:51, lec:"L-4", blk:"Solving", topic:"Rearranging to standard form",
+{id:51, lec:"L-4", blk:"Solving", topic:"Rearranging to standard form", t:60,
  q:"The solution of 2x² + x &lt; 15 is",
  opts:["(−3, 5/2)","(−∞, −3) ∪ (5/2, ∞)","(−5/2, 3)","[−3, 5/2]"],
  ans:0,
@@ -895,7 +921,7 @@ const QUIZ = [
   "The inequality is strict, so the roots are excluded."],
  sol:"Bring everything to one side first: 2x² + x − 15 &lt; 0 ⇒ (2x − 5)(x + 3) &lt; 0 ⇒ <b>x ∈ (−3, 5/2)</b>."},
 
-{id:52, lec:"L-4", blk:"The discriminant test", topic:"Always positive",
+{id:52, lec:"L-4", blk:"The discriminant test", topic:"Always positive", t:60,
  q:"A quadratic ax² + bx + c is positive for <b>every</b> real x precisely when",
  opts:[
   "a &gt; 0 and D = b² − 4ac &lt; 0",
@@ -910,7 +936,7 @@ const QUIZ = [
   "D = 0 gives a repeated root where the expression equals zero, so it is not strictly positive everywhere."],
  sol:"<b>a &gt; 0, D &lt; 0 ⇒ always positive. a &lt; 0, D &lt; 0 ⇒ always negative.</b> A fixed sign requires no real roots."},
 
-{id:53, lec:"L-4", blk:"The discriminant test", topic:"Always negative",
+{id:53, lec:"L-4", blk:"The discriminant test", topic:"Always negative", t:60,
  q:"A quadratic ax² + bx + c is negative for every real x precisely when",
  opts:[
   "a &lt; 0 and D &lt; 0",
@@ -925,7 +951,7 @@ const QUIZ = [
   "At the repeated root the expression is zero, not negative."],
  sol:"<b>a &lt; 0 and D &lt; 0.</b> Both conditions are needed."},
 
-{id:54, lec:"L-4", blk:"Parameter problems", topic:"Finding a range for k",
+{id:54, lec:"L-4", blk:"Parameter problems", topic:"Finding a range for k", t:90,
  q:"The values of k for which x² − (k − 3)x − k + 6 &gt; 0 holds for all real x are",
  opts:["(−3, 5)","[−3, 5]","(−∞, −3) ∪ (5, ∞)","(−5, 3)"],
  ans:0,
@@ -936,7 +962,7 @@ const QUIZ = [
   "The roots of the discriminant condition are −3 and 5, not −5 and 3."],
  sol:"Need D &lt; 0: (k − 3)² − 4(6 − k) &lt; 0 ⇒ k² − 2k − 15 &lt; 0 ⇒ (k + 3)(k − 5) &lt; 0 ⇒ <b>k ∈ (−3, 5)</b>."},
 
-{id:55, lec:"L-4", blk:"Modulus and quadratics", topic:"Squaring a modulus inequality",
+{id:55, lec:"L-4", blk:"Modulus and quadratics", topic:"Squaring a modulus inequality", t:60,
  q:"To solve |X| &gt; |Y| where X and Y are expressions, the safe move is to",
  opts:[
   "square both sides, since both are non-negative, giving X² − Y² &gt; 0",
@@ -951,7 +977,7 @@ const QUIZ = [
   "Adding them does not produce an equivalent statement."],
  sol:"<b>Both sides non-negative ⇒ square safely.</b> Then X² − Y² = (X + Y)(X − Y) turns it into a polynomial inequality."},
 
-{id:56, lec:"L-4", blk:"Modulus and quadratics", topic:"A worked squaring problem",
+{id:56, lec:"L-4", blk:"Modulus and quadratics", topic:"A worked squaring problem", t:90,
  q:"The solution of |x² − 3x − 3| &gt; |x² + 7x − 13| is",
  opts:[
   "(−∞, −4) ∪ (1, 2)",
@@ -966,7 +992,7 @@ const QUIZ = [
   "This drops the ray x &lt; −4."],
  sol:"Square: (X+Y)(X−Y) &gt; 0 with X + Y = 2x² + 4x − 16 and X − Y = −10x + 10. This gives −20(x+4)(x−2)(x−1) &gt; 0 ⇒ (x+4)(x−1)(x−2) &lt; 0 ⇒ <b>x ∈ (−∞, −4) ∪ (1, 2)</b>."},
 
-{id:57, lec:"L-4", blk:"The sign rule", topic:"Endpoints with slack signs",
+{id:57, lec:"L-4", blk:"The sign rule", topic:"Endpoints with slack signs", t:60,
  q:"For α &lt; β, the solution of (x − α)(x − β) ≤ 0 is",
  opts:["[α, β]","(α, β)","(−∞, α] ∪ [β, ∞)","(−∞, α) ∪ (β, ∞)"],
  ans:0,
@@ -977,7 +1003,7 @@ const QUIZ = [
   "That solves the &gt; version."],
  sol:"Same region as the strict case, but with <b>closed</b> brackets: <b>[α, β]</b>."},
 
-{id:58, lec:"L-4", blk:"The discriminant test", topic:"Reading the discriminant",
+{id:58, lec:"L-4", blk:"The discriminant test", topic:"Reading the discriminant", t:60,
  q:"A quadratic with D = b² − 4ac &gt; 0 has",
  opts:[
   "two distinct real roots, so its sign changes twice",
@@ -992,7 +1018,7 @@ const QUIZ = [
   "Complex roots correspond to D &lt; 0."],
  sol:"<b>D &gt; 0:</b> two distinct real roots. <b>D = 0:</b> one repeated root (touches). <b>D &lt; 0:</b> no real roots (fixed sign)."},
 
-{id:59, lec:"L-4", blk:"Solving", topic:"A perfect-square quadratic",
+{id:59, lec:"L-4", blk:"Solving", topic:"A perfect-square quadratic", t:60,
  q:"The solution of (x − 2)² &gt; 0 is",
  opts:["ℝ − {2}","ℝ","(2, ∞)","∅"],
  ans:0,
@@ -1003,7 +1029,7 @@ const QUIZ = [
   "Almost every x works."],
  sol:"A squared factor is <b>never negative</b>. (x − 2)² &gt; 0 for every x except the root itself: <b>ℝ − {2}</b>."},
 
-{id:60, lec:"L-4", blk:"Solving", topic:"A quadratic with no real roots",
+{id:60, lec:"L-4", blk:"Solving", topic:"A quadratic with no real roots", t:90,
  q:"The solution of x² + x + 1 &gt; 0 is",
  opts:["ℝ","∅","(−1, 0)","(−∞, −1) ∪ (0, ∞)"],
  ans:0,
@@ -1014,7 +1040,7 @@ const QUIZ = [
   "Same — no real roots exist."],
  sol:"D = 1 − 4(1)(1) = −3 &lt; 0 with a &gt; 0 ⇒ the expression is <b>always positive</b>, so the solution is <b>ℝ</b>."},
 
-{id:61, lec:"L-4", blk:"Standard form", topic:"A negative leading coefficient worked",
+{id:61, lec:"L-4", blk:"Standard form", topic:"A negative leading coefficient worked", t:60,
  q:"The solution of −x² + 4x − 3 &gt; 0 is",
  opts:["(1, 3)","(−∞, 1) ∪ (3, ∞)","(−3, −1)","[1, 3]"],
  ans:0,
@@ -1025,7 +1051,7 @@ const QUIZ = [
   "The inequality is strict, so the roots are excluded."],
  sol:"Multiply by −1 and <b>flip</b>: x² − 4x + 3 &lt; 0 ⇒ (x − 1)(x − 3) &lt; 0 ⇒ <b>x ∈ (1, 3)</b>."},
 
-{id:62, lec:"L-4", blk:"Parameter problems", topic:"What the two conditions do",
+{id:62, lec:"L-4", blk:"Parameter problems", topic:"What the two conditions do", t:60,
  q:"In a “find k so that the quadratic keeps one sign” problem, the two conditions you impose are",
  opts:[
   "the sign of the leading coefficient, and D &lt; 0",
@@ -1041,7 +1067,7 @@ const QUIZ = [
  sol:"<b>Two conditions: (1) sign of a, (2) D &lt; 0.</b> Together they pin the parabola entirely above or entirely below the axis."},
 
 /* ---------------- L-5 (16) ---------------- */
-{id:63, lec:"L-5", blk:"The method", topic:"Step one",
+{id:63, lec:"L-5", blk:"The method", topic:"Step one", t:60,
  q:"The first step of the wavy-curve (method of intervals) procedure is to",
  opts:[
   "make the right-hand side zero and factor the left into linear factors",
@@ -1056,7 +1082,7 @@ const QUIZ = [
   "Test values come later, after the critical points are known."],
  sol:"<b>Step 1: bring everything to one side so the RHS is 0, then factor.</b> Cross-multiplying an unknown-sign denominator is invalid."},
 
-{id:64, lec:"L-5", blk:"The method", topic:"Normalising the factors",
+{id:64, lec:"L-5", blk:"The method", topic:"Normalising the factors", t:60,
  q:"Before marking critical points, every factor should be rewritten so that",
  opts:[
   "the coefficient of x in each factor is positive",
@@ -1071,7 +1097,7 @@ const QUIZ = [
   "The degrees need not match."],
  sol:"<b>Step 2: force every factor into the form (x − r).</b> Rewrite (4 − x) as −(x − 4) and carry the minus sign outside, flipping the inequality if needed."},
 
-{id:65, lec:"L-5", blk:"The method", topic:"The rightmost sign",
+{id:65, lec:"L-5", blk:"The method", topic:"The rightmost sign", t:60,
  q:"In the wavy-curve method, the sign placed on the extreme right of the number line is",
  opts:[
   "positive",
@@ -1086,7 +1112,7 @@ const QUIZ = [
   "Testing works but is unnecessary — after normalising, the rightmost region is always positive."],
  sol:"<b>Step 4: put + on the far right, then alternate across each simple root.</b> This is valid precisely because step 2 made every leading coefficient positive."},
 
-{id:66, lec:"L-5", blk:"Multiplicity", topic:"Even-power factors",
+{id:66, lec:"L-5", blk:"Multiplicity", topic:"Even-power factors", t:60,
  q:"Crossing a root that comes from an <b>even</b>-power factor such as (x + 4)²,",
  opts:[
   "the sign does not change",
@@ -1101,7 +1127,7 @@ const QUIZ = [
   "Multiplicity, not position, decides whether the sign flips."],
  sol:"<b>Odd multiplicity ⇒ sign flips (curve crosses). Even multiplicity ⇒ sign unchanged (curve touches and bounces).</b>"},
 
-{id:67, lec:"L-5", blk:"Multiplicity", topic:"Why signs alternate",
+{id:67, lec:"L-5", blk:"Multiplicity", topic:"Why signs alternate", t:60,
  q:"Signs alternate at simple roots because",
  opts:[
   "crossing a simple root flips exactly one factor's sign, and hence the whole product's",
@@ -1116,7 +1142,7 @@ const QUIZ = [
   "The listing order is a bookkeeping convenience, not the reason."],
  sol:"Each simple root flips exactly one factor, so the product flips. An even root flips a factor twice — <b>net no change</b>."},
 
-{id:68, lec:"L-5", blk:"Endpoints", topic:"Denominator roots",
+{id:68, lec:"L-5", blk:"Endpoints", topic:"Denominator roots", t:60,
  q:"In a rational inequality with a slack sign (≥ or ≤), the roots of the <b>denominator</b> are",
  opts:[
   "always excluded, because the expression is undefined there",
@@ -1131,7 +1157,7 @@ const QUIZ = [
   "Multiplicity affects the sign pattern, not whether the point is defined."],
  sol:"⚠ <b>Denominator roots are always excluded (open circles), even for ≤ and ≥.</b> Numerator roots are included for slack signs."},
 
-{id:69, lec:"L-5", blk:"Endpoints", topic:"Numerator roots",
+{id:69, lec:"L-5", blk:"Endpoints", topic:"Numerator roots", t:60,
  q:"In a rational inequality with sign ≥, the roots of the <b>numerator</b> (which are not also denominator roots) are",
  opts:[
   "included, because the expression equals 0 there and 0 ≥ 0",
@@ -1146,7 +1172,7 @@ const QUIZ = [
   "An even-multiplicity numerator root still makes the expression zero, so it still qualifies for a slack sign."],
  sol:"<b>Numerator roots are included for slack signs</b> (the expression is 0 there) and excluded for strict ones. This holds regardless of multiplicity."},
 
-{id:70, lec:"L-5", blk:"Solving", topic:"A rational inequality with a square denominator",
+{id:70, lec:"L-5", blk:"Solving", topic:"A rational inequality with a square denominator", t:60,
  q:"The solution of (3x − x²)/(x + 4)² ≥ 0 is",
  opts:["[0, 3]","(0, 3)","[0, 3] − {−4}","(−∞, 0] ∪ [3, ∞)"],
  ans:0,
@@ -1157,7 +1183,7 @@ const QUIZ = [
   "That is where x(3 − x) ≤ 0, the opposite region."],
  sol:"(x + 4)² &gt; 0 for x ≠ −4, so the inequality reduces to x(3 − x) ≥ 0 ⇒ <b>x ∈ [0, 3]</b>."},
 
-{id:71, lec:"L-5", blk:"Solving", topic:"A repeated factor with a strict sign",
+{id:71, lec:"L-5", blk:"Solving", topic:"A repeated factor with a strict sign", t:60,
  q:"The solution of 2x³ + 5x² + 3x &lt; x² + x is",
  opts:[
   "(−∞, −1) ∪ (−1, 0)",
@@ -1172,7 +1198,7 @@ const QUIZ = [
   "This drops the whole ray below −1, where the expression is also negative."],
  sol:"2x³ + 4x² + 2x &lt; 0 ⇒ 2x(x + 1)² &lt; 0. Need x &lt; 0 <b>and</b> (x+1)² ≠ 0, so <b>x ∈ (−∞, −1) ∪ (−1, 0)</b>."},
 
-{id:72, lec:"L-5", blk:"Solving", topic:"A squared factor with a slack sign",
+{id:72, lec:"L-5", blk:"Solving", topic:"A squared factor with a slack sign", t:60,
  q:"The solution of (x + 2)²(x − 3) ≤ 0 is",
  opts:["(−∞, 3]","(−∞, 3] − {−2}","[−2, 3]","(−∞, −2) ∪ (−2, 3]"],
  ans:0,
@@ -1183,7 +1209,7 @@ const QUIZ = [
   "Same error as the second option, written differently."],
  sol:"(x + 2)² ≥ 0, so the sign is that of (x − 3). Solution: <b>(−∞, 3]</b> — and x = −2 <b>is</b> included, since the expression is 0 there."},
 
-{id:73, lec:"L-5", blk:"Solving", topic:"A four-factor rational inequality",
+{id:73, lec:"L-5", blk:"Solving", topic:"A four-factor rational inequality", t:60,
  q:"The solution of (x − 1)²(x − 2) / [(4 − x)(x − 3)<sup>5</sup>] ≥ 0 is",
  opts:[
   "(−∞, 2] ∪ (3, 4)",
@@ -1198,7 +1224,7 @@ const QUIZ = [
   "This is roughly the complement of the true solution."],
  sol:"Normalise: (4 − x) = −(x − 4), so the inequality becomes (x−1)²(x−2)/[(x−4)(x−3)<sup>5</sup>] ≤ 0. Critical points 1 (even), 2, 3, 4. Excluded: <b>3 and 4 only</b> (denominator). Answer: <b>(−∞, 2] ∪ (3, 4)</b>."},
 
-{id:74, lec:"L-5", blk:"The method", topic:"Why not cross-multiply",
+{id:74, lec:"L-5", blk:"The method", topic:"Why not cross-multiply", t:60,
  q:"In solving f(x)/g(x) &gt; 0, why must you avoid multiplying both sides by g(x)?",
  opts:[
   "because the sign of g(x) is unknown, so you cannot tell whether to flip the inequality",
@@ -1213,7 +1239,7 @@ const QUIZ = [
   "A shared factor affects the domain, but it is not why cross-multiplication fails."],
  sol:"⚠ <b>Never cross-multiply by an expression of unknown sign.</b> Instead bring everything to one side and read the signs off the number line."},
 
-{id:75, lec:"L-5", blk:"Multiplicity", topic:"Counting sign changes",
+{id:75, lec:"L-5", blk:"Multiplicity", topic:"Counting sign changes", t:60,
  q:"For the expression (x − 1)(x − 2)²(x − 3)³, the sign changes at",
  opts:[
   "x = 1 and x = 3 only",
@@ -1228,7 +1254,7 @@ const QUIZ = [
   "The two odd-multiplicity roots do flip the sign."],
  sol:"<b>Odd multiplicity ⇒ crosses (sign flips). Even multiplicity ⇒ touches (sign held).</b> Here 1 and 3 flip; 2 does not."},
 
-{id:76, lec:"L-5", blk:"Solving", topic:"A simple rational inequality",
+{id:76, lec:"L-5", blk:"Solving", topic:"A simple rational inequality", t:60,
  q:"The solution of (x − 1)/(x + 2) &gt; 0 is",
  opts:[
   "(−∞, −2) ∪ (1, ∞)",
@@ -1243,7 +1269,7 @@ const QUIZ = [
   "Wrong region and wrong brackets."],
  sol:"Critical points −2 (excluded, denominator) and 1. Sign pattern + − + from the right ⇒ <b>x ∈ (−∞, −2) ∪ (1, ∞)</b>."},
 
-{id:77, lec:"L-5", blk:"The method", topic:"The final step",
+{id:77, lec:"L-5", blk:"The method", topic:"The final step", t:60,
  q:"Having marked the alternating signs, the last step is to",
  opts:[
   "select the + regions for &gt; 0 and the − regions for &lt; 0, then fix the endpoint brackets",
@@ -1258,7 +1284,7 @@ const QUIZ = [
   "Zero has no special status; it may or may not lie in the solution."],
  sol:"<b>Step 5: pick the regions matching the required sign, then set the brackets</b> — numerator roots in for slack signs, denominator roots always out."},
 
-{id:78, lec:"L-5", blk:"Solving", topic:"A strict version of the same problem",
+{id:78, lec:"L-5", blk:"Solving", topic:"A strict version of the same problem", t:90,
  q:"How does the solution of (x + 2)²(x − 3) &lt; 0 differ from that of (x + 2)²(x − 3) ≤ 0?",
  opts:[
   "the strict version additionally excludes x = −2 and x = 3, giving (−∞, −2) ∪ (−2, 3)",
@@ -1274,7 +1300,7 @@ const QUIZ = [
  sol:"The expression is 0 at <b>both</b> x = −2 and x = 3. Slack ⇒ (−∞, 3]. Strict ⇒ <b>(−∞, −2) ∪ (−2, 3)</b>."},
 
 /* ---------------- Strong Box (8) ---------------- */
-{id:79, lec:"SB", blk:"JEE Main 2026 (24 Jan Shift-1)", topic:"A functional equation via the x → k/x swap",
+{id:79, lec:"SB", blk:"JEE Main 2026 (24 Jan Shift-1)", topic:"A functional equation via the x → k/x swap", t:180,
  q:"Let f satisfy 3f(x) + 2f(m/(19x)) = 5x for x ≠ 0, where m = Σ<sub>i=1..9</sub> i². Then f(5) − f(2) equals",
  opts:["18","−9","9","36"],
  ans:0,
@@ -1285,7 +1311,7 @@ const QUIZ = [
   "36 would double the true difference."],
  sol:"m = 9·10·19/6 = 285, so the relation is 3f(x) + 2f(15/x) = 5x. Replacing x by 15/x gives 3f(15/x) + 2f(x) = 75/x. Eliminating f(15/x): <b>f(x) = 3x − 30/x</b>. Then f(5) − f(2) = 9 − (−9) = <b>18</b>."},
 
-{id:80, lec:"SB", blk:"The recurring technique", topic:"Why the swap works",
+{id:80, lec:"SB", blk:"The recurring technique", topic:"Why the swap works", t:90,
  q:"For a functional equation of the form a·f(x) + b·f(k/x) = g(x), the standard move is to",
  opts:[
   "replace x by k/x to get a second equation, then solve the two as a linear system in f(x) and f(k/x)",
@@ -1300,7 +1326,7 @@ const QUIZ = [
   "That technique suits equations like g(f(x)) = polynomial, not this reciprocal form."],
  sol:"<b>x → k/x is an involution</b> — applying it twice returns x. That is what makes the two equations close into a solvable 2×2 system."},
 
-{id:81, lec:"SB", blk:"JEE Main 2025 (28 Jan Shift-2)", topic:"A domain with the greatest-integer function",
+{id:81, lec:"SB", blk:"JEE Main 2025 (28 Jan Shift-2)", topic:"A domain with the greatest-integer function", t:90,
  q:"With [x] the greatest integer function, the domain of f(x) = sec<sup>−1</sup>(2[x] + 1) is",
  opts:[
   "(−∞, ∞)",
@@ -1315,7 +1341,7 @@ const QUIZ = [
   "x = 0 gives t = 1, which is allowed."],
  sol:"2[x] + 1 is <b>always odd</b>, hence never in the forbidden open interval (−1, 1). So the domain is all of <b>ℝ</b>. The trap is treating 2[x] + 1 as a continuous quantity."},
 
-{id:82, lec:"SB", blk:"JEE Main 2022 (28 Jul Shift-1)", topic:"A domain from a two-sided inequality",
+{id:82, lec:"SB", blk:"JEE Main 2022 (28 Jul Shift-1)", topic:"A domain from a two-sided inequality", t:90,
  q:"The domain of f(x) = cos<sup>−1</sup>((x² − 4x + 2)/(x² + 3)) is",
  opts:[
   "[−1/4, ∞)",
@@ -1330,7 +1356,7 @@ const QUIZ = [
   "Wrong direction and wrong sign."],
  sol:"Need −1 ≤ (x²−4x+2)/(x²+3) ≤ 1, and x² + 3 &gt; 0 always. Right: −4x ≤ 1 ⇒ <b>x ≥ −1/4</b>. Left: 2x² − 4x + 5 ≥ 0, which has D = −24 &lt; 0 and a &gt; 0, so it is automatic. Domain: <b>[−1/4, ∞)</b>."},
 
-{id:83, lec:"SB", blk:"JEE Main 2022 (27 Jul Shift-2)", topic:"A domain combining GIF, arcsine and logs",
+{id:83, lec:"SB", blk:"JEE Main 2022 (27 Jul Shift-2)", topic:"A domain combining GIF, arcsine and logs", t:90,
  q:"The domain of f(x) = sin<sup>−1</sup>[2x² − 3] + log<sub>2</sub>(log<sub>1/4</sub>(x² − 5x + 5)), where [t] is the greatest integer function, is",
  opts:[
   "(1, (5 − √5)/2)",
@@ -1345,7 +1371,7 @@ const QUIZ = [
   "That piece satisfies the log condition but lies outside the arcsine range, whose upper limit is √2.5 ≈ 1.581."],
  sol:"sin<sup>−1</sup>[t] needs [2x²−3] ∈ {−1,0,1} ⇒ −1 ≤ 2x²−3 &lt; 2 ⇒ 1 ≤ x² &lt; 5/2. The log needs log<sub>1/4</sub>(·) &gt; 0 ⇒ 0 &lt; x²−5x+5 &lt; 1 ⇒ x ∈ (1, (5−√5)/2) ∪ ((5+√5)/2, 4). Intersecting: <b>(1, (5 − √5)/2)</b>."},
 
-{id:84, lec:"SB", blk:"JEE Main 2023 (24 Jan Shift-1)", topic:"An equation with the greatest-integer function",
+{id:84, lec:"SB", blk:"JEE Main 2023 (24 Jan Shift-1)", topic:"An equation with the greatest-integer function", t:180,
  q:"The equation x² − 4x + [x] + 3 = x[x], where [x] is the greatest integer function, has",
  opts:[
   "a unique solution, namely x = 1",
@@ -1360,7 +1386,7 @@ const QUIZ = [
   "The second branch is empty, so the solution set is a single point."],
  sol:"x² − 4x + 3 = [x](x − 1) ⇒ (x−1)(x−3) = [x](x−1) ⇒ (x − 1)(x − 3 − [x]) = 0. Either x = 1, or [x] = x − 3 ⇒ x − [x] = 3 — impossible, since <b>0 ≤ {x} &lt; 1</b>. Unique solution <b>x = 1</b>."},
 
-{id:85, lec:"SB", blk:"JEE Main 2024 (4 Apr Shift-2)", topic:"An iterated composition",
+{id:85, lec:"SB", blk:"JEE Main 2024 (4 Apr Shift-2)", topic:"An iterated composition", t:180,
  q:"Let f(x) = 2x/√(1 + 9x²). If the tenfold composition satisfies (f∘f∘…∘f)(x) = 2<sup>10</sup>x/√(1 + 9αx²), then √(3α + 1) equals",
  opts:["1024","512","2048","256"],
  ans:0,
@@ -1371,7 +1397,7 @@ const QUIZ = [
   "256 = 2⁸ would correspond to eight."],
  sol:"f(f(x)) = 4x/√(1 + 45x²) and f³(x) = 8x/√(1 + 189x²) — the pattern is <b>f<sup>n</sup>(x) = 2ⁿx/√(1 + 9·((4ⁿ−1)/3)x²)</b>. So α = (4¹⁰ − 1)/3, giving 3α + 1 = 4¹⁰ and <b>√(3α+1) = 2¹⁰ = 1024</b>."},
 
-{id:86, lec:"SB", blk:"The recurring technique", topic:"How to find a domain",
+{id:86, lec:"SB", blk:"The recurring technique", topic:"How to find a domain", t:90,
  q:"To find the domain of an expression combining an inverse-trigonometric function, a square root and a logarithm, you should",
  opts:[
   "write down the constraint each piece imposes, solve each as an inequality, then intersect all of them",
@@ -1390,13 +1416,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter M-6 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1414,6 +1451,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1448,15 +1488,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1468,47 +1509,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1518,30 +1576,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1550,7 +1652,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1563,9 +1667,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1574,7 +1696,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1595,21 +1718,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter M-6 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

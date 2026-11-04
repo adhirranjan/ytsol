@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -241,7 +267,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (13) ---------------- */
-{id:1, lec:"L-1", blk:"Laws of friction", topic:"Amonton's First Law &mdash; what friction is proportional to",
+{id:1, lec:"L-1", blk:"Laws of friction", topic:"Amonton's First Law &mdash; what friction is proportional to", t:90,
  src:"L-1 · SUGGESTED PROBLEMS Q1 (Level-1)",
  q:"According to Amonton's First Law, the frictional force is directly proportional to:",
  opts:["Surface area",
@@ -254,7 +280,7 @@ const QUIZ = [
   "Correct &mdash; f<sub>k</sub> = &mu;<sub>k</sub>N, so friction is directly proportional to the normal reaction N.",
   "Wrong &mdash; Coulomb's law of friction states that at moderate speeds kinetic friction is independent of the relative sliding velocity."],
  sol:"<b>Concept:</b> The book states the first of the five laws of friction as &ldquo;the friction force is directly proportional to the normal reaction between the surfaces&rdquo; &mdash; Amonton's First Law of Dry Friction.<br><b>Formula:</b> f<sub>k</sub> = &mu;<sub>k</sub>N for sliding, and f<sub>s</sub> &le; &mu;<sub>s</sub>N for no slipping. The single variable on the right is N.<br><b>Step 1:</b> Area is ruled out by Amonton's <i>Second</i> Law &mdash; f<sub>k</sub> and f<sub>s</sub> do not depend on the contact area as long as N is the same.<br><b>Step 2:</b> Speed is ruled out by Coulomb's law &mdash; for moderate speeds kinetic friction is independent of relative velocity.<br><b>Step 3:</b> Mass is only indirectly involved: on a horizontal surface N = mg so f = &mu;mg, but on an incline N = mg cos&theta; and if you press the block down or pull it up N changes with m fixed. So the proportionality is to N, not to m.<br><b>Answer:</b> (c) Normal reaction."},
-{id:2, lec:"L-1", blk:"Nature of surfaces", topic:"Effect of increasing smoothness (polishing) on friction &mdash; cold welding limit",
+{id:2, lec:"L-1", blk:"Nature of surfaces", topic:"Effect of increasing smoothness (polishing) on friction &mdash; cold welding limit", t:60,
  src:"L-1 · LEVEL-1 Q2",
  q:"If the smoothness of surfaces in contact is increased, the force of friction:",
  opts:["must decrease",
@@ -267,7 +293,7 @@ const QUIZ = [
   "Correct &mdash; it <i>may</i> decrease: normally smoothing reduces friction, but past the cold-welding limit further polishing raises it, so only 'may' is safe.",
   "Wrong &mdash; option (c) is a valid statement, so 'none of these' cannot be chosen."],
  sol:"<b>Concept:</b> Friction comes from interlocking of the mountains-and-valleys irregularities plus molecular bonding at the real contact points.<br><b>Step 1:</b> Removing gross irregularities by polishing cuts down the interlocking, so friction ordinarily falls &mdash; this is the familiar behaviour.<br><b>Step 2:</b> But polishing also increases the <i>real</i> area of contact. The book's own LEVEL-2 statement says: &ldquo;There is a limit beyond which further polishing of surface increases rather than decreases frictional resistance.&rdquo;<br><b>Step 3:</b> The reason is molecular: when surfaces are made too smooth the binding force of adhesion grows, the molecular bonds at the contact points multiply, and friction rises. This is called <b>cold welding</b>.<br><b>Step 4:</b> Because the outcome depends on which side of that limit you are on, friction is not forced either way &mdash; the only defensible word is 'may'.<br><b>Answer:</b> (c) may decrease. <b>&#9889; JEE Trick:</b> Whenever an option pair reads 'must X' vs 'may X' on a friction-surface question, the cold-welding limit almost always makes 'may' the answer."},
-{id:3, lec:"L-1", blk:"Types of friction", topic:"Relative strength of rolling friction versus kinetic (sliding) friction",
+{id:3, lec:"L-1", blk:"Types of friction", topic:"Relative strength of rolling friction versus kinetic (sliding) friction", t:90,
  src:"L-1 · LEVEL-1 Q4",
  q:"When a wheel rolls on a surface, the resistance offered by the surface, i.e. rolling friction:",
  opts:["is greater than kinetic friction",
@@ -280,7 +306,7 @@ const QUIZ = [
   "Correct &mdash; &mu;<sub>r</sub> is one to two orders of magnitude below &mu;<sub>k</sub>, so rolling friction is negligible in comparison.",
   "Wrong &mdash; (c) is true, so 'none of the above' fails."],
  sol:"<b>Concept:</b> The book lists three types &mdash; static, kinetic sliding and kinetic rolling &mdash; and states that <i>rolling friction is much weaker than both sliding friction and static friction</i>.<br><b>Step 1:</b> Read the book's table of coefficients. Rubber on concrete: &mu;<sub>s</sub> = 1.0, &mu;<sub>k</sub> = 0.80, &mu;<sub>r</sub> = 0.03.<br><b>Step 2:</b> Take the ratio: &mu;<sub>r</sub>/&mu;<sub>k</sub> = 0.03/0.80 = 0.0375, i.e. rolling resistance is under 4% of the sliding value.<br><b>Step 3:</b> Wood on wood is even more extreme: &mu;<sub>r</sub>/&mu;<sub>k</sub> = 0.003/0.20 = 0.015, about 1.5%.<br><b>Step 4:</b> This is exactly why the book says it is much easier to move heavy boxes on a wheeled cart than by carrying or sliding them, and why bicycles and cars use wheels.<br><b>Answer:</b> (c) is negligible in comparison to kinetic friction. <b>Ordering to memorise:</b> &mu;<sub>s</sub> &gt; &mu;<sub>k</sub> &gt;&gt; &mu;<sub>r</sub>."},
-{id:4, lec:"L-1", blk:"Contact force", topic:"Resultant (contact) force of the ground = vector sum of normal reaction and friction",
+{id:4, lec:"L-1", blk:"Contact force", topic:"Resultant (contact) force of the ground = vector sum of normal reaction and friction", t:180,
  src:"L-1 · LEVEL-2 Q1",
  q:"A block A of mass 4 kg is kept on ground. The coefficient of friction between the block and the ground is 0.8. An external force of magnitude 30 N is applied parallel to the ground. The resultant force exerted by the ground on the block is (g = 10 m/s&sup2;)",
  opts:["40 N",
@@ -293,7 +319,7 @@ const QUIZ = [
   "Wrong &mdash; the ground certainly pushes on the block (it holds it up), so the contact force cannot be zero.",
   "Correct &mdash; N and f are perpendicular, so the ground's total force is &radic;(40&sup2; + 30&sup2;) = 50 N."],
  sol:"<b>Concept:</b> The ground exerts <i>one</i> contact force on the block; we resolve it into a normal component N and a tangential component f. The question asks for the resultant, so the two must be recombined vectorially.<br><b>Step 1:</b> Normal reaction &mdash; the surface is horizontal and the 30 N force is parallel to the ground, so N = mg = 4 &times; 10 = 40 N.<br><b>Step 2:</b> Test for slipping &mdash; limiting friction f<sub>L</sub> = &mu;N = 0.8 &times; 40 = 32 N.<br><b>Step 3:</b> Applied force 30 N &lt; 32 N, so the block does <b>not</b> slide; static friction takes exactly the value needed for equilibrium, f = 30 N (not &mu;N).<br><b>Step 4:</b> N is vertical, f is horizontal, so combine at right angles: R = &radic;(N&sup2; + f&sup2;) = &radic;(40&sup2; + 30&sup2;) = &radic;(1600 + 900) = &radic;2500 = 50 N.<br><b>Answer:</b> (d) 50 N. <b>&#9889; JEE Trick:</b> Never write f = &mu;N before checking whether the block actually slips &mdash; here the &mu; = 0.8 is a decoy that only tells you the block stays put."},
-{id:5, lec:"L-1", blk:"Limiting friction", topic:"Static friction balances the RESULTANT of two perpendicular applied forces, not each separately",
+{id:5, lec:"L-1", blk:"Limiting friction", topic:"Static friction balances the RESULTANT of two perpendicular applied forces, not each separately", t:180,
  src:"L-1 · LEVEL-2 Q2",
  q:"A block of mass 10 kg is kept on a rough floor. The coefficients of friction between floor and block are &mu;<sub>s</sub> = 0.4 and &mu;<sub>k</sub> = 0.3. Two horizontal forces F<sub>1</sub> = 5 N and F<sub>2</sub> = 4 N acting at right angles to each other are applied on the block. The magnitude of the friction force equals (g = 10 m/s&sup2;)",
  opts:["&radic;31 N",
@@ -306,7 +332,7 @@ const QUIZ = [
   "Correct &mdash; the block is in equilibrium, so friction equals the resultant applied force &radic;(5&sup2; + 4&sup2;) = &radic;41 N.",
   "Wrong &mdash; &radic;36 = 6 N looks like a careless difference/rounding of the resultant; the exact value is &radic;41 &asymp; 6.40 N."],
  sol:"<b>Concept:</b> Two horizontal forces at 90&deg; act as one resultant. Static friction is a single vector that opposes that resultant and sizes itself to keep the block in equilibrium.<br><b>Step 1:</b> Resultant of the applied forces &mdash; F<sub>R</sub> = &radic;(F<sub>1</sub>&sup2; + F<sub>2</sub>&sup2;) = &radic;(5&sup2; + 4&sup2;) = &radic;(25 + 16) = &radic;41 &asymp; 6.40 N.<br><b>Step 2:</b> Normal reaction &mdash; both forces are horizontal, so N = mg = 10 &times; 10 = 100 N.<br><b>Step 3:</b> Limiting friction &mdash; f<sub>L</sub> = &mu;<sub>s</sub>N = 0.4 &times; 100 = 40 N.<br><b>Step 4:</b> Compare &mdash; 6.40 N &lt;&lt; 40 N, so the block cannot move; static friction, not kinetic, is in play and &mu;<sub>k</sub> = 0.3 is never used.<br><b>Step 5:</b> For equilibrium the friction must cancel the resultant exactly: f = F<sub>R</sub> = &radic;41 N, directed opposite to F<sub>R</sub>.<br><b>Answer:</b> (c) &radic;41 N. <b>&#9889; JEE Trick:</b> Both &mu; values here are decoys &mdash; whenever the applied resultant is far below &mu;<sub>s</sub>N, the answer <i>is</i> the applied resultant."},
-{id:6, lec:"L-1", blk:"Inclined pull", topic:"Pull at an angle reduces the normal reaction; constant velocity means f = &mu;<sub>k</sub>N exactly balances the horizontal component",
+{id:6, lec:"L-1", blk:"Inclined pull", topic:"Pull at an angle reduces the normal reaction; constant velocity means f = &mu;<sub>k</sub>N exactly balances the horizontal component", t:180,
  src:"L-1 · SUGGESTED PROBLEMS Q5 (Level-5)",
  q:"A block is pulled to the right at constant velocity by a force of 10 N acting 30&deg; above the horizontal. If the coefficient of sliding friction between the block and the surface is 0.5, the weight of the block is",
  opts:["20 N",
@@ -319,7 +345,7 @@ const QUIZ = [
   "Wrong &mdash; 56 N comes from wrongly <i>adding</i> F sin30&deg; to the weight, i.e. taking N = W + F sin30&deg; as if the force pushed down.",
   "Wrong &mdash; 72.4 N results from using tan or a swapped sin/cos, e.g. F cos30&deg;/&mu; treated as N without the sin correction and then doubled."],
  sol:"<b>Concept:</b> 'Constant velocity' means zero acceleration, so the block is sliding with kinetic friction and both force equations are pure equilibrium equations.<br><b>Step 1:</b> Resolve the pull &mdash; horizontal component F cos30&deg; = 10 &times; (&radic;3/2) = 8.66 N, vertical (upward) component F sin30&deg; = 10 &times; 0.5 = 5 N.<br><b>Step 2:</b> Vertical equilibrium &mdash; N + F sin30&deg; = W, so N = W &minus; 5. The slanted pull <b>lifts</b> part of the weight, so N is less than W.<br><b>Step 3:</b> Horizontal equilibrium with sliding friction &mdash; F cos30&deg; = &mu;<sub>k</sub>N gives 8.66 = 0.5(W &minus; 5).<br><b>Step 4:</b> Solve &mdash; 8.66 = 0.5W &minus; 2.5, so 0.5W = 11.16 and W = 22.32 N.<br><b>Answer:</b> (b) 22.32 N. <b>&#9889; JEE Trick:</b> Pull at an angle &rarr; N = W &minus; F sin&theta;; push at an angle &rarr; N = W + F sin&theta;. Getting that sign wrong is exactly what produces the 56 N distractor."},
-{id:7, lec:"L-1", blk:"Friction on incline", topic:"Net force on a block sliding down a rough incline: mg sin&theta; &minus; &mu;mg cos&theta;",
+{id:7, lec:"L-1", blk:"Friction on incline", topic:"Net force on a block sliding down a rough incline: mg sin&theta; &minus; &mu;mg cos&theta;", t:180,
  src:"L-1 · LEVEL-3 Q2",
  q:"A 10 kg block is on a 30&deg; inclined plane. If &mu; = 0.2, what is the net force acting on it down the plane? (Take g = 10 m/s&sup2;)",
  opts:["33 N",
@@ -332,7 +358,7 @@ const QUIZ = [
   "Wrong &mdash; 30 N would need f = 20 N and mg sin&theta; = 50 N with rounding abuse, or mg cos&theta; miscalculated; it is not the correct value.",
   "Wrong &mdash; 25 N comes from halving mg sin&theta; a second time, i.e. an extra factor of sin30&deg;."],
  sol:"<b>Concept:</b> On an incline gravity splits into mg sin&theta; along the slope and mg cos&theta; perpendicular to it; only the perpendicular part sets the normal reaction.<br><b>Step 1:</b> Weight &mdash; mg = 10 &times; 10 = 100 N.<br><b>Step 2:</b> Driving component down the plane &mdash; mg sin30&deg; = 100 &times; 0.5 = 50 N.<br><b>Step 3:</b> Normal reaction &mdash; N = mg cos30&deg; = 100 &times; (&radic;3/2) = 50&radic;3 = 86.6 N.<br><b>Step 4:</b> Friction (acting up the plane, opposing the downward slide) &mdash; f = &mu;N = 0.2 &times; 86.6 = 17.32 N. Since 50 N &gt; 17.32 N the block does slide, so this is the full friction value.<br><b>Step 5:</b> Net force down the plane = mg sin&theta; &minus; &mu;mg cos&theta; = 50 &minus; 17.32 = 32.68 &asymp; 33 N.<br><b>Answer:</b> (a) 33 N. <b>&#9889; JEE Trick:</b> N = mg cos&theta; on an incline, never mg &mdash; the 40 N distractor is built exactly from that slip."},
-{id:8, lec:"L-1", blk:"Area independence", topic:"Friction does not depend on contact area &mdash; so a different outcome must come from a different &mu;",
+{id:8, lec:"L-1", blk:"Area independence", topic:"Friction does not depend on contact area &mdash; so a different outcome must come from a different &mu;", t:60,
  src:"L-1 · LEVEL-3 Q4",
  q:"A block is first placed on its long side (situation I) and then on its short side (situation II) on the same inclined plane. The block slides down in situation (II) but remains at rest in situation (I). A possible explanation is",
  opts:["Normal force is less in situation (II)",
@@ -345,7 +371,7 @@ const QUIZ = [
   "Correct &mdash; the only quantity left that can differ is the nature of the surface, i.e. &mu;. A smoother short side means a smaller &mu;, smaller limiting friction, and hence sliding in (II).",
   "Wrong &mdash; it is backwards: the block stays at rest in (I), so friction is <i>sufficient</i> there, i.e. larger, not less."],
  sol:"<b>Concept:</b> Limiting friction is f<sub>L</sub> = &mu;<sub>s</sub>N. Only two things can change it: &mu;<sub>s</sub> (nature of the surfaces) and N.<br><b>Step 1:</b> Check N &mdash; the same block on the same incline gives N = mg cos&theta;, with the same m and the same &theta;, so N is unchanged between (I) and (II).<br><b>Step 2:</b> Check area &mdash; by the book's law (b), the frictional force is independent of the area and the shape of the contacting surfaces as long as N is the same. So the area change by itself cannot alter the friction, killing option (b).<br><b>Step 3:</b> The observed facts &mdash; slides in (II), rests in (I) &mdash; require mg sin&theta; &gt; &mu;<sub>II</sub>N but mg sin&theta; &le; &mu;<sub>I</sub>N, hence &mu;<sub>II</sub> &lt; &mu;<sub>I</sub>.<br><b>Step 4:</b> With N fixed and area irrelevant, the only surviving cause is a genuinely different surface quality: the short face must be smoother.<br><b>Answer:</b> (c) The shorter side is smoother. <b>&#9889; JEE Trick:</b> 'Less area &rarr; less friction' is never the answer in a friction chapter &mdash; hunt for a &mu; or an N difference instead."},
-{id:9, lec:"L-1", blk:"Time-varying force", topic:"Onset of sliding under a ramping force, and the drop from &mu;<sub>s</sub>N to &mu;<sub>k</sub>N once it slides",
+{id:9, lec:"L-1", blk:"Time-varying force", topic:"Onset of sliding under a ramping force, and the drop from &mu;<sub>s</sub>N to &mu;<sub>k</sub>N once it slides", t:180,
  src:"L-1 · LEVEL-3 Q5",
  q:"A 1 kg block rests on a rough horizontal surface (&mu;<sub>s</sub> = 0.5, &mu;<sub>k</sub> = 0.3). It is pulled to the right by a time-varying force F(t) = 1 + t N for 0 &le; t &le; 6 s. (Take g = 10 m/s&sup2;.) Which statement is correct?",
  opts:["The block remains at rest until t = 3 s.",
@@ -358,7 +384,7 @@ const QUIZ = [
   "Wrong &mdash; once sliding starts the friction drops to the kinetic value &mu;<sub>k</sub>N = 0.3 &times; 10 = 3 N, not 5 N.",
   "Wrong &mdash; friction always opposes relative sliding, so it acts opposite to the applied force (leftward), never with it."],
  sol:"<b>Concept:</b> Static friction grows to match F up to the ceiling &mu;<sub>s</sub>N; at the instant F exceeds that ceiling the block breaks free and friction drops to the kinetic value &mu;<sub>k</sub>N.<br><b>Step 1:</b> Normal reaction &mdash; horizontal surface, horizontal pull, so N = mg = 1 &times; 10 = 10 N.<br><b>Step 2:</b> Limiting (maximum static) friction &mdash; f<sub>L</sub> = &mu;<sub>s</sub>N = 0.5 &times; 10 = 5 N. This is the trigger value, confirming option (b).<br><b>Step 3:</b> When does that happen? F(t) = 1 + t = 5 gives t = 4 s, not 3 s &mdash; so option (a) is false.<br><b>Step 4:</b> After t = 4 s the friction is kinetic: f<sub>k</sub> = &mu;<sub>k</sub>N = 0.3 &times; 10 = 3 N, so option (c)'s 5 N is false.<br><b>Step 5:</b> By law (d) of friction, kinetic friction is opposite to the velocity of the body relative to the surface, so it opposes F &mdash; option (d) is false.<br><b>Answer:</b> (b) The block starts sliding when F(t) = 5 N. <b>&#9889; JEE Trick:</b> Compare F against &mu;<sub>s</sub>N to decide <i>whether</i> it moves, then switch to &mu;<sub>k</sub>N for everything <i>after</i> it moves."},
-{id:10, lec:"L-1", blk:"Contact force", topic:"For a block at rest on an incline the surface's total force must balance the weight exactly",
+{id:10, lec:"L-1", blk:"Contact force", topic:"For a block at rest on an incline the surface's total force must balance the weight exactly", t:180,
  src:"L-1 · LEVEL-5 Q1",
  q:"A block of mass 3 kg is at rest on a rough fixed inclined plane of inclination 30&deg;. The magnitude of net force exerted by the surface on the block will be (g = 10 m/s&sup2;)",
  opts:["26 N",
@@ -371,7 +397,7 @@ const QUIZ = [
   "Wrong &mdash; 15 N is just the friction component f = mg sin30&deg;; it leaves out the normal reaction.",
   "Correct &mdash; the block is in equilibrium under only two forces, weight and the surface's contact force, so the contact force must equal mg = 30 N."],
  sol:"<b>Concept:</b> The surface exerts a single contact force, whose components are N (perpendicular) and f (along the plane). The block is at rest, so Newton's first law fixes the resultant immediately.<br><b>Step 1:</b> List the forces on the block &mdash; its weight mg downward, and the contact force from the surface. There is nothing else.<br><b>Step 2:</b> At rest &rArr; net force zero &rArr; the contact force is equal and opposite to the weight, so its magnitude is mg = 3 &times; 10 = 30 N, directed vertically upward.<br><b>Step 3 (component check):</b> N = mg cos30&deg; = 30 &times; (&radic;3/2) = 15&radic;3 N, and since the block does not slide, f = mg sin30&deg; = 30 &times; 0.5 = 15 N.<br><b>Step 4:</b> Recombine &mdash; R = &radic;(N&sup2; + f&sup2;) = &radic;((15&radic;3)&sup2; + 15&sup2;) = &radic;(675 + 225) = &radic;900 = 30 N, confirming Step 2.<br><b>Answer:</b> (d) 30 N. <b>&#9889; JEE Trick:</b> Whenever a body rests on a surface with only gravity and the surface acting, the total contact force is <i>always</i> mg, vertically up &mdash; no angle needed."},
-{id:11, lec:"L-1", blk:"Direction of friction", topic:"'Tends to slip' means static friction, directed opposite to the tendency of relative motion",
+{id:11, lec:"L-1", blk:"Direction of friction", topic:"'Tends to slip' means static friction, directed opposite to the tendency of relative motion", t:60,
  src:"L-1 · LEVEL-5 Q3",
  q:"A block on a rough table is dragged to the right with a small acceleration a. The upper block tends to slip left relative to the lower. Which statement is correct?",
  opts:["Kinetic friction on the upper block points left.",
@@ -384,7 +410,7 @@ const QUIZ = [
   "Wrong &mdash; the upper block presses on the lower with its weight, so N = m<sub>upper</sub>g &ne; 0; a zero N would mean zero friction and no way to accelerate the upper block.",
   "Wrong &mdash; &mu;<sub>k</sub>N is the sliding value. Here friction is static and takes the value m<sub>upper</sub>a, which is less than the limiting &mu;<sub>s</sub>N."],
  sol:"<b>Concept:</b> The book's rule for static friction &mdash; its direction is such that the total force keeps the body moving <i>with</i> the other body; equivalently, imagine the surfaces smooth, see which way the body would slip, and point friction the other way.<br><b>Step 1:</b> Apply the smooth-surface test. With no friction the lower block would be dragged right while the upper block stays behind, so the upper block would slip <b>left</b> relative to the lower &mdash; which is exactly what the question states.<br><b>Step 2:</b> Friction opposes that relative tendency, so friction on the upper block acts <b>rightward</b>.<br><b>Step 3:</b> Cross-check with Newton's second law &mdash; the upper block accelerates to the right with acceleration a, and friction is the only horizontal force on it, so it must point right with magnitude f = m<sub>upper</sub>a.<br><b>Step 4:</b> Static or kinetic? The word <i>tends</i> means there is no actual relative sliding, so it is static friction and f = m<sub>upper</sub>a &lt; &mu;<sub>s</sub>N &mdash; you cannot write &mu;<sub>k</sub>N.<br><b>Answer:</b> (b) Static friction on the upper block points right. <b>&#9889; JEE Trick:</b> Friction is the <i>driving</i> force for a block carried on top of another &mdash; it does not always oppose the motion, only the relative motion."},
-{id:12, lec:"L-1", blk:"Static friction on incline", topic:"For a block at rest on an incline, friction = mg sin&theta; (not &mu;mg cos&theta;) &mdash; back-solving for the mass",
+{id:12, lec:"L-1", blk:"Static friction on incline", topic:"For a block at rest on an incline, friction = mg sin&theta; (not &mu;mg cos&theta;) &mdash; back-solving for the mass", t:180,
  src:"L-1 · LEVEL-6 Q7",
  q:"A block rests on a rough inclined plane making an angle of 30&deg; with the horizontal surface. The coefficient of static friction between the block and the plane is 0.8. If the frictional force on the block is 10 N, the mass of the block (in kg) is (take g = 10 m/s&sup2;)",
  opts:["2.0",
@@ -397,7 +423,7 @@ const QUIZ = [
   "Wrong &mdash; 1.6 kg comes from the classic trap f = &mu;mg cos30&deg;: 10 = 0.8 &times; m &times; 10 &times; 0.866 gives m = 1.44, and a rounding of that route lands near 1.6.",
   "Wrong &mdash; 2.5 kg comes from using f = &mu;mg = 0.8 &times; m &times; 10, treating the incline as horizontal."],
  sol:"<b>Concept:</b> The block 'rests' on the plane, so it is in equilibrium and friction is the static value that balances the down-slope pull &mdash; it is NOT automatically &mu;N.<br><b>Step 1:</b> Equilibrium along the plane &mdash; f = mg sin&theta;, so 10 = m &times; 10 &times; sin30&deg; = m &times; 10 &times; 0.5 = 5m, giving m = 2.0 kg.<br><b>Step 2:</b> Check the answer is physically allowed. Normal reaction N = mg cos30&deg; = 2 &times; 10 &times; (&radic;3/2) = 10&radic;3 = 17.32 N.<br><b>Step 3:</b> Limiting friction f<sub>L</sub> = &mu;<sub>s</sub>N = 0.8 &times; 17.32 = 13.86 N.<br><b>Step 4:</b> Since the required 10 N &lt; 13.86 N, the block genuinely can stay at rest, so m = 2.0 kg is consistent.<br><b>Answer:</b> (a) 2.0 kg. <b>&#9889; JEE Trick:</b> &mu; in a 'block rests' problem is there only to be checked against, not to be plugged in &mdash; use f = mg sin&theta; and then verify f &le; &mu;mg cos&theta;."},
-{id:13, lec:"L-1", blk:"Multi-body friction", topic:"Minimum &mu; for a stack of three balls &mdash; friction on the lower balls must resist the outward push of the top ball",
+{id:13, lec:"L-1", blk:"Multi-body friction", topic:"Minimum &mu; for a stack of three balls &mdash; friction on the lower balls must resist the outward push of the top ball", t:180,
  src:"L-1 · LEVEL-6 Q10",
  q:"Three identical billiard balls each of mass 1 kg are placed as shown (two touching balls on the ground with the third resting in the groove between them). The upper ball is smooth. Find the minimum coefficient of static friction between the lower balls and the ground so that the balls remain stationary.",
  opts:["1/&radic;3",
@@ -412,7 +438,7 @@ const QUIZ = [
  sol:"<b>Concept:</b> The three centres form an equilateral triangle, so each line of centres (upper ball to a lower ball) makes 60&deg; with the horizontal. The contact between two smooth spheres transmits force only along that line of centres.<br><b>Step 1:</b> Upper ball equilibrium. Two contact normals N act on it, each at 60&deg; to the horizontal, so 2N sin60&deg; = W, giving N = W/(2 sin60&deg;) = W/&radic;3.<br><b>Step 2:</b> Reaction on a lower ball. By Newton's third law each lower ball feels N = W/&radic;3 directed along the line of centres, downwards and outwards. Its horizontal (outward) part is N cos60&deg; = (W/&radic;3)(1/2) = W/(2&radic;3), and its vertical (downward) part is N sin60&deg; = (W/&radic;3)(&radic;3/2) = W/2.<br><b>Step 3:</b> Normal reaction from the ground on one lower ball &mdash; it supports that ball's own weight plus the transmitted share: N<sub>g</sub> = W + W/2 = 3W/2.<br><b>Step 4:</b> The two lower balls are pushed apart, so their mutual contact cannot pull them together; only ground friction can hold each one in. Required friction f = W/(2&radic;3), acting inwards.<br><b>Step 5:</b> Condition f &le; &mu;N<sub>g</sub> gives &mu; &ge; [W/(2&radic;3)]/[3W/2] = (1/(2&radic;3)) &times; (2/3) = 1/(3&radic;3) &asymp; 0.192.<br><b>Answer:</b> (b) 1/(3&radic;3). <b>&#9889; JEE Trick:</b> In stacked-sphere problems, always resolve along the <i>line of centres</i> and remember the ground normal is inflated by the load transmitted from above."},
 
 /* ---------------- L-2 (13) ---------------- */
-{id:14, lec:"L-2", blk:"Friction laws", topic:"Which physical quantity the frictional force is NOT affected by",
+{id:14, lec:"L-2", blk:"Friction laws", topic:"Which physical quantity the frictional force is NOT affected by", t:60,
  src:"L-2 · LEVEL-1 Q5",
  q:"Frictional force is independent of:",
  opts:["Type of surfaces in contact",
@@ -425,7 +451,7 @@ const QUIZ = [
   "(c) Wrong &mdash; friction is directly proportional to the normal reaction: f = &mu;N.",
   "(d) Wrong &mdash; f = &mu;N is directly proportional to the coefficient of friction."],
  sol:"<b>Concept.</b> The book lists the three rules of friction: it depends on the nature of the surfaces, it is proportional to the normal reaction, and it is independent of the area of contact.<br><b>Step 1.</b> Static branch: f(max) = &mu;&#8347;N &mdash; no area term appears.<br><b>Step 2.</b> Kinetic branch: f&#8342; = &mu;&#8342;N &mdash; again no area term.<br><b>Step 3.</b> Physical reason: pressing a larger area spreads the SAME normal force over more contact points, so the load per junction falls in exactly the proportion the area rises; the product stays fixed.<br><b>Step 4.</b> &mu; and N both sit in the formula, and the surface material fixes &mu;, so (a), (c), (d) all matter.<br><b>&#9889; JEE Trick:</b> \"Independent of\" questions on friction almost always point at CONTACT AREA (and, for kinetic friction, at SPEED).<br><b>Answer: (b) Contact surface area.</b>"},
-{id:15, lec:"L-2", blk:"Below limiting friction", topic:"Static friction is self-adjusting: applied force smaller than the limiting value",
+{id:15, lec:"L-2", blk:"Below limiting friction", topic:"Static friction is self-adjusting: applied force smaller than the limiting value", t:180,
  src:"L-2 · LEVEL-2 Q2",
  q:"A block of mass 2 kg is placed on the floor. The coefficient of static friction is 0.4. A horizontal force of 2.8 N is applied on the block as shown in figure. The force of friction between the block and the floor is: (Take g = 10 ms<sup>&minus;2</sup>)",
  opts:["2.8 N",
@@ -438,7 +464,7 @@ const QUIZ = [
   "(c) Wrong &mdash; 20 N is the normal reaction mg, not a friction force.",
   "(d) Wrong &mdash; friction cannot be zero, otherwise the 2.8 N force would accelerate the resting block."],
  sol:"<b>Concept.</b> Static friction is a variable force: f&#8347; &le; f(max) = &mu;&#8347;N. Never write f = &mu;N for a body that is still at rest.<br><b>Step 1 &mdash; normal reaction.</b> The force is horizontal, so N = mg = (2)(10) = 20 N.<br><b>Step 2 &mdash; limiting friction.</b> f(max) = &mu;&#8347;N = (0.4)(20) = 8 N.<br><b>Step 3 &mdash; compare.</b> Applied F = 2.8 N &lt; 8 N, so the block does not slide.<br><b>Step 4 &mdash; equilibrium.</b> For a body at rest &Sigma;F&#8339; = 0 &rArr; f = F = 2.8 N.<br><b>&#9889; JEE Trick:</b> Compute &mu;&#8347;N first &mdash; it is only a gate. If F &lt; &mu;&#8347;N the answer is F itself; if F &gt; &mu;&#8347;N the block slides and the answer becomes &mu;&#8342;N.<br><b>Answer: (a) 2.8 N.</b>"},
-{id:16, lec:"L-2", blk:"Retarding force", topic:"Equal retarding force per bogey means equal deceleration, hence equal stopping time",
+{id:16, lec:"L-2", blk:"Retarding force", topic:"Equal retarding force per bogey means equal deceleration, hence equal stopping time", t:180,
  src:"L-2 · LEVEL-2 Q3",
  q:"In a train moving with a uniform acceleration, the brakes are applied. If the brakes produce the same effective retarding force on each bogey then:",
  opts:["the first bogey stops first",
@@ -451,7 +477,7 @@ const QUIZ = [
   "(c) CORRECT &mdash; same retarding force on identical bogies &rArr; same deceleration a = F/m; all start from the same speed v, so all take the same time t = v/a to stop.",
   "(d) Wrong &mdash; the middle position gives it no extra retardation either."],
  sol:"<b>Concept.</b> Stopping time depends on DECELERATION, and deceleration is force per unit mass &mdash; not on where a bogey sits in the train.<br><b>Step 1 &mdash; one bogey.</b> Each bogey has the same mass m and feels the same effective retarding force F, so a = F/m = same for every bogey.<br><b>Step 2 &mdash; same initial speed.</b> The train moved as a rigid unit, so every bogey enters braking with the same speed v.<br><b>Step 3 &mdash; stopping time.</b> v = u &minus; at &rArr; 0 = v &minus; (F/m)t &rArr; t = v/(F/m) = mv/F, identical for all bogies.<br><b>Step 4 &mdash; couplings.</b> Because every bogey decelerates equally there is no tendency for relative motion, so the couplings carry zero force and cannot make any bogey stop earlier.<br><b>&#9889; JEE Trick:</b> Equal force on equal masses &rArr; equal acceleration &rArr; the connected system behaves like one body; coupling tensions vanish.<br><b>Answer: (c) all bogies stop at the same time.</b><br>&#9888; ICAD key says (b); working gives (c) because identical bogies under identical retarding forces all have a = F/m and t = mv/F, so no bogey can stop before another."},
-{id:17, lec:"L-2", blk:"Kinetic friction laws", topic:"Kinetic friction does not change when the sliding speed changes",
+{id:17, lec:"L-2", blk:"Kinetic friction laws", topic:"Kinetic friction does not change when the sliding speed changes", t:90,
  src:"L-2 · LEVEL-2 Q4",
  q:"A body is moving with uniform velocity of 2 m s<sup>&minus;1</sup> on a rough level surface. The frictional force on it is 10 N. If the body moves with velocity 4 m s<sup>&minus;1</sup>, the force of friction will be:",
  opts:["2.5 N",
@@ -464,7 +490,7 @@ const QUIZ = [
   "(c) CORRECT &mdash; kinetic friction is f&#8342; = &mu;&#8342;N; neither &mu;&#8342; nor N = mg changes with speed, so it stays 10 N.",
   "(d) Wrong &mdash; assumes friction is proportional to speed (a viscous-drag law, not a dry-friction law)."],
  sol:"<b>Concept.</b> Rule 1 of kinetic friction: the frictional force is independent of the relative velocity between the two surfaces for conventional speeds (below about 10 m/s).<br><b>Step 1 &mdash; identify the regime.</b> The body slides on the surface, so the friction acting is kinetic: f&#8342; = &mu;&#8342;N.<br><b>Step 2 &mdash; what changed.</b> Doubling v changes neither the material pair (&mu;&#8342; fixed) nor the normal reaction N = mg (mass and g unchanged).<br><b>Step 3 &mdash; conclusion.</b> f&#8342; = &mu;&#8342;N = unchanged = 10 N.<br><b>Step 4 &mdash; consistency check.</b> At 2 m/s the body moved with UNIFORM velocity, so the applied force also equalled 10 N; at 4 m/s friction is still 10 N, so a 10 N drive again gives uniform velocity.<br><b>&#9889; JEE Trick:</b> Dry (Coulomb) friction is speed-independent; only fluid drag scales with v or v&sup2;. Do not mix the two.<br><b>Answer: (c) 10 N.</b>"},
-{id:18, lec:"L-2", blk:"Friction as centripetal", topic:"Maximum angular velocity on a circular track before friction fails",
+{id:18, lec:"L-2", blk:"Friction as centripetal", topic:"Maximum angular velocity on a circular track before friction fails", t:90,
  src:"L-2 · LEVEL-2 Q5",
  q:"A body moves along a circular path of radius 10 m and the coefficient of friction is 0.5. What should be its angular velocity (in rad/sec) if it is not to slip from the surface? (Take g = 9.8 m s<sup>&minus;2</sup>)",
  opts:["10",
@@ -477,7 +503,7 @@ const QUIZ = [
   "(c) Wrong &mdash; 0.1 rad/s is safe but it is not the limiting value the question asks for; it comes from mis-taking the square root of &mu;g/r as 0.01.",
   "(d) CORRECT &mdash; &omega;(max) = &radic;(&mu;g/r) = &radic;(0.5 &times; 9.8/10) = &radic;0.49 = 0.7 rad/s."],
  sol:"<b>Concept.</b> On a flat circular track the ONLY horizontal force available to bend the path is friction, so friction must supply the whole centripetal force &mdash; and it is capped at &mu;N.<br><b>Step 1 &mdash; normal reaction.</b> The track is horizontal, so N = mg.<br><b>Step 2 &mdash; condition for no slipping.</b> m&omega;&sup2;r &le; &mu;N = &mu;mg &rArr; &omega;&sup2; &le; &mu;g/r (mass cancels).<br><b>Step 3 &mdash; substitute.</b> &omega;&sup2; &le; &mu;g/r = (0.5)(9.8)/10 = 0.49.<br><b>Step 4 &mdash; take the root.</b> &omega; &le; &radic;0.49 = 0.7 rad/s.<br><b>Step 5 &mdash; read the options.</b> Only 0.7 satisfies the bound and is the limiting value.<br><b>&#9889; JEE Trick:</b> Mass always cancels in flat-track skidding problems &mdash; &omega;(max) = &radic;(&mu;g/r) and v(max) = &radic;(&mu;gr). Memorise the pair.<br><b>Answer: (d) 0.7 rad/sec.</b>"},
-{id:19, lec:"L-2", blk:"Pulley on block", topic:"A pulley mounted on the block doubles the pull; check it against limiting friction",
+{id:19, lec:"L-2", blk:"Pulley on block", topic:"A pulley mounted on the block doubles the pull; check it against limiting friction", t:180,
  src:"L-2 · LEVEL-3 Q3",
  q:"A 10 kg block rests on a rough horizontal floor with coefficient of friction &mu; = 0.41. A light string is anchored to a wall, passes round a frictionless pulley mounted on the block, and its free end is pulled horizontally with F = 20 N. Find the friction force (F<sub>r</sub>) acting on the block and its direction, if any. (g = 10 m/s&sup2;)",
  opts:["40 N, opposite to the pull",
@@ -490,7 +516,7 @@ const QUIZ = [
   "(c) Wrong &mdash; 41 N is the limiting friction &mu;mg, the maximum available; the block never reaches it because the pull is only 40 N.",
   "(d) Wrong &mdash; there is a real 40 N horizontal pull on a stationary block, so friction must be non-zero to keep it in equilibrium."],
  sol:"<b>Concept.</b> A pulley FIXED TO THE BLOCK is a movable pulley: the same tension acts along two segments, so the block feels 2T. Then static friction is checked against &mu;N.<br><b>Step 1 &mdash; tension.</b> The string is light and the pulley frictionless, so T = F = 20 N throughout.<br><b>Step 2 &mdash; pull on the block.</b> Both segments tug the block the same way: F(net) = 2T = 2(20) = 40 N.<br><b>Step 3 &mdash; limiting friction.</b> N = mg = (10)(10) = 100 N &rArr; f(max) = &mu;N = (0.41)(100) = 41 N.<br><b>Step 4 &mdash; compare.</b> 40 N &lt; 41 N, so the block cannot slide; static friction acts, not kinetic.<br><b>Step 5 &mdash; equilibrium.</b> f = F(net) = 40 N, directed opposite to the pull.<br><b>&#9889; JEE Trick:</b> &mu; = 0.41 is chosen deliberately so that &mu;mg = 41 N sits just above 2F = 40 N &mdash; the examiner is testing whether you doubled the force AND then compared instead of writing &mu;N straight away.<br><b>Answer: 40 N, opposing the pull.</b>"},
-{id:20, lec:"L-2", blk:"Braking distance", topic:"Shortest stopping distance set by the limiting friction between tyre and road",
+{id:20, lec:"L-2", blk:"Braking distance", topic:"Shortest stopping distance set by the limiting friction between tyre and road", t:180,
  src:"L-2 · LEVEL-3 Q5",
  q:"Consider a car moving along a straight horizontal road with a speed of 72 km/h. If the coefficient of static friction between the tyre and the road is 0.5, the shortest distance in which the car can be stopped is: (Take g = 10 m s<sup>&minus;2</sup>)",
  opts:["30 m",
@@ -503,7 +529,7 @@ const QUIZ = [
   "(c) Wrong &mdash; 72 is the speed in km/h reused as a distance; a classic unit trap.",
   "(d) Wrong &mdash; 20 m comes from using v = 20 without squaring, or from forgetting the factor 2."],
  sol:"<b>Concept.</b> The largest retarding force the road can exert is the limiting friction &mu;mg, so the shortest stopping distance follows from v&sup2; = u&sup2; + 2as with a = &minus;&mu;g.<br><b>Step 1 &mdash; convert units.</b> u = 72 km/h = 72 &times; (5/18) = 20 m/s.<br><b>Step 2 &mdash; maximum retardation.</b> &mu;mg = ma &rArr; a = &mu;g = (0.5)(10) = 5 m/s&sup2; (mass cancels).<br><b>Step 3 &mdash; kinematics.</b> 0 = u&sup2; &minus; 2ad &rArr; d = u&sup2;/(2a) = (20)&sup2;/(2 &times; 5) = 400/10 = 40 m.<br><b>Step 4 &mdash; sanity check.</b> Halving &mu; would double the distance to 80 m, which matches the intuition that a slippery road needs far more room.<br><b>&#9889; JEE Trick:</b> Learn d = v&sup2;/(2&mu;g) as one formula, and note d &prop; v&sup2; &mdash; doubling the speed quadruples the stopping distance.<br><b>Answer: (b) 40 m.</b>"},
-{id:21, lec:"L-2", blk:"Incline equilibrium range", topic:"Friction gives a RANGE of hanging masses that keep an incline block in static equilibrium",
+{id:21, lec:"L-2", blk:"Incline equilibrium range", topic:"Friction gives a RANGE of hanging masses that keep an incline block in static equilibrium", t:180,
  src:"L-2 · LEVEL-4 Q4",
  q:"A 100 kg block rests on a rough inclined plane of inclination 37&deg; with &mu; = 0.3. A light string from the block passes over a frictionless pulley at the top of the incline and carries a hanging mass m. The positive value of m for which the 100 kg block remains in static equilibrium is (g = 9.8 m/s&sup2;, sin37&deg; = 0.6, cos37&deg; = 0.8):",
  opts:["35 kg",
@@ -516,7 +542,7 @@ const QUIZ = [
   "(c) Wrong &mdash; 85 kg gives T = 833 N, just above the upper bound 823.2 N, so the block is dragged UP the incline.",
   "(d) Wrong &mdash; 100 kg gives T = 980 N, far above the upper bound; the block definitely moves up."],
  sol:"<b>Concept.</b> With friction, equilibrium on an incline is not one special value of m but a BAND, because friction can point either up or down the slope with any magnitude up to &mu;N.<br><b>Step 1 &mdash; forces along the incline.</b> Gravity component down the slope = mg sin37&deg; = (100)(9.8)(0.6) = 588 N.<br><b>Step 2 &mdash; limiting friction.</b> N = mg cos37&deg; = (100)(9.8)(0.8) = 784 N &rArr; f(max) = &mu;N = (0.3)(784) = 235.2 N.<br><b>Step 3 &mdash; lower bound (block about to slip down, friction acts UP).</b> T + f(max) = 588 &rArr; T(min) = 588 &minus; 235.2 = 352.8 N.<br><b>Step 4 &mdash; upper bound (block about to be pulled up, friction acts DOWN).</b> T = 588 + f(max) = 588 + 235.2 = 823.2 N.<br><b>Step 5 &mdash; convert to mass.</b> T = mg &rArr; 352.8/9.8 = 36 kg &le; m &le; 823.2/9.8 = 84 kg.<br><b>Step 6 &mdash; pick the option.</b> Only 50 kg lies in [36, 84] kg.<br><b>&#9889; JEE Trick:</b> Write the band as m g sin&theta; &minus; &mu;mg cos&theta; &le; Mg &le; mg sin&theta; + &mu;mg cos&theta; and test the options &mdash; far faster than solving twice.<br><b>Answer: (b) 50 kg.</b>"},
-{id:22, lec:"L-2", blk:"Incline friction direction", topic:"Finding the magnitude AND direction of static friction on an incline block tied to a hanging mass",
+{id:22, lec:"L-2", blk:"Incline friction direction", topic:"Finding the magnitude AND direction of static friction on an incline block tied to a hanging mass", t:180,
  src:"L-2 · LEVEL-4 Q5",
  q:"A block m<sub>1</sub> = 10 kg lies on a rough incline of 37&deg; (&mu; = 0.2) and is connected by a light string over a frictionless pulley at the top to a hanging block m<sub>2</sub>. In the figure shown, what will be the value of the friction force and its direction on m<sub>1</sub> if m<sub>2</sub> = 7 kg? (g = 10 m/s&sup2;, sin37&deg; = 0.6, cos37&deg; = 0.8)",
  opts:["16 N, down the incline",
@@ -529,7 +555,7 @@ const QUIZ = [
   "(c) Wrong &mdash; both magnitude and direction are wrong; &mu;N = 16 N is only the cap.",
   "(d) CORRECT &mdash; the unbalanced 70 &minus; 60 = 10 N acts up the incline, so static friction supplies 10 N down the incline, which is within the 16 N limit."],
  sol:"<b>Concept.</b> Find the net of all NON-friction forces along the incline; static friction then takes exactly that value in the opposite direction, provided it does not exceed &mu;N.<br><b>Step 1 &mdash; gravity along the incline.</b> m<sub>1</sub>g sin37&deg; = (10)(10)(0.6) = 60 N, directed down the slope.<br><b>Step 2 &mdash; tension.</b> Assume equilibrium: for the hanging block T = m<sub>2</sub>g = (7)(10) = 70 N, pulling m<sub>1</sub> up the slope.<br><b>Step 3 &mdash; limiting friction.</b> N = m<sub>1</sub>g cos37&deg; = (10)(10)(0.8) = 80 N &rArr; f(max) = &mu;N = (0.2)(80) = 16 N.<br><b>Step 4 &mdash; imbalance.</b> T &minus; m<sub>1</sub>g sin37&deg; = 70 &minus; 60 = 10 N up the incline.<br><b>Step 5 &mdash; verify and conclude.</b> 10 N &le; 16 N, so the system really does stay at rest and static friction = 10 N acting DOWN the incline.<br><b>&#9889; JEE Trick:</b> Never write f = &mu;N on sight &mdash; first test whether |T &minus; mg sin&theta;| exceeds &mu;N. Only if it does is the friction kinetic and equal to &mu;N.<br><b>Answer: (d) 10 N, down the incline.</b>"},
-{id:23, lec:"L-2", blk:"Block on vertical wall", topic:"Friction is zero when the vertical component of the applied force already balances the weight",
+{id:23, lec:"L-2", blk:"Block on vertical wall", topic:"Friction is zero when the vertical component of the applied force already balances the weight", t:180,
  src:"L-2 · LEVEL-4 Q8",
  q:"A block of mass m = 5 kg is held against a vertical wall by a force of 100 N applied at 30&deg; above the horizontal (pointing into the wall and upwards). The coefficient of friction between the block and the wall is &mu; = 0.1. Find the frictional force on the block. (g = 10 m/s&sup2;)",
  opts:["zero",
@@ -542,7 +568,7 @@ const QUIZ = [
   "(c) Wrong &mdash; 50 N is the weight mg, which is balanced by the applied force's vertical component, not by friction. It would also exceed the 8.66 N cap and is therefore impossible.",
   "(d) Wrong &mdash; 86.6 N is the HORIZONTAL component 100 cos30&deg;, which is the normal reaction N, not a friction force."],
  sol:"<b>Concept.</b> Static friction only supplies whatever the other forces fail to balance. Resolve the applied force first; if the vertical equation already closes, friction is exactly zero.<br><b>Step 1 &mdash; resolve the 100 N force.</b> Horizontal (into the wall) = 100 cos30&deg; = 86.6 N; vertical (upward) = 100 sin30&deg; = 50 N.<br><b>Step 2 &mdash; normal reaction.</b> The wall pushes back with N = 86.6 N, so the friction available is f(max) = &mu;N = (0.1)(86.6) = 8.66 N.<br><b>Step 3 &mdash; vertical balance.</b> Weight mg = (5)(10) = 50 N downward; the applied upward component is also 50 N.<br><b>Step 4 &mdash; solve for friction.</b> &Sigma;F<sub>y</sub> = 0 &rArr; 100 sin30&deg; &minus; mg + f = 0 &rArr; 50 &minus; 50 + f = 0 &rArr; f = 0.<br><b>Step 5 &mdash; check the cap.</b> The required friction (0 N) is well under 8.66 N, so the block indeed stays at rest without any friction.<br><b>&#9889; JEE Trick:</b> Whenever a wall problem gives a force at an angle, compare F sin&theta; with mg BEFORE reaching for &mu;N &mdash; equality means f = 0, and the examiner has tuned the numbers for exactly that.<br><b>Answer: friction = 0.</b>"},
-{id:24, lec:"L-2", blk:"Static vs kinetic gap", topic:"Acceleration produced when a force equal to the limiting friction acts on an already-sliding body",
+{id:24, lec:"L-2", blk:"Static vs kinetic gap", topic:"Acceleration produced when a force equal to the limiting friction acts on an already-sliding body", t:180,
  src:"L-2 · LEVEL-4 Q9",
  q:"For a body on a horizontal surface, the coefficients of static and kinetic friction are 0.4 and 0.2 respectively. When the body is in uniform motion on the surface, a horizontal force equal in magnitude to the limiting friction is applied on it. The acceleration produced is:",
  opts:["0.4 g",
@@ -555,7 +581,7 @@ const QUIZ = [
   "(c) CORRECT &mdash; the applied force is &mu;&#8347;mg = 0.4mg while the opposing kinetic friction is &mu;&#8342;mg = 0.2mg; a = (0.4 &minus; 0.2)g = 0.2 g.",
   "(d) Wrong &mdash; 0.6 g comes from ADDING &mu;&#8347; and &mu;&#8342;, i.e. treating friction as helping the applied force."],
  sol:"<b>Concept.</b> Once a body is already sliding, the resistance it feels is KINETIC friction &mu;&#8342;N, even if the driving force happens to have been set equal to the larger static (limiting) value &mu;&#8347;N. The gap between the two coefficients is what accelerates it.<br><b>Step 1 &mdash; the applied force.</b> It is defined as equal in magnitude to the limiting friction: F = &mu;&#8347;N = &mu;&#8347;mg = 0.4mg.<br><b>Step 2 &mdash; the resisting force.</b> The body is in motion, so friction is kinetic: f&#8342; = &mu;&#8342;mg = 0.2mg.<br><b>Step 3 &mdash; Newton's second law.</b> ma = F &minus; f&#8342; = 0.4mg &minus; 0.2mg = 0.2mg.<br><b>Step 4 &mdash; cancel the mass.</b> a = 0.2mg/m = 0.2 g.<br><b>Step 5 &mdash; sanity check.</b> The answer is (&mu;&#8347; &minus; &mu;&#8342;)g, which must be positive because &mu;&#8342; &lt; &mu;&#8347; &mdash; exactly why the body speeds up instead of staying in uniform motion.<br><b>&#9889; JEE Trick:</b> a = (&mu;&#8347; &minus; &mu;&#8342;)g is the standard result for this setup; the distractors are built from 0.4g, 0.1g and 0.6g precisely to catch dropped or added terms.<br><b>Answer: (c) 0.2 g.</b><br>&#9888; ICAD key says (a) 0.4 g; working gives (c) 0.2 g because the sliding body is opposed by kinetic friction 0.2mg, so the NET force is 0.4mg &minus; 0.2mg = 0.2mg and a = (&mu;&#8347; &minus; &mu;&#8342;)g = 0.2 g."},
-{id:25, lec:"L-2", blk:"Push at an angle", topic:"Condition on the push angle for a downward-inclined force F = Mg to be able to move the block",
+{id:25, lec:"L-2", blk:"Push at an angle", topic:"Condition on the push angle for a downward-inclined force F = Mg to be able to move the block", t:180,
  src:"L-2 · LEVEL-5 Q1",
  q:"A block of mass M is placed on a rough horizontal surface. A force F = Mg acts on the block, inclined to the vertical at an angle &theta; (pushing downwards into the surface). The coefficient of friction is &mu;. The block can be pushed along the surface only if:",
  opts:["tan&theta; &ge; &mu;",
@@ -568,7 +594,7 @@ const QUIZ = [
   "(c) CORRECT &mdash; Mg sin&theta; &ge; &mu;(Mg + Mg cos&theta;) reduces, via sin&theta;/(1 + cos&theta;) = tan(&theta;/2), to tan(&theta;/2) &ge; &mu;.",
   "(d) Wrong &mdash; cot(&theta;/2) &ge; &mu; inverts the inequality and would wrongly claim a nearly vertical push (&theta; &rarr; 0) can always move the block."],
  sol:"<b>Concept.</b> A push directed DOWN into the surface adds to the normal reaction, so it boosts the friction it has to overcome. The driving and resisting terms must be compared with N written correctly.<br><b>Step 1 &mdash; resolve F = Mg at angle &theta; to the vertical.</b> Horizontal (driving) = Mg sin&theta;; vertical (pressing down) = Mg cos&theta;.<br><b>Step 2 &mdash; normal reaction.</b> N = Mg + Mg cos&theta; = Mg(1 + cos&theta;).<br><b>Step 3 &mdash; limiting friction.</b> f(max) = &mu;N = &mu;Mg(1 + cos&theta;).<br><b>Step 4 &mdash; condition to move.</b> Mg sin&theta; &ge; &mu;Mg(1 + cos&theta;) &rArr; sin&theta;/(1 + cos&theta;) &ge; &mu; (Mg cancels).<br><b>Step 5 &mdash; half-angle identity.</b> sin&theta;/(1 + cos&theta;) = [2 sin(&theta;/2) cos(&theta;/2)]/[2 cos&sup2;(&theta;/2)] = tan(&theta;/2), so the condition is tan(&theta;/2) &ge; &mu;.<br><b>Step 6 &mdash; check the limits.</b> &theta; &rarr; 0 (straight down) gives tan(&theta;/2) &rarr; 0 &lt; &mu; &mdash; never moves, as expected; &theta; &rarr; 90&deg; gives tan45&deg; = 1, so any &mu; &lt; 1 lets it move.<br><b>&#9889; JEE Trick:</b> sin&theta;/(1 + cos&theta;) = tan(&theta;/2) and (1 &minus; cos&theta;)/sin&theta; = tan(&theta;/2) are the two identities that turn friction-with-angle problems into one-line answers.<br><b>Answer: (c) tan(&theta;/2) &ge; &mu;.</b>"},
-{id:26, lec:"L-2", blk:"Sliding body friction", topic:"For a body already sliding, friction is &mu;N regardless of the applied force's size or direction",
+{id:26, lec:"L-2", blk:"Sliding body friction", topic:"For a body already sliding, friction is &mu;N regardless of the applied force's size or direction", t:90,
  src:"L-2 · LEVEL-5 Q4",
  q:"A block of mass 10 kg is moving on a rough surface with velocity v = 4 m/s towards the left while a force F = 20 N is applied towards the right. The coefficient of friction is &mu; = 0.6. The frictional force acting on the block is (g = 10 m/s&sup2;):",
  opts:["20 N",
@@ -583,7 +609,7 @@ const QUIZ = [
  sol:"<b>Concept.</b> The moment a body is SLIDING, the friction on it is fixed at &mu;N and points opposite to its VELOCITY &mdash; never opposite to the applied force and never equal to it.<br><b>Step 1 &mdash; identify the regime.</b> The block already has v = 4 m/s, so the surfaces are in relative sliding: kinetic friction, not static.<br><b>Step 2 &mdash; normal reaction.</b> F is horizontal, so it does not affect N: N = mg = (10)(10) = 100 N.<br><b>Step 3 &mdash; kinetic friction.</b> f&#8342; = &mu;N = (0.6)(100) = 60 N.<br><b>Step 4 &mdash; direction.</b> The velocity is leftward, so friction acts rightward (with the 20 N force, not against it).<br><b>Step 5 &mdash; what the block does.</b> Net rightward force = 20 + 60 = 80 N on 10 kg gives a = 8 m/s&sup2;, decelerating and then reversing the block &mdash; but the friction VALUE asked for is still 60 N while it slides leftward.<br><b>&#9889; JEE Trick:</b> Friction opposes RELATIVE MOTION, not the applied force. Here they happen to point the same way, which is why 20 N is such a tempting wrong answer.<br><b>Answer: (c) 60 N.</b>"},
 
 /* ---------------- L-3 (14) ---------------- */
-{id:27, lec:"L-3", blk:"Angle of repose", topic:"What is exactly true at the angle of repose: limiting friction equals the driving force",
+{id:27, lec:"L-3", blk:"Angle of repose", topic:"What is exactly true at the angle of repose: limiting friction equals the driving force", t:90,
  src:"L-3 · SUGGESTED PROBLEMS Q1 (Level-1)",
  q:"At angle of repose &alpha;, which of the following is true?",
  opts:["Limiting friction = 0",
@@ -596,7 +622,7 @@ const QUIZ = [
   "Correct. The angle of repose is defined as the inclination at which the block is just on the verge of sliding, i.e. the driving force has grown to exactly match the limiting friction.",
   "Wrong. Friction can never exceed its limiting value, and at &alpha; it is exactly equal to the driving force, not greater. For &theta; &lt; &alpha; we have f<sub>L</sub> &gt; F, but then the ACTING friction equals F, still not greater."],
  sol:"<b>Step 1 — Set up on the incline.</b> Perpendicular to the plane N = mg cos&theta;, so limiting friction f<sub>L</sub> = &mu;N = &mu;mg cos&theta;; along the plane the driving force is F = mg sin&theta;.<br><b>Step 2 — What happens as &theta; grows.</b> cos&theta; falls and sin&theta; rises, so f<sub>L</sub> decreases while F increases; they must cross at one particular angle.<br><b>Step 3 — Define the crossing.</b> That crossing angle is the angle of repose &alpha;, where the block is just about to slide, so f<sub>L</sub> = F.<br><b>Step 4 — Extract &mu;.</b> &mu;mg cos&alpha; = mg sin&alpha; &rArr; tan&alpha; = &mu; &rArr; &alpha; = tan<sup>-1</sup>&mu;, independent of the mass.<br><b>Step 5 — Conclusion.</b> Neither force is zero at &alpha;; they are simply equal, so option (c) is correct."},
-{id:28, lec:"L-3", blk:"Incline force balance", topic:"Which quantity falls as the inclination of the plane is increased",
+{id:28, lec:"L-3", blk:"Incline force balance", topic:"Which quantity falls as the inclination of the plane is increased", t:90,
  src:"L-3 · LEVEL-1 Q1",
  q:"Which factor decreases when the angle of inclination &theta; increases?",
  opts:["Driving force",
@@ -609,7 +635,7 @@ const QUIZ = [
   "Wrong. &mu; is a property of the pair of surfaces in contact; it does not depend on the geometry of the plane.",
   "Wrong. The weight mg is fixed by the mass and g; tilting the plane only changes how mg is resolved, not its magnitude."],
  sol:"<b>Step 1 — Resolve the weight.</b> Along the plane mg sin&theta;, perpendicular to it mg cos&theta;.<br><b>Step 2 — Normal reaction.</b> N = mg cos&theta;; at &theta; = 0&deg; N = mg, at &theta; = 60&deg; N = mg/2, at &theta; = 90&deg; N = 0, so N steadily decreases.<br><b>Step 3 — Limiting friction follows N.</b> f<sub>L</sub> = &mu;N = &mu;mg cos&theta;, so it decreases along with N.<br><b>Step 4 — Driving force moves the other way.</b> F = mg sin&theta; increases, which is exactly why a crossing (the angle of repose) exists at tan&alpha; = &mu;.<br><b>Step 5 — Conclusion.</b> The only listed quantity that decreases is the normal reaction, option (b)."},
-{id:29, lec:"L-3", blk:"Kinetic friction incline", topic:"Computing the kinetic friction &mu;mg cos&theta; on a 30&deg; incline",
+{id:29, lec:"L-3", blk:"Kinetic friction incline", topic:"Computing the kinetic friction &mu;mg cos&theta; on a 30&deg; incline", t:180,
  src:"L-3 · LEVEL-2 Q2",
  q:"A body of mass 100 g is sliding from an inclined plane of inclination &theta; = 30&deg;. What is the frictional force experienced if &mu; = 1.7? (take g = 10 m/s<sup>2</sup>)",
  opts:["1.7 &times; &radic;2 &times; (1/&radic;3) N",
@@ -622,7 +648,7 @@ const QUIZ = [
   "Wrong. This is 1.7&radic;3 &asymp; 2.94 N, twice the true value — it drops the factor (1/2) in cos30&deg; = &radic;3/2.",
   "Wrong. &radic;4 &times; (1/2) = 1, so this gives 1.7 N = &mu;mg, which is the friction only on a HORIZONTAL surface where cos&theta; = 1."],
  sol:"<b>Step 1 — Weight in newtons.</b> m = 100 g = 0.1 kg, so mg = 0.1 &times; 10 = 1 N.<br><b>Step 2 — Normal reaction.</b> On the incline N = mg cos&theta; = 1 &times; cos30&deg; = &radic;3/2 N. Note N is NOT mg here.<br><b>Step 3 — The body is sliding, so friction is kinetic and equal to &mu;N.</b> f = &mu;N = &mu;mg cos&theta; = 1.7 &times; 1 &times; (&radic;3/2) = 1.7 &times; &radic;3 &times; (1/2) N &asymp; 1.47 N.<br><b>Step 4 — Match the printed form.</b> That is exactly option (b).<br><b>Step 5 — Trap.</b> Option (d) equals 1.7 N, what you get by carelessly using N = mg; the cos&theta; factor is the whole point of the question.<br><b>Note on the premise:</b> with &mu; = 1.7 the angle of repose is tan<sup>-1</sup>(1.7) &asymp; 59.5&deg;, so a block on a 30&deg; incline could not actually start sliding on its own — the book's phrase “is sliding” only means it has been set moving, and the computation asked for is &mu;mg cos&theta;."},
-{id:30, lec:"L-3", blk:"Friction against wall", topic:"Block held against a vertical wall: the pressing force is N and friction supports the weight",
+{id:30, lec:"L-3", blk:"Friction against wall", topic:"Block held against a vertical wall: the pressing force is N and friction supports the weight", t:90,
  src:"L-3 · LEVEL-2 Q4",
  q:"A horizontal force of 10 N is necessary to just hold a block stationary against a wall. The coefficient of friction between the block and the wall is 0.2. The weight of the block is:",
  opts:["2 N",
@@ -635,7 +661,7 @@ const QUIZ = [
   "Wrong. 50 N = 10/0.2, again the result of dividing by &mu;.",
   "Wrong. 100 N has no basis here; it would need N = 500 N."],
  sol:"<b>Step 1 — Identify the normal reaction.</b> The wall is vertical, so the 10 N horizontal push is perpendicular to the wall: N = 10 N. (On a horizontal floor N would come from mg, but not here.)<br><b>Step 2 — Direction of friction.</b> The block tends to slide DOWN the wall, so friction acts vertically upwards along the wall face.<br><b>Step 3 — Limiting value.</b> f<sub>L</sub> = &mu;N = 0.2 &times; 10 = 2 N.<br><b>Step 4 — Apply “just holds stationary”.</b> Vertical equilibrium at the point of slipping gives W = f<sub>L</sub> = 2 N.<br><b>Step 5 — Sanity check.</b> With &mu; = 0.2 a 10 N push can only support one-fifth of that, i.e. 2 N — friction on a wall is always much weaker than the push, so the answer must be SMALLER than 10 N. That rules out (b), (c) and (d) at a glance."},
-{id:31, lec:"L-3", blk:"Static vs limiting", topic:"Below the angle of repose the acting friction equals the driving force, not &mu;N",
+{id:31, lec:"L-3", blk:"Static vs limiting", topic:"Below the angle of repose the acting friction equals the driving force, not &mu;N", t:180,
  src:"L-3 · LEVEL-3 Q2",
  q:"A block of wood weighs 10 N and is resting on an inclined plane. The coefficient of friction is 0.7. The frictional force that acts on the block when the plane is 30&deg; inclined with the horizontal is:",
  opts:["6.062 N",
@@ -648,7 +674,7 @@ const QUIZ = [
   "Wrong. 9.8 N is just the weight times a stray factor of g/10; it has no role here, and friction cannot nearly equal the full weight on a 30&deg; slope.",
   "Wrong. 70 N = &mu; &times; 10 &times; 10; it multiplies the 10 N WEIGHT by g again, which is dimensionally a mass-times-g error."],
  sol:"<b>Step 1 — Find the angle of repose.</b> tan&alpha; = &mu; = 0.7 &rArr; &alpha; = tan<sup>-1</sup>(0.7) &asymp; 35&deg;.<br><b>Step 2 — Compare with the given inclination.</b> &theta; = 30&deg; &lt; &alpha; &asymp; 35&deg;, so the block does NOT slide; it is in static equilibrium.<br><b>Step 3 — Confirm numerically.</b> Driving force F = mg sin&theta; = 10 &times; sin30&deg; = 5 N, limiting friction f<sub>L</sub> = &mu;mg cos&theta; = 0.7 &times; 10 &times; cos30&deg; = 6.06 N; since 5 N &lt; 6.06 N, the block stays put.<br><b>Step 4 — Apply equilibrium.</b> For a stationary block the friction is whatever is needed to balance the pull along the plane: f = mg sin&theta; = 5 N, up the plane.<br><b>Step 5 — The rule.</b> Friction equals &mu;N only when the body is sliding or exactly on the verge. Below the angle of repose, use equilibrium, not &mu;N.<br><b>&#9889; JEE Trick:</b> Whenever a question gives &mu; AND says the block “is resting”, first test tan&theta; against &mu;. If tan&theta; &lt; &mu;, answer mg sin&theta; and ignore &mu; entirely — the &mu;N value will always be sitting there as a distractor."},
-{id:32, lec:"L-3", blk:"Motion up rough incline", topic:"Retardation of a particle moving UP a rough incline: gravity and friction both oppose",
+{id:32, lec:"L-3", blk:"Motion up rough incline", topic:"Retardation of a particle moving UP a rough incline: gravity and friction both oppose", t:180,
  src:"L-3 · LEVEL-3 Q3",
  q:"A particle is projected along the line of greatest slope up a rough plane inclined at an angle of 45&deg; with the horizontal. If the coefficient of friction is (1/2), their retardation is:",
  opts:["g/(2&radic;2)",
@@ -661,7 +687,7 @@ const QUIZ = [
   "Wrong. The minus sign is the DOWNWARD-sliding case, where friction opposes the downward motion and so subtracts. Here the particle moves up.",
   "Correct. Moving up, both gravity and friction act down the plane, so a = g(sin45&deg; + &mu;cos45&deg;) = (g/&radic;2)(1 + (1/2))."],
  sol:"<b>Step 1 — Fix the direction of motion.</b> The particle is projected UP the plane, so kinetic friction acts DOWN the plane, the same way as the gravity component.<br><b>Step 2 — Write the retarding force.</b> ma = mg sin&theta; + &mu;mg cos&theta; &rArr; a = g(sin&theta; + &mu;cos&theta;).<br><b>Step 3 — Substitute &theta; = 45&deg;, &mu; = 1/2.</b> a = g(sin45&deg; + (1/2)cos45&deg;) = g((1/&radic;2) + (1/2)(1/&radic;2)) = (g/&radic;2)(1 + (1/2)).<br><b>Step 4 — Numerical size.</b> (g/&radic;2)(3/2) = 1.06 g &asymp; 10.6 m/s<sup>2</sup>, which is sensibly LARGER than g sin45&deg; = 0.707 g.<br><b>Step 5 — Sign rule to memorise.</b> Going up: a = g(sin&theta; + &mu;cos&theta;); coming down: a = g(sin&theta; &minus; &mu;cos&theta;). Options (c) and (d) are placed side by side precisely to test that sign."},
-{id:33, lec:"L-3", blk:"Stopping distance incline", topic:"Distance travelled up a rough 37&deg; incline before the block stops",
+{id:33, lec:"L-3", blk:"Stopping distance incline", topic:"Distance travelled up a rough 37&deg; incline before the block stops", t:180,
  src:"L-3 · LEVEL-3 Q4",
  q:"Find out the distance travelled by the block on the incline before it stops. The initial velocity of the block up the incline is 10 m/s, the incline is fixed at 37&deg; and the coefficient of friction between the block and incline is &mu; = 0.5. (take g = 10 m/s<sup>2</sup>, sin37&deg; = 0.6, cos37&deg; = 0.8)",
  opts:["2 m",
@@ -674,7 +700,7 @@ const QUIZ = [
   "Wrong. 3 m corresponds to a &asymp; 16.7 m/s<sup>2</sup>.",
   "Wrong. 4 m corresponds to a = 12.5 m/s<sup>2</sup>; this is what you get by inflating the friction term."],
  sol:"<b>Step 1 — The block moves up, so gravity and friction both retard it.</b> a = g(sin&theta; + &mu;cos&theta;).<br><b>Step 2 — Substitute.</b> a = 10(sin37&deg; + 0.5 cos37&deg;) = 10(0.6 + 0.5 &times; 0.8) = 10(0.6 + 0.4) = 10 m/s<sup>2</sup>.<br><b>Step 3 — Kinematics to the stopping point.</b> v<sup>2</sup> = u<sup>2</sup> &minus; 2as with v = 0 gives s = u<sup>2</sup>/2a = (10)<sup>2</sup>/(2 &times; 10) = 5 m.<br><b>Step 4 — Check it stays there (bonus).</b> tan37&deg; = 0.75 &gt; &mu; = 0.5, so 37&deg; is above the angle of repose and the block will slide back down afterwards — but the question only asks for the distance up.<br><b>Step 5 — &#9889; JEE Trick:</b> With the 3-4-5 triangle values the bracket (0.6 + 0.4) collapses to 1, so a = g exactly. Spotting that saves all the arithmetic."},
-{id:34, lec:"L-3", blk:"Verge of sliding", topic:"Applied force exactly equal to limiting friction: the block stays at rest, a = 0",
+{id:34, lec:"L-3", blk:"Verge of sliding", topic:"Applied force exactly equal to limiting friction: the block stays at rest, a = 0", t:180,
  src:"L-3 · LEVEL-3 Q5",
  q:"A block of 10 kg initially at rest lies on a rough horizontal surface with &mu; = 0.5. A horizontal force of 50 N is applied to it. Find the acceleration of the block (in m/s<sup>2</sup>, g = 10 m/s<sup>2</sup>).",
  opts:["1/2",
@@ -687,7 +713,7 @@ const QUIZ = [
   "Wrong. 3/4 m/s<sup>2</sup> needs a 7.5 N net force; nothing in the data produces that.",
   "Wrong. A definite answer does exist, namely zero, so “none” is not needed."],
  sol:"<b>Step 1 — Normal reaction.</b> The surface is horizontal and the applied force is horizontal, so N = mg = 10 &times; 10 = 100 N.<br><b>Step 2 — Maximum friction available.</b> f<sub>L</sub> = &mu;N = 0.5 &times; 100 = 50 N.<br><b>Step 3 — Compare with the applied force.</b> F = 50 N = f<sub>L</sub>, so the applied force is exactly at (not above) the limiting value.<br><b>Step 4 — Decide the state.</b> The block is on the verge of sliding: static friction can still supply the full 50 N, so the net force is 50 &minus; 50 = 0 and a = 0.<br><b>Step 5 — The concept being tested.</b> This is the horizontal-surface twin of “&theta; = &alpha;” on an incline: at the verge the body is still in equilibrium, so its acceleration is zero, not an infinitesimally small positive number.<br><b>&#9889; JEE Trick:</b> Always compute &mu;N first and compare with the applied force. If F &le; &mu;N, write a = 0 immediately; only if F &gt; &mu;N do you use a = (F &minus; &mu;N)/m."},
-{id:35, lec:"L-3", blk:"Repose on curved surface", topic:"Angle of repose applied point-by-point on a hemispherical (curved) surface",
+{id:35, lec:"L-3", blk:"Repose on curved surface", topic:"Angle of repose applied point-by-point on a hemispherical (curved) surface", t:90,
  src:"L-3 · LEVEL-4 Q4",
  q:"An insect crawls up a hemispherical surface very slowly. The coefficient of friction between the surface and the insect is (1/3). If the line joining the centre of the hemispherical surface to the insect makes an angle &alpha; with the vertical, the maximum possible value of &alpha; is given by:",
  opts:["cot&alpha; = 3",
@@ -700,7 +726,7 @@ const QUIZ = [
   "Wrong. sec&alpha; = 3 gives cos&alpha; = 1/3 and &alpha; &asymp; 70.5&deg;, far above the repose angle tan<sup>-1</sup>(1/3) &asymp; 18.4&deg;.",
   "Wrong. cosec&alpha; = 3 gives sin&alpha; = 1/3, &alpha; &asymp; 19.5&deg; — close in value but the wrong trigonometric relation; only the tangent ratio comes out of &mu;mg cos&alpha; = mg sin&alpha;."],
  sol:"<b>Step 1 — Localise the geometry.</b> At the insect's position the radius makes angle &alpha; with the vertical, so the tangent to the surface there makes the SAME angle &alpha; with the horizontal. The insect is effectively standing on an incline of inclination &alpha;.<br><b>Step 2 — Forces along and across that tangent plane.</b> N = mg cos&alpha; and the driving (down-slope) component is mg sin&alpha;. “Very slowly” means we may treat it as static equilibrium at every instant.<br><b>Step 3 — Impose the no-slip condition.</b> mg sin&alpha; &le; &mu;N = &mu;mg cos&alpha; &rArr; tan&alpha; &le; &mu;.<br><b>Step 4 — Substitute &mu; = 1/3.</b> tan&alpha; &le; 1/3, so the maximum &alpha; satisfies tan&alpha; = 1/3, i.e. cot&alpha; = 3.<br><b>Step 5 — Interpret.</b> &alpha;<sub>max</sub> = tan<sup>-1</sup>(1/3) &asymp; 18.4&deg;: the insect can only climb until the surface tilts by the angle of repose, then it slips. Mass and radius never enter.<br><b>&#9889; JEE Trick:</b> On any curved surface, replace the curve by its tangent plane at the point of interest and the problem becomes the ordinary angle-of-repose result tan&theta; = &mu;."},
-{id:36, lec:"L-3", blk:"Drag vs lift", topic:"Condition on &mu; for dragging up a 30&deg; incline to be cheaper than lifting vertically",
+{id:36, lec:"L-3", blk:"Drag vs lift", topic:"Condition on &mu; for dragging up a 30&deg; incline to be cheaper than lifting vertically", t:90,
  src:"L-3 · LEVEL-4 Q5",
  q:"A block is placed on a rough inclined plane of inclination &theta; = 30&deg;. If the force to drag it along the plane is to be smaller than the force to lift it, the coefficient of friction &mu; should be less than:",
  opts:["1/2",
@@ -713,7 +739,7 @@ const QUIZ = [
   "Wrong. 2/3 = 0.667 &gt; 0.577, so at that &mu; dragging already costs mg(0.5 + 0.577) &gt; mg.",
   "Correct. 1/&radic;3 &asymp; 0.577 is exactly where mg sin30&deg; + &mu;mg cos30&deg; equals mg."],
  sol:"<b>Step 1 — Force to drag the block up along the plane.</b> It must beat both the gravity component and friction: F<sub>drag</sub> = mg sin&theta; + &mu;mg cos&theta;.<br><b>Step 2 — Force to lift the block vertically.</b> Off the surface there is no normal reaction and hence no friction, so F<sub>lift</sub> = mg.<br><b>Step 3 — Impose the required inequality.</b> mg sin30&deg; + &mu;mg cos30&deg; &lt; mg &rArr; (1/2) + &mu;(&radic;3/2) &lt; 1.<br><b>Step 4 — Solve for &mu;.</b> &mu;(&radic;3/2) &lt; 1/2 &rArr; &mu; &lt; 1/&radic;3 &asymp; 0.577.<br><b>Step 5 — Read the result physically.</b> 1/&radic;3 = tan30&deg;, so the condition is simply &mu; &lt; tan&theta;, i.e. the plane must already be steeper than its own angle of repose — exactly when the block would slide down by itself.<br><b>&#9889; JEE Trick:</b> The general answer is &mu; &lt; tan&theta; whatever the angle, because mg sin&theta; + &mu;mg cos&theta; &lt; mg reduces to &mu; &lt; (1 &minus; sin&theta;)/cos&theta; only if you forget the identity; at &theta; = 30&deg; substitute numbers straight away and check against tan30&deg;."},
-{id:37, lec:"L-3", blk:"Pushing at an angle", topic:"A downward-slanted push increases N, so the limiting friction grows with F itself",
+{id:37, lec:"L-3", blk:"Pushing at an angle", topic:"A downward-slanted push increases N, so the limiting friction grows with F itself", t:180,
  src:"L-3 · LEVEL-4 Q7",
  q:"A block of mass m = &radic;3 kg rests on a rough horizontal surface with &mu; = 1/(2&radic;3). A force F is applied on the block at 60&deg; with the horizontal, directed downwards into the surface as shown. What is the maximum value of the force F such that the block does not move? (g = 10 m/s<sup>2</sup>)",
  opts:["20 N",
@@ -726,7 +752,7 @@ const QUIZ = [
   "Wrong. 12 N does not satisfy the equilibrium equation; at F = 12 N the drive is 6 N while the available friction is 8 N, so the block still would not move — it is not the MAXIMUM.",
   "Wrong. 15 N likewise leaves the block stationary (drive 7.5 N vs friction 8.75 N), so it is not the maximum value either."],
  sol:"<b>Step 1 — Resolve the applied force.</b> Horizontal (driving) component F cos60&deg; = F/2; vertical component F sin60&deg; = (&radic;3/2)F pressing DOWN on the surface.<br><b>Step 2 — Normal reaction grows with F.</b> N = mg + F sin60&deg; = &radic;3(10) + (&radic;3/2)F = 10&radic;3 + (&radic;3/2)F.<br><b>Step 3 — Limiting friction.</b> f<sub>L</sub> = &mu;N = (1/(2&radic;3))(10&radic;3 + (&radic;3/2)F) = 5 + F/4.<br><b>Step 4 — Condition for no motion, taken at the limit.</b> F/2 = 5 + F/4 &rArr; F/2 &minus; F/4 = 5 &rArr; F/4 = 5 &rArr; F = 20 N.<br><b>Step 5 — Why a finite answer exists.</b> The angle of friction here is tan<sup>-1</sup>(1/(2&radic;3)) &asymp; 16.1&deg; from the vertical, while the push is 30&deg; from the vertical; because 30&deg; lies OUTSIDE the friction cone, a large enough push does move the block. Had the push been steeper than 73.9&deg; to the horizontal, no force would ever move it.<br><b>&#9889; JEE Trick:</b> A push tilted downwards helps friction (N increases); a pull tilted upwards helps you (N decreases). Getting that sign right in N = mg &plusmn; F sin&theta; is the whole question."},
-{id:38, lec:"L-3", blk:"Friction on conveyor", topic:"Friction is the only force that can accelerate a block riding an inclined accelerating belt",
+{id:38, lec:"L-3", blk:"Friction on conveyor", topic:"Friction is the only force that can accelerate a block riding an inclined accelerating belt", t:90,
  src:"L-3 · LEVEL-4 Q10",
  q:"A block of mass 1 kg is stationary with respect to a conveyor belt that is accelerating with 1 ms<sup>&minus;2</sup> upwards at an angle 30&deg;. The magnitude of the frictional force acting on the block equals: (g = 10 m/s<sup>2</sup>)",
  opts:["6 N",
@@ -739,7 +765,7 @@ const QUIZ = [
   "Wrong. 3&radic;3 &asymp; 5.2 N looks like a mg cos30&deg;-flavoured answer; the normal direction is irrelevant because the acceleration is along the belt.",
   "Wrong. 3&radic;2 &asymp; 4.24 N would correspond to a 45&deg; belt, not 30&deg;."],
  sol:"<b>Step 1 — Identify the block's acceleration.</b> “Stationary with respect to the belt” means the block shares the belt's acceleration: 1 m/s<sup>2</sup> directed UP along the 30&deg; incline.<br><b>Step 2 — List the along-incline forces on the block.</b> Only two: the gravity component mg sin30&deg; down the incline, and friction f from the belt. The normal reaction is perpendicular and cannot contribute.<br><b>Step 3 — Newton's second law along the incline.</b> f &minus; mg sin30&deg; = ma &rArr; f = m(g sin30&deg; + a) = 1(10 &times; 0.5 + 1) = 6 N, directed up the incline.<br><b>Step 4 — Check consistency.</b> Friction must both hold the block against gravity (5 N) and drive it forward (1 N), which is why the answer exceeds mg sin30&deg;.<br><b>Step 5 — Hidden condition.</b> This requires &mu;mg cos30&deg; &ge; 6 N, i.e. &mu; &ge; 6/(10 &times; 0.866) &asymp; 0.69; the problem tacitly assumes the belt is rough enough.<br><b>&#9889; JEE Trick:</b> When a body rides an accelerating surface without slipping, never write f = &mu;N. Use f = m(a + g sin&theta;) from Newton's law; &mu;N only sets the ceiling on what is possible."},
-{id:39, lec:"L-3", blk:"Two-condition incline", topic:"Friction reverses direction between 'just prevented from sliding down' and 'just made to slide up'",
+{id:39, lec:"L-3", blk:"Two-condition incline", topic:"Friction reverses direction between 'just prevented from sliding down' and 'just made to slide up'", t:90,
  src:"L-3 · LEVEL-5 Q6",
  q:"A box of mass 8 kg placed on a rough inclined plane of inclination &theta; has its downward motion prevented by applying an upward pull F along the plane, and it can be made to slide upwards by applying a force 2F along the plane. The coefficient of friction between the box and the inclined plane is:",
  opts:["(1/3) tan&theta;",
@@ -752,7 +778,7 @@ const QUIZ = [
   "Wrong. (1/2)tan&theta; is what you get if you use the ratio 2 on only one side, e.g. 2sin&theta; = ... &minus; ... with a sign kept wrong.",
   "Wrong. 2 tan&theta; again inverts the relation and is larger than tan&theta;, which would make the plane's repose angle exceed &theta; — contradicting the fact that the box slides down unaided."],
  sol:"<b>Step 1 — Case 1: box just prevented from sliding DOWN by pull F up the plane.</b> The box tends to slide down, so friction acts UP: F + &mu;mg cos&theta; = mg sin&theta; &rArr; F = mg sin&theta; &minus; &mu;mg cos&theta;.<br><b>Step 2 — Case 2: box just made to slide UP by 2F.</b> Now motion is up the plane, so friction reverses and acts DOWN: 2F = mg sin&theta; + &mu;mg cos&theta;.<br><b>Step 3 — Eliminate F.</b> 2(mg sin&theta; &minus; &mu;mg cos&theta;) = mg sin&theta; + &mu;mg cos&theta; &rArr; 2sin&theta; &minus; 2&mu;cos&theta; = sin&theta; + &mu;cos&theta;.<br><b>Step 4 — Collect terms.</b> sin&theta; = 3&mu;cos&theta; &rArr; &mu; = (1/3)tan&theta;.<br><b>Step 5 — Check consistency.</b> &mu; = (1/3)tan&theta; &lt; tan&theta;, so &theta; is above the angle of repose and the box really would slide down unaided — exactly the situation described. The mass 8 kg cancels and is never needed.<br><b>&#9889; JEE Trick:</b> Whenever a problem gives you TWO statements about the same incline, write both equations with the friction sign flipped and divide; the unknown force and the mass always cancel."},
-{id:40, lec:"L-3", blk:"Horizontal string equilibrium", topic:"A horizontal tension on an inclined block changes BOTH the along-plane balance and the normal reaction",
+{id:40, lec:"L-3", blk:"Horizontal string equilibrium", topic:"A horizontal tension on an inclined block changes BOTH the along-plane balance and the normal reaction", t:180,
  src:"L-3 · LEVEL-6 Q3",
  q:"A block of mass 15 kg is resting on a rough inclined plane of inclination 45&deg;. The block is tied up by a horizontal string which has a tension of 50 N. The coefficient of friction between the surfaces of contact is: (g = 10 m s<sup>&minus;2</sup>)",
  opts:["1/2",
@@ -767,7 +793,7 @@ const QUIZ = [
  sol:"<b>Step 1 — Resolve the horizontal tension on a 45&deg; plane.</b> A horizontal force T has component T cos45&deg; UP along the plane and component T sin45&deg; PRESSING INTO the plane — both effects matter.<br><b>Step 2 — Perpendicular balance.</b> N = mg cos45&deg; + T sin45&deg; = (150 + 50)/&radic;2 = 200/&radic;2 = 141.4 N.<br><b>Step 3 — Along-plane balance.</b> Net down-slope pull = mg sin45&deg; &minus; T cos45&deg; = (150 &minus; 50)/&radic;2 = 100/&radic;2 = 70.7 N, which friction must supply, so f = 70.7 N up the plane.<br><b>Step 4 — Coefficient at the limiting condition.</b> &mu; = f/N = (100/&radic;2)/(200/&radic;2) = 100/200 = 1/2.<br><b>Step 5 — Why the &radic;2 cancels.</b> At 45&deg; both resolutions carry the same factor 1/&radic;2, so the answer reduces to the plain ratio (mg &minus; T)/(mg + T) = (150 &minus; 50)/(150 + 50) = 1/2.<br><b>&#9889; JEE Trick:</b> The most common error is to subtract T sin45&deg; from N. Draw the normal as the outward unit vector (&minus;sin&theta;, cos&theta;) or (sin&theta;, cos&theta;) and dot it with the tension — a horizontal pull towards the hill always INCREASES N."},
 
 /* ---------------- L-4 (13) ---------------- */
-{id:41, lec:"L-4", blk:"belt slipping", topic:"Block dropped on a moving conveyor belt: kinetic friction accelerates it until speeds match; find the sliding distance.",
+{id:41, lec:"L-4", blk:"belt slipping", topic:"Block dropped on a moving conveyor belt: kinetic friction accelerates it until speeds match; find the sliding distance.", t:180,
  src:"L-4 · SUGGESTED PROBLEMS Q4 (Level-4)",
  q:"A conveyor belt is moving with a constant speed of 3 ms<sup>&minus;1</sup>. A block is gently placed on it. The coefficient of friction between the block and the belt is &mu; = 0.3. The distance travelled by the block on the belt before it starts moving with the belt (take g = 10 ms<sup>&minus;2</sup>) is",
  opts:["0.45 m",
@@ -780,7 +806,7 @@ const QUIZ = [
   "0.9 m &mdash; comes from multiplying v&sup2;/(2g) by &mu; instead of dividing by it; dimensionally fine but the wrong operation.",
   "0 m &mdash; would hold only if the block were placed already moving at belt speed, or if &mu; were infinite; here the block starts at rest so it must slide."],
  sol:"<b>Step 1.</b> Placed gently means the block starts at rest while the belt runs at v = 3 m/s, so the belt slides forward under the block and kinetic friction acts <b>forward</b> on the block.<br><b>Step 2.</b> a = &mu;g = (0.3)(10) = 3 m/s&sup2;, constant until the speeds match.<br><b>Step 3.</b> Time to match speeds: t = v/a = 3/3 = 1 s. After that instant there is no relative sliding, friction drops to zero and they travel together.<br><b>Step 4.</b> Distance covered by the block in that 1 s: s = (1/2)at&sup2; = (1/2)(3)(1)&sup2; = v&sup2;/(2&mu;g) = 9/6 = 1.5 m.<br><b>Step 5.</b> Cross-check the other reading of the question: the belt covers vt = 3(1) = 3 m, so the slip relative to the belt = 3 &minus; 1.5 = 1.5 m. Both readings give the same number, so the answer is unambiguous.<br>&#9888; ICAD key says (a) 0.45 m; working gives (b) 1.5 m because a = &mu;g = 3 m/s&sup2; forces t = 1 s, hence s = v&sup2;/(2&mu;g) = 1.5 m and the relative slip equals the same 1.5 m."},
-{id:42, lec:"L-4", blk:"stacked blocks", topic:"Two stacked blocks pushed by opposing forces on a smooth floor: find the static friction between them (not &mu;N).",
+{id:42, lec:"L-4", blk:"stacked blocks", topic:"Two stacked blocks pushed by opposing forces on a smooth floor: find the static friction between them (not &mu;N).", t:180,
  src:"L-4 · LEVEL-2 Q4",
  q:"In the arrangement shown in figure, coefficient of friction between the two blocks is &mu; = (1/2). A 2 kg block rests on a 4 kg block which lies on a smooth floor. A force F<sub>1</sub> = 2 N acts on the upper 2 kg block towards the right while F<sub>2</sub> = 20 N acts on the lower 4 kg block towards the left. The force of friction acting between the two blocks is:",
  opts:["8 N",
@@ -793,7 +819,7 @@ const QUIZ = [
   "6 N &mdash; obtained by using the net force on the pair (18 N) with the wrong mass, or by forgetting F<sub>1</sub> on the upper block.",
   "4 N &mdash; obtained from 2 kg &times; 2 m/s&sup2;, i.e. dividing the 18 N net force by 9 instead of by the actual 6 kg total."],
  sol:"<b>Step 1.</b> Limiting friction at the interface: f<sub>max</sub> = &mu; m<sub>top</sub> g = (1/2)(2)(10) = 10 N.<br><b>Step 2.</b> Assume no slipping and treat the pair as one body of 6 kg; the interface friction is internal and cancels: a = (F<sub>1</sub> &minus; F<sub>2</sub>)/(m + M) = (2 &minus; 20)/6 = &minus;3 m/s&sup2;, i.e. 3 m/s&sup2; towards the left.<br><b>Step 3.</b> Isolate the 2 kg block. Its only horizontal forces are F<sub>1</sub> = 2 N (right) and friction f: 2 + f = (2)(&minus;3) = &minus;6 &rarr; f = &minus;8 N, i.e. <b>8 N towards the left</b>.<br><b>Step 4.</b> Test the assumption: |f| = 8 N &le; f<sub>max</sub> = 10 N, so static friction can supply it and the blocks really do move together.<br><b>Step 5.</b> Hence the friction between the blocks is 8 N &mdash; a static value fixed by the dynamics, not by &mu;N."},
-{id:43, lec:"L-4", blk:"max force together", topic:"Maximum force on the lower block of a stack (smooth floor) so the upper block is not left behind.",
+{id:43, lec:"L-4", blk:"max force together", topic:"Maximum force on the lower block of a stack (smooth floor) so the upper block is not left behind.", t:90,
  src:"L-4 · LEVEL-3 Q3",
  q:"Two blocks A (2 kg) and B (5 kg) rest one over the other on a smooth horizontal plane. The coefficient of static and dynamic friction between A and B is the same and is equal to 0.60. The maximum horizontal force that can be applied to B in order that both A and B do not have relative motion is:",
  opts:["4.2 N",
@@ -806,7 +832,7 @@ const QUIZ = [
   "5.4 N &mdash; comes from &mu; &times; (m<sub>A</sub> + m<sub>B</sub>) with g mis-applied; it is not the limiting friction of either interface.",
   "1.2 N &mdash; obtained from &mu; &times; m<sub>A</sub> = 0.6 &times; 2 with g omitted entirely."],
  sol:"<b>Step 1.</b> A (the upper block) is dragged forward by nothing except friction from B, so its acceleration is capped by the limiting friction.<br><b>Step 2.</b> f<sub>max</sub> = &mu; m<sub>A</sub> g = (0.60)(2)(10) = 12 N.<br><b>Step 3.</b> a<sub>max</sub> = f<sub>max</sub>/m<sub>A</sub> = &mu;g = 12/2 = 6 m/s&sup2;. This is the ceiling for the whole system: if the pair is driven faster, A cannot keep up and slides.<br><b>Step 4.</b> The floor is smooth, so for the pair as one body F = (m<sub>A</sub> + m<sub>B</sub>)a<sub>max</sub> = (2 + 5)(6) = 42 N.<br><b>Step 5.</b> Any F above 42 N leaves A behind; at exactly 42 N the interface friction is on the verge of its limit."},
-{id:44, lec:"L-4", blk:"max acceleration", topic:"The ceiling acceleration a = &mu;g for a block carried on top of another purely by friction.",
+{id:44, lec:"L-4", blk:"max acceleration", topic:"The ceiling acceleration a = &mu;g for a block carried on top of another purely by friction.", t:90,
  src:"L-4 · LEVEL-3 Q4",
  q:"A block of mass m is placed on the top of another block of mass M as shown in the figure. The coefficient of friction between them is &mu;. What is the maximum acceleration with which the block M may move so that m also moves along with it?",
  opts:["&mu;g",
@@ -819,7 +845,7 @@ const QUIZ = [
   "&mu;<sup>2</sup>/g &mdash; wrong dimensions for acceleration (&mu; is dimensionless, so this is s&sup2;/m).",
   "g/&mu;<sup>2</sup> &mdash; also inverted in &mu; and has no physical route from f = &mu;N = ma."],
  sol:"<b>Step 1.</b> Isolate the upper block m. Horizontally the ONLY force on it is friction from M &mdash; nothing else touches it.<br><b>Step 2.</b> Normal reaction at the interface: N = mg (the upper block is not accelerating vertically).<br><b>Step 3.</b> Maximum friction available: f<sub>max</sub> = &mu;N = &mu;mg.<br><b>Step 4.</b> Newton's second law on m: f<sub>max</sub> = m a<sub>max</sub> &rarr; &mu;mg = m a<sub>max</sub> &rarr; a<sub>max</sub> = &mu;g.<br><b>Step 5.</b> Note that M cancels completely: the answer does not depend on the lower block's mass, only on &mu;. &#9889; This single result (a<sub>max</sub> = &mu;g) is the backbone of every 'maximum force so the blocks move together' problem in this lecture."},
-{id:45, lec:"L-4", blk:"max force together", topic:"Convert a<sub>max</sub> = &mu;g into the maximum applied force on the lower block, smooth floor.",
+{id:45, lec:"L-4", blk:"max force together", topic:"Convert a<sub>max</sub> = &mu;g into the maximum applied force on the lower block, smooth floor.", t:180,
  src:"L-4 · LEVEL-4 Q1",
  q:"Two blocks A and B of masses 6 kg and 3 kg rest on a smooth horizontal surface as shown in the figure (the 3 kg block B sits on top of the 6 kg block A and the force F is applied horizontally to A). If the coefficient of friction between A and B is 0.4, the maximum horizontal force which can make them move without separation is:",
  opts:["72 N",
@@ -832,7 +858,7 @@ const QUIZ = [
   "36 N &mdash; correct. a<sub>max</sub> = &mu;g = 4 m/s&sup2;, F = (6 + 3)(4) = 36 N.",
   "20 N &mdash; this is roughly the limiting friction on B scaled wrongly; the actual limiting friction on B is only 12 N."],
  sol:"<b>Step 1.</b> B (3 kg, on top) is driven only by friction from A, so its acceleration is capped at a<sub>max</sub> = &mu;g = (0.4)(10) = 4 m/s&sup2;.<br><b>Step 2.</b> Equivalently, f<sub>max</sub> = &mu; m<sub>B</sub> g = (0.4)(3)(10) = 12 N and a<sub>max</sub> = 12/3 = 4 m/s&sup2;.<br><b>Step 3.</b> The floor is smooth, so no ground friction enters; treat the pair as one body of 9 kg at that acceleration.<br><b>Step 4.</b> F = (m<sub>A</sub> + m<sub>B</sub>) a<sub>max</sub> = (6 + 3)(4) = 36 N.<br><b>Step 5.</b> At F = 36 N the interface friction is exactly 12 N (its limit); above 36 N B slides backwards relative to A."},
-{id:46, lec:"L-4", blk:"static vs kinetic", topic:"Test the together-assumption first, then switch to the kinetic coefficient; acceleration of the lower slab.",
+{id:46, lec:"L-4", blk:"static vs kinetic", topic:"Test the together-assumption first, then switch to the kinetic coefficient; acceleration of the lower slab.", t:180,
  src:"L-4 · LEVEL-4 Q2",
  q:"Block A of mass 35 kg is resting on a frictionless floor. Another block B of mass 7 kg is resting on it as shown in the figure. The coefficient of friction between the blocks is 0.5 while kinetic friction is 0.4. If a force of 100 N is applied to block B, the acceleration of block A will be: (g = 10 ms<sup>&minus;2</sup>)",
  opts:["0.8 ms<sup>&minus;2</sup>",
@@ -845,7 +871,7 @@ const QUIZ = [
   "0.4 ms<sup>&minus;2</sup> &mdash; numerically &mu;<sub>k</sub> quoted as an acceleration; it drops the factor m<sub>B</sub>g/m<sub>A</sub>.",
   "4.4 ms<sup>&minus;2</sup> &mdash; unreachable: A is acted on only by friction from B, whose kinetic value is 28 N, so a<sub>A</sub> cannot exceed 28/35 = 0.8 ms<sup>&minus;2</sup> whatever F is."],
  sol:"<b>Step 1.</b> Static limit at the interface: f<sub>s,max</sub> = &mu;<sub>s</sub> m<sub>B</sub> g = (0.5)(7)(10) = 35 N.<br><b>Step 2.</b> Test moving together: a = F/(m<sub>A</sub> + m<sub>B</sub>) = 100/42 = 2.38 m/s&sup2;. The friction needed to drag the 35 kg block at that rate is f = m<sub>A</sub>a = 35(2.38) = 83.3 N.<br><b>Step 3.</b> 83.3 N &gt; 35 N, so static friction cannot hold: the blocks SLIP and the friction locks to its kinetic value.<br><b>Step 4.</b> f<sub>k</sub> = &mu;<sub>k</sub> m<sub>B</sub> g = (0.4)(7)(10) = 28 N.<br><b>Step 5.</b> The floor is frictionless, so this 28 N is the only horizontal force on A: a<sub>A</sub> = f<sub>k</sub>/m<sub>A</sub> = 28/35 = <b>0.8 m/s&sup2;</b>.<br><b>Step 6.</b> (Consistency check: a<sub>B</sub> = (100 &minus; 28)/7 = 10.3 m/s&sup2; &gt; a<sub>A</sub>, confirming B really does slide forward over A.)"},
-{id:47, lec:"L-4", blk:"pulley + friction", topic:"Loading a horizontal block so that friction can just balance a hanging weight across a pulley.",
+{id:47, lec:"L-4", blk:"pulley + friction", topic:"Loading a horizontal block so that friction can just balance a hanging weight across a pulley.", t:90,
  src:"L-4 · LEVEL-4 Q3",
  q:"Two blocks of masses M<sub>1</sub> and M<sub>2</sub> are connected with a string passing over a pulley as shown in the figure. The block M<sub>1</sub> lies on a horizontal surface. The coefficient of friction between the block M<sub>1</sub> and the horizontal surface is &mu;. The system accelerates. What additional mass m should be placed on the block M<sub>1</sub> so that the system does not accelerate?",
  opts:["(M<sub>2</sub> &minus; M<sub>1</sub>)/&mu;",
@@ -858,7 +884,7 @@ const QUIZ = [
   "M<sub>2</sub> &minus; (M<sub>1</sub>/&mu;) &mdash; puts &mu; under the wrong mass; it even goes negative for small &mu;, where more load, not less, is needed.",
   "(M<sub>2</sub> &minus; M<sub>1</sub>)&mu; &mdash; multiplies instead of dividing, so a very slippery surface (&mu; &rarr; 0) would need NO extra mass, which is absurd."],
  sol:"<b>Step 1.</b> With the extra mass m on top, the normal reaction under M<sub>1</sub> becomes N = (M<sub>1</sub> + m)g (the added block rides along, so its weight passes straight through).<br><b>Step 2.</b> Maximum friction the surface can supply: f<sub>max</sub> = &mu;N = &mu;(M<sub>1</sub> + m)g.<br><b>Step 3.</b> If the system is not to accelerate, the string tension must be held entirely by friction, and with M<sub>2</sub> in equilibrium the tension is T = M<sub>2</sub>g.<br><b>Step 4.</b> Condition for no motion: &mu;(M<sub>1</sub> + m)g &ge; M<sub>2</sub>g &rarr; M<sub>1</sub> + m &ge; M<sub>2</sub>/&mu;.<br><b>Step 5.</b> The minimum such m is m = M<sub>2</sub>/&mu; &minus; M<sub>1</sub>, i.e. option (b).<br><b>Step 6.</b> Sanity check: as &mu; &rarr; 0 the required m &rarr; &infin; (a frictionless table can never hold the load), and for &mu; = 1 it reduces to m = M<sub>2</sub> &minus; M<sub>1</sub>."},
-{id:48, lec:"L-4", blk:"pulley + friction", topic:"Minimum mass to pile on a table block so friction can hold a hanging block &mdash; numerical version of the same balance.",
+{id:48, lec:"L-4", blk:"pulley + friction", topic:"Minimum mass to pile on a table block so friction can hold a hanging block &mdash; numerical version of the same balance.", t:90,
  src:"L-4 · LEVEL-4 Q4",
  q:"Two masses A and B of 10 kg and 5 kg respectively are connected with a string passing over a frictionless pulley fixed at the corner of a table as shown in figure. The coefficient of friction of A with the table is 0.2. The minimum mass of C that may be placed on A to prevent it from moving is equal to:",
  opts:["15 kg",
@@ -871,7 +897,7 @@ const QUIZ = [
   "5 kg &mdash; simply copies the hanging mass; that would give friction 0.2(15)(10) = 30 N &lt; 50 N, so A still slides.",
   "zero &mdash; without C the friction is only 0.2(10)(10) = 20 N against a 50 N pull, so the system definitely accelerates (as the question states)."],
  sol:"<b>Step 1.</b> With C on top, the normal reaction under A is N = (10 + m<sub>C</sub>)g.<br><b>Step 2.</b> Maximum friction available: f<sub>max</sub> = &mu;N = 0.2(10 + m<sub>C</sub>)(10) = 2(10 + m<sub>C</sub>) N.<br><b>Step 3.</b> With B (5 kg) hanging in equilibrium the tension is T = m<sub>B</sub>g = 50 N, and the pulley is frictionless so that whole 50 N reaches A horizontally.<br><b>Step 4.</b> No motion requires f<sub>max</sub> &ge; T: 2(10 + m<sub>C</sub>) &ge; 50 &rarr; 10 + m<sub>C</sub> &ge; 25 &rarr; m<sub>C</sub> &ge; 15 kg.<br><b>Step 5.</b> The minimum value is therefore <b>15 kg</b>. Note that C adds only weight, not extra friction coefficient &mdash; the point of the trick is that N, not &mu;, is what you can change."},
-{id:49, lec:"L-4", blk:"sandwiched block", topic:"Block held up by friction from a horizontally-pressed neighbour: the normal force is generated by the acceleration itself.",
+{id:49, lec:"L-4", blk:"sandwiched block", topic:"Block held up by friction from a horizontally-pressed neighbour: the normal force is generated by the acceleration itself.", t:90,
  src:"L-4 · LEVEL-4 Q5",
  q:"The system is pushed by a force F as shown in figure: three blocks A (mass 2m), B (mass m) and C (mass 2m) are in contact, with the small block B squeezed between A and C so that it does not touch the ground. All surfaces are smooth except between B and C. Friction coefficient between B and C is &mu;. Minimum value of F to prevent block B from downward slipping is:",
  opts:["(3/2&mu;)mg",
@@ -884,7 +910,7 @@ const QUIZ = [
   "(5/2)&mu;mg &mdash; has &mu; in the numerator; that would mean a slipperier interface needs a SMALLER force, which is backwards.",
   "(3/2)&mu;mg &mdash; wrong on both counts: wrong total mass and &mu; in the numerator."],
  sol:"<b>Step 1.</b> All three blocks are rigidly in contact and the floor is smooth, so the whole train accelerates together: a = F/(2m + m + 2m) = F/5m.<br><b>Step 2.</b> B is held up only by friction from C, and that friction depends on the horizontal normal force N between B and C.<br><b>Step 3.</b> Find N by isolating C: the only horizontal force on C is the push N from B, so N = (2m)a = 2m(F/5m) = 2F/5.<br><b>Step 4.</b> Vertical equilibrium of B: friction must carry its weight, &mu;N &ge; mg &rarr; &mu;(2F/5) &ge; mg.<br><b>Step 5.</b> Solve: F &ge; 5mg/(2&mu;), i.e. F<sub>min</sub> = (5/2&mu;)mg.<br><b>Step 6.</b> &#9889; The counter-intuitive bit: you press HORIZONTALLY to stop a block falling VERTICALLY &mdash; the acceleration manufactures the normal force that friction needs."},
-{id:50, lec:"L-4", blk:"hanging chain", topic:"Chain on the point of sliding off a table: only the part ON the table contributes to the normal force.",
+{id:50, lec:"L-4", blk:"hanging chain", topic:"Chain on the point of sliding off a table: only the part ON the table contributes to the normal force.", t:90,
  src:"L-4 · LEVEL-4 Q9",
  q:"A uniform chain is just at rest over a rough horizontal table with its (1/&eta;)<sup>th</sup> part of length hanging vertically. The coefficient of static friction between the chain and the table is:",
  opts:["&mu; = 1/(&eta; &minus; 1)",
@@ -897,7 +923,7 @@ const QUIZ = [
   "&eta;/(1 &minus; &eta;) &mdash; inverted: it is negative for &eta; &gt; 1, which is the only physically meaningful range here.",
   "&eta;/(1 + &eta;) &mdash; tends to 1 for large &eta;, but a chain with almost nothing hanging should need almost NO friction, so &mu; must tend to 0."],
  sol:"<b>Step 1.</b> Let the chain have total mass M and length L. The hanging part is L/&eta;, so its mass is M/&eta; and the part on the table has mass M(&eta; &minus; 1)/&eta;.<br><b>Step 2.</b> Only the part lying on the table presses it, so N = [M(&eta; &minus; 1)/&eta;]g.<br><b>Step 3.</b> The pull that tries to drag the chain off is the weight of the hanging part: W = (M/&eta;)g.<br><b>Step 4.</b> 'Just at rest' means limiting friction exactly balances it: &mu;N = W &rarr; &mu;[M(&eta; &minus; 1)/&eta;]g = (M/&eta;)g.<br><b>Step 5.</b> M, g and &eta; cancel: &mu;(&eta; &minus; 1) = 1 &rarr; &mu; = 1/(&eta; &minus; 1).<br><b>Step 6.</b> Check with &eta; = 2 (half hanging): &mu; = 1, which is right &mdash; equal masses on each side need &mu; = 1 to hold."},
-{id:51, lec:"L-4", blk:"two rough surfaces", topic:"Stack on a ROUGH floor: the applied force must beat ground friction and still not exceed a = &mu;g for the top block.",
+{id:51, lec:"L-4", blk:"two rough surfaces", topic:"Stack on a ROUGH floor: the applied force must beat ground friction and still not exceed a = &mu;g for the top block.", t:180,
  src:"L-4 · LEVEL-5 Q2",
  q:"Two blocks of mass M = 6 kg and m = 3 kg are placed as shown in the figure (m rests on top of M and the force F is applied horizontally to M). Coefficient of friction between M and m is 0.5. Coefficient of friction between M and the surface is 0.4. The maximum horizontal force that can be applied to the mass M so that they move without separation is: (g = 10 ms<sup>&minus;2</sup>)",
  opts:["41 N",
@@ -910,7 +936,7 @@ const QUIZ = [
   "81 N &mdash; correct. F = (M + m)(&mu;<sub>1</sub> + &mu;<sub>2</sub>)g = 9(0.5 + 0.4)(10) = 81 N.",
   "101 N &mdash; would require a<sub>max</sub> above &mu;<sub>1</sub>g = 5 m/s&sup2;, at which point the 3 kg block has already been left behind."],
  sol:"<b>Step 1.</b> The 3 kg top block is dragged only by friction, so the ceiling is a<sub>max</sub> = &mu;<sub>1</sub>g = (0.5)(10) = 5 m/s&sup2;.<br><b>Step 2.</b> Ground friction acts on the pair and uses the TOTAL weight: f<sub>ground</sub> = &mu;<sub>2</sub>(M + m)g = (0.4)(9)(10) = 36 N.<br><b>Step 3.</b> Newton's law for the pair (interface friction is internal): F &minus; f<sub>ground</sub> = (M + m)a<sub>max</sub> &rarr; F &minus; 36 = 9(5) = 45.<br><b>Step 4.</b> F = 45 + 36 = <b>81 N</b>, which is the compact formula F<sub>max</sub> = (M + m)(&mu;<sub>1</sub> + &mu;<sub>2</sub>)g = 9(0.9)(10) = 81 N.<br><b>Step 5.</b> Check the interface: at a = 5 m/s&sup2; the 3 kg block needs 15 N, exactly its limit &mu;<sub>1</sub>m g = (0.5)(3)(10) = 15 N &mdash; on the verge, as required."},
-{id:52, lec:"L-4", blk:"slab slipping", topic:"Big slab on a frictionless floor driven only by kinetic friction from the block above (g = 9.8).",
+{id:52, lec:"L-4", blk:"slab slipping", topic:"Big slab on a frictionless floor driven only by kinetic friction from the block above (g = 9.8).", t:180,
  src:"L-4 · LEVEL-5 Q9",
  q:"A 40 kg slab rests on a frictionless floor as shown in the figure. A 10 kg block rests on the top of the slab. The static coefficient of friction between the block and the slab is 0.60 while the kinetic friction is 0.40. The 10 kg block is acted upon by a horizontal force 100 N. If g = 9.8 ms<sup>&minus;2</sup>, the resulting acceleration of the slab will be:",
  opts:["0.98 m/s&sup2;",
@@ -923,7 +949,7 @@ const QUIZ = [
   "1.52 m/s&sup2; &mdash; roughly 0.6(10)(10)/40 with g rounded to 10; the same static-coefficient error plus a rounded g.",
   "6.1 m/s&sup2; &mdash; this is the BLOCK's acceleration, (100 &minus; 39.2)/10 = 6.08 m/s&sup2;, not the slab's."],
  sol:"<b>Step 1.</b> Static limit at the interface: f<sub>s,max</sub> = &mu;<sub>s</sub>mg = (0.60)(10)(9.8) = 58.8 N.<br><b>Step 2.</b> Test the together-case: a = 100/(10 + 40) = 2 m/s&sup2;, for which the slab would need friction f = 40(2) = 80 N.<br><b>Step 3.</b> 80 N &gt; 58.8 N, so static friction cannot hold: the block slides on the slab and friction becomes kinetic.<br><b>Step 4.</b> f<sub>k</sub> = &mu;<sub>k</sub>mg = (0.40)(10)(9.8) = 39.2 N.<br><b>Step 5.</b> The floor is frictionless, so f<sub>k</sub> is the slab's only horizontal force: a<sub>slab</sub> = 39.2/40 = <b>0.98 m/s&sup2;</b>.<br><b>Step 6.</b> For completeness a<sub>block</sub> = (100 &minus; 39.2)/10 = 6.08 m/s&sup2; &gt; 0.98, confirming forward sliding. &#9889; Always test with &mu;<sub>s</sub>, then compute with &mu;<sub>k</sub>."},
-{id:53, lec:"L-4", blk:"wedge equilibrium", topic:"Two blocks over a double 45&deg; wedge: compare the net driving force with the TOTAL limiting friction before assuming motion.",
+{id:53, lec:"L-4", blk:"wedge equilibrium", topic:"Two blocks over a double 45&deg; wedge: compare the net driving force with the TOTAL limiting friction before assuming motion.", t:90,
  src:"L-4 · LEVEL-5 Q10",
  q:"Block A of mass m and block B of mass 2m are placed on a fixed triangular wedge by means of a massless, inextensible string and a frictionless pulley as shown in figure. The wedge is inclined at 45&deg; to the horizontal on both the sides. If the coefficient of friction between the block A and the wedge is 2/3 and that between block B and the wedge is 1/3 and both the system A and B are released from rest, the acceleration of A will be:",
  opts:["&minus;1 m/s&sup2;",
@@ -938,7 +964,7 @@ const QUIZ = [
  sol:"<b>Step 1.</b> Both faces are at 45&deg;, so sin45&deg; = cos45&deg; = 1/&radic;2 for both blocks.<br><b>Step 2.</b> Net driving force (B is heavier, so it would pull A up its face): F<sub>drive</sub> = 2mg sin45&deg; &minus; mg sin45&deg; = mg/&radic;2.<br><b>Step 3.</b> Total limiting friction, summing BOTH contact faces: f<sub>max</sub> = &mu;<sub>A</sub>mg cos45&deg; + &mu;<sub>B</sub>(2m)g cos45&deg; = (2/3)(mg/&radic;2) + (1/3)(2mg/&radic;2) = (2/3 + 2/3)(mg/&radic;2) = (4/3)(mg/&radic;2).<br><b>Step 4.</b> Compare: F<sub>drive</sub> = 1.00 &times; (mg/&radic;2) while f<sub>max</sub> = 1.33 &times; (mg/&radic;2), so f<sub>max</sub> &gt; F<sub>drive</sub>.<br><b>Step 5.</b> Friction is static and needs only to supply mg/&radic;2, which it can; nothing moves and the acceleration of A is <b>zero</b>.<br><b>Step 6.</b> &#9889; Trap: both blocks must be counted when you add up the available friction &mdash; grading only block A's face gives (2/3)(mg/&radic;2) &lt; mg/&radic;2 and the false conclusion that the system slides."},
 
 /* ---------------- SB (10) ---------------- */
-{id:54, lec:"SB", blk:"Incline, applied force", topic:"When &mu; &gt; tan&theta;, the force needed to make a block move DOWN at constant speed acts down the slope",
+{id:54, lec:"SB", blk:"Incline, applied force", topic:"When &mu; &gt; tan&theta;, the force needed to make a block move DOWN at constant speed acts down the slope", t:180,
  src:"Strong Box · PYQ Q2 (JEE Main 2026, 28 Jan Shift-1)",
  q:"A block of mass 5 kg is moving on an inclined plane which makes an angle of 30&deg; with the horizontal. Friction coefficient between the block and inclined plane surface is &radic;3/2. The force to be applied on the block so that the block will move down without acceleration is ____ N.",
  opts:["25 N",
@@ -951,7 +977,7 @@ const QUIZ = [
   "7.5 N results from using cos30&deg; = 1/2 or &mu; = 0.5 by mistake.",
   "15 N does not satisfy F + mg sin&theta; = &mu;mg cos&theta; for any consistent substitution."],
  sol:"<b>Step 1 &mdash; data.</b> m = 5 kg, &theta; = 30&deg;, &mu; = &radic;3/2, g = 10 m/s&sup2;.<br><b>Step 2 &mdash; gravity along the slope.</b> mg sin&theta; = 5 &times; 10 &times; (1/2) = 25 N.<br><b>Step 3 &mdash; limiting friction.</b> f = &mu;mg cos&theta; = (&radic;3/2) &times; 5 &times; 10 &times; (&radic;3/2) = 37.5 N.<br><b>Step 4 &mdash; does it slide on its own?</b> tan30&deg; = 0.577 while &mu; = 0.866, so &mu; &gt; tan&theta; and the block would stay at rest. The applied force must therefore act DOWN the incline.<br><b>Step 5 &mdash; constant velocity down.</b> Friction now acts UP the slope at its full value: F + mg sin&theta; = &mu;mg cos&theta; &rArr; F = 37.5 &minus; 25 = 12.5 N.<br><b>Step 6 &mdash; answer.</b> F = <b>12.5 N, directed down the incline</b>.<br>&#9889; <b>JEE Trick:</b> compare &mu; with tan&theta; before anything else &mdash; it decides which way the required force points."},
-{id:55, lec:"SB", blk:"Rough vs smooth incline", topic:"Relating the time of slide on a rough 45&deg; incline to the smooth one to extract &mu;k",
+{id:55, lec:"SB", blk:"Rough vs smooth incline", topic:"Relating the time of slide on a rough 45&deg; incline to the smooth one to extract &mu;k", t:180,
  src:"Strong Box · PYQ Q3 (JEE Main 2024)",
  q:"A given object takes n times the time to slide down a 45&deg; rough inclined plane as it takes the time to slide down an identical perfectly smooth 45&deg; inclined plane. The coefficient of kinetic friction between the object and the surface of the inclined plane is:",
  opts:["&radic;(1 &minus; 1/n&sup2;)",
@@ -964,7 +990,7 @@ const QUIZ = [
   "Correct: n&sup2; = 1/(1 &minus; &mu;) gives &mu; = 1 &minus; 1/n&sup2;, which lies in (0, 1) for every n &gt; 1.",
   "&radic;(1 &minus; n&sup2;) is imaginary for n &gt; 1."],
  sol:"<b>Step 1 &mdash; same distance from rest.</b> s = (1/2)at&sup2; with s fixed &rArr; t = &radic;(2s/a), so t &prop; 1/&radic;a.<br><b>Step 2 &mdash; the two accelerations.</b> Smooth: a&#8321; = g sin45&deg;. Rough: a&#8322; = g sin45&deg; &minus; &mu;g cos45&deg; = g sin45&deg;(1 &minus; &mu;), since sin45&deg; = cos45&deg;.<br><b>Step 3 &mdash; form the ratio.</b> t&#8322;/t&#8321; = n = &radic;(a&#8321;/a&#8322;) = &radic;[g sin45&deg; / (g sin45&deg;(1&minus;&mu;))] = 1/&radic;(1&minus;&mu;).<br><b>Step 4 &mdash; square and solve.</b> n&sup2; = 1/(1 &minus; &mu;) &rArr; 1 &minus; &mu; = 1/n&sup2; &rArr; &mu; = <b>1 &minus; 1/n&sup2;</b>.<br><b>Step 5 &mdash; sanity check.</b> n = 1 (no friction) gives &mu; = 0; n &rarr; &infin; gives &mu; &rarr; 1 = tan45&deg;, the angle of repose &mdash; both limits are physical.<br>&#9889; <b>JEE Trick:</b> at 45&deg; every sin/cos cancels, so the answer can only contain n &mdash; options carrying a stray &radic; or a negative value can be struck out on sight."},
-{id:56, lec:"SB", blk:"Block on a curve", topic:"Highest resting point on a curved surface is where the local slope equals &mu;",
+{id:56, lec:"SB", blk:"Block on a curve", topic:"Highest resting point on a curved surface is where the local slope equals &mu;", t:180,
  src:"Strong Box · PYQ Q4 (JEE Main 2024)",
  q:"A block of mass m is placed on a surface having vertical cross section given by y = x&sup2;/4. If the coefficient of friction is 0.5, the maximum height above the ground at which the block can be placed without slipping is:",
  opts:["(1/4) m",
@@ -977,7 +1003,7 @@ const QUIZ = [
   "1/6 m comes from using y = x&sup2;/6 or from mis-differentiating.",
   "1/3 m does not follow from y = x&sup2;/4 with &mu; = 0.5."],
  sol:"<b>Step 1 &mdash; condition to rest on a slope.</b> A block rests on an incline of angle &theta; only while tan&theta; &le; &mu;; the highest point is where tan&theta; = &mu; exactly.<br><b>Step 2 &mdash; local slope of the surface.</b> tan&theta; = dy/dx = d(x&sup2;/4)/dx = x/2.<br><b>Step 3 &mdash; impose the limit.</b> x/2 = &mu; = 0.5 &rArr; x = 1 m.<br><b>Step 4 &mdash; convert to height.</b> y = x&sup2;/4 = (1)&sup2;/4 = <b>1/4 m</b>.<br><b>Step 5 &mdash; why higher fails.</b> For x &gt; 1 the slope x/2 exceeds &mu;, so mg sin&theta; beats &mu;mg cos&theta; and the block slides down until x = 1.<br>&#9889; <b>JEE Trick:</b> 'curved surface + &mu;' is always dy/dx = &mu;; the only trap is stopping at x instead of substituting back for y."},
-{id:57, lec:"SB", blk:"Doubly inclined plane", topic:"Two blocks over a pulley on a double incline with friction on both faces",
+{id:57, lec:"SB", blk:"Doubly inclined plane", topic:"Two blocks over a pulley on a double incline with friction on both faces", t:180,
  src:"Strong Box · PYQ Q5 (JEE Main 2024)",
  q:"In the given arrangement of a doubly inclined plane two blocks of masses M and m are placed. The blocks are connected by a light string passing over an ideal pulley at the apex; M lies on the 53&deg; face and m on the 37&deg; face. The coefficient of friction between the surface of the plane and the blocks is 0.25. The value of m, for which M = 10 kg will move down with an acceleration of 2 m s&#8315;&sup2;, is: (take g = 10 m s&#8315;&sup2; and tan37&deg; = 3/4)",
  opts:["9 kg",
@@ -990,7 +1016,7 @@ const QUIZ = [
   "6.5 kg does not satisfy either free-body equation.",
   "2.25 kg follows from using a = 2 m/s&sup2; on the wrong side or halving m twice."],
  sol:"<b>Step 1 &mdash; data.</b> M = 10 kg on the 53&deg; face (sin53&deg; = 0.8, cos53&deg; = 0.6), m on the 37&deg; face (sin37&deg; = 0.6, cos37&deg; = 0.8), &mu; = 0.25, a = 2 m/s&sup2;, g = 10.<br><b>Step 2 &mdash; M moves down, so friction on M acts up its slope.</b> Mg sin53&deg; &minus; T &minus; &mu;Mg cos53&deg; = Ma &rArr; 80 &minus; T &minus; 15 = 20 &rArr; T = 45 N.<br><b>Step 3 &mdash; m is dragged up its slope, so friction on m opposes it too (acts down the 37&deg; slope).</b> T &minus; mg sin37&deg; &minus; &mu;mg cos37&deg; = ma.<br><b>Step 4 &mdash; substitute.</b> 45 &minus; 6m &minus; 2m = 2m &rArr; 45 = 10m.<br><b>Step 5 &mdash; solve.</b> m = <b>4.5 kg</b>.<br><b>Step 6 &mdash; check.</b> With m = 4.5 kg the two resisting terms are 27 N and 9 N, so the net force on m is 45 &minus; 36 = 9 N = 4.5 &times; 2 &#10003;.<br>&#9889; <b>JEE Trick:</b> get T from the block whose numbers are fully known (M) first &mdash; the second equation then has one unknown only."},
-{id:58, lec:"SB", blk:"Up vs down the incline", topic:"The identity F&#8321; &minus; F&#8322; = 2&mu;mg cos&theta; for 'just move up' minus 'just prevent sliding down'",
+{id:58, lec:"SB", blk:"Up vs down the incline", topic:"The identity F&#8321; &minus; F&#8322; = 2&mu;mg cos&theta; for 'just move up' minus 'just prevent sliding down'", t:180,
  src:"Strong Box · PYQ Q6 (JEE Main 2024)",
  q:"A block of mass 5 kg is placed on a rough inclined surface making 30&deg; with the horizontal, with &mu; = 0.1. If F&#8321; is the force required to just move the block up the inclined plane and F&#8322; is the force required to just prevent the block from sliding down, then the value of F&#8321; &minus; F&#8322; is: [Use g = 10 m s&#8315;&sup2;]",
  opts:["25&radic;3 N",
@@ -1003,7 +1029,7 @@ const QUIZ = [
   "(5&radic;3)/2 N drops the factor 2, i.e. uses &mu;mg cos&theta; instead of 2&mu;mg cos&theta;.",
   "10 N would follow from using sin30&deg; in place of cos30&deg; and mishandling &mu;."],
  sol:"<b>Step 1 &mdash; force to just push it up.</b> Friction acts down the slope at its maximum: F&#8321; = mg sin&theta; + &mu;mg cos&theta;.<br><b>Step 2 &mdash; force to just prevent it sliding down.</b> Friction now acts up the slope at its maximum: F&#8322; = mg sin&theta; &minus; &mu;mg cos&theta;.<br><b>Step 3 &mdash; subtract.</b> The mg sin&theta; terms cancel: F&#8321; &minus; F&#8322; = 2&mu;mg cos&theta;.<br><b>Step 4 &mdash; substitute.</b> 2&mu;mg cos&theta; = 2 &times; 0.1 &times; 5 &times; 10 &times; cos30&deg; = 10 &times; (&radic;3/2) = <b>5&radic;3 N</b>.<br><b>Step 5 &mdash; interpretation.</b> The difference is exactly twice the limiting friction, because friction flips direction between the two situations.<br>&#9889; <b>JEE Trick:</b> memorise the pair &mdash; the DIFFERENCE is 2&mu;mg cos&theta; and the RATIO is (tan&theta; + &mu;)/(tan&theta; &minus; &mu;); one of the two finishes almost every incline PYQ."},
-{id:59, lec:"SB", blk:"Pull at an angle", topic:"Pulling at an angle lifts part of the weight, so N = mg &minus; F sin&theta; must be used",
+{id:59, lec:"SB", blk:"Pull at an angle", topic:"Pulling at an angle lifts part of the weight, so N = mg &minus; F sin&theta; must be used", t:180,
  src:"Strong Box · PYQ Q9 (JEE Main 2023)",
  q:"As shown in the figure, a block of mass 10 kg lying on a horizontal surface is pulled by a force F acting at an angle 30&deg; with the horizontal. For &mu;<sub>s</sub> = 0.25, the block will just start to move for the value of F: [Given g = 10 m&middot;s&#8315;&sup2;]",
  opts:["33.3 N",
@@ -1016,7 +1042,7 @@ const QUIZ = [
   "20 N ignores the tilt of F altogether; a purely horizontal pull would need &mu;mg = 25 N, not 20 N.",
   "35.7 N results from using N = mg + F sin&theta; (a downward push) instead of mg &minus; F sin&theta;."],
  sol:"<b>Step 1 &mdash; resolve F.</b> Horizontal: F cos30&deg;. Vertical (upward): F sin30&deg;.<br><b>Step 2 &mdash; normal reaction.</b> N = mg &minus; F sin30&deg; = 100 &minus; 0.5F.<br><b>Step 3 &mdash; on the verge of moving.</b> F cos30&deg; = &mu;<sub>s</sub>N &rArr; 0.866F = 0.25(100 &minus; 0.5F) = 25 &minus; 0.125F.<br><b>Step 4 &mdash; collect.</b> F(0.866 + 0.125) = 25 &rArr; F(0.991) = 25 &rArr; F = <b>25.2 N</b>.<br><b>Step 5 &mdash; general form.</b> F = &mu;mg/(cos&theta; + &mu; sin&theta;), which is minimum when tan&theta; = &mu; &mdash; here tan&#8315;&sup1;(0.25) &asymp; 14&deg;, so 30&deg; is slightly past the optimum.<br><b>Step 6 &mdash; check.</b> N = 100 &minus; 12.6 = 87.4 N, &mu;N = 21.85 N and F cos30&deg; = 21.8 N &#10003;.<br>&#9889; <b>JEE Trick:</b> any pull tilted above the horizontal REDUCES N &mdash; forgetting the &minus;F sin&theta; is the single most-punished slip in this topic."},
-{id:60, lec:"SB", blk:"Acceleration to &mu;k", topic:"Back-solving &mu;k from the measured acceleration of a block sliding down a 30&deg; incline",
+{id:60, lec:"SB", blk:"Acceleration to &mu;k", topic:"Back-solving &mu;k from the measured acceleration of a block sliding down a 30&deg; incline", t:180,
  src:"Strong Box · PYQ Q13 (JEE Main 2023)",
  q:"A block of mass m slides down a plane inclined at angle 30&deg; with an acceleration g/4. The value of the coefficient of kinetic friction will be:",
  opts:["(2&radic;3 + 1)/2",
@@ -1029,7 +1055,7 @@ const QUIZ = [
   "&radic;3/2 &asymp; 0.866 exceeds tan30&deg;, so the block would be static, not accelerating at g/4.",
   "(2&radic;3 &minus; 1)/2 &asymp; 1.23 also exceeds tan30&deg; and is physically impossible here &mdash; this is the letter the printed ICAD key gives."],
  sol:"<b>Step 1 &mdash; equation of motion down a rough incline.</b> a = g sin&theta; &minus; &mu;<sub>k</sub> g cos&theta;.<br><b>Step 2 &mdash; substitute the data.</b> g/4 = g sin30&deg; &minus; &mu;<sub>k</sub> g cos30&deg; = g(1/2) &minus; &mu;<sub>k</sub> g(&radic;3/2).<br><b>Step 3 &mdash; cancel g and rearrange.</b> &mu;<sub>k</sub>(&radic;3/2) = 1/2 &minus; 1/4 = 1/4.<br><b>Step 4 &mdash; solve.</b> &mu;<sub>k</sub> = (1/4) &times; (2/&radic;3) = <b>1/(2&radic;3)</b> &asymp; 0.289.<br><b>Step 5 &mdash; consistency check.</b> The block does slide, so we need &mu;<sub>k</sub> &lt; tan30&deg; = 0.577; 0.289 &lt; 0.577 &#10003;. Every other option exceeds 0.577 and is therefore impossible.<br>&#9889; <b>JEE Trick:</b> on any 'slides down with acceleration a' problem, the answer must satisfy &mu; &lt; tan&theta; &mdash; that one inequality kills three of the four options instantly.<br>⚠ ICAD key says (d) = (2&radic;3 &minus; 1)/2 &asymp; 1.23; working gives (b) = 1/(2&radic;3) &asymp; 0.289, because a &mu; of 1.23 is far above tan30&deg; = 0.577 and would hold the block stationary instead of letting it accelerate at g/4."},
-{id:61, lec:"SB", blk:"Topple vs slide", topic:"Deciding whether a tall block topples before it slides as the incline angle is raised",
+{id:61, lec:"SB", blk:"Topple vs slide", topic:"Deciding whether a tall block topples before it slides as the incline angle is raised", t:90,
  src:"Strong Box · PYQ Q19 (JEE Advanced 2009 Paper-1)",
  q:"A block of base 10 cm &times; 10 cm and height 15 cm is kept on an inclined plane. The coefficient of friction between them is &radic;3. The inclination &theta; of this inclined plane from the horizontal plane is gradually increased from 0&deg;. Then:",
  opts:["at &theta; = 30&deg;, the block will start sliding down the plane",
@@ -1042,7 +1068,7 @@ const QUIZ = [
   "Sliding at 60&deg; never happens because the block has already toppled at 33.7&deg;.",
   "Same error as (c), with the order of the two events reversed."],
  sol:"<b>Step 1 &mdash; sliding condition.</b> The block slides when mg sin&theta; &gt; &mu;mg cos&theta;, i.e. tan&theta; &gt; &mu; = &radic;3 &rArr; &theta; &gt; 60&deg;.<br><b>Step 2 &mdash; toppling condition.</b> The block topples about its lower edge when the line of action of the weight falls outside the base: tan&theta; &gt; (base)/(height) = 10/15 = 2/3 &rArr; &theta; &gt; tan&#8315;&sup1;(2/3) &asymp; 33.7&deg;.<br><b>Step 3 &mdash; compare the two thresholds.</b> 33.7&deg; &lt; 60&deg;, so as &theta; is raised slowly from 0&deg; the toppling condition is met first.<br><b>Step 4 &mdash; conclusion.</b> The block stays at rest up to about 33.7&deg; and then <b>topples</b>; it never gets the chance to slide.<br><b>Step 5 &mdash; generalise.</b> A tall, narrow block (small b/h) topples; a wide, flat block (large b/h) on a slippery plane slides &mdash; the winner is whichever of tan&#8315;&sup1;(b/h) and tan&#8315;&sup1;(&mu;) is smaller.<br>&#9889; <b>JEE Trick:</b> the instant a problem gives you BOTH the base dimensions and &mu;, it is a topple-vs-slide race &mdash; compute both angles before answering."},
-{id:62, lec:"SB", blk:"Pulley on accelerating block", topic:"Maximum push on a big block so that a rider block and a hanging block stay at rest relative to it",
+{id:62, lec:"SB", blk:"Pulley on accelerating block", topic:"Maximum push on a big block so that a rider block and a hanging block stay at rest relative to it", t:180,
  src:"Strong Box · LEVEL-7 Q3",
  q:"The horizontal surface below the bigger block M is smooth. A block A of mass m rests on top of M and is joined by a light string over a pulley at the top-right corner of M to a block B of mass m that hangs against the vertical right face of M. The coefficient of friction between the blocks and M is &mu;. A horizontal force F is applied to M. The maximum force which can be applied to keep the smaller blocks at rest with respect to the bigger block is:",
  opts:["[(1 &minus; &mu;)/(1 + &mu;)] (M + m)g",
@@ -1055,7 +1081,7 @@ const QUIZ = [
   "Correct: a<sub>max</sub> = g(1+&mu;)/(1&minus;&mu;) and F = (M + 2m)a<sub>max</sub>.",
   "Misses the (1 &minus; &mu;) denominator entirely, so it gives a finite answer even as &mu; &rarr; 1 where the true force diverges."],
  sol:"<b>Step 1 &mdash; work in the frame of M</b> (acceleration a to the right), adding a pseudo-force ma to the left on each small block.<br><b>Step 2 &mdash; block B on the vertical face.</b> The pseudo-force presses B into the face, so N<sub>B</sub> = ma and the friction limit there is &mu;ma. At the maximum a the string is pulling B upward, so friction acts down: T = mg + &mu;ma.<br><b>Step 3 &mdash; block A on top.</b> N<sub>A</sub> = mg. A tends to lag behind M, so friction on A acts forward at its maximum: T + &mu;mg = ma.<br><b>Step 4 &mdash; eliminate T.</b> ma &minus; &mu;mg = mg + &mu;ma &rArr; ma(1 &minus; &mu;) = mg(1 + &mu;) &rArr; a = g(1 + &mu;)/(1 &minus; &mu;).<br><b>Step 5 &mdash; back to the ground frame.</b> The floor is smooth, so F accelerates the whole mass: F = (M + 2m)a = <b>[(1 + &mu;)/(1 &minus; &mu;)](M + 2m)g</b>.<br><b>Step 6 &mdash; limit check.</b> &mu; &rarr; 0 gives a = g (the classic frictionless result) and &mu; &rarr; 1 gives F &rarr; &infin;, both as expected.<br>&#9889; <b>JEE Trick:</b> a block pinned to a vertical accelerating face has N = ma, so its friction capacity grows with a &mdash; that is what puts (1 &minus; &mu;) in the denominator."},
-{id:63, lec:"SB", blk:"Two-angle slope pair", topic:"Same applied force at two different slope angles &mdash; eliminate mg to get &mu;",
+{id:63, lec:"SB", blk:"Two-angle slope pair", topic:"Same applied force at two different slope angles &mdash; eliminate mg to get &mu;", t:180,
  src:"Strong Box · LEVEL-8 Q1",
  q:"A man can just push a box up a 37&deg; concrete slope. When he keeps it at the point where the angle increases to 53&deg;, he can just hold it from sliding back. If the coefficient of friction between the box and the concrete slope is &mu;, the value of 1/&mu; is (assume the man applies the same magnitude of force along the tangent to the curve in both cases):",
  opts:["5",
@@ -1072,13 +1098,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter P-7 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1096,6 +1133,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1130,15 +1170,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1150,47 +1191,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1200,30 +1258,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1232,7 +1334,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1245,9 +1349,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1256,7 +1378,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1277,21 +1400,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter P-7 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

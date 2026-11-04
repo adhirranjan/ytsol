@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -145,6 +161,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -154,12 +172,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -188,7 +213,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -200,6 +225,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -258,7 +284,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (8) ---------------- */
-{id:1, lec:"L-1", blk:"Scalars &amp; vectors", topic:"Which quantities are vectors",
+{id:1, lec:"L-1", blk:"Scalars &amp; vectors", topic:"Which quantities are vectors", t:60,
  q:"Which of these is a <b>scalar</b> quantity?",
  opts:["Distance","Displacement","Velocity","Acceleration"],
  ans:0,
@@ -269,7 +295,7 @@ const QUIZ = [
   "Acceleration is the rate of change of a vector, so it is itself a vector."],
  sol:"<b>Scalars: distance, speed.</b> <b>Vectors: displacement, velocity, acceleration.</b> The distinction matters immediately — a round trip has zero displacement but non-zero distance."},
 
-{id:2, lec:"L-1", blk:"Distance vs displacement", topic:"The inequality between them",
+{id:2, lec:"L-1", blk:"Distance vs displacement", topic:"The inequality between them", t:60,
  q:"For any motion, the relationship between distance and the magnitude of displacement is",
  opts:[
   "|displacement| ≤ distance",
@@ -284,7 +310,7 @@ const QUIZ = [
   "The relationship is completely general and holds for every possible motion."],
  sol:"<b>|displacement| ≤ distance</b>, with equality only for motion along a straight line in one direction. For a closed loop, displacement = 0 while distance = the perimeter."},
 
-{id:3, lec:"L-1", blk:"Distance vs displacement", topic:"A path with a reversal",
+{id:3, lec:"L-1", blk:"Distance vs displacement", topic:"A path with a reversal", t:60,
  q:"A person walks 5 km east, then 3 km south, then 1 km west. The distance covered and the magnitude of the displacement are",
  opts:["9 km and 5 km","9 km and 9 km","5 km and 9 km","9 km and 4 km"],
  ans:0,
@@ -295,7 +321,7 @@ const QUIZ = [
   "4 km is the net eastward component alone; the southward 3 km must be combined with it."],
  sol:"Add the legs for <b>distance</b> (9 km); add them as <b>vectors</b> for displacement. Net (4 east, 3 south) ⇒ <b>5 km</b> — the 3-4-5 triangle again."},
 
-{id:4, lec:"L-1", blk:"Distance vs displacement", topic:"A rectangular path",
+{id:4, lec:"L-1", blk:"Distance vs displacement", topic:"A rectangular path", t:60,
  q:"A person walks from P to Q (5 km) and then Q to R (2 km) along two perpendicular sides of a rectangle. The displacement is",
  opts:["√29 km","7 km","3 km","√7 km"],
  ans:0,
@@ -306,7 +332,7 @@ const QUIZ = [
   "√7 adds the lengths before taking the root, rather than adding their squares."],
  sol:"Perpendicular legs combine by Pythagoras: <b>√(5² + 2²) = √29 km</b>. Distance is 7 km, so |displacement| &lt; distance as required ✓"},
 
-{id:5, lec:"L-1", blk:"Circular paths", topic:"Three-quarters of a circle",
+{id:5, lec:"L-1", blk:"Circular paths", topic:"Three-quarters of a circle", t:90,
  q:"A body moves along three-quarters of a circle of radius 8 km. Its displacement is",
  opts:["8√2 km","12π km","16 km","8 km"],
  ans:0,
@@ -317,7 +343,7 @@ const QUIZ = [
   "8 km is the radius, not a chord between the two end points."],
  sol:"Three-quarters of a turn leaves the radii <b>90° apart</b>, so the chord is r√2 = <b>8√2 km</b>. Distance = ¾ × 2π(8) = 37.7 km. For a <b>full</b> circle the displacement would be zero."},
 
-{id:6, lec:"L-1", blk:"Speed vs velocity", topic:"A round trip",
+{id:6, lec:"L-1", blk:"Speed vs velocity", topic:"A round trip", t:60,
  q:"A car drives from A to B and back to A in total time t. Its average velocity and average speed are respectively",
  opts:[
   "zero and non-zero",
@@ -332,7 +358,7 @@ const QUIZ = [
   "They are equal only when |displacement| = distance, which fails badly for a return trip."],
  sol:"<b>Average velocity = displacement/time</b> (a vector) and <b>average speed = distance/time</b> (a scalar). A round trip is the standard demonstration that the two are genuinely different quantities."},
 
-{id:7, lec:"L-1", blk:"Relativity of motion", topic:"Rest and motion",
+{id:7, lec:"L-1", blk:"Relativity of motion", topic:"Rest and motion", t:60,
  q:"A passenger sitting in a moving train is",
  opts:[
   "at rest relative to the train and in motion relative to the ground",
@@ -347,7 +373,7 @@ const QUIZ = [
   "The ground frame is the one in which the passenger <b>is</b> moving."],
  sol:"<b>Rest and motion are relative.</b> Every statement about motion is incomplete until the reference frame is named — the idea that L-10 to L-12 build into a full method."},
 
-{id:8, lec:"L-1", blk:"Distance vs displacement", topic:"When the two are equal",
+{id:8, lec:"L-1", blk:"Distance vs displacement", topic:"When the two are equal", t:60,
  q:"The magnitude of displacement equals the distance travelled only when the motion is",
  opts:[
   "along a straight line without any reversal of direction",
@@ -363,7 +389,7 @@ const QUIZ = [
  sol:"Equality needs <b>a straight line and no reversal</b>. The two conditions are separate, and the reversal one is the more commonly forgotten."},
 
 /* ---------------- L-2 (8) ---------------- */
-{id:9, lec:"L-2", blk:"Acceleration", topic:"Definition",
+{id:9, lec:"L-2", blk:"Acceleration", topic:"Definition", t:90,
  q:"An object speeds up from 30 m/s to 40 m/s in 100 s. Its average acceleration is",
  opts:["0.1 m s⁻²","10 m s⁻²","0.7 m s⁻²","70 m s⁻²"],
  ans:0,
@@ -374,7 +400,7 @@ const QUIZ = [
   "70 m s⁻² adds the velocities instead of subtracting them."],
  sol:"<b>a<sub>avg</sub> = Δv/Δt = (v<sub>f</sub> − v<sub>i</sub>)/(t<sub>f</sub> − t<sub>i</sub>)</b> = 10/100 = <b>0.1 m s⁻²</b>. Only the <b>change</b> in velocity enters, never the velocities themselves."},
 
-{id:10, lec:"L-2", blk:"Acceleration", topic:"Acceleration with constant speed",
+{id:10, lec:"L-2", blk:"Acceleration", topic:"Acceleration with constant speed", t:60,
  q:"A body moving at constant speed around a circular track",
  opts:[
   "is accelerating, because its direction is changing",
@@ -389,7 +415,7 @@ const QUIZ = [
   "The velocity has constant magnitude and is never zero; it is only the average velocity over a full lap that vanishes."],
  sol:"<b>A change of direction alone is acceleration.</b> This is why uniform circular motion needs a centripetal force even though nothing speeds up."},
 
-{id:11, lec:"L-2", blk:"Kinematic equations", topic:"When they apply",
+{id:11, lec:"L-2", blk:"Kinematic equations", topic:"When they apply", t:90,
  q:"The equations v = u + at, s = ut + ½at² and v² = u² + 2as are valid only when",
  opts:[
   "the acceleration is constant",
@@ -404,7 +430,7 @@ const QUIZ = [
   "u appears explicitly in each equation precisely so that it need not be zero."],
  sol:"<b>Constant acceleration is the one requirement.</b> ⚠ For a = f(t), f(x) or f(v), switch to <b>a = dv/dt = v(dv/dx)</b> — that is what L-5 is for."},
 
-{id:12, lec:"L-2", blk:"Kinematic equations", topic:"Distance in the n-th second",
+{id:12, lec:"L-2", blk:"Kinematic equations", topic:"Distance in the n-th second", t:60,
  q:"The distance covered in the n-th second by a body starting from rest with acceleration a is",
  opts:[
   "(a/2)(2n − 1)",
@@ -419,7 +445,7 @@ const QUIZ = [
   "The sign inside the bracket is wrong — check n = 1, which must give a/2, the distance in the first second."],
  sol:"<b>s<sub>n</sub> = u + (a/2)(2n − 1)</b>, reducing to (a/2)(2n − 1) from rest. ⚠ Despite looking like a rate, this is a <b>distance in metres</b> — it is the distance covered during a one-second interval."},
 
-{id:13, lec:"L-2", blk:"Kinematic equations", topic:"Two bodies meeting",
+{id:13, lec:"L-2", blk:"Kinematic equations", topic:"Two bodies meeting", t:90,
  q:"Body A starts from rest with uniform acceleration a. Body B starts from the same point at the same instant with constant velocity v in the same direction. They meet again after a time",
  opts:["2v/a","v/a","v/2a","a/2v"],
  ans:0,
@@ -430,7 +456,7 @@ const QUIZ = [
   "a/2v is the reciprocal and does not even have the units of time."],
  sol:"Equal displacements: ½at² = vt ⇒ <b>t = 2v/a</b>. Note the structure — A is behind at first, catches up at t = v/a in <b>speed</b>, and only at <b>2v/a</b> in position."},
 
-{id:14, lec:"L-2", blk:"2D acceleration", topic:"Average acceleration in a plane",
+{id:14, lec:"L-2", blk:"2D acceleration", topic:"Average acceleration in a plane", t:90,
  q:"A particle has x = 2t² and y = t³ (SI units). Its average acceleration between t = 0 and t = 2 s is",
  opts:[
   "(4î + 6ĵ) m s⁻²",
@@ -445,7 +471,7 @@ const QUIZ = [
   "2î + 3ĵ comes from differentiating the position coefficients rather than the velocity."],
  sol:"Differentiate to get <b>v = 4t î + 3t² ĵ</b>, evaluate at both ends, then <b>a<sub>avg</sub> = Δv/Δt</b> = (8î + 12ĵ)/2 = <b>4î + 6ĵ</b>. ⚠ Average acceleration uses only the endpoints; it is <b>not</b> dv/dt evaluated anywhere."},
 
-{id:15, lec:"L-2", blk:"Acceleration", topic:"Retardation",
+{id:15, lec:"L-2", blk:"Acceleration", topic:"Retardation", t:60,
  q:"A body is slowing down. Its acceleration is",
  opts:[
   "directed opposite to its velocity",
@@ -460,7 +486,7 @@ const QUIZ = [
   "Acceleration along the velocity makes the body speed up."],
  sol:"<b>a along v → speeding up · a opposite v → slowing down.</b> ⚠ “Negative acceleration” and “deceleration” are not synonyms — the first is about your axis, the second about the physics."},
 
-{id:16, lec:"L-2", blk:"Kinematic equations", topic:"Choosing the right equation",
+{id:16, lec:"L-2", blk:"Kinematic equations", topic:"Choosing the right equation", t:90,
  q:"A car decelerates uniformly from 20 m/s and stops in 50 m. Its acceleration is",
  opts:["−4 m s⁻²","−0.4 m s⁻²","−8 m s⁻²","−2.5 m s⁻²"],
  ans:0,
@@ -472,7 +498,7 @@ const QUIZ = [
  sol:"When the <b>time is not mentioned</b>, reach for <b>v² = u² + 2as</b>. Here 0 = 20² + 2a(50) ⇒ 100a = −400 ⇒ <b>a = −4 m s⁻²</b>. Picking the equation by what is missing saves most of the algebra."},
 
 /* ---------------- L-3 (8) ---------------- */
-{id:17, lec:"L-3", blk:"Free fall", topic:"Independence of mass",
+{id:17, lec:"L-3", blk:"Free fall", topic:"Independence of mass", t:60,
  q:"Two stones of mass 1 kg and 10 kg are dropped from the same height (air resistance neglected). They",
  opts:[
   "reach the ground at the same time",
@@ -487,7 +513,7 @@ const QUIZ = [
   "Impact speed is √(2gh), which contains no mass at all — both land at the same speed."],
  sol:"<b>g is independent of mass.</b> The gravitational force is larger on the heavier stone, but so is its inertia, and the two effects cancel exactly. Air resistance is what breaks the tie in real life."},
 
-{id:18, lec:"L-3", blk:"Free fall", topic:"Impact speed",
+{id:18, lec:"L-3", blk:"Free fall", topic:"Impact speed", t:60,
  q:"A body dropped from rest through a height h strikes the ground with speed",
  opts:["√(2gh)","2gh","√(gh)","gh"],
  ans:0,
@@ -498,7 +524,7 @@ const QUIZ = [
   "gh is dimensionally wrong for a speed."],
  sol:"<b>v = √(2gh).</b> Note that <b>v ∝ √h</b>, not h — quadrupling the drop height only doubles the impact speed."},
 
-{id:19, lec:"L-3", blk:"Free fall", topic:"Where the speed is half the impact speed",
+{id:19, lec:"L-3", blk:"Free fall", topic:"Where the speed is half the impact speed", t:60,
  q:"A body is dropped from height h and lands with speed V. It has speed V/2 after falling a distance",
  opts:["h/4","3h/4","h/2","h/√2"],
  ans:0,
@@ -509,7 +535,7 @@ const QUIZ = [
   "h/√2 gives v = V/2^¼, again because of the square-root dependence."],
  sol:"v ∝ √d, so half the speed means a <b>quarter</b> of the distance: <b>d = h/4</b>, leaving h′ = 3h/4 above ground. Bodies pick up most of their speed in the <b>last</b> part of a fall — 3/4 of the drop happens after the halfway point in speed."},
 
-{id:20, lec:"L-3", blk:"Free fall", topic:"Distance in the n-th second of a fall",
+{id:20, lec:"L-3", blk:"Free fall", topic:"Distance in the n-th second of a fall", t:90,
  q:"For a body falling from rest with g = 10 m s⁻², the distance covered in the 3rd second is",
  opts:["25 m","45 m","30 m","20 m"],
  ans:0,
@@ -520,7 +546,7 @@ const QUIZ = [
   "20 m is the total distance in the first 2 s."],
  sol:"<b>h<sub>nth</sub> = (g/2)(2n − 1)</b>: 5, 15, 25, 35, … m for successive seconds — the odd numbers, which is Galileo's famous result. Check: 5 + 15 + 25 = 45 m = ½(10)(3²) ✓"},
 
-{id:21, lec:"L-3", blk:"Two-body problems", topic:"Two stones released one second apart",
+{id:21, lec:"L-3", blk:"Two-body problems", topic:"Two stones released one second apart", t:90,
  q:"Two stones are released from rest from the same height 1.0 s apart (g = 10 m s⁻²). They are 10 m apart at a time, after the first is released, of",
  opts:["1.5 s","1.0 s","2.0 s","0.5 s"],
  ans:0,
@@ -531,7 +557,7 @@ const QUIZ = [
   "At 0.5 s the second stone has not yet been released at all."],
  sol:"Separation = ½gt² − ½g(t−1)² = <b>(g/2)(2t − 1)</b>, which grows <b>linearly</b> with t once both are falling — because the head-start converts into a constant velocity difference. Setting it to 10 gives <b>t = 1.5 s</b>."},
 
-{id:22, lec:"L-3", blk:"Two-body problems", topic:"Passing two marked points",
+{id:22, lec:"L-3", blk:"Two-body problems", topic:"Passing two marked points", t:90,
  q:"A freely falling body passes two points 30 m apart in 1 s (g = 9.8 m s⁻²). The height above the upper point from which it started is about",
  opts:["32 m","30 m","15 m","62 m"],
  ans:0,
@@ -542,7 +568,7 @@ const QUIZ = [
   "62 m adds the 30 m separation to the answer, but the question asks only for the height above the <b>upper</b> point."],
  sol:"Let t₁ be the time to reach the upper point. Then <b>½g[(t₁+1)² − t₁²] = 30</b> ⇒ (g/2)(2t₁ + 1) = 30 ⇒ t₁ = 2.56 s ⇒ h = ½gt₁² = <b>32.1 m</b>. The (2t + 1) structure is the same one as in the previous question."},
 
-{id:23, lec:"L-3", blk:"Free fall", topic:"Time to fall a given height",
+{id:23, lec:"L-3", blk:"Free fall", topic:"Time to fall a given height", t:90,
  q:"An object falls from rest through 80 m (g = 10 m s⁻²). The time taken is",
  opts:["4 s","8 s","16 s","2 s"],
  ans:0,
@@ -553,7 +579,7 @@ const QUIZ = [
   "2 s would cover only ½(10)(4) = 20 m."],
  sol:"<b>h = ½gt² ⇒ t = √(2h/g)</b> = √(160/10) = <b>4 s</b>. Impact speed would be gt = 40 m/s, and √(2gh) = √1600 = 40 ✓"},
 
-{id:24, lec:"L-3", blk:"Free fall", topic:"Doubling the drop height",
+{id:24, lec:"L-3", blk:"Free fall", topic:"Doubling the drop height", t:60,
  q:"If the height of a free fall is doubled, the time of fall is multiplied by",
  opts:["√2","2","4","1/2"],
  ans:0,
@@ -565,7 +591,7 @@ const QUIZ = [
  sol:"<b>h ∝ t², so t ∝ √h and v ∝ √h.</b> Double the height ⇒ time × √2 and impact speed × √2. Distances go as the square of times throughout free fall."},
 
 /* ---------------- L-4 (8) ---------------- */
-{id:25, lec:"L-4", blk:"Vertical projection", topic:"Maximum height",
+{id:25, lec:"L-4", blk:"Vertical projection", topic:"Maximum height", t:90,
  q:"A body projected vertically upward with speed u rises to a maximum height of",
  opts:["u²/2g","u²/g","2u²/g","u/2g"],
  ans:0,
@@ -576,7 +602,7 @@ const QUIZ = [
   "u/2g is not even dimensionally a length — it has units of time."],
  sol:"<b>h<sub>max</sub> = u²/2g · t<sub>ascent</sub> = u/g · t<sub>flight</sub> = 2u/g.</b> Note h ∝ u²: doubling the launch speed <b>quadruples</b> the height."},
 
-{id:26, lec:"L-4", blk:"Vertical projection", topic:"At the highest point",
+{id:26, lec:"L-4", blk:"Vertical projection", topic:"At the highest point", t:60,
  q:"At the highest point of the flight of a body thrown vertically upward,",
  opts:[
   "the velocity is zero but the acceleration is g downward",
@@ -591,7 +617,7 @@ const QUIZ = [
   "The velocity is <b>minimum</b> (zero) at the top, not maximum."],
  sol:"⚠ <b>v = 0 but a = g at the top.</b> The most-tested conceptual trap in the chapter: zero velocity does not imply zero acceleration."},
 
-{id:27, lec:"L-4", blk:"Vertical projection", topic:"Time of flight",
+{id:27, lec:"L-4", blk:"Vertical projection", topic:"Time of flight", t:90,
  q:"A ball is thrown vertically upward at 30 m/s (g = 10 m s⁻²). Its total time of flight before returning to the launch level is",
  opts:["6 s","3 s","1.5 s","12 s"],
  ans:0,
@@ -602,7 +628,7 @@ const QUIZ = [
   "12 s doubles the flight time a second time."],
  sol:"<b>t<sub>ascent</sub> = t<sub>descent</sub> = u/g = 3 s</b>, so <b>t<sub>flight</sub> = 2u/g = 6 s</b>. The symmetry holds only when the body returns to the <b>same level</b> it started from."},
 
-{id:28, lec:"L-4", blk:"Vertical projection", topic:"Symmetry of speeds",
+{id:28, lec:"L-4", blk:"Vertical projection", topic:"Symmetry of speeds", t:60,
  q:"A body thrown vertically upward with speed u returns to the point of projection with speed",
  opts:[
   "u, directed downward",
@@ -617,7 +643,7 @@ const QUIZ = [
   "Gravity does not add extra energy on the way down beyond what it removed on the way up."],
  sol:"<b>Speed at any height is the same going up as coming down</b>, with the velocity reversed. It follows from v² = u² − 2gh, which involves only the height."},
 
-{id:29, lec:"L-4", blk:"From a tower", topic:"Two balls from a terrace",
+{id:29, lec:"L-4", blk:"From a tower", topic:"Two balls from a terrace", t:90,
  q:"Two balls are thrown from a terrace with the same speed, one straight up and one straight down. The upward one reaches the ground in 9 s and the downward one in 4 s (g = 10 m s⁻²). The throwing speed is",
  opts:["25 m/s","20 m/s","45 m/s","12.5 m/s"],
  ans:0,
@@ -628,7 +654,7 @@ const QUIZ = [
   "12.5 m/s is u/2 — the 2 in 2u/g has been applied twice."],
  sol:"<b>Key insight:</b> once the up-ball falls back to terrace level it is moving downward at exactly u, i.e. it becomes the down-ball. So the time difference is the whole up-and-down excursion: <b>2u/g = 5 s ⇒ u = 25 m/s</b>, and the tower height is 25(4) + ½(10)(16) = 180 m."},
 
-{id:30, lec:"L-4", blk:"From a tower", topic:"Setting up the tower equation",
+{id:30, lec:"L-4", blk:"From a tower", topic:"Setting up the tower equation", t:90,
  q:"A ball is thrown upward with speed u from a tower of height h and lands on the ground below. Taking up as positive, the correct equation for the flight time is",
  opts:[
   "−h = ut − ½gt²",
@@ -643,7 +669,7 @@ const QUIZ = [
   "Both signs are wrong for the stated convention."],
  sol:"<b>s = −h and a = −g</b> ⇒ <b>−h = ut − ½gt²</b>. One quadratic handles the entire up-and-down flight — there is no need to split it into ascent and descent, which is where most sign errors originate."},
 
-{id:31, lec:"L-4", blk:"Vertical projection", topic:"Doubling the launch speed",
+{id:31, lec:"L-4", blk:"Vertical projection", topic:"Doubling the launch speed", t:60,
  q:"If the launch speed of a vertically thrown ball is doubled, its maximum height",
  opts:["becomes four times","doubles","becomes √2 times","stays the same"],
  ans:0,
@@ -654,7 +680,7 @@ const QUIZ = [
   "Height clearly depends on launch speed; only g is fixed."],
  sol:"<b>h ∝ u² but t ∝ u.</b> Doubling u quadruples the height while only doubling the flight time — worth keeping straight, since the two scale differently."},
 
-{id:32, lec:"L-4", blk:"Vertical projection", topic:"Speed at half the maximum height",
+{id:32, lec:"L-4", blk:"Vertical projection", topic:"Speed at half the maximum height", t:90,
  q:"A ball thrown upward with speed u is at half its maximum height. Its speed there is",
  opts:["u/√2","u/2","u√2","u/4"],
  ans:0,
@@ -666,7 +692,7 @@ const QUIZ = [
  sol:"Half the height removes half the kinetic energy: v² = u²/2 ⇒ <b>v = u/√2</b>. ⚠ Half the height does <b>not</b> mean half the speed — the relationship is quadratic."},
 
 /* ---------------- L-5 (8) ---------------- */
-{id:33, lec:"L-5", blk:"Calculus tools", topic:"The three derivative relations",
+{id:33, lec:"L-5", blk:"Calculus tools", topic:"The three derivative relations", t:90,
  q:"Which relation is <b>not</b> generally correct?",
  opts:[
   "a = x/t²",
@@ -681,7 +707,7 @@ const QUIZ = [
   "a = v(dv/dx) follows from the chain rule, dv/dt = (dv/dx)(dx/dt), and is the form to use when a depends on position."],
  sol:"<b>v = dx/dt · a = dv/dt = v(dv/dx).</b> These three are definitions and always hold. Anything algebraic like x = ½at² is a <b>consequence</b> of constant a and fails otherwise."},
 
-{id:34, lec:"L-5", blk:"Calculus tools", topic:"Choosing the right form",
+{id:34, lec:"L-5", blk:"Calculus tools", topic:"Choosing the right form", t:90,
  q:"If the acceleration is given as a function of <b>position</b>, a = f(x), the most convenient relation to integrate is",
  opts:[
   "v dv = a dx",
@@ -696,7 +722,7 @@ const QUIZ = [
   "a = dv/dt is the definition, but as it stands it mixes x and t and cannot be separated."],
  sol:"<b>a = f(t) → use dv = a dt · a = f(x) → use v dv = a dx.</b> Pick the form whose variables match what you were given; that choice is most of the work."},
 
-{id:35, lec:"L-5", blk:"Worked type", topic:"Testing for uniform acceleration",
+{id:35, lec:"L-5", blk:"Worked type", topic:"Testing for uniform acceleration", t:90,
  q:"For x = 20 + t³ − 12t (SI units), the motion is",
  opts:[
   "not uniformly accelerated, since a = 6t",
@@ -711,7 +737,7 @@ const QUIZ = [
   "The velocity 3t² − 12 changes with time, so it is certainly not constant."],
  sol:"Differentiate twice and check whether the result is <b>free of t</b>: a = <b>6t</b> is not, so the motion is non-uniformly accelerated. At t = 0 the particle is at x = 20 m moving at −12 m/s."},
 
-{id:36, lec:"L-5", blk:"Worked type", topic:"Position when the velocity is zero",
+{id:36, lec:"L-5", blk:"Worked type", topic:"Position when the velocity is zero", t:90,
  q:"For x = 20 + t³ − 12t, the position when the velocity is zero is",
  opts:["4 m","20 m","2 m","8 m"],
  ans:0,
@@ -722,7 +748,7 @@ const QUIZ = [
   "8 is the t³ term at t = 2, only one part of the expression for x."],
  sol:"Set <b>v = dx/dt = 0</b> to find the time, then substitute back into x. Here 3t² = 12 ⇒ t = 2 s ⇒ x = 20 + 8 − 24 = <b>4 m</b>. ⚠ Solving for t and stopping is the standard half-finished answer."},
 
-{id:37, lec:"L-5", blk:"Worked type", topic:"Velocity at the origin",
+{id:37, lec:"L-5", blk:"Worked type", topic:"Velocity at the origin", t:90,
  q:"A particle moves as x = (2t − 3)² (SI units). Its velocity when it is at the origin is",
  opts:["0","4 m/s","−12 m/s","6 m/s"],
  ans:0,
@@ -733,7 +759,7 @@ const QUIZ = [
   "6 m/s matches no instant of this motion."],
  sol:"v = dx/dt = 2(2t − 3)(2) = <b>4(2t − 3)</b>. Since x itself is (2t − 3)², both x and v vanish at the same instant t = 1.5 s — the particle <b>momentarily stops</b> exactly at the origin. Acceleration is a constant 8 m s⁻² throughout."},
 
-{id:38, lec:"L-5", blk:"Integration", topic:"Position from a velocity function",
+{id:38, lec:"L-5", blk:"Integration", topic:"Position from a velocity function", t:90,
  q:"A particle has v = 2t î + 3t² ĵ m/s and is at (2 m, 4 m) at t = 0. Its coordinates at t = 2 s are",
  opts:["(6 m, 12 m)","(4 m, 8 m)","(2 m, 4 m)","(8 m, 16 m)"],
  ans:0,
@@ -744,7 +770,7 @@ const QUIZ = [
   "(8, 16) doubles the displacement before adding it."],
  sol:"<b>r(t) = r₀ + ∫₀ᵗ v dt.</b> Here ∫v dt = t²î + t³ĵ, so r(2) = (2î + 4ĵ) + (4î + 8ĵ) = <b>6î + 12ĵ</b>. ⚠ The constant of integration <b>is</b> the initial position — forgetting it is the commonest error in these."},
 
-{id:39, lec:"L-5", blk:"Calculus tools", topic:"Acceleration from a velocity function",
+{id:39, lec:"L-5", blk:"Calculus tools", topic:"Acceleration from a velocity function", t:60,
  q:"For v = 2t î + 3t² ĵ m/s, the acceleration at t = 1 s is",
  opts:[
   "(2î + 6ĵ) m s⁻²",
@@ -759,7 +785,7 @@ const QUIZ = [
   "The î-component of the acceleration is 2, not 0 — d(2t)/dt = 2."],
  sol:"Differentiate component by component: <b>a = 2î + 6t ĵ</b>, then put t = 1 to get <b>2î + 6ĵ m s⁻²</b>. Note the î-acceleration is constant while the ĵ-acceleration grows."},
 
-{id:40, lec:"L-5", blk:"Calculus tools", topic:"Uniform acceleration as a special case",
+{id:40, lec:"L-5", blk:"Calculus tools", topic:"Uniform acceleration as a special case", t:90,
  q:"A particle has a = dv/dt = constant = k. Integrating once gives",
  opts:[
   "v = u + kt",
@@ -775,7 +801,7 @@ const QUIZ = [
  sol:"<b>a = dv/dt = k ⇒ v = u + kt</b>, and integrating again gives <b>s = ut + ½kt²</b>. The three familiar equations are just this calculus with the constant of integration named."},
 
 /* ---------------- L-6 (7) ---------------- */
-{id:41, lec:"L-6", blk:"Slopes", topic:"Slope of an s–t graph",
+{id:41, lec:"L-6", blk:"Slopes", topic:"Slope of an s–t graph", t:90,
  q:"The slope of a displacement–time graph gives",
  opts:["velocity","acceleration","distance","displacement"],
  ans:0,
@@ -786,7 +812,7 @@ const QUIZ = [
   "Displacement is the quantity plotted on the vertical axis, not its slope."],
  sol:"<b>s–t: slope = velocity. v–t: slope = acceleration, area = displacement. a–t: area = change in velocity.</b> Slope differentiates, area integrates."},
 
-{id:42, lec:"L-6", blk:"Areas", topic:"Area under a v–t graph",
+{id:42, lec:"L-6", blk:"Areas", topic:"Area under a v–t graph", t:60,
  q:"The area under a velocity–time graph gives",
  opts:["displacement","acceleration","speed","distance always"],
  ans:0,
@@ -797,7 +823,7 @@ const QUIZ = [
   "Area gives <b>displacement</b>, which counts area below the axis as negative. It equals the distance only when the velocity never changes sign."],
  sol:"<b>Area under v–t = displacement</b>, signed. To get <b>distance</b>, take the magnitude of each region and add — the two differ whenever the body reverses direction."},
 
-{id:43, lec:"L-6", blk:"Reading graphs", topic:"A horizontal s–t line",
+{id:43, lec:"L-6", blk:"Reading graphs", topic:"A horizontal s–t line", t:60,
  q:"An s–t graph that is a straight line parallel to the time axis represents a body that is",
  opts:[
   "at rest",
@@ -812,7 +838,7 @@ const QUIZ = [
   "Infinite velocity would be a <b>vertical</b> line, which is physically impossible anyway."],
  sol:"On an s–t graph: <b>horizontal → at rest · sloping straight → uniform velocity · curved → accelerating</b>. Steeper always means faster."},
 
-{id:44, lec:"L-6", blk:"Reading graphs", topic:"The impossible graph",
+{id:44, lec:"L-6", blk:"Reading graphs", topic:"The impossible graph", t:60,
  q:"An s–t graph can never be vertical because that would imply",
  opts:[
   "the body is at two positions at the same instant",
@@ -827,7 +853,7 @@ const QUIZ = [
   "Backward motion is a negative slope, which is a legitimate graph."],
  sol:"<b>A vertical s–t segment means infinite velocity</b> — the body would occupy several positions at one instant. Any graph you sketch must pass this test."},
 
-{id:45, lec:"L-6", blk:"Reading graphs", topic:"A curved s–t graph",
+{id:45, lec:"L-6", blk:"Reading graphs", topic:"A curved s–t graph", t:60,
  q:"An s–t graph that curves upward with increasing steepness represents",
  opts:[
   "motion with increasing velocity, i.e. acceleration",
@@ -842,7 +868,7 @@ const QUIZ = [
   "A body at rest gives a horizontal line."],
  sol:"<b>Steepening s–t → acceleration · flattening s–t → retardation · straight s–t → constant velocity.</b> Read the <b>change</b> in slope, not the slope itself."},
 
-{id:46, lec:"L-6", blk:"Areas", topic:"Area under an a–t graph",
+{id:46, lec:"L-6", blk:"Areas", topic:"Area under an a–t graph", t:90,
  q:"The area under an acceleration–time graph gives",
  opts:[
   "the change in velocity",
@@ -857,7 +883,7 @@ const QUIZ = [
   "The average acceleration is the area divided by the time interval, not the area itself."],
  sol:"<b>∫a dt = Δv = v − u.</b> To get v you still need u. This is exactly the same relationship as v = u + at, written for a varying acceleration."},
 
-{id:47, lec:"L-6", blk:"Reading graphs", topic:"Negative slope on an s–t graph",
+{id:47, lec:"L-6", blk:"Reading graphs", topic:"Negative slope on an s–t graph", t:60,
  q:"A straight s–t line making an obtuse angle with the positive time axis represents",
  opts:[
   "uniform velocity directed back toward the origin",
@@ -873,7 +899,7 @@ const QUIZ = [
  sol:"<b>Acute angle → positive velocity · obtuse angle → negative velocity · zero angle → at rest.</b> The line stays straight in each case, so the motion is uniform; only the direction differs."},
 
 /* ---------------- L-7 (8) ---------------- */
-{id:48, lec:"L-7", blk:"Independence", topic:"The key principle",
+{id:48, lec:"L-7", blk:"Independence", topic:"The key principle", t:90,
  q:"In projectile motion, the horizontal and vertical components of the motion are",
  opts:[
   "completely independent of each other",
@@ -888,7 +914,7 @@ const QUIZ = [
   "The independence holds at every instant of the flight, not just at the top."],
  sol:"<b>a<sub>x</sub> = 0 (so v<sub>x</sub> = u cosθ is constant) and a<sub>y</sub> = −g.</b> Treat the two as separate 1-D problems sharing only the clock — that single idea solves every projectile question."},
 
-{id:49, lec:"L-7", blk:"Projectile formulas", topic:"Time of flight",
+{id:49, lec:"L-7", blk:"Projectile formulas", topic:"Time of flight", t:90,
  q:"For a projectile launched from ground level at speed u and angle θ, the time of flight is",
  opts:["2u sinθ/g","u sinθ/g","2u cosθ/g","u²sin2θ/g"],
  ans:0,
@@ -899,7 +925,7 @@ const QUIZ = [
   "u²sin2θ/g is the <b>range</b>, a distance rather than a time."],
  sol:"<b>T = 2u sinθ/g · R = u²sin2θ/g · H = u²sin²θ/2g.</b> The projectile's vertical motion is exactly a vertical throw at speed u sinθ."},
 
-{id:50, lec:"L-7", blk:"Projectile formulas", topic:"Maximum range",
+{id:50, lec:"L-7", blk:"Projectile formulas", topic:"Maximum range", t:90,
  q:"For a given launch speed, the horizontal range of a ground-level projectile is maximum at a launch angle of",
  opts:["45°","30°","60°","90°"],
  ans:0,
@@ -910,7 +936,7 @@ const QUIZ = [
   "90° is straight up, giving zero range."],
  sol:"<b>R = u²sin2θ/g is maximum at θ = 45°</b>, where R<sub>max</sub> = u²/g. Note that 45° is <b>self-complementary</b>, which is why no other angle can match it."},
 
-{id:51, lec:"L-7", blk:"Projectile motion", topic:"Speed at the highest point",
+{id:51, lec:"L-7", blk:"Projectile motion", topic:"Speed at the highest point", t:60,
  q:"At the highest point of its path, a projectile launched at angle θ with speed u has speed",
  opts:["u cosθ","zero","u sinθ","u"],
  ans:0,
@@ -921,7 +947,7 @@ const QUIZ = [
   "The speed is minimum at the top, so it is less than u for any θ other than zero."],
  sol:"At the top <b>v<sub>y</sub> = 0</b> but <b>v<sub>x</sub> = u cosθ</b> throughout, so the speed there is <b>u cosθ</b> — the minimum speed of the whole flight. Velocity is horizontal at that instant."},
 
-{id:52, lec:"L-7", blk:"Trajectory", topic:"Shape of the path",
+{id:52, lec:"L-7", blk:"Trajectory", topic:"Shape of the path", t:60,
  q:"The trajectory of a projectile under constant gravity with no air resistance is",
  opts:["a parabola","a circle","a straight line","a hyperbola"],
  ans:0,
@@ -932,7 +958,7 @@ const QUIZ = [
   "The equation y = x tanθ − gx²/(2u²cos²θ) is quadratic, not of hyperbolic form."],
  sol:"<b>y = x tanθ − gx²/(2u²cos²θ)</b> — quadratic in x, so a <b>parabola</b>. The constant downward acceleration with constant horizontal velocity is the defining recipe for one."},
 
-{id:53, lec:"L-7", blk:"2D vectors", topic:"Velocity from u + at in a plane",
+{id:53, lec:"L-7", blk:"2D vectors", topic:"Velocity from u + at in a plane", t:90,
  q:"A particle has u = (2î + 3ĵ) m/s and constant a = (4î + 2ĵ) m s⁻². Its velocity at t = 2 s is",
  opts:[
   "(10î + 7ĵ) m/s",
@@ -947,7 +973,7 @@ const QUIZ = [
   "12î + 10ĵ is the <b>displacement</b> s = ut + ½at², not the velocity."],
  sol:"<b>v = u + at</b> applies component by component: î gives 2 + 4(2) = 10, ĵ gives 3 + 2(2) = 7. Likewise <b>s = ut + ½at²</b> = (4î + 6ĵ) + (8î + 4ĵ) = 12î + 10ĵ m."},
 
-{id:54, lec:"L-7", blk:"2D motion", topic:"A perpendicular force",
+{id:54, lec:"L-7", blk:"2D motion", topic:"A perpendicular force", t:90,
  q:"A 1 kg particle moving at 2 m/s is acted on by a 2 N force perpendicular to its velocity for 1 s. Its final speed is",
  opts:["2√2 m/s","2 m/s","4 m/s","3 m/s"],
  ans:0,
@@ -958,7 +984,7 @@ const QUIZ = [
   "3 m/s matches neither the vector nor the scalar sum."],
  sol:"Along the original direction the speed stays 2 m/s; perpendicular to it, v = at = 2 m/s. Resultant = <b>√(4 + 4) = 2√2 m/s</b>, at 45°. The displacement is 2î + 1ĵ m — note the two components differ, since one motion is uniform and the other accelerated."},
 
-{id:55, lec:"L-7", blk:"Projectile formulas", topic:"Maximum height",
+{id:55, lec:"L-7", blk:"Projectile formulas", topic:"Maximum height", t:90,
  q:"For a ground-level projectile, the maximum height is",
  opts:["u²sin²θ/2g","u²sin2θ/2g","u²sinθ/2g","u²sin²θ/g"],
  ans:0,
@@ -970,7 +996,7 @@ const QUIZ = [
  sol:"<b>H = u²sin²θ/2g.</b> Check θ = 90°: H = u²/2g, the pure vertical throw ✓ Check θ = 0: H = 0 ✓"},
 
 /* ---------------- L-8 (8) ---------------- */
-{id:56, lec:"L-8", blk:"Complementary angles", topic:"Why the ranges match",
+{id:56, lec:"L-8", blk:"Complementary angles", topic:"Why the ranges match", t:60,
  q:"Two projectiles are fired with the same speed at 30° and 60°. Their horizontal ranges are",
  opts:[
   "equal",
@@ -985,7 +1011,7 @@ const QUIZ = [
   "1 : √3 is the ratio of the <b>times of flight</b>, T₁/T₂ = tanθ = tan30° = 1/√3."],
  sol:"<b>θ and 90° − θ give the same range</b> because sin2θ is symmetric about 45°. Everything else differs: the steeper angle gives the greater height and the longer flight."},
 
-{id:57, lec:"L-8", blk:"Complementary angles", topic:"Ratio of flight times",
+{id:57, lec:"L-8", blk:"Complementary angles", topic:"Ratio of flight times", t:60,
  q:"For projectiles fired at θ and (90° − θ) with the same speed, the ratio of their times of flight T₁ : T₂ is",
  opts:["tan θ","cot θ","1","tan 2θ"],
  ans:0,
@@ -996,7 +1022,7 @@ const QUIZ = [
   "tan 2θ does not arise from the ratio of the two sines."],
  sol:"<b>T₁/T₂ = tanθ.</b> Combined with the equal ranges and <b>H₁ + H₂ = u²/2g</b>, these three relations solve most complementary-angle questions without any fresh algebra."},
 
-{id:58, lec:"L-8", blk:"Complementary angles", topic:"Sum of the maximum heights",
+{id:58, lec:"L-8", blk:"Complementary angles", topic:"Sum of the maximum heights", t:90,
  q:"For projectiles at θ and (90° − θ) with the same speed u, the sum of their maximum heights H₁ + H₂ equals",
  opts:["u²/2g","u²/g","u²/4g","u²sin2θ/2g"],
  ans:0,
@@ -1007,7 +1033,7 @@ const QUIZ = [
   "This still depends on θ, whereas the sum is remarkably θ-independent."],
  sol:"<b>H₁ + H₂ = u²/2g</b> — a constant, independent of θ, thanks to sin²θ + cos²θ = 1. Verify with 30°/60° at u = 10, g = 10: 1.25 + 3.75 = 5 = 100/20 ✓"},
 
-{id:59, lec:"L-8", blk:"Complementary angles", topic:"Range from the two heights",
+{id:59, lec:"L-8", blk:"Complementary angles", topic:"Range from the two heights", t:90,
  q:"For a complementary pair with maximum heights H₁ and H₂, the common range R equals",
  opts:["4√(H₁H₂)","2√(H₁H₂)","√(H₁H₂)","H₁ + H₂"],
  ans:0,
@@ -1018,7 +1044,7 @@ const QUIZ = [
   "H₁ + H₂ = u²/2g, which is a height, not the range."],
  sol:"<b>R = 4√(H₁H₂).</b> Check with H₁ = 1.25, H₂ = 3.75: 4√4.6875 = 4(2.165) = <b>8.66 m = 5√3</b> ✓ matching the direct calculation."},
 
-{id:60, lec:"L-8", blk:"Complementary angles", topic:"Heights at 30° and 60°",
+{id:60, lec:"L-8", blk:"Complementary angles", topic:"Heights at 30° and 60°", t:90,
  q:"An object is projected at 10 m/s at 30° and again at 60° (g = 10 m s⁻²). The maximum heights are",
  opts:["1.25 m and 3.75 m","3.75 m and 1.25 m","2.5 m and 2.5 m","1.25 m and 2.5 m"],
  ans:0,
@@ -1029,7 +1055,7 @@ const QUIZ = [
   "2.5 m corresponds to sin²θ = 0.5, i.e. 45°, which is neither angle."],
  sol:"H ∝ sin²θ: sin²30° = 0.25 and sin²60° = 0.75, a ratio of <b>1 : 3</b>. Heights <b>1.25 m and 3.75 m</b>, summing to 5 m = u²/2g ✓ Ranges are both 5√3 m."},
 
-{id:61, lec:"L-8", blk:"Complementary angles", topic:"Which angle flies longest",
+{id:61, lec:"L-8", blk:"Complementary angles", topic:"Which angle flies longest", t:60,
  q:"Of two complementary launch angles at the same speed, the one that stays in the air longer is",
  opts:[
   "the steeper angle",
@@ -1044,7 +1070,7 @@ const QUIZ = [
   "A greater horizontal component means a <b>smaller</b> vertical one and hence a shorter flight — the reasoning is inverted."],
  sol:"<b>T ∝ sinθ and H ∝ sin²θ</b>, so the steeper launch wins on both. The ranges tie because R depends on <b>sin2θ</b>, which mixes the two components."},
 
-{id:62, lec:"L-8", blk:"Complementary angles", topic:"Ranges at 20° and 70°",
+{id:62, lec:"L-8", blk:"Complementary angles", topic:"Ranges at 20° and 70°", t:90,
  q:"Projectiles are fired with equal speeds at 20°, 45° and 70°. The ranges satisfy",
  opts:[
   "R(45°) is greatest, and R(20°) = R(70°)",
@@ -1059,7 +1085,7 @@ const QUIZ = [
   "20° is too flat: sin40° = 0.643, well below sin90° = 1."],
  sol:"sin2θ at 20°, 45°, 70° is sin40° = 0.643, sin90° = 1, sin140° = 0.643. So <b>R(45°) &gt; R(20°) = R(70°)</b>. The range curve is symmetric about its 45° peak."},
 
-{id:63, lec:"L-8", blk:"Complementary angles", topic:"Angles for a given range",
+{id:63, lec:"L-8", blk:"Complementary angles", topic:"Angles for a given range", t:60,
  q:"A projectile of speed u must achieve a range R less than R<sub>max</sub>. The number of launch angles that achieve it is",
  opts:["two","one","three","none"],
  ans:0,
@@ -1071,7 +1097,7 @@ const QUIZ = [
  sol:"<b>sin2θ = Rg/u²</b> gives 2θ and 180° − 2θ, hence θ and 90° − θ. So every achievable range below R<sub>max</sub> has <b>two</b> launch angles — one flat and fast, one steep and slow."},
 
 /* ---------------- L-9 (8) ---------------- */
-{id:64, lec:"L-9", blk:"Horizontal projection", topic:"Time of fall",
+{id:64, lec:"L-9", blk:"Horizontal projection", topic:"Time of fall", t:90,
  q:"A body is projected horizontally with speed u from a height h. Its time to reach the ground is",
  opts:["√(2h/g)","u/g","√(2h/g) + u/g","2u/g"],
  ans:0,
@@ -1082,7 +1108,7 @@ const QUIZ = [
   "2u/g is the flight time for a <b>vertical</b> throw at speed u, a different situation entirely."],
  sol:"Horizontal projection is the θ = 0 case: <b>T = √(2h/g)</b> and <b>R = u√(2h/g)</b>. The time depends only on the height."},
 
-{id:65, lec:"L-9", blk:"Horizontal projection", topic:"Two bodies from the same height",
+{id:65, lec:"L-9", blk:"Horizontal projection", topic:"Two bodies from the same height", t:60,
  q:"Two balls are thrown horizontally from the same height with speeds 5 m/s and 20 m/s. They",
  opts:[
   "land at the same time, the faster one landing farther away",
@@ -1097,7 +1123,7 @@ const QUIZ = [
   "Nor does a smaller horizontal speed shorten it."],
  sol:"<b>Same height ⇒ same fall time, whatever the horizontal speed.</b> This is the independence principle in its most testable form — and it is also why a bullet fired horizontally and one dropped hit the ground together."},
 
-{id:66, lec:"L-9", blk:"From a height", topic:"Time of flight from a tower",
+{id:66, lec:"L-9", blk:"From a height", topic:"Time of flight from a tower", t:90,
  q:"For a projectile launched at speed u and angle θ from a height h, the time of flight is",
  opts:[
   "[u sinθ + √(u²sin²θ + 2gh)]/g",
@@ -1112,7 +1138,7 @@ const QUIZ = [
   "√(2h/g) is the purely horizontal case, valid only when θ = 0."],
  sol:"<b>T = [u sinθ + √(u²sin²θ + 2gh)]/g.</b> Check h = 0: T = 2u sinθ/g ✓ Check θ = 0: T = √(2h/g) ✓ Both special cases fall out, which is a good way to remember it."},
 
-{id:67, lec:"L-9", blk:"From a height", topic:"Projectile from a tower",
+{id:67, lec:"L-9", blk:"From a height", topic:"Projectile from a tower", t:90,
  q:"A particle is projected from a 25 m tower at 20√2 m/s at 45° (g = 10 m s⁻²). The time to strike the ground is",
  opts:["5 s","4 s","2 s","3 s"],
  ans:0,
@@ -1123,7 +1149,7 @@ const QUIZ = [
   "3 s would return it to the launch level only, without the extra fall to the ground."],
  sol:"u sinθ = u cosθ = 20 m/s at 45°. <b>T = [20 + √(20² + 2(10)(25))]/10 = (20 + 30)/10 = 5 s.</b> Then R = 20 × 5 = 100 m and the impact velocity is 20î − 30ĵ m/s."},
 
-{id:68, lec:"L-9", blk:"From a height", topic:"Maximum height above the ground",
+{id:68, lec:"L-9", blk:"From a height", topic:"Maximum height above the ground", t:60,
  q:"For a projectile launched at angle θ with speed u from a height h, the greatest height reached <b>above the ground</b> is",
  opts:[
   "u²sin²θ/2g + h",
@@ -1138,7 +1164,7 @@ const QUIZ = [
   "h is the launch height alone, ignoring the rise altogether."],
  sol:"<b>H above the ground = u²sin²θ/2g + h.</b> The tower height simply shifts the origin; it never changes how high the projectile climbs above its own launch point."},
 
-{id:69, lec:"L-9", blk:"Horizontal projection", topic:"A bomb released from an aeroplane",
+{id:69, lec:"L-9", blk:"Horizontal projection", topic:"A bomb released from an aeroplane", t:90,
  q:"An aeroplane flying horizontally at 600 km/h releases a bomb from 1960 m (g = 10 m s⁻²). The horizontal distance to the impact point is about",
  opts:["3.3 km","1.96 km","0.6 km","6.6 km"],
  ans:0,
@@ -1149,7 +1175,7 @@ const QUIZ = [
   "6.6 km doubles the answer, as if the fall time were 39.6 s."],
  sol:"Convert first: 600 km/h = <b>166.7 m/s</b>. Then T = √(2h/g) = <b>19.8 s</b> and R = uT ≈ <b>3300 m</b>. The bomb keeps the aeroplane's horizontal velocity, so it stays directly beneath the plane the whole way down."},
 
-{id:70, lec:"L-9", blk:"From a height", topic:"Impact velocity components",
+{id:70, lec:"L-9", blk:"From a height", topic:"Impact velocity components", t:90,
  q:"For the 25 m tower projectile above (u sinθ = 20 m/s, T = 5 s, g = 10 m s⁻²), the vertical velocity at impact is",
  opts:["30 m/s downward","20 m/s downward","50 m/s downward","30 m/s upward"],
  ans:0,
@@ -1160,7 +1186,7 @@ const QUIZ = [
   "By impact the particle is descending, so the direction is downward."],
  sol:"<b>v<sub>y</sub> = u sinθ − gT</b> = 20 − 10(5) = <b>−30 m/s</b>. With v<sub>x</sub> = 20 m/s unchanged, the impact speed is √(400 + 900) = √1300 ≈ 36 m/s."},
 
-{id:71, lec:"L-9", blk:"Horizontal projection", topic:"Doubling the launch height",
+{id:71, lec:"L-9", blk:"Horizontal projection", topic:"Doubling the launch height", t:60,
  q:"A body is projected horizontally from height h and lands a distance R away. If the height is doubled at the same launch speed, the new horizontal distance is",
  opts:["R√2","2R","4R","R/√2"],
  ans:0,
@@ -1172,7 +1198,7 @@ const QUIZ = [
  sol:"<b>R = u√(2h/g) ∝ √h.</b> Because it is the <b>time</b> that scales as √h, and the horizontal speed is unchanged."},
 
 /* ---------------- L-10 (7) ---------------- */
-{id:72, lec:"L-10", blk:"Relative velocity", topic:"The defining relation",
+{id:72, lec:"L-10", blk:"Relative velocity", topic:"The defining relation", t:60,
  q:"The velocity of B relative to A is",
  opts:["v_B − v_A","v_A − v_B","v_A + v_B","(v_A + v_B)/2"],
  ans:0,
@@ -1183,7 +1209,7 @@ const QUIZ = [
   "An average of two velocities has no interpretation as a relative velocity."],
  sol:"<b>v<sub>BA</sub> = v<sub>B</sub> − v<sub>A</sub></b>, and similarly for positions and accelerations. Note <b>v<sub>BA</sub> = −v<sub>AB</sub></b>: the order in the subscript matters."},
 
-{id:73, lec:"L-10", blk:"Relative velocity", topic:"Two trains approaching",
+{id:73, lec:"L-10", blk:"Relative velocity", topic:"Two trains approaching", t:90,
  q:"Train A moves north to south at 60 km/h and train B south to north at 70 km/h. The speed of B relative to A is",
  opts:["130 km/h","10 km/h","65 km/h","4200 km/h"],
  ans:0,
@@ -1194,7 +1220,7 @@ const QUIZ = [
   "4200 is the product of the two speeds, which is dimensionally wrong."],
  sol:"⚠ <b>Sign the velocities first, then subtract.</b> Opposite directions ⇒ the relative speed is the <b>sum</b>, 60 + 70 = <b>130 km/h</b>. Same direction ⇒ the difference."},
 
-{id:74, lec:"L-10", blk:"Relative velocity", topic:"Two bodies moving alike",
+{id:74, lec:"L-10", blk:"Relative velocity", topic:"Two bodies moving alike", t:90,
  q:"Two cars travel in the same direction at 50 km/h and 50 km/h. On a position–time graph their lines are",
  opts:[
   "parallel, and they never meet",
@@ -1209,7 +1235,7 @@ const QUIZ = [
   "Constant velocity gives straight lines, not curves."],
  sol:"<b>Equal velocity ⇒ parallel s–t lines ⇒ v<sub>BA</sub> = 0.</b> In A's frame, B is simply stationary. If the slopes differ the lines must cross, and that crossing is the moment they meet."},
 
-{id:75, lec:"L-10", blk:"Crossing", topic:"Time to overtake",
+{id:75, lec:"L-10", blk:"Crossing", topic:"Time to overtake", t:90,
  q:"A 100 m train travelling at 20 m/s overtakes a 50 m train travelling in the same direction at 15 m/s. The time to completely pass it is",
  opts:["30 s","10 s","7.5 s","6 s"],
  ans:0,
@@ -1220,7 +1246,7 @@ const QUIZ = [
   "6 s uses a relative speed of 25 m/s, which would be right only if they moved in opposite directions."],
  sol:"<b>t = (combined length)/(relative speed).</b> Same direction ⇒ relative speed 5 m/s; total length 150 m ⇒ <b>30 s</b>. Head-on, the relative speed would be 35 m/s and the time only 4.3 s."},
 
-{id:76, lec:"L-10", blk:"Relative velocity", topic:"Relative acceleration",
+{id:76, lec:"L-10", blk:"Relative velocity", topic:"Relative acceleration", t:60,
  q:"Two bodies are in free fall, released at different times. The acceleration of one relative to the other is",
  opts:[
   "zero",
@@ -1235,7 +1261,7 @@ const QUIZ = [
   "There is no upward acceleration anywhere in this situation."],
  sol:"<b>Relative acceleration = 0 for any two bodies in free fall.</b> This is why the separation between two dropped stones grows <b>linearly</b> in time rather than quadratically — exactly the (g/2)(2t − 1) result from L-3."},
 
-{id:77, lec:"L-10", blk:"Relative velocity", topic:"Same direction",
+{id:77, lec:"L-10", blk:"Relative velocity", topic:"Same direction", t:60,
  q:"Two cars move in the same direction at 80 km/h and 60 km/h. The relative speed of the faster with respect to the slower is",
  opts:["20 km/h","140 km/h","70 km/h","10 km/h"],
  ans:0,
@@ -1246,7 +1272,7 @@ const QUIZ = [
   "10 km/h halves the correct answer."],
  sol:"<b>Same direction ⇒ subtract · opposite directions ⇒ add.</b> Formally it is always v<sub>B</sub> − v<sub>A</sub>; the sign convention does the rest automatically."},
 
-{id:78, lec:"L-10", blk:"Relative velocity", topic:"Symmetry of relative velocities",
+{id:78, lec:"L-10", blk:"Relative velocity", topic:"Symmetry of relative velocities", t:60,
  q:"If the velocity of B relative to A is 30 m/s east, then the velocity of A relative to B is",
  opts:["30 m/s west","30 m/s east","60 m/s west","zero"],
  ans:0,
@@ -1258,7 +1284,7 @@ const QUIZ = [
  sol:"<b>v<sub>AB</sub> = −v<sub>BA</sub>.</b> If B recedes from A eastward, then from B's viewpoint A recedes westward at the same rate. The relative <b>speed</b> is a single number both ways."},
 
 /* ---------------- L-11 (7) ---------------- */
-{id:79, lec:"L-11", blk:"Rain–man", topic:"Which direction to hold the umbrella",
+{id:79, lec:"L-11", blk:"Rain–man", topic:"Which direction to hold the umbrella", t:60,
  q:"A man walking in the rain should hold his umbrella along the direction of",
  opts:[
   "the velocity of the rain relative to himself",
@@ -1273,7 +1299,7 @@ const QUIZ = [
   "Vertical is correct only when he stands still and the rain falls vertically."],
  sol:"<b>v<sub>rm</sub> = v<sub>r</sub> − v<sub>m</sub>, and the umbrella points along v<sub>rm</sub>.</b> Walking faster tilts the apparent rain further forward, which is why you lean the umbrella into your motion."},
 
-{id:80, lec:"L-11", blk:"Rain–man", topic:"Reading “rain appears vertical”",
+{id:80, lec:"L-11", blk:"Rain–man", topic:"Reading “rain appears vertical”", t:90,
  q:"“To a walking man the rain appears to fall vertically” means that",
  opts:[
   "the horizontal component of v_rm is zero",
@@ -1288,7 +1314,7 @@ const QUIZ = [
   "A zero <b>vertical</b> component would make the rain appear horizontal, not vertical."],
  sol:"<b>Apparent vertical ⇒ î-component of v<sub>rm</sub> = 0 ⇒ the rain's horizontal velocity equals the man's.</b> That single condition is usually the first equation in these problems."},
 
-{id:81, lec:"L-11", blk:"Rain–man", topic:"The classic two-speed problem",
+{id:81, lec:"L-11", blk:"Rain–man", topic:"The classic two-speed problem", t:90,
  q:"To a man walking at 3 km/h the rain appears vertical; at 6 km/h it appears at 45° to the vertical. The speed of the rain is",
  opts:["3√2 km/h","3 km/h","6 km/h","6√2 km/h"],
  ans:0,
@@ -1299,7 +1325,7 @@ const QUIZ = [
   "6√2 doubles the answer, using 6 as the horizontal component instead of 3."],
  sol:"Write <b>v<sub>r</sub> = aî + bĵ</b>. At 3 km/h vertical ⇒ a − 3 = 0 ⇒ <b>a = 3</b>. At 6 km/h: v<sub>rm</sub> = −3î + bĵ at 45° ⇒ |b| = 3. So |v<sub>r</sub>| = <b>3√2 km/h</b>."},
 
-{id:82, lec:"L-11", blk:"Method", topic:"The general procedure",
+{id:82, lec:"L-11", blk:"Method", topic:"The general procedure", t:90,
  q:"The standard method for a rain–umbrella problem is to",
  opts:[
   "write v_r in î–ĵ components, subtract v_m, then apply each stated observation",
@@ -1314,7 +1340,7 @@ const QUIZ = [
   "The sign is wrong: relative velocity always subtracts the observer's velocity."],
  sol:"<b>v<sub>rm</sub> = v<sub>r</sub> − v<sub>m</sub>.</b> Resolve into components, then convert each observation: vertical ⇒ î-component zero; angle θ from the vertical ⇒ tanθ = |horizontal|/|vertical|."},
 
-{id:83, lec:"L-11", blk:"On an incline", topic:"Resolving the man's velocity",
+{id:83, lec:"L-11", blk:"On an incline", topic:"Resolving the man's velocity", t:60,
  q:"A man moves <b>down</b> a 37° incline at 5 m/s. His velocity components (taking î horizontal, ĵ vertically up) are",
  opts:[
   "−4î − 3ĵ",
@@ -1329,7 +1355,7 @@ const QUIZ = [
   "The vertical component must be negative for downhill motion."],
  sol:"On a 37° incline, 5 m/s resolves as <b>4 horizontal and 3 vertical</b> (the 3-4-5 triangle). Going down gives both components negative: <b>−4î − 3ĵ</b>; going up reverses both."},
 
-{id:84, lec:"L-11", blk:"On an incline", topic:"The incline rain problem",
+{id:84, lec:"L-11", blk:"On an incline", topic:"The incline rain problem", t:180,
  q:"A man moving down a 37° incline at 5 m/s sees rain falling vertically; moving up at the same speed he sees it at tan⁻¹(7/8) to the horizontal. The rain's speed is",
  opts:["√32 m/s","√64 m/s","7 m/s","4 m/s"],
  ans:0,
@@ -1340,7 +1366,7 @@ const QUIZ = [
   "4 m/s is one component of v<sub>r</sub>; both must be combined."],
  sol:"Set v<sub>r</sub> = aî + bĵ. <b>Downhill</b> (v<sub>m</sub> = −4î − 3ĵ): vertical ⇒ a + 4 = 0 ⇒ a = −4. <b>Uphill</b> (v<sub>m</sub> = 4î + 3ĵ): v<sub>rm</sub> = −8î + (b−3)ĵ, and tanθ = 7/8 ⇒ b = −4. <b>|v<sub>r</sub>| = √32 ≈ 5.66 m/s.</b> ⚠ Reject b = +10 on physical grounds — rain falls."},
 
-{id:85, lec:"L-11", blk:"Rain–man", topic:"Effect of walking faster",
+{id:85, lec:"L-11", blk:"Rain–man", topic:"Effect of walking faster", t:60,
  q:"Rain falls vertically. As a man walks faster, the apparent direction of the rain tilts",
  opts:[
   "further forward, so the umbrella must be tilted more",
@@ -1356,7 +1382,7 @@ const QUIZ = [
  sol:"With vertical rain, tanθ = v<sub>m</sub>/v<sub>r</sub> from the vertical. Walking twice as fast doubles the tangent — which is the everyday experience of running through rain."},
 
 /* ---------------- L-12 (8) ---------------- */
-{id:86, lec:"L-12", blk:"River crossing", topic:"Minimum-time crossing",
+{id:86, lec:"L-12", blk:"River crossing", topic:"Minimum-time crossing", t:90,
  q:"To cross a river in the <b>minimum time</b>, a boat should be headed",
  opts:[
   "straight across, perpendicular to the bank",
@@ -1371,7 +1397,7 @@ const QUIZ = [
   "Along the current the boat never crosses at all."],
  sol:"<b>Minimum time: θ = 0, t<sub>min</sub> = d/v<sub>br</sub></b>, but you drift downstream by v<sub>r</sub>t. <b>Shortest path: sinθ = v<sub>r</sub>/v<sub>br</sub> upstream</b>, zero drift but a longer crossing. The two goals genuinely conflict."},
 
-{id:87, lec:"L-12", blk:"River crossing", topic:"The zero-drift condition",
+{id:87, lec:"L-12", blk:"River crossing", topic:"The zero-drift condition", t:90,
  q:"For a boat to reach the point directly opposite its start, it must head upstream at an angle θ from the normal, where",
  opts:[
   "sinθ = v_r/v_br",
@@ -1386,7 +1412,7 @@ const QUIZ = [
   "This is inverted, and would demand sinθ &gt; 1 whenever the boat is faster than the current."],
  sol:"<b>v<sub>br</sub> sinθ = v<sub>r</sub> ⇒ sinθ = v<sub>r</sub>/v<sub>br</sub>.</b> ⚠ This has no solution when <b>v<sub>r</sub> &gt; v<sub>br</sub></b> — a boat slower than the current simply cannot avoid drifting."},
 
-{id:88, lec:"L-12", blk:"River crossing", topic:"Time and drift",
+{id:88, lec:"L-12", blk:"River crossing", topic:"Time and drift", t:90,
  q:"A 400 m river flows at 2.0 m/s. A boat with a still-water speed of 10.0 m/s heads straight across. The crossing time and the drift are",
  opts:[
   "40 s and 80 m",
@@ -1401,7 +1427,7 @@ const QUIZ = [
   "200 s uses the current speed to cross, which is not the relevant component at all."],
  sol:"Heading straight across, the across-river speed is the full 10 m/s: <b>t = d/v<sub>br</sub> = 40 s</b>. The current acts perpendicular to that and produces <b>drift = v<sub>r</sub>t = 80 m</b>. ⚠ The current never changes the crossing time in this configuration."},
 
-{id:89, lec:"L-12", blk:"River crossing", topic:"Shortest-path crossing time",
+{id:89, lec:"L-12", blk:"River crossing", topic:"Shortest-path crossing time", t:90,
  q:"When a boat crosses by the shortest path, its effective speed across the river is",
  opts:[
   "√(v_br² − v_r²)",
@@ -1416,7 +1442,7 @@ const QUIZ = [
   "v<sub>br</sub> is the full boat speed, achievable across the river only when heading straight across."],
  sol:"<b>v<sub>across</sub> = v<sub>br</sub>cosθ = √(v<sub>br</sub>² − v<sub>r</sub>²)</b>, so <b>t = d/√(v<sub>br</sub>² − v<sub>r</sub>²)</b> — always longer than the minimum-time crossing d/v<sub>br</sub>."},
 
-{id:90, lec:"L-12", blk:"River crossing", topic:"Deducing the river data",
+{id:90, lec:"L-12", blk:"River crossing", topic:"Deducing the river data", t:90,
  q:"A minimum-time crossing takes 10 min with 120 m of drift; the shortest-path crossing takes 12.5 min. The current speed is",
  opts:["0.2 m/s","0.33 m/s","2.0 m/s","1.2 m/s"],
  ans:0,
@@ -1427,7 +1453,7 @@ const QUIZ = [
   "1.2 m/s divides the drift by 100 rather than by the 600 s crossing time."],
  sol:"Min-time crossing: <b>drift = v<sub>r</sub>t ⇒ v<sub>r</sub> = 120/600 = 0.2 m/s</b>. Then 600v<sub>br</sub>/√(v<sub>br</sub>² − v<sub>r</sub>²) = 750 gives v<sub>r</sub>/v<sub>br</sub> = 3/5, so <b>v<sub>br</sub> = 1/3 m/s</b> and the width is 600(1/3) = <b>200 m</b>."},
 
-{id:91, lec:"L-12", blk:"Wind–aeroplane", topic:"Heading into a crosswind",
+{id:91, lec:"L-12", blk:"Wind–aeroplane", topic:"Heading into a crosswind", t:90,
  q:"A plane with air speed 500 km/h must fly due north while a 200 km/h wind blows due east. It should head",
  opts:[
   "sin⁻¹(0.4) west of north",
@@ -1442,7 +1468,7 @@ const QUIZ = [
   "South is the wrong way entirely; the destination lies to the north."],
  sol:"<b>Aim into the wind: sinθ = v<sub>wind</sub>/v<sub>air</sub> = 200/500 = 0.4</b>, so θ = 23.6° <b>west of north</b>. Identical in structure to steering a boat upstream."},
 
-{id:92, lec:"L-12", blk:"Wind–aeroplane", topic:"Ground speed in a crosswind",
+{id:92, lec:"L-12", blk:"Wind–aeroplane", topic:"Ground speed in a crosswind", t:60,
  q:"For that plane (air speed 500 km/h, crosswind 200 km/h), the ground speed along the intended track is",
  opts:["√210000 ≈ 458 km/h","700 km/h","300 km/h","500 km/h"],
  ans:0,
@@ -1453,7 +1479,7 @@ const QUIZ = [
   "500 km/h is the full air speed, achievable along track only in still air."],
  sol:"<b>v<sub>ground</sub> = √(v<sub>air</sub>² − v<sub>wind</sub>²)</b> for a perpendicular wind = <b>458 km/h</b>. Crossing 1000 km takes 1000/458 ≈ 2.18 h. A crosswind always <b>costs</b> time, whichever way it blows."},
 
-{id:93, lec:"L-12", blk:"River crossing", topic:"When the current is too strong",
+{id:93, lec:"L-12", blk:"River crossing", topic:"When the current is too strong", t:60,
  q:"If the river current is faster than the boat's still-water speed, the boat",
  opts:[
   "cannot avoid drifting downstream, whatever heading it takes",
@@ -1469,7 +1495,7 @@ const QUIZ = [
  sol:"<b>v<sub>r</sub> &gt; v<sub>br</sub> ⇒ zero drift is impossible</b>, but crossing is not. The best you can do is <b>minimise</b> the drift, which happens at cosθ = v<sub>br</sub>/v<sub>r</sub> — not at zero drift."},
 
 /* ---------------- Strong Box (14) ---------------- */
-{id:94, lec:"SB", blk:"Projectile", topic:"Velocity of projection from parametric equations",
+{id:94, lec:"SB", blk:"Projectile", topic:"Velocity of projection from parametric equations", t:90,
  q:"A ball is projected from the origin with x = 6t and y = 8t − 5t² (SI units). Its speed of projection is",
  opts:["10 m/s","6 m/s","8 m/s","14 m/s"],
  ans:0,
@@ -1480,7 +1506,7 @@ const QUIZ = [
   "14 m/s adds the components as scalars; perpendicular components combine by Pythagoras."],
  sol:"Differentiate: v<sub>x</sub> = 6 (constant) and v<sub>y</sub> = 8 − 10t. At t = 0 the velocity is 6î + 8ĵ, so the speed is <b>10 m/s</b> at 53°. The coefficient 5 confirms g = 10, since y contains ½gt²."},
 
-{id:95, lec:"SB", blk:"Projectile", topic:"Speed at a given direction",
+{id:95, lec:"SB", blk:"Projectile", topic:"Speed at a given direction", t:90,
  q:"A projectile is thrown at 60° to the horizontal. When its direction of motion makes 45° with the horizontal, its speed is 20 m/s. The speed of projection was",
  opts:["20√2 m/s","20 m/s","10√2 m/s","40 m/s"],
  ans:0,
@@ -1491,7 +1517,7 @@ const QUIZ = [
   "40 m/s would follow from ignoring the cos45° factor on the right-hand side."],
  sol:"<b>Horizontal velocity is invariant:</b> u cosθ₀ = v cosθ. Here u(0.5) = 20(1/√2) ⇒ <b>u = 20√2 m/s</b>. This one relation solves every “speed when the direction is φ” question."},
 
-{id:96, lec:"SB", blk:"Projectile", topic:"Effect of a horizontal wind",
+{id:96, lec:"SB", blk:"Projectile", topic:"Effect of a horizontal wind", t:90,
  q:"A projectile has range R and maximum height H. A wind now supplies a constant horizontal acceleration g/2 along the motion. The new horizontal range is",
  opts:["R + 2H","R + H","2R + H","R + 4H"],
  ans:0,
@@ -1502,7 +1528,7 @@ const QUIZ = [
   "R + 4H doubles the extra term."],
  sol:"The wind changes nothing vertically, so <b>T = 2u sinθ/g is unchanged</b>. Extra distance = ½(g/2)T² = u²sin²θ/g, and since <b>H = u²sin²θ/2g</b> that is exactly <b>2H</b>. New range = <b>R + 2H</b>."},
 
-{id:97, lec:"SB", blk:"Projectile", topic:"Radius of curvature at the top",
+{id:97, lec:"SB", blk:"Projectile", topic:"Radius of curvature at the top", t:90,
  q:"For a projectile launched at speed u and angle θ, the radius of curvature of the path at its highest point is",
  opts:["u²cos²θ/g","u²/g","u²sin²θ/g","u²cos²θ/2g"],
  ans:0,
@@ -1513,7 +1539,7 @@ const QUIZ = [
   "The factor of 2 has no place here; r = v²/a with no halving."],
  sol:"At the apex the velocity is horizontal and g is entirely <b>centripetal</b>, so <b>r = v²/g = u²cos²θ/g</b>. Elsewhere on the path only the perpendicular component of g counts, giving r = v²/(g cosφ)."},
 
-{id:98, lec:"SB", blk:"Free fall", topic:"Drops from a tap",
+{id:98, lec:"SB", blk:"Free fall", topic:"Drops from a tap", t:90,
  q:"Drops fall from a tap at regular intervals onto a floor 5 m below. The first drop strikes the floor at the instant the sixth begins to fall. The height of the third drop above the floor at that instant is",
  opts:["3.2 m","1.8 m","2.5 m","4.2 m"],
  ans:0,
@@ -1524,7 +1550,7 @@ const QUIZ = [
   "4.2 m would be the height of the fourth drop, which has fallen only 5(2/5)² = 0.8 m."],
  sol:"With 6 drops in flight, the first has fallen through 5 intervals. Since <b>h ∝ t²</b>, drop n has fallen 5[(6−n)/5]² metres. Drop 3: 5(9/25) = <b>1.8 m fallen ⇒ 3.2 m above the floor</b>."},
 
-{id:99, lec:"SB", blk:"Free fall", topic:"The paratrooper",
+{id:99, lec:"SB", blk:"Free fall", topic:"The paratrooper", t:180,
  q:"A paratrooper free-falls for 2 s, then decelerates uniformly at 3 m s⁻²; at 10 m above the ground his speed is 5 m/s (g = 10 m s⁻²). The aeroplane's height was",
  opts:["92.5 m","82.5 m","72.5 m","102.5 m"],
  ans:0,
@@ -1535,7 +1561,7 @@ const QUIZ = [
   "102.5 m adds an extra 10 m that is already included."],
  sol:"<b>Phase 1</b> (2 s free fall): v = 20 m/s, s = 20 m. <b>Phase 2</b> (decelerating to 5 m/s): 25 = 400 − 2(3)s ⇒ s = 62.5 m. <b>Phase 3</b>: the remaining 10 m. Total = <b>92.5 m</b>."},
 
-{id:100, lec:"SB", blk:"Projectile", topic:"Landing on a roof",
+{id:100, lec:"SB", blk:"Projectile", topic:"Landing on a roof", t:180,
  q:"A ball thrown at 45° reaches its highest point 2 s after launch and lands on a roof 3 s after launch (g = 10 m s⁻²). The roof height H is",
  opts:["15 m","20 m","25 m","10 m"],
  ans:0,
@@ -1546,7 +1572,7 @@ const QUIZ = [
   "10 m would correspond to a landing time of about 3.4 s."],
  sol:"Apex at 2 s ⇒ <b>u sinθ = g(2) = 20 m/s</b>. Then <b>y(3) = 20(3) − 5(9) = 15 m</b>. Sanity check: H<sub>max</sub> = 20 m at t = 2 s, and the ball has fallen 5 m in the third second ✓"},
 
-{id:101, lec:"SB", blk:"Relative motion", topic:"The tip of a shadow",
+{id:101, lec:"SB", blk:"Relative motion", topic:"The tip of a shadow", t:180,
  q:"A 1.6 m tall person walks away from a 4 m lamp post at 60 cm/s. The speed of the tip of their shadow <b>relative to the person</b> is",
  opts:["0.4 m/s","1.0 m/s","0.6 m/s","1.6 m/s"],
  ans:0,
@@ -1557,7 +1583,7 @@ const QUIZ = [
   "1.6 m/s adds the two speeds instead of subtracting them; they move in the same direction."],
  sol:"Similar triangles: 1.6/(s − x) = 4/s ⇒ <b>s = (5/3)x</b> ⇒ ds/dt = (5/3)(0.6) = <b>1.0 m/s</b> in the ground frame. Relative to the walker: <b>1.0 − 0.6 = 0.4 m/s</b>. ⚠ Read carefully which frame is wanted."},
 
-{id:102, lec:"SB", blk:"Kinematics", topic:"Where the speed reaches a given value",
+{id:102, lec:"SB", blk:"Kinematics", topic:"Where the speed reaches a given value", t:90,
  q:"A car brakes uniformly from 160 km/h at mark A to 40 km/h at mark C. B lies midway between them. The car was doing 100 km/h",
  opts:[
   "between B and C",
@@ -1572,7 +1598,7 @@ const QUIZ = [
   "At C the speed is 40 km/h, well below 100."],
  sol:"⚠ It is <b>v², not v</b>, that falls linearly with distance. At the midpoint v = √((160² + 40²)/2) ≈ <b>116.6 km/h</b>, so 100 km/h comes later: solving gives x = 1.3 AB, i.e. <b>between B and C</b>. Averaging the speeds to 100 at B is the trap."},
 
-{id:103, lec:"SB", blk:"River crossing", topic:"Round-trip minimum time",
+{id:103, lec:"SB", blk:"River crossing", topic:"Round-trip minimum time", t:90,
  q:"A 200 m river flows at 18 km/h. A boat with still-water speed 36 km/h makes one round trip bank to bank. The minimum total time is",
  opts:["40 s","80 s","46 s","20 s"],
  ans:0,
@@ -1583,7 +1609,7 @@ const QUIZ = [
   "20 s is one leg only; a round trip is two crossings."],
  sol:"Convert first: 36 km/h = <b>10 m/s</b>, current 5 m/s. Minimum time per crossing is <b>d/v<sub>br</sub> = 20 s</b>, independent of the current. Round trip = <b>40 s</b>. The drift does not matter when only time is asked for."},
 
-{id:104, lec:"SB", blk:"Variable force", topic:"Integrating a time-dependent force",
+{id:104, lec:"SB", blk:"Variable force", topic:"Integrating a time-dependent force", t:180,
  q:"A 4 kg mass starts from rest at the origin under F = (4t³î − 3tĵ) N. Its velocity at t = 2 s is",
  opts:[
   "(4î − 1.5ĵ) m/s",
@@ -1598,7 +1624,7 @@ const QUIZ = [
   "1.6î − 1ĵ is the <b>position</b> at t = 2 s, not the velocity."],
  sol:"<b>a = F/m</b>, then <b>v = ∫a dt</b> with v(0) = 0: v = (t⁴/4)î − (0.375t²)ĵ ⇒ v(2) = <b>4î − 1.5ĵ m/s</b>. Integrating once more gives r(2) = 1.6î − 1ĵ m."},
 
-{id:105, lec:"SB", blk:"Variable acceleration", topic:"Acceleration as a function of position",
+{id:105, lec:"SB", blk:"Variable acceleration", topic:"Acceleration as a function of position", t:180,
  q:"A motorboat starts from rest with a = c/(x + 4)² m s⁻². Its speed is 4 m/s after a displacement of 8 m. The value of c is",
  opts:["48","24","96","12"],
  ans:0,
@@ -1609,7 +1635,7 @@ const QUIZ = [
   "12 is a quarter of the correct value."],
  sol:"a depends on <b>position</b>, so use <b>v dv = a dx</b>. LHS = v²/2 = 8. RHS = c[−1/(x+4)]₀⁸ = c(1/4 − 1/12) = c/6. So <b>c = 48 m³ s⁻²</b>. ⚠ Using dv = a dt here would be unusable, since a is not given as a function of t."},
 
-{id:106, lec:"SB", blk:"Relative motion", topic:"A round trip against and with a wind",
+{id:106, lec:"SB", blk:"Relative motion", topic:"A round trip against and with a wind", t:90,
  q:"An aeroplane flies from A to B and back, with a steady wind along AB (helping one way, hindering the other). Compared with the still-air round-trip time, the total time is",
  opts:[
   "always longer",
@@ -1624,7 +1650,7 @@ const QUIZ = [
   "The result is universal: any wind along the route costs time, whatever its speed."],
  sol:"<b>T<sub>w</sub>/T₀ = v²/(v² − u²) &gt; 1 for all u ≠ 0.</b> The reason is that the plane is <b>slowed for longer</b> than it is helped — the same asymmetry that makes a river round trip slower than still water."},
 
-{id:107, lec:"SB", blk:"Kinematics", topic:"When the velocity vanishes",
+{id:107, lec:"SB", blk:"Kinematics", topic:"When the velocity vanishes", t:180,
  q:"A particle moves as x(t) = 4t³ − 3t (SI units). Its velocity is zero at t equal to",
  opts:["0.5 s","1 s","0.25 s","√3 s"],
  ans:0,
@@ -1639,13 +1665,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter P-4 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1663,6 +1700,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1697,15 +1737,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1717,47 +1758,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1767,30 +1825,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1799,7 +1901,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1812,9 +1916,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1823,7 +1945,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1844,21 +1967,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter P-4 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

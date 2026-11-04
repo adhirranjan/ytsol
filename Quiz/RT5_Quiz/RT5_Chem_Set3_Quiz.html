@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different chapters</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -234,7 +260,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- C-6 · Thermodynamics ---------------- */
-{id:1, lec:"C6", blk:"L-3 · First law", topic:"Statement of the first law",
+{id:1, lec:"C6", blk:"L-3 · First law", topic:"Statement of the first law", t:90,
  q:"The first law of thermodynamics, in the form ΔU = q + w, expresses",
  opts:[
   "conservation of energy: the change in internal energy equals heat added plus work done on the system",
@@ -248,7 +274,7 @@ const QUIZ = [
   "Energy is conserved, never destroyed — that is the whole point of the first law.",
   "Heat and work are separate energy transfers; they need not be equal."],
  sol:"<b>First law: ΔU = q + w</b> (energy conservation). q = heat added to the system, w = work done on the system. Equivalently ΔU = q − W, where W = −w is work done <i>by</i> the system."},
-{id:2, lec:"C6", blk:"L-7 · Thermochemical equations", topic:"Physical states in thermochemical equations",
+{id:2, lec:"C6", blk:"L-7 · Thermochemical equations", topic:"Physical states in thermochemical equations", t:60,
  q:"A thermochemical equation must include the physical states of all species because",
  opts:[
   "ΔH depends on the states (s, l, g, aq) of reactants and products",
@@ -262,7 +288,7 @@ const QUIZ = [
   "It is not arbitrary; the states carry real enthalpy differences.",
   "Rate is a kinetic matter; thermochemical equations are about ΔH, which depends on state."],
  sol:"ΔH is state-dependent: e.g. combustion giving H₂O(l) releases more heat than giving H₂O(g), by the enthalpy of vaporisation. <b>Always label states.</b>"},
-{id:3, lec:"C6", blk:"L-11 · Definition", topic:"Gibbs free energy relation",
+{id:3, lec:"C6", blk:"L-11 · Definition", topic:"Gibbs free energy relation", t:60,
  q:"The Gibbs free energy change is defined (at constant T, P) by",
  opts:["ΔG = ΔH − TΔS","ΔG = ΔH + TΔS","ΔG = TΔS − ΔH","ΔG = ΔU − TΔS"],
  ans:0,
@@ -272,7 +298,7 @@ const QUIZ = [
   "The terms are in the wrong order and sign; the correct form is ΔH − TΔS.",
   "The correct definition uses ΔH, not ΔU (G = H − TS)."],
  sol:"<b>ΔG = ΔH − TΔS.</b> Spontaneous if ΔG &lt; 0, at equilibrium if ΔG = 0, non-spontaneous if ΔG &gt; 0."},
-{id:4, lec:"C6", blk:"L-2 · Sign convention", topic:"Sign of heat absorbed",
+{id:4, lec:"C6", blk:"L-2 · Sign convention", topic:"Sign of heat absorbed", t:60,
  q:"Using the convention ΔU = q + w, heat absorbed by the system is taken as",
  opts:["positive (q > 0)","negative (q &lt; 0)","zero","undefined"],
  ans:0,
@@ -282,7 +308,7 @@ const QUIZ = [
   "Absorbed heat is a real energy input, not zero.",
   "The sign is well defined: positive for absorption."],
  sol:"IUPAC convention (ΔU = q + w): energy <b>into</b> the system is positive. So heat absorbed q &gt; 0, heat released q &lt; 0, work done on the system w &gt; 0."},
-{id:5, lec:"C6", blk:"L-6 · Heat capacities", topic:"Cv of a monatomic gas",
+{id:5, lec:"C6", blk:"L-6 · Heat capacities", topic:"Cv of a monatomic gas", t:90,
  q:"The molar heat capacity at constant volume, Cv, of an ideal monatomic gas is",
  opts:["(3/2)R","(5/2)R","3R","R"],
  ans:0,
@@ -292,7 +318,7 @@ const QUIZ = [
   "3R is the Cv of a non-linear triatomic (or the Dulong–Petit solid value), not a monatomic gas.",
   "R alone omits the factor 3/2."],
  sol:"Monatomic: 3 translational DOF ⇒ Cv = (3/2)R, Cp = (5/2)R, γ = Cp/Cv = <b>5/3</b>."},
-{id:6, lec:"C6", blk:"L-10 · Entropy definition", topic:"Defining equation for entropy",
+{id:6, lec:"C6", blk:"L-10 · Entropy definition", topic:"Defining equation for entropy", t:60,
  q:"The entropy change of a reversible process at temperature T is",
  opts:["ΔS = q_rev / T","ΔS = q_rev × T","ΔS = w/T","ΔS = ΔH × T"],
  ans:0,
@@ -304,7 +330,7 @@ const QUIZ = [
  sol:"<b>ΔS = q_rev / T</b> (units J/K). Entropy measures the dispersal of energy; only the reversible heat divided by T gives the true entropy change."},
 
 /* ---------------- C-5 · Chemical Bonding and Molecular Structure ---------------- */
-{id:7, lec:"C5", blk:"L-3 · Overlap", topic:"σ vs π overlap",
+{id:7, lec:"C5", blk:"L-3 · Overlap", topic:"σ vs π overlap", t:60,
  q:"A σ bond and a π bond differ in that",
  opts:[
   "the σ bond forms by axial (head-on) overlap, the π bond by sidewise (lateral) overlap",
@@ -318,7 +344,7 @@ const QUIZ = [
   "The σ bond has maximum density <i>along</i> the axis between the nuclei.",
   "The σ bond forms first; π bonds only form after a σ framework exists (in double/triple bonds)."],
  sol:"<b>σ = axial overlap</b> (s–s, s–p, p–p head-on), strong and free to rotate. <b>π = lateral overlap</b> of parallel p orbitals, weaker, and locks rotation. A single bond is σ; a double is σ+π; a triple is σ+2π."},
-{id:8, lec:"C5", blk:"L-7 · LCAO", topic:"Conditions for LCAO",
+{id:8, lec:"C5", blk:"L-7 · LCAO", topic:"Conditions for LCAO", t:60,
  q:"For two atomic orbitals to combine into molecular orbitals, they must",
  opts:[
   "have comparable energies, the same symmetry about the bond axis, and overlap significantly",
@@ -332,7 +358,7 @@ const QUIZ = [
   "MOs form from orbitals on <i>different</i> atoms; same-atom mixing is hybridisation.",
   "Filled or half-filled — occupancy is not a condition for the orbitals to combine."],
  sol:"LCAO conditions: <b>similar energy, same symmetry, sufficient overlap.</b> Meeting these lets two AOs form one bonding and one antibonding MO."},
-{id:9, lec:"C5", blk:"SB · Shape + hybridisation", topic:"Hybridisation of XeF₄",
+{id:9, lec:"C5", blk:"SB · Shape + hybridisation", topic:"Hybridisation of XeF₄", t:90,
  q:"XeF₄ is square planar. The hybridisation of xenon is",
  opts:["sp³d²","sp³d","sp³","dsp²"],
  ans:0,
@@ -342,7 +368,7 @@ const QUIZ = [
   "sp³ (SN 4) is tetrahedral.",
   "dsp² is used in coordination chemistry (inner-orbital complexes), not for main-group XeF₄."],
  sol:"XeF₄: AB₄L₂, SN 6 ⇒ <b>sp³d²</b>. Two axial lone pairs leave four F in a square plane. ICl₄⁻ is isostructural."},
-{id:10, lec:"C5", blk:"L-4 · Steric number rule", topic:"Hybridisation from steric number",
+{id:10, lec:"C5", blk:"L-4 · Steric number rule", topic:"Hybridisation from steric number", t:60,
  q:"An atom with a steric number of 5 (bond pairs + lone pairs = 5) is hybridised as",
  opts:["sp³d","sp³","sp³d²","sp²"],
  ans:0,
@@ -352,7 +378,7 @@ const QUIZ = [
   "sp³d² provides six hybrids (steric number 6).",
   "sp² provides three hybrids (steric number 3)."],
  sol:"Steric-number → hybridisation: 2 sp, 3 sp², 4 sp³, 5 sp³d, 6 sp³d², 7 sp³d³. SN 5 ⇒ <b>sp³d</b> (basic geometry: trigonal bipyramidal, e.g. PCl₅)."},
-{id:11, lec:"C5", blk:"L-8 · N₂", topic:"Bond order of N₂",
+{id:11, lec:"C5", blk:"L-8 · N₂", topic:"Bond order of N₂", t:90,
  q:"The bond order of the nitrogen molecule N₂ is",
  opts:["3","2","2.5","1"],
  ans:0,
@@ -364,7 +390,7 @@ const QUIZ = [
  sol:"N₂ (14 electrons): N_b = 10, N_a = 4 ⇒ (10 − 4)/2 = <b>3</b>. The triple bond and all-paired electrons make N₂ very stable and diamagnetic."},
 
 /* ---------------- C-2 · Structure of Atom ---------------- */
-{id:12, lec:"C2", blk:"L-3 · Observations", topic:"What intensity controls",
+{id:12, lec:"C2", blk:"L-3 · Observations", topic:"What intensity controls", t:60,
  q:"In the photoelectric effect, increasing the <b>intensity</b> of the incident light (at fixed frequency above ν₀) increases",
  opts:[
   "the number of photoelectrons ejected per second",
@@ -378,7 +404,7 @@ const QUIZ = [
   "ν₀ is fixed by the metal itself and is completely unaffected by the light shone on it.",
   "W₀ = hν₀ is likewise a property of the metal surface, not of the illumination."],
  sol:"<b>Intensity → how many. Frequency → how fast.</b> This split is the whole reason the photoelectric effect proves light is particulate: a wave theory would let a bright, low-frequency beam gradually pump enough energy into an electron, and it never does."},
-{id:13, lec:"C2", blk:"L-7 · Rydberg formula", topic:"The formula",
+{id:13, lec:"C2", blk:"L-7 · Rydberg formula", topic:"The formula", t:90,
  q:"The Rydberg formula for the wave number of a spectral line of a hydrogen-like species is",
  opts:[
   "ν̄ = R Z² (1/n₁² − 1/n₂²)",
@@ -392,7 +418,7 @@ const QUIZ = [
   "The Z-dependence is quadratic, matching the Z² in the energy formula.",
   "The reciprocals must be of the <b>squares</b> of the quantum numbers, since energy goes as 1/n²."],
  sol:"<b>ν̄ = 1/λ = R Z² (1/n₁² − 1/n₂²)</b> with <b>n₁ &lt; n₂</b> and R = 109677 cm⁻¹. It is just ΔE/hc written out."},
-{id:14, lec:"C2", blk:"L-11 · Nodes", topic:"Radial nodes",
+{id:14, lec:"C2", blk:"L-11 · Nodes", topic:"Radial nodes", t:90,
  q:"The number of radial nodes in an orbital with quantum numbers n and ℓ is",
  opts:["n − ℓ − 1","ℓ","n − 1","n − ℓ"],
  ans:0,
@@ -402,7 +428,7 @@ const QUIZ = [
   "n − 1 is the <b>total</b> node count, the sum of radial and angular nodes.",
   "n − ℓ is one too many — the formula subtracts an extra 1."],
  sol:"<b>Angular nodes = ℓ · Radial nodes = n − ℓ − 1 · Total nodes = n − 1.</b> Check the sum: ℓ + (n − ℓ − 1) = n − 1 ✓"},
-{id:15, lec:"C2", blk:"L-4 · Bohr's postulates", topic:"Why stationary orbits solve the stability problem",
+{id:15, lec:"C2", blk:"L-4 · Bohr's postulates", topic:"Why stationary orbits solve the stability problem", t:60,
  q:"According to Bohr, an electron moving in a stationary orbit",
  opts:[
   "does not radiate energy",
@@ -418,7 +444,7 @@ const QUIZ = [
  sol:"Bohr's postulates: (i) fixed circular orbits with Coulomb attraction supplying the centripetal force; (ii) angular momentum = nh/2π; (iii) <b>no radiation within an orbit</b>; (iv) on a jump, <b>ΔE = hν</b>."},
 
 /* ---------------- C-3 · Some Basic Concepts of Chemistry ---------------- */
-{id:16, lec:"C3", blk:"L-3 · Dulong &amp; Petit", topic:"The law",
+{id:16, lec:"C3", blk:"L-3 · Dulong &amp; Petit", topic:"The law", t:60,
  q:"Dulong and Petit's law states that, for a solid metallic element,",
  opts:[
   "atomic mass × specific heat ≈ 6.4",
@@ -432,7 +458,7 @@ const QUIZ = [
   "22.4 is the molar gas volume in litres, from an entirely different context.",
   "Equivalent mass × valency gives the <b>exact</b> atomic mass, which is a separate relation with no 6.4 in it."],
  sol:"<b>Atomic mass × specific heat ≈ 6.4 cal g⁻¹ K⁻¹.</b> It gives only an <b>approximate</b> value; the exact atomic mass is <b>equivalent mass × valency</b>, with the valency picked as the whole number nearest the Dulong–Petit estimate. The law fails for light elements such as B, C and Si."},
-{id:17, lec:"C3", blk:"L-7 · Mass percent", topic:"Definition of mass percent",
+{id:17, lec:"C3", blk:"L-7 · Mass percent", topic:"Definition of mass percent", t:60,
  q:"Mass percent (w/w) of a solute is defined as",
  opts:[
   "(mass of solute / mass of solution) × 100",
@@ -446,7 +472,7 @@ const QUIZ = [
   "That is mass/volume percent, <b>%(w/v)</b>, which uses millilitres of solution.",
   "That is essentially the mole fraction × 100, a different quantity entirely."],
  sol:"<b>%(w/w) = (W<sub>solute</sub>/W<sub>solution</sub>) × 100.</b> ⚠ Solution, not solvent — this single word is the most common source of error in the whole topic."},
-{id:18, lec:"C3", blk:"L-11 · Counting rules", topic:"Leading zeros",
+{id:18, lec:"C3", blk:"L-11 · Counting rules", topic:"Leading zeros", t:60,
  q:"The number of significant figures in 0.00368 is",
  opts:["3","5","6","2"],
  ans:0,
@@ -456,7 +482,7 @@ const QUIZ = [
   "6 counts every character in the number.",
   "2 drops a genuine significant digit; all three of 3, 6 and 8 are measured."],
  sol:"<b>Leading zeros are never significant.</b> Writing the number as 3.68 × 10⁻³ makes the count obvious — scientific notation removes the ambiguity entirely."},
-{id:19, lec:"C3", blk:"L-2 · Conversions", topic:"Mass of a fixed number of atoms",
+{id:19, lec:"C3", blk:"L-2 · Conversions", topic:"Mass of a fixed number of atoms", t:90,
  q:"The mass of 100 atoms of magnesium (Mg = 24) is about",
  opts:["3.99 × 10⁻²¹ g","2.4 × 10³ g","4.0 × 10⁻²³ g","3.99 × 10⁻¹⁹ g"],
  ans:0,
@@ -468,7 +494,7 @@ const QUIZ = [
  sol:"Mass of 1 atom = M/N<sub>A</sub> = 24/(6.022 × 10²³) = 3.985 × 10⁻²³ g. × 100 = <b>3.985 × 10⁻²¹ g</b>. Any “mass of n atoms” question is just this two-step chain."},
 
 /* ---------------- C-1 · States of Matter ---------------- */
-{id:20, lec:"C1", blk:"L-3 · Gay-Lussac", topic:"Constant-volume law",
+{id:20, lec:"C1", blk:"L-3 · Gay-Lussac", topic:"Constant-volume law", t:60,
  q:"Gay-Lussac's law, for a fixed amount of gas at constant volume, states that",
  opts:["P₁/T₁ = P₂/T₂","P₁V₁ = P₂V₂","V₁/T₁ = V₂/T₂","P₁/V₁ = P₂/V₂"],
  ans:0,
@@ -478,7 +504,7 @@ const QUIZ = [
   "That is Charles' law, at constant pressure.",
   "Not a gas law at all."],
  sol:"<b>P/T = k at constant V and n.</b> The three simple laws each hold one variable fixed."},
-{id:21, lec:"C1", blk:"L-7 · The three speeds", topic:"Root-mean-square speed",
+{id:21, lec:"C1", blk:"L-7 · The three speeds", topic:"Root-mean-square speed", t:90,
  q:"The root-mean-square speed of gas molecules is",
  opts:["√(3RT/M)","√(2RT/M)","√(8RT/πM)","√(RT/M)"],
  ans:0,
@@ -488,7 +514,7 @@ const QUIZ = [
   "That is the <b>average</b> speed.",
   "Not one of the three standard speeds."],
  sol:"<b>u<sub>rms</sub> = √(3RT/M) = √(3P/d) = √(3PV/M).</b>"},
-{id:22, lec:"C1", blk:"L-11 · Types of force", topic:"Force between nonpolar molecules",
+{id:22, lec:"C1", blk:"L-11 · Types of force", topic:"Force between nonpolar molecules", t:60,
  q:"The only intermolecular force acting between nonpolar molecules such as CH₄ is",
  opts:[
   "London dispersion",
@@ -504,7 +530,7 @@ const QUIZ = [
  sol:"<b>London dispersion acts between all molecules</b>, and it is the <b>only</b> force between nonpolar ones."},
 
 /* ---------------- C-4 · Classification of Elements & Periodic Properties ---------------- */
-{id:23, lec:"C4", blk:"L-3 · Isoelectronic species", topic:"Definition of isoelectronic",
+{id:23, lec:"C4", blk:"L-3 · Isoelectronic species", topic:"Definition of isoelectronic", t:60,
  q:"Two species are called isoelectronic when they have the same",
  opts:["number of electrons","number of protons","atomic radius","charge"],
  ans:0,
@@ -514,7 +540,7 @@ const QUIZ = [
   "Their radii are generally different; the point of the concept is to compare those radii.",
   "Their charges differ; only the electron count is common."],
  sol:"<b>Isoelectronic = equal number of electrons.</b> Within such a set the size is decided entirely by nuclear charge Z: more protons pull the same electron cloud in tighter, so radius falls as Z rises."},
-{id:24, lec:"C4", blk:"SB · Combined trends", topic:"Property increasing down a group",
+{id:24, lec:"C4", blk:"SB · Combined trends", topic:"Property increasing down a group", t:90,
  q:"Which property <b>increases</b> down a group while <b>decreasing</b> across a period (left to right)?",
  opts:[
   "atomic radius",
@@ -528,7 +554,7 @@ const QUIZ = [
   "Electronegativity also falls down a group and rises across a period.",
   "Z* rises across a period and changes little down a group; it does not increase down and decrease across."],
  sol:"<b>Atomic (and ionic) radius</b> increases down and decreases across. IE, EA magnitude and electronegativity all move the opposite way, because they track Z* and 1/radius."},
-{id:25, lec:"C4", blk:"L-4 · IE trends", topic:"Group trend in ionisation energy",
+{id:25, lec:"C4", blk:"L-4 · IE trends", topic:"Group trend in ionisation energy", t:60,
  q:"Down a group, first ionisation energy generally",
  opts:[
   "decreases, because the outer electron is farther out and better shielded",
@@ -547,13 +573,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "RT-5 Chemistry Set 3 complete";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -571,6 +608,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -605,15 +645,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -625,47 +666,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -675,30 +733,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -707,7 +809,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -720,9 +824,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -731,7 +853,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -752,21 +875,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "RT-5 Chemistry Set 3 complete" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

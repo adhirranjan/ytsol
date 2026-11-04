@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -235,7 +261,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (22) ---------------- */
-{id:1, lec:"L-1", blk:"Angle basics", topic:"Sense of rotation",
+{id:1, lec:"L-1", blk:"Angle basics", topic:"Sense of rotation", t:60,
  q:"An angle generated by rotating the ray <b>anticlockwise</b> about its end point is taken to be",
  opts:["positive","negative","always acute","always reflex"],
  ans:0,
@@ -246,7 +272,7 @@ const QUIZ = [
   "Reflex simply means between 180° and 360°; the sense of rotation does not decide it."],
  sol:"<b>Anticlockwise → positive, clockwise → negative.</b> The angle is the figure obtained by rotating a ray about its end point; the ray's start is the <i>initial side</i> and its finish the <i>terminal side</i>."},
 
-{id:2, lec:"L-1", blk:"Angle basics", topic:"Standard position",
+{id:2, lec:"L-1", blk:"Angle basics", topic:"Standard position", t:60,
  q:"An angle is in <b>standard position</b> when",
  opts:[
   "its vertex is at the origin and its initial side lies along the positive x-axis",
@@ -261,7 +287,7 @@ const QUIZ = [
   "Nothing restricts the arms to one quadrant; an angle in standard position may terminate in any quadrant."],
  sol:"<b>Vertex at the origin, initial side along the positive x-axis.</b> The quadrant of the <i>terminal</i> side then names the angle: I (0°–90°), II (90°–180°), III (180°–270°), IV (270°–360°)."},
 
-{id:3, lec:"L-1", blk:"Angle basics", topic:"Coterminal angles",
+{id:3, lec:"L-1", blk:"Angle basics", topic:"Coterminal angles", t:60,
  q:"Two angles are said to be <b>coterminal</b> when they",
  opts:[
   "share the same initial and terminal sides, differing by an integral multiple of 360°",
@@ -276,7 +302,7 @@ const QUIZ = [
   "Angles adding to 90° are <b>complementary</b> — again a different relation entirely."],
  sol:"Coterminal ⇔ the measures differ by an <b>integral multiple of 360°</b> (2π radians). Adding or subtracting whole revolutions never moves the terminal side."},
 
-{id:4, lec:"L-1", blk:"Angle basics", topic:"Finding a coterminal angle",
+{id:4, lec:"L-1", blk:"Angle basics", topic:"Finding a coterminal angle", t:60,
  q:"Which of the following angles is coterminal with 45°?",
  opts:["−315°","315°","−45°","135°"],
  ans:0,
@@ -287,7 +313,7 @@ const QUIZ = [
   "135° terminates in quadrant II; the difference is 90°."],
  sol:"Add or subtract 360° as often as you like: 45°, 405°, 765°, −315°, −675°, … are all coterminal. Here <b>45° − 360° = −315°</b>."},
 
-{id:5, lec:"L-1", blk:"Angle basics", topic:"Quadrant of an angle",
+{id:5, lec:"L-1", blk:"Angle basics", topic:"Quadrant of an angle", t:60,
  q:"The terminal side of an angle of 200° in standard position lies in quadrant",
  opts:["III","II","IV","I"],
  ans:0,
@@ -298,7 +324,7 @@ const QUIZ = [
   "Quadrant I runs from 0° to 90°."],
  sol:"I: 0°–90° · II: 90°–180° · <b>III: 180°–270°</b> · IV: 270°–360°. Since 200° lies between 180° and 270°, it is in quadrant III."},
 
-{id:6, lec:"L-1", blk:"Angle basics", topic:"Quadrantal angles",
+{id:6, lec:"L-1", blk:"Angle basics", topic:"Quadrantal angles", t:60,
  q:"Which of the following is a <b>quadrantal</b> angle?",
  opts:["270°","45°","120°","200°"],
  ans:0,
@@ -309,7 +335,7 @@ const QUIZ = [
   "200° terminates inside quadrant III."],
  sol:"<b>Quadrantal</b> = terminal side lies along an axis, i.e. θ = 0°, 90°, 180°, 270° or 360°. Such an angle belongs to no quadrant — it sits on the boundary."},
 
-{id:7, lec:"L-1", blk:"Systems of measurement", topic:"The sexagesimal system",
+{id:7, lec:"L-1", blk:"Systems of measurement", topic:"The sexagesimal system", t:90,
  q:"In the <b>sexagesimal</b> (English) system,",
  opts:[
   "1 right angle = 90°, 1° = 60′, 1′ = 60″",
@@ -324,7 +350,7 @@ const QUIZ = [
   "A right angle is 90 degrees or 100 grades — never 100 degrees."],
  sol:"<b>Sexagesimal:</b> 1 right angle = 90°, 1° = 60′, 1′ = 60″."},
 
-{id:8, lec:"L-1", blk:"Systems of measurement", topic:"The centesimal system",
+{id:8, lec:"L-1", blk:"Systems of measurement", topic:"The centesimal system", t:90,
  q:"In the <b>centesimal</b> (French) system,",
  opts:[
   "1 right angle = 100<sup>g</sup>, 1<sup>g</sup> = 100′, 1′ = 100″",
@@ -339,7 +365,7 @@ const QUIZ = [
   "π/2 is the right angle in the <b>circular</b> (radian) system, not in grades."],
  sol:"<b>Centesimal:</b> 1 right angle = 100<sup>g</sup>, 1<sup>g</sup> = 100′, 1′ = 100″."},
 
-{id:9, lec:"L-1", blk:"Systems of measurement", topic:"The minute-vs-minute trap",
+{id:9, lec:"L-1", blk:"Systems of measurement", topic:"The minute-vs-minute trap", t:60,
  q:"One minute in the <b>centesimal</b> (French) system equals",
  opts:[
   "(1/100)<sup>g</sup>",
@@ -354,7 +380,7 @@ const QUIZ = [
   "They are quite different: 1 English minute = (1/60)° ≈ 0.0167°, while 1 French minute = (1/100)(9/10)° = 0.009°."],
  sol:"⚠ The word “minute” means different things in the two systems. <b>French 1′ = (1/100)<sup>g</sup>; English 1′ = (1/60)°.</b> Never convert between them by treating the symbols as equivalent."},
 
-{id:10, lec:"L-1", blk:"Systems of measurement", topic:"Definition of a radian",
+{id:10, lec:"L-1", blk:"Systems of measurement", topic:"Definition of a radian", t:90,
  q:"One radian is the angle subtended at the centre of a circle by an arc whose length is",
  opts:[
   "equal to the radius",
@@ -369,7 +395,7 @@ const QUIZ = [
   "That would make the angle depend on the radius — a fixed arc of 1 unit subtends a bigger angle on a smaller circle. The definition is deliberately a <i>ratio</i>."],
  sol:"1<sup>c</sup> = the central angle of an arc equal in length to the radius. Since angles are proportional to their arcs, 1<sup>c</sup>/(straight angle) = r/(πr) = 1/π, so <b>1 radian = 180°/π</b> — independent of r."},
 
-{id:11, lec:"L-1", blk:"Systems of measurement", topic:"Radian ↔ degree",
+{id:11, lec:"L-1", blk:"Systems of measurement", topic:"Radian ↔ degree", t:90,
  q:"π radians equals",
  opts:["180°","360°","90°","270°"],
  ans:0,
@@ -380,7 +406,7 @@ const QUIZ = [
   "270° is 3π/2 radians."],
  sol:"<b>π radians = 180°</b>, hence 1<sup>c</sup> = 180°/π and 1° = π/180 radian. Every conversion in this chapter is this one line."},
 
-{id:12, lec:"L-1", blk:"Systems of measurement", topic:"The value of one radian",
+{id:12, lec:"L-1", blk:"Systems of measurement", topic:"The value of one radian", t:60,
  q:"Expressed in degrees, minutes and seconds, one radian is approximately",
  opts:["57° 16′ 22″","57° 22′ 16″","57° 30′","58° 16′ 22″"],
  ans:0,
@@ -391,7 +417,7 @@ const QUIZ = [
   "The whole-degree part is 57, not 58: 630/11 = 57.27, which does not reach 58."],
  sol:"1<sup>c</sup> = 180°/π ≈ 57.2727° ≈ <b>57° 16′ 22″</b> ≈ 57.3°. Conversely 1° = π/180 ≈ 0.01745<sup>c</sup>."},
 
-{id:13, lec:"L-1", blk:"Systems of measurement", topic:"The master relation",
+{id:13, lec:"L-1", blk:"Systems of measurement", topic:"The master relation", t:90,
  q:"If one and the same angle measures D degrees, R radians and G grades, then",
  opts:[
   "D/90 = 2R/π = G/100",
@@ -406,7 +432,7 @@ const QUIZ = [
   "The radian term is inverted. Same test: π/(2 × π/2) = 1 ✓ by coincidence at a right angle, but at a straight angle D = 180, R = π gives 2 = 1/2 ✗."],
  sol:"Write the angle as a fraction of a right angle in each system: <b>D/90 = 2R/π = G/100</b>. Check on the straight angle: 180/90 = 2π/π = 200/100 = 2 ✓"},
 
-{id:14, lec:"L-1", blk:"Conversions", topic:"Radian → degree",
+{id:14, lec:"L-1", blk:"Conversions", topic:"Radian → degree", t:60,
  q:"The degree measure corresponding to (2π/15)<sup>c</sup> is",
  opts:["24°","12°","30°","48°"],
  ans:0,
@@ -417,7 +443,7 @@ const QUIZ = [
   "Twice the answer — the factor 2 has been applied a second time."],
  sol:"Multiply by 180/π: (2π/15)(180/π) = 360/15 = <b>24°</b>."},
 
-{id:15, lec:"L-1", blk:"Conversions", topic:"Radian → degrees, minutes",
+{id:15, lec:"L-1", blk:"Conversions", topic:"Radian → degrees, minutes", t:90,
  q:"The degree measure corresponding to (π/8)<sup>c</sup> is",
  opts:["22° 30′","22° 50′","45°","11° 15′"],
  ans:0,
@@ -428,7 +454,7 @@ const QUIZ = [
   "Half the answer — this corresponds to π/16."],
  sol:"(π/8)(180/π) = 180/8 = 22.5° = 22° + (0.5 × 60)′ = <b>22° 30′</b>. To convert a decimal degree, multiply the fractional part by 60 for minutes, then that fraction by 60 again for seconds."},
 
-{id:16, lec:"L-1", blk:"Conversions", topic:"Degree → radian",
+{id:16, lec:"L-1", blk:"Conversions", topic:"Degree → radian", t:90,
  q:"The radian measure corresponding to 75° is",
  opts:["5π/12","5π/9","12π/5","4π/15"],
  ans:0,
@@ -439,7 +465,7 @@ const QUIZ = [
   "4π/15 corresponds to 48°."],
  sol:"Multiply by π/180: 75 × π/180 = <b>5π/12</b>. (Sanity check: 5π/12 is a little more than π/4 = 45°, and less than π/2 = 90° ✓)"},
 
-{id:17, lec:"L-1", blk:"Conversions", topic:"Degree → radian, large angle",
+{id:17, lec:"L-1", blk:"Conversions", topic:"Degree → radian, large angle", t:60,
  q:"The radian measure corresponding to 340° is",
  opts:["17π/9","17π/18","9π/17","34π/9"],
  ans:0,
@@ -450,7 +476,7 @@ const QUIZ = [
   "Twice the answer, which would exceed a full revolution."],
  sol:"340 × π/180 = 34π/18 = <b>17π/9</b>."},
 
-{id:18, lec:"L-1", blk:"Conversions", topic:"DMS → radian",
+{id:18, lec:"L-1", blk:"Conversions", topic:"DMS → radian", t:90,
  q:"The radian measure corresponding to 5° 37′ 30″ is",
  opts:["π/32","π/16","π/64","5π/32"],
  ans:0,
@@ -461,7 +487,7 @@ const QUIZ = [
   "Five times too large; the whole 5° has been kept as a separate factor rather than added in."],
  sol:"Work down the ladder: 30″ = ½′ ⇒ 37′30″ = (75/2)′ = (75/120)° = (5/8)°. So the angle is 5 + 5/8 = <b>45/8</b> degrees, and (45/8)(π/180) = 45π/1440 = <b>π/32</b>."},
 
-{id:19, lec:"L-1", blk:"Arc length", topic:"When s = rθ is valid",
+{id:19, lec:"L-1", blk:"Arc length", topic:"When s = rθ is valid", t:60,
  q:"The relation s = rθ (equivalently θ = s/r) is valid",
  opts:[
   "only when θ is measured in radians",
@@ -476,7 +502,7 @@ const QUIZ = [
   "Grades need their own conversion factor too."],
  sol:"<b>Convert to radians first.</b> θ = s/r is the definition of radian measure; s = rθ only means what you want when θ is in radians."},
 
-{id:20, lec:"L-1", blk:"Arc length", topic:"Arc from radius and angle",
+{id:20, lec:"L-1", blk:"Arc length", topic:"Arc from radius and angle", t:90,
  q:"Find the length of the arc of a circle of radius 5 cm subtending a central angle of 15°.",
  opts:["5π/12 cm","75 cm","π/12 cm","5π/6 cm"],
  ans:0,
@@ -487,7 +513,7 @@ const QUIZ = [
   "This uses θ = π/6 (i.e. 30°) instead of π/12."],
  sol:"Convert first: θ = 15° = π/12 radian. Then s = rθ = 5(π/12) = <b>5π/12 cm</b>."},
 
-{id:21, lec:"L-1", blk:"Arc length", topic:"Equal arcs, different circles",
+{id:21, lec:"L-1", blk:"Arc length", topic:"Equal arcs, different circles", t:90,
  q:"Arcs of the same length in two circles subtend angles of 60° and 75° at their centres. The ratio of the radii of the circles is",
  opts:["5 : 4","4 : 5","60 : 75","1 : 1"],
  ans:0,
@@ -498,7 +524,7 @@ const QUIZ = [
   "Equal radii would force equal angles for equal arcs."],
  sol:"s = r₁θ₁ = r₂θ₂ with θ₁ = π/3 and θ₂ = 5π/12 ⇒ r₁(π/3) = r₂(5π/12) ⇒ 4r₁ = 5r₂ ⇒ <b>r₁ : r₂ = 5 : 4</b>."},
 
-{id:22, lec:"L-1", blk:"Arc length", topic:"Angles of a triangle in A.P.",
+{id:22, lec:"L-1", blk:"Arc length", topic:"Angles of a triangle in A.P.", t:90,
  q:"The angles of a triangle are in A.P. The number of degrees in the least angle is to the number of radians in the greatest angle as 60 : π. The angles are",
  opts:["30°, 60°, 90°","45°, 60°, 75°","40°, 60°, 80°","50°, 60°, 70°"],
  ans:0,
@@ -510,7 +536,7 @@ const QUIZ = [
  sol:"Angles a − d, a, a + d sum to 180° ⇒ a = 60. Greatest in radians = (60 + d)π/180. The condition gives 180(60 − d)/[60(60 + d)] = 60/60 ⇒ 3(60 − d) = 60 + d ⇒ 4d = 120 ⇒ d = 30. Angles: <b>30°, 60°, 90°</b>."},
 
 /* ---------------- L-2 (22) ---------------- */
-{id:23, lec:"L-2", blk:"Polygons", topic:"Sum of the interior angles",
+{id:23, lec:"L-2", blk:"Polygons", topic:"Sum of the interior angles", t:60,
  q:"The sum of the interior angles of a polygon with n sides is",
  opts:["(n − 2) × 180°","n × 180°","(n − 2) × 360°","360°, for every n"],
  ans:0,
@@ -521,7 +547,7 @@ const QUIZ = [
   "That is the sum of the <b>exterior</b> angles, which really is 360° for every convex polygon."],
  sol:"<b>S = (n − 2) × 180°</b>. Triangle 180°, quadrilateral 360°, pentagon 540°, hexagon 720°, decagon 1440°."},
 
-{id:24, lec:"L-2", blk:"Polygons", topic:"Sum of the exterior angles",
+{id:24, lec:"L-2", blk:"Polygons", topic:"Sum of the exterior angles", t:90,
  q:"The sum of the exterior angles of any convex polygon is",
  opts:[
   "360°, independent of the number of sides",
@@ -536,7 +562,7 @@ const QUIZ = [
   "It is famously the <i>same</i> for every convex polygon — walking once round the boundary turns you through exactly one full revolution."],
  sol:"Σ exterior = 180n − (n − 2)180 = <b>360°</b>, for every n. This is what makes n = 360°/(exterior angle) work for regular polygons."},
 
-{id:25, lec:"L-2", blk:"Polygons", topic:"Interior angle in right angles",
+{id:25, lec:"L-2", blk:"Polygons", topic:"Interior angle in right angles", t:90,
  q:"Each interior angle of a regular polygon of n sides, measured in <b>right angles</b>, is",
  opts:[
   "(2n − 4)/n right angles",
@@ -551,7 +577,7 @@ const QUIZ = [
   "Check n = 10: 4 right angles = 360°, impossible for a single interior angle."],
  sol:"Interior sum = (n − 2)180° = (2n − 4) right angles ⇒ each angle = <b>(2n − 4)/n</b> right angles = [180(n − 2)]/n degrees."},
 
-{id:26, lec:"L-2", blk:"Polygons", topic:"Finding n from the interior angle",
+{id:26, lec:"L-2", blk:"Polygons", topic:"Finding n from the interior angle", t:90,
  q:"If each interior angle of a regular polygon is 144°, the number of sides is",
  opts:["10","8","12","9"],
  ans:0,
@@ -562,7 +588,7 @@ const QUIZ = [
   "A regular nonagon has interior angles of 140°."],
  sol:"Go via the <b>exterior</b> angle — it is always the quicker route. Exterior = 180° − 144° = 36°, and since the exterior angles total 360°, <b>n = 360/36 = 10</b>."},
 
-{id:27, lec:"L-2", blk:"Polygons", topic:"The exterior-angle route",
+{id:27, lec:"L-2", blk:"Polygons", topic:"The exterior-angle route", t:60,
  q:"For a regular polygon, the number of sides equals",
  opts:[
   "360° ÷ (each exterior angle)",
@@ -577,7 +603,7 @@ const QUIZ = [
   "Upside-down — this yields a small fraction rather than a whole number of sides."],
  sol:"Σ exterior = 360° and all n are equal, so each is 360°/n, hence <b>n = 360°/(exterior angle)</b>."},
 
-{id:28, lec:"L-2", blk:"Polygons", topic:"Convex versus concave",
+{id:28, lec:"L-2", blk:"Polygons", topic:"Convex versus concave", t:60,
  q:"A polygon is <b>convex</b> when",
  opts:[
   "every interior angle is less than 180°",
@@ -592,7 +618,7 @@ const QUIZ = [
   "Equal sides make it <b>equilateral</b>; equal sides <i>and</i> equal angles make it regular. Convexity is a separate property."],
  sol:"<b>Convex:</b> every interior angle &lt; 180°. <b>Concave:</b> at least one interior angle &gt; 180°."},
 
-{id:29, lec:"L-2", blk:"Polygons", topic:"Decagon angle in grades",
+{id:29, lec:"L-2", blk:"Polygons", topic:"Decagon angle in grades", t:90,
  q:"Each interior angle of a regular decagon, expressed in <b>grades</b>, is",
  opts:["160<sup>g</sup>","144<sup>g</sup>","150<sup>g</sup>","180<sup>g</sup>"],
  ans:0,
@@ -603,7 +629,7 @@ const QUIZ = [
   "180<sup>g</sup> is 1.8 right angles = 162°."],
  sol:"Each angle = (2×10 − 4)/10 = <b>8/5 right angles</b>. In grades: (8/5)(100<sup>g</sup>) = <b>160<sup>g</sup></b>. Cross-check with D/90 = G/100: 144/90 = 1.6 = 160/100 ✓"},
 
-{id:30, lec:"L-2", blk:"Polygons", topic:"Decagon angle in radians",
+{id:30, lec:"L-2", blk:"Polygons", topic:"Decagon angle in radians", t:90,
  q:"Each interior angle of a regular decagon, expressed in <b>radians</b>, is",
  opts:["4π/5","5π/4","2π/5","π/5"],
  ans:0,
@@ -614,7 +640,7 @@ const QUIZ = [
   "π/5 = 36°, which is the <b>exterior</b> angle of a regular decagon."],
  sol:"(8/5) right angles = (8/5)(π/2) = <b>4π/5</b> radian = 144°. So 144° = 160<sup>g</sup> = (4π/5)<sup>c</sup> — the same angle in all three systems."},
 
-{id:31, lec:"L-2", blk:"Sectors", topic:"Arc length of a sector",
+{id:31, lec:"L-2", blk:"Sectors", topic:"Arc length of a sector", t:60,
  q:"For a sector of radius r whose central angle is θ <b>degrees</b>, the arc length is",
  opts:[
   "(θ/360°) × 2πr",
@@ -629,7 +655,7 @@ const QUIZ = [
   "This uses half the circumference; at θ = 360° it returns πr, not 2πr."],
  sol:"ℓ = (θ/360°) × 2πr = πrθ/180°, which is exactly <b>rθ</b> once θ is converted to radians."},
 
-{id:32, lec:"L-2", blk:"Sectors", topic:"Area of a sector",
+{id:32, lec:"L-2", blk:"Sectors", topic:"Area of a sector", t:90,
  q:"The area of a sector of radius r with central angle θ <b>radians</b> is",
  opts:["½ r²θ","r²θ","½ rθ","2πr²θ"],
  ans:0,
@@ -640,7 +666,7 @@ const QUIZ = [
   "At θ = 2π this gives 4π²r², wildly too large."],
  sol:"<b>A = ½r²θ</b> (θ in radians) = (θ/360°)πr² (θ in degrees) = <b>½ℓr</b> (using the arc length)."},
 
-{id:33, lec:"L-2", blk:"Sectors", topic:"Area from arc length",
+{id:33, lec:"L-2", blk:"Sectors", topic:"Area from arc length", t:60,
  q:"If a sector has arc length ℓ and radius r, its area is",
  opts:["ℓr/2","ℓr","ℓ²r/2","ℓ/(2r)"],
  ans:0,
@@ -651,7 +677,7 @@ const QUIZ = [
   "This is a dimensionless ratio, not an area."],
  sol:"<b>A = ℓr/2.</b> When you know the arc and the radius this is the fastest route — skip the angle entirely."},
 
-{id:34, lec:"L-2", blk:"Sectors", topic:"Sector area from arc and radius",
+{id:34, lec:"L-2", blk:"Sectors", topic:"Sector area from arc and radius", t:90,
  q:"Find the area of a sector when the radius of the circle is 16 units and the length of the arc is 5 units.",
  opts:["40 sq units","80 sq units","20 sq units","400 sq units"],
  ans:0,
@@ -662,7 +688,7 @@ const QUIZ = [
   "This is ℓ²r/2 or similar — dimensionally wrong."],
  sol:"A = ℓr/2 = (5)(16)/2 = <b>40 square units</b>."},
 
-{id:35, lec:"L-2", blk:"Sectors", topic:"Perimeter of a sector",
+{id:35, lec:"L-2", blk:"Sectors", topic:"Perimeter of a sector", t:60,
  q:"The perimeter of a sector of radius r with central angle θ radians is",
  opts:["2r + rθ","rθ","2πr + rθ","2r + 2πr"],
  ans:0,
@@ -673,7 +699,7 @@ const QUIZ = [
   "This omits the arc and adds the full circumference."],
  sol:"<b>P = 2r + ℓ = 2r + rθ</b> (θ in radians). Two radii and one arc."},
 
-{id:36, lec:"L-2", blk:"Sectors", topic:"Numerical sector perimeter",
+{id:36, lec:"L-2", blk:"Sectors", topic:"Numerical sector perimeter", t:90,
  q:"A circular arc of radius 12 cm makes an angle of 30° at the centre. The perimeter of the sector formed is (take π = 3.14)",
  opts:["30.28 cm","6.28 cm","24 cm","36.28 cm"],
  ans:0,
@@ -684,7 +710,7 @@ const QUIZ = [
   "This adds 12.28 instead of 6.28 — the arc is 12 × π/6 = 2π, not 4π."],
  sol:"θ = 30° = π/6 radian. Arc = rθ = 12(π/6) = 2π ≈ 6.28 cm. P = 2r + arc = 24 + 6.28 = <b>30.28 cm</b>."},
 
-{id:37, lec:"L-2", blk:"Sectors", topic:"Sector area in degrees",
+{id:37, lec:"L-2", blk:"Sectors", topic:"Sector area in degrees", t:90,
  q:"A sector of radius 4 units has central angle 45°. Its area is (take π = 22/7)",
  opts:["44/7 sq units","22/7 sq units","88/7 sq units","44 sq units"],
  ans:0,
@@ -695,7 +721,7 @@ const QUIZ = [
   "The division by 7 has been dropped."],
  sol:"A = (θ/360°)πr² = (45/360)(22/7)(4²) = (1/8)(22/7)(16) = <b>44/7 square units</b>, and the arc is (45/360)(2)(22/7)(4) = 22/7 units."},
 
-{id:38, lec:"L-2", blk:"Clock angles", topic:"Speed of the minute hand",
+{id:38, lec:"L-2", blk:"Clock angles", topic:"Speed of the minute hand", t:90,
  q:"In one minute, the minute hand of a clock turns through",
  opts:["6°","0.5°","30°","12°"],
  ans:0,
@@ -706,7 +732,7 @@ const QUIZ = [
   "This would complete a revolution in 30 minutes."],
  sol:"Minute hand: 360° in 60 min ⇒ <b>6° per minute</b>. Hour hand: 360° in 12 h ⇒ 30° per hour ⇒ 0.5° per minute."},
 
-{id:39, lec:"L-2", blk:"Clock angles", topic:"Speed of the hour hand",
+{id:39, lec:"L-2", blk:"Clock angles", topic:"Speed of the hour hand", t:60,
  q:"In one minute, the hour hand of a clock turns through",
  opts:["0.5°","6°","30°","1°"],
  ans:0,
@@ -717,7 +743,7 @@ const QUIZ = [
   "1° per minute would take 360 minutes for a revolution, not 720."],
  sol:"Hour hand: 360° in 12 hours = 30° per hour = <b>0.5° per minute</b>."},
 
-{id:40, lec:"L-2", blk:"Clock angles", topic:"Gap between hour marks",
+{id:40, lec:"L-2", blk:"Clock angles", topic:"Gap between hour marks", t:60,
  q:"The angle between two consecutive hour marks on a clock face is",
  opts:["30° (= π/6 radian)","60° (= π/3 radian)","15° (= π/12 radian)","6° (= π/30 radian)"],
  ans:0,
@@ -728,7 +754,7 @@ const QUIZ = [
   "6° is the angle the <b>minute</b> hand sweeps in one minute, i.e. the gap between two consecutive minute marks."],
  sol:"360°/12 = <b>30°</b> = π/6 radian between consecutive hour marks."},
 
-{id:41, lec:"L-2", blk:"Clock angles", topic:"The clock-angle formula",
+{id:41, lec:"L-2", blk:"Clock angles", topic:"The clock-angle formula", t:60,
  q:"At H hours and M minutes, the angle between the hour and minute hands is",
  opts:[
   "|30H − 5.5M|°",
@@ -743,7 +769,7 @@ const QUIZ = [
   "The roles of H and M have been swapped — it is the hour count that carries the factor 30."],
  sol:"Hour hand at 30H + 0.5M degrees, minute hand at 6M degrees ⇒ angle = <b>|30H − 5.5M|°</b>. ⚠ Never forget the hour hand's drift."},
 
-{id:42, lec:"L-2", blk:"Clock angles", topic:"A clock-angle computation",
+{id:42, lec:"L-2", blk:"Clock angles", topic:"A clock-angle computation", t:90,
  q:"Find the angle between the minute hand and the hour hand of a clock at 7 : 20.",
  opts:["100°","90°","110°","120°"],
  ans:0,
@@ -754,7 +780,7 @@ const QUIZ = [
   "120° is the minute hand's own position measured from the 12, not the angle between the hands."],
  sol:"Hour hand: 7 h 20 min = 22/3 h from 12, so (360/12)(22/3) = 220°. Minute hand: (360/60)(20) = 120°. Angle = 220° − 120° = <b>100°</b>. (Check with the formula: |30(7) − 5.5(20)| = |210 − 110| = 100 ✓)"},
 
-{id:43, lec:"L-2", blk:"Clock angles", topic:"Distance travelled by a hand tip",
+{id:43, lec:"L-2", blk:"Clock angles", topic:"Distance travelled by a hand tip", t:90,
  q:"The minute hand of a watch is 1.5 cm long. How far does its tip move in 40 minutes? (take π = 3.14)",
  opts:["6.28 cm","4.71 cm","9.42 cm","3.14 cm"],
  ans:0,
@@ -765,7 +791,7 @@ const QUIZ = [
   "This uses 120° instead of 240° — half the actual rotation."],
  sol:"The minute hand turns 6° per minute, so in 40 minutes it turns 240° = (4π/3)<sup>c</sup>. Tip distance = rθ = 1.5 × 4π/3 = 2π = <b>6.28 cm</b>."},
 
-{id:44, lec:"L-2", blk:"Arc length", topic:"An astronomical application",
+{id:44, lec:"L-2", blk:"Arc length", topic:"An astronomical application", t:90,
  q:"The moon's distance from the earth is 360 000 km and its diameter subtends an angle of 31′ at the observer's eye. The diameter of the moon is about (take π = 22/7)",
  opts:["3247.62 km","194 857 km","186 000 km","324.76 km"],
  ans:0,
@@ -780,13 +806,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter M-1 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -804,6 +841,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -838,15 +878,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -858,47 +899,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -908,30 +966,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -940,7 +1042,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -953,9 +1057,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -964,7 +1086,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -985,21 +1108,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter M-1 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -246,7 +272,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 · Reversible reactions & equilibrium (11) ---------------- */
-{id:1, lec:"L-1", blk:"Reversible reactions", topic:"Definition of a reversible reaction",
+{id:1, lec:"L-1", blk:"Reversible reactions", topic:"Definition of a reversible reaction", t:60,
  q:"A reversible reaction is one in which",
  opts:[
   "products can react to re-form the reactants under the same conditions",
@@ -261,7 +287,7 @@ const QUIZ = [
   "Complete consumption of reactants is the mark of an irreversible reaction, not a reversible one."],
  sol:"<b>Reversible reaction</b>: proceeds in both directions under the same conditions (⇌), so it reaches a state where both reactants and products are present — equilibrium."},
 
-{id:2, lec:"L-1", blk:"Dynamic equilibrium", topic:"Nature of chemical equilibrium",
+{id:2, lec:"L-1", blk:"Dynamic equilibrium", topic:"Nature of chemical equilibrium", t:60,
  q:"At chemical equilibrium,",
  opts:[
   "the forward and backward reactions continue at equal rates",
@@ -276,7 +302,7 @@ const QUIZ = [
   "Concentrations become constant, but not necessarily equal — they hold at whatever ratio satisfies K."],
  sol:"Equilibrium is <b>dynamic</b>: rate_forward = rate_backward ≠ 0. Macroscopic properties stay constant while molecular exchange continues in both directions."},
 
-{id:3, lec:"L-1", blk:"Characteristics", topic:"Constant vs equal concentrations",
+{id:3, lec:"L-1", blk:"Characteristics", topic:"Constant vs equal concentrations", t:60,
  q:"At equilibrium the concentrations of reactants and products are",
  opts:[
   "constant, but not necessarily equal",
@@ -291,7 +317,7 @@ const QUIZ = [
   "At equilibrium concentrations no longer change with time."],
  sol:"At equilibrium concentrations are <b>constant, not equal</b>. Whether products or reactants dominate depends on the value of K, not on equality."},
 
-{id:4, lec:"L-1", blk:"Closed system", topic:"Requirement for equilibrium",
+{id:4, lec:"L-1", blk:"Closed system", topic:"Requirement for equilibrium", t:60,
  q:"Chemical equilibrium can only be established in a",
  opts:[
   "closed system",
@@ -306,7 +332,7 @@ const QUIZ = [
   "With no reactants there is no reaction to reach equilibrium."],
  sol:"Equilibrium needs a <b>closed system</b>: if a product escapes (open vessel), the reverse reaction cannot keep pace and the forward reaction runs to completion instead."},
 
-{id:5, lec:"L-1", blk:"Homogeneous/heterogeneous", topic:"Classifying an equilibrium",
+{id:5, lec:"L-1", blk:"Homogeneous/heterogeneous", topic:"Classifying an equilibrium", t:60,
  q:"The equilibrium CaCO₃(s) ⇌ CaO(s) + CO₂(g) is",
  opts:[
   "heterogeneous, because more than one phase is present",
@@ -321,7 +347,7 @@ const QUIZ = [
   "The presence of a gas alongside solids makes it heterogeneous, not homogeneous."],
  sol:"<b>Homogeneous</b>: all species in one phase (e.g. all gases). <b>Heterogeneous</b>: more than one phase — as here, with solids CaCO₃, CaO and gaseous CO₂."},
 
-{id:6, lec:"L-1", blk:"Irreversible reactions", topic:"Characteristic of an irreversible reaction",
+{id:6, lec:"L-1", blk:"Irreversible reactions", topic:"Characteristic of an irreversible reaction", t:60,
  q:"Which is a feature of an irreversible reaction?",
  opts:[
   "it proceeds essentially to completion in one direction",
@@ -336,7 +362,7 @@ const QUIZ = [
   "Irreversible reactions (e.g. combustion, precipitation, gas escape) often occur in open systems."],
  sol:"<b>Irreversible reactions</b> go to completion (combustion, precipitation, a gas or precipitate leaving the system). Reversible reactions instead settle at equilibrium."},
 
-{id:7, lec:"L-1", blk:"Dynamic equilibrium", topic:"Liquid–vapour equilibrium",
+{id:7, lec:"L-1", blk:"Dynamic equilibrium", topic:"Liquid–vapour equilibrium", t:60,
  q:"In a closed vessel, liquid water and its vapour reach equilibrium when",
  opts:[
   "the rate of evaporation equals the rate of condensation",
@@ -351,7 +377,7 @@ const QUIZ = [
   "The vapour pressure reaches a constant, non-zero value (the saturation vapour pressure)."],
  sol:"Liquid ⇌ vapour equilibrium: <b>rate of evaporation = rate of condensation</b>, giving a constant saturated vapour pressure. A physical example of dynamic equilibrium."},
 
-{id:8, lec:"L-1", blk:"Characteristics", topic:"Approaching equilibrium from either side",
+{id:8, lec:"L-1", blk:"Characteristics", topic:"Approaching equilibrium from either side", t:60,
  q:"A key characteristic of a true equilibrium is that",
  opts:[
   "the same equilibrium state can be reached from either the forward or the reverse direction",
@@ -366,7 +392,7 @@ const QUIZ = [
   "A catalyst speeds attainment of equilibrium but is not required to reach it."],
  sol:"A genuine equilibrium is reachable from <b>either side</b> and is independent of the path — starting from reactants or products gives the same K at a given temperature."},
 
-{id:9, lec:"L-1", blk:"Characteristics", topic:"Effect of a catalyst on the equilibrium state",
+{id:9, lec:"L-1", blk:"Characteristics", topic:"Effect of a catalyst on the equilibrium state", t:60,
  q:"Adding a catalyst to a reaction at equilibrium",
  opts:[
   "does not change the position of equilibrium, only how fast it is reached",
@@ -381,7 +407,7 @@ const QUIZ = [
   "K depends only on temperature, so a catalyst does not change it."],
  sol:"A catalyst lowers the activation energy for both directions equally ⇒ equilibrium is reached <b>faster but unchanged</b>. K is a function of temperature alone."},
 
-{id:10, lec:"L-1", blk:"Dynamic equilibrium", topic:"Observable properties at equilibrium",
+{id:10, lec:"L-1", blk:"Dynamic equilibrium", topic:"Observable properties at equilibrium", t:60,
  q:"At equilibrium, macroscopic properties such as colour, pressure and concentration",
  opts:[
   "remain constant with time",
@@ -396,7 +422,7 @@ const QUIZ = [
   "The properties reach constant, non-zero values."],
  sol:"At equilibrium, all measurable properties (colour, [conc], P) are <b>constant in time</b> — the signature of the dynamic balance between forward and reverse reactions."},
 
-{id:11, lec:"L-1", blk:"Closed system", topic:"Why an open vessel prevents equilibrium",
+{id:11, lec:"L-1", blk:"Closed system", topic:"Why an open vessel prevents equilibrium", t:90,
  q:"Heating CaCO₃ in an open container decomposes it completely to CaO, rather than reaching equilibrium, because",
  opts:[
   "the CO₂ gas escapes, so the reverse reaction cannot occur",
@@ -412,7 +438,7 @@ const QUIZ = [
  sol:"Open vessel ⇒ CO₂ escapes ⇒ no reverse reaction ⇒ CaCO₃ decomposes fully. In a <b>closed vessel</b> the CO₂ builds up and equilibrium is established."},
 
 /* ---------------- L-2 · Law of mass action & K (11) ---------------- */
-{id:12, lec:"L-2", blk:"Active mass", topic:"Meaning of active mass",
+{id:12, lec:"L-2", blk:"Active mass", topic:"Meaning of active mass", t:60,
  q:"In the law of mass action, the 'active mass' of a species in solution is taken as its",
  opts:[
   "molar concentration (mol/L)",
@@ -427,7 +453,7 @@ const QUIZ = [
   "Active mass is expressed as concentration, not a raw molecule count."],
  sol:"<b>Active mass = molar concentration</b> (mol/L), written in square brackets. For gases, partial pressure may be used instead (leading to Kp)."},
 
-{id:13, lec:"L-2", blk:"Law of mass action", topic:"Statement of the law of mass action",
+{id:13, lec:"L-2", blk:"Law of mass action", topic:"Statement of the law of mass action", t:60,
  q:"The law of mass action states that the rate of a reaction is proportional to",
  opts:[
   "the product of the active masses of the reactants, each raised to its stoichiometric coefficient",
@@ -442,7 +468,7 @@ const QUIZ = [
   "Temperature affects the rate constant, but the law of mass action concerns concentrations."],
  sol:"<b>Law of mass action</b>: rate ∝ product of active masses raised to their stoichiometric powers. Equating forward and reverse rates gives Kc = [products]ⁿ/[reactants]ᵐ."},
 
-{id:14, lec:"L-2", blk:"Kc expression", topic:"Writing the equilibrium constant",
+{id:14, lec:"L-2", blk:"Kc expression", topic:"Writing the equilibrium constant", t:60,
  q:"For aA + bB ⇌ cC + dD, the equilibrium constant Kc is",
  opts:[
   "[C]ᶜ[D]ᵈ / ([A]ᵃ[B]ᵇ)",
@@ -457,7 +483,7 @@ const QUIZ = [
   "The concentrations must be in a products/reactants ratio, not all multiplied together."],
  sol:"<b>Kc = [C]ᶜ[D]ᵈ / [A]ᵃ[B]ᵇ</b> — products over reactants, each raised to its stoichiometric coefficient."},
 
-{id:15, lec:"L-2", blk:"Catalyst", topic:"Catalyst and the equilibrium constant",
+{id:15, lec:"L-2", blk:"Catalyst", topic:"Catalyst and the equilibrium constant", t:60,
  q:"A catalyst affects the value of the equilibrium constant K by",
  opts:[
   "not changing it at all",
@@ -472,7 +498,7 @@ const QUIZ = [
   "It has no multiplicative effect on K."],
  sol:"A catalyst speeds both directions equally, so it does <b>not change K</b> (only temperature does). It just shortens the time to reach equilibrium."},
 
-{id:16, lec:"L-2", blk:"Kc dependence", topic:"What K depends on",
+{id:16, lec:"L-2", blk:"Kc dependence", topic:"What K depends on", t:60,
  q:"The value of the equilibrium constant of a given reaction depends on",
  opts:[
   "temperature",
@@ -487,7 +513,7 @@ const QUIZ = [
   "K is fixed at a given temperature regardless of the total pressure."],
  sol:"<b>K depends only on temperature.</b> Changing initial amounts, adding a catalyst, or altering pressure shifts the position but leaves K unchanged (unless T changes)."},
 
-{id:17, lec:"L-2", blk:"Kp", topic:"Kp in terms of partial pressures",
+{id:17, lec:"L-2", blk:"Kp", topic:"Kp in terms of partial pressures", t:60,
  q:"For a gaseous equilibrium, Kp is written using",
  opts:[
   "the partial pressures of the gases, each raised to its coefficient",
@@ -502,7 +528,7 @@ const QUIZ = [
   "Volumes are not used directly in Kp."],
  sol:"<b>Kp</b> uses partial pressures: e.g. for N₂ + 3H₂ ⇌ 2NH₃, Kp = p(NH₃)² / [p(N₂)·p(H₂)³]."},
 
-{id:18, lec:"L-2", blk:"Active mass of solids", topic:"Active mass of a pure solid or liquid",
+{id:18, lec:"L-2", blk:"Active mass of solids", topic:"Active mass of a pure solid or liquid", t:60,
  q:"The active mass of a pure solid or pure liquid is taken as",
  opts:[
   "unity (constant), so it does not appear in K",
@@ -517,7 +543,7 @@ const QUIZ = [
   "It is unity, not zero (zero would make K undefined)."],
  sol:"Pure solids and liquids have essentially constant activity, taken as <b>1</b>, so they are left out of Kc and Kp. This is why heterogeneous equilibria omit the solids."},
 
-{id:19, lec:"L-2", blk:"Kc units", topic:"Units of the equilibrium constant",
+{id:19, lec:"L-2", blk:"Kc units", topic:"Units of the equilibrium constant", t:90,
  q:"For the reaction N₂(g) + 3H₂(g) ⇌ 2NH₃(g), the units of Kc are",
  opts:[
   "mol⁻²·L² (since Δn = −2)",
@@ -532,7 +558,7 @@ const QUIZ = [
   "mol²·L⁻² is the reciprocal of the correct units."],
  sol:"Units of Kc = (mol/L)^Δn. Here Δn = 2 − 4 = −2 ⇒ units (mol/L)⁻² = <b>mol⁻²·L²</b>."},
 
-{id:20, lec:"L-2", blk:"Catalyst direction", topic:"Catalyst favours neither direction",
+{id:20, lec:"L-2", blk:"Catalyst direction", topic:"Catalyst favours neither direction", t:60,
  q:"A catalyst in a reversible reaction",
  opts:[
   "speeds up the forward and reverse reactions equally",
@@ -547,7 +573,7 @@ const QUIZ = [
   "A catalyst speeds reactions up, it does not slow them."],
  sol:"A catalyst provides an alternative low-energy path that both directions share equally ⇒ it does <b>not shift equilibrium</b>, only hastens it."},
 
-{id:21, lec:"L-2", blk:"Concentration on compression", topic:"Effect of compression on concentrations",
+{id:21, lec:"L-2", blk:"Concentration on compression", topic:"Effect of compression on concentrations", t:60,
  q:"Compressing a gaseous equilibrium mixture into half the volume changes each gas's molar concentration by",
  opts:[
   "doubling it",
@@ -562,7 +588,7 @@ const QUIZ = [
   "The gas is still present, so its concentration is non-zero."],
  sol:"Concentration = n/V. Halve V ⇒ each [gas] <b>doubles</b>. This is why compression shifts a gaseous equilibrium toward the side with fewer moles (Le Chatelier)."},
 
-{id:22, lec:"L-2", blk:"Equilibrium condition", topic:"Condition for equilibrium via rates",
+{id:22, lec:"L-2", blk:"Equilibrium condition", topic:"Condition for equilibrium via rates", t:60,
  q:"Equilibrium is reached when",
  opts:[
   "the rate of the forward reaction equals the rate of the reverse reaction",
@@ -578,7 +604,7 @@ const QUIZ = [
  sol:"Equilibrium: <b>rate_forward = rate_backward ≠ 0</b>. Setting the mass-action rate expressions equal yields the equilibrium constant."},
 
 /* ---------------- L-3 · Manipulating K, Kp-Kc, ICE (11) ---------------- */
-{id:23, lec:"L-3", blk:"Kp-Kc relation", topic:"Relation between Kp and Kc",
+{id:23, lec:"L-3", blk:"Kp-Kc relation", topic:"Relation between Kp and Kc", t:90,
  q:"The equilibrium constants Kp and Kc are related by",
  opts:[
   "Kp = Kc (RT)^Δn",
@@ -593,7 +619,7 @@ const QUIZ = [
   "Kp = Kc only in the special case Δn = 0."],
  sol:"<b>Kp = Kc (RT)^Δn</b>, Δn = (gaseous product moles) − (gaseous reactant moles). Kp = Kc when Δn = 0."},
 
-{id:24, lec:"L-3", blk:"Kp-Kc numeric", topic:"When Kp equals Kc",
+{id:24, lec:"L-3", blk:"Kp-Kc numeric", topic:"When Kp equals Kc", t:90,
  q:"For which reaction is Kp = Kc?",
  opts:[
   "H₂(g) + I₂(g) ⇌ 2HI(g)",
@@ -608,7 +634,7 @@ const QUIZ = [
   "SO₃ formation has Δn = 2 − 3 = −1 ⇒ Kp ≠ Kc."],
  sol:"Kp = Kc ⇔ Δn = 0. Only H₂ + I₂ ⇌ 2HI has equal gaseous moles on both sides (2 = 2), so <b>Kp = Kc</b>."},
 
-{id:25, lec:"L-3", blk:"Reversing K", topic:"K of the reverse reaction",
+{id:25, lec:"L-3", blk:"Reversing K", topic:"K of the reverse reaction", t:60,
  q:"If a reaction has equilibrium constant K, the reverse reaction has equilibrium constant",
  opts:["1/K","−K","K","K²"],
  ans:0,
@@ -619,7 +645,7 @@ const QUIZ = [
   "Squaring corresponds to doubling the equation, not reversing it."],
  sol:"Reverse reaction ⇒ <b>K_reverse = 1/K</b>. (Doubling an equation squares K; adding equations multiplies their K's.)"},
 
-{id:26, lec:"L-3", blk:"Scaling K", topic:"K when an equation is doubled",
+{id:26, lec:"L-3", blk:"Scaling K", topic:"K when an equation is doubled", t:90,
  q:"If the coefficients of a balanced equation are all doubled, its equilibrium constant becomes",
  opts:["K²","2K","K/2","K"],
  ans:0,
@@ -630,7 +656,7 @@ const QUIZ = [
   "K is unchanged only if the equation is unchanged."],
  sol:"Multiply an equation by n ⇒ raise K to the nth power. Doubling (n = 2) ⇒ <b>K²</b>. Halving ⇒ √K."},
 
-{id:27, lec:"L-3", blk:"Adding equilibria", topic:"K when equilibria are added",
+{id:27, lec:"L-3", blk:"Adding equilibria", topic:"K when equilibria are added", t:90,
  q:"If reaction 1 (K₁) and reaction 2 (K₂) are added to give an overall reaction, its equilibrium constant is",
  opts:["K₁ × K₂","K₁ + K₂","K₁ / K₂","K₁ − K₂"],
  ans:0,
@@ -641,7 +667,7 @@ const QUIZ = [
   "Subtraction of constants is not a valid operation here."],
  sol:"Add equations ⇒ <b>multiply</b> their K's: K_overall = K₁ × K₂. (Reverse ⇒ reciprocal; scale ⇒ power.)"},
 
-{id:28, lec:"L-3", blk:"Heterogeneous K", topic:"Writing K for a heterogeneous equilibrium",
+{id:28, lec:"L-3", blk:"Heterogeneous K", topic:"Writing K for a heterogeneous equilibrium", t:60,
  q:"For CaCO₃(s) ⇌ CaO(s) + CO₂(g), the equilibrium constant Kp is",
  opts:[
   "p(CO₂)",
@@ -656,7 +682,7 @@ const QUIZ = [
   "The correct expression is p(CO₂), not its reciprocal."],
  sol:"Pure solids are excluded (activity = 1), so <b>Kp = p(CO₂)</b>. The decomposition pressure of CaCO₃ depends only on temperature."},
 
-{id:29, lec:"L-3", blk:"Degree of dissociation", topic:"Degree of dissociation definition",
+{id:29, lec:"L-3", blk:"Degree of dissociation", topic:"Degree of dissociation definition", t:90,
  q:"The degree of dissociation α of a substance is",
  opts:[
   "the fraction of the substance that has dissociated at equilibrium",
@@ -671,7 +697,7 @@ const QUIZ = [
   "α is a fraction of the initial amount, not the amount itself."],
  sol:"<b>Degree of dissociation α = (fraction dissociated)</b> = moles reacted / initial moles. It links to K through the ICE table (e.g. Kc = Cα²/(1−α) for weak electrolytes)."},
 
-{id:30, lec:"L-3", blk:"ICE table", topic:"Using an ICE table",
+{id:30, lec:"L-3", blk:"ICE table", topic:"Using an ICE table", t:60,
  q:"For A ⇌ 2B starting with 1 mol A (volume V), if α is the degree of dissociation, the equilibrium moles of A and B are",
  opts:[
   "A: (1 − α), B: 2α",
@@ -686,7 +712,7 @@ const QUIZ = [
   "This ignores the dissociation entirely."],
  sol:"ICE for A ⇌ 2B: start 1, 0; change −α, +2α; equilibrium <b>(1 − α), 2α</b>. Total moles = 1 + α (the mole increase drives vapour-density methods)."},
 
-{id:31, lec:"L-3", blk:"Kp-Kc numeric", topic:"Computing Kp from Kc",
+{id:31, lec:"L-3", blk:"Kp-Kc numeric", topic:"Computing Kp from Kc", t:90,
  q:"For N₂(g) + 3H₂(g) ⇌ 2NH₃(g), Δn = −2. Then Kp equals",
  opts:[
   "Kc (RT)⁻²",
@@ -701,7 +727,7 @@ const QUIZ = [
   "Kp = Kc only when Δn = 0, but here Δn = −2."],
  sol:"Δn = 2 − 4 = −2 ⇒ <b>Kp = Kc (RT)⁻²</b>. With fewer gas moles on the product side, Kp &lt; Kc (for RT &gt; 1)."},
 
-{id:32, lec:"L-3", blk:"Adding equilibria numeric", topic:"Overall K from two steps",
+{id:32, lec:"L-3", blk:"Adding equilibria numeric", topic:"Overall K from two steps", t:90,
  q:"If K₁ = 4 for A ⇌ B and K₂ = 3 for B ⇌ C, the equilibrium constant for A ⇌ C is",
  opts:["12","7","4/3","1"],
  ans:0,
@@ -712,7 +738,7 @@ const QUIZ = [
   "1 would require the two to be reciprocals, which they are not."],
  sol:"Add the two equilibria ⇒ multiply the constants: K(A⇌C) = K₁K₂ = 4 × 3 = <b>12</b>."},
 
-{id:33, lec:"L-3", blk:"Reaction quotient", topic:"Reaction quotient Q",
+{id:33, lec:"L-3", blk:"Reaction quotient", topic:"Reaction quotient Q", t:90,
  q:"The reaction quotient Q has the same form as K but is evaluated using",
  opts:[
   "the concentrations at any moment, not necessarily at equilibrium",
@@ -728,7 +754,7 @@ const QUIZ = [
  sol:"<b>Q</b> = same expression as K but with current concentrations. Q &lt; K ⇒ net forward; Q &gt; K ⇒ net reverse; Q = K ⇒ equilibrium."},
 
 /* ---------------- L-4 · Thermodynamics of equilibrium (11) ---------------- */
-{id:34, lec:"L-4", blk:"ΔG° and K", topic:"Relation ΔG° = −RT ln K",
+{id:34, lec:"L-4", blk:"ΔG° and K", topic:"Relation ΔG° = −RT ln K", t:60,
  q:"The standard free-energy change and the equilibrium constant are related by",
  opts:[
   "ΔG° = −RT ln K",
@@ -743,7 +769,7 @@ const QUIZ = [
   "The relation is a product, not a quotient."],
  sol:"<b>ΔG° = −RT ln K = −2.303 RT log K.</b> This bridges thermodynamics (ΔG°) and equilibrium (K)."},
 
-{id:35, lec:"L-4", blk:"ΔG and Q", topic:"General ΔG relation",
+{id:35, lec:"L-4", blk:"ΔG and Q", topic:"General ΔG relation", t:90,
  q:"Under non-standard conditions, ΔG is given by",
  opts:[
   "ΔG = ΔG° + RT ln Q",
@@ -758,7 +784,7 @@ const QUIZ = [
   "ΔG equals ΔG° only when Q = 1 (standard conditions)."],
  sol:"<b>ΔG = ΔG° + RT ln Q.</b> Setting ΔG = 0 at equilibrium (Q = K) gives ΔG° = −RT ln K."},
 
-{id:36, lec:"L-4", blk:"Q vs K direction", topic:"Direction of reaction from Q and K",
+{id:36, lec:"L-4", blk:"Q vs K direction", topic:"Direction of reaction from Q and K", t:90,
  q:"If the reaction quotient Q is less than K, the reaction proceeds",
  opts:[
   "in the forward direction (toward products)",
@@ -773,7 +799,7 @@ const QUIZ = [
   "Moving toward reactants is the reverse direction, favoured when Q &gt; K."],
  sol:"<b>Q &lt; K ⇒ forward</b> (make more products); Q &gt; K ⇒ reverse; Q = K ⇒ at equilibrium. Equivalently, ΔG = RT ln(Q/K) &lt; 0 when Q &lt; K."},
 
-{id:37, lec:"L-4", blk:"ΔG° = 0", topic:"When K equals 1",
+{id:37, lec:"L-4", blk:"ΔG° = 0", topic:"When K equals 1", t:90,
  q:"If ΔG° = 0 for a reaction, then the equilibrium constant K is",
  opts:["1","0","∞","negative"],
  ans:0,
@@ -784,7 +810,7 @@ const QUIZ = [
   "K is always positive; it cannot be negative."],
  sol:"ΔG° = −RT ln K = 0 ⇒ ln K = 0 ⇒ <b>K = 1</b>. Products and reactants are equally favoured at standard conditions."},
 
-{id:38, lec:"L-4", blk:"ΔG° sign", topic:"Sign of ΔG° for a product-favoured reaction",
+{id:38, lec:"L-4", blk:"ΔG° sign", topic:"Sign of ΔG° for a product-favoured reaction", t:60,
  q:"A reaction with K ≫ 1 (products strongly favoured) has ΔG°",
  opts:["large and negative","large and positive","equal to zero","equal to RT"],
  ans:0,
@@ -795,7 +821,7 @@ const QUIZ = [
   "ΔG° = −RT ln K, which is large and negative, not equal to RT."],
  sol:"K ≫ 1 ⇒ <b>ΔG° large and negative</b> (products favoured). K ≪ 1 ⇒ ΔG° large positive."},
 
-{id:39, lec:"L-4", blk:"ΔG° → K numeric", topic:"K from ΔG°",
+{id:39, lec:"L-4", blk:"ΔG° → K numeric", topic:"K from ΔG°", t:90,
  q:"If ΔG° = −11.5 kJ/mol at 300 K, then K is about (2.303 RT ≈ 5.74 kJ/mol)",
  opts:["≈ 100","≈ 10","≈ 0.01","≈ 1"],
  ans:0,
@@ -806,7 +832,7 @@ const QUIZ = [
   "K = 1 corresponds to ΔG° = 0."],
  sol:"log K = −ΔG°/(2.303 RT) = 11.5/5.74 ≈ 2 ⇒ K ≈ <b>100</b>. Negative ΔG° gives K &gt; 1."},
 
-{id:40, lec:"L-4", blk:"Equilibrium as ΔG = 0", topic:"Thermodynamic equilibrium condition",
+{id:40, lec:"L-4", blk:"Equilibrium as ΔG = 0", topic:"Thermodynamic equilibrium condition", t:60,
  q:"At chemical equilibrium, the value of ΔG (not ΔG°) is",
  opts:["0","negative","positive","equal to ΔG°"],
  ans:0,
@@ -817,7 +843,7 @@ const QUIZ = [
   "ΔG = ΔG° only at standard conditions (Q = 1), not generally at equilibrium."],
  sol:"<b>ΔG = 0 at equilibrium</b> (free-energy minimum). Note ΔG° is generally non-zero — it fixes K via ΔG° = −RT ln K."},
 
-{id:41, lec:"L-4", blk:"α from K", topic:"Degree of dissociation from K",
+{id:41, lec:"L-4", blk:"α from K", topic:"Degree of dissociation from K", t:60,
  q:"For a weak dissociation A ⇌ B + C with small α and initial concentration C, the degree of dissociation is approximately",
  opts:[
   "α ≈ √(K/C)",
@@ -832,7 +858,7 @@ const QUIZ = [
   "√(KC) has the wrong form; the concentration should be in the denominator."],
  sol:"K = Cα²/(1 − α) ≈ Cα² (small α) ⇒ <b>α ≈ √(K/C)</b>. Dilution (smaller C) increases α — Ostwald's dilution law."},
 
-{id:42, lec:"L-4", blk:"ΔG at given Q", topic:"ΔG away from equilibrium",
+{id:42, lec:"L-4", blk:"ΔG at given Q", topic:"ΔG away from equilibrium", t:90,
  q:"A reaction has ΔG° = −10 kJ/mol. If, at some instant, Q happens to equal K, then ΔG at that instant is",
  opts:["0","−10 kJ/mol","+10 kJ/mol","−RT"],
  ans:0,
@@ -843,7 +869,7 @@ const QUIZ = [
   "−RT is not a free energy relevant here."],
  sol:"When Q = K the system is at equilibrium ⇒ <b>ΔG = 0</b>, regardless of the (non-zero) value of ΔG°."},
 
-{id:43, lec:"L-4", blk:"ΔG° units", topic:"Consistent units in ΔG° = −RT ln K",
+{id:43, lec:"L-4", blk:"ΔG° units", topic:"Consistent units in ΔG° = −RT ln K", t:60,
  q:"When using ΔG° = −2.303 RT log K with R = 8.314 J/mol·K and T = 298 K, the factor 2.303 RT is about",
  opts:["5.7 kJ/mol","2.5 kJ/mol","19 kJ/mol","0.057 kJ/mol"],
  ans:0,
@@ -854,7 +880,7 @@ const QUIZ = [
   "0.057 kJ/mol is off by a factor of 100."],
  sol:"2.303 RT = 2.303 × 8.314 × 298 ≈ <b>5.7 kJ/mol</b> at 298 K — a handy value: ΔG° (kJ/mol) ≈ −5.7 log K."},
 
-{id:44, lec:"L-4", blk:"Q vs K", topic:"Reaction at Q > K",
+{id:44, lec:"L-4", blk:"Q vs K", topic:"Reaction at Q > K", t:60,
  q:"If, for a reaction, Q > K at a given moment, then ΔG is ___ and the reaction proceeds ___.",
  opts:[
   "positive; in the reverse direction",
@@ -870,7 +896,7 @@ const QUIZ = [
  sol:"Q &gt; K ⇒ too many products ⇒ <b>ΔG &gt; 0, reaction goes reverse</b> (toward reactants) until Q falls back to K."},
 
 /* ---------------- L-5 · Le Chatelier (11) ---------------- */
-{id:45, lec:"L-5", blk:"Le Chatelier", topic:"Statement of Le Chatelier's principle",
+{id:45, lec:"L-5", blk:"Le Chatelier", topic:"Statement of Le Chatelier's principle", t:60,
  q:"Le Chatelier's principle states that a system at equilibrium, when disturbed, shifts to",
  opts:[
   "partially counteract the disturbance",
@@ -885,7 +911,7 @@ const QUIZ = [
   "The shift may change concentrations but not K (unless T changes)."],
  sol:"<b>Le Chatelier</b>: a disturbed equilibrium shifts to partly <b>counteract</b> the change, reaching a new equilibrium position."},
 
-{id:46, lec:"L-5", blk:"Concentration", topic:"Effect of adding a reactant",
+{id:46, lec:"L-5", blk:"Concentration", topic:"Effect of adding a reactant", t:60,
  q:"Adding more reactant to a system at equilibrium shifts it",
  opts:[
   "toward the products (forward)",
@@ -900,7 +926,7 @@ const QUIZ = [
   "Adding a reactant does not change temperature."],
  sol:"Add reactant ⇒ Q &lt; K ⇒ shift <b>forward</b> (make more product) to partly consume the added reactant. Removing product does the same."},
 
-{id:47, lec:"L-5", blk:"Pressure", topic:"Effect of increasing pressure",
+{id:47, lec:"L-5", blk:"Pressure", topic:"Effect of increasing pressure", t:60,
  q:"Increasing the pressure (decreasing volume) on a gaseous equilibrium shifts it toward",
  opts:[
   "the side with fewer moles of gas",
@@ -915,7 +941,7 @@ const QUIZ = [
   "Molecular mass is irrelevant; it is the number of gas moles that matters."],
  sol:"Increase P ⇒ shift toward <b>fewer gas moles</b>. E.g. N₂ + 3H₂ ⇌ 2NH₃ (4 → 2 mol) shifts forward under high pressure."},
 
-{id:48, lec:"L-5", blk:"Temperature", topic:"Effect of temperature on an endothermic reaction",
+{id:48, lec:"L-5", blk:"Temperature", topic:"Effect of temperature on an endothermic reaction", t:60,
  q:"For an endothermic reaction at equilibrium, raising the temperature shifts it",
  opts:[
   "toward the products (forward)",
@@ -930,7 +956,7 @@ const QUIZ = [
   "Mole count governs pressure effects, not temperature effects."],
  sol:"Endothermic (ΔH &gt; 0): heat is like a reactant. Raise T ⇒ shift <b>forward</b>, and K <b>increases</b>. (Exothermic: raising T shifts reverse and lowers K.)"},
 
-{id:49, lec:"L-5", blk:"Catalyst", topic:"Catalyst and equilibrium position",
+{id:49, lec:"L-5", blk:"Catalyst", topic:"Catalyst and equilibrium position", t:60,
  q:"Adding a catalyst to an equilibrium mixture",
  opts:[
   "does not shift the equilibrium position",
@@ -945,7 +971,7 @@ const QUIZ = [
   "K is unchanged by a catalyst."],
  sol:"A catalyst affects only the <b>rate</b> of attaining equilibrium, not its position or K."},
 
-{id:50, lec:"L-5", blk:"Inert gas", topic:"Adding an inert gas at constant volume",
+{id:50, lec:"L-5", blk:"Inert gas", topic:"Adding an inert gas at constant volume", t:60,
  q:"Adding an inert gas to a gaseous equilibrium at constant volume",
  opts:[
   "does not shift the equilibrium",
@@ -960,7 +986,7 @@ const QUIZ = [
   "No shift occurs at constant volume."],
  sol:"Inert gas at <b>constant volume</b>: partial pressures of the reactants/products are unchanged ⇒ <b>no shift</b>. (At constant pressure, adding inert gas increases volume and shifts toward more moles.)"},
 
-{id:51, lec:"L-5", blk:"Common-ion effect", topic:"Common-ion effect",
+{id:51, lec:"L-5", blk:"Common-ion effect", topic:"Common-ion effect", t:60,
  q:"The common-ion effect describes the suppression of the ionisation of a weak electrolyte when",
  opts:[
   "an ion common to it is added from another source",
@@ -975,7 +1001,7 @@ const QUIZ = [
   "Boiling is not the mechanism of the common-ion effect."],
  sol:"<b>Common-ion effect</b>: adding an ion already present shifts the equilibrium (Le Chatelier) to reduce ionisation — e.g. adding CH₃COONa suppresses CH₃COOH ionisation."},
 
-{id:52, lec:"L-5", blk:"Pressure no effect", topic:"Pressure with equal moles",
+{id:52, lec:"L-5", blk:"Pressure no effect", topic:"Pressure with equal moles", t:90,
  q:"Changing the pressure has no effect on the equilibrium H₂(g) + I₂(g) ⇌ 2HI(g) because",
  opts:[
   "the number of gas moles is the same on both sides",
@@ -990,7 +1016,7 @@ const QUIZ = [
   "No catalyst is implied, and it would not matter for pressure."],
  sol:"Δn_gas = 2 − 2 = 0 ⇒ pressure changes do <b>not shift</b> this equilibrium. Pressure only matters when the two sides differ in gaseous moles."},
 
-{id:53, lec:"L-5", blk:"Temperature and K", topic:"Colour change indicating ΔH sign",
+{id:53, lec:"L-5", blk:"Temperature and K", topic:"Colour change indicating ΔH sign", t:60,
  q:"On heating, a gaseous equilibrium becomes more intensely coloured (more of a coloured product). This shows the forward reaction is",
  opts:[
   "endothermic",
@@ -1005,7 +1031,7 @@ const QUIZ = [
   "Catalysis does not shift equilibrium with temperature."],
  sol:"Heating shifts an equilibrium in the <b>endothermic</b> direction. More coloured product on heating ⇒ the forward reaction is endothermic (e.g. N₂O₄ ⇌ 2NO₂ deepens brown on heating)."},
 
-{id:54, lec:"L-5", blk:"Adding a solid", topic:"Effect of adding a pure solid",
+{id:54, lec:"L-5", blk:"Adding a solid", topic:"Effect of adding a pure solid", t:60,
  q:"Adding more of a pure solid to a heterogeneous equilibrium",
  opts:[
   "does not shift the equilibrium",
@@ -1020,7 +1046,7 @@ const QUIZ = [
   "K is unchanged; solids are excluded from it."],
  sol:"Pure solids/liquids have unit activity and are absent from K ⇒ adding more <b>does not shift</b> the equilibrium (e.g. adding CaCO₃ to CaCO₃ ⇌ CaO + CO₂)."},
 
-{id:55, lec:"L-5", blk:"Combined effects", topic:"Optimising ammonia yield",
+{id:55, lec:"L-5", blk:"Combined effects", topic:"Optimising ammonia yield", t:60,
  q:"For N₂(g) + 3H₂(g) ⇌ 2NH₃(g), ΔH &lt; 0, the ammonia yield is maximised by",
  opts:[
   "high pressure and low temperature",
@@ -1036,7 +1062,7 @@ const QUIZ = [
  sol:"Exothermic, mole-decreasing reaction ⇒ favoured by <b>high pressure + low temperature</b>. (In practice a moderate temperature and catalyst balance yield against rate — the Haber process.)"},
 
 /* ---------------- L-6 · Degree of dissociation from vapour density (11) ---------------- */
-{id:56, lec:"L-6", blk:"Vapour density formula", topic:"α from vapour density",
+{id:56, lec:"L-6", blk:"Vapour density formula", topic:"α from vapour density", t:90,
  q:"For a dissociation giving n moles of product per mole of reactant, the degree of dissociation from vapour densities is",
  opts:[
   "α = (D − d) / [(n − 1)d]",
@@ -1051,7 +1077,7 @@ const QUIZ = [
   "This is the reciprocal-style rearrangement, not the correct formula."],
  sol:"<b>α = (D − d)/[(n − 1)d]</b>, where D = theoretical (undissociated) vapour density, d = observed, n = product moles per reactant mole. Dissociation lowers d below D."},
 
-{id:57, lec:"L-6", blk:"Vapour density numeric", topic:"α of N₂O₄",
+{id:57, lec:"L-6", blk:"Vapour density numeric", topic:"α of N₂O₄", t:90,
  q:"N₂O₄ ⇌ 2NO₂ has theoretical vapour density D = 46. If the observed vapour density is d = 30, the degree of dissociation is",
  opts:[
   "≈ 0.53",
@@ -1066,7 +1092,7 @@ const QUIZ = [
   "0.65 mis-adds the numerator; (46 − 30) = 16, not 19.5."],
  sol:"α = (D − d)/[(n − 1)d] = (46 − 30)/[(1)(30)] = 16/30 ≈ <b>0.53</b> (about 53% dissociated)."},
 
-{id:58, lec:"L-6", blk:"Vapour density numeric", topic:"α of PCl₅",
+{id:58, lec:"L-6", blk:"Vapour density numeric", topic:"α of PCl₅", t:90,
  q:"PCl₅ ⇌ PCl₃ + Cl₂ has theoretical vapour density D = 104.25. If d = 80, the degree of dissociation is",
  opts:[
   "≈ 0.30",
@@ -1081,7 +1107,7 @@ const QUIZ = [
   "0.70 mis-computes the numerator."],
  sol:"α = (D − d)/[(n − 1)d] = (104.25 − 80)/80 = 24.25/80 ≈ <b>0.30</b> (30% dissociated)."},
 
-{id:59, lec:"L-6", blk:"Molar mass form", topic:"α from observed molar mass",
+{id:59, lec:"L-6", blk:"Molar mass form", topic:"α from observed molar mass", t:90,
  q:"The degree of dissociation can also be written in terms of molar masses as",
  opts:[
   "α = (M − m) / [(n − 1)m]",
@@ -1096,7 +1122,7 @@ const QUIZ = [
   "A simple ratio M/m does not give the degree of dissociation."],
  sol:"Because molar mass ∝ vapour density, <b>α = (M − m)/[(n − 1)m]</b>, where M = normal molar mass, m = observed (apparent) molar mass."},
 
-{id:60, lec:"L-6", blk:"Effect on molar mass", topic:"Observed molar mass on dissociation",
+{id:60, lec:"L-6", blk:"Effect on molar mass", topic:"Observed molar mass on dissociation", t:60,
  q:"When a gas dissociates into more molecules, its observed (apparent) molar mass is",
  opts:[
   "less than the true molar mass",
@@ -1111,7 +1137,7 @@ const QUIZ = [
   "The apparent molar mass is reduced but non-zero."],
  sol:"Dissociation increases moles ⇒ apparent molar mass (and vapour density) <b>falls below</b> the true value. Association does the reverse (apparent mass rises)."},
 
-{id:61, lec:"L-6", blk:"% dissociation", topic:"Percent dissociation from α",
+{id:61, lec:"L-6", blk:"% dissociation", topic:"Percent dissociation from α", t:60,
  q:"If the degree of dissociation is α = 0.4, the percentage dissociation is",
  opts:["40%","4%","0.4%","60%"],
  ans:0,
@@ -1122,7 +1148,7 @@ const QUIZ = [
   "60% is the undissociated fraction (1 − α) × 100, not the dissociation."],
  sol:"% dissociation = α × 100 = <b>40%</b>. The remaining 60% is undissociated."},
 
-{id:62, lec:"L-6", blk:"Association", topic:"Distinguishing association from dissociation",
+{id:62, lec:"L-6", blk:"Association", topic:"Distinguishing association from dissociation", t:60,
  q:"If a substance associates (e.g. 2X ⇌ X₂) in the vapour, its observed vapour density is",
  opts:[
   "greater than the theoretical value",
@@ -1137,7 +1163,7 @@ const QUIZ = [
   "The vapour density rises but is non-zero."],
  sol:"Association (fewer moles) ⇒ observed vapour density (and apparent molar mass) is <b>greater</b> than theoretical — the mirror image of dissociation."},
 
-{id:63, lec:"L-6", blk:"Total moles", topic:"Total moles at equilibrium",
+{id:63, lec:"L-6", blk:"Total moles", topic:"Total moles at equilibrium", t:60,
  q:"For 1 mol of A dissociating as A ⇌ 2B with degree of dissociation α, the total moles at equilibrium are",
  opts:["1 + α","1 − α","2α","1 + 2α"],
  ans:0,
@@ -1148,7 +1174,7 @@ const QUIZ = [
   "1 + 2α over-counts; the total is 1 + α for this stoichiometry."],
  sol:"Total moles = (1 − α) + 2α = <b>1 + α</b>. The factor (1 + α) is what raises the observed volume/lowers the vapour density."},
 
-{id:64, lec:"L-6", blk:"Vapour density definition", topic:"Relation of vapour density to molar mass",
+{id:64, lec:"L-6", blk:"Vapour density definition", topic:"Relation of vapour density to molar mass", t:60,
  q:"The molar mass of a gas equals",
  opts:[
   "2 × vapour density",
@@ -1163,7 +1189,7 @@ const QUIZ = [
   "The factor is 2, not 4."],
  sol:"<b>Molar mass = 2 × vapour density</b> (VD is defined relative to hydrogen). This is why the α formula works identically with either quantity."},
 
-{id:65, lec:"L-6", blk:"Vapour density numeric", topic:"α of SO₃",
+{id:65, lec:"L-6", blk:"Vapour density numeric", topic:"α of SO₃", t:90,
  q:"For 2SO₃ ⇌ 2SO₂ + O₂ ... but treated as a per-mole dissociation with n = 1.5, if D = 40 and d = 32, α is",
  opts:[
   "≈ 0.5",
@@ -1178,7 +1204,7 @@ const QUIZ = [
   "0.80 mis-computes the numerator."],
  sol:"With n = 1.5 (3 product moles from 2 reactant moles ⇒ 1.5 per mole), α = (40 − 32)/[(0.5)(32)] = 8/16 = <b>0.5</b>."},
 
-{id:66, lec:"L-6", blk:"Interpreting α", topic:"Meaning of α = 1",
+{id:66, lec:"L-6", blk:"Interpreting α", topic:"Meaning of α = 1", t:60,
  q:"A degree of dissociation of α = 1 means the substance is",
  opts:[
   "completely (100%) dissociated",
@@ -1194,7 +1220,7 @@ const QUIZ = [
  sol:"α runs from 0 (no dissociation) to 1 (complete). <b>α = 1 ⇒ 100% dissociated.</b>"},
 
 /* ---------------- L-7 · Ionic equilibrium & electrolytes (11) ---------------- */
-{id:67, lec:"L-7", blk:"Electrolytes", topic:"Definition of an electrolyte",
+{id:67, lec:"L-7", blk:"Electrolytes", topic:"Definition of an electrolyte", t:60,
  q:"An electrolyte is a substance that",
  opts:[
   "conducts electricity in molten state or aqueous solution by producing ions",
@@ -1209,7 +1235,7 @@ const QUIZ = [
   "Conduction is by ions, not free electrons (that is metallic conduction)."],
  sol:"<b>Electrolyte</b>: gives ions in the molten state or in aqueous solution, and those mobile ions conduct electricity. NaCl, HCl and CH₃COOH are electrolytes."},
 
-{id:68, lec:"L-7", blk:"Strong vs weak", topic:"Strong electrolyte",
+{id:68, lec:"L-7", blk:"Strong vs weak", topic:"Strong electrolyte", t:60,
  q:"A strong electrolyte is one that",
  opts:[
   "is almost completely ionised in solution",
@@ -1224,7 +1250,7 @@ const QUIZ = [
   "Conduction requires mobile ions (molten or dissolved), not the solid."],
  sol:"<b>Strong electrolyte</b>: nearly 100% ionised (α ≈ 1) — strong acids, strong bases, most salts. <b>Weak</b>: only partly ionised (α ≪ 1) — weak acids/bases."},
 
-{id:69, lec:"L-7", blk:"Degree of ionisation", topic:"Definition of α for an electrolyte",
+{id:69, lec:"L-7", blk:"Degree of ionisation", topic:"Definition of α for an electrolyte", t:60,
  q:"The degree of ionisation α of an electrolyte is",
  opts:[
   "the fraction of the dissolved electrolyte that exists as ions",
@@ -1239,7 +1265,7 @@ const QUIZ = [
   "Conductivity depends on α but is a different quantity."],
  sol:"<b>Degree of ionisation α</b> = fraction of the electrolyte present as ions. Strong: α ≈ 1; weak: α small and increasing on dilution."},
 
-{id:70, lec:"L-7", blk:"Ostwald's dilution law", topic:"Ostwald's dilution law",
+{id:70, lec:"L-7", blk:"Ostwald's dilution law", topic:"Ostwald's dilution law", t:60,
  q:"Ostwald's dilution law for a weak electrolyte of concentration C gives the dissociation constant as",
  opts:[
   "Ka = Cα² / (1 − α)",
@@ -1254,7 +1280,7 @@ const QUIZ = [
   "C²α is dimensionally and functionally wrong."],
  sol:"<b>Ka = Cα²/(1 − α) ≈ Cα²</b> for small α (weak electrolyte). Hence α ≈ √(Ka/C): dilution (smaller C) increases α."},
 
-{id:71, lec:"L-7", blk:"Dilution and α", topic:"Effect of dilution on ionisation",
+{id:71, lec:"L-7", blk:"Dilution and α", topic:"Effect of dilution on ionisation", t:60,
  q:"On dilution, the degree of ionisation of a weak electrolyte",
  opts:[
   "increases",
@@ -1269,7 +1295,7 @@ const QUIZ = [
   "α rises toward 1 on dilution; it does not vanish."],
  sol:"α ≈ √(Ka/C) ⇒ smaller C (more dilute) ⇒ <b>larger α</b>. This is the essence of Ostwald's dilution law."},
 
-{id:72, lec:"L-7", blk:"Ostwald numeric", topic:"α from Ka and C",
+{id:72, lec:"L-7", blk:"Ostwald numeric", topic:"α from Ka and C", t:60,
  q:"For a weak acid with Ka = 1.8 × 10⁻⁵ at concentration 0.1 M, the degree of ionisation is about",
  opts:[
   "≈ 0.013",
@@ -1284,7 +1310,7 @@ const QUIZ = [
   "0.18 mis-scales the exponent."],
  sol:"α ≈ √(Ka/C) = √(1.8 × 10⁻⁵/0.1) = √(1.8 × 10⁻⁴) ≈ <b>0.013</b> (about 1.3% ionised — a typical weak acid)."},
 
-{id:73, lec:"L-7", blk:"Strong electrolyte α", topic:"α of a strong electrolyte",
+{id:73, lec:"L-7", blk:"Strong electrolyte α", topic:"α of a strong electrolyte", t:60,
  q:"For a strong electrolyte such as NaCl in dilute solution, the degree of ionisation is approximately",
  opts:["1 (fully ionised)","0.5","0.1","0"],
  ans:0,
@@ -1295,7 +1321,7 @@ const QUIZ = [
   "α = 0 would mean no ionisation (a non-electrolyte)."],
  sol:"Strong electrolytes ionise essentially completely ⇒ <b>α ≈ 1</b>. Ostwald's dilution law applies to <i>weak</i> electrolytes, not strong ones."},
 
-{id:74, lec:"L-7", blk:"Classifying electrolytes", topic:"Identifying a weak electrolyte",
+{id:74, lec:"L-7", blk:"Classifying electrolytes", topic:"Identifying a weak electrolyte", t:60,
  q:"Which of the following is a weak electrolyte?",
  opts:["CH₃COOH","NaCl","HCl","NaOH"],
  ans:0,
@@ -1306,7 +1332,7 @@ const QUIZ = [
   "NaOH is a strong base, fully ionised."],
  sol:"<b>CH₃COOH</b> is a weak electrolyte (partial ionisation). NaCl, HCl and NaOH are strong electrolytes (complete ionisation)."},
 
-{id:75, lec:"L-7", blk:"Conductivity", topic:"Conductivity and ionisation",
+{id:75, lec:"L-7", blk:"Conductivity", topic:"Conductivity and ionisation", t:90,
  q:"A dilute solution of a weak electrolyte conducts electricity",
  opts:[
   "weakly, because only a small fraction is ionised",
@@ -1321,7 +1347,7 @@ const QUIZ = [
   "Conduction requires the dissolved (ionised) state, not the solid."],
  sol:"Weak electrolyte ⇒ small α ⇒ few ions ⇒ <b>low conductivity</b>. Strong electrolytes, fully ionised, conduct well."},
 
-{id:76, lec:"L-7", blk:"Common-ion effect", topic:"Common-ion effect on a weak acid",
+{id:76, lec:"L-7", blk:"Common-ion effect", topic:"Common-ion effect on a weak acid", t:60,
  q:"Adding sodium acetate to an acetic acid solution",
  opts:[
   "decreases the ionisation of acetic acid (common-ion effect)",
@@ -1336,7 +1362,7 @@ const QUIZ = [
   "It remains a weak acid; its ionisation is merely reduced further."],
  sol:"Acetate is the common ion; adding it shifts CH₃COOH ⇌ CH₃COO⁻ + H⁺ to the left ⇒ <b>less ionisation</b> (and forms a buffer)."},
 
-{id:77, lec:"L-7", blk:"Ionic equilibrium", topic:"Definition of ionic equilibrium",
+{id:77, lec:"L-7", blk:"Ionic equilibrium", topic:"Definition of ionic equilibrium", t:60,
  q:"Ionic equilibrium refers to the equilibrium between",
  opts:[
   "unionised molecules and their ions in solution",
@@ -1352,7 +1378,7 @@ const QUIZ = [
  sol:"<b>Ionic equilibrium</b>: the balance between undissociated molecules and their ions, e.g. CH₃COOH ⇌ CH₃COO⁻ + H⁺. Ka governs its position."},
 
 /* ---------------- L-8 · Acids & bases (11) ---------------- */
-{id:78, lec:"L-8", blk:"Arrhenius", topic:"Arrhenius acid",
+{id:78, lec:"L-8", blk:"Arrhenius", topic:"Arrhenius acid", t:60,
  q:"According to the Arrhenius concept, an acid is a substance that",
  opts:[
   "produces H⁺ (H₃O⁺) ions in aqueous solution",
@@ -1367,7 +1393,7 @@ const QUIZ = [
   "Donating an electron pair is the Lewis definition of a base."],
  sol:"<b>Arrhenius acid</b>: gives H⁺ (hydronium) in water; <b>Arrhenius base</b>: gives OH⁻. (Limited to aqueous solutions.)"},
 
-{id:79, lec:"L-8", blk:"Bronsted-Lowry", topic:"Brønsted–Lowry acid",
+{id:79, lec:"L-8", blk:"Bronsted-Lowry", topic:"Brønsted–Lowry acid", t:60,
  q:"A Brønsted–Lowry acid is defined as a",
  opts:[
   "proton (H⁺) donor",
@@ -1382,7 +1408,7 @@ const QUIZ = [
   "Producing hydroxide is the Arrhenius base idea."],
  sol:"<b>Brønsted–Lowry acid = proton donor</b>, base = proton acceptor. This concept extends beyond water and introduces conjugate acid–base pairs."},
 
-{id:80, lec:"L-8", blk:"Conjugate pairs", topic:"Conjugate base",
+{id:80, lec:"L-8", blk:"Conjugate pairs", topic:"Conjugate base", t:60,
  q:"The conjugate base of HCl is",
  opts:["Cl⁻","H⁺","H₃O⁺","OH⁻"],
  ans:0,
@@ -1393,7 +1419,7 @@ const QUIZ = [
   "OH⁻ is the conjugate base of water, not of HCl."],
  sol:"A conjugate base = acid minus one proton. HCl → H⁺ + <b>Cl⁻</b>, so Cl⁻ is the conjugate base."},
 
-{id:81, lec:"L-8", blk:"Lewis", topic:"Lewis acid",
+{id:81, lec:"L-8", blk:"Lewis", topic:"Lewis acid", t:60,
  q:"A Lewis acid is a species that",
  opts:[
   "accepts a lone pair of electrons",
@@ -1408,7 +1434,7 @@ const QUIZ = [
   "Producing OH⁻ is the Arrhenius base idea."],
  sol:"<b>Lewis acid = electron-pair acceptor</b> (BF₃, H⁺, metal cations); <b>Lewis base = electron-pair donor</b> (NH₃, OH⁻). The most general acid–base concept."},
 
-{id:82, lec:"L-8", blk:"Amphoteric", topic:"Amphoteric species",
+{id:82, lec:"L-8", blk:"Amphoteric", topic:"Amphoteric species", t:60,
  q:"Which species is amphoteric (can act as both an acid and a base)?",
  opts:["water (H₂O)","HCl","NaOH","Na⁺"],
  ans:0,
@@ -1419,7 +1445,7 @@ const QUIZ = [
   "Na⁺ is a spectator ion, neither acid nor base in the Brønsted sense."],
  sol:"<b>Water is amphoteric (amphiprotic)</b>: H₂O → OH⁻ + H⁺ (acid) or H₂O + H⁺ → H₃O⁺ (base). HCO₃⁻ and HSO₄⁻ are other examples."},
 
-{id:83, lec:"L-8", blk:"Basicity", topic:"Basicity of an acid",
+{id:83, lec:"L-8", blk:"Basicity", topic:"Basicity of an acid", t:60,
  q:"The basicity of phosphoric acid, H₃PO₄, is",
  opts:["3","1","2","4"],
  ans:0,
@@ -1430,7 +1456,7 @@ const QUIZ = [
   "H₃PO₄ has only three ionisable H, not four."],
  sol:"<b>Basicity = number of ionisable H⁺</b>. H₃PO₄ has 3 replaceable H ⇒ basicity 3. (H₃PO₃ is only dibasic — one H is bonded to P and not ionisable.)"},
 
-{id:84, lec:"L-8", blk:"Basicity anomaly", topic:"Basicity of phosphorous acid",
+{id:84, lec:"L-8", blk:"Basicity anomaly", topic:"Basicity of phosphorous acid", t:60,
  q:"Phosphorous acid, H₃PO₃, has a basicity of",
  opts:[
   "2, because one H is bonded directly to P and is not ionisable",
@@ -1445,7 +1471,7 @@ const QUIZ = [
   "It does ionise (two acidic H), so basicity is not 0."],
  sol:"H₃PO₃ has structure (HO)₂P(=O)H: two O–H (ionisable) and one P–H (not). <b>Basicity = 2</b> — a classic trap, since it has three hydrogens."},
 
-{id:85, lec:"L-8", blk:"Boric acid", topic:"Nature of boric acid",
+{id:85, lec:"L-8", blk:"Boric acid", topic:"Nature of boric acid", t:60,
  q:"Boric acid, H₃BO₃, is a weak monobasic acid because it",
  opts:[
   "acts as a Lewis acid, accepting OH⁻ from water rather than donating its own H⁺",
@@ -1460,7 +1486,7 @@ const QUIZ = [
   "It generates H⁺ (via accepting OH⁻ from water), not OH⁻."],
  sol:"H₃BO₃ is a <b>Lewis acid</b>: it accepts OH⁻ from water, freeing one H⁺, so it behaves as a weak <b>monobasic</b> acid despite having three H."},
 
-{id:86, lec:"L-8", blk:"Conjugate acid", topic:"Conjugate acid of a base",
+{id:86, lec:"L-8", blk:"Conjugate acid", topic:"Conjugate acid of a base", t:60,
  q:"The conjugate acid of ammonia, NH₃, is",
  opts:["NH₄⁺","NH₂⁻","N₃⁻","OH⁻"],
  ans:0,
@@ -1471,7 +1497,7 @@ const QUIZ = [
   "OH⁻ is not derived from ammonia by adding a proton."],
  sol:"Conjugate acid = base + one proton. NH₃ + H⁺ → <b>NH₄⁺</b>."},
 
-{id:87, lec:"L-8", blk:"Acidity of a base", topic:"Acidity of a base",
+{id:87, lec:"L-8", blk:"Acidity of a base", topic:"Acidity of a base", t:60,
  q:"The acidity of a base is the number of",
  opts:[
   "ionisable OH⁻ groups it provides",
@@ -1486,7 +1512,7 @@ const QUIZ = [
   "The count is per formula unit, not per litre."],
  sol:"<b>Acidity of a base = number of ionisable OH⁻ groups</b>: NaOH acidity 1, Ca(OH)₂ acidity 2, Al(OH)₃ acidity 3. (Parallels 'basicity' of an acid.)"},
 
-{id:88, lec:"L-8", blk:"Strength ordering", topic:"Basic strength of group-15 hydrides",
+{id:88, lec:"L-8", blk:"Strength ordering", topic:"Basic strength of group-15 hydrides", t:60,
  q:"The order of basic strength of the group-15 hydrides is",
  opts:[
   "NH₃ > PH₃ > AsH₃ > SbH₃",
@@ -1502,7 +1528,7 @@ const QUIZ = [
  sol:"Basic strength (lone-pair availability) decreases down group 15: <b>NH₃ &gt; PH₃ &gt; AsH₃ &gt; SbH₃</b>. The smaller, denser N lone pair donates best."},
 
 /* ---------------- L-9 · pH, pOH, Kw (11) ---------------- */
-{id:89, lec:"L-9", blk:"Kw", topic:"Ionic product of water",
+{id:89, lec:"L-9", blk:"Kw", topic:"Ionic product of water", t:90,
  q:"The ionic product of water Kw at 25 °C is",
  opts:["1.0 × 10⁻¹⁴","1.0 × 10⁻⁷","1.0 × 10⁻¹","1.0 × 10¹⁴"],
  ans:0,
@@ -1513,7 +1539,7 @@ const QUIZ = [
   "10¹⁴ has the wrong sign of exponent."],
  sol:"<b>Kw = [H⁺][OH⁻] = 1.0 × 10⁻¹⁴ at 25 °C.</b> In pure water [H⁺] = [OH⁻] = 10⁻⁷ M, giving pH = 7."},
 
-{id:90, lec:"L-9", blk:"pH definition", topic:"Definition of pH",
+{id:90, lec:"L-9", blk:"pH definition", topic:"Definition of pH", t:90,
  q:"pH is defined as",
  opts:[
   "−log₁₀[H⁺]",
@@ -1528,7 +1554,7 @@ const QUIZ = [
   "pH is a logarithmic quantity, not a simple multiple of [H⁺]."],
  sol:"<b>pH = −log₁₀[H⁺].</b> Likewise pOH = −log[OH⁻], and pH + pOH = 14 at 25 °C."},
 
-{id:91, lec:"L-9", blk:"pH numeric", topic:"pH of a strong acid",
+{id:91, lec:"L-9", blk:"pH numeric", topic:"pH of a strong acid", t:90,
  q:"The pH of a 0.01 M HCl solution is",
  opts:["2","1","12","0.01"],
  ans:0,
@@ -1539,7 +1565,7 @@ const QUIZ = [
   "0.01 is the concentration, not the pH."],
  sol:"Strong acid: [H⁺] = 0.01 M = 10⁻² ⇒ pH = <b>2</b>."},
 
-{id:92, lec:"L-9", blk:"pH + pOH", topic:"pH from pOH",
+{id:92, lec:"L-9", blk:"pH + pOH", topic:"pH from pOH", t:90,
  q:"A solution has pOH = 4 at 25 °C. Its pH is",
  opts:["10","4","14","7"],
  ans:0,
@@ -1550,7 +1576,7 @@ const QUIZ = [
   "7 would require pOH = 7 (neutral)."],
  sol:"pH + pOH = 14 at 25 °C ⇒ pH = 14 − 4 = <b>10</b> (a basic solution)."},
 
-{id:93, lec:"L-9", blk:"pH of base", topic:"pH of a strong base",
+{id:93, lec:"L-9", blk:"pH of base", topic:"pH of a strong base", t:90,
  q:"The pH of a 0.001 M NaOH solution is",
  opts:["11","3","2","13"],
  ans:0,
@@ -1561,7 +1587,7 @@ const QUIZ = [
   "13 corresponds to 0.1 M NaOH, not 0.001 M."],
  sol:"Strong base: [OH⁻] = 0.001 = 10⁻³ ⇒ pOH = 3 ⇒ pH = 14 − 3 = <b>11</b>."},
 
-{id:94, lec:"L-9", blk:"pH scale", topic:"Factor of ten on the pH scale",
+{id:94, lec:"L-9", blk:"pH scale", topic:"Factor of ten on the pH scale", t:90,
  q:"A solution of pH 3 is how many times more acidic than a solution of pH 5?",
  opts:["100 times","2 times","10 times","1000 times"],
  ans:0,
@@ -1572,7 +1598,7 @@ const QUIZ = [
   "1000× would be a 3-unit difference."],
  sol:"pH is logarithmic: Δ(pH) = 2 ⇒ [H⁺] ratio = 10² = <b>100×</b>. pH 3 has 100 times the [H⁺] of pH 5."},
 
-{id:95, lec:"L-9", blk:"Neutral", topic:"pH of a neutral solution",
+{id:95, lec:"L-9", blk:"Neutral", topic:"pH of a neutral solution", t:90,
  q:"At 25 °C, a neutral solution has",
  opts:[
   "[H⁺] = [OH⁻] = 10⁻⁷ M and pH = 7",
@@ -1587,7 +1613,7 @@ const QUIZ = [
   "[OH⁻] is 10⁻⁷ M, not zero, in a neutral solution."],
  sol:"Neutral (25 °C): <b>[H⁺] = [OH⁻] = 10⁻⁷ M, pH = 7</b>. (At higher temperatures Kw rises and neutral pH falls below 7.)"},
 
-{id:96, lec:"L-9", blk:"Dilution", topic:"Effect of dilution on acid pH",
+{id:96, lec:"L-9", blk:"Dilution", topic:"Effect of dilution on acid pH", t:60,
  q:"Diluting a strong acid solution with water causes its pH to",
  opts:[
   "increase toward 7 (but never exceed it)",
@@ -1602,7 +1628,7 @@ const QUIZ = [
   "A diluted acid approaches pH 7 but does not cross it into basic territory."],
  sol:"Dilute a strong acid ⇒ [H⁺] falls ⇒ <b>pH rises toward 7</b> (asymptotically; extreme dilution is limited by water's own 10⁻⁷ M H⁺)."},
 
-{id:97, lec:"L-9", blk:"Diprotic acid", topic:"pH of a dilute strong diprotic acid",
+{id:97, lec:"L-9", blk:"Diprotic acid", topic:"pH of a dilute strong diprotic acid", t:90,
  q:"The pH of a 0.005 M H₂SO₄ solution (assume complete ionisation to 2H⁺) is",
  opts:["2","3","1","2.3"],
  ans:0,
@@ -1613,7 +1639,7 @@ const QUIZ = [
   "2.3 would come from treating it as monoprotic (0.005 M H⁺)."],
  sol:"Diprotic, fully ionised: [H⁺] = 2 × 0.005 = 0.01 M = 10⁻² ⇒ pH = <b>2</b>."},
 
-{id:98, lec:"L-9", blk:"Mixing", topic:"pH after mixing acid and base",
+{id:98, lec:"L-9", blk:"Mixing", topic:"pH after mixing acid and base", t:90,
  q:"Equal volumes of 0.1 M HCl and 0.1 M NaOH are mixed. The resulting pH is",
  opts:[
   "7 (neutral — they exactly neutralise)",
@@ -1628,7 +1654,7 @@ const QUIZ = [
   "pH 0 would require a huge excess of acid."],
  sol:"Equal moles of HCl and NaOH ⇒ complete neutralisation ⇒ only NaCl (a neutral salt) remains ⇒ <b>pH = 7</b>."},
 
-{id:99, lec:"L-9", blk:"Excess after mixing", topic:"pH with excess acid",
+{id:99, lec:"L-9", blk:"Excess after mixing", topic:"pH with excess acid", t:90,
  q:"Mixing 100 mL of 0.1 M HCl with 100 mL of 0.05 M NaOH gives a solution whose [H⁺] is",
  opts:[
   "0.025 M (pH ≈ 1.6)",
@@ -1647,13 +1673,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter C-7 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1671,6 +1708,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1705,15 +1745,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1725,47 +1766,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1775,30 +1833,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1807,7 +1909,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1820,9 +1924,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1831,7 +1953,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1852,21 +1975,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter C-7 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

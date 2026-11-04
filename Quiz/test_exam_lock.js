@@ -173,7 +173,7 @@ let totalFail = 0;
 const graces = new Set();
 
 files.sort().forEach(f => {
-  const html = fs.readFileSync(path.join(__dirname, f), "utf8");
+  const html = fs.readFileSync(path.join(__dirname, f), "utf8").replace(/\r\n/g, "\n");   // M12/M13 are CRLF
   const i = html.indexOf(MARK), j = html.indexOf("renderPicker();\n</script>");
   if (i < 0 || j < 0) { console.log("  MISSING LOCK  " + f); totalFail++; return; }
   const src = html.slice(i, j);

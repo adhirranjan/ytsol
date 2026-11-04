@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -257,7 +283,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (9) ---------------- */
-{id:1, lec:"L-1", blk:"Atomic mass", topic:"Definition of the amu",
+{id:1, lec:"L-1", blk:"Atomic mass", topic:"Definition of the amu", t:60,
  q:"One atomic mass unit (u) is defined as",
  opts:[
   "one-twelfth of the mass of one ¹²C atom",
@@ -272,7 +298,7 @@ const QUIZ = [
   "One mole of ¹²C weighs 12 g, so a twelfth of that is 1 g — an enormous mass compared with a single atomic unit."],
  sol:"<b>1 u = (1/12) × mass of one ¹²C atom = 1.66056 × 10⁻²⁴ g.</b> ⚠ Note this is defined per <b>atom</b>, not per mole. Multiplying 1 u by N<sub>A</sub> gives exactly 1 g."},
 
-{id:2, lec:"L-1", blk:"Atomic mass", topic:"Average atomic mass is weighted",
+{id:2, lec:"L-1", blk:"Atomic mass", topic:"Average atomic mass is weighted", t:60,
  q:"Nitrogen occurs as 99.33 % ¹⁴N and 0.67 % ¹⁵N. Its average atomic mass is closest to",
  opts:["14.007 u","14.5 u","14.67 u","15.0 u"],
  ans:0,
@@ -283,7 +309,7 @@ const QUIZ = [
   "15.0 is the mass of the minor isotope alone."],
  sol:"<b>Ā = ΣP<sub>i</sub>A<sub>i</sub>/100</b>, a <b>weighted</b> mean. With one isotope at 99 %, the average must sit almost on top of it."},
 
-{id:3, lec:"L-1", blk:"Atomic mass", topic:"Average atomic mass of argon",
+{id:3, lec:"L-1", blk:"Atomic mass", topic:"Average atomic mass of argon", t:90,
  q:"Argon occurs as ³⁶Ar (0.34 %), ³⁸Ar (0.06 %) and ⁴⁰Ar (99.6 %). Its average atomic mass is about",
  opts:["39.99 u","38.0 u","40.0 u exactly","37.99 u"],
  ans:0,
@@ -294,7 +320,7 @@ const QUIZ = [
   "37.99 is a full 2 u too low; the dominant isotope is 40, not 38."],
  sol:"Ā = [(36)(0.34) + (38)(0.06) + (40)(99.6)]/100 = (12.24 + 2.28 + 3984)/100 = <b>39.99 u</b>. When one isotope dominates, the answer should land just short of its mass — a useful check."},
 
-{id:4, lec:"L-1", blk:"Atomic mass", topic:"Isotopic abundance from the average",
+{id:4, lec:"L-1", blk:"Atomic mass", topic:"Isotopic abundance from the average", t:90,
  q:"Boron has two isotopes of masses 10 u and 11 u. If the average atomic mass is 10.8 u, the percentage abundance of the lighter isotope is",
  opts:["20 %","80 %","10.8 %","50 %"],
  ans:0,
@@ -305,7 +331,7 @@ const QUIZ = [
   "50 % would give an average of exactly 10.5, not 10.8."],
  sol:"Set up the weighted mean and solve: 10x + 11(100 − x) = 1080 ⇒ <b>x = 20 % ¹⁰B, 80 % ¹¹B</b>. Sanity check: 10.8 sits much closer to 11 than to 10, so the heavier isotope must dominate."},
 
-{id:5, lec:"L-1", blk:"Molecular vs formula mass", topic:"When to say formula mass",
+{id:5, lec:"L-1", blk:"Molecular vs formula mass", topic:"When to say formula mass", t:60,
  q:"For sodium chloride we speak of <b>formula mass</b> rather than molecular mass because",
  opts:[
   "NaCl is ionic and contains no discrete molecules",
@@ -320,7 +346,7 @@ const QUIZ = [
   "Fractional atomic masses come from isotopic mixtures and affect covalent compounds just as much."],
  sol:"<b>Molecular mass</b> for covalent species with real molecules (H₂O, CO₂); <b>formula mass</b> for ionic solids (NaCl, CaCO₃), where the formula gives only the ion ratio."},
 
-{id:6, lec:"L-1", blk:"Redefining the unit", topic:"Effect of changing the mass standard",
+{id:6, lec:"L-1", blk:"Redefining the unit", topic:"Effect of changing the mass standard", t:60,
  q:"If 1/24 of the mass of a ¹²C atom were taken as the new atomic mass unit, the atomic mass of iron (currently 56) would become",
  opts:["112","28","56","14"],
  ans:0,
@@ -331,7 +357,7 @@ const QUIZ = [
   "14 quarters the value, corresponding to a unit four times larger."],
  sol:"1/24 of a ¹²C atom is <b>half</b> the present unit. Atomic mass = (mass of atom)/(unit), so a smaller unit gives a <b>larger</b> number: <b>56 × 2 = 112</b>. On this scale carbon itself would be 24."},
 
-{id:7, lec:"L-1", blk:"Mass of one atom", topic:"One atom versus one gram atom",
+{id:7, lec:"L-1", blk:"Mass of one atom", topic:"One atom versus one gram atom", t:60,
  q:"For oxygen (atomic mass 16), which statement is correct?",
  opts:[
   "One atom weighs about 2.66 × 10⁻²³ g, while one gram atom weighs 16 g",
@@ -346,7 +372,7 @@ const QUIZ = [
   "One atom weighs 16 <b>u</b>; one gram atom weighs 16 <b>g</b>. The numbers match but the units differ by a factor of N<sub>A</sub>."],
  sol:"<b>Mass of one atom = (gram atomic mass)/N<sub>A</sub>.</b> For O: 16/6.022 × 10²³ = <b>2.66 × 10⁻²³ g</b>. The numerical coincidence between “16 u per atom” and “16 g per mole” is exactly what makes N<sub>A</sub> so convenient."},
 
-{id:8, lec:"L-1", blk:"Atomic mass", topic:"Why carbon-12 is the standard",
+{id:8, lec:"L-1", blk:"Atomic mass", topic:"Why carbon-12 is the standard", t:60,
  q:"¹²C was chosen as the reference for the atomic mass scale mainly because",
  opts:[
   "it makes the atomic masses of most elements come out close to whole numbers",
@@ -361,7 +387,7 @@ const QUIZ = [
   "Hydrogen is by far the lightest element, and it was in fact the original standard."],
  sol:"<b>1 u = (1/12) of a ¹²C atom</b>, chosen so that atomic masses come out near-integral (H 1.008, N 14.007, O 15.999). The near-integers reflect the underlying count of nucleons."},
 
-{id:9, lec:"L-1", blk:"Molecular mass", topic:"Computing a molecular mass",
+{id:9, lec:"L-1", blk:"Molecular mass", topic:"Computing a molecular mass", t:60,
  q:"The molecular mass of CuSO₄·5H₂O (Cu = 63.5, S = 32, O = 16, H = 1) is",
  opts:["249.5","159.5","177.5","267.5"],
  ans:0,
@@ -373,7 +399,7 @@ const QUIZ = [
  sol:"<b>CuSO₄·5H₂O = 159.5 + 5(18) = 249.5 g mol⁻¹.</b> Water of crystallization is part of the formula mass — forgetting it is a standard slip in percentage-composition problems."},
 
 /* ---------------- L-2 (9) ---------------- */
-{id:10, lec:"L-2", blk:"The mole", topic:"Definition of the mole",
+{id:10, lec:"L-2", blk:"The mole", topic:"Definition of the mole", t:90,
  q:"One mole of any substance contains",
  opts:[
   "6.022 × 10²³ entities",
@@ -388,7 +414,7 @@ const QUIZ = [
   "One mole weighs one gram only for a substance of molar mass 1, which is nearly true of atomic hydrogen and of nothing else."],
  sol:"<b>1 mole = 6.022 × 10²³ entities.</b> The three master conversions: <b>n = w/M = N/N<sub>A</sub> = V/22.4</b> (the last for a gas at NTP)."},
 
-{id:11, lec:"L-2", blk:"Conversions", topic:"Mass of a fixed number of atoms",
+{id:11, lec:"L-2", blk:"Conversions", topic:"Mass of a fixed number of atoms", t:90,
  q:"The mass of 100 atoms of magnesium (Mg = 24) is about",
  opts:["3.99 × 10⁻²¹ g","2.4 × 10³ g","4.0 × 10⁻²³ g","3.99 × 10⁻¹⁹ g"],
  ans:0,
@@ -399,7 +425,7 @@ const QUIZ = [
   "This is a hundred times too large, from multiplying by 10⁴ instead of 10²."],
  sol:"Mass of 1 atom = M/N<sub>A</sub> = 24/(6.022 × 10²³) = 3.985 × 10⁻²³ g. × 100 = <b>3.985 × 10⁻²¹ g</b>. Any “mass of n atoms” question is just this two-step chain."},
 
-{id:12, lec:"L-2", blk:"Conversions", topic:"Molecules in a given mass",
+{id:12, lec:"L-2", blk:"Conversions", topic:"Molecules in a given mass", t:90,
  q:"The number of molecules in 3.6 g of water is",
  opts:["1.2 × 10²³","2.2 × 10²³","3.6 × 10²³","6.0 × 10²²"],
  ans:0,
@@ -410,7 +436,7 @@ const QUIZ = [
   "6.0 × 10²² is 0.1 mol — the mass has been divided by 36 rather than 18."],
  sol:"n = w/M = 3.6/18 = <b>0.2 mol</b> ⇒ molecules = 0.2 × N<sub>A</sub> = <b>1.204 × 10²³</b>. Always go through moles; jumping straight from grams to particles is where errors creep in."},
 
-{id:13, lec:"L-2", blk:"Conversions", topic:"Atoms versus molecules",
+{id:13, lec:"L-2", blk:"Conversions", topic:"Atoms versus molecules", t:90,
  q:"The total number of <b>atoms</b> in 3.6 g of water is",
  opts:["3.61 × 10²³","1.20 × 10²³","2.41 × 10²³","1.08 × 10²⁴"],
  ans:0,
@@ -421,7 +447,7 @@ const QUIZ = [
   "1.08 × 10²⁴ multiplies by 9 instead of 3."],
  sol:"Molecules = 0.2 × N<sub>A</sub> = 1.204 × 10²³. Atoms per H₂O = <b>3</b>. Total atoms = <b>3.61 × 10²³</b>. Read the question carefully: molecules, atoms of one element, and total atoms are three different answers."},
 
-{id:14, lec:"L-2", blk:"Counting sub-particles", topic:"Electrons in a sample",
+{id:14, lec:"L-2", blk:"Counting sub-particles", topic:"Electrons in a sample", t:90,
  q:"The number of electrons in 1 g of CaCO₃ (Ca = 20, C = 6, O = 8 electrons each) is about",
  opts:["3.01 × 10²³","6.02 × 10²¹","5.0 × 10²²","1.20 × 10²⁴"],
  ans:0,
@@ -432,7 +458,7 @@ const QUIZ = [
   "1.20 × 10²⁴ counts 200 electrons per formula unit — four times too many."],
  sol:"Electrons per CaCO₃ = 20 (Ca) + 6 (C) + 24 (3 O) = <b>50</b>. n = 1/100 = 0.01 mol ⇒ units = 6.022 × 10²¹ ⇒ electrons = <b>3.01 × 10²³</b>. The recipe: <b>moles → × N<sub>A</sub> → × particles per formula unit</b>."},
 
-{id:15, lec:"L-2", blk:"Gases", topic:"Molar volume at NTP",
+{id:15, lec:"L-2", blk:"Gases", topic:"Molar volume at NTP", t:60,
  q:"At NTP, 11.2 L of any ideal gas contains",
  opts:["0.5 mol","1 mol","11.2 mol","22.4 mol"],
  ans:0,
@@ -443,7 +469,7 @@ const QUIZ = [
   "22.4 is the molar volume in litres per mole, not a number of moles."],
  sol:"<b>n = V/22.4</b> for a gas at NTP. Note this depends only on the volume, not on which gas — 11.2 L of H₂ and 11.2 L of CO₂ both hold 0.5 mol, though they weigh 1 g and 22 g respectively."},
 
-{id:16, lec:"L-2", blk:"Ionic compounds", topic:"Ions in one mole of NaCl",
+{id:16, lec:"L-2", blk:"Ionic compounds", topic:"Ions in one mole of NaCl", t:90,
  q:"One mole of NaCl contains",
  opts:[
   "N_A sodium ions and N_A chloride ions",
@@ -458,7 +484,7 @@ const QUIZ = [
   "This doubles both counts. One formula unit yields exactly one ion of each kind."],
  sol:"1 mol NaCl = N<sub>A</sub> formula units = <b>N<sub>A</sub> Na⁺ + N<sub>A</sub> Cl⁻ = 2N<sub>A</sub> ions</b>. Contrast 1 mol CaCl₂, which gives N<sub>A</sub> Ca²⁺ and 2N<sub>A</sub> Cl⁻."},
 
-{id:17, lec:"L-2", blk:"Comparisons", topic:"Which sample has the most atoms",
+{id:17, lec:"L-2", blk:"Comparisons", topic:"Which sample has the most atoms", t:60,
  q:"Which 1 g sample contains the greatest number of <b>atoms</b>?",
  opts:["H₂","He","C","O₂"],
  ans:0,
@@ -469,7 +495,7 @@ const QUIZ = [
   "1 g O₂ = 1/32 = 0.031 mol of molecules = 0.0625 mol of atoms, the fewest of the four."],
  sol:"Convert each to <b>moles of atoms</b>: H₂ 1.0 · He 0.25 · C 0.083 · O₂ 0.0625. The lightest element wins, and being diatomic doubles the atom count — so <b>H₂</b>. Watch whether the question asks for molecules or atoms; for O₂ the two differ by a factor of 2."},
 
-{id:18, lec:"L-2", blk:"Gases", topic:"Mass of a gas from its volume",
+{id:18, lec:"L-2", blk:"Gases", topic:"Mass of a gas from its volume", t:90,
  q:"The mass of 5.6 L of CO₂ at NTP (C = 12, O = 16) is",
  opts:["11 g","44 g","5.6 g","22 g"],
  ans:0,
@@ -481,7 +507,7 @@ const QUIZ = [
  sol:"<b>V → n → w</b>: n = 5.6/22.4 = 0.25 mol; w = n × M = 0.25 × 44 = <b>11 g</b>. Two conversions, never one."},
 
 /* ---------------- L-3 (9) ---------------- */
-{id:19, lec:"L-3", blk:"Dulong &amp; Petit", topic:"The law",
+{id:19, lec:"L-3", blk:"Dulong &amp; Petit", topic:"The law", t:60,
  q:"Dulong and Petit's law states that, for a solid metallic element,",
  opts:[
   "atomic mass × specific heat ≈ 6.4",
@@ -496,7 +522,7 @@ const QUIZ = [
   "Equivalent mass × valency gives the <b>exact</b> atomic mass, which is a separate relation with no 6.4 in it."],
  sol:"<b>Atomic mass × specific heat ≈ 6.4 cal g⁻¹ K⁻¹.</b> It gives only an <b>approximate</b> value; the exact atomic mass is <b>equivalent mass × valency</b>, with the valency picked as the whole number nearest the Dulong–Petit estimate. The law fails for light elements such as B, C and Si."},
 
-{id:20, lec:"L-3", blk:"Dulong &amp; Petit", topic:"Specific heat from atomic mass",
+{id:20, lec:"L-3", blk:"Dulong &amp; Petit", topic:"Specific heat from atomic mass", t:60,
  q:"A metal has atomic mass 32. Its specific heat is likely to be about",
  opts:["0.2 cal g⁻¹","5 cal g⁻¹","0.02 cal g⁻¹","32 cal g⁻¹"],
  ans:0,
@@ -507,7 +533,7 @@ const QUIZ = [
   "This just repeats the atomic mass; the two quantities are inversely related, not equal."],
  sol:"<b>Specific heat ≈ 6.4/atomic mass = 6.4/32 = 0.2 cal g⁻¹.</b> Heavier atoms have smaller specific heats, since the same energy per atom is spread over more grams."},
 
-{id:21, lec:"L-3", blk:"Vapour density", topic:"Molecular mass from V.D.",
+{id:21, lec:"L-3", blk:"Vapour density", topic:"Molecular mass from V.D.", t:60,
  q:"A gas has vapour density 22. Its molecular mass is",
  opts:["44","22","11","2"],
  ans:0,
@@ -518,7 +544,7 @@ const QUIZ = [
   "2 is the molecular mass of H₂, the reference gas against which vapour density is measured."],
  sol:"<b>Molecular mass = 2 × V.D.</b>, because V.D. is measured against H₂ (molecular mass 2). So V.D. is always half the molecular mass."},
 
-{id:22, lec:"L-3", blk:"Gas density", topic:"Density of a gas at STP",
+{id:22, lec:"L-3", blk:"Gas density", topic:"Density of a gas at STP", t:90,
  q:"A gas has density 1.25 g L⁻¹ at STP. Its molar mass is",
  opts:["28","22.4","1.25","56"],
  ans:0,
@@ -529,7 +555,7 @@ const QUIZ = [
   "56 doubles the correct value, as if the vapour-density factor of 2 also applied here — it does not."],
  sol:"<b>d = (molar mass)/22.4</b> at STP, so molar mass = d × 22.4 = 1.25 × 22.4 = <b>28 g mol⁻¹</b>. ⚠ Do not confuse this with the vapour-density relation; density in g L⁻¹ and V.D. are different quantities."},
 
-{id:23, lec:"L-3", blk:"Avogadro's hypothesis", topic:"Equal volumes",
+{id:23, lec:"L-3", blk:"Avogadro's hypothesis", topic:"Equal volumes", t:60,
  q:"Avogadro's hypothesis states that, under the same conditions of temperature and pressure, equal volumes of all gases contain equal numbers of",
  opts:["molecules","atoms","grams","electrons"],
  ans:0,
@@ -540,7 +566,7 @@ const QUIZ = [
   "Electron counts scale with the molecule's composition and are not equal at all."],
  sol:"<b>Equal volumes → equal numbers of molecules.</b> Directly gives the 22.4 L molar volume and lets balanced equations be read as volume ratios for gases."},
 
-{id:24, lec:"L-3", blk:"% composition", topic:"Minimum molecular mass",
+{id:24, lec:"L-3", blk:"% composition", topic:"Minimum molecular mass", t:90,
  q:"A compound contains 10 % sulphur by mass. Its minimum possible molecular mass is",
  opts:["320","32","10","3.2"],
  ans:0,
@@ -551,7 +577,7 @@ const QUIZ = [
   "3.2 is 10 % of 32 — the calculation done backwards."],
  sol:"At minimum the molecule holds <b>one</b> S atom. Then 32 = 10 % of M, so <b>M = 32 × 100/10 = 320</b>. Any larger molecular mass must be a whole-number multiple of this."},
 
-{id:25, lec:"L-3", blk:"% composition", topic:"Percentage of carbon in urea",
+{id:25, lec:"L-3", blk:"% composition", topic:"Percentage of carbon in urea", t:60,
  q:"The percentage of carbon in urea, NH₂CONH₂ (molar mass 60), is",
  opts:["20 %","26.67 %","46.67 %","6.67 %"],
  ans:0,
@@ -562,7 +588,7 @@ const QUIZ = [
   "6.67 % is the percentage of <b>hydrogen</b>, 4/60."],
  sol:"%element = (mass of that element in the formula ÷ molar mass) × 100. Urea (M = 60): <b>C 20 %, N 46.67 %, O 26.67 %, H 6.67 %</b> — and they sum to 100 %, which is always worth checking."},
 
-{id:26, lec:"L-3", blk:"Atomic mass", topic:"Exact atomic mass",
+{id:26, lec:"L-3", blk:"Atomic mass", topic:"Exact atomic mass", t:60,
  q:"The exact atomic mass of an element is given by",
  opts:[
   "equivalent mass × valency",
@@ -577,7 +603,7 @@ const QUIZ = [
   "Mixing the equivalent mass with a specific heat combines two unrelated methods."],
  sol:"<b>Atomic mass = equivalent mass × valency.</b> Standard route: Dulong–Petit gives a rough atomic mass, rough ÷ equivalent mass gives a near-integer valency, then round it and multiply back for the <b>exact</b> value."},
 
-{id:27, lec:"L-3", blk:"Isomorphism", topic:"Law of isomorphism",
+{id:27, lec:"L-3", blk:"Isomorphism", topic:"Law of isomorphism", t:60,
  q:"MgSO₄·7H₂O, ZnSO₄·7H₂O and FeSO₄·7H₂O are isomorphous. This tells us that",
  opts:[
   "Mg, Zn and Fe have the same valency in these salts",
@@ -593,7 +619,7 @@ const QUIZ = [
  sol:"<b>Law of isomorphism:</b> isomorphous compounds have similar formulas and the corresponding elements have the <b>same valency</b>. Historically this let chemists assign a valency, and hence an exact atomic mass, to a newly studied element."},
 
 /* ---------------- L-4 (9) ---------------- */
-{id:28, lec:"L-4", blk:"Definitions", topic:"Empirical versus molecular formula",
+{id:28, lec:"L-4", blk:"Definitions", topic:"Empirical versus molecular formula", t:60,
  q:"The empirical formula of a compound gives",
  opts:[
   "the simplest whole-number ratio of the atoms present",
@@ -608,7 +634,7 @@ const QUIZ = [
   "Molecular mass is a number, not a formula, though it is what converts an empirical formula into a molecular one."],
  sol:"<b>E.F.</b> simplest ratio · <b>M.F.</b> actual counts · <b>Structural</b> the bonding. And <b>M.F. = n × E.F.</b> with n = (molar mass)/(E.F. mass)."},
 
-{id:29, lec:"L-4", blk:"Finding the E.F.", topic:"Empirical formula of hydrogen peroxide",
+{id:29, lec:"L-4", blk:"Finding the E.F.", topic:"Empirical formula of hydrogen peroxide", t:60,
  q:"The empirical formula of H₂O₂ is",
  opts:["HO","H₂O₂","H₂O","HO₂"],
  ans:0,
@@ -619,7 +645,7 @@ const QUIZ = [
   "HO₂ has a 1 : 2 ratio, which is not the ratio in H₂O₂."],
  sol:"Divide the subscripts by their HCF: H₂O₂ → <b>HO</b>. Note that some formulas are already simplest — N₂O₅ and H₃PO₄ reduce no further, so E.F. = M.F. for them."},
 
-{id:30, lec:"L-4", blk:"Finding the E.F.", topic:"Empirical formula from percentages",
+{id:30, lec:"L-4", blk:"Finding the E.F.", topic:"Empirical formula from percentages", t:90,
  q:"A compound is 26.6 % K, 35.4 % Cr and 38.1 % O (K = 39.1, Cr = 52, O = 16). Its empirical formula is",
  opts:["K₂Cr₂O₇","KCrO₃","K₂CrO₄","KCrO₄"],
  ans:0,
@@ -630,7 +656,7 @@ const QUIZ = [
   "KCrO₄ rounds 3.5 up to 4, again instead of clearing the fraction properly."],
  sol:"Moles: K 26.6/39.1 = 0.68, Cr 35.4/52 = 0.68, O 38.1/16 = 2.38. ÷ 0.68 → 1 : 1 : 3.5. <b>× 2 → 2 : 2 : 7 = K₂Cr₂O₇</b> (potassium dichromate). ⚠ Never round a .5 — multiply the whole ratio until every entry is a whole number."},
 
-{id:31, lec:"L-4", blk:"Finding the E.F.", topic:"A C, H, O compound",
+{id:31, lec:"L-4", blk:"Finding the E.F.", topic:"A C, H, O compound", t:90,
  q:"A compound contains 52.2 % C, 13.0 % H and 34.8 % O. Its empirical formula is",
  opts:["C₂H₆O","CH₆O","CH₃O","C₂H₆O₂"],
  ans:0,
@@ -641,7 +667,7 @@ const QUIZ = [
   "C₂H₆O₂ has two oxygens, giving %O = 51.6 % — far above the stated 34.8 %."],
  sol:"Moles: C 52.2/12 = 4.35, H 13.0/1 = 13.0, O 34.8/16 = 2.175. ÷ 2.175 ⇒ <b>C : H : O = 2 : 6 : 1 ⇒ C₂H₆O</b>, E.F. mass 46 (ethanol). The module's printed “CH₆O / 34 g” is wrong; verify by back-calculating the percentages, which is what settles it."},
 
-{id:32, lec:"L-4", blk:"E.F. → M.F.", topic:"Finding the multiplier n",
+{id:32, lec:"L-4", blk:"E.F. → M.F.", topic:"Finding the multiplier n", t:90,
  q:"A compound has empirical formula CH₂ and vapour density 21. Its molecular formula is",
  opts:["C₃H₆","CH₂","C₂H₄","C₆H₁₂"],
  ans:0,
@@ -652,7 +678,7 @@ const QUIZ = [
   "C₆H₁₂ has molar mass 84, twice the value the vapour density gives."],
  sol:"<b>Molar mass = 2 × V.D. = 42.</b> n = 42/14 = <b>3</b>, so M.F. = 3 × CH₂ = <b>C₃H₆</b>. The vapour density is what supplies the molar mass — without it, an empirical formula alone can never fix the molecular one."},
 
-{id:33, lec:"L-4", blk:"E.F. → M.F.", topic:"When E.F. equals M.F.",
+{id:33, lec:"L-4", blk:"E.F. → M.F.", topic:"When E.F. equals M.F.", t:60,
  q:"For which compound are the empirical and molecular formulas the same?",
  opts:["H₃PO₄","C₆H₆","H₂O₂","N₂O₄"],
  ans:0,
@@ -663,7 +689,7 @@ const QUIZ = [
   "N₂O₄ reduces to NO₂, again a factor of 2."],
  sol:"E.F. = M.F. whenever the subscripts have <b>HCF 1</b>. True for H₃PO₄, N₂O₅, H₂O and CO₂; false for C₆H₆ (CH), C₆H₁₂ (CH₂), H₂O₂ (HO), B₂H₆ (BH₃) and N₂O₄ (NO₂)."},
 
-{id:34, lec:"L-4", blk:"E.F. → M.F.", topic:"Two compounds with one empirical formula",
+{id:34, lec:"L-4", blk:"E.F. → M.F.", topic:"Two compounds with one empirical formula", t:60,
  q:"Which pair of compounds shares the same empirical formula?",
  opts:[
   "C₂H₂ and C₆H₆",
@@ -678,7 +704,7 @@ const QUIZ = [
   "N₂O₄ reduces to NO₂, while N₂O₅ cannot be reduced at all."],
  sol:"<b>C₂H₂ → CH and C₆H₆ → CH.</b> This is exactly why an empirical formula alone is not enough: two very different substances can share one, and only the molar mass tells them apart."},
 
-{id:35, lec:"L-4", blk:"Finding the E.F.", topic:"Percentages that do not add to 100",
+{id:35, lec:"L-4", blk:"Finding the E.F.", topic:"Percentages that do not add to 100", t:90,
  q:"An organic compound is found to be 40 % C and 6.7 % H, with no other element determined. The usual assumption is that the remaining 53.3 % is",
  opts:["oxygen","nitrogen","water","an impurity"],
  ans:0,
@@ -689,7 +715,7 @@ const QUIZ = [
   "The figures describe the pure compound; treating the balance as impurity would make the analysis useless."],
  sol:"<b>%O = 100 − (all other percentages).</b> Here 100 − 40 − 6.7 = 53.3 % O, giving moles 3.33 : 6.7 : 3.33 = 1 : 2 : 1, i.e. <b>CH₂O</b> — the empirical formula of glucose and of formaldehyde alike."},
 
-{id:36, lec:"L-4", blk:"E.F. → M.F.", topic:"The relation between the two formulas",
+{id:36, lec:"L-4", blk:"E.F. → M.F.", topic:"The relation between the two formulas", t:90,
  q:"If the molar mass of a compound is 180 and its empirical formula is CH₂O (E.F. mass 30), its molecular formula is",
  opts:["C₆H₁₂O₆","C₃H₆O₃","CH₂O","C₁₂H₂₄O₁₂"],
  ans:0,
@@ -701,7 +727,7 @@ const QUIZ = [
  sol:"<b>n = (molar mass)/(E.F. mass) = 180/30 = 6</b> ⇒ M.F. = 6 × CH₂O = <b>C₆H₁₂O₆</b>. Multiply <b>every</b> subscript by n, not just the first."},
 
 /* ---------------- L-5 (9) ---------------- */
-{id:37, lec:"L-5", blk:"Reading an equation", topic:"What a balanced equation gives",
+{id:37, lec:"L-5", blk:"Reading an equation", topic:"What a balanced equation gives", t:90,
  q:"For N₂ + 3H₂ → 2NH₃, the coefficients 1 : 3 : 2 give the ratio of",
  opts:[
   "moles, and for gases also volumes, but not masses",
@@ -716,7 +742,7 @@ const QUIZ = [
   "Coefficients are mole ratios first; the volume interpretation is a consequence for gases."],
  sol:"N₂ + 3H₂ → 2NH₃ means <b>1 mol : 3 mol : 2 mol = 1 vol : 3 vol : 2 vol</b> (gases) <b>= 28 g : 6 g : 34 g</b>. Note that 28 + 6 = 34 — mass is conserved, as it must be."},
 
-{id:38, lec:"L-5", blk:"Mass–mass", topic:"Ammonia from nitrogen",
+{id:38, lec:"L-5", blk:"Mass–mass", topic:"Ammonia from nitrogen", t:90,
  q:"What mass of NH₃ is produced when 140 g of N₂ reacts completely? (N₂ + 3H₂ → 2NH₃)",
  opts:["170 g","280 g","85 g","140 g"],
  ans:0,
@@ -727,7 +753,7 @@ const QUIZ = [
   "140 g assumes the product mass equals the reactant mass, but the hydrogen adds mass too."],
  sol:"Under the equation write the masses: 28 g N₂ → 2 × 17 = <b>34 g NH₃</b>. Scale: 140/28 = 5, so 5 × 34 = <b>170 g</b>. The extra 30 g comes from the hydrogen consumed."},
 
-{id:39, lec:"L-5", blk:"Mass–mass", topic:"Oxygen needed to burn hydrogen",
+{id:39, lec:"L-5", blk:"Mass–mass", topic:"Oxygen needed to burn hydrogen", t:60,
  q:"How many grams of O₂ react completely with 0.200 g of H₂? (2H₂ + O₂ → 2H₂O)",
  opts:["1.6 g","0.8 g","3.2 g","0.2 g"],
  ans:0,
@@ -738,7 +764,7 @@ const QUIZ = [
   "0.2 g simply repeats the hydrogen mass; the molar masses differ by a factor of 16."],
  sol:"2H₂ + O₂ → 2H₂O gives <b>4 g H₂ : 32 g O₂ : 36 g H₂O</b>. Scale by 0.200/4 = 0.05: <b>1.6 g O₂</b> and 1.8 g H₂O. Check: 0.2 + 1.6 = 1.8 ✓"},
 
-{id:40, lec:"L-5", blk:"Mass–volume", topic:"Oxygen from potassium chlorate",
+{id:40, lec:"L-5", blk:"Mass–volume", topic:"Oxygen from potassium chlorate", t:90,
  q:"What volume of O₂ at NTP is produced by 6.125 g of KClO₃? (2KClO₃ → 2KCl + 3O₂, KClO₃ = 122.5)",
  opts:["1.68 L","1.12 L","2.24 L","0.56 L"],
  ans:0,
@@ -749,7 +775,7 @@ const QUIZ = [
   "0.56 L is a quarter of the correct answer, from halving twice."],
  sol:"n(KClO₃) = 6.125/122.5 = 0.05 mol. Mole ratio 2 : 3 ⇒ n(O₂) = 0.075 mol. V = 0.075 × 22.4 = <b>1.68 L</b>. For any gas product, finish with <b>× 22.4</b>."},
 
-{id:41, lec:"L-5", blk:"Multi-step", topic:"Chaining two equations",
+{id:41, lec:"L-5", blk:"Multi-step", topic:"Chaining two equations", t:60,
  q:"How many moles of H₂ are needed to make 4 mol of NH₃? (N₂ + 3H₂ → 2NH₃)",
  opts:["6 mol","4 mol","12 mol","2 mol"],
  ans:0,
@@ -760,7 +786,7 @@ const QUIZ = [
   "2 mol inverts the ratio to 2 : 3 · that would give less hydrogen than ammonia, which the equation forbids."],
  sol:"<b>3 mol H₂ : 2 mol NH₃</b>, so n(H₂) = (3/2) × 4 = <b>6 mol</b>. In a two-equation chain, always route through this shared species."},
 
-{id:42, lec:"L-5", blk:"Multi-step", topic:"Zinc needed for a two-stage synthesis",
+{id:42, lec:"L-5", blk:"Multi-step", topic:"Zinc needed for a two-stage synthesis", t:90,
  q:"What mass of zinc is needed to generate enough H₂ for 4 mol of NH₃? (Zn + 2HCl → ZnCl₂ + H₂; N₂ + 3H₂ → 2NH₃; Zn = 65.39)",
  opts:["392.3 g","261.6 g","130.8 g","65.4 g"],
  ans:0,
@@ -771,7 +797,7 @@ const QUIZ = [
   "65.4 g is a single mole of zinc, enough for only 1 mol of H₂."],
  sol:"Two steps. <b>(1)</b> 4 mol NH₃ × (3 H₂ / 2 NH₃) = <b>6 mol H₂</b>. <b>(2)</b> Zn + 2HCl → ZnCl₂ + H₂ is 1 : 1, so 6 mol Zn = 6 × 65.39 = <b>392.3 g</b>. The module writes “65.39 × 6” and then prints 261.56 — an arithmetic slip; 65.39 × 6 = 392.34."},
 
-{id:43, lec:"L-5", blk:"Reading an equation", topic:"Gas volume ratios",
+{id:43, lec:"L-5", blk:"Reading an equation", topic:"Gas volume ratios", t:60,
  q:"When hydrogen and chlorine combine (H₂ + Cl₂ → 2HCl), 10 mL of H₂ reacts with 10 mL of Cl₂ to give",
  opts:["20 mL of HCl","10 mL of HCl","5 mL of HCl","40 mL of HCl"],
  ans:0,
@@ -782,7 +808,7 @@ const QUIZ = [
   "40 mL doubles twice; the coefficient on HCl is 2, not 4."],
  sol:"For gases at the same T and P, <b>coefficients are volume ratios</b> (Avogadro). H₂ + Cl₂ → 2HCl means 1 vol + 1 vol → <b>2 vol</b>. Note the total volume is unchanged here — that is not true in general (N₂ + 3H₂ → 2NH₃ contracts from 4 to 2)."},
 
-{id:44, lec:"L-5", blk:"Mass conservation", topic:"Checking a balanced equation",
+{id:44, lec:"L-5", blk:"Mass conservation", topic:"Checking a balanced equation", t:60,
  q:"In the balanced equation 2H₂ + O₂ → 2H₂O, the quantity that is <b>not</b> necessarily conserved is",
  opts:[
   "the total number of molecules",
@@ -797,7 +823,7 @@ const QUIZ = [
   "Two oxygen atoms appear on each side, again by construction."],
  sol:"A balanced equation conserves <b>atoms and mass</b>, never the molecule count. This is why gas volumes can change during a reaction even though nothing is lost."},
 
-{id:45, lec:"L-5", blk:"Mass–mass", topic:"Water produced from hydrogen",
+{id:45, lec:"L-5", blk:"Mass–mass", topic:"Water produced from hydrogen", t:60,
  q:"How much water forms when 0.200 g of H₂ burns completely in oxygen?",
  opts:["1.8 g","1.6 g","0.2 g","3.6 g"],
  ans:0,
@@ -809,7 +835,7 @@ const QUIZ = [
  sol:"2H₂ + O₂ → 2H₂O: <b>4 g H₂ → 36 g H₂O</b>. Scale by 0.05: <b>1.8 g</b>. Cross-check against mass conservation: 0.2 g H₂ + 1.6 g O₂ = 1.8 g H₂O ✓"},
 
 /* ---------------- L-6 (9) ---------------- */
-{id:46, lec:"L-6", blk:"Definitions", topic:"What the limiting reagent is",
+{id:46, lec:"L-6", blk:"Definitions", topic:"What the limiting reagent is", t:60,
  q:"The limiting reagent in a reaction is the reactant that",
  opts:[
   "is completely consumed and so fixes how much product forms",
@@ -824,7 +850,7 @@ const QUIZ = [
   "Molar mass alone says nothing; a heavy reactant can still be the one supplied in surplus."],
  sol:"To find it: <b>convert each reactant to moles, divide by its coefficient, and pick the smallest</b>. That reactant limits the yield, and adding more of any other one changes nothing."},
 
-{id:47, lec:"L-6", blk:"Finding it", topic:"The moles-over-coefficient test",
+{id:47, lec:"L-6", blk:"Finding it", topic:"The moles-over-coefficient test", t:90,
  q:"For N₂ + 3H₂ → 2NH₃, you have 1 mol of N₂ and 1.5 mol of H₂. The limiting reagent is",
  opts:["H₂","N₂","neither — they are stoichiometric","both equally"],
  ans:0,
@@ -835,7 +861,7 @@ const QUIZ = [
   "Both can be limiting only when the ratios are exactly equal, and 1 ≠ 0.5."],
  sol:"Divide <b>moles by coefficient</b>: N₂ 1/1 = 1, H₂ 1.5/3 = <b>0.5</b> ⇒ H₂ limits. Yield = 0.5 × 2 = 1 mol NH₃ = 17 g, and 0.5 mol of N₂ is left over. ⚠ Comparing raw moles without dividing by the coefficients is the classic trap."},
 
-{id:48, lec:"L-6", blk:"Yield", topic:"Carbon dioxide from marble and acid",
+{id:48, lec:"L-6", blk:"Yield", topic:"Carbon dioxide from marble and acid", t:90,
  q:"20 g of CaCO₃ is treated with 20 g of HCl. The mass of CO₂ generated is (CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂)",
  opts:["8.8 g","12.1 g","4.4 g","20 g"],
  ans:0,
@@ -846,7 +872,7 @@ const QUIZ = [
   "20 g assumes all the carbonate mass becomes CO₂, whereas the CaCl₂ and H₂O carry away most of it."],
  sol:"CaCO₃ needed per 20 g: HCl required = (73/100) × 20 = 14.6 g &lt; 20 g available ⇒ <b>CaCO₃ is limiting</b>. CO₂ = (44/100) × 20 = <b>8.8 g</b>."},
 
-{id:49, lec:"L-6", blk:"Yield", topic:"Calcium phosphate produced",
+{id:49, lec:"L-6", blk:"Yield", topic:"Calcium phosphate produced", t:90,
  q:"100 g of CaCO₃ reacts with 70 g of H₃PO₄ (3CaCO₃ + 2H₃PO₄ → Ca₃(PO₄)₂ + 3H₂O + 3CO₂). The mass of Ca₃(PO₄)₂ formed is",
  opts:["103.3 g","110.7 g","310 g","70 g"],
  ans:0,
@@ -857,7 +883,7 @@ const QUIZ = [
   "70 g is the mass of acid taken, not of product formed."],
  sol:"Check first: H₃PO₄ needed = (196/300) × 100 = 65.33 g &lt; 70 g ⇒ <b>CaCO₃ limits</b>. Ca₃(PO₄)₂ = (310/300) × 100 = <b>103.3 g</b>, and 70 − 65.33 = <b>4.67 g of H₃PO₄ is left over</b>."},
 
-{id:50, lec:"L-6", blk:"Excess", topic:"How much excess reagent survives",
+{id:50, lec:"L-6", blk:"Excess", topic:"How much excess reagent survives", t:90,
  q:"In the previous reaction (100 g CaCO₃ with 70 g H₃PO₄), the mass of excess reagent left unreacted is",
  opts:["4.67 g of H₃PO₄","4.67 g of CaCO₃","65.33 g of H₃PO₄","30 g of H₃PO₄"],
  ans:0,
@@ -868,7 +894,7 @@ const QUIZ = [
   "30 g would be the leftover if only 40 g had reacted, which does not match the stoichiometry."],
  sol:"<b>Excess left = supplied − consumed.</b> H₃PO₄ consumed = (196/300) × 100 = 65.33 g, so 70 − 65.33 = <b>4.67 g remains</b>. The limiting reagent, by definition, leaves nothing."},
 
-{id:51, lec:"L-6", blk:"Key idea", topic:"Effect of adding more excess reagent",
+{id:51, lec:"L-6", blk:"Key idea", topic:"Effect of adding more excess reagent", t:60,
  q:"After a reaction has gone to completion, adding more of the excess reagent will",
  opts:[
   "not increase the amount of product at all",
@@ -883,7 +909,7 @@ const QUIZ = [
   "Adding a reactant never reverses a completed reaction; that would need entirely different conditions."],
  sol:"<b>Yield is fixed by the limiting reagent alone.</b> This is why industrial processes deliberately run one reactant in excess — to drive the expensive one to full conversion, not to raise the theoretical yield."},
 
-{id:52, lec:"L-6", blk:"Finding it", topic:"Which reactant limits, by mass",
+{id:52, lec:"L-6", blk:"Finding it", topic:"Which reactant limits, by mass", t:90,
  q:"For 2H₂ + O₂ → 2H₂O, you have 4 g of H₂ and 16 g of O₂. The limiting reagent is",
  opts:["O₂","H₂","neither","both"],
  ans:0,
@@ -894,7 +920,7 @@ const QUIZ = [
   "The two ratios are 1 and 0.5, which are not equal."],
  sol:"n(H₂) = 4/2 = 2, n(O₂) = 16/32 = 0.5. Divide by coefficients: 1 and <b>0.5</b> ⇒ <b>O₂ limits</b>. Water formed = 2 × 0.5 = 1 mol = 18 g, and 1 mol (2 g) of H₂ is left. ⚠ The reactant with the smaller <b>mass</b> is not automatically the limiting one."},
 
-{id:53, lec:"L-6", blk:"Yield", topic:"Product from the limiting reagent",
+{id:53, lec:"L-6", blk:"Yield", topic:"Product from the limiting reagent", t:90,
  q:"In the reaction above (4 g H₂ with 16 g O₂), the mass of water formed is",
  opts:["18 g","36 g","20 g","32 g"],
  ans:0,
@@ -905,7 +931,7 @@ const QUIZ = [
   "32 g would be the water yield from a full 32 g of oxygen — twice what is supplied."],
  sol:"O₂ limits at 0.5 mol ⇒ H₂O = 2 × 0.5 = 1 mol = <b>18 g</b>. Mass check: 2 g H₂ + 16 g O₂ = 18 g reacted, with 2 g H₂ left over, and 18 + 2 = 20 g total ✓"},
 
-{id:54, lec:"L-6", blk:"Definitions", topic:"The excess reagent",
+{id:54, lec:"L-6", blk:"Definitions", topic:"The excess reagent", t:60,
  q:"The excess reagent in a reaction is the one that",
  opts:[
   "remains partly unreacted when the reaction stops",
@@ -921,7 +947,7 @@ const QUIZ = [
  sol:"<b>Limiting</b> = fully consumed, sets the yield. <b>Excess</b> = partly left over. Every reaction with non-stoichiometric amounts has exactly one of each."},
 
 /* ---------------- L-7 (8) ---------------- */
-{id:55, lec:"L-7", blk:"Mass percent", topic:"Definition of mass percent",
+{id:55, lec:"L-7", blk:"Mass percent", topic:"Definition of mass percent", t:60,
  q:"Mass percent (w/w) of a solute is defined as",
  opts:[
   "(mass of solute / mass of solution) × 100",
@@ -936,7 +962,7 @@ const QUIZ = [
   "That is essentially the mole fraction × 100, a different quantity entirely."],
  sol:"<b>%(w/w) = (W<sub>solute</sub>/W<sub>solution</sub>) × 100.</b> ⚠ Solution, not solvent — this single word is the most common source of error in the whole topic."},
 
-{id:56, lec:"L-7", blk:"Mass percent", topic:"Preparing a solution of stated strength",
+{id:56, lec:"L-7", blk:"Mass percent", topic:"Preparing a solution of stated strength", t:90,
  q:"To prepare 250 g of a 25 % cane-sugar solution, the masses of sugar and water needed are",
  opts:[
   "62.5 g sugar and 187.5 g water",
@@ -951,7 +977,7 @@ const QUIZ = [
   "50 g of sugar in 250 g of solution is 20 %, not 25 %."],
  sol:"Solute = 25 % × 250 = <b>62.5 g</b>; solvent = total − solute = <b>187.5 g</b>. The total mass is fixed at 250 g, so the water is found by subtraction, never by a second percentage."},
 
-{id:57, lec:"L-7", blk:"Mass percent", topic:"Mass percent of benzene",
+{id:57, lec:"L-7", blk:"Mass percent", topic:"Mass percent of benzene", t:90,
  q:"22 g of benzene is dissolved in 122 g of carbon tetrachloride. The mass percent of benzene is",
  opts:["15.28 %","18.03 %","84.72 %","22 %"],
  ans:0,
@@ -962,7 +988,7 @@ const QUIZ = [
   "22 is the mass of benzene in grams, not a percentage."],
  sol:"Total solution = 22 + 122 = <b>144 g</b>. %C₆H₆ = 22/144 × 100 = <b>15.28 %</b>, and %CCl₄ = 84.72 %. Mass percentages of all components always add to exactly 100."},
 
-{id:58, lec:"L-7", blk:"Mass fraction", topic:"Mass fraction versus mass percent",
+{id:58, lec:"L-7", blk:"Mass fraction", topic:"Mass fraction versus mass percent", t:90,
  q:"3.65 g of aspirin is dissolved in 25.08 g of water. The mass fraction of aspirin is",
  opts:["0.127","12.70","0.1455","1.27"],
  ans:0,
@@ -973,7 +999,7 @@ const QUIZ = [
   "1.27 is ten times the fraction; a mass fraction can never exceed 1."],
  sol:"<b>Mass fraction = mass of solute / mass of solution</b>, and <b>mass % = fraction × 100</b>. Here 3.65/28.73 = <b>0.127</b>, i.e. 12.70 %. A fraction above 1 is always an arithmetic error."},
 
-{id:59, lec:"L-7", blk:"Volume percent", topic:"Volume percent of alcohol",
+{id:59, lec:"L-7", blk:"Volume percent", topic:"Volume percent of alcohol", t:90,
  q:"125 cm³ of isopropyl alcohol is diluted with water to a total volume of 175 cm³. Its volume percent is",
  opts:["71.4 %","250 %","40 %","28.6 %"],
  ans:0,
@@ -984,7 +1010,7 @@ const QUIZ = [
   "28.6 % is the volume percent of the <b>water</b>, the other 50 cm³."],
  sol:"<b>%(v/v) = (V<sub>solute</sub>/V<sub>solution</sub>) × 100 = 125/175 × 100 = 71.4 %</b>, so the volume fraction is 0.714."},
 
-{id:60, lec:"L-7", blk:"Traps", topic:"Do volume percentages add to 100?",
+{id:60, lec:"L-7", blk:"Traps", topic:"Do volume percentages add to 100?", t:60,
  q:"Which statement is correct?",
  opts:[
   "Mass percentages of all components add to 100 %, but volume percentages need not",
@@ -999,7 +1025,7 @@ const QUIZ = [
   "Mass percentages do add to 100 %, since mass is conserved on mixing."],
  sol:"<b>Mass is conserved and additive; volume is not.</b> This is also why molarity (per litre of solution) shifts with temperature while molality (per kg of solvent) does not."},
 
-{id:61, lec:"L-7", blk:"Mass/volume percent", topic:"%(w/v)",
+{id:61, lec:"L-7", blk:"Mass/volume percent", topic:"%(w/v)", t:60,
  q:"A solution labelled 5 % (w/v) contains",
  opts:[
   "5 g of solute in 100 mL of solution",
@@ -1014,7 +1040,7 @@ const QUIZ = [
   "The denominator is the solution, not the solvent — the same distinction that applies to %(w/w)."],
  sol:"<b>%(w/w)</b> g per 100 g solution · <b>%(v/v)</b> mL per 100 mL solution · <b>%(w/v)</b> g per 100 mL solution. Only %(w/v) mixes the two kinds of unit, which is exactly why it is worth naming carefully."},
 
-{id:62, lec:"L-7", blk:"Mass percent", topic:"Reading a mass percent backwards",
+{id:62, lec:"L-7", blk:"Mass percent", topic:"Reading a mass percent backwards", t:60,
  q:"How much of a 20 % (w/w) glucose solution contains 15 g of glucose?",
  opts:["75 g of solution","3 g of solution","300 g of solution","60 g of solution"],
  ans:0,
@@ -1026,7 +1052,7 @@ const QUIZ = [
  sol:"Set up the proportion: 20 g solute per 100 g solution ⇒ 15 g solute per <b>75 g solution</b>. Check: 15/75 = 0.20 ✓"},
 
 /* ---------------- L-8 (9) ---------------- */
-{id:63, lec:"L-8", blk:"Trace units", topic:"Meaning of ppm",
+{id:63, lec:"L-8", blk:"Trace units", topic:"Meaning of ppm", t:60,
  q:"A concentration of 1 ppm means one part of solute per",
  opts:["10⁶ parts of solution","10³ parts of solution","10⁹ parts of solution","100 parts of solution"],
  ans:0,
@@ -1037,7 +1063,7 @@ const QUIZ = [
   "One part per hundred is simply 1 %."],
  sol:"<b>ppt ×10³ · ppm ×10⁶ · ppb ×10⁹</b>, so <b>1 ppm = 10³ ppb</b>. These units exist because percentages become unwieldy for trace pollutants and impurities."},
 
-{id:64, lec:"L-8", blk:"Molarity", topic:"The molarity formula",
+{id:64, lec:"L-8", blk:"Molarity", topic:"The molarity formula", t:60,
  q:"Molarity is defined as",
  opts:[
   "moles of solute per litre of solution",
@@ -1052,7 +1078,7 @@ const QUIZ = [
   "Grams per litre is the <b>strength</b> S, related to molarity by S = M × molar mass."],
  sol:"<b>M = (moles solute)/(litres of solution) = (w × 1000)/(M<sub>B</sub> × V<sub>mL</sub>).</b> ⚠ Solution, not solvent — and molarity therefore <b>changes with temperature</b> as the solution expands."},
 
-{id:65, lec:"L-8", blk:"Calculations", topic:"Molarity of a sodium hydroxide solution",
+{id:65, lec:"L-8", blk:"Calculations", topic:"Molarity of a sodium hydroxide solution", t:90,
  q:"The molarity of a solution of 4 g NaOH in 200 mL of solution (NaOH = 40) is",
  opts:["0.5 M","0.2 M","2 M","0.02 M"],
  ans:0,
@@ -1063,7 +1089,7 @@ const QUIZ = [
   "0.02 M is a hundred times too small, from a slipped factor of 1000 in the volume conversion."],
  sol:"n = 4/40 = 0.1 mol in 0.2 L ⇒ <b>M = 0.1/0.2 = 0.5 M</b>. Or use <b>M = (w × 1000)/(M<sub>B</sub> × V<sub>mL</sub>)</b> directly."},
 
-{id:66, lec:"L-8", blk:"Calculations", topic:"Molarity of a sodium carbonate solution",
+{id:66, lec:"L-8", blk:"Calculations", topic:"Molarity of a sodium carbonate solution", t:90,
  q:"5.3 g of anhydrous Na₂CO₃ is dissolved to make 100 mL of solution (Na = 23, C = 12, O = 16). The molarity is",
  opts:["0.5 M","0.552 M","0.053 M","5.3 M"],
  ans:0,
@@ -1074,7 +1100,7 @@ const QUIZ = [
   "5.3 M is the mass in grams treated as a molarity, with no conversion at all."],
  sol:"<b>M(Na₂CO₃) = 46 + 12 + 48 = 106 g mol⁻¹.</b> n = 5.3/106 = 0.05 mol; V = 0.1 L ⇒ <b>M = 0.5 M</b>. Always compute the molar mass yourself — an error there propagates silently through the whole answer."},
 
-{id:67, lec:"L-8", blk:"Calculations", topic:"Molarity of a dilute acid",
+{id:67, lec:"L-8", blk:"Calculations", topic:"Molarity of a dilute acid", t:90,
  q:"The molarity of 0.365 g of HCl in 50 mL of solution (HCl = 36.5) is",
  opts:["0.2 M","0.1 M","0.02 M","2 M"],
  ans:0,
@@ -1085,7 +1111,7 @@ const QUIZ = [
   "2 M is ten times too large, from treating the volume as 5 mL."],
  sol:"n = 0.365/36.5 = <b>0.01 mol</b>; V = 0.050 L ⇒ M = 0.01/0.050 = <b>0.2 M</b>."},
 
-{id:68, lec:"L-8", blk:"Density shortcut", topic:"Molarity from mass percent and density",
+{id:68, lec:"L-8", blk:"Density shortcut", topic:"Molarity from mass percent and density", t:60,
  q:"A solution is 13 % H₂SO₄ by mass with density 1.09 g mL⁻¹ (H₂SO₄ = 98). Its molarity is",
  opts:["1.45 M","1.33 M","0.13 M","13 M"],
  ans:0,
@@ -1096,7 +1122,7 @@ const QUIZ = [
   "13 M just repeats the percentage as a molarity."],
  sol:"<b>M = (mass % × d × 10)/molar mass.</b> The 10 converts g mL⁻¹ into g L⁻¹ per percentage point. Here (13 × 1.09 × 10)/98 = <b>1.45 M</b>. Denser solutions pack more solute into a litre, so the density must appear."},
 
-{id:69, lec:"L-8", blk:"Traps", topic:"Temperature dependence",
+{id:69, lec:"L-8", blk:"Traps", topic:"Temperature dependence", t:60,
  q:"Which concentration term <b>changes</b> when the temperature of a solution is raised?",
  opts:["Molarity","Molality","Mole fraction","Mass percent"],
  ans:0,
@@ -1107,7 +1133,7 @@ const QUIZ = [
   "Mass percent is a ratio of masses, again temperature-independent."],
  sol:"Only quantities involving a <b>volume</b> vary with temperature. <b>Molarity and normality drift; molality, mole fraction and mass percent do not.</b> This is why precise physical-chemistry work is quoted in molality."},
 
-{id:70, lec:"L-8", blk:"Strength", topic:"Strength in grams per litre",
+{id:70, lec:"L-8", blk:"Strength", topic:"Strength in grams per litre", t:90,
  q:"The strength (in g L⁻¹) of a 0.25 M solution of NaOH (molar mass 40) is",
  opts:["10 g L⁻¹","0.25 g L⁻¹","160 g L⁻¹","40 g L⁻¹"],
  ans:0,
@@ -1118,7 +1144,7 @@ const QUIZ = [
   "40 g L⁻¹ would be a 1 M solution."],
  sol:"<b>Strength S (g L⁻¹) = Molarity × molar mass.</b> Here 0.25 × 40 = <b>10 g L⁻¹</b>. The reverse conversion, M = S/molar mass, is just as often needed."},
 
-{id:71, lec:"L-8", blk:"Dilution", topic:"Molarity on dilution",
+{id:71, lec:"L-8", blk:"Dilution", topic:"Molarity on dilution", t:90,
  q:"100 mL of 2 M HCl is diluted with water to 500 mL. The new molarity is",
  opts:["0.4 M","0.2 M","10 M","1 M"],
  ans:0,
@@ -1130,7 +1156,7 @@ const QUIZ = [
  sol:"Dilution adds solvent but no solute, so the <b>moles are unchanged</b>: <b>M₁V₁ = M₂V₂</b>. Here M₂ = (2 × 100)/500 = <b>0.4 M</b>."},
 
 /* ---------------- L-9 (8) ---------------- */
-{id:72, lec:"L-9", blk:"Definitions", topic:"Definition of normality",
+{id:72, lec:"L-9", blk:"Definitions", topic:"Definition of normality", t:90,
  q:"Normality is defined as the number of",
  opts:[
   "gram-equivalents of solute per litre of solution",
@@ -1145,7 +1171,7 @@ const QUIZ = [
   "Grams per litre is the strength."],
  sol:"<b>N = (gram-equivalents)/(litres of solution) = (w × 1000)/(E<sub>B</sub> × V<sub>mL</sub>) = M × valence factor.</b>"},
 
-{id:73, lec:"L-9", blk:"Equivalent mass", topic:"Equivalent mass of an acid",
+{id:73, lec:"L-9", blk:"Equivalent mass", topic:"Equivalent mass of an acid", t:90,
  q:"The equivalent mass of an acid is its molar mass divided by its",
  opts:["basicity","acidity","molarity","valency of the anion"],
  ans:0,
@@ -1156,7 +1182,7 @@ const QUIZ = [
   "For a <b>salt</b> the divisor is the total positive valency, but for an acid it is the basicity."],
  sol:"<b>Acid → ÷ basicity · Base → ÷ acidity · Salt → ÷ total positive valency.</b> So E(H₂SO₄) = 49, E(Ca(OH)₂) = 74/2 = 37, E(Na₂CO₃) = 106/2 = 53."},
 
-{id:74, lec:"L-9", blk:"N and M", topic:"Relating normality to molarity",
+{id:74, lec:"L-9", blk:"N and M", topic:"Relating normality to molarity", t:90,
  q:"For a solution of H₂SO₄, the normality equals",
  opts:["2 × molarity","the molarity","half the molarity","molarity ÷ 98"],
  ans:0,
@@ -1167,7 +1193,7 @@ const QUIZ = [
   "Dividing by the molar mass confuses normality with strength."],
  sol:"<b>N = M × valence factor.</b> H₂SO₄ and Ca(OH)₂ both have factor 2, so N = 2M; HCl and NaOH have factor 1, so N = M. A 1 M H₂SO₄ solution is <b>2 N</b>."},
 
-{id:75, lec:"L-9", blk:"Calculations", topic:"Normality of a hydrochloric acid solution",
+{id:75, lec:"L-9", blk:"Calculations", topic:"Normality of a hydrochloric acid solution", t:90,
  q:"The normality of a 500 mL solution containing 3.65 g of HCl (equivalent mass 36.5) is",
  opts:["0.2 N","0.1 N","2 N","0.5 N"],
  ans:0,
@@ -1178,7 +1204,7 @@ const QUIZ = [
   "0.5 N matches neither the mass nor the volume given."],
  sol:"g-equivalents = 3.65/36.5 = 0.1; volume = 0.5 L ⇒ <b>N = 0.1/0.5 = 0.2 N</b>. Since HCl is monobasic, its molarity is also 0.2 M."},
 
-{id:76, lec:"L-9", blk:"Calculations", topic:"Normality from gram-equivalents",
+{id:76, lec:"L-9", blk:"Calculations", topic:"Normality from gram-equivalents", t:90,
  q:"15 gram-equivalents of a solute are dissolved in 750 mL of solution. The normality is",
  opts:["20 N","2 N","11.25 N","0.05 N"],
  ans:0,
@@ -1189,7 +1215,7 @@ const QUIZ = [
   "0.05 N inverts the ratio entirely."],
  sol:"<b>N = (gram-equivalents)/(litres) = 15/0.750 = 20 N.</b> With the equivalents already given, no equivalent mass is needed."},
 
-{id:77, lec:"L-9", blk:"Dilution", topic:"Normality after dilution",
+{id:77, lec:"L-9", blk:"Dilution", topic:"Normality after dilution", t:90,
  q:"20 mL of 5 N HCl is diluted to 1 L. The resulting normality is",
  opts:["0.1 N","0.5 N","1 N","0.02 N"],
  ans:0,
@@ -1200,7 +1226,7 @@ const QUIZ = [
   "0.02 N is the volume ratio 20/1000 with the 5 N left out."],
  sol:"<b>N₁V₁ = N₂V₂</b> — the equivalents are conserved on dilution. N₂ = (5 × 20)/1000 = <b>0.1 N</b>. The solution has been diluted fiftyfold, and 5/50 = 0.1 ✓"},
 
-{id:78, lec:"L-9", blk:"Mixing", topic:"Normality of a mixture",
+{id:78, lec:"L-9", blk:"Mixing", topic:"Normality of a mixture", t:60,
  q:"When two solutions of the same solute are mixed, the resulting normality is given by",
  opts:[
   "N₃ = (N₁V₁ + N₂V₂)/(V₁ + V₂)",
@@ -1215,7 +1241,7 @@ const QUIZ = [
   "N₁V₁ + N₂V₂ is the total number of <b>equivalents</b>; dividing by the total volume is what turns it back into a normality."],
  sol:"<b>N₁V₁ + N₂V₂ = N₃(V₁ + V₂).</b> Equivalents are conserved on mixing, so the result is always a volume-weighted average lying between N₁ and N₂."},
 
-{id:79, lec:"L-9", blk:"Equivalent mass", topic:"Equivalent mass of a base",
+{id:79, lec:"L-9", blk:"Equivalent mass", topic:"Equivalent mass of a base", t:90,
  q:"The equivalent mass of Ca(OH)₂ (molar mass 74) is",
  opts:["37","74","148","24.7"],
  ans:0,
@@ -1227,7 +1253,7 @@ const QUIZ = [
  sol:"<b>E(base) = molar mass / acidity = 74/2 = 37.</b> So a 1 M solution of Ca(OH)₂ is 2 N."},
 
 /* ---------------- L-10 (9) ---------------- */
-{id:80, lec:"L-10", blk:"Mole fraction", topic:"Definition and sum",
+{id:80, lec:"L-10", blk:"Mole fraction", topic:"Definition and sum", t:90,
  q:"For a two-component solution, the mole fractions of solute and solvent",
  opts:[
   "always add up to 1",
@@ -1242,7 +1268,7 @@ const QUIZ = [
   "The identity is exact at every concentration, being pure arithmetic rather than an approximation."],
  sol:"<b>x<sub>solute</sub> = n/(n + N), x<sub>solvent</sub> = N/(n + N), and x<sub>solute</sub> + x<sub>solvent</sub> = 1.</b> Being a ratio of mole counts, mole fraction is unaffected by temperature."},
 
-{id:81, lec:"L-10", blk:"Molality", topic:"Definition of molality",
+{id:81, lec:"L-10", blk:"Molality", topic:"Definition of molality", t:60,
  q:"Molality is the number of moles of solute per",
  opts:[
   "kilogram of solvent",
@@ -1257,7 +1283,7 @@ const QUIZ = [
   "Litres of solvent is not used by any standard concentration term."],
  sol:"<b>m = (moles solute)/(kg solvent) = (w × 1000)/(M<sub>B</sub> × W<sub>solvent in g</sub>).</b> ⚠ Molarity uses the solution's volume; molality uses the solvent's mass. Two different denominators, and they are constantly confused."},
 
-{id:82, lec:"L-10", blk:"Calculations", topic:"Molarity of an oxalic acid solution",
+{id:82, lec:"L-10", blk:"Calculations", topic:"Molarity of an oxalic acid solution", t:90,
  q:"0.63 g of oxalic acid (COOH)₂·2H₂O (molar mass 126) is dissolved to make 250 mL of solution. Its molarity is",
  opts:["0.02 M","0.04 M","0.05 M","0.2 M"],
  ans:0,
@@ -1268,7 +1294,7 @@ const QUIZ = [
   "0.2 M is ten times too large, from taking the volume as 25 mL."],
  sol:"n = 0.63/126 = <b>0.005 mol</b>; V = 0.25 L ⇒ <b>M = 0.02 M</b>. ⚠ Include the two waters of crystallization in the molar mass: 90 + 36 = 126, not 90."},
 
-{id:83, lec:"L-10", blk:"Calculations", topic:"Normality of the same solution",
+{id:83, lec:"L-10", blk:"Calculations", topic:"Normality of the same solution", t:90,
  q:"For the same oxalic acid solution (0.63 g of (COOH)₂·2H₂O in 250 mL), the normality is",
  opts:["0.04 N","0.02 N","0.01 N","0.08 N"],
  ans:0,
@@ -1279,7 +1305,7 @@ const QUIZ = [
   "0.08 applies a valence factor of 4, but oxalic acid has only two replaceable hydrogens."],
  sol:"E = 126/2 = 63 ⇒ g-equivalents = 0.63/63 = 0.01 in 0.25 L ⇒ <b>N = 0.04 N</b>. Equivalently <b>N = M × 2 = 0.04</b>."},
 
-{id:84, lec:"L-10", blk:"Calculations", topic:"Mole fraction in a three-component mixture",
+{id:84, lec:"L-10", blk:"Calculations", topic:"Mole fraction in a three-component mixture", t:60,
  q:"A solution is 25 % water, 25 % ethanol and 50 % acetic acid by mass. The mole fraction of water is about (H₂O = 18, C₂H₅OH = 46, CH₃COOH = 60)",
  opts:["0.50","0.25","0.33","0.75"],
  ans:0,
@@ -1290,7 +1316,7 @@ const QUIZ = [
   "0.75 is the combined mole fraction of the other two components."],
  sol:"Work in 100 g, convert each to moles, then divide. <b>x(H₂O) = 1.389/2.766 = 0.502.</b> Note how the lightest component's mole fraction far exceeds its mass fraction — always convert before comparing."},
 
-{id:85, lec:"L-10", blk:"Calculations", topic:"Molality from mole fraction",
+{id:85, lec:"L-10", blk:"Calculations", topic:"Molality from mole fraction", t:90,
  q:"In a methanol–water solution the mole fraction of methanol is 0.25. The molality of methanol is about",
  opts:["18.5 m","13.9 m","0.25 m","55.5 m"],
  ans:0,
@@ -1301,7 +1327,7 @@ const QUIZ = [
   "55.5 is the molality of pure water expressed in itself, an unrelated figure."],
  sol:"Take a basis of <b>1 mol of solution</b>: 0.25 mol solute, 0.75 mol water = 0.75 × 18 = 13.5 g = 0.0135 kg. <b>m = 0.25/0.0135 = 18.5 m.</b> Or use m = [x/(1 − x)] × (1000/M<sub>solvent</sub>)."},
 
-{id:86, lec:"L-10", blk:"Comparisons", topic:"Which terms are temperature-independent",
+{id:86, lec:"L-10", blk:"Comparisons", topic:"Which terms are temperature-independent", t:60,
  q:"Which set of concentration terms is entirely independent of temperature?",
  opts:[
   "molality, mole fraction and mass percent",
@@ -1316,7 +1342,7 @@ const QUIZ = [
   "Mass percent is fine, but normality is per litre of solution and therefore drifts."],
  sol:"<b>Volume-based → temperature-dependent (molarity, normality). Mass- or mole-based → independent (molality, mole fraction, mass percent).</b> A one-line test: does the definition mention a volume?"},
 
-{id:87, lec:"L-10", blk:"Conversions", topic:"Molarity to molality",
+{id:87, lec:"L-10", blk:"Conversions", topic:"Molarity to molality", t:60,
  q:"To convert molarity into molality you additionally need to know",
  opts:[
   "the density of the solution",
@@ -1331,7 +1357,7 @@ const QUIZ = [
   "The two use different denominators, so no conversion is possible without more information."],
  sol:"<b>M = (m·d·1000)/(1000 + m·M<sub>B</sub>)</b>, where d is the solution density. The recipe: take 1 L, use d to get its mass, subtract the solute mass to get the solvent mass, then divide the moles by it."},
 
-{id:88, lec:"L-10", blk:"Mole fraction", topic:"Mole fraction of the solvent",
+{id:88, lec:"L-10", blk:"Mole fraction", topic:"Mole fraction of the solvent", t:90,
  q:"A solution contains 2 mol of solute and 8 mol of solvent. The mole fraction of the solvent is",
  opts:["0.8","0.2","4.0","8.0"],
  ans:0,
@@ -1343,7 +1369,7 @@ const QUIZ = [
  sol:"<b>x<sub>solvent</sub> = N/(n + N) = 8/10 = 0.8</b>, and x<sub>solute</sub> = 0.2. Always check that the two add to 1."},
 
 /* ---------------- L-11 (8) ---------------- */
-{id:89, lec:"L-11", blk:"Counting rules", topic:"Leading zeros",
+{id:89, lec:"L-11", blk:"Counting rules", topic:"Leading zeros", t:60,
  q:"The number of significant figures in 0.00368 is",
  opts:["3","5","6","2"],
  ans:0,
@@ -1354,7 +1380,7 @@ const QUIZ = [
   "2 drops a genuine significant digit; all three of 3, 6 and 8 are measured."],
  sol:"<b>Leading zeros are never significant.</b> Writing the number as 3.68 × 10⁻³ makes the count obvious — scientific notation removes the ambiguity entirely."},
 
-{id:90, lec:"L-11", blk:"Counting rules", topic:"Trailing zeros after a decimal point",
+{id:90, lec:"L-11", blk:"Counting rules", topic:"Trailing zeros after a decimal point", t:60,
  q:"The number of significant figures in 500.0 is",
  opts:["4","1","3","2"],
  ans:0,
@@ -1365,7 +1391,7 @@ const QUIZ = [
   "2 has no basis in the counting rules."],
  sol:"<b>Trailing zeros after a decimal point are significant</b> — that is precisely why they are written. So 500.0 has <b>4</b>, 0.00800 has 3, and 500 has an ambiguous 1 to 3."},
 
-{id:91, lec:"L-11", blk:"Counting rules", topic:"Trailing zeros in a whole number",
+{id:91, lec:"L-11", blk:"Counting rules", topic:"Trailing zeros in a whole number", t:60,
  q:"By the usual convention, the number of significant figures in 126000 is taken as",
  opts:["3","6","5","4"],
  ans:0,
@@ -1376,7 +1402,7 @@ const QUIZ = [
   "4 does the same with a different arbitrary cut."],
  sol:"Trailing zeros in a whole number are <b>ambiguous</b>; the convention is not to count them. Write <b>1.26 × 10⁵</b> for 3 s.f. or <b>1.26000 × 10⁵</b> for 6 — scientific notation is the only unambiguous form."},
 
-{id:92, lec:"L-11", blk:"Rounding", topic:"Rounding a digit that is exactly 5",
+{id:92, lec:"L-11", blk:"Rounding", topic:"Rounding a digit that is exactly 5", t:60,
  q:"Rounding 2.45 to two significant figures gives",
  opts:["2.4","2.5","2.0","2.45"],
  ans:0,
@@ -1387,7 +1413,7 @@ const QUIZ = [
   "2.45 has three significant figures, so no rounding has been done at all."],
  sol:"<b>Round-half-to-even:</b> drop &lt; 5 → keep; drop &gt; 5 → raise by 1; drop exactly 5 → round so the last digit is <b>even</b>. So 2.45 → <b>2.4</b> but 2.35 → 2.4 as well. This keeps rounding errors from accumulating in one direction."},
 
-{id:93, lec:"L-11", blk:"Arithmetic rules", topic:"Multiplication and division",
+{id:93, lec:"L-11", blk:"Arithmetic rules", topic:"Multiplication and division", t:60,
  q:"In multiplication and division, the answer should be reported with",
  opts:[
   "as many significant figures as the operand having the fewest",
@@ -1402,7 +1428,7 @@ const QUIZ = [
   "Calculator digits are an artefact of the arithmetic and carry no information about measurement precision."],
  sol:"<b>× and ÷ → fewest significant figures. + and − → fewest decimal places.</b> Two different rules, and applying the wrong one is the most common error in this topic."},
 
-{id:94, lec:"L-11", blk:"Arithmetic rules", topic:"Addition and subtraction",
+{id:94, lec:"L-11", blk:"Arithmetic rules", topic:"Addition and subtraction", t:60,
  q:"The sum 12.11 + 18.0 + 1.012, reported to the correct precision, is",
  opts:["31.1","31.122","31.12","31"],
  ans:0,
@@ -1413,7 +1439,7 @@ const QUIZ = [
   "31 rounds to zero decimal places, discarding precision that the data does support."],
  sol:"For <b>+ and −</b>, match the operand with the <b>fewest decimal places</b>. Here 18.0 has one, so 31.122 → <b>31.1</b>. Note it is decimal places that matter here, not significant figures."},
 
-{id:95, lec:"L-11", blk:"Counting rules", topic:"Zeros between digits",
+{id:95, lec:"L-11", blk:"Counting rules", topic:"Zeros between digits", t:60,
  q:"The number of significant figures in 2.0034 is",
  opts:["5","3","4","2"],
  ans:0,
@@ -1424,7 +1450,7 @@ const QUIZ = [
   "2 counts only the digits before the zeros."],
  sol:"<b>Zeros between non-zero digits are always significant.</b> So 2.0034 has 5, 5005 has 4, and 208 has 3. Only <b>leading</b> zeros and ambiguous <b>trailing</b> zeros in whole numbers fail to count."},
 
-{id:96, lec:"L-11", blk:"Counting rules", topic:"Significant figures in a constant",
+{id:96, lec:"L-11", blk:"Counting rules", topic:"Significant figures in a constant", t:60,
  q:"The speed of light is often quoted as 3.0 × 10⁸ m s⁻¹. The number of significant figures is",
  opts:["2","1","8","9"],
  ans:0,
@@ -1436,7 +1462,7 @@ const QUIZ = [
  sol:"<b>The exponent never affects the significant-figure count.</b> So 3.0 × 10⁸ has 2, 6.626 × 10⁻³⁴ has 4, and 6.022 × 10²³ has 4."},
 
 /* ---------------- L-12 (8) ---------------- */
-{id:97, lec:"L-12", blk:"Conservation of mass", topic:"The law",
+{id:97, lec:"L-12", blk:"Conservation of mass", topic:"The law", t:60,
  q:"The law of conservation of mass states that in a chemical reaction",
  opts:[
   "the total mass of the products equals the total mass of the reactants consumed",
@@ -1451,7 +1477,7 @@ const QUIZ = [
   "Moles are not conserved for the same reason as molecules; only <b>atoms and mass</b> are."],
  sol:"<b>Mass in = mass out.</b> Conserved: atoms and mass. Not conserved: molecules, moles, volume. This law is what lets you find an unmeasured product mass purely by subtraction."},
 
-{id:98, lec:"L-12", blk:"Conservation of mass", topic:"Finding a gas mass by difference",
+{id:98, lec:"L-12", blk:"Conservation of mass", topic:"Finding a gas mass by difference", t:90,
  q:"6.3 g of NaHCO₃ is added to 15.0 g of CH₃COOH and the residue weighs 18.0 g. The mass of CO₂ released is",
  opts:["3.3 g","2.7 g","8.7 g","21.3 g"],
  ans:0,
@@ -1462,7 +1488,7 @@ const QUIZ = [
   "21.3 g is the total reactant mass; most of it stays behind in the residue."],
  sol:"<b>Mass of gas = total reactants − residue = 21.3 − 18.0 = 3.3 g.</b> No equation balancing needed — conservation of mass alone settles it."},
 
-{id:99, lec:"L-12", blk:"Definite composition", topic:"The law of constant composition",
+{id:99, lec:"L-12", blk:"Definite composition", topic:"The law of constant composition", t:60,
  q:"The law of definite (constant) composition states that",
  opts:[
   "a given compound always contains the same elements in the same fixed mass ratio",
@@ -1477,7 +1503,7 @@ const QUIZ = [
   "That atoms come in whole numbers is true but is a different idea, belonging to Dalton's atomic theory."],
  sol:"<b>Same compound ⇒ same elements in the same fixed mass ratio, whatever its source.</b> It is precisely this that separates a compound from a mixture."},
 
-{id:100, lec:"L-12", blk:"Multiple proportions", topic:"The law",
+{id:100, lec:"L-12", blk:"Multiple proportions", topic:"The law", t:60,
  q:"CO contains 12 g of carbon per 16 g of oxygen, and CO₂ contains 12 g of carbon per 32 g of oxygen. This illustrates the law of",
  opts:["multiple proportions","definite composition","reciprocal proportions","conservation of mass"],
  ans:0,
@@ -1488,7 +1514,7 @@ const QUIZ = [
   "Conservation of mass concerns totals before and after a reaction, not composition ratios."],
  sol:"<b>Multiple proportions:</b> when two elements form more than one compound, the masses of one that combine with a fixed mass of the other are in a <b>simple whole-number ratio</b>. Here 16 : 32 = <b>1 : 2</b>."},
 
-{id:101, lec:"L-12", blk:"Multiple proportions", topic:"Testing data against the law",
+{id:101, lec:"L-12", blk:"Multiple proportions", topic:"Testing data against the law", t:60,
  q:"Two carbon–oxygen compounds contain 42.9 % and 27.3 % carbon. The ratio of carbon masses combining with a fixed mass of oxygen is",
  opts:["2 : 1","1 : 2","3 : 2","1.57 : 1"],
  ans:0,
@@ -1499,7 +1525,7 @@ const QUIZ = [
   "1.57 : 1 is the ratio of the percentages 42.9/27.3, which is not what the law compares."],
  sol:"⚠ <b>Fix one element first.</b> Per 1 g of oxygen the carbon masses are 0.75 g and 0.375 g, giving <b>2 : 1</b> — a simple whole-number ratio, so the law holds. Comparing the percentages directly gives 1.57 : 1 and appears to break the law."},
 
-{id:102, lec:"L-12", blk:"Multiple proportions", topic:"Nitrogen–oxygen compounds",
+{id:102, lec:"L-12", blk:"Multiple proportions", topic:"Nitrogen–oxygen compounds", t:60,
  q:"Four nitrogen–oxygen compounds have N : O mass ratios 14 : 16, 14 : 32, 28 : 32 and 28 : 80. Fixing nitrogen at 14 g, the oxygen masses are in the ratio",
  opts:["2 : 4 : 2 : 5","1 : 2 : 2 : 5","2 : 4 : 4 : 10","1 : 2 : 1 : 2.5"],
  ans:0,
@@ -1510,7 +1536,7 @@ const QUIZ = [
   "This is the correct ratio divided by 2, which reintroduces a fraction; a whole-number ratio is what the law calls for."],
  sol:"Scale every compound to <b>14 g of N</b>: O becomes 16, 32, 16, 40. Divide by the HCF 8 ⇒ <b>2 : 4 : 2 : 5</b> — simple whole numbers, confirming the law of multiple proportions."},
 
-{id:103, lec:"L-12", blk:"Reciprocal proportions", topic:"The law",
+{id:103, lec:"L-12", blk:"Reciprocal proportions", topic:"The law", t:60,
  q:"Hydrogen combines with 23 parts by mass of sodium and with 35.5 parts of chlorine. Sodium and chlorine themselves combine in the ratio 23 : 35.5. This illustrates the law of",
  opts:["reciprocal proportions","multiple proportions","definite composition","conservation of mass"],
  ans:0,
@@ -1521,7 +1547,7 @@ const QUIZ = [
   "Conservation of mass is about totals across a reaction, not combining ratios."],
  sol:"<b>Reciprocal proportions:</b> B and C each combine with a fixed mass of A in some ratio; B and C then combine with each other in that same ratio or a simple multiple of it. Here the third element is hydrogen, and 23 : 35.5 recurs in NaCl."},
 
-{id:104, lec:"L-12", blk:"Definite composition", topic:"Distinguishing the laws",
+{id:104, lec:"L-12", blk:"Definite composition", topic:"Distinguishing the laws", t:60,
  q:"Pure water from a river, from a laboratory synthesis and from melted ice all contain 11.1 % hydrogen and 88.9 % oxygen. This best illustrates the law of",
  opts:["definite composition","multiple proportions","reciprocal proportions","conservation of mass"],
  ans:0,
@@ -1533,7 +1559,7 @@ const QUIZ = [
  sol:"The tell is <b>“regardless of source”</b>: that phrase always signals <b>definite composition</b>. Comparing H₂O with H₂O₂ instead would illustrate multiple proportions, with the oxygen ratio 1 : 2."},
 
 /* ---------------- Strong Box (12) ---------------- */
-{id:105, lec:"SB", blk:"Limiting reagent", topic:"Aluminium oxide from aluminium and oxygen",
+{id:105, lec:"SB", blk:"Limiting reagent", topic:"Aluminium oxide from aluminium and oxygen", t:180,
  q:"When 81.0 g of aluminium reacts with 128.0 g of oxygen gas, the mass of aluminium oxide produced is (Al = 27, O = 16)",
  opts:["153 g","204 g","209 g","102 g"],
  ans:0,
@@ -1544,7 +1570,7 @@ const QUIZ = [
   "102 g is 1 mol of Al₂O₃, which would need only 2 mol of aluminium."],
  sol:"<b>4Al + 3O₂ → 2Al₂O₃.</b> n(Al) = 81/27 = 3, n(O₂) = 128/32 = 4. Ratios 3/4 = 0.75 and 4/3 = 1.33 ⇒ <b>Al limits</b>. n(Al₂O₃) = 3 × 2/4 = 1.5 mol × 102 = <b>153 g</b>."},
 
-{id:106, lec:"SB", blk:"Limiting reagent", topic:"Barium phosphate from a mixture",
+{id:106, lec:"SB", blk:"Limiting reagent", topic:"Barium phosphate from a mixture", t:90,
  q:"If 5 mol of BaCl₂ is mixed with 2 mol of Na₃PO₄, the maximum number of moles of Ba₃(PO₄)₂ formed is",
  opts:["1","1.67","2","5"],
  ans:0,
@@ -1555,7 +1581,7 @@ const QUIZ = [
   "5 mol is the BaCl₂ taken, and three moles of it are needed per mole of product."],
  sol:"<b>3BaCl₂ + 2Na₃PO₄ → Ba₃(PO₄)₂ + 6NaCl.</b> Divide by coefficients: 5/3 = 1.67 vs 2/2 = <b>1</b> ⇒ Na₃PO₄ limits. Product = 1 × (1/2) × 2 = <b>1 mol</b>, with 2 mol of BaCl₂ left over."},
 
-{id:107, lec:"SB", blk:"Combustion analysis", topic:"Percentage of carbon from CO₂",
+{id:107, lec:"SB", blk:"Combustion analysis", topic:"Percentage of carbon from CO₂", t:90,
  q:"On complete combustion, 0.30 g of an organic compound gave 0.20 g of CO₂. The percentage of carbon in the compound is about",
  opts:["18 %","27 %","67 %","12 %"],
  ans:0,
@@ -1566,7 +1592,7 @@ const QUIZ = [
   "12 is the atomic mass of carbon, not a percentage."],
  sol:"<b>%C = (12/44) × (mass of CO₂ / mass of sample) × 100.</b> The 12/44 extracts the carbon from the CO₂. Here (12/44)(0.20/0.30)(100) = <b>18.2 %</b>. The parallel rule for hydrogen uses <b>2/18</b> with the mass of H₂O."},
 
-{id:108, lec:"SB", blk:"Combustion analysis", topic:"Percentage of carbon, larger sample",
+{id:108, lec:"SB", blk:"Combustion analysis", topic:"Percentage of carbon, larger sample", t:90,
  q:"Complete combustion of 0.492 g of an organic compound gave 0.792 g of CO₂. The percentage of carbon is nearest to",
  opts:["44 %","16 %","62 %","27 %"],
  ans:0,
@@ -1577,7 +1603,7 @@ const QUIZ = [
   "27 % is the 12/44 fraction alone, without the sample scaling."],
  sol:"<b>%C = (12/44)(0.792/0.492)(100) = 43.9 % ≈ 44 %.</b> Note the CO₂ here outweighs the sample — perfectly normal, since each carbon atom picks up two oxygens during combustion."},
 
-{id:109, lec:"SB", blk:"Titration", topic:"Sodium hydroxide from an oxalic acid titration",
+{id:109, lec:"SB", blk:"Titration", topic:"Sodium hydroxide from an oxalic acid titration", t:180,
  q:"50 mL of 0.5 M oxalic acid exactly neutralises 25 mL of NaOH solution. The mass of NaOH in 50 mL of that NaOH solution is (NaOH = 40)",
  opts:["4 g","2 g","1 g","8 g"],
  ans:0,
@@ -1588,7 +1614,7 @@ const QUIZ = [
   "8 g would need a 4 M NaOH solution."],
  sol:"Equivalents must match: N<sub>acid</sub>V<sub>acid</sub> = N<sub>base</sub>V<sub>base</sub> ⇒ (0.5 × 2)(50) = N(25) ⇒ <b>N = 2</b>, and NaOH is monoacidic so M = 2. In 50 mL: n = 0.05 × 2 = 0.1 mol ⇒ <b>4 g</b>. ⚠ The dibasic factor on oxalic acid is the whole question."},
 
-{id:110, lec:"SB", blk:"Molarity ↔ molality", topic:"Molality of a 3 M sodium chloride solution",
+{id:110, lec:"SB", blk:"Molarity ↔ molality", topic:"Molality of a 3 M sodium chloride solution", t:180,
  q:"The molality of a 3 M aqueous NaCl solution of density 1.25 g mL⁻¹ is about (NaCl = 58.5)",
  opts:["2.79 m","3.00 m","2.40 m","3.42 m"],
  ans:0,
@@ -1599,7 +1625,7 @@ const QUIZ = [
   "3.42 m would follow from a solvent mass below 1 kg, but here the water weighs more than a kilogram."],
  sol:"Basis <b>1 L</b>: mass = 1000 × 1.25 = 1250 g. Solute = 3 × 58.5 = 175.5 g ⇒ <b>water = 1074.5 g</b>. m = 3/1.0745 = <b>2.79 m</b>. ⚠ Subtract the solute mass — that step is what separates molality from molarity."},
 
-{id:111, lec:"SB", blk:"Oleum", topic:"Labelling an oleum sample",
+{id:111, lec:"SB", blk:"Oleum", topic:"Labelling an oleum sample", t:90,
  q:"An oleum sample has a mass fraction of free SO₃ equal to 0.6. Its label is (S = 32, O = 16, H = 1)",
  opts:["113.5 %","104.5 %","109 %","115 %"],
  ans:0,
@@ -1610,7 +1636,7 @@ const QUIZ = [
   "115 % overshoots; 60 g of SO₃ can generate only 73.5 g of H₂SO₄, not 75 g."],
  sol:"The label is the mass of H₂SO₄ obtained when <b>100 g of oleum</b> is treated with water. 60 g SO₃ = 0.75 mol → 0.75 × 98 = 73.5 g H₂SO₄; add the 40 g already present ⇒ <b>113.5 %</b>. A label always exceeds 100 % because water is absorbed."},
 
-{id:112, lec:"SB", blk:"Empirical formula", topic:"Atomic mass from a carbonate-to-chloride conversion",
+{id:112, lec:"SB", blk:"Empirical formula", topic:"Atomic mass from a carbonate-to-chloride conversion", t:180,
  q:"1 g of a metallic carbonate XCO₃ is completely converted into the chloride XCl₂, weighing 1.11 g. The atomic mass of X is (C = 12, O = 16, Cl = 35.5)",
  opts:["40","24","56","65"],
  ans:0,
@@ -1621,7 +1647,7 @@ const QUIZ = [
   "65 (zinc) would give 1.09 g."],
  sol:"The mole count is unchanged: <b>1/(A + 60) = 1.11/(A + 71)</b>. Cross-multiplying, A + 71 = 1.11A + 66.6 ⇒ 4.4 = 0.11A ⇒ <b>A = 40</b> (Ca). Setting the two mole expressions equal is the whole method for these conversion problems."},
 
-{id:113, lec:"SB", blk:"Mole concept", topic:"Molar mass of a carbonate from evolved CO₂",
+{id:113, lec:"SB", blk:"Mole concept", topic:"Molar mass of a carbonate from evolved CO₂", t:90,
  q:"1 g of a carbonate M₂CO₃ treated with excess HCl produces 0.01 mol of CO₂. The molar mass of M₂CO₃ is",
  opts:["100 g mol⁻¹","10 g mol⁻¹","50 g mol⁻¹","200 g mol⁻¹"],
  ans:0,
@@ -1632,7 +1658,7 @@ const QUIZ = [
   "200 g mol⁻¹ would need only 0.005 mol of carbonate."],
  sol:"M₂CO₃ + 2HCl → 2MCl + H₂O + CO₂ is <b>1 : 1</b> in carbonate to CO₂, so n(M₂CO₃) = 0.01 mol. <b>M = w/n = 1/0.01 = 100 g mol⁻¹</b> (which makes M ≈ 20, i.e. sodium at 23 within rounding)."},
 
-{id:114, lec:"SB", blk:"Significant figures", topic:"Matching significant-figure counts",
+{id:114, lec:"SB", blk:"Significant figures", topic:"Matching significant-figure counts", t:90,
  q:"Which of these have the <b>same</b> number of significant figures? (A) 0.00253 (B) 1.0003 (C) 15.0 (D) 163",
  opts:["A, C and D","A, B and C","B, C and D","all four"],
  ans:0,
@@ -1643,7 +1669,7 @@ const QUIZ = [
   "B breaks the set at 5 significant figures."],
  sol:"<b>A</b> 0.00253 → 3 (leading zeros never count) · <b>B</b> 1.0003 → 5 (interior zeros always count) · <b>C</b> 15.0 → 3 (trailing decimal zero counts) · <b>D</b> 163 → 3. So <b>A, C and D</b> match."},
 
-{id:115, lec:"SB", blk:"Significant figures", topic:"Significant figures in a calculation",
+{id:115, lec:"SB", blk:"Significant figures", topic:"Significant figures in a calculation", t:90,
  q:"Using the rules for significant figures, the value of (0.02858 × 0.112)/0.5702 is",
  opts:["0.00561","0.005614","0.0056","0.00562"],
  ans:0,
@@ -1654,7 +1680,7 @@ const QUIZ = [
   "0.00562 rounds the fourth digit incorrectly — the raw value 0.005614 rounds down, not up."],
  sol:"Operands have 4, <b>3</b> and 4 significant figures, so the answer takes <b>3</b>. (0.02858 × 0.112)/0.5702 = 0.0056138 → <b>0.00561</b>. Round only at the very end, never at intermediate steps."},
 
-{id:116, lec:"SB", blk:"Mole concept", topic:"Counting atoms of one element",
+{id:116, lec:"SB", blk:"Mole concept", topic:"Counting atoms of one element", t:180,
  q:"The number of nitrogen atoms in 681 g of C₇H₅N₃O₆ is x × 10²¹. The value of x is (N_A = 6.02 × 10²³)",
  opts:["5418","1806","2271","602"],
  ans:0,
@@ -1669,13 +1695,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter C-3 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1693,6 +1730,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1727,15 +1767,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1747,47 +1788,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1797,30 +1855,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1829,7 +1931,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1842,9 +1946,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1853,7 +1975,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1874,21 +1997,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter C-3 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -244,7 +270,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 · Sine Rule, Triangle Basics & Nature (14) ---------------- */
-{id:1, lec:"L-1", blk:"Elements of a triangle", topic:"Standard side notation",
+{id:1, lec:"L-1", blk:"Elements of a triangle", topic:"Standard side notation", t:90,
  q:"In the standard notation for △ABC, the side denoted a is",
  opts:["BC, the side opposite vertex A","AB, the side opposite vertex C","CA, the side opposite vertex B","the longest side of the triangle"],
  ans:0,
@@ -255,7 +281,7 @@ const QUIZ = [
   "a is defined by position (opposite A), not by length — a need not be the longest side."],
  sol:"By convention the side opposite vertex A is <b>a = BC</b>, opposite B is b = CA, opposite C is c = AB. The label is fixed by the opposite vertex, not by the side's length."},
 
-{id:2, lec:"L-1", blk:"Triangle inequality", topic:"Valid set of sides",
+{id:2, lec:"L-1", blk:"Triangle inequality", topic:"Valid set of sides", t:60,
  q:"Which of these cannot be the side lengths of a triangle?",
  opts:["1, 2, 3","2, 3, 4","4, 5, 6","3, 4, 5"],
  ans:0,
@@ -266,7 +292,7 @@ const QUIZ = [
   "3 + 4 &gt; 5 etc.; the familiar right triangle, valid."],
  sol:"A triangle needs each side &lt; sum of the other two. For 1, 2, 3: 1 + 2 = 3, which is <b>not strictly greater</b> than 3, so no triangle exists (the points are collinear)."},
 
-{id:3, lec:"L-1", blk:"Triangle inequality (difference form)", topic:"Range of the third side",
+{id:3, lec:"L-1", blk:"Triangle inequality (difference form)", topic:"Range of the third side", t:60,
  q:"Two sides of a triangle are 5 and 8. The third side c must satisfy",
  opts:["3 &lt; c &lt; 13","0 &lt; c &lt; 13","3 &lt; c &lt; 40","5 &lt; c &lt; 8"],
  ans:0,
@@ -277,7 +303,7 @@ const QUIZ = [
   "c need not lie between the two given sides; it only must lie between their difference and sum."],
  sol:"Third-side range: <b>|a − b| &lt; c &lt; a + b</b> ⇒ |8 − 5| &lt; c &lt; 8 + 5 ⇒ <b>3 &lt; c &lt; 13</b>."},
 
-{id:4, lec:"L-1", blk:"The sine rule", topic:"Common ratio = 2R",
+{id:4, lec:"L-1", blk:"The sine rule", topic:"Common ratio = 2R", t:90,
  q:"In any △ABC the common value of a/sinA = b/sinB = c/sinC is",
  opts:["2R (the circum-diameter)","R (the circum-radius)","R/2","4R"],
  ans:0,
@@ -288,7 +314,7 @@ const QUIZ = [
   "4R is double the correct value; that would need a = 4R sinA."],
  sol:"The extended sine rule: a/sinA = b/sinB = c/sinC = <b>2R</b>, where R is the circum-radius. Equivalently a = 2R sinA."},
 
-{id:5, lec:"L-1", blk:"Sides proportional to sines", topic:"Find a side",
+{id:5, lec:"L-1", blk:"Sides proportional to sines", topic:"Find a side", t:90,
  q:"In △ABC, ∠A = 30°, ∠B = 90° and side a = 5. Then side b is",
  opts:["10","5","5√3","2.5"],
  ans:0,
@@ -299,7 +325,7 @@ const QUIZ = [
   "2.5 inverts the ratio (a·sinA/sinB) instead of a·sinB/sinA."],
  sol:"Sine rule: b = a·sinB/sinA = 5·sin90°/sin30° = 5·1/(1/2) = <b>10</b>. (Here b is the hypotenuse of a 30-60-90 triangle, twice the side opposite 30°.)"},
 
-{id:6, lec:"L-1", blk:"Sides and sines in A.P.", topic:"A.P. of sides ⇒ A.P. of sines",
+{id:6, lec:"L-1", blk:"Sides and sines in A.P.", topic:"A.P. of sides ⇒ A.P. of sines", t:90,
  q:"If the sides a, b, c of a triangle are in A.P., then sinA, sinB, sinC are in",
  opts:["A.P.","G.P.","H.P.","no particular progression"],
  ans:0,
@@ -310,7 +336,7 @@ const QUIZ = [
   "The relation is exact: sides ∝ sines, so an A.P. of sides forces an A.P. of sines."],
  sol:"a = 2R sinA, b = 2R sinB, c = 2R sinC. Dividing the A.P. a, b, c by the constant 2R leaves it an A.P., so <b>sinA, sinB, sinC are in A.P.</b>"},
 
-{id:7, lec:"L-1", blk:"Sides vs angles (trap)", topic:"Sides are proportional to…",
+{id:7, lec:"L-1", blk:"Sides vs angles (trap)", topic:"Sides are proportional to…", t:60,
  q:"In any triangle the sides are proportional to",
  opts:["the sines of the opposite angles","the opposite angles themselves","the cosines of the opposite angles","the sines of the half-angles"],
  ans:0,
@@ -321,7 +347,7 @@ const QUIZ = [
   "Half-angle sines appear in the in-radius formula, not in the side-to-angle proportionality."],
  sol:"From a/sinA = b/sinB = c/sinC, the sides are proportional to the <b>sines of the opposite angles</b>, never to the angles themselves — a classic trap (angles in A.P. ≠ sides in A.P.)."},
 
-{id:8, lec:"L-1", blk:"Nature of a triangle", topic:"Obtuse test",
+{id:8, lec:"L-1", blk:"Nature of a triangle", topic:"Obtuse test", t:60,
  q:"A triangle has sides 3, 5, 7. It is",
  opts:["obtuse-angled","right-angled","acute-angled","equilateral"],
  ans:0,
@@ -332,7 +358,7 @@ const QUIZ = [
   "The three sides are unequal, so it cannot be equilateral."],
  sol:"Compare the largest side's square with the sum of the other two: 7² = 49 vs 3² + 5² = 34. Since 49 &gt; 34, the triangle is <b>obtuse-angled</b> (obtuse at the vertex opposite the side 7)."},
 
-{id:9, lec:"L-1", blk:"Nature of a triangle", topic:"Acute test",
+{id:9, lec:"L-1", blk:"Nature of a triangle", topic:"Acute test", t:60,
  q:"A triangle has sides 4, 5, 6. It is",
  opts:["acute-angled","right-angled","obtuse-angled","not a valid triangle"],
  ans:0,
@@ -343,7 +369,7 @@ const QUIZ = [
   "4 + 5 &gt; 6, so it is a valid triangle."],
  sol:"Test the largest side: 6² = 36 vs 4² + 5² = 41. Since 36 &lt; 41, the largest angle is acute, hence all angles are acute — the triangle is <b>acute-angled</b>."},
 
-{id:10, lec:"L-1", blk:"Circum-radius from the sine rule", topic:"Find R",
+{id:10, lec:"L-1", blk:"Circum-radius from the sine rule", topic:"Find R", t:90,
  q:"In △ABC, a = √3 and ∠A = 60°. The circum-radius R is",
  opts:["1","√3","2","1/2"],
  ans:0,
@@ -354,7 +380,7 @@ const QUIZ = [
   "1/2 halves the correct answer, as if 2R = 1."],
  sol:"2R = a/sinA = √3 / sin60° = √3/(√3/2) = 2 ⇒ <b>R = 1</b>."},
 
-{id:11, lec:"L-1", blk:"Sine rule — find a sine", topic:"Right angle via sine rule",
+{id:11, lec:"L-1", blk:"Sine rule — find a sine", topic:"Right angle via sine rule", t:90,
  q:"In △ABC, a = 2, b = 3 and sinA = 2/3. Then ∠B is",
  opts:["90°","60°","45°","30°"],
  ans:0,
@@ -365,7 +391,7 @@ const QUIZ = [
   "30° gives sinB = 1/2, half the correct value."],
  sol:"Sine rule: a/sinA = b/sinB ⇒ sinB = b·sinA/a = 3·(2/3)/2 = 1 ⇒ <b>∠B = 90°</b>."},
 
-{id:12, lec:"L-1", blk:"Sine rule identity", topic:"Simplify cos2A/a² − cos2B/b²",
+{id:12, lec:"L-1", blk:"Sine rule identity", topic:"Simplify cos2A/a² − cos2B/b²", t:90,
  q:"In any △ABC, the value of (cos2A)/a² − (cos2B)/b² is",
  opts:["1/a² − 1/b²","0","1/b² − 1/a²","a² − b²"],
  ans:0,
@@ -376,7 +402,7 @@ const QUIZ = [
   "a² − b² inverts the expression; the terms are 1/a² and 1/b²."],
  sol:"cos2A = 1 − 2sin²A ⇒ (cos2A)/a² − (cos2B)/b² = (1/a² − 1/b²) − 2(sin²A/a² − sin²B/b²). By the sine rule sinA/a = sinB/b, so the bracket is 0, leaving <b>1/a² − 1/b²</b>."},
 
-{id:13, lec:"L-1", blk:"Cyclic sine identity", topic:"a sin(B−C)+… = 0",
+{id:13, lec:"L-1", blk:"Cyclic sine identity", topic:"a sin(B−C)+… = 0", t:90,
  q:"In any △ABC, a·sin(B−C) + b·sin(C−A) + c·sin(A−B) equals",
  opts:["0","a + b + c","2R","1"],
  ans:0,
@@ -387,7 +413,7 @@ const QUIZ = [
   "A cyclic difference expression like this always vanishes, it is not 1."],
  sol:"a sin(B−C) = 2R sinA sin(B−C) = 2R sin(B+C)sin(B−C) = 2R(sin²B − sin²C) (using sinA = sin(B+C)). Summing cyclically, (sin²B−sin²C)+(sin²C−sin²A)+(sin²A−sin²B) = <b>0</b>."},
 
-{id:14, lec:"L-1", blk:"Sides proportional to cos(A/2)", topic:"Angles of the new triangle",
+{id:14, lec:"L-1", blk:"Sides proportional to cos(A/2)", topic:"Angles of the new triangle", t:90,
  q:"The sides of a triangle are proportional to cos(A/2), cos(B/2), cos(C/2). Its angles are",
  opts:["π/2 − A/2, π/2 − B/2, π/2 − C/2","A/2, B/2, C/2","A, B, C","π − A, π − B, π − C"],
  ans:0,
@@ -399,7 +425,7 @@ const QUIZ = [
  sol:"Write cos(A/2) = sin(π/2 − A/2). Since sides ∝ sines of the opposite angles, the triangle's angles are <b>π/2 − A/2, π/2 − B/2, π/2 − C/2</b> (their sum = 3π/2 − π/2 = π ✓)."},
 
 /* ---------------- L-2 · Cosine Rule, Projection & Solution (13) ---------------- */
-{id:15, lec:"L-2", blk:"The cosine rule", topic:"cosA formula",
+{id:15, lec:"L-2", blk:"The cosine rule", topic:"cosA formula", t:60,
  q:"In any △ABC, cosA equals",
  opts:["(b² + c² − a²)/(2bc)","(a² + c² − b²)/(2ac)","(b² + c² − a²)/(bc)","(a² − b² − c²)/(2bc)"],
  ans:0,
@@ -410,7 +436,7 @@ const QUIZ = [
   "Sign error: the subtracted term is a² (the side opposite A), giving +b²+c²−a² in the numerator."],
  sol:"cosA = <b>(b² + c² − a²)/(2bc)</b> — in the numerator subtract the square of the side opposite A; in the denominator use twice the product of the two sides adjacent to A."},
 
-{id:16, lec:"L-2", blk:"Cosine rule — find an angle", topic:"cosA from three sides",
+{id:16, lec:"L-2", blk:"Cosine rule — find an angle", topic:"cosA from three sides", t:90,
  q:"In △ABC, a = 2, b = 3, c = 4. Then cosA equals",
  opts:["7/8","11/16","−1/4","1/8"],
  ans:0,
@@ -421,7 +447,7 @@ const QUIZ = [
   "1/8 drops a term; the numerator is 9+16−4 = 21, not 3."],
  sol:"cosA = (b²+c²−a²)/(2bc) = (9 + 16 − 4)/(2·3·4) = 21/24 = <b>7/8</b>."},
 
-{id:17, lec:"L-2", blk:"Cosine rule — find a side", topic:"SAS third side",
+{id:17, lec:"L-2", blk:"Cosine rule — find a side", topic:"SAS third side", t:90,
  q:"In △ABC, b = √3, c = 1 and ∠A = 30°. The side a equals",
  opts:["1","2","√2","√3"],
  ans:0,
@@ -432,7 +458,7 @@ const QUIZ = [
   "√3 just copies side b; a must be computed from the cosine rule."],
  sol:"a² = b² + c² − 2bc cosA = 3 + 1 − 2·√3·1·cos30° = 4 − 2√3·(√3/2) = 4 − 3 = 1 ⇒ <b>a = 1</b>."},
 
-{id:18, lec:"L-2", blk:"Solution of triangles", topic:"Finding B after a is known",
+{id:18, lec:"L-2", blk:"Solution of triangles", topic:"Finding B after a is known", t:90,
  q:"Continuing (b = √3, c = 1, A = 30°, a = 1): the angle B is",
  opts:["120°","60°","90°","30°"],
  ans:0,
@@ -443,7 +469,7 @@ const QUIZ = [
   "30° equals A; B is the largest angle (opposite the largest side √3)."],
  sol:"cosB = (a²+c²−b²)/(2ac) = (1 + 1 − 3)/(2·1·1) = −1/2 ⇒ <b>B = 120°</b> (then C = 180° − 30° − 120° = 30°)."},
 
-{id:19, lec:"L-2", blk:"Cosine rule — special relation", topic:"c²+a²−b² = ac",
+{id:19, lec:"L-2", blk:"Cosine rule — special relation", topic:"c²+a²−b² = ac", t:90,
  q:"In △ABC, if c² + a² − b² = ac, then ∠B equals",
  opts:["π/3","π/6","π/2","2π/3"],
  ans:0,
@@ -454,7 +480,7 @@ const QUIZ = [
   "2π/3 gives cosB = −1/2; the numerator ac is positive."],
  sol:"cosB = (c² + a² − b²)/(2ac) = ac/(2ac) = 1/2 ⇒ <b>∠B = π/3</b> (60°)."},
 
-{id:20, lec:"L-2", blk:"Projection rule", topic:"Side as a projection",
+{id:20, lec:"L-2", blk:"Projection rule", topic:"Side as a projection", t:60,
  q:"The projection rule expresses side a as",
  opts:["b cosC + c cosB","b cosB + c cosC","a cosB + b cosA","b sinC + c sinB"],
  ans:0,
@@ -465,7 +491,7 @@ const QUIZ = [
   "Projections use cosines of the base angles, not sines."],
  sol:"Reading BC off the foot of the altitude from A: a = BD + DC = <b>c cosB + b cosC</b> — each of the other two sides projected onto BC."},
 
-{id:21, lec:"L-2", blk:"Projection rule application", topic:"a cos²(C/2)+c cos²(A/2)=3b/2",
+{id:21, lec:"L-2", blk:"Projection rule application", topic:"a cos²(C/2)+c cos²(A/2)=3b/2", t:90,
  q:"If a·cos²(C/2) + c·cos²(A/2) = 3b/2, then a, b, c are in",
  opts:["A.P.","G.P.","H.P.","geometric then equal"],
  ans:0,
@@ -476,7 +502,7 @@ const QUIZ = [
   "The result is a single clean condition a + c = 2b (A.P.), not a mixed progression."],
  sol:"a(1+cosC)/2 + c(1+cosA)/2 = 3b/2 ⇒ (a+c) + (a cosC + c cosA) = 3b. By the projection rule a cosC + c cosA = b, so a + c + b = 3b ⇒ a + c = 2b ⇒ <b>a, b, c in A.P.</b>"},
 
-{id:22, lec:"L-2", blk:"Cosine rule identity", topic:"sin(A−B)/sin(A+B)",
+{id:22, lec:"L-2", blk:"Cosine rule identity", topic:"sin(A−B)/sin(A+B)", t:90,
  q:"In any △ABC, sin(A−B)/sin(A+B) equals",
  opts:["(a² − b²)/c²","(a² + b²)/c²","(a² − b²)/(ab)","(b² − a²)/c²"],
  ans:0,
@@ -487,7 +513,7 @@ const QUIZ = [
   "This is the negative of the answer (sign error in sinA cosB − cosA sinB)."],
  sol:"sin(A−B)/sin(A+B) = (sinA cosB − cosA sinB)/sinC. Put sinA = a/2R, sinB = b/2R and the cosine rule: = [(a²+c²−b²) − (b²+c²−a²)]/(2c²) = (2a² − 2b²)/(2c²) = <b>(a² − b²)/c²</b>."},
 
-{id:23, lec:"L-2", blk:"Cosine rule — find an angle", topic:"Identity gives a right angle",
+{id:23, lec:"L-2", blk:"Cosine rule — find an angle", topic:"Identity gives a right angle", t:90,
  q:"If (2cosA)/a + (cosB)/b + (2cosC)/c = a/(bc) + b/(ac), then ∠A equals",
  opts:["90°","60°","45°","30°"],
  ans:0,
@@ -498,7 +524,7 @@ const QUIZ = [
   "30° would need b²+c²−a² = √3 bc; not what the identity yields."],
  sol:"Multiply by 2abc and substitute the cosine rule: 2(b²+c²−a²) + (a²+c²−b²) + 2(a²+b²−c²) = 2(a²+b²). LHS = a² + 3b² + c²; setting equal gives b² + c² = a² ⇒ <b>∠A = 90°</b>."},
 
-{id:24, lec:"L-2", blk:"Greatest angle", topic:"Largest angle via cosine rule",
+{id:24, lec:"L-2", blk:"Greatest angle", topic:"Largest angle via cosine rule", t:90,
  q:"In △ABC with a = 3, b = 5, c = 7, the largest angle is",
  opts:["120°","90°","60°","150°"],
  ans:0,
@@ -509,7 +535,7 @@ const QUIZ = [
   "150° gives cosC = −√3/2 ≠ −1/2."],
  sol:"Largest angle faces the largest side 7: cosC = (a²+b²−c²)/(2ab) = (9+25−49)/(2·3·5) = −15/30 = −1/2 ⇒ <b>C = 120°</b>."},
 
-{id:25, lec:"L-2", blk:"Nature of a triangle", topic:"Obtuse from the cosine rule",
+{id:25, lec:"L-2", blk:"Nature of a triangle", topic:"Obtuse from the cosine rule", t:90,
  q:"The triangle with sides 2, 3, 4 is",
  opts:["obtuse-angled","right-angled","acute-angled","equilateral"],
  ans:0,
@@ -520,7 +546,7 @@ const QUIZ = [
   "The sides are unequal, so not equilateral."],
  sol:"For the largest side 4: cosC = (2²+3²−4²)/(2·2·3) = (4+9−16)/12 = −1/4. Since cosC &lt; 0, angle C is obtuse ⇒ the triangle is <b>obtuse-angled</b>."},
 
-{id:26, lec:"L-2", blk:"Meaning of the projection rule", topic:"Geometric reading",
+{id:26, lec:"L-2", blk:"Meaning of the projection rule", topic:"Geometric reading", t:60,
  q:"The projection rule a = b cosC + c cosB states that side a is",
  opts:["the sum of the projections of the other two sides onto BC","equal to the altitude drawn from A","half the perimeter of the triangle","the geometric mean of b and c"],
  ans:0,
@@ -531,7 +557,7 @@ const QUIZ = [
   "The geometric mean √(bc) is not the projection sum."],
  sol:"Dropping the altitude from A to BC, the base splits as BD + DC = c cosB + b cosC = a — side a is literally the <b>sum of the projections of b and c onto BC</b>."},
 
-{id:27, lec:"L-2", blk:"Type of triangle (trap)", topic:"a cosA = b cosB",
+{id:27, lec:"L-2", blk:"Type of triangle (trap)", topic:"a cosA = b cosB", t:90,
  q:"In △ABC, if a cosA = b cosB, the triangle is necessarily",
  opts:["isosceles (A = B) or right-angled (C = 90°)","only isosceles","only right-angled","equilateral"],
  ans:0,
@@ -543,7 +569,7 @@ const QUIZ = [
  sol:"Put a = 2R sinA, b = 2R sinB: sinA cosA = sinB cosB ⇒ sin2A = sin2B ⇒ 2A = 2B (A = B, isosceles) <b>or</b> 2A = π − 2B (A + B = 90°, so C = 90°, right-angled). Both cases are valid — forgetting the second is the classic slip."},
 
 /* ---------------- L-3 · Napier's Analogy & Area (11) ---------------- */
-{id:28, lec:"L-3", blk:"Napier's analogy", topic:"Law of tangents form",
+{id:28, lec:"L-3", blk:"Napier's analogy", topic:"Law of tangents form", t:60,
  q:"Napier's analogy gives tan[(B−C)/2] equal to",
  opts:["[(b − c)/(b + c)]·cot(A/2)","[(b − c)/(b + c)]·tan(A/2)","[(b + c)/(b − c)]·cot(A/2)","[(b − c)/(b + c)]·cot(C/2)"],
  ans:0,
@@ -554,7 +580,7 @@ const QUIZ = [
   "The cotangent is of A/2 (the half of the third angle), not C/2."],
  sol:"Law of tangents: tan[(B−C)/2] = <b>[(b − c)/(b + c)]·cot(A/2)</b>, using (B+C)/2 = 90° − A/2."},
 
-{id:29, lec:"L-3", blk:"Napier's analogy — compute", topic:"tan[(B−C)/2]",
+{id:29, lec:"L-3", blk:"Napier's analogy — compute", topic:"tan[(B−C)/2]", t:90,
  q:"In △ABC, b = √3 + 1, c = √3 − 1 and ∠A = 60°. Then tan[(B−C)/2] equals",
  opts:["1","√3","1/√3","0"],
  ans:0,
@@ -565,7 +591,7 @@ const QUIZ = [
   "0 would need b = c, but b ≠ c here."],
  sol:"tan[(B−C)/2] = [(b−c)/(b+c)]·cot(A/2) = [2/(2√3)]·cot30° = (1/√3)·√3 = <b>1</b>."},
 
-{id:30, lec:"L-3", blk:"Area from two sides and included angle", topic:"Δ = (1/2)bc sinA",
+{id:30, lec:"L-3", blk:"Area from two sides and included angle", topic:"Δ = (1/2)bc sinA", t:90,
  q:"In △ABC, ∠A = 60°, b = 4 and c = √3. The area is",
  opts:["3","6","2√3","3√3"],
  ans:0,
@@ -576,7 +602,7 @@ const QUIZ = [
   "3√3 keeps an extra √3; (√3)·(√3/2) = 3/2, not 3√3/2."],
  sol:"Δ = (1/2)·b·c·sinA = (1/2)·4·√3·sin60° = (1/2)·4·√3·(√3/2) = (1/2)·4·(3/2) = <b>3</b>."},
 
-{id:31, lec:"L-3", blk:"Area formula", topic:"Which is the area",
+{id:31, lec:"L-3", blk:"Area formula", topic:"Which is the area", t:60,
  q:"The area of △ABC equals",
  opts:["(1/2)ab sinC","(1/2)ab cosC","ab sinC","(1/2)ac sinC"],
  ans:0,
@@ -587,7 +613,7 @@ const QUIZ = [
   "The included angle between a and c is B, so (1/2)ac sinC pairs the wrong angle with the sides."],
  sol:"Area = half the product of two sides times the sine of the <b>included</b> angle: Δ = <b>(1/2)ab sinC</b> (C is included between sides a and b)."},
 
-{id:32, lec:"L-3", blk:"Area via the law of tangents", topic:"cos(A−B) data",
+{id:32, lec:"L-3", blk:"Area via the law of tangents", topic:"cos(A−B) data", t:90,
  q:"In △ABC, a = 6, b = 3 and cos(A − B) = 4/5. The area is",
  opts:["9","18","12","6"],
  ans:0,
@@ -598,7 +624,7 @@ const QUIZ = [
   "6 mis-multiplies; (1/2)·6·3·1 = 9."],
  sol:"cos(A−B) = (1−t²)/(1+t²) = 4/5 with t = tan[(A−B)/2] ⇒ t = 1/3. Napier: tan[(A−B)/2] = [(a−b)/(a+b)]cot(C/2) ⇒ 1/3 = (3/9)cot(C/2) ⇒ cot(C/2)=1 ⇒ C = 90°. Then Δ = (1/2)ab sinC = (1/2)·6·3·1 = <b>9</b>."},
 
-{id:33, lec:"L-3", blk:"Area — equilateral deduction", topic:"cosA/a = cosB/b = cosC/c",
+{id:33, lec:"L-3", blk:"Area — equilateral deduction", topic:"cosA/a = cosB/b = cosC/c", t:90,
  q:"In △ABC, (cosA)/a = (cosB)/b = (cosC)/c and a = 2. The area is",
  opts:["√3","2√3","4√3","√3/4"],
  ans:0,
@@ -609,7 +635,7 @@ const QUIZ = [
   "√3/4 forgets to multiply by a² = 4."],
  sol:"Using a = k sinA, the condition becomes cotA = cotB = cotC ⇒ A = B = C = 60° (equilateral). With side a = 2, Δ = (√3/4)a² = (√3/4)·4 = <b>√3</b>."},
 
-{id:34, lec:"L-3", blk:"Using the law of tangents", topic:"Which data suits it",
+{id:34, lec:"L-3", blk:"Using the law of tangents", topic:"Which data suits it", t:60,
  q:"The law of tangents is the natural tool to finish solving a triangle when you are given",
  opts:["two sides and the included angle","all three sides","two angles and one side","one side only"],
  ans:0,
@@ -620,7 +646,7 @@ const QUIZ = [
   "One side alone does not determine a triangle."],
  sol:"With two sides and the included angle (say b, c, A), Napier gives tan[(B−C)/2] = [(b−c)/(b+c)]cot(A/2). Combined with (B+C)/2 = 90° − A/2 this pins down B and C — the law of tangents is tailored to the <b>SAS</b> case."},
 
-{id:35, lec:"L-3", blk:"Area of a right triangle from sides", topic:"Right angle via cosine rule",
+{id:35, lec:"L-3", blk:"Area of a right triangle from sides", topic:"Right angle via cosine rule", t:90,
  q:"In △ABC, a = √2, b = √3 and c = √5. The area is",
  opts:["√6/2","√6","√30/2","√5/2"],
  ans:0,
@@ -631,7 +657,7 @@ const QUIZ = [
   "√5/2 uses only side c; the legs are a and b."],
  sol:"Since a² + b² = 2 + 3 = 5 = c², angle C = 90°. Then Δ = (1/2)·(leg)(leg) = (1/2)·√2·√3 = <b>√6/2</b>."},
 
-{id:36, lec:"L-3", blk:"Napier's analogy (A, B)", topic:"tan[(A−B)/2] with C = 90°",
+{id:36, lec:"L-3", blk:"Napier's analogy (A, B)", topic:"tan[(A−B)/2] with C = 90°", t:90,
  q:"In △ABC, a = 6, b = 3 and ∠C = 90°. Then tan[(A − B)/2] equals",
  opts:["1/3","3","1","1/2"],
  ans:0,
@@ -642,7 +668,7 @@ const QUIZ = [
   "1/2 miscomputes (a−b)/(a+b) = 3/9 = 1/3, not 1/2."],
  sol:"tan[(A−B)/2] = [(a−b)/(a+b)]·cot(C/2) = [(6−3)/(6+3)]·cot45° = (1/3)·1 = <b>1/3</b>."},
 
-{id:37, lec:"L-3", blk:"Area in terms of R", topic:"Δ = abc/4R",
+{id:37, lec:"L-3", blk:"Area in terms of R", topic:"Δ = abc/4R", t:90,
  q:"The area of a triangle in terms of its sides and circum-radius R is",
  opts:["abc/(4R)","abc/(2R)","4R/(abc)","abc/R"],
  ans:0,
@@ -653,7 +679,7 @@ const QUIZ = [
   "abc/R omits the factor 1/4."],
  sol:"Δ = (1/2)ab sinC; substitute sinC = c/(2R): Δ = (1/2)ab·c/(2R) = <b>abc/(4R)</b> (equivalently R = abc/4Δ)."},
 
-{id:38, lec:"L-3", blk:"Napier's analogy — key step", topic:"(B+C)/2",
+{id:38, lec:"L-3", blk:"Napier's analogy — key step", topic:"(B+C)/2", t:90,
  q:"In any △ABC, (B + C)/2 equals",
  opts:["90° − A/2","90° + A/2","A/2","180° − A"],
  ans:0,
@@ -665,7 +691,7 @@ const QUIZ = [
  sol:"From A + B + C = 180°, B + C = 180° − A, so (B + C)/2 = <b>90° − A/2</b>. This is the step that converts tan[(B+C)/2] into cot(A/2) in Napier's analogy."},
 
 /* ---------------- L-4 · Heights & Distances; m–n Theorem (13) ---------------- */
-{id:39, lec:"L-4", blk:"Basic terms", topic:"Angle of elevation",
+{id:39, lec:"L-4", blk:"Basic terms", topic:"Angle of elevation", t:60,
  q:"The angle of elevation of an object is the angle the line of sight makes with",
  opts:["the horizontal, the object being above the observer","the vertical, the object being above","the horizontal, the object being below","the line joining the observer to the ground"],
  ans:0,
@@ -676,7 +702,7 @@ const QUIZ = [
   "The reference is the horizontal line, not a slant ground line."],
  sol:"Angle of elevation = angle the line of sight makes with the <b>horizontal</b> when the object is <b>above</b> the observer's eye."},
 
-{id:40, lec:"L-4", blk:"Elevation and depression", topic:"Depression equals elevation",
+{id:40, lec:"L-4", blk:"Elevation and depression", topic:"Depression equals elevation", t:60,
  q:"The angle of depression of point B seen from point A equals",
  opts:["the angle of elevation of A seen from B","twice the angle of elevation of A from B","the complement of the elevation of A from B","90° minus the elevation of A from B"],
  ans:0,
@@ -687,7 +713,7 @@ const QUIZ = [
   "No 90° offset arises; the alternate angles are equal."],
  sol:"The horizontal through A and the horizontal through B are parallel; the line AB is a transversal, so the <b>angle of depression of B from A = angle of elevation of A from B</b> (alternate angles)."},
 
-{id:41, lec:"L-4", blk:"Tower height — two elevations", topic:"Walking toward the tower",
+{id:41, lec:"L-4", blk:"Tower height — two elevations", topic:"Walking toward the tower", t:90,
  q:"A tower's angle of elevation is 30°; after walking 20 m toward its base (level ground) it is 60°. The tower's height is",
  opts:["10√3 m","20√3 m","10 m","20/√3 m"],
  ans:0,
@@ -698,7 +724,7 @@ const QUIZ = [
   "20/√3 equals the walked distance over √3, not the height."],
  sol:"Horizontal distances are h cot30° and h cot60°; their difference is the 20 m walked: h(cot30° − cot60°) = 20 ⇒ h(√3 − 1/√3) = h·(2/√3) = 20 ⇒ <b>h = 10√3 m</b>."},
 
-{id:42, lec:"L-4", blk:"Broken-tree problem", topic:"Height of the break",
+{id:42, lec:"L-4", blk:"Broken-tree problem", topic:"Height of the break", t:90,
  q:"A 20 m tree breaks; the top touches the ground making 30° with it. The height of the break point above the ground is",
  opts:["20/3 m","10 m","20/√3 m","10/3 m"],
  ans:0,
@@ -709,7 +735,7 @@ const QUIZ = [
   "10/3 solves 20 − h = 5h by mistake; the correct equation is 20 − h = 2h."],
  sol:"Let the break be at height h; the fallen part has length 20 − h and makes 30° with the ground, with vertical rise h: sin30° = h/(20 − h) ⇒ 1/2 = h/(20 − h) ⇒ 20 − h = 2h ⇒ <b>h = 20/3 m</b>."},
 
-{id:43, lec:"L-4", blk:"Depression of top and bottom of a pole", topic:"Height of the pole",
+{id:43, lec:"L-4", blk:"Depression of top and bottom of a pole", topic:"Height of the pole", t:90,
  q:"From the top of a 60 m tower the angles of depression of the top and bottom of a pole are α and β. The pole's height h is",
  opts:["60(cotα − cotβ)/cotα","60(cotβ − cotα)/cotα","60(cotα − cotβ)","60 cotα/(cotα − cotβ)"],
  ans:0,
@@ -720,7 +746,7 @@ const QUIZ = [
   "This inverts the structure; solving for h divides by cotα, it does not divide into it."],
  sol:"Equal horizontal distance d: d = (60 − h)cotα (to the pole top) = 60 cotβ (to the pole foot). So 60 cotα − h cotα = 60 cotβ ⇒ h cotα = 60(cotα − cotβ) ⇒ <b>h = 60(cotα − cotβ)/cotα</b>."},
 
-{id:44, lec:"L-4", blk:"m–n theorem", topic:"Statement",
+{id:44, lec:"L-4", blk:"m–n theorem", topic:"Statement", t:60,
  q:"For D on BC with BD:DC = m:n, ∠ADC = θ, ∠BAD = α, ∠DAC = β, the m–n theorem states",
  opts:["(m + n)cotθ = m cotα − n cotβ","(m + n)cotθ = m cotα + n cotβ","(m + n)cotθ = n cotα − m cotβ","(m − n)cotθ = m cotα − n cotβ"],
  ans:0,
@@ -731,7 +757,7 @@ const QUIZ = [
   "The left side uses (m + n), not (m − n)."],
  sol:"m–n theorem: <b>(m + n)cotθ = m cotα − n cotβ</b>, equivalently (m + n)cotθ = n cotB − m cotC."},
 
-{id:45, lec:"L-4", blk:"m–n theorem — compute", topic:"Find ∠ACB",
+{id:45, lec:"L-4", blk:"m–n theorem — compute", topic:"Find ∠ACB", t:90,
  q:"In △ABC, ∠ABC = 45°; D lies on BC with 2BD = DC and ∠DAB = 15°. Then ∠ACB is",
  opts:["75°","60°","45°","30°"],
  ans:0,
@@ -742,7 +768,7 @@ const QUIZ = [
   "30° would need cotC = √3; here cotC = 2 − √3."],
  sol:"∠ADB = 180° − (15° + 45°) = 120°, so ∠ADC = 60°. With BD:DC = 1:2 (m = 1, n = 2) and θ = 60°: (m+n)cotθ = n cotB − m cotC ⇒ 3cot60° = 2cot45° − cotC ⇒ √3 = 2 − cotC ⇒ cotC = 2 − √3 ⇒ <b>∠ACB = 75°</b>."},
 
-{id:46, lec:"L-4", blk:"m–n theorem with an altitude", topic:"Area of the triangle",
+{id:46, lec:"L-4", blk:"m–n theorem with an altitude", topic:"Area of the triangle", t:90,
  q:"In △ABC the altitude AD meets BC with ∠BAC = 45°, DB = 3, DC = 2. The area is",
  opts:["15","30","7.5","10"],
  ans:0,
@@ -753,7 +779,7 @@ const QUIZ = [
   "10 uses AD = 4 (wrong root of the quadratic)."],
  sol:"Let ∠BAD = α. m–n with m = 3, n = 2, θ = 90° (AD ⊥ BC): 3 cotα = 2 cot(45° − α) ⇒ 2tan²α + 5tanα − 3 = 0 ⇒ tanα = 1/2. Then AD = DB/tanα = 3/(1/2) = 6, so Δ = (1/2)·(3+2)·6 = <b>15</b>."},
 
-{id:47, lec:"L-4", blk:"m–n theorem — median", topic:"tanA/tanB",
+{id:47, lec:"L-4", blk:"m–n theorem — median", topic:"tanA/tanB", t:90,
  q:"If the median of △ABC through A is perpendicular to AB, then tanA/tanB equals",
  opts:["−2","2","−1/2","1/2"],
  ans:0,
@@ -764,7 +790,7 @@ const QUIZ = [
   "1/2 both inverts and loses the sign."],
  sol:"For the median, m = n = 1. With AD ⊥ AB, applying (m+n)cotθ = m cotα − n cotβ yields −2 tanB = tanA, so <b>tanA/tanB = −2</b>."},
 
-{id:48, lec:"L-4", blk:"Car approaching under depression", topic:"Time to reach the tree",
+{id:48, lec:"L-4", blk:"Car approaching under depression", topic:"Time to reach the tree", t:90,
  q:"From a treetop the depression of a car is 30°; 3 minutes later it is 60°. At the same speed the car reaches the tree after a further",
  opts:["1.5 minutes","3 minutes","2 minutes","1 minute"],
  ans:0,
@@ -775,7 +801,7 @@ const QUIZ = [
   "1 minute underestimates; the ratio works out to 1.5."],
  sol:"Remaining time = (h cot60°)÷[h(cot30° − cot60°)/3] = 3·cot60°/(cot30° − cot60°) = 3·(1/√3)/(√3 − 1/√3) = 3·(1/√3)/(2/√3) = <b>1.5 minutes</b>."},
 
-{id:49, lec:"L-4", blk:"Basic terms", topic:"Line of sight",
+{id:49, lec:"L-4", blk:"Basic terms", topic:"Line of sight", t:60,
  q:"In heights-and-distances problems, the 'line of sight' is",
  opts:["the straight line from the observer's eye to the point being viewed","the horizontal line through the observer's eye","the vertical height of the object","the shadow cast by the object"],
  ans:0,
@@ -786,7 +812,7 @@ const QUIZ = [
   "A shadow is a ground projection, unrelated to the line of sight."],
  sol:"The <b>line of sight</b> is the straight line joining the observer's eye to the object viewed; elevation/depression is the angle it makes with the horizontal."},
 
-{id:50, lec:"L-4", blk:"Shadow and sun's altitude", topic:"When shadow equals height",
+{id:50, lec:"L-4", blk:"Shadow and sun's altitude", topic:"When shadow equals height", t:90,
  q:"A vertical pole casts a shadow equal to its own height when the sun's angle of elevation is",
  opts:["45°","30°","60°","90°"],
  ans:0,
@@ -797,7 +823,7 @@ const QUIZ = [
   "90° would make the shadow zero."],
  sol:"tan(θ) = height/shadow. Shadow = height ⇒ tanθ = 1 ⇒ <b>θ = 45°</b>."},
 
-{id:51, lec:"L-4", blk:"Pole height from one elevation", topic:"Elevation 30°",
+{id:51, lec:"L-4", blk:"Pole height from one elevation", topic:"Elevation 30°", t:90,
  q:"From a point 30√3 m from the foot of a vertical pole, the pole's top has elevation 30°. The pole's height is",
  opts:["30 m","10 m","30√3 m","90 m"],
  ans:0,
@@ -809,7 +835,7 @@ const QUIZ = [
  sol:"h = (horizontal distance)·tan(elevation) = 30√3·tan30° = 30√3·(1/√3) = <b>30 m</b>."},
 
 /* ---------------- L-5 · Half-Angle & Heron's (14) ---------------- */
-{id:52, lec:"L-5", blk:"Heron's formula", topic:"Semi-perimeter",
+{id:52, lec:"L-5", blk:"Heron's formula", topic:"Semi-perimeter", t:60,
  q:"In Heron's formula Δ = √[s(s−a)(s−b)(s−c)], the quantity s is",
  opts:["(a + b + c)/2","a + b + c","(a + b + c)/3","(a + b − c)/2"],
  ans:0,
@@ -820,7 +846,7 @@ const QUIZ = [
   "(a + b − c)/2 equals s − c, not s."],
  sol:"s = <b>(a + b + c)/2</b>, the semi-perimeter. Then s − a, s − b, s − c are each positive by the triangle inequality."},
 
-{id:53, lec:"L-5", blk:"Heron's formula — compute", topic:"13-14-15 area",
+{id:53, lec:"L-5", blk:"Heron's formula — compute", topic:"13-14-15 area", t:90,
  q:"The area of a triangle with sides 13, 14, 15 is",
  opts:["84","42","168","84√2"],
  ans:0,
@@ -831,7 +857,7 @@ const QUIZ = [
   "84√2 adds a spurious √2; 21·8·7·6 = 7056 is a perfect square."],
  sol:"s = (13+14+15)/2 = 21. Δ = √[21(21−13)(21−14)(21−15)] = √[21·8·7·6] = √7056 = <b>84</b>."},
 
-{id:54, lec:"L-5", blk:"Heron's formula — compute", topic:"3-4-5 area",
+{id:54, lec:"L-5", blk:"Heron's formula — compute", topic:"3-4-5 area", t:90,
  q:"The area of a triangle with sides 3, 4, 5 is",
  opts:["6","12","7.5","√30"],
  ans:0,
@@ -842,7 +868,7 @@ const QUIZ = [
   "√30 misreads the Heron product; 6·3·2·1 = 36, a perfect square."],
  sol:"s = 6. Δ = √[6(6−3)(6−4)(6−5)] = √[6·3·2·1] = √36 = <b>6</b> (consistent with the right triangle area (1/2)·3·4 = 6)."},
 
-{id:55, lec:"L-5", blk:"Half-angle (sine)", topic:"sin(A/2) formula",
+{id:55, lec:"L-5", blk:"Half-angle (sine)", topic:"sin(A/2) formula", t:60,
  q:"In any △ABC, sin(A/2) equals",
  opts:["√[(s−b)(s−c)/(bc)]","√[s(s−a)/(bc)]","√[(s−a)(s−b)/(bc)]","√[(s−b)(s−c)/(ab)]"],
  ans:0,
@@ -853,7 +879,7 @@ const QUIZ = [
   "The denominator must be bc (the two sides adjacent to A), not ab."],
  sol:"sin(A/2) = <b>√[(s−b)(s−c)/(bc)]</b> — it carries (s−b) and (s−c), the terms for the two other vertices, over the adjacent sides bc."},
 
-{id:56, lec:"L-5", blk:"Half-angle (cosine)", topic:"cos(A/2) formula",
+{id:56, lec:"L-5", blk:"Half-angle (cosine)", topic:"cos(A/2) formula", t:60,
  q:"In any △ABC, cos(A/2) equals",
  opts:["√[s(s−a)/(bc)]","√[(s−b)(s−c)/(bc)]","√[s(s−a)/(ab)]","√[s(s−b)/(bc)]"],
  ans:0,
@@ -864,7 +890,7 @@ const QUIZ = [
   "The second factor is s − a (same vertex A), not s − b."],
  sol:"cos(A/2) = <b>√[s(s−a)/(bc)]</b>, from (1 + cosA)/2 = s(s−a)/bc."},
 
-{id:57, lec:"L-5", blk:"Half-angle (tangent)", topic:"tan(A/2) in terms of Δ",
+{id:57, lec:"L-5", blk:"Half-angle (tangent)", topic:"tan(A/2) in terms of Δ", t:90,
  q:"In any △ABC, tan(A/2) equals",
  opts:["Δ/[s(s−a)]","Δ/[(s−b)(s−c)]","s(s−a)/Δ","Δ/s"],
  ans:0,
@@ -875,7 +901,7 @@ const QUIZ = [
   "Δ/s is the in-radius r, not tan(A/2)."],
  sol:"tan(A/2) = sin(A/2)/cos(A/2) = √[(s−b)(s−c)/(s(s−a))]. Since Δ = √[s(s−a)(s−b)(s−c)], this equals <b>Δ/[s(s−a)]</b>."},
 
-{id:58, lec:"L-5", blk:"Half-angle — numeric", topic:"tan(A/2) for 3-4-5",
+{id:58, lec:"L-5", blk:"Half-angle — numeric", topic:"tan(A/2) for 3-4-5", t:90,
  q:"In a 3-4-5 triangle (A opposite the side 3), tan(A/2) equals",
  opts:["1/3","3","1/2","1/6"],
  ans:0,
@@ -886,7 +912,7 @@ const QUIZ = [
   "1/6 drops a factor; s(s−a) = 18 and Δ = 6, so 6/18 = 1/3."],
  sol:"s = 6, Δ = 6, s − a = 3. tan(A/2) = Δ/[s(s−a)] = 6/(6·3) = <b>1/3</b> (check: cosA = 4/5, sinA = 3/5, (1−cosA)/sinA = (1/5)/(3/5) = 1/3)."},
 
-{id:59, lec:"L-5", blk:"Semi-perimeter arithmetic", topic:"s − a value",
+{id:59, lec:"L-5", blk:"Semi-perimeter arithmetic", topic:"s − a value", t:90,
  q:"For a triangle with sides a = 5, b = 6, c = 7, the value of s − a is",
  opts:["4","3","2","9"],
  ans:0,
@@ -897,7 +923,7 @@ const QUIZ = [
   "9 is s itself, not s − a."],
  sol:"s = (5+6+7)/2 = 9, so s − a = 9 − 5 = <b>4</b> (and s − b = 3, s − c = 2)."},
 
-{id:60, lec:"L-5", blk:"Half-angle identity", topic:"b cos²(C/2)+c cos²(B/2)",
+{id:60, lec:"L-5", blk:"Half-angle identity", topic:"b cos²(C/2)+c cos²(B/2)", t:90,
  q:"In any △ABC, b·cos²(C/2) + c·cos²(B/2) equals",
  opts:["s","2s","a","b + c"],
  ans:0,
@@ -908,7 +934,7 @@ const QUIZ = [
   "b + c is the input, not the simplified output."],
  sol:"b·cos²(C/2) + c·cos²(B/2) = b·s(s−c)/(ab) + c·s(s−b)/(ac) = s(s−c)/a + s(s−b)/a = s(2s − b − c)/a = s·a/a = <b>s</b>."},
 
-{id:61, lec:"L-5", blk:"Half-angle condition", topic:"cos(A/2)=√[(b+c)/2c]",
+{id:61, lec:"L-5", blk:"Half-angle condition", topic:"cos(A/2)=√[(b+c)/2c]", t:90,
  q:"If cos(A/2) = √[(b + c)/(2c)], then the sides satisfy",
  opts:["c² = a² + b²","a² = b² + c²","b² = a² + c²","the triangle is equilateral"],
  ans:0,
@@ -919,7 +945,7 @@ const QUIZ = [
   "Equilateral is not forced; only the Pythagorean relation c² = a² + b² follows."],
  sol:"cos²(A/2) = s(s−a)/bc and = (b+c)/2c ⇒ 2s(s−a) = b(b+c) ⇒ (b+c)² − a² = 2b² + 2bc ⇒ b² + c² + 2bc − a² = 2b² + 2bc ⇒ <b>c² = a² + b²</b>."},
 
-{id:62, lec:"L-5", blk:"Area–perimeter inequality", topic:"Equality case",
+{id:62, lec:"L-5", blk:"Area–perimeter inequality", topic:"Equality case", t:90,
  q:"For a triangle of area A and perimeter 2S, the bound A ≤ S²/(3√3) becomes an equality when the triangle is",
  opts:["equilateral","right-angled","isosceles but not equilateral","obtuse-angled"],
  ans:0,
@@ -930,7 +956,7 @@ const QUIZ = [
   "Obtuse triangles are far from the bound."],
  sol:"A² = S(S−a)(S−b)(S−c). AM–GM gives (S−a)(S−b)(S−c) ≤ [(3S − 2S)/3]³ = (S/3)³, with equality iff S−a = S−b = S−c, i.e. <b>equilateral</b>."},
 
-{id:63, lec:"L-5", blk:"Cotangents of half-angles in A.P.", topic:"Implication for the sides",
+{id:63, lec:"L-5", blk:"Cotangents of half-angles in A.P.", topic:"Implication for the sides", t:90,
  q:"If cot(A/2), cot(B/2), cot(C/2) are in A.P., then a, b, c are in",
  opts:["A.P.","G.P.","H.P.","no fixed progression"],
  ans:0,
@@ -941,7 +967,7 @@ const QUIZ = [
   "The reduction is exact and gives the A.P. condition cleanly."],
  sol:"2cot(B/2) = cot(A/2) + cot(C/2). Writing each as √[s(s−·)/…] and multiplying through by √[(s−a)(s−b)(s−c)/s] gives 2(s−b) = (s−a) + (s−c) ⇒ 2b = a + c ⇒ <b>a, b, c in A.P.</b>"},
 
-{id:64, lec:"L-5", blk:"Half-angle — numeric", topic:"sin(A/2) for 13-14-15",
+{id:64, lec:"L-5", blk:"Half-angle — numeric", topic:"sin(A/2) for 13-14-15", t:90,
  q:"In the 13-14-15 triangle (A opposite 13), sin(A/2) equals",
  opts:["1/√5","2/√5","1/5","√5"],
  ans:0,
@@ -952,7 +978,7 @@ const QUIZ = [
   "√5 inverts the surd."],
  sol:"s = 21, s − b = 7, s − c = 6, bc = 14·15 = 210. sin(A/2) = √[(s−b)(s−c)/bc] = √(42/210) = √(1/5) = <b>1/√5</b> (check: cosA = 3/5, so sin²(A/2) = (1−3/5)/2 = 1/5)."},
 
-{id:65, lec:"L-5", blk:"Half-angle tangent identity", topic:"Σ tan(A/2)tan(B/2)",
+{id:65, lec:"L-5", blk:"Half-angle tangent identity", topic:"Σ tan(A/2)tan(B/2)", t:90,
  q:"In any △ABC, tan(A/2)tan(B/2) + tan(B/2)tan(C/2) + tan(C/2)tan(A/2) equals",
  opts:["1","0","s²","1/2"],
  ans:0,
@@ -964,7 +990,7 @@ const QUIZ = [
  sol:"With A/2 + B/2 + C/2 = 90°, the standard identity tan x tan y + tan y tan z + tan z tan x = 1 (for x + y + z = 90°) gives the value <b>1</b>. (This is why Σr₁r₂ = s².)"},
 
 /* ---------------- L-6 · Circum-, In-, Ex-radii (20) ---------------- */
-{id:66, lec:"L-6", blk:"Circum-radius", topic:"R = abc/4Δ",
+{id:66, lec:"L-6", blk:"Circum-radius", topic:"R = abc/4Δ", t:90,
  q:"The circum-radius of a triangle is given by",
  opts:["abc/(4Δ)","abc/(2Δ)","4Δ/(abc)","Δ/(abc)"],
  ans:0,
@@ -975,7 +1001,7 @@ const QUIZ = [
   "Δ/abc has the wrong structure entirely."],
  sol:"From Δ = abc/4R we get R = <b>abc/(4Δ)</b> (equivalently R = a/2sinA)."},
 
-{id:67, lec:"L-6", blk:"Circum-radius — compute", topic:"R for 18-24-30",
+{id:67, lec:"L-6", blk:"Circum-radius — compute", topic:"R for 18-24-30", t:90,
  q:"In △ABC, a = 18, b = 24, c = 30. The circum-radius R is",
  opts:["15","12","30","7.5"],
  ans:0,
@@ -986,7 +1012,7 @@ const QUIZ = [
   "7.5 is a quarter of the hypotenuse; R is half."],
  sol:"18² + 24² = 324 + 576 = 900 = 30², so the triangle is right-angled with hypotenuse 30. Hence R = c/2 = <b>15</b> (check: R = abc/4Δ = 12960/864 = 15)."},
 
-{id:68, lec:"L-6", blk:"In-radius", topic:"r = Δ/s",
+{id:68, lec:"L-6", blk:"In-radius", topic:"r = Δ/s", t:90,
  q:"The in-radius of a triangle equals",
  opts:["Δ/s","Δ/(s−a)","s/Δ","Δ·s"],
  ans:0,
@@ -997,7 +1023,7 @@ const QUIZ = [
   "Δ·s has the wrong dimensions for a radius."],
  sol:"Splitting △ABC into three triangles from the incentre (each of height r): Δ = (1/2)r(a+b+c) = rs ⇒ r = <b>Δ/s</b>."},
 
-{id:69, lec:"L-6", blk:"In-radius — compute", topic:"r for 4-6-8",
+{id:69, lec:"L-6", blk:"In-radius — compute", topic:"r for 4-6-8", t:90,
  q:"In △ABC with a = 4, b = 6, c = 8, the in-radius r is",
  opts:["√15/3","3√15","√15","√15/9"],
  ans:0,
@@ -1008,7 +1034,7 @@ const QUIZ = [
   "√15/9 divides by s twice (Δ/s² rather than Δ/s)."],
  sol:"s = 9, Δ = √[9(9−4)(9−6)(9−8)] = √[9·5·3·1] = √135 = 3√15. r = Δ/s = 3√15/9 = <b>√15/3</b>."},
 
-{id:70, lec:"L-6", blk:"Ex-radius", topic:"r₁ = Δ/(s−a)",
+{id:70, lec:"L-6", blk:"Ex-radius", topic:"r₁ = Δ/(s−a)", t:60,
  q:"The ex-radius r₁ (opposite vertex A) equals",
  opts:["Δ/(s − a)","Δ/s","Δ/(s − b)","(s − a)/Δ"],
  ans:0,
@@ -1019,7 +1045,7 @@ const QUIZ = [
   "(s − a)/Δ is the reciprocal of r₁."],
  sol:"The ex-circle opposite A has radius r₁ = <b>Δ/(s − a)</b> (= s tan(A/2))."},
 
-{id:71, lec:"L-6", blk:"Ex-radius — compute", topic:"r₁ for 18-24-30",
+{id:71, lec:"L-6", blk:"Ex-radius — compute", topic:"r₁ for 18-24-30", t:90,
  q:"In △ABC, a = 18, b = 24, c = 30 (s = 36, Δ = 216). The ex-radius r₁ is",
  opts:["12","18","36","6"],
  ans:0,
@@ -1030,7 +1056,7 @@ const QUIZ = [
   "6 is the in-radius r = Δ/s = 216/36."],
  sol:"r₁ = Δ/(s − a) = 216/(36 − 18) = 216/18 = <b>12</b>."},
 
-{id:72, lec:"L-6", blk:"Radius identity (re-derived)", topic:"r₁+r₂+r₃ and R",
+{id:72, lec:"L-6", blk:"Radius identity (re-derived)", topic:"r₁+r₂+r₃ and R", t:90,
  q:"The correct identity relating the three ex-radii, the in-radius and the circum-radius is",
  opts:["r₁ + r₂ + r₃ − r = 4R","r + r₁ + r₂ + r₃ = 4R","r₁ + r₂ + r₃ = 4R","r₁·r₂·r₃ = 4R"],
  ans:0,
@@ -1041,7 +1067,7 @@ const QUIZ = [
   "A product r₁r₂r₃ = 4R is dimensionally impossible (it equals Δ²/(... )), not a length."],
  sol:"The genuine identity is <b>r₁ + r₂ + r₃ − r = 4R</b>. Check with 18-24-30 (r = 6, r₁ = 12, r₂ = 18, r₃ = 36, R = 15): 12 + 18 + 36 − 6 = 60 = 4·15 ✓. Note the sum r + r₁ + r₂ + r₃ = 72 equals 4R + 2r, NOT 4R — a slip to avoid."},
 
-{id:73, lec:"L-6", blk:"Ex-radii identity", topic:"Σ r₁r₂",
+{id:73, lec:"L-6", blk:"Ex-radii identity", topic:"Σ r₁r₂", t:90,
  q:"In any triangle, r₁r₂ + r₂r₃ + r₃r₁ equals",
  opts:["s²","s","4R²","Δ²"],
  ans:0,
@@ -1052,7 +1078,7 @@ const QUIZ = [
   "Δ² equals the product r·r₁·r₂·r₃, not the sum of pairwise products."],
  sol:"r₁ = s tan(A/2), so r₁r₂ = s²tan(A/2)tan(B/2). Summing: Σr₁r₂ = s²·[tan(A/2)tan(B/2) + …] = s²·1 = <b>s²</b>."},
 
-{id:74, lec:"L-6", blk:"Radii product", topic:"r·r₁·r₂·r₃",
+{id:74, lec:"L-6", blk:"Radii product", topic:"r·r₁·r₂·r₃", t:90,
  q:"In any triangle, the product r·r₁·r₂·r₃ equals",
  opts:["Δ²","Δ","s²","4R²"],
  ans:0,
@@ -1063,7 +1089,7 @@ const QUIZ = [
   "4R² is unrelated to this product."],
  sol:"r·r₁·r₂·r₃ = Δ⁴/[s(s−a)(s−b)(s−c)] = Δ⁴/Δ² = <b>Δ²</b> (using Heron's Δ² = s(s−a)(s−b)(s−c))."},
 
-{id:75, lec:"L-6", blk:"Reciprocal-sum identity (misprint)", topic:"1/bc + 1/ca + 1/ab",
+{id:75, lec:"L-6", blk:"Reciprocal-sum identity (misprint)", topic:"1/bc + 1/ca + 1/ab", t:90,
  q:"In any △ABC, 1/(bc) + 1/(ca) + 1/(ab) equals",
  opts:["1/(2Rr)","1/(2pr)","1/(Rr)","2/(Rr)"],
  ans:0,
@@ -1074,7 +1100,7 @@ const QUIZ = [
   "2/(Rr) is four times too large."],
  sol:"1/(bc) + 1/(ca) + 1/(ab) = (a+b+c)/(abc) = 2s/(abc). With abc = 4RΔ and s/Δ = 1/r: = 2s/(4RΔ) = (1/r)/(2R) = <b>1/(2Rr)</b>. (The book's '1/(2pr)' is a misprint — 'p' should be the circum-radius R.)"},
 
-{id:76, lec:"L-6", blk:"Right triangle special case", topic:"In-radius",
+{id:76, lec:"L-6", blk:"Right triangle special case", topic:"In-radius", t:90,
  q:"In a right triangle with the right angle at C, the in-radius r equals",
  opts:["s − c","s","s − a","c/2"],
  ans:0,
@@ -1085,7 +1111,7 @@ const QUIZ = [
   "c/2 is the circum-radius R for a right triangle, not r."],
  sol:"For a right angle at C, r = (a + b − c)/2. Since s = (a+b+c)/2, this is s − c. (For 18-24-30: s − c = 36 − 30 = 6 = r ✓.)"},
 
-{id:77, lec:"L-6", blk:"Right triangle special case", topic:"Circum-radius",
+{id:77, lec:"L-6", blk:"Right triangle special case", topic:"Circum-radius", t:90,
  q:"In a right triangle with the right angle at C, the circum-radius R equals",
  opts:["c/2","c","a/2","b/2"],
  ans:0,
@@ -1096,7 +1122,7 @@ const QUIZ = [
   "b/2 likewise uses a leg, not the hypotenuse."],
  sol:"In a right triangle the hypotenuse subtends the right angle and is a diameter of the circumcircle, so 2R = c ⇒ R = <b>c/2</b>."},
 
-{id:78, lec:"L-6", blk:"In-radius trig form", topic:"r = 4R sin(A/2)sin(B/2)sin(C/2)",
+{id:78, lec:"L-6", blk:"In-radius trig form", topic:"r = 4R sin(A/2)sin(B/2)sin(C/2)", t:60,
  q:"The in-radius r can be written as",
  opts:["4R sin(A/2) sin(B/2) sin(C/2)","4R cos(A/2) cos(B/2) cos(C/2)","R sin(A/2) sin(B/2) sin(C/2)","4R sinA sinB sinC"],
  ans:0,
@@ -1107,7 +1133,7 @@ const QUIZ = [
   "It uses the half-angles, not the full angles."],
  sol:"r = <b>4R sin(A/2) sin(B/2) sin(C/2)</b> (contrast r₁ = 4R sin(A/2)cos(B/2)cos(C/2))."},
 
-{id:79, lec:"L-6", blk:"Ex-radius trig form", topic:"r₁ = s tan(A/2)",
+{id:79, lec:"L-6", blk:"Ex-radius trig form", topic:"r₁ = s tan(A/2)", t:90,
  q:"The ex-radius r₁ (opposite A) can be written as",
  opts:["s·tan(A/2)","(s − a)·tan(A/2)","s·cot(A/2)","s·tan(B/2)"],
  ans:0,
@@ -1118,7 +1144,7 @@ const QUIZ = [
   "The half-angle must be A/2 (the vertex the ex-circle faces), not B/2."],
  sol:"r₁ = Δ/(s − a) = <b>s·tan(A/2)</b> (since tan(A/2) = Δ/[s(s−a)], multiply by s)."},
 
-{id:80, lec:"L-6", blk:"In-radius tangent form", topic:"r = (s−a)tan(A/2)",
+{id:80, lec:"L-6", blk:"In-radius tangent form", topic:"r = (s−a)tan(A/2)", t:90,
  q:"The in-radius r can be written as",
  opts:["(s − a)·tan(A/2)","s·tan(A/2)","(s − a)·cot(A/2)","(s − b)·tan(A/2)"],
  ans:0,
@@ -1129,7 +1155,7 @@ const QUIZ = [
   "(s − b)tan(A/2) mismatches the vertex: it must be (s − a) with A/2."],
  sol:"r = Δ/s and tan(A/2) = Δ/[s(s−a)] ⇒ r = <b>(s − a)·tan(A/2)</b>."},
 
-{id:81, lec:"L-6", blk:"Ambiguous case", topic:"a = b sinA count",
+{id:81, lec:"L-6", blk:"Ambiguous case", topic:"a = b sinA count", t:90,
  q:"In △ABC, a = 3, b = 6 and ∠A = 30°. The number of such triangles is",
  opts:["exactly one","two","none","infinitely many"],
  ans:0,
@@ -1140,7 +1166,7 @@ const QUIZ = [
   "A triangle is determined once B = 90° is fixed, so not infinitely many."],
  sol:"sinB = (b/a)sinA = (6/3)·sin30° = 2·(1/2) = 1 ⇒ B = 90°. This is the borderline a = b sinA case, giving <b>exactly one</b> (right-angled) triangle."},
 
-{id:82, lec:"L-6", blk:"Ambiguous case", topic:"Two-triangle count",
+{id:82, lec:"L-6", blk:"Ambiguous case", topic:"Two-triangle count", t:90,
  q:"In △ABC, a = 3, b = 4 and sinA = 3/5. The number of such triangles is",
  opts:["two","one","none","three"],
  ans:0,
@@ -1151,7 +1177,7 @@ const QUIZ = [
   "At most two triangles can arise in the ambiguous case, never three."],
  sol:"sinB = (b/a)sinA = (4/3)(3/5) = 4/5 ⇒ B = 53° or 127°. Since b sinA = 4·(3/5) = 2.4 &lt; a = 3 &lt; b = 4, both keep C &gt; 0, giving <b>two</b> triangles."},
 
-{id:83, lec:"L-6", blk:"Sum of squares = 0", topic:"Find the angles",
+{id:83, lec:"L-6", blk:"Sum of squares = 0", topic:"Find the angles", t:90,
  q:"If (a√3/2 − b)² + (a/2 − c)² = 0 in △ABC, the angles (at A, B, C) are",
  opts:["90°, 60°, 30°","60°, 60°, 60°","90°, 45°, 45°","30°, 30°, 120°"],
  ans:0,
@@ -1162,7 +1188,7 @@ const QUIZ = [
   "30°, 30°, 120° has no right angle, contradicting b² + c² = a²."],
  sol:"A sum of squares is 0 only if both vanish: b = √3a/2, c = a/2. Then b² + c² = 3a²/4 + a²/4 = a² ⇒ right angle at A; sinB = b/(2R) with 2R = a gives sinB = √3/2 ⇒ B = 60°, C = 30°. Angles: <b>90°, 60°, 30°</b>."},
 
-{id:84, lec:"L-6", blk:"In-radius / circum-radius ratio", topic:"Equilateral r : R",
+{id:84, lec:"L-6", blk:"In-radius / circum-radius ratio", topic:"Equilateral r : R", t:90,
  q:"In an equilateral triangle, the ratio r : R (in-radius to circum-radius) is",
  opts:["1 : 2","2 : 1","1 : 3","1 : √3"],
  ans:0,
@@ -1173,7 +1199,7 @@ const QUIZ = [
   "1 : √3 is the ratio of in-radius to side-related length, not to R."],
  sol:"For side a: r = a/(2√3) and R = a/√3, so r/R = 1/2 ⇒ <b>r : R = 1 : 2</b> (the equilateral triangle attains the extremal R = 2r)."},
 
-{id:85, lec:"L-6", blk:"Circum-radius of equilateral", topic:"R in terms of side",
+{id:85, lec:"L-6", blk:"Circum-radius of equilateral", topic:"R in terms of side", t:90,
  q:"The circum-radius of an equilateral triangle of side a is",
  opts:["a/√3","a/2","a/3","a√3"],
  ans:0,
@@ -1185,7 +1211,7 @@ const QUIZ = [
  sol:"Δ = (√3/4)a², so R = abc/4Δ = a³/[4·(√3/4)a²] = a³/(√3a²) = <b>a/√3</b>."},
 
 /* ---------------- L-7 · Regular Polygons, Cyclic Quads, Exradii (15) ---------------- */
-{id:86, lec:"L-7", blk:"Regular polygon inscribed", topic:"Side length",
+{id:86, lec:"L-7", blk:"Regular polygon inscribed", topic:"Side length", t:60,
  q:"A regular n-gon is inscribed in a circle of radius r. Its side length is",
  opts:["2r·sin(π/n)","2r·tan(π/n)","r·sin(2π/n)","2r·cos(π/n)"],
  ans:0,
@@ -1196,7 +1222,7 @@ const QUIZ = [
   "2r cos(π/n) uses cosine where the half-angle sine is needed."],
  sol:"Splitting into n isosceles triangles of apex 2π/n, each chord (side) = 2·r·sin(π/n) = <b>2r sin(π/n)</b>."},
 
-{id:87, lec:"L-7", blk:"Regular polygon circumscribed", topic:"Side length",
+{id:87, lec:"L-7", blk:"Regular polygon circumscribed", topic:"Side length", t:60,
  q:"A regular n-gon is circumscribed about a circle of radius R. Its side length is",
  opts:["2R·tan(π/n)","2R·sin(π/n)","R·tan(π/n)","2R·cos(π/n)"],
  ans:0,
@@ -1207,7 +1233,7 @@ const QUIZ = [
   "2R cos(π/n) misuses cosine."],
  sol:"For a circumscribed polygon the circle (radius R) is the apothem's circle; half the side = R tan(π/n), so side = <b>2R tan(π/n)</b>."},
 
-{id:88, lec:"L-7", blk:"Inscribed hexagon", topic:"Perimeter",
+{id:88, lec:"L-7", blk:"Inscribed hexagon", topic:"Perimeter", t:90,
  q:"A regular hexagon is inscribed in a circle of radius r. Its perimeter is",
  opts:["6r","12r","3r","6r√3"],
  ans:0,
@@ -1218,7 +1244,7 @@ const QUIZ = [
   "6r√3 would be a hexagon circumscribed about the circle, not inscribed."],
  sol:"Side = 2r sin(π/6) = 2r·(1/2) = r. The hexagon has 6 sides, so perimeter = <b>6r</b> (the inscribed regular hexagon's side equals the radius)."},
 
-{id:89, lec:"L-7", blk:"Inscribed polygon area", topic:"Area of inscribed square",
+{id:89, lec:"L-7", blk:"Inscribed polygon area", topic:"Area of inscribed square", t:90,
  q:"A square is inscribed in a circle of radius r. Its area is",
  opts:["2r²","4r²","r²","2√2 r²"],
  ans:0,
@@ -1229,7 +1255,7 @@ const QUIZ = [
   "2√2 r² mishandles the diagonal; the inscribed square's area is 2r²."],
  sol:"Area = (1/2)n r² sin(2π/n) = (1/2)·4·r²·sin(π/2) = 2r². (Check: diagonal = 2r ⇒ side = r√2 ⇒ area = (r√2)² = <b>2r²</b>.)"},
 
-{id:90, lec:"L-7", blk:"Inscribed square", topic:"Side length",
+{id:90, lec:"L-7", blk:"Inscribed square", topic:"Side length", t:90,
  q:"A square inscribed in a circle of radius r has side",
  opts:["r√2","2r","r","2r√2"],
  ans:0,
@@ -1240,7 +1266,7 @@ const QUIZ = [
   "2r√2 is the perimeter-scaled value, not the side."],
  sol:"The square's diagonal equals the diameter 2r. Side = diagonal/√2 = 2r/√2 = <b>r√2</b>."},
 
-{id:91, lec:"L-7", blk:"Circumscribed polygon area", topic:"Hexagon about a circle",
+{id:91, lec:"L-7", blk:"Circumscribed polygon area", topic:"Hexagon about a circle", t:90,
  q:"A regular hexagon is circumscribed about a circle of radius R. Its area is",
  opts:["2√3 R²","6R²","3√3 R²","√3 R²"],
  ans:0,
@@ -1251,7 +1277,7 @@ const QUIZ = [
   "√3 R² is a third of the correct area."],
  sol:"Area = nR² tan(π/n) = 6R²·tan30° = 6R²·(1/√3) = 6R²/√3 = <b>2√3 R²</b>."},
 
-{id:92, lec:"L-7", blk:"Cyclic quadrilateral", topic:"Opposite angles",
+{id:92, lec:"L-7", blk:"Cyclic quadrilateral", topic:"Opposite angles", t:60,
  q:"In a cyclic quadrilateral, the sum of a pair of opposite angles is",
  opts:["180°","360°","90°","it varies with the sides"],
  ans:0,
@@ -1262,7 +1288,7 @@ const QUIZ = [
   "The sum is fixed at 180° regardless of the side lengths."],
  sol:"Opposite angles of a cyclic quadrilateral subtend arcs that together make the whole circle, so they are supplementary: their sum is <b>180°</b>."},
 
-{id:93, lec:"L-7", blk:"Ptolemy's theorem", topic:"Diagonals and sides",
+{id:93, lec:"L-7", blk:"Ptolemy's theorem", topic:"Diagonals and sides", t:60,
  q:"For a cyclic quadrilateral ABCD (sides AB = a, BC = b, CD = c, DA = d), Ptolemy's theorem gives AC·BD =",
  opts:["ac + bd","ab + cd","ad + bc","(a + c)(b + d)"],
  ans:0,
@@ -1273,7 +1299,7 @@ const QUIZ = [
   "(a + c)(b + d) expands to extra cross terms; Ptolemy is a sum of two products."],
  sol:"Ptolemy's theorem: in a cyclic quadrilateral the product of the diagonals equals the sum of the products of the two pairs of <b>opposite</b> sides: AC·BD = <b>ac + bd</b>."},
 
-{id:94, lec:"L-7", blk:"Brahmagupta's formula", topic:"Area of a cyclic quadrilateral",
+{id:94, lec:"L-7", blk:"Brahmagupta's formula", topic:"Area of a cyclic quadrilateral", t:60,
  q:"The area of a cyclic quadrilateral with sides a, b, c, d and s = (a+b+c+d)/2 is",
  opts:["√[(s−a)(s−b)(s−c)(s−d)]","√[s(s−a)(s−b)(s−c)]","(s−a)(s−b)(s−c)(s−d)","√[(s−a)(s−b)(s−c)]"],
  ans:0,
@@ -1284,7 +1310,7 @@ const QUIZ = [
   "A fourth factor (s − d) is missing — this is only a three-term Heron-type product."],
  sol:"Brahmagupta's formula (the cyclic-quadrilateral analogue of Heron): area = <b>√[(s−a)(s−b)(s−c)(s−d)]</b>, with s the semi-perimeter of the quadrilateral."},
 
-{id:95, lec:"L-7", blk:"Pentagon area ratio (misprint)", topic:"A₁/A₂",
+{id:95, lec:"L-7", blk:"Pentagon area ratio (misprint)", topic:"A₁/A₂", t:90,
  q:"A₁ is the area of a circle and A₂ the area of the regular pentagon inscribed in it. Then A₁/A₂ equals",
  opts:["(2π/5)·sec(π/10)","(2π/5)·cos(π/10)","(5/2π)·cos18°","(2π/5)·sin18°"],
  ans:0,
@@ -1295,7 +1321,7 @@ const QUIZ = [
   "sin18° is the wrong co-function; the pentagon area carries cos18° in the denominator."],
  sol:"A₂ = 5·(1/2)r²sin72° = (5/2)r²cos18° and A₁ = πr². So A₁/A₂ = πr²/[(5/2)r²cos18°] = (2π/5)·(1/cos18°) = <b>(2π/5)sec(π/10)</b>. (The book's '(2π/5)cos(π/10)' is a misprint: dividing by cos gives sec.)"},
 
-{id:96, lec:"L-7", blk:"Exradii in H.P.", topic:"Implication for the sides",
+{id:96, lec:"L-7", blk:"Exradii in H.P.", topic:"Implication for the sides", t:90,
  q:"If the ex-radii r₁, r₂, r₃ of a triangle are in H.P., then its sides a, b, c are in",
  opts:["A.P.","G.P.","H.P.","no fixed progression"],
  ans:0,
@@ -1306,7 +1332,7 @@ const QUIZ = [
   "The link is exact and yields an A.P. of sides."],
  sol:"r₁, r₂, r₃ in H.P. ⇒ 1/r₁, 1/r₂, 1/r₃ in A.P. ⇒ (s−a), (s−b), (s−c) in A.P. (since 1/r₁ = (s−a)/Δ) ⇒ a, b, c in <b>A.P.</b>"},
 
-{id:97, lec:"L-7", blk:"Circumscribed polygon area", topic:"Dodecagon",
+{id:97, lec:"L-7", blk:"Circumscribed polygon area", topic:"Dodecagon", t:90,
  q:"A regular dodecagon (n = 12) of side 20 cm is circumscribed about its incircle. Its area is",
  opts:["4800(2 − √3) cm²","1200(2 − √3) cm²","4800(2 + √3) cm²","400(2 − √3) cm²"],
  ans:0,
@@ -1317,7 +1343,7 @@ const QUIZ = [
   "400(2 − √3) drops the factor n = 12."],
  sol:"For a circumscribed polygon, area = (1/2)·perimeter·R and side = 2R tan(π/n). Directly, area = n·(side/2)²·cot(π/n)... equivalently = 12·20²·tan15° = 4800·tan15° = <b>4800(2 − √3) cm²</b> (tan15° = 2 − √3)."},
 
-{id:98, lec:"L-7", blk:"Regular polygon", topic:"Central angle",
+{id:98, lec:"L-7", blk:"Regular polygon", topic:"Central angle", t:60,
  q:"The central angle subtended by one side of a regular pentagon at its centre is",
  opts:["72°","36°","108°","60°"],
  ans:0,
@@ -1328,7 +1354,7 @@ const QUIZ = [
   "60° is the central angle of a hexagon, not a pentagon."],
  sol:"Each of the n congruent triangles from the centre has apex (central) angle 360°/n = 360°/5 = <b>72°</b>."},
 
-{id:99, lec:"L-7", blk:"Ex-radii and in-radius", topic:"(r₁−r)(r₂+r₃)",
+{id:99, lec:"L-7", blk:"Ex-radii and in-radius", topic:"(r₁−r)(r₂+r₃)", t:90,
  q:"In any triangle, (r₁ − r)(r₂ + r₃) equals",
  opts:["a²","b²","s²","Δ²"],
  ans:0,
@@ -1339,7 +1365,7 @@ const QUIZ = [
   "Δ² is r·r₁·r₂·r₃, not this product."],
  sol:"Using r = (s−a)tan(A/2), r₁ = s tan(A/2) and the r₂, r₃ forms, (r₁ − r)(r₂ + r₃) simplifies to <b>a²</b> (check 18-24-30: (12−6)(18+36) = 324 = 18²)."},
 
-{id:100, lec:"L-7", blk:"Cyclic quadrilateral", topic:"Exterior angle",
+{id:100, lec:"L-7", blk:"Cyclic quadrilateral", topic:"Exterior angle", t:60,
  q:"In a cyclic quadrilateral, an exterior angle equals",
  opts:["the interior angle at the opposite vertex","the adjacent interior angle","90° always","half the opposite interior angle"],
  ans:0,
@@ -1351,7 +1377,7 @@ const QUIZ = [
  sol:"Opposite angles sum to 180°, so the exterior angle at one vertex, 180° − (its interior angle), equals <b>the interior angle at the opposite vertex</b>."},
 
 /* ---------------- SB · Strong Box (advanced single-answer PYQ) (14) ---------------- */
-{id:101, lec:"SB", blk:"Level-7 · radius identity", topic:"Δ²/(a²+b²+c²)·Σ1/r²",
+{id:101, lec:"SB", blk:"Level-7 · radius identity", topic:"Δ²/(a²+b²+c²)·Σ1/r²", t:180,
  q:"Evaluate [Δ²/(a² + b² + c²)]·[1/r₁² + 1/r₂² + 1/r₃² + 1/r²].",
  opts:["1","1/2","a² + b² + c²","Δ²"],
  ans:0,
@@ -1362,7 +1388,7 @@ const QUIZ = [
   "Δ² is left over only if the bracket were 1; it is (a²+b²+c²)/Δ²."],
  sol:"1/r² = s²/Δ² and 1/r₁²+1/r₂²+1/r₃² = [(s−a)²+(s−b)²+(s−c)²]/Δ²; their sum is (a²+b²+c²)/Δ². So the product = [Δ²/(a²+b²+c²)]·[(a²+b²+c²)/Δ²] = <b>1</b>. (Check 3-4-5: s=6, Δ=6, bracket = 50/36, prefactor = 36/50 ⇒ 1.)"},
 
-{id:102, lec:"SB", blk:"Level-7 · packed circles", topic:"Three equal circles in a circle",
+{id:102, lec:"SB", blk:"Level-7 · packed circles", topic:"Three equal circles in a circle", t:180,
  q:"Three equal circles of radius r touch one another and are inscribed in a circle of radius R, with r/R = 1/(a/√b + c), a, b, c ∈ ℕ. The least value of a + b + c is",
  opts:["6","5","7","4"],
  ans:0,
@@ -1373,7 +1399,7 @@ const QUIZ = [
   "4 is too small for a = 2, b = 3, c = 1."],
  sol:"The three centres form an equilateral triangle of side 2r with circum-radius 2r/√3; the big circle's radius reaches a small centre plus r: R = r + 2r/√3 ⇒ r/R = 1/(1 + 2/√3) = 1/(2/√3 + 1). Matching, a = 2, b = 3, c = 1 ⇒ a + b + c = <b>6</b>."},
 
-{id:103, lec:"SB", blk:"Level-7 · sine-rule ratio", topic:"Not always equal to 2R",
+{id:103, lec:"SB", blk:"Level-7 · sine-rule ratio", topic:"Not always equal to 2R", t:90,
  q:"The common ratio a/sinA (= b/sinB = c/sinC) is NOT always equal to which of the following?",
  opts:["(2/3)√(a² + b² + c²)","2R","abc/(2Δ)","(abc)^(2/3)/(h₁h₂h₃)^(1/3), where hₐ is the altitude to a"],
  ans:0,
@@ -1384,7 +1410,7 @@ const QUIZ = [
   "With hₐ = 2Δ/a, (abc)^(2/3)/(h₁h₂h₃)^(1/3) = abc/(2Δ) = 2R, always equal."],
  sol:"The ratio is 2R. (b) 2R and (c) abc/2Δ = 2R always hold; (d) reduces to abc/2Δ = 2R too. Only <b>(2/3)√(a²+b²+c²)</b> equals 2R solely for the equilateral case, so it is NOT always equal."},
 
-{id:104, lec:"SB", blk:"Level-7 · circum-radius", topic:"Isosceles with given altitude",
+{id:104, lec:"SB", blk:"Level-7 · circum-radius", topic:"Isosceles with given altitude", t:180,
  q:"A triangle inscribed in a circle of radius R has b = c = 1 and the altitude from A to BC equal to √(2/3). Then R equals",
  opts:["√3/(2√2)","√2/3","2√2/√3","1/2"],
  ans:0,
@@ -1395,7 +1421,7 @@ const QUIZ = [
   "1/2 would be the circum-radius only if the hypotenuse were 1 in a right triangle."],
  sol:"Since b = c the foot bisects BC: (a/2)² + (√(2/3))² = 1² ⇒ (a/2)² = 1/3 ⇒ a = 2/√3. Δ = (1/2)·a·√(2/3) = √2/3. R = abc/(4Δ) = (2/√3)/(4·√2/3) = √6/4 = <b>√3/(2√2)</b>."},
 
-{id:105, lec:"SB", blk:"Level-7 · cosine rule", topic:"Angle in a 13-14-15 triangle",
+{id:105, lec:"SB", blk:"Level-7 · cosine rule", topic:"Angle in a 13-14-15 triangle", t:180,
  q:"In △ABC with a = 13, b = 14, c = 15, the angle A equals",
  opts:["sin⁻¹(4/5)","sin⁻¹(3/5)","cos⁻¹(4/5)","π/3"],
  ans:0,
@@ -1406,7 +1432,7 @@ const QUIZ = [
   "π/3 gives cosA = 1/2, not 3/5."],
  sol:"cosA = (b²+c²−a²)/(2bc) = (196+225−169)/420 = 252/420 = 3/5 ⇒ sinA = 4/5 ⇒ <b>A = sin⁻¹(4/5)</b>."},
 
-{id:106, lec:"SB", blk:"Level-7 · law of tangents", topic:"A − B from b = (√3−1)a",
+{id:106, lec:"SB", blk:"Level-7 · law of tangents", topic:"A − B from b = (√3−1)a", t:180,
  q:"In △ABC, b = (√3 − 1)a and ∠C = 30°. Then A − B equals",
  opts:["60°","30°","90°","45°"],
  ans:0,
@@ -1417,7 +1443,7 @@ const QUIZ = [
   "45° is neither (A−B)/2 nor A − B for this data."],
  sol:"tan[(A−B)/2] = [(a−b)/(a+b)]cot(C/2) = [a(1−(√3−1))/(a(1+(√3−1)))]·cot15° = [(2−√3)/√3]·(2+√3) = (4−3)/√3 = 1/√3 ⇒ (A−B)/2 = 30° ⇒ <b>A − B = 60°</b>."},
 
-{id:107, lec:"SB", blk:"Level-7 · sine rule", topic:"Find a side",
+{id:107, lec:"SB", blk:"Level-7 · sine rule", topic:"Find a side", t:180,
  q:"In △ABC, ∠C = 105°, ∠B = 45° and side AC = 2. Then AB equals",
  opts:["√3 + 1","√3 − 1","2√2","√6 + √2"],
  ans:0,
@@ -1428,7 +1454,7 @@ const QUIZ = [
   "√6 + √2 is 2·sin105°·(…) left un-simplified (it is twice too large)."],
  sol:"∠A = 180° − 105° − 45° = 30°. AC = b = 2 (opposite B); AB = c (opposite C). c = b·sinC/sinB = 2·sin105°/sin45° = 2·[(√6+√2)/4]/(√2/2) = <b>√3 + 1</b>."},
 
-{id:108, lec:"SB", blk:"Level-7 · solving a triangle", topic:"sinB from 2b=a+c, A−C=90°",
+{id:108, lec:"SB", blk:"Level-7 · solving a triangle", topic:"sinB from 2b=a+c, A−C=90°", t:180,
  q:"In △ABC, 2b = a + c and A − C = 90°. Then sinB equals",
  opts:["√7/4","3/4","√7/2","1/4"],
  ans:0,
@@ -1439,7 +1465,7 @@ const QUIZ = [
   "1/4 is sin²(... ) mis-identified; sinB = √7/4."],
  sol:"2sinB = sinA + sinC = 2sin((A+C)/2)cos((A−C)/2) = 2cos(B/2)cos45° = √2 cos(B/2). Also 2sinB = 4sin(B/2)cos(B/2), so sin(B/2) = √2/4, cos(B/2) = √14/4, and sinB = 2·(√2/4)(√14/4) = <b>√7/4</b>."},
 
-{id:109, lec:"SB", blk:"Level-9 · pedal triangle", topic:"Ratio of side products",
+{id:109, lec:"SB", blk:"Level-9 · pedal triangle", topic:"Ratio of side products", t:90,
  q:"AD, BE, CF are the altitudes of an acute △ABC and DEF is the orthic (pedal) triangle. The ratio (product of DEF's sides)/(product of ABC's sides) equals",
  opts:["cosA·cosB·cosC","sinA·sinB·sinC","(1/2)cosA·cosB·cosC","cosA + cosB + cosC"],
  ans:0,
@@ -1450,7 +1476,7 @@ const QUIZ = [
   "It is a product of cosines, not their sum."],
  sol:"The orthic triangle's sides are EF = a cosA, FD = b cosB, DE = c cosC. Hence the ratio = (a cosA·b cosB·c cosC)/(abc) = <b>cosA cosB cosC</b>."},
 
-{id:110, lec:"SB", blk:"Level-9 · pedal triangle", topic:"Orthocentre as a centre of DEF",
+{id:110, lec:"SB", blk:"Level-9 · pedal triangle", topic:"Orthocentre as a centre of DEF", t:90,
  q:"The orthocentre of an acute △ABC is, for its orthic (pedal) triangle DEF, the",
  opts:["incentre","circumcentre","centroid","orthocentre"],
  ans:0,
@@ -1461,7 +1487,7 @@ const QUIZ = [
   "H is the orthocentre of ABC, but the incentre of DEF."],
  sol:"The altitudes AD, BE, CF bisect the angles of the orthic triangle DEF, so their common point H is the meeting of DEF's angle bisectors — the <b>incentre</b> of DEF."},
 
-{id:111, lec:"SB", blk:"Level-9 · paragraph", topic:"Area from tanA,tanB,tanC",
+{id:111, lec:"SB", blk:"Level-9 · paragraph", topic:"Area from tanA,tanB,tanC", t:180,
  q:"In △ABC, tanA = 1, tanB = 2, tanC = 3 and c = 3. The area is",
  opts:["3","6","9/2","√10"],
  ans:0,
@@ -1472,7 +1498,7 @@ const QUIZ = [
   "√10 is 2R, not the area."],
  sol:"tanA+tanB+tanC = tanA tanB tanC = 6 (consistent). A = 45°, sinC = 3/√10, so 2R = c/sinC = √10. Then a = 2R sinA = √5, b = 2R sinB = 2√2, and Δ = (1/2)ab sinC = (1/2)·√5·2√2·(3/√10) = <b>3</b>."},
 
-{id:112, lec:"SB", blk:"Level-9 · paragraph", topic:"Pedal-area ratio k",
+{id:112, lec:"SB", blk:"Level-9 · paragraph", topic:"Pedal-area ratio k", t:180,
  q:"For the same triangle (tanA = 1, tanB = 2, tanC = 3), if Δ = k·Δₚ where Δₚ is the pedal-triangle area, then k equals",
  opts:["5","10","2","1/5"],
  ans:0,
@@ -1483,7 +1509,7 @@ const QUIZ = [
   "1/5 is the reciprocal (Δₚ/Δ), not k = Δ/Δₚ."],
  sol:"Δₚ = 2Δ cosA cosB cosC. cosA = 1/√2, cosB = 1/√5, cosC = 1/√10, product = 1/√100 = 1/10. So Δₚ = 2Δ·(1/10) = Δ/5 ⇒ k = Δ/Δₚ = <b>5</b>."},
 
-{id:113, lec:"SB", blk:"Level-8 · triangle centres", topic:"Angle ∠BIC (incentre)",
+{id:113, lec:"SB", blk:"Level-8 · triangle centres", topic:"Angle ∠BIC (incentre)", t:90,
  q:"If I is the incentre of △ABC, then ∠BIC equals",
  opts:["π/2 + A/2","π/2 − A/2","π − A","2A"],
  ans:0,
@@ -1494,7 +1520,7 @@ const QUIZ = [
   "2A is ∠BOC (the circumcentre angle), not ∠BIC."],
  sol:"In △BIC, ∠IBC = B/2 and ∠ICB = C/2, so ∠BIC = π − (B/2 + C/2) = π − (π − A)/2 = <b>π/2 + A/2</b>."},
 
-{id:114, lec:"SB", blk:"Level-8 · triangle centres", topic:"Angle ∠BOC (circumcentre)",
+{id:114, lec:"SB", blk:"Level-8 · triangle centres", topic:"Angle ∠BOC (circumcentre)", t:90,
  q:"If O is the circumcentre of △ABC (A acute), then ∠BOC equals",
  opts:["2A","A","π/2 + A/2","π − A"],
  ans:0,
@@ -1507,13 +1533,24 @@ const QUIZ = [
 
 ];
 
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter M-12 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1531,6 +1568,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1565,15 +1605,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1585,47 +1626,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1635,30 +1693,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1667,7 +1769,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1680,9 +1784,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1691,7 +1813,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1712,21 +1835,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter M-12 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

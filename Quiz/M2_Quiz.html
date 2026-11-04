@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different lectures</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -239,7 +265,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- L-1 (20) ---------------- */
-{id:1, lec:"L-1", blk:"What is a set", topic:"Well-defined collections",
+{id:1, lec:"L-1", blk:"What is a set", topic:"Well-defined collections", t:60,
  q:"Which of the following is a <b>well-defined set</b>?",
  opts:[
   "The collection of all prime numbers less than 20",
@@ -254,7 +280,7 @@ const QUIZ = [
   "“Difficult” is subjective in the same way. Vague adjectives never define sets."],
  sol:"A set is a <b>well-defined collection of distinct objects</b>. “Well-defined” means membership can be settled with certainty. Subjective words — good, tall, rich, difficult, beautiful — always fail this test."},
 
-{id:2, lec:"L-1", blk:"What is a set", topic:"Roster form and distinctness",
+{id:2, lec:"L-1", blk:"What is a set", topic:"Roster form and distinctness", t:60,
  q:"In roster form, the set of letters of the word <b>SCHOOL</b> is",
  opts:["{S, C, H, O, L}","{S, C, H, O, O, L}","{S, C, H, L}","{SCHOOL}"],
  ans:0,
@@ -265,7 +291,7 @@ const QUIZ = [
   "This is a singleton whose only element is the word “SCHOOL” itself, not a set of its letters."],
  sol:"Roster (tabular) form lists the elements between braces, each written <b>once</b>: <b>{S, C, H, O, L}</b>. Order is irrelevant too — {L, O, H, C, S} is the same set."},
 
-{id:3, lec:"L-1", blk:"What is a set", topic:"Cardinality with repeated letters",
+{id:3, lec:"L-1", blk:"What is a set", topic:"Cardinality with repeated letters", t:60,
  q:"If A is the set of letters of the word <b>MATHEMATICS</b>, then n(A) is",
  opts:["8","11","9","10"],
  ans:0,
@@ -276,7 +302,7 @@ const QUIZ = [
   "10 counts only one repetition."],
  sol:"MATHEMATICS has 11 letters, but M, A and T each occur twice. Distinct letters: <b>{M, A, T, H, E, I, C, S}</b>, so n(A) = <b>8</b>."},
 
-{id:4, lec:"L-1", blk:"What is a set", topic:"Set-builder notation",
+{id:4, lec:"L-1", blk:"What is a set", topic:"Set-builder notation", t:60,
  q:"In set-builder notation {x : P(x)}, the symbol “:” (or “|”) reads",
  opts:["such that","belongs to","for all","implies"],
  ans:0,
@@ -287,7 +313,7 @@ const QUIZ = [
   "“Implies” is the arrow ⇒, which links whole statements rather than separating a variable from its condition."],
  sol:"{x <b>:</b> x has property P} = “the set of all x <b>such that</b> x has property P”. Either “:” or “|” may be used."},
 
-{id:5, lec:"L-1", blk:"Types of set", topic:"Identifying the empty set",
+{id:5, lec:"L-1", blk:"Types of set", topic:"Identifying the empty set", t:60,
  q:"Which of the following is the <b>empty set</b>?",
  opts:[
   "{x : x is a prime number between 24 and 28}",
@@ -302,7 +328,7 @@ const QUIZ = [
   "This is {2} — 2 is the one and only even prime."],
  sol:"The empty (null, void) set φ has <b>no</b> elements, so n(φ) = 0. ⚠ Distinguish φ from {0} and from {φ}, both of which are singletons."},
 
-{id:6, lec:"L-1", blk:"Types of set", topic:"Cardinality of the empty set",
+{id:6, lec:"L-1", blk:"Types of set", topic:"Cardinality of the empty set", t:60,
  q:"The value of n(φ) is",
  opts:["0","1","φ","undefined"],
  ans:0,
@@ -313,7 +339,7 @@ const QUIZ = [
   "It is perfectly well defined; counting nothing gives 0."],
  sol:"<b>n(φ) = 0</b>, while n({φ}) = 1. The cardinal number counts distinct elements."},
 
-{id:7, lec:"L-1", blk:"Types of set", topic:"Equal versus equivalent",
+{id:7, lec:"L-1", blk:"Types of set", topic:"Equal versus equivalent", t:60,
  q:"Two sets A and B are called <b>equivalent</b> when",
  opts:[
   "n(A) = n(B)",
@@ -328,7 +354,7 @@ const QUIZ = [
   "Disjointness says the sets share nothing — unrelated to whether they are the same size."],
  sol:"<b>Equivalent:</b> n(A) = n(B). <b>Equal:</b> identical elements. Equal sets are always equivalent; equivalent sets need not be equal."},
 
-{id:8, lec:"L-1", blk:"Types of set", topic:"Singleton sets",
+{id:8, lec:"L-1", blk:"Types of set", topic:"Singleton sets", t:60,
  q:"A set containing exactly one element is called",
  opts:["a singleton set","a null set","an equivalent set","a universal set"],
  ans:0,
@@ -339,7 +365,7 @@ const QUIZ = [
   "The universal set U is the set containing all objects under discussion in a given context."],
  sol:"<b>Singleton</b> = exactly one element. Related terms: null/empty (none), non-empty (at least one), finite, infinite."},
 
-{id:9, lec:"L-1", blk:"Subsets and power sets", topic:"Counting subsets",
+{id:9, lec:"L-1", blk:"Subsets and power sets", topic:"Counting subsets", t:90,
  q:"A set has n elements. The total number of its subsets is",
  opts:["2<sup>n</sup>","2<sup>n</sup> − 1","n²","n!"],
  ans:0,
@@ -350,7 +376,7 @@ const QUIZ = [
   "n! counts arrangements. For n = 3 it gives 6, not 8."],
  sol:"<b>Subsets = 2<sup>n</sup></b>, proper subsets = 2ⁿ − 1, and |P(A)| = 2ⁿ."},
 
-{id:10, lec:"L-1", blk:"Subsets and power sets", topic:"Counting proper subsets",
+{id:10, lec:"L-1", blk:"Subsets and power sets", topic:"Counting proper subsets", t:60,
  q:"A set has n elements. The number of its <b>proper</b> subsets is",
  opts:["2<sup>n</sup> − 1","2<sup>n</sup>","2<sup>n</sup> − 2","n − 1"],
  ans:0,
@@ -361,7 +387,7 @@ const QUIZ = [
   "n − 1 bears no relation to the count; for n = 3 there are 7 proper subsets, not 2."],
  sol:"<b>Proper subsets = 2<sup>n</sup> − 1.</b> A ⊂ B (proper) means A ⊆ B and A ≠ B, so only B itself is excluded."},
 
-{id:11, lec:"L-1", blk:"Subsets and power sets", topic:"Subsets of a three-element set",
+{id:11, lec:"L-1", blk:"Subsets and power sets", topic:"Subsets of a three-element set", t:60,
  q:"The total number of subsets of {a, b, c} is",
  opts:["8","6","7","3"],
  ans:0,
@@ -372,7 +398,7 @@ const QUIZ = [
   "3 counts only the singletons."],
  sol:"2<sup>n</sup> with n = 3 gives <b>8</b> subsets."},
 
-{id:12, lec:"L-1", blk:"Subsets and power sets", topic:"Subsets of the empty set",
+{id:12, lec:"L-1", blk:"Subsets and power sets", topic:"Subsets of the empty set", t:60,
  q:"The total number of subsets of φ is",
  opts:["1","0","2","undefined"],
  ans:0,
@@ -383,7 +409,7 @@ const QUIZ = [
   "The formula 2ⁿ applies perfectly well at n = 0."],
  sol:"n(φ) = 0, so the number of subsets is 2<sup>0</sup> = <b>1</b> — the empty set is its own only subset."},
 
-{id:13, lec:"L-1", blk:"Subsets and power sets", topic:"The power set of the empty set",
+{id:13, lec:"L-1", blk:"Subsets and power sets", topic:"The power set of the empty set", t:60,
  q:"The power set P(φ) is",
  opts:[
   "{φ}, a set with one element",
@@ -398,7 +424,7 @@ const QUIZ = [
   "It is entirely well defined."],
  sol:"P(A) is the set whose <b>elements are the subsets</b> of A. Since φ ⊆ φ, we get <b>P(φ) = {φ}</b>, with 2<sup>0</sup> = 1 element."},
 
-{id:14, lec:"L-1", blk:"Subsets and power sets", topic:"Why the count is 2ⁿ",
+{id:14, lec:"L-1", blk:"Subsets and power sets", topic:"Why the count is 2ⁿ", t:60,
  q:"The number of subsets of an n-element set is 2<sup>n</sup> because",
  opts:[
   "each element is independently either in or out of the subset, giving 2 choices per element",
@@ -413,7 +439,7 @@ const QUIZ = [
   "That describes n², a different count entirely."],
  sol:"Build a subset by walking the n elements and saying <b>in</b> or <b>out</b> at each — 2 choices, n times, so <b>2<sup>n</sup></b> subsets."},
 
-{id:15, lec:"L-1", blk:"Subsets and power sets", topic:"Solving a power-set equation",
+{id:15, lec:"L-1", blk:"Subsets and power sets", topic:"Solving a power-set equation", t:90,
  q:"For finite sets A and B, n[P(A)] = n[P(B)] + 15. Then",
  opts:[
   "n(A) = 4 and n(B) = 0",
@@ -428,7 +454,7 @@ const QUIZ = [
   "2⁵ − 2¹ = 32 − 2 = 30, not 15."],
  sol:"n[P(A)] = 2<sup>n(A)</sup>, so 2<sup>a</sup> − 2<sup>b</sup> = 15. Since 15 is odd, 2<sup>b</sup> must be 1 (b = 0), giving 2<sup>a</sup> = 16 and <b>a = 4, b = 0</b>."},
 
-{id:16, lec:"L-1", blk:"Subsets and power sets", topic:"The 2ᵐ − 2ⁿ = 56 equation",
+{id:16, lec:"L-1", blk:"Subsets and power sets", topic:"The 2ᵐ − 2ⁿ = 56 equation", t:90,
  q:"Two finite sets have m and n elements. The total number of subsets of the first is 56 more than that of the second. Then",
  opts:[
   "m = 6, n = 3",
@@ -443,7 +469,7 @@ const QUIZ = [
   "2⁸ − 2³ = 256 − 8 = 248."],
  sol:"2<sup>m</sup> − 2<sup>n</sup> = 56. Factor out: 2<sup>n</sup>(2<sup>m−n</sup> − 1) = 56 = 8 × 7, so 2<sup>n</sup> = 8 and 2<sup>m−n</sup> − 1 = 7 ⇒ <b>n = 3, m = 6</b>. This exact equation reappears in the Strong Box."},
 
-{id:17, lec:"L-1", blk:"Subsets and power sets", topic:"The empty set as a subset",
+{id:17, lec:"L-1", blk:"Subsets and power sets", topic:"The empty set as a subset", t:60,
  q:"Which statement is TRUE?",
  opts:[
   "φ is a subset of every set",
@@ -458,7 +484,7 @@ const QUIZ = [
   "φ has no elements while {φ} has one, so they cannot be equal."],
  sol:"<b>φ ⊆ A for every set A</b>, and every set is a subset of the universal set U. Keep ⊆ and ∈ distinct."},
 
-{id:18, lec:"L-1", blk:"Subsets and power sets", topic:"Transitivity of inclusion",
+{id:18, lec:"L-1", blk:"Subsets and power sets", topic:"Transitivity of inclusion", t:60,
  q:"If A ⊂ B and B ⊂ C, then",
  opts:["A ⊂ C","C ⊂ A","A = C","nothing can be concluded"],
  ans:0,
@@ -469,7 +495,7 @@ const QUIZ = [
   "The conclusion follows immediately by chasing an arbitrary element through both inclusions."],
  sol:"Inclusion is <b>transitive</b>. x ∈ A ⇒ x ∈ B ⇒ x ∈ C, so <b>A ⊂ C</b>."},
 
-{id:19, lec:"L-1", blk:"Subsets and power sets", topic:"Two-way containment",
+{id:19, lec:"L-1", blk:"Subsets and power sets", topic:"Two-way containment", t:60,
  q:"If A ⊆ B and B ⊆ A, then",
  opts:["A = B","A ⊂ B","A ∩ B = φ","n(A) &gt; n(B)"],
  ans:0,
@@ -480,7 +506,7 @@ const QUIZ = [
   "The counts must be equal, since the sets are equal."],
  sol:"<b>A ⊆ B and B ⊆ A ⇒ A = B.</b> This “prove containment both ways” pattern is the standard route to any set equality."},
 
-{id:20, lec:"L-1", blk:"Subsets and power sets", topic:"Improper subset",
+{id:20, lec:"L-1", blk:"Subsets and power sets", topic:"Improper subset", t:60,
  q:"The <b>improper</b> subset of a set A is",
  opts:["A itself","φ","any subset with n(A) − 1 elements","the power set of A"],
  ans:0,
@@ -492,7 +518,7 @@ const QUIZ = [
  sol:"<b>Improper subset = A itself</b> (A ⊆ A but not A ⊂ A). Removing it from the 2ⁿ subsets leaves 2ⁿ − 1 proper subsets."},
 
 /* ---------------- L-2 (20) ---------------- */
-{id:21, lec:"L-2", blk:"Intervals", topic:"Open interval notation",
+{id:21, lec:"L-2", blk:"Intervals", topic:"Open interval notation", t:60,
  q:"The set {x : a &lt; x &lt; b} is written in interval form as",
  opts:["(a, b)","[a, b]","[a, b)","(a, b]"],
  ans:0,
@@ -503,7 +529,7 @@ const QUIZ = [
   "(a, b] excludes a but includes b, i.e. a &lt; x ≤ b."],
  sol:"<b>Round bracket ⇒ endpoint excluded, square bracket ⇒ endpoint included.</b> Strict inequalities on both sides give the open interval <b>(a, b)</b>."},
 
-{id:22, lec:"L-2", blk:"Intervals", topic:"Reading the brackets",
+{id:22, lec:"L-2", blk:"Intervals", topic:"Reading the brackets", t:60,
  q:"In interval notation, a <b>square</b> bracket indicates that the endpoint is",
  opts:["included","excluded","infinite","negative"],
  ans:0,
@@ -514,7 +540,7 @@ const QUIZ = [
   "Brackets carry no information about sign."],
  sol:"<b>Square = in, round = out.</b> So [a, b) means a ≤ x &lt; b."},
 
-{id:23, lec:"L-2", blk:"Intervals", topic:"Bracketing infinity",
+{id:23, lec:"L-2", blk:"Intervals", topic:"Bracketing infinity", t:60,
  q:"In an interval, the symbol ∞ always takes",
  opts:["a round bracket","a square bracket","either bracket","no bracket at all"],
  ans:0,
@@ -525,7 +551,7 @@ const QUIZ = [
   "Every interval endpoint carries a bracket."],
  sol:"Write <b>(−∞, a]</b> or <b>[a, ∞)</b> — the infinite end is always round, because infinity is not a number that can belong to the set."},
 
-{id:24, lec:"L-2", blk:"Intervals", topic:"Half-open intervals",
+{id:24, lec:"L-2", blk:"Intervals", topic:"Half-open intervals", t:60,
  q:"The interval [a, b) in set-builder form is",
  opts:[
   "{x : a ≤ x &lt; b}",
@@ -540,7 +566,7 @@ const QUIZ = [
   "This is the open interval (a, b)."],
  sol:"[a, b) = <b>{x : a ≤ x &lt; b}</b> — a is in, b is out."},
 
-{id:25, lec:"L-2", blk:"Union and intersection", topic:"Definition of union",
+{id:25, lec:"L-2", blk:"Union and intersection", topic:"Definition of union", t:60,
  q:"A ∪ B is defined as",
  opts:[
   "{x : x ∈ A <b>or</b> x ∈ B}",
@@ -555,7 +581,7 @@ const QUIZ = [
   "That is (A ∪ B)′, the complement of the union."],
  sol:"<b>Union = OR, intersection = AND.</b> A ∪ B collects everything in either set, each element written once."},
 
-{id:26, lec:"L-2", blk:"Union and intersection", topic:"Definition of intersection",
+{id:26, lec:"L-2", blk:"Union and intersection", topic:"Definition of intersection", t:60,
  q:"A ∩ B is defined as",
  opts:[
   "{x : x ∈ A <b>and</b> x ∈ B}",
@@ -570,7 +596,7 @@ const QUIZ = [
   "That is the difference B − A — the part of B lying outside A."],
  sol:"<b>A ∩ B = {x : x ∈ A and x ∈ B}</b>, the common part. If it is empty the sets are disjoint."},
 
-{id:27, lec:"L-2", blk:"Union and intersection", topic:"Computing a union",
+{id:27, lec:"L-2", blk:"Union and intersection", topic:"Computing a union", t:90,
  q:"If A = {1, 2, 3, 4, 5} and B = {2, 4, 6, 8}, then A ∪ B is",
  opts:[
   "{1, 2, 3, 4, 5, 6, 8}",
@@ -585,7 +611,7 @@ const QUIZ = [
   "That is A − B, the part of A outside B — it drops 2, 4, 6 and 8 altogether."],
  sol:"A ∪ B = <b>{1, 2, 3, 4, 5, 6, 8}</b>. Note n(A ∪ B) = 7 = 5 + 4 − 2 ✓, matching n(A) + n(B) − n(A ∩ B)."},
 
-{id:28, lec:"L-2", blk:"Union and intersection", topic:"Computing an intersection",
+{id:28, lec:"L-2", blk:"Union and intersection", topic:"Computing an intersection", t:60,
  q:"If A = {1, 2, 3, 4, 5} and B = {2, 4, 6, 8}, then A ∩ B is",
  opts:["{2, 4}","{1, 3, 5}","{6, 8}","{1, 2, 3, 4, 5, 6, 8}"],
  ans:0,
@@ -596,7 +622,7 @@ const QUIZ = [
   "That is A ∪ B, which keeps everything in either set rather than only the shared part."],
  sol:"Keep only what appears in <b>both</b> lists: 2 and 4 are in A and also in B, while 1, 3, 5 are in A alone and 6, 8 in B alone. So A ∩ B = <b>{2, 4}</b>."},
 
-{id:29, lec:"L-2", blk:"Difference", topic:"Set difference",
+{id:29, lec:"L-2", blk:"Difference", topic:"Set difference", t:60,
  q:"If A = {1, 2, 3, 4, 5, 6} and B = {2, 4, 6, 8}, then A − B is",
  opts:["{1, 3, 5}","{8}","{1, 3, 5, 8}","{2, 4, 6}"],
  ans:0,
@@ -607,7 +633,7 @@ const QUIZ = [
   "That is A ∩ B, the part that gets removed."],
  sol:"A − B = {x : x ∈ A and x ∉ B} = <b>{1, 3, 5}</b>."},
 
-{id:30, lec:"L-2", blk:"Difference", topic:"Difference is not symmetric",
+{id:30, lec:"L-2", blk:"Difference", topic:"Difference is not symmetric", t:60,
  q:"For the same sets A = {1, 2, 3, 4, 5, 6} and B = {2, 4, 6, 8}, B − A is",
  opts:["{8}","{1, 3, 5}","φ","{2, 4, 6}"],
  ans:0,
@@ -618,7 +644,7 @@ const QUIZ = [
   "That is A ∩ B, the shared part — exactly the elements that B − A removes."],
  sol:"B − A = <b>{8}</b>, while A − B = {1, 3, 5}. ⚠ <b>A − B ≠ B − A</b> in general."},
 
-{id:31, lec:"L-2", blk:"Difference", topic:"Symmetric difference — definition",
+{id:31, lec:"L-2", blk:"Difference", topic:"Symmetric difference — definition", t:60,
  q:"The symmetric difference A Δ B is defined as",
  opts:[
   "(A − B) ∪ (B − A)",
@@ -633,7 +659,7 @@ const QUIZ = [
   "This simplifies to A ∩ B, the exact opposite of what A Δ B keeps."],
  sol:"<b>A Δ B = (A − B) ∪ (B − A)</b> — the elements in one set or the other but <i>not both</i>."},
 
-{id:32, lec:"L-2", blk:"Difference", topic:"Computing a symmetric difference",
+{id:32, lec:"L-2", blk:"Difference", topic:"Computing a symmetric difference", t:90,
  q:"If P = {1, 2, 3} and Q = {2, 3, 4}, then P Δ Q is",
  opts:["{1, 4}","{2, 3}","{1, 2, 3, 4}","φ"],
  ans:0,
@@ -644,7 +670,7 @@ const QUIZ = [
   "It would be empty only if P = Q."],
  sol:"P − Q = {1}, Q − P = {4} ⇒ P Δ Q = <b>{1, 4}</b>. Check the count: n(P) + n(Q) − 2n(P ∩ Q) = 3 + 3 − 4 = 2 ✓"},
 
-{id:33, lec:"L-2", blk:"Complement", topic:"Definition of the complement",
+{id:33, lec:"L-2", blk:"Complement", topic:"Definition of the complement", t:60,
  q:"The complement A′ of a set A relative to the universal set U is",
  opts:["U − A","A − U","A ∪ U","φ"],
  ans:0,
@@ -655,7 +681,7 @@ const QUIZ = [
   "A′ is empty only in the special case A = U."],
  sol:"<b>A′ = U − A</b> = {x ∈ U : x ∉ A}."},
 
-{id:34, lec:"L-2", blk:"Complement", topic:"Double complement",
+{id:34, lec:"L-2", blk:"Complement", topic:"Double complement", t:90,
  q:"For any set A, (A′)′ equals",
  opts:["A","A′","U","φ"],
  ans:0,
@@ -666,7 +692,7 @@ const QUIZ = [
   "φ is the complement of U."],
  sol:"<b>(A′)′ = A.</b> Also φ′ = U, U′ = φ, A ∪ A′ = U and A ∩ A′ = φ."},
 
-{id:35, lec:"L-2", blk:"Complement", topic:"Complements of φ and U",
+{id:35, lec:"L-2", blk:"Complement", topic:"Complements of φ and U", t:60,
  q:"In a universal set U, the complements φ′ and U′ are respectively",
  opts:["U and φ","φ and U","U and U","φ and φ"],
  ans:0,
@@ -677,7 +703,7 @@ const QUIZ = [
   "φ′ cannot be φ, since U itself is non-empty in any meaningful context."],
  sol:"<b>φ′ = U</b> and <b>U′ = φ</b>."},
 
-{id:36, lec:"L-2", blk:"De Morgan", topic:"Complement of a union",
+{id:36, lec:"L-2", blk:"De Morgan", topic:"Complement of a union", t:60,
  q:"By De Morgan's law, (A ∪ B)′ equals",
  opts:["A′ ∩ B′","A′ ∪ B′","A ∩ B","A′ − B′"],
  ans:0,
@@ -688,7 +714,7 @@ const QUIZ = [
   "A difference of complements is a different set entirely."],
  sol:"<b>(A ∪ B)′ = A′ ∩ B′</b> and <b>(A ∩ B)′ = A′ ∪ B′</b> — complement the parts and <b>flip the operation</b>."},
 
-{id:37, lec:"L-2", blk:"De Morgan", topic:"Complement of an intersection",
+{id:37, lec:"L-2", blk:"De Morgan", topic:"Complement of an intersection", t:60,
  q:"By De Morgan's law, (A ∩ B)′ equals",
  opts:["A′ ∪ B′","A′ ∩ B′","A ∪ B","(A − B)′"],
  ans:0,
@@ -699,7 +725,7 @@ const QUIZ = [
   "A − B is a different set, and so is its complement."],
  sol:"<b>(A ∩ B)′ = A′ ∪ B′.</b> Both De Morgan laws follow one rule: complement each set and swap ∪ ↔ ∩."},
 
-{id:38, lec:"L-2", blk:"De Morgan", topic:"Verifying De Morgan numerically",
+{id:38, lec:"L-2", blk:"De Morgan", topic:"Verifying De Morgan numerically", t:90,
  q:"Let U = {1, 2, 3, 4, 5, 6}, A = {2, 3} and B = {3, 4, 5}. Then (A ∪ B)′ is",
  opts:["{1, 6}","{1, 2, 6}","{1, 4, 5, 6}","{6}"],
  ans:0,
@@ -710,7 +736,7 @@ const QUIZ = [
   "1 has been dropped — it lies in neither A nor B, so it belongs in the complement."],
  sol:"A ∪ B = {2, 3, 4, 5} ⇒ (A ∪ B)′ = <b>{1, 6}</b>, which agrees with A′ ∩ B′ ✓"},
 
-{id:39, lec:"L-2", blk:"Distributive law", topic:"Intersection over union",
+{id:39, lec:"L-2", blk:"Distributive law", topic:"Intersection over union", t:60,
  q:"For any sets A, B, C, the expression A ∩ (B ∪ C) equals",
  opts:[
   "(A ∩ B) ∪ (A ∩ C)",
@@ -725,7 +751,7 @@ const QUIZ = [
   "Same test: {2,3,4,5,6} ∩ {1,3,5} ∩ {2,4,5} = {5}."],
  sol:"<b>A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)</b>, and dually <b>A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)</b>."},
 
-{id:40, lec:"L-2", blk:"Venn diagrams", topic:"Disjoint sets",
+{id:40, lec:"L-2", blk:"Venn diagrams", topic:"Disjoint sets", t:60,
  q:"Two sets A and B are <b>disjoint</b> when",
  opts:["A ∩ B = φ","A ∪ B = φ","A = B","A ⊆ B"],
  ans:0,
@@ -737,7 +763,7 @@ const QUIZ = [
  sol:"<b>Disjoint ⇔ A ∩ B = φ</b>, and then n(A ∪ B) = n(A) + n(B) with no correction term."},
 
 /* ---------------- L-3 (18) ---------------- */
-{id:41, lec:"L-3", blk:"Algebra of sets", topic:"Identity laws",
+{id:41, lec:"L-3", blk:"Algebra of sets", topic:"Identity laws", t:90,
  q:"The expressions A ∪ φ and A ∩ U are respectively equal to",
  opts:["A and A","φ and U","A and U","φ and A"],
  ans:0,
@@ -748,7 +774,7 @@ const QUIZ = [
   "Both have been mixed up with the domination laws."],
  sol:"<b>Identity:</b> A ∪ φ = A and A ∩ U = A. <b>Domination:</b> A ∪ U = U and A ∩ φ = φ."},
 
-{id:42, lec:"L-3", blk:"Algebra of sets", topic:"Idempotent laws",
+{id:42, lec:"L-3", blk:"Algebra of sets", topic:"Idempotent laws", t:60,
  q:"The expressions A ∪ A and A ∩ A are respectively equal to",
  opts:["A and A","U and φ","φ and A","A and U"],
  ans:0,
@@ -759,7 +785,7 @@ const QUIZ = [
   "A ∩ A is A, not U — intersecting a set with itself cannot enlarge it to the whole universal set."],
  sol:"<b>Idempotent:</b> A ∪ A = A and A ∩ A = A. Contrast with the complement laws, which involve A′."},
 
-{id:43, lec:"L-3", blk:"Algebra of sets", topic:"Complement laws",
+{id:43, lec:"L-3", blk:"Algebra of sets", topic:"Complement laws", t:90,
  q:"The expressions A ∪ A′ and A ∩ A′ are respectively equal to",
  opts:["U and φ","φ and U","A and A′","U and U"],
  ans:0,
@@ -770,7 +796,7 @@ const QUIZ = [
   "A ∩ A′ cannot be U — no element lies in a set and its complement at once."],
  sol:"<b>A ∪ A′ = U</b> and <b>A ∩ A′ = φ</b>. Together with (A′)′ = A these are the complement laws."},
 
-{id:44, lec:"L-3", blk:"Counting", topic:"The two-set counting formula",
+{id:44, lec:"L-3", blk:"Counting", topic:"The two-set counting formula", t:60,
  q:"For any two finite sets, n(A ∪ B) equals",
  opts:[
   "n(A) + n(B) − n(A ∩ B)",
@@ -785,7 +811,7 @@ const QUIZ = [
   "A difference of counts is not a union."],
  sol:"<b>n(A ∪ B) = n(A) + n(B) − n(A ∩ B)</b> — the inclusion–exclusion principle for two sets."},
 
-{id:45, lec:"L-3", blk:"Counting", topic:"Disjoint sets",
+{id:45, lec:"L-3", blk:"Counting", topic:"Disjoint sets", t:60,
  q:"If A and B are disjoint finite sets, then n(A ∪ B) equals",
  opts:["n(A) + n(B)","n(A) × n(B)","n(A) − n(B)","max{n(A), n(B)}"],
  ans:0,
@@ -796,7 +822,7 @@ const QUIZ = [
   "The union contains <b>both</b> sets, so it is at least as large as their total, not just the larger one."],
  sol:"Disjoint means n(A ∩ B) = 0, so <b>n(A ∪ B) = n(A) + n(B)</b>."},
 
-{id:46, lec:"L-3", blk:"Counting", topic:"Counting a difference",
+{id:46, lec:"L-3", blk:"Counting", topic:"Counting a difference", t:60,
  q:"For finite sets, n(A − B) equals",
  opts:[
   "n(A) − n(A ∩ B)",
@@ -811,7 +837,7 @@ const QUIZ = [
   "That is n(B − A), the other one-sided difference. Remember A − B ≠ B − A."],
  sol:"<b>n(A − B) = n(A) − n(A ∩ B)</b>. Only the shared part is taken away."},
 
-{id:47, lec:"L-3", blk:"Counting", topic:"Counting a symmetric difference",
+{id:47, lec:"L-3", blk:"Counting", topic:"Counting a symmetric difference", t:60,
  q:"For finite sets, n(A Δ B) equals",
  opts:[
   "n(A) + n(B) − 2n(A ∩ B)",
@@ -826,7 +852,7 @@ const QUIZ = [
   "A difference of counts is not the symmetric difference."],
  sol:"<b>n(A Δ B) = n(A) + n(B) − 2n(A ∩ B)</b> = n(A ∪ B) − n(A ∩ B). The factor <b>2</b> is what distinguishes it from the union count."},
 
-{id:48, lec:"L-3", blk:"Counting", topic:"The three-set formula",
+{id:48, lec:"L-3", blk:"Counting", topic:"The three-set formula", t:60,
  q:"For three finite sets, n(A ∪ B ∪ C) equals",
  opts:[
   "n(A)+n(B)+n(C) − n(A∩B) − n(B∩C) − n(C∩A) + n(A∩B∩C)",
@@ -841,7 +867,7 @@ const QUIZ = [
   "This ignores the pairwise overlaps. Same test: 3 − 1 = 2, not 1."],
  sol:"<b>n(A∪B∪C) = Σn(single) − Σn(pairs) + n(A∩B∩C)</b> — inclusion–exclusion, alternating signs."},
 
-{id:49, lec:"L-3", blk:"Counting", topic:"The “neither” count",
+{id:49, lec:"L-3", blk:"Counting", topic:"The “neither” count", t:90,
  q:"The number of elements of the universal set lying in <b>neither</b> A nor B is",
  opts:[
   "n(U) − n(A ∪ B)",
@@ -856,7 +882,7 @@ const QUIZ = [
   "This is n((A ∩ B)′) = n(A′ ∪ B′), the count of those missing from at least one set."],
  sol:"Neither = n(A′ ∩ B′) = n((A ∪ B)′) = <b>n(U) − n(A ∪ B)</b>. ⚠ You always need n(U) for a “neither” question."},
 
-{id:50, lec:"L-3", blk:"Counting", topic:"Finding the overlap",
+{id:50, lec:"L-3", blk:"Counting", topic:"Finding the overlap", t:90,
  q:"X and Y are sets with n(X ∪ Y) = 50, n(X) = 28 and n(Y) = 32. Then n(X ∩ Y) is",
  opts:["10","110","6","18"],
  ans:0,
@@ -867,7 +893,7 @@ const QUIZ = [
   "This would make n(X ∪ Y) = 42."],
  sol:"n(X ∪ Y) = n(X) + n(Y) − n(X ∩ Y) ⇒ n(X ∩ Y) = 28 + 32 − 50 = <b>10</b>."},
 
-{id:51, lec:"L-3", blk:"Counting", topic:"A survey with “neither”",
+{id:51, lec:"L-3", blk:"Counting", topic:"A survey with “neither”", t:90,
  q:"In a survey of 400 students, 100 take apple juice, 150 take orange juice and 75 take both. How many take neither?",
  opts:["225","175","150","250"],
  ans:0,
@@ -878,7 +904,7 @@ const QUIZ = [
   "This would correspond to n(A ∪ B) = 150, i.e. forgetting to subtract the overlap at all."],
  sol:"n(A ∪ B) = 100 + 150 − 75 = 175. Neither = n(U) − n(A ∪ B) = 400 − 175 = <b>225</b>."},
 
-{id:52, lec:"L-3", blk:"Counting", topic:"Least possible overlap",
+{id:52, lec:"L-3", blk:"Counting", topic:"Least possible overlap", t:90,
  q:"In a survey of 1000 consumers, 720 like product A and 450 like product B. The <b>least</b> number who must like both is",
  opts:["170","270","450","0"],
  ans:0,
@@ -889,7 +915,7 @@ const QUIZ = [
   "Zero overlap would need 1170 distinct consumers, but only 1000 exist. This is exactly the pigeonhole squeeze the question tests."],
  sol:"n(A ∩ B) = n(A) + n(B) − n(A ∪ B) = 1170 − n(A ∪ B). The overlap is smallest when the union is largest, and n(A ∪ B) ≤ n(U) = 1000 ⇒ n(A ∩ B) ≥ <b>170</b>."},
 
-{id:53, lec:"L-3", blk:"Counting", topic:"Exactly two of three sets",
+{id:53, lec:"L-3", blk:"Counting", topic:"Exactly two of three sets", t:60,
  q:"For three sets, the number of elements belonging to <b>exactly two</b> of them is",
  opts:[
   "n(A∩B) + n(B∩C) + n(C∩A) − 3n(A∩B∩C)",
@@ -904,7 +930,7 @@ const QUIZ = [
   "Adding makes the over-count worse."],
  sol:"<b>Exactly two = Σn(pairs) − 3n(A∩B∩C).</b> Each pairwise term includes the centre region once, so all three copies must go."},
 
-{id:54, lec:"L-3", blk:"Counting", topic:"Exactly one of three sets",
+{id:54, lec:"L-3", blk:"Counting", topic:"Exactly one of three sets", t:60,
  q:"For three sets, the number of elements belonging to <b>exactly one</b> of them is",
  opts:[
   "n(A)+n(B)+n(C) − 2[n(A∩B)+n(B∩C)+n(C∩A)] + 3n(A∩B∩C)",
@@ -919,7 +945,7 @@ const QUIZ = [
   "The coefficient on the pairwise terms is 2, not 3."],
  sol:"<b>Exactly one = Σn(single) − 2Σn(pairs) + 3n(A∩B∩C).</b> Sanity check with three identical sets of size 1: 3 − 6 + 3 = 0 ✓ (no element lies in exactly one of them)."},
 
-{id:55, lec:"L-3", blk:"Counting", topic:"Counting a union of complements",
+{id:55, lec:"L-3", blk:"Counting", topic:"Counting a union of complements", t:90,
  q:"For finite sets in a universal set U, n(A′ ∪ B′) equals",
  opts:[
   "n(U) − n(A ∩ B)",
@@ -934,7 +960,7 @@ const QUIZ = [
   "This subtracts the overlap twice over."],
  sol:"A′ ∪ B′ = (A ∩ B)′ ⇒ <b>n(A′ ∪ B′) = n(U) − n(A ∩ B)</b>."},
 
-{id:56, lec:"L-3", blk:"Set identities", topic:"When union equals intersection",
+{id:56, lec:"L-3", blk:"Set identities", topic:"When union equals intersection", t:60,
  q:"If A ∪ B = A ∩ B, then",
  opts:["A = B","A ⊂ B","A ∩ B = φ","A = φ"],
  ans:0,
@@ -945,7 +971,7 @@ const QUIZ = [
   "A = B is forced, but neither has to be empty. A = B = {1, 2} satisfies the condition."],
  sol:"Chase an arbitrary element both ways: A ⊆ B and B ⊆ A, hence <b>A = B</b>."},
 
-{id:57, lec:"L-3", blk:"Set identities", topic:"When the union collapses",
+{id:57, lec:"L-3", blk:"Set identities", topic:"When the union collapses", t:60,
  q:"If A ∪ B = B, then",
  opts:["A ⊆ B","B ⊆ A","A = B","A ∩ B = φ"],
  ans:0,
@@ -956,7 +982,7 @@ const QUIZ = [
   "Quite the opposite — A sits entirely inside B, so they overlap fully (unless A is empty)."],
  sol:"<b>A ∪ B = B ⇔ A ⊆ B.</b> Adding a subset to its superset changes nothing."},
 
-{id:58, lec:"L-3", blk:"Set identities", topic:"When the intersection collapses",
+{id:58, lec:"L-3", blk:"Set identities", topic:"When the intersection collapses", t:60,
  q:"If A ∩ B = A, then",
  opts:["A ⊆ B","B ⊆ A","A = B","A ∪ B = φ"],
  ans:0,
@@ -968,7 +994,7 @@ const QUIZ = [
  sol:"<b>A ∩ B = A ⇔ A ⊆ B</b> — the same statement as A ∪ B = B, written the other way round."},
 
 /* ---------------- Strong Box (8) ---------------- */
-{id:59, lec:"SB", blk:"JEE Main 2024 (27 Jan Shift 2)", topic:"2ᵐ − 2ⁿ = 56 with a distance",
+{id:59, lec:"SB", blk:"JEE Main 2024 (27 Jan Shift 2)", topic:"2ᵐ − 2ⁿ = 56 with a distance", t:180,
  q:"Sets A and B have m and n elements. The total number of subsets of A is 56 more than that of B. The distance of the point P(m, n) from Q(−2, −3) is",
  opts:["10","6","4","8"],
  ans:0,
@@ -979,7 +1005,7 @@ const QUIZ = [
   "8 is the horizontal gap alone; the vertical gap of 6 must also be included."],
  sol:"2<sup>n</sup>(2<sup>m−n</sup> − 1) = 56 = 8 × 7 ⇒ n = 3, m = 6. Then PQ = √[(6 − (−2))² + (3 − (−3))²] = √(8² + 6²) = <b>10</b> — a 6-8-10 triangle."},
 
-{id:60, lec:"SB", blk:"JEE Main 2026 (21 Jan Shift 1)", topic:"Counting subsets with an even product",
+{id:60, lec:"SB", blk:"JEE Main 2026 (21 Jan Shift 1)", topic:"Counting subsets with an even product", t:90,
  q:"Let S be the set of the first 11 natural numbers. The number of subsets B ⊆ S with n(B) ≥ 2 whose elements have an <b>even</b> product is",
  opts:["1979","2036","57","1024"],
  ans:0,
@@ -990,7 +1016,7 @@ const QUIZ = [
   "1024 = 2<sup>10</sup> does not arise from this count at all."],
  sol:"A product is even ⇔ the subset contains at least one even number. Count the complement: with 5 evens and <b>6 odds</b> in {1,…,11}, the odd-product subsets of size ≥ 2 number 2⁶ − 1 − 6 = 57. Answer = (2¹¹ − 1 − 11) − 57 = 2036 − 57 = <b>1979</b>."},
 
-{id:61, lec:"SB", blk:"JEE Main 2026 (21 Jan Shift 2)", topic:"Modulus conditions as intervals",
+{id:61, lec:"SB", blk:"JEE Main 2026 (21 Jan Shift 2)", topic:"Modulus conditions as intervals", t:180,
  q:"Let A = {x : |x² − 10| ≤ 6} and B = {x : |x − 2| &gt; 1}. Which statement is TRUE?",
  opts:[
   "B − A = (−∞, −4) ∪ (−2, 1) ∪ (4, ∞)",
@@ -1005,7 +1031,7 @@ const QUIZ = [
   "3 does lie in A − B (it is in A, and not in B), so the interval must be closed: A − B = [2, 3]."],
  sol:"|x² − 10| ≤ 6 ⇒ 4 ≤ x² ≤ 16 ⇒ 2 ≤ |x| ≤ 4 ⇒ A = <b>[−4,−2] ∪ [2,4]</b>. |x − 2| &gt; 1 ⇒ x &lt; 1 or x &gt; 3 ⇒ B = <b>(−∞,1) ∪ (3,∞)</b>. Then B − A = (−∞,−4) ∪ (−2,1) ∪ (4,∞) ✓"},
 
-{id:62, lec:"SB", blk:"JEE Main 2022 (26 June Shift 1)", topic:"Sum of numbers coprime to 24",
+{id:62, lec:"SB", blk:"JEE Main 2022 (26 June Shift 1)", topic:"Sum of numbers coprime to 24", t:90,
  q:"The sum of all elements of {α ∈ {1, 2, …, 100} : HCF(α, 24) = 1} is",
  opts:["1633","5050","2500","833"],
  ans:0,
@@ -1016,7 +1042,7 @@ const QUIZ = [
   "This omits adding back the multiples of 6, which were subtracted twice."],
  sol:"24 = 2³·3, so exclude multiples of 2 and of 3. Σ(1..100) = 5050; multiples of 2 sum to 2550; of 3 sum to 1683; of 6 sum to 816. Answer = 5050 − 2550 − 1683 + <b>816</b> = <b>1633</b>."},
 
-{id:63, lec:"SB", blk:"JEE Main 2025 (24 Jan Shift 2)", topic:"Coprime filter on the even numbers",
+{id:63, lec:"SB", blk:"JEE Main 2025 (24 Jan Shift 2)", topic:"Coprime filter on the even numbers", t:90,
  q:"Let A = {n ∈ ℕ : HCF(n, 45) = 1} and B = {2k : k ∈ {1, 2, …, 100}}. The sum of all elements of A ∩ B is",
  opts:["5264","10100","4634","6734"],
  ans:0,
@@ -1027,7 +1053,7 @@ const QUIZ = [
   "This removes only the multiples of 3, leaving the multiples of 5 in place."],
  sol:"45 = 3²·5, so from the evens 2…200 remove those divisible by 3 or 5. Total 10100; evens divisible by 3 sum to 3366; by 5 sum to 2100; by 15 sum to 630. Answer = 10100 − 3366 − 2100 + 630 = <b>5264</b>."},
 
-{id:64, lec:"SB", blk:"JEE Main 2022 (28 Jul Shift 2)", topic:"Subsets meeting a given set",
+{id:64, lec:"SB", blk:"JEE Main 2022 (28 Jul Shift 2)", topic:"Subsets meeting a given set", t:90,
  q:"Let A = {1, 2, 3, 4, 5, 6, 7} and B = {3, 6, 7, 9}. The number of subsets C ⊆ A with C ∩ B ≠ φ is",
  opts:["112","16","128","120"],
  ans:0,
@@ -1038,7 +1064,7 @@ const QUIZ = [
   "This subtracts 8 instead of 16, as if A − B had only three elements. It has four: 9 ∉ A, so only 3, 6, 7 are removed from A."],
  sol:"Only 3, 6, 7 of B lie in A, so A − B = {1, 2, 4, 5} with 4 elements. Subsets meeting B = 2<sup>7</sup> − 2<sup>4</sup> = 128 − 16 = <b>112</b>. ⚠ Note 9 ∈ B but 9 ∉ A — it plays no part."},
 
-{id:65, lec:"SB", blk:"The recurring technique", topic:"Counting subsets that meet a set",
+{id:65, lec:"SB", blk:"The recurring technique", topic:"Counting subsets that meet a set", t:90,
  q:"Let A have n elements and let B be a subset of A with k elements. The number of subsets of A that have at least one element in common with B is",
  opts:[
   "2<sup>n</sup> − 2<sup>n−k</sup>",
@@ -1053,7 +1079,7 @@ const QUIZ = [
   "2<sup>n−k</sup> counts precisely the subsets that <b>fail</b> the condition."],
  sol:"<b>Count the complement.</b> Subsets disjoint from B = subsets of A − B = 2<sup>n−k</sup>, so the answer is <b>2<sup>n</sup> − 2<sup>n−k</sup></b>. With n = 7, k = 3 this gives 128 − 16 = 112, matching the 2022 question."},
 
-{id:66, lec:"SB", blk:"The recurring technique", topic:"Coprime sums by inclusion–exclusion",
+{id:66, lec:"SB", blk:"The recurring technique", topic:"Coprime sums by inclusion–exclusion", t:90,
  q:"Several Strong Box questions ask for the sum of the numbers in {1, …, N} that are coprime to a given m. The standard method is to",
  opts:[
   "subtract the sums of the multiples of each prime factor of m, then add back the sums of the multiples of their products",
@@ -1072,13 +1098,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter M-2 mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -1096,6 +1133,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -1130,15 +1170,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -1150,47 +1191,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -1200,30 +1258,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -1232,7 +1334,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -1245,9 +1349,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -1256,7 +1378,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -1277,21 +1400,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "Chapter M-2 mastered" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

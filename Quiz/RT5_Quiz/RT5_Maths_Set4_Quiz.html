@@ -113,6 +113,22 @@
   .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
   .hide{display:none}
   sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
 </style>
 </head>
 <body>
@@ -144,6 +160,8 @@
         <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
         <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
         <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
       </ol>
       <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
     </div>
@@ -153,12 +171,19 @@
   <div id="scr-quiz" class="hide">
     <div class="bar">
       <span class="pill">Round <b id="pRound">1</b></span>
-      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
       <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
       <div class="prog"><i id="pBar"></i></div>
       <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
     </div>
-    <div id="qlist"></div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
     <div class="banner mix" id="submitBox">
       <h2>Finished?</h2>
       <div style="font-size:.92rem" id="submitHint"></div>
@@ -187,7 +212,7 @@
     <div class="banner mix">
       <h2>Ready to try again?</h2>
       <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
-      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
     </div>
   </div>
 
@@ -199,6 +224,7 @@
       <div style="font-size:.95rem" id="dnLine"></div>
       <div class="hist" id="dnHist"></div>
       <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
         <button class="btn" onclick="backToIntro()">Choose different chapters</button>
         <button class="btn ghost" onclick="backToIntro()">Restart</button>
       </div>
@@ -240,7 +266,7 @@ const LECTURES = [
 const QUIZ = [
 
 /* ---------------- M-9 · Complex Number-I ---------------- */
-{id:1, lec:"M9", blk:"L-4 · Distance", topic:"Distance between two points",
+{id:1, lec:"M9", blk:"L-4 · Distance", topic:"Distance between two points", t:90,
  q:"The distance between the points z₁ = 1 + 2i and z₂ = 4 + 6i in the Argand plane is",
  opts:["5","√13","7","√(41)"],
  ans:0,
@@ -250,7 +276,7 @@ const QUIZ = [
   "7 = 3 + 4 adds the coordinate differences instead of taking √(3² + 4²).",
   "√41 = √(4² + 5²) uses the coordinates themselves, not their differences."],
  sol:"Distance = |z₁ − z₂| = |(1 − 4) + (2 − 6)i| = |−3 − 4i| = √(3² + 4²) = <b>5</b>."},
-{id:2, lec:"M9", blk:"SB · Conjugate roots", topic:"Real quadratic from a complex root",
+{id:2, lec:"M9", blk:"SB · Conjugate roots", topic:"Real quadratic from a complex root", t:180,
  q:"If 1 + 2i is a root of x² + px + q = 0 with real p, q, then (p, q) is",
  opts:["(−2, 5)","(2, 5)","(−2, −3)","(−1, 5)"],
  ans:0,
@@ -260,7 +286,7 @@ const QUIZ = [
   "(−2, −3) uses product = (1)(1) − ... incorrectly; product is 5.",
   "(−1, 5) halves the sum of roots."],
  sol:"Real coefficients ⇒ roots 1 ± 2i. Sum = 2 = −p ⇒ p = −2; product = (1+2i)(1−2i) = 5 = q. So <b>(−2, 5)</b>."},
-{id:3, lec:"M9", blk:"L-4 · Locus", topic:"Perpendicular bisector locus",
+{id:3, lec:"M9", blk:"L-4 · Locus", topic:"Perpendicular bisector locus", t:60,
  q:"The locus of z satisfying |z − z₁| = |z − z₂| (z₁ ≠ z₂) is",
  opts:[
   "the perpendicular bisector of the segment joining z₁ and z₂",
@@ -274,7 +300,7 @@ const QUIZ = [
   "An ellipse arises from |z − z₁| + |z − z₂| = constant, a sum not an equality.",
   "The line through z₁ and z₂ is where distances are unequal except at the midpoint."],
  sol:"|z − z₁| = |z − z₂| says z is equidistant from z₁ and z₂ ⇒ the <b>perpendicular bisector</b> of segment z₁z₂."},
-{id:4, lec:"M9", blk:"SB · Locus", topic:"Equidistant from 3 and −3",
+{id:4, lec:"M9", blk:"SB · Locus", topic:"Equidistant from 3 and −3", t:90,
  q:"The locus |z − 3| = |z + 3| is",
  opts:["the imaginary axis","the real axis","the unit circle","a circle of radius 3"],
  ans:0,
@@ -284,7 +310,7 @@ const QUIZ = [
   "The unit circle is |z| = 1, unrelated.",
   "No radius-3 circle satisfies equal distances to ±3."],
  sol:"3 and −3 are mirror images in the imaginary axis, so their perpendicular bisector is the <b>imaginary axis</b> (Re(z) = 0)."},
-{id:5, lec:"M9", blk:"L-4 · Locus", topic:"Circle locus",
+{id:5, lec:"M9", blk:"L-4 · Locus", topic:"Circle locus", t:60,
  q:"The locus |z − (2 + 3i)| = 5 is",
  opts:[
   "a circle of radius 5 centred at (2, 3)",
@@ -300,7 +326,7 @@ const QUIZ = [
  sol:"|z − z₀| = r describes all points at distance r from z₀: a <b>circle radius 5, centre (2, 3)</b>."},
 
 /* ---------------- M-8D · Some Special Series ---------------- */
-{id:6, lec:"M8D", blk:"L-4 · Definitions", topic:"Arithmetic mean of two numbers",
+{id:6, lec:"M8D", blk:"L-4 · Definitions", topic:"Arithmetic mean of two numbers", t:60,
  q:"The arithmetic mean (A.M.) of two numbers a and b is",
  opts:["(a + b)/2","√(ab)","2ab/(a + b)","(a + b)"],
  ans:0,
@@ -310,7 +336,7 @@ const QUIZ = [
   "2ab/(a + b) is the harmonic mean.",
   "a + b is the sum, not the mean."],
  sol:"<b>A.M. = (a + b)/2.</b> It is the middle term of the A.P. a, A.M., b, so 2·A.M. = a + b."},
-{id:7, lec:"M8D", blk:"L-2 · nth term", topic:"General term of an A.G.P.",
+{id:7, lec:"M8D", blk:"L-2 · nth term", topic:"General term of an A.G.P.", t:60,
  q:"The nth term of 1 + 2x + 3x² + 4x³ + … is",
  opts:["n·x^(n−1)","n·xⁿ","(n+1)x^(n−1)","x^(n−1)"],
  ans:0,
@@ -320,7 +346,7 @@ const QUIZ = [
   "(n+1)x^(n−1) gives T₁ = 2, but the first term is 1.",
   "x^(n−1) omits the arithmetic coefficient n."],
  sol:"Coefficients 1, 2, 3, 4 (A.P.) times powers 1, x, x², x³ (G.P.) ⇒ <b>Tₙ = n·x^(n−1)</b>."},
-{id:8, lec:"M8D", blk:"SB · A.G.P.", topic:"Solve for r given the infinite sum",
+{id:8, lec:"M8D", blk:"SB · A.G.P.", topic:"Solve for r given the infinite sum", t:180,
  q:"If 1 + 2r + 3r² + 4r³ + … = 9 (|r| &lt; 1), then r equals",
  opts:["2/3","1/3","3/4","1/2"],
  ans:0,
@@ -332,7 +358,7 @@ const QUIZ = [
  sol:"1/(1 − r)² = 9 ⇒ (1 − r)² = 1/9 ⇒ 1 − r = ⅓ (take + root for |r| &lt; 1) ⇒ r = <b>2/3</b>."},
 
 /* ---------------- M-7 · Exponential & Log Equations and Inequations ---------------- */
-{id:9, lec:"M7", blk:"L-4 · Instant answers", topic:"Positivity of the exponential",
+{id:9, lec:"M7", blk:"L-4 · Instant answers", topic:"Positivity of the exponential", t:60,
  q:"For a &gt; 0, the solution set of a<sup>x</sup> &gt; 0 is",
  opts:["ℝ","(0, ∞)","∅","[0, ∞)"],
  ans:0,
@@ -342,7 +368,7 @@ const QUIZ = [
   "The inequality holds everywhere, so the set is not empty.",
   "Negative x gives small positive values, so they qualify too."],
  sol:"<b>a<sup>x</sup> &gt; 0 for all real x</b> — hence the solution is all of ℝ."},
-{id:10, lec:"M7", blk:"L-3 · Consequences", topic:"The reciprocal rule",
+{id:10, lec:"M7", blk:"L-3 · Consequences", topic:"The reciprocal rule", t:90,
  q:"For admissible a and b, log<sub>b</sub>a equals",
  opts:[
   "1 / log<sub>a</sub>b",
@@ -356,7 +382,7 @@ const QUIZ = [
   "Swapping base and argument genuinely changes the value.",
   "That equals −log<sub>a</sub>b, again not the reciprocal."],
  sol:"<b>log<sub>b</sub>a = 1/log<sub>a</sub>b.</b> So log<sub>125</sub>5 = 1/log₅125 = 1/3."},
-{id:11, lec:"M7", blk:"L-2 · Log rules", topic:"The product rule",
+{id:11, lec:"M7", blk:"L-2 · Log rules", topic:"The product rule", t:60,
  q:"log<sub>b</sub>(mn) equals",
  opts:[
   "log<sub>b</sub>m + log<sub>b</sub>n",
@@ -372,7 +398,7 @@ const QUIZ = [
  sol:"<b>log<sub>b</sub>(mn) = log<sub>b</sub>m + log<sub>b</sub>n.</b> Logs convert multiplication into addition."},
 
 /* ---------------- M-5C · Multiple & Submultiple Angles ---------------- */
-{id:12, lec:"M5C", blk:"L-4 · Tangent & cotangent", topic:"The tangent corollary",
+{id:12, lec:"M5C", blk:"L-4 · Tangent & cotangent", topic:"The tangent corollary", t:60,
  q:"If A + B + C = π, then tan A + tan B + tan C equals",
  opts:[
   "tan A · tan B · tan C",
@@ -386,7 +412,7 @@ const QUIZ = [
   "Same check: the sum is 3√3, not 1.",
   "For the equilateral triangle the cotangent sum is √3, not 3√3."],
  sol:"<b>tan A + tan B + tan C = tan A tan B tan C</b> whenever A + B + C = π."},
-{id:13, lec:"M5C", blk:"L-3 · Triple angle", topic:"cos 3θ",
+{id:13, lec:"M5C", blk:"L-3 · Triple angle", topic:"cos 3θ", t:60,
  q:"cos 3θ equals",
  opts:[
   "4 cos³θ − 3 cos θ",
@@ -400,7 +426,7 @@ const QUIZ = [
   "That is sin 3θ — the cubic in sine rather than in cosine.",
   "Same check: 4 + 3 = 7, impossible for a cosine."],
  sol:"<b>cos 3θ = 4 cos³θ − 3 cos θ.</b> Both triple-angle formulas are cubics; only the order of 3 and 4 differs."},
-{id:14, lec:"M5C", blk:"L-2 · 22.5° values", topic:"tan 22.5°",
+{id:14, lec:"M5C", blk:"L-2 · 22.5° values", topic:"tan 22.5°", t:90,
  q:"The exact value of tan 22.5° is",
  opts:["√2 − 1","√2 + 1","2 − √3","1/√2"],
  ans:0,
@@ -412,7 +438,7 @@ const QUIZ = [
  sol:"<b>tan 22.5° = √2 − 1.</b> Note (√2 − 1)(√2 + 1) = 1, confirming tan 22.5° · tan 67.5° = 1."},
 
 /* ---------------- M-8A · Arithmetic Progressions ---------------- */
-{id:15, lec:"M8A", blk:"SB · JEE Main 2026 (22 Jan Shift 1)", topic:"Two sums, one target sum",
+{id:15, lec:"M8A", blk:"SB · JEE Main 2026 (22 Jan Shift 1)", topic:"Two sums, one target sum", t:180,
  q:"The sum of the first four terms of an A.P. is 6 and the sum of its first six terms is 4. The sum of its first twelve terms is",
  opts:["−22","−20","−24","−26"],
  ans:0,
@@ -422,7 +448,7 @@ const QUIZ = [
   "Would need the bracket to be −4; it is −11/3.",
   "Would need the bracket to be −13/3."],
  sol:"S<sub>4</sub> = 2(2a + 3d) = 6 ⇒ 2a + 3d = 3. S<sub>6</sub> = 3(2a + 5d) = 4 ⇒ 2a + 5d = 4/3. Subtract: 2d = −5/3 ⇒ d = −5/6, and 2a = 3 + 5/2 = 11/2. S<sub>12</sub> = 6(2a + 11d) = 6(11/2 − 55/6) = 33 − 55 = <b>−22</b>. Classic Strong Box shape: two linear equations in a and d."},
-{id:16, lec:"M8A", blk:"SB · JEE Main 2026 (23 Jan Shift 1)", topic:"Quadratic S<sub>n</sub> with two term conditions",
+{id:16, lec:"M8A", blk:"SB · JEE Main 2026 (23 Jan Shift 1)", topic:"Quadratic S<sub>n</sub> with two term conditions", t:180,
  q:"Let Σ<sub>k=1..n</sub> a<sub>k</sub> = αn² + βn. If a<sub>10</sub> = 59 and a<sub>6</sub> = 7a<sub>1</sub>, then α + β equals",
  opts:["5","12","3","7"],
  ans:0,
@@ -434,7 +460,7 @@ const QUIZ = [
  sol:"S<sub>n</sub> = αn² + βn ⇒ a<sub>n</sub> = S<sub>n</sub> − S<sub>n−1</sub> = α(2n − 1) + β, so a<sub>1</sub> = α + β and d = 2α. From a<sub>10</sub>: 19α + β = 59. From a<sub>6</sub> = 7a<sub>1</sub>: 11α + β = 7α + 7β ⇒ 4α = 6β ⇒ β = 2α/3. Then 19α + 2α/3 = 59 ⇒ 59α/3 = 59 ⇒ α = 3, β = 2 ⇒ α + β = <b>5</b>."},
 
 /* ---------------- M-8B · Geometric Progressions ---------------- */
-{id:17, lec:"M8B", blk:"SB · JEE Main 2026 (28 Jan Shift-1)", topic:"The range of the sum of three G.P. terms",
+{id:17, lec:"M8B", blk:"SB · JEE Main 2026 (28 Jan Shift-1)", topic:"The range of the sum of three G.P. terms", t:180,
  q:"In a G.P. the product of the first three terms is 27, and the set of all possible values of the sum of the first three terms is ℝ − (a, b). Then a² + b² equals",
  opts:["90","45","36","18"],
  ans:0,
@@ -444,7 +470,7 @@ const QUIZ = [
   "Would need a = 0 and b = 6, but a G.P. sum of 0 is attainable only if r + 1/r = −1, which is impossible.",
   "Would need a² + b² = 18, e.g. a = b = 3 — but the excluded interval is not degenerate."],
  sol:"Take A/r, A, Ar. Product A³ = 27 ⇒ A = 3, and the sum is 3(1/r + 1 + r) = 3 + 3(r + 1/r). For real r ≠ 0, <b>r + 1/r ∈ (−∞, −2] ∪ [2, ∞)</b>, so the sum lies in (−∞, −3] ∪ [9, ∞) and the missing interval is (−3, 9). Hence a = −3, b = 9 and a² + b² = <b>90</b>."},
-{id:18, lec:"M8B", blk:"SB · JEE Main 2025 (22 Jan Shift-1)", topic:"Equidistant products turning into a quadratic",
+{id:18, lec:"M8B", blk:"SB · JEE Main 2025 (22 Jan Shift-1)", topic:"Equidistant products turning into a quadratic", t:180,
  q:"Let a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, … be a G.P. of increasing positive terms with a<sub>1</sub>a<sub>5</sub> = 28 and a<sub>2</sub> + a<sub>4</sub> = 29. Then a<sub>6</sub> equals",
  opts:["784","628","812","526"],
  ans:0,
@@ -456,7 +482,7 @@ const QUIZ = [
  sol:"Because 1 + 5 = 2 + 4, the equidistant-product property gives a<sub>2</sub>a<sub>4</sub> = a<sub>1</sub>a<sub>5</sub> = 28. With a<sub>2</sub> + a<sub>4</sub> = 29 they are the roots of t² − 29t + 28 = 0 ⇒ 1 and 28; increasing forces a<sub>2</sub> = 1. Then r² = a<sub>4</sub>/a<sub>2</sub> = 28 and a<sub>6</sub> = a<sub>4</sub>r² = <b>784</b>."},
 
 /* ---------------- M-6 · Functions-II — Inequalities & Modulus ---------------- */
-{id:19, lec:"M6", blk:"L-4 · The sign rule", topic:"Product greater than zero",
+{id:19, lec:"M6", blk:"L-4 · The sign rule", topic:"Product greater than zero", t:60,
  q:"For α &lt; β, the inequality (x − α)(x − β) &gt; 0 has solution",
  opts:[
   "(−∞, α) ∪ (β, ∞)",
@@ -470,7 +496,7 @@ const QUIZ = [
   "The inequality is strict, so the roots themselves (where the product is 0) are excluded.",
   "Wrong region and wrong brackets."],
  sol:"<b>Positive ⇒ outside the roots. Negative ⇒ between the roots.</b> With slack signs, include the endpoints."},
-{id:20, lec:"M6", blk:"L-2 · Systems in one variable", topic:"A numerical system",
+{id:20, lec:"M6", blk:"L-2 · Systems in one variable", topic:"A numerical system", t:60,
  q:"The solution of the system 3x − 6 ≥ 0 and 4x − 10 ≤ 6 is",
  opts:["[2, 4]","(2, 4)","(−∞, 4]","[2, ∞)"],
  ans:0,
@@ -482,7 +508,7 @@ const QUIZ = [
  sol:"3x ≥ 6 ⇒ x ≥ 2; 4x ≤ 16 ⇒ x ≤ 4. Intersection: <b>[2, 4]</b>."},
 
 /* ---------------- M-5A · Trigonometric Ratios of Compound Angles ---------------- */
-{id:21, lec:"M5A", blk:"SB · JEE Main 2026 (24 Jan Shift-1)", topic:"A compound angle hidden in a long expression",
+{id:21, lec:"M5A", blk:"SB · JEE Main 2026 (24 Jan Shift-1)", topic:"A compound angle hidden in a long expression", t:90,
  q:"If cot x = 5/12 for some x ∈ (π, 3π/2), then sin 7x[cos(13x/2) + sin(13x/2)] + cos 7x[cos(13x/2) − sin(13x/2)] equals",
  opts:["1/√13","5/√13","6/√26","4/√26"],
  ans:0,
@@ -494,7 +520,7 @@ const QUIZ = [
  sol:"Regroup as [sin7x·cos(13x/2) − cos7x·sin(13x/2)] + [sin7x·sin(13x/2) + cos7x·cos(13x/2)] = sin(x/2) + cos(x/2). Squaring gives 1 + sin x. In QIII with cot x = 5/12: cos x = −5/13, sin x = −12/13, so 1 + sin x = 1/13. Since x/2 ∈ (π/2, 3π/4) the sum is positive, giving <b>1/√13</b>."},
 
 /* ---------------- M-5B · Transformation Formulae ---------------- */
-{id:22, lec:"M5B", blk:"L-2 · The tan-splitting trick", topic:"A telescoping cyclic sum",
+{id:22, lec:"M5B", blk:"L-2 · The tan-splitting trick", topic:"A telescoping cyclic sum", t:60,
  q:"The value of sin(B−C)/(cos B cos C) + sin(C−A)/(cos C cos A) + sin(A−B)/(cos A cos B) is",
  opts:["0","1","tan A tan B tan C","−1"],
  ans:0,
@@ -506,7 +532,7 @@ const QUIZ = [
  sol:"Split each fraction into a difference of tangents; the three differences <b>telescope to 0</b>. Note this holds for <i>any</i> A, B, C — no triangle condition is needed."},
 
 /* ---------------- M-2 · Sets ---------------- */
-{id:23, lec:"M2", blk:"L-1 · What is a set", topic:"Well-defined collections",
+{id:23, lec:"M2", blk:"L-1 · What is a set", topic:"Well-defined collections", t:60,
  q:"Which of the following is a <b>well-defined set</b>?",
  opts:[
   "The collection of all prime numbers less than 20",
@@ -522,7 +548,7 @@ const QUIZ = [
  sol:"A set is a <b>well-defined collection of distinct objects</b>. “Well-defined” means membership can be settled with certainty. Subjective words — good, tall, rich, difficult, beautiful — always fail this test."},
 
 /* ---------------- M-3 · Trigonometric Ratios & Identities ---------------- */
-{id:24, lec:"M3", blk:"L-2 · Negative angles", topic:"Sine of a negative angle",
+{id:24, lec:"M3", blk:"L-2 · Negative angles", topic:"Sine of a negative angle", t:90,
  q:"sin(−θ) equals",
  opts:["−sin θ","sin θ","cos θ","−cos θ"],
  ans:0,
@@ -534,7 +560,7 @@ const QUIZ = [
  sol:"<b>sin(−θ) = −sin θ</b>, tan(−θ) = −tan θ, but <b>cos(−θ) = +cos θ</b>."},
 
 /* ---------------- M-4 · Functions-I ---------------- */
-{id:25, lec:"M4", blk:"L-3 · Algebra of functions", topic:"Domain of a sum",
+{id:25, lec:"M4", blk:"L-3 · Algebra of functions", topic:"Domain of a sum", t:60,
  q:"The domain of f + g is",
  opts:["Dom(f) ∩ Dom(g)","Dom(f) ∪ Dom(g)","Dom(f)","ℝ"],
  ans:0,
@@ -549,13 +575,24 @@ const QUIZ = [
 /* ============================================================
    ENGINE
    ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
 const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
 const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "RT-5 Maths Set 4 complete";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
 
 let selected = LECTURES.map(l => l.key);   // all lectures on by default
 let selIds   = [];                          // ids in the chosen lectures
 let round = 0, pool = [], order = {}, picked = {};
 let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
 
 function $(id){ return document.getElementById(id); }
 function show(scr){
@@ -573,6 +610,9 @@ function shuffle(arr){
 }
 function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
 function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
 /* ---------- lecture picker ---------- */
 function renderPicker(){
@@ -607,15 +647,16 @@ function setAllLectures(on){
 function startQuiz(){
   selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
   if (!selIds.length) return;
-  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
   $("pSel").textContent = selIds.length;
   examStart();
   nextRound();
 }
 function backToIntro(){
   examStop();
-  round = 0; pool = []; picked = {}; order = {};
-  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
   renderPicker();
   show("intro");
 }
@@ -627,47 +668,64 @@ function nextRound(){
 }
 
 function renderPool(){
-  picked = {}; order = {};
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
   $("pRound").textContent = round;
   $("pCount").textContent = pool.length;
   $("pTot").textContent = pool.length;
   $("pMast").textContent = selIds.length - pool.length;
   $("pSel").textContent = selIds.length;
-  $("submitHint").textContent = round === 1
-    ? "Unanswered questions count as wrong and come back in the next round."
-    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+  $("pTime").textContent = "0:00";
 
-  const list = $("qlist");
-  list.innerHTML = "";
-  let curLec = null;
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
   pool.forEach((id, i) => {
     const q = BY_ID[id];
     if (q.lec !== curLec){
       curLec = q.lec;
-      const h = document.createElement("div");
-      h.className = "sechead";
-      h.innerHTML = lecName(q.lec);
-      list.appendChild(h);
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
     }
-    order[id] = shuffle(q.opts.map((_, k) => k));
-    const div = document.createElement("div");
-    div.className = "q"; div.id = "q" + id;
-    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
-            '<span class="qlec">' + q.lec + '</span>' +
-            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
-    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
-    h += '</div><div class="qtext">' + q.q + '</div>';
-    order[id].forEach((orig, k) => {
-      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
-           '<input type="radio" name="q' + id + '">' +
-           '<span class="lt">' + LETTERS[k] + '.</span>' +
-           '<span>' + q.opts[orig] + '</span></label>';
-    });
-    div.innerHTML = h;
-    list.appendChild(div);
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
   });
+  showQ(0);
   updateProgress();
   show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
 }
 
 function pick(id, orig){
@@ -677,30 +735,74 @@ function pick(id, orig){
     const el = $("o" + id + "_" + k);
     if (el) el.classList.toggle("picked", k === orig);
   });
-  const card = $("q" + id);
-  if (card) card.classList.remove("unans");
+  const b = $("pb" + id); if (b) b.classList.add("ans");
   updateProgress();
 }
 
 function updateProgress(){
-  const n = Object.keys(picked).length;
+  const n = Object.keys(picked).length, left = pool.length - n;
   $("pAns").textContent = n;
   $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
 }
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
 
 /* ---------- submit → review is compulsory ---------- */
 function submitRound(){
   wrongIds = []; leftIds = [];
-  let right = 0;
+  let right = 0, slow = 0;
   pool.forEach(id => {
-    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
-    else if (picked[id] === BY_ID[id].ans) right++;
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
     else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
   });
 
   const missed = wrongIds.concat(leftIds);
   history.push({ round: round, asked: pool.length, right: right,
-                 wrong: wrongIds.length, left: leftIds.length });
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
   pool = pool.filter(id => missed.indexOf(id) !== -1);
 
   if (pool.length === 0){ finish(); return; }
@@ -709,7 +811,9 @@ function submitRound(){
   $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
   $("subDetail").innerHTML =
     "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
-    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
   $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
   show("sub");
 }
@@ -722,9 +826,27 @@ function showReview(){
 
   const list = $("rvlist");
   list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
   wrongIds.concat(leftIds).forEach(id => {
     const q = BY_ID[id];
     const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
     const div = document.createElement("div");
     div.className = "rv" + (wasLeft ? " left" : "");
     let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
@@ -733,7 +855,8 @@ function showReview(){
             '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
             '<div class="qtext">' + q.q + '</div>' +
             '<div class="yourans">Your answer: <b>' +
-            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
     order[id].forEach((orig, k) => {
       const isAns = (orig === q.ans);
       const isYours = (!wasLeft && picked[id] === orig);
@@ -754,21 +877,135 @@ function showReview(){
 function finish(){
   const names = selected.map(k => k).join(", ");
   $("dnTitle").textContent = (selected.length === LECTURES.length)
-    ? "RT-5 Maths Set 4 complete" : "Selection mastered";
+    ? DONE_TITLE : "Selection mastered";
   $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
-    "</b> answered correctly, in <b>" + round + "</b> round(s).";
-  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
-  history.forEach(h => {
-    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
-         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
-  });
-  t += '</table>';
-  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
-  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
-    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
-    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
   examStop();
   show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 /* ============================================================

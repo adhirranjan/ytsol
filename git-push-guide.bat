@@ -44,15 +44,13 @@ echo.
 echo === Step 4: Reminder ===
 echo All changed and new files in this folder will be staged and pushed.
 echo Make sure everything is ready before continuing.
-pause
 
 echo.
 echo === Step 5: Staging all changed files ===
 git add -A
 
 echo.
-set /p commitmsg="Enter a commit message (or press Enter for default): "
-if "%commitmsg%"=="" set commitmsg=Add new files to YouTube_Solutions
+set commitmsg=Add new files to YouTube_Solutions
 
 git commit -m "%commitmsg%"
 if %errorlevel% neq 0 (

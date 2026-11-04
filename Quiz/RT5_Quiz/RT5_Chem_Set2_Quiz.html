@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RT-5 Chemistry · Revision Quiz — Set 2</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · RT-5 (16 Nov 2026) · Chemistry revision</p>
+    <h1>RT-5 Chemistry · Set 2</h1>
+    <p id="heroSub">25 questions across 6 chapters · priority-weighted · one of 4 parallel sets · loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the chapters to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All chapters are selected by default — that runs the full 25-question set.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">136 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different chapters</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · RT-5 revision · Chemistry Set 2 of 4 · priority-weighted from your chapter &amp; study-priority analysis · answers carried verbatim from the per-chapter mastery quizzes.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-6 THERMODYNAMICS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"C6", name:"C-6 · Thermodynamics", desc:"Tier 1 · master first"},
+  {key:"C5", name:"C-5 · Chemical Bonding and Molecular Structure", desc:"Tier 1 · master first"},
+  {key:"C2", name:"C-2 · Structure of Atom", desc:"Tier 2 · solid"},
+  {key:"C3", name:"C-3 · Some Basic Concepts of Chemistry", desc:"Tier 1 · master first"},
+  {key:"C1", name:"C-1 · States of Matter", desc:"Tier 2 · solid"},
+  {key:"C4", name:"C-4 · Classification of Elements & Periodic Properties", desc:"Tier 3 · maintain"}
+];
+
+const QUIZ = [
+
+/* ---------------- C-6 · Thermodynamics ---------------- */
+{id:1, lec:"C6", blk:"L-2 · Internal energy", topic:"Internal energy as a state function",
+ q:"The internal energy of a system is",
+ opts:[
+  "a state function and an extensive property",
+  "a path function",
+  "an intensive property",
+  "always zero for an ideal gas"],
+ ans:0,
+ why:[
+  "Correct. U depends only on the state and scales with the amount of substance — a state function and extensive.",
+  "U is a state function, not a path function (unlike q and w).",
+  "U is extensive, not intensive.",
+  "U is not zero for an ideal gas; only its <i>change</i> in an isothermal process is zero."],
+ sol:"<b>Internal energy U</b>: total kinetic + potential energy of all particles. It is a state function (ΔU is path-independent) and extensive. For an ideal gas, U depends on temperature only."},
+{id:2, lec:"C6", blk:"L-6 · Mayer relation", topic:"Cp − Cv for an ideal gas",
+ q:"For one mole of an ideal gas, Cp − Cv equals",
+ opts:["R","0","R/2","2R"],
+ ans:0,
+ why:[
+  "Correct. Mayer's relation: Cp − Cv = R for one mole of ideal gas (the extra Cp accounts for expansion work at constant pressure).",
+  "They differ by exactly R, not zero.",
+  "R/2 is per degree of freedom, not the Cp − Cv difference.",
+  "The difference is R, not 2R."],
+ sol:"<b>Mayer's relation: Cp − Cv = R</b> (per mole). At constant pressure the gas also does expansion work, so Cp exceeds Cv by R."},
+{id:3, lec:"C6", blk:"L-10 · Spontaneity", topic:"Definition of a spontaneous process",
+ q:"A spontaneous process is one that",
+ opts:[
+  "occurs on its own without continuous external help, in a definite direction",
+  "occurs instantly",
+  "requires continuous energy input to proceed",
+  "always releases heat"],
+ ans:0,
+ why:[
+  "Correct. Spontaneity is about direction and feasibility, not speed — it proceeds without sustained outside intervention.",
+  "Spontaneous does not mean fast; rusting is spontaneous but slow.",
+  "A process needing continuous input is non-spontaneous.",
+  "Some spontaneous processes are endothermic (e.g. ice melting above 0 °C, salt dissolving)."],
+ sol:"<b>Spontaneous</b> = naturally proceeds in one direction without continuous external aid. It says nothing about rate, and it need not be exothermic — the true criterion is ΔG &lt; 0."},
+{id:4, lec:"C6", blk:"L-1 · Systems", topic:"Isolated system",
+ q:"An isolated system is one that exchanges",
+ opts:[
+  "neither matter nor energy with its surroundings",
+  "energy but not matter",
+  "matter but not energy",
+  "both matter and energy freely"],
+ ans:0,
+ why:[
+  "Correct. An isolated system is sealed to matter and perfectly insulated to energy — an idealisation approached by a good thermos flask.",
+  "Exchanging energy only describes a closed system.",
+  "Exchanging matter only is not a standard category; matter transfer normally carries energy too.",
+  "Free exchange of both is an open system."],
+ sol:"<b>Isolated system</b>: no exchange of matter <i>or</i> energy. The universe as a whole is the ultimate isolated system."},
+{id:5, lec:"C6", blk:"L-5 · Isobaric", topic:"Isobaric work",
+ q:"At constant pressure, the work done on a system when its volume changes by ΔV is",
+ opts:["w = −PΔV","w = +PΔV","w = 0","w = −V ΔP"],
+ ans:0,
+ why:[
+  "Correct. Constant pressure gives w = −P ΔV directly.",
+  "The sign is wrong for work done <i>on</i> the system during expansion.",
+  "There is a volume change at constant pressure, so work is non-zero.",
+  "At constant pressure ΔP = 0, so −V ΔP would be zero — the wrong expression."],
+ sol:"Isobaric: <b>w = −P ΔV</b>. The area under a horizontal line on a P–V plot is PΔV, the magnitude of this work."},
+{id:6, lec:"C6", blk:"L-9 · ΔH from bonds", topic:"Bond-enthalpy formula for ΔH",
+ q:"Using bond enthalpies, the enthalpy of a reaction is",
+ opts:[
+  "Σ (bond enthalpies of bonds broken) − Σ (bond enthalpies of bonds formed)",
+  "Σ (bonds formed) − Σ (bonds broken)",
+  "Σ (bonds broken) + Σ (bonds formed)",
+  "the product of the two sums"],
+ ans:0,
+ why:[
+  "Correct. Breaking bonds costs energy (+) and forming bonds releases it (−); ΔH = Σ broken − Σ formed.",
+  "This is the negative of the correct expression; it would flip the sign of ΔH.",
+  "The two sums are subtracted, not added.",
+  "Bond enthalpies are summed and subtracted, never multiplied."],
+ sol:"<b>ΔH = Σ B.E.(bonds broken) − Σ B.E.(bonds formed).</b> Reactant bonds are broken (endothermic), product bonds are formed (exothermic)."},
+
+/* ---------------- C-5 · Chemical Bonding and Molecular Structure ---------------- */
+{id:7, lec:"C5", blk:"L-2 · Covalency", topic:"Definition of a covalent bond",
+ q:"A covalent bond is formed by",
+ opts:[
+  "the mutual sharing of one or more electron pairs between two atoms",
+  "the complete transfer of electrons from one atom to another",
+  "the attraction between two fully-formed ions",
+  "the overlap of two nuclei"],
+ ans:0,
+ why:[
+  "Correct. Each atom contributes electrons to a shared pair that both nuclei attract, completing both octets.",
+  "Complete transfer produces an <b>ionic</b> bond, not covalent.",
+  "Ion–ion attraction is the ionic bond.",
+  "Nuclei repel; bonding is about the shared electron cloud, not overlapping nuclei."],
+ sol:"<b>Covalent bond = shared electron pair(s)</b>. In H₂ each H shares its electron; in O₂ two pairs are shared (double bond). Sharing lets both atoms count the pair toward a full octet."},
+{id:8, lec:"C5", blk:"L-6 · Repulsion order", topic:"VSEPR repulsion hierarchy",
+ q:"The correct order of electron-pair repulsion strength is",
+ opts:[
+  "lone pair–lone pair > lone pair–bond pair > bond pair–bond pair",
+  "bond pair–bond pair > lone pair–bond pair > lone pair–lone pair",
+  "all repulsions are equal",
+  "lone pair–bond pair > lone pair–lone pair > bond pair–bond pair"],
+ ans:0,
+ why:[
+  "Correct. Lone pairs are held only by one nucleus, so they spread out and repel more; hence lp–lp &gt; lp–bp &gt; bp–bp.",
+  "This is fully reversed; bond pairs, held between two nuclei, repel least.",
+  "The three repulsions differ, which is why lone pairs distort angles.",
+  "lp–lp is the strongest, so it cannot sit below lp–bp."],
+ sol:"<b>lp–lp &gt; lp–bp &gt; bp–bp.</b> A lone pair, attracted by only one nucleus, is more diffuse and repels harder — the key to every bond-angle comparison."},
+{id:9, lec:"C5", blk:"L-10 · Bond length", topic:"Definition of bond length",
+ q:"The bond length of a covalent bond is",
+ opts:[
+  "the equilibrium distance between the nuclei of the two bonded atoms",
+  "the sum of the two atoms' masses",
+  "the energy released on forming the bond",
+  "the angle between two bonds"],
+ ans:0,
+ why:[
+  "Correct. Bond length is the internuclear distance at which attraction and repulsion balance; it roughly equals the sum of the covalent radii.",
+  "Mass has nothing to do with bond length.",
+  "That is bond enthalpy.",
+  "That describes the bond angle — the angle between two bonds at the central atom — not this quantity."],
+ sol:"<b>Bond length</b> = equilibrium internuclear separation ≈ sum of covalent radii. It shortens as bond order rises and as the atoms get smaller."},
+{id:10, lec:"C5", blk:"L-3 · Overlap strength", topic:"Order of overlap strength",
+ q:"For σ overlap of orbitals along the bond axis, the usual order of increasing bond strength is",
+ opts:[
+  "s–s &lt; s–p &lt; p–p",
+  "p–p &lt; s–p &lt; s–s",
+  "s–p &lt; s–s &lt; p–p",
+  "all overlaps are equally strong"],
+ ans:0,
+ why:[
+  "Correct. Directional p orbitals overlap more effectively head-on than the spherical s orbitals, so p–p &gt; s–p &gt; s–s.",
+  "This reverses the trend; s–s is the weakest, not the strongest.",
+  "s–s is weakest, so it cannot sit in the middle.",
+  "Overlap effectiveness depends strongly on orbital shape and direction, so they are not equal."],
+ sol:"Directional p orbitals give better axial overlap than diffuse s orbitals: <b>s–s &lt; s–p &lt; p–p</b>. Greater overlap ⇒ stronger σ bond."},
+{id:11, lec:"C5", blk:"L-7 · Bonding vs antibonding", topic:"Bonding MO character",
+ q:"A bonding molecular orbital, compared with the atomic orbitals that formed it,",
+ opts:[
+  "is lower in energy and has increased electron density between the nuclei",
+  "is higher in energy with a node between the nuclei",
+  "has the same energy as the atomic orbitals",
+  "contains no electrons"],
+ ans:0,
+ why:[
+  "Correct. Constructive combination piles electron density between the nuclei and lowers the energy — this stabilisation is the bond.",
+  "That description is the <b>antibonding</b> MO.",
+  "MOs are shifted in energy (one down, one up), not unchanged.",
+  "A bonding MO can and usually does hold electrons."],
+ sol:"<b>Bonding MO</b>: constructive interference ⇒ electron density concentrated between nuclei ⇒ lower energy (stabilising). <b>Antibonding MO</b>: destructive ⇒ node between nuclei ⇒ higher energy."},
+
+/* ---------------- C-2 · Structure of Atom ---------------- */
+{id:12, lec:"C2", blk:"L-2 · Wave relations", topic:"The basic wave equation",
+ q:"For electromagnetic radiation travelling in vacuum,",
+ opts:["c = νλ","c = ν/λ","c = λ/ν","c = ν²λ"],
+ ans:0,
+ why:[
+  "Correct — speed equals frequency times wavelength, so ν and λ are inversely related at fixed c.",
+  "Dimensionally wrong: frequency divided by wavelength has units s⁻¹m⁻¹, not m s⁻¹.",
+  "λ/ν gives m·s, not a speed. This is the reciprocal of the frequency-per-metre quantity.",
+  "There is no square in the relation; c = νλ is exact for every electromagnetic wave in vacuum."],
+ sol:"<b>c = νλ</b>, with c = 3 × 10⁸ m s⁻¹ in vacuum for <b>all</b> electromagnetic radiation, from γ-rays to radio waves. Also ν̄ = 1/λ, ν = cν̄ and T = 1/ν."},
+{id:13, lec:"C2", blk:"L-6 · Velocity", topic:"The velocity formula",
+ q:"The velocity of an electron in the n-th Bohr orbit of a species of atomic number Z is",
+ opts:[
+  "2.18 × 10⁶ (Z/n) m s⁻¹",
+  "2.18 × 10⁶ (n/Z) m s⁻¹",
+  "2.18 × 10⁶ (Z²/n²) m s⁻¹",
+  "2.18 × 10⁶ (Z/n²) m s⁻¹"],
+ ans:0,
+ why:[
+  "Correct. v ∝ Z/n — the electron moves faster near a heavier nucleus and slower in an outer orbit.",
+  "This is inverted: it would make outer orbits faster, whereas distant electrons move more slowly.",
+  "Z²/n² is the dependence of the <b>energy</b> (and of the kinetic energy), not of the speed itself.",
+  "Z/n² is neither the velocity nor any other standard Bohr quantity; the radius uses n²/Z."],
+ sol:"<b>v = 2.18 × 10⁶ (Z/n) m s⁻¹.</b> The three key powers: <b>r ∝ n²/Z, v ∝ Z/n, E ∝ Z²/n².</b> Note v²  ∝ Z²/n², matching K.E. ∝ Z²/n²."},
+{id:14, lec:"C2", blk:"L-10 · Aufbau", topic:"The (n+ℓ) rule",
+ q:"According to the (n + ℓ) rule, the subshell that fills first is the one with",
+ opts:[
+  "lower (n + ℓ); if equal, the lower n",
+  "lower (n + ℓ); if equal, the higher n",
+  "higher (n + ℓ); if equal, the lower n",
+  "lower n, whatever (n + ℓ) may be"],
+ ans:0,
+ why:[
+  "Correct. Compare (n + ℓ) first, and break any tie in favour of the smaller principal quantum number.",
+  "The tie-break runs the other way. With 3p and 4s both at (n + ℓ) = 4, it is <b>3p</b> that fills first.",
+  "Lower energy fills first, and lower (n + ℓ) means lower energy.",
+  "This ignores (n + ℓ) altogether and would wrongly fill 3d before 4s — the exact case the rule exists to settle."],
+ sol:"<b>Lower (n + ℓ) wins; on a tie, lower n wins.</b> This single rule generates the whole Aufbau order 1s, 2s, 2p, 3s, 3p, 4s, 3d, 4p, 5s, 4d, 5p, 6s, 4f, 5d, 6p, 7s."},
+{id:15, lec:"C2", blk:"L-3 · Observations", topic:"Below the threshold",
+ q:"A very intense beam of light with frequency below the threshold frequency ν₀ of a metal will",
+ opts:[
+  "eject no electrons at all, however long it shines",
+  "eject a few electrons after a long time lag",
+  "eject electrons of very low kinetic energy",
+  "eject more electrons than a weak beam above ν₀"],
+ ans:0,
+ why:[
+  "Correct. Each individual photon carries hν &lt; W₀, and one electron absorbs one photon — so no single absorption ever supplies enough energy.",
+  "There is <b>no time lag</b> in the photoelectric effect. Energy does not accumulate over time; that is exactly what the wave picture wrongly predicted.",
+  "Not even a slow electron appears. The K.E. would have to be negative, which is impossible.",
+  "A weak beam above ν₀ ejects electrons; an intense beam below ν₀ ejects none. Frequency is the gate, not brightness."],
+ sol:"<b>ν &gt; ν₀ or nothing happens.</b> The all-or-nothing frequency threshold, the absence of a time lag, and the intensity-independence of K.E. are the three observations that classical wave theory cannot explain."},
+
+/* ---------------- C-3 · Some Basic Concepts of Chemistry ---------------- */
+{id:16, lec:"C3", blk:"L-2 · The mole", topic:"Definition of the mole",
+ q:"One mole of any substance contains",
+ opts:[
+  "6.022 × 10²³ entities",
+  "6.022 × 10²³ grams",
+  "22.4 entities",
+  "one gram of the substance"],
+ ans:0,
+ why:[
+  "Correct — the mole is a <b>count</b>, equal to the number of atoms in exactly 12 g of ¹²C, and it applies to atoms, molecules or formula units alike.",
+  "N<sub>A</sub> is a pure number, not a mass. The mass of one mole is the molar mass in grams, which varies by substance.",
+  "22.4 is the volume in <b>litres</b> occupied by one mole of an ideal gas at NTP, not a count.",
+  "One mole weighs one gram only for a substance of molar mass 1, which is nearly true of atomic hydrogen and of nothing else."],
+ sol:"<b>1 mole = 6.022 × 10²³ entities.</b> The three master conversions: <b>n = w/M = N/N<sub>A</sub> = V/22.4</b> (the last for a gas at NTP)."},
+{id:17, lec:"C3", blk:"L-6 · Definitions", topic:"What the limiting reagent is",
+ q:"The limiting reagent in a reaction is the reactant that",
+ opts:[
+  "is completely consumed and so fixes how much product forms",
+  "is present in the largest amount",
+  "is left over when the reaction stops",
+  "has the largest molar mass"],
+ ans:0,
+ why:[
+  "Correct. Once it runs out the reaction stops, so the yield is set entirely by this reactant.",
+  "The largest amount by mass is often the reactant in <b>excess</b>; what matters is the amount relative to the coefficient.",
+  "The leftover reactant is the <b>excess</b> reagent, the opposite of limiting.",
+  "Molar mass alone says nothing; a heavy reactant can still be the one supplied in surplus."],
+ sol:"To find it: <b>convert each reactant to moles, divide by its coefficient, and pick the smallest</b>. That reactant limits the yield, and adding more of any other one changes nothing."},
+{id:18, lec:"C3", blk:"L-10 · Mole fraction", topic:"Definition and sum",
+ q:"For a two-component solution, the mole fractions of solute and solvent",
+ opts:[
+  "always add up to 1",
+  "always add up to 100",
+  "are each greater than 1",
+  "add up to 1 only in dilute solutions"],
+ ans:0,
+ why:[
+  "Correct. Each is a share of the same total mole count, so the two shares necessarily complete the whole.",
+  "100 would apply to mole <b>percentages</b>, which are mole fractions multiplied by 100.",
+  "Each is a fraction of the total, so both lie between 0 and 1.",
+  "The identity is exact at every concentration, being pure arithmetic rather than an approximation."],
+ sol:"<b>x<sub>solute</sub> = n/(n + N), x<sub>solvent</sub> = N/(n + N), and x<sub>solute</sub> + x<sub>solvent</sub> = 1.</b> Being a ratio of mole counts, mole fraction is unaffected by temperature."},
+{id:19, lec:"C3", blk:"L-1 · Atomic mass", topic:"Average atomic mass is weighted",
+ q:"Nitrogen occurs as 99.33 % ¹⁴N and 0.67 % ¹⁵N. Its average atomic mass is closest to",
+ opts:["14.007 u","14.5 u","14.67 u","15.0 u"],
+ ans:0,
+ why:[
+  "Correct. (14 × 99.33 + 15 × 0.67)/100 = 14.0067 — barely above 14, because ¹⁵N is so rare.",
+  "14.5 is the <b>simple</b> average of 14 and 15. Averaging isotope masses without weighting by abundance is the classic error here.",
+  "14.67 would need ¹⁵N to be about two-thirds of the sample, whereas it is under 1 %.",
+  "15.0 is the mass of the minor isotope alone."],
+ sol:"<b>Ā = ΣP<sub>i</sub>A<sub>i</sub>/100</b>, a <b>weighted</b> mean. With one isotope at 99 %, the average must sit almost on top of it."},
+
+/* ---------------- C-1 · States of Matter ---------------- */
+{id:20, lec:"C1", blk:"L-2 · Temperature scales", topic:"Celsius to Kelvin",
+ q:"To convert a Celsius temperature to Kelvin you",
+ opts:["add 273.15","subtract 273.15","multiply by 273.15","multiply by 9/5 and add 32"],
+ ans:0,
+ why:[
+  "Correct — the two scales share a degree size and differ only by an offset.",
+  "That converts Kelvin back to Celsius.",
+  "The scales differ by an offset, not a factor.",
+  "That is the Celsius-to-Fahrenheit conversion."],
+ sol:"<b>T(K) = t(°C) + 273.15.</b> ⚠ Always convert to Kelvin before any gas-law calculation."},
+{id:21, lec:"C1", blk:"L-6 · Kinetic equation", topic:"The kinetic gas equation",
+ q:"The kinetic gas equation is",
+ opts:[
+  "PV = ⅓ m N u²<sub>rms</sub>",
+  "PV = ⅔ m N u²<sub>rms</sub>",
+  "PV = 3 m N u²<sub>rms</sub>",
+  "PV = ½ m N u²<sub>rms</sub>"],
+ ans:0,
+ why:[
+  "Correct — the factor ⅓ arises because motion is shared equally among the three spatial directions.",
+  "⅔ is the factor relating PV to the total <b>kinetic energy</b>, not to mNu².",
+  "The factor is a third, not three.",
+  "½ appears in the kinetic-energy expression ½mu², not here."],
+ sol:"<b>PV = ⅓mNu²<sub>rms</sub> = ⅔E<sub>k</sub></b>, since E<sub>k</sub> = ½mNu²<sub>rms</sub>."},
+{id:22, lec:"C1", blk:"L-10 · Properties", topic:"Defining features of a liquid",
+ q:"A liquid has",
+ opts:[
+  "a definite volume but no definite shape",
+  "a definite shape but no definite volume",
+  "both a definite shape and a definite volume",
+  "neither a definite shape nor a definite volume"],
+ ans:0,
+ why:[
+  "Correct — molecules are close-packed enough to fix the volume, but mobile enough to flow into the container's shape.",
+  "That is backwards; solids have a definite shape.",
+  "That describes a solid.",
+  "That describes a gas."],
+ sol:"<b>Liquid: definite volume, no definite shape, nearly incompressible.</b> Its intermolecular forces lie between those of gases and solids."},
+
+/* ---------------- C-4 · Classification of Elements & Periodic Properties ---------------- */
+{id:23, lec:"C4", blk:"L-2 · Screening", topic:"Definition of shielding",
+ q:"The screening (shielding) effect refers to",
+ opts:[
+  "the reduction of the nucleus's pull on an outer electron by the inner electrons between them",
+  "the attraction between two electrons in the same orbital",
+  "the energy needed to remove the outermost electron",
+  "the tendency of an atom to attract a shared electron pair"],
+ ans:0,
+ why:[
+  "Correct. Inner electrons repel an outer electron and partly cancel the nuclear attraction, so the outer electron feels a reduced 'effective' charge.",
+  "Same-orbital electrons do repel, but shielding specifically describes <i>inner</i> electrons screening <i>outer</i> ones.",
+  "That is ionisation energy, a consequence of the net pull, not the definition of shielding.",
+  "That is electronegativity — a different property entirely."],
+ sol:"Shielding: inner electrons stand between the nucleus and an outer electron, screening it from the full nuclear charge. The leftover pull the outer electron actually feels is the <b>effective nuclear charge Z*</b>."},
+{id:24, lec:"C4", blk:"L-6 · Trends", topic:"Most electronegative element",
+ q:"The most electronegative element in the periodic table is",
+ opts:["fluorine","oxygen","chlorine","caesium"],
+ ans:0,
+ why:[
+  "Correct. Fluorine tops the Pauling scale at 4.0 — small size and high Z* give it the strongest pull on a shared pair.",
+  "Oxygen (3.5) is second but below fluorine.",
+  "Chlorine (3.0) is less electronegative than both F and O.",
+  "Caesium is one of the <b>least</b> electronegative (most electropositive) elements."],
+ sol:"Electronegativity peaks at the top-right (excluding noble gases): <b>fluorine, 4.0</b> on Pauling's scale. It falls toward the bottom-left, where Cs/Fr are most electropositive."},
+{id:25, lec:"C4", blk:"L-3 · Cations", topic:"Why a cation is smaller than its atom",
+ q:"A cation is always smaller than its parent atom because",
+ opts:[
+  "it has fewer electrons than protons, so each remaining electron feels a larger Z* (and a whole shell may be lost)",
+  "it has gained an extra shell",
+  "it has more electrons",
+  "the nucleus loses protons on ionisation"],
+ ans:0,
+ why:[
+  "Correct. Removing electrons leaves the same nuclear charge acting on fewer electrons, raising Z* per electron; often the entire outer shell is emptied, shrinking the ion sharply.",
+  "It loses electrons and often a whole shell — the opposite of gaining one.",
+  "A cation has <i>fewer</i> electrons, not more.",
+  "The nucleus is untouched; only electrons are removed."],
+ sol:"Cation: protons &gt; electrons ⇒ higher Z* per electron and frequently one fewer occupied shell (e.g. Na 1s²2s²2p⁶3s¹ → Na⁺ 1s²2s²2p⁶). Hence <b>cation &lt; atom</b>. Na is 186 pm; Na⁺ is 95 pm."},
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {};
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "RT-5 Chemistry Set 2 complete" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+  examStop();
+  show("done");
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

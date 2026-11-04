@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RT-5 Maths · Revision Quiz — Set 3</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · RT-5 (16 Nov 2026) · Maths revision</p>
+    <h1>RT-5 Maths · Set 3</h1>
+    <p id="heroSub">25 questions across 12 chapters · priority-weighted · one of 4 parallel sets · loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the chapters to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All chapters are selected by default — that runs the full 25-question set.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">136 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different chapters</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · RT-5 revision · Maths Set 3 of 4 · priority-weighted from your chapter &amp; study-priority analysis · answers carried verbatim from the per-chapter mastery quizzes.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-6 THERMODYNAMICS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"M9", name:"M-9 · Complex Number-I", desc:"Tier 1 · master first"},
+  {key:"M8D", name:"M-8D · Some Special Series", desc:"Tier 1 · master first"},
+  {key:"M7", name:"M-7 · Exponential & Log Equations and Inequations", desc:"Tier 2 · solid"},
+  {key:"M5C", name:"M-5C · Multiple & Submultiple Angles", desc:"Tier 1 · master first"},
+  {key:"M8A", name:"M-8A · Arithmetic Progressions", desc:"Tier 2 · solid"},
+  {key:"M8B", name:"M-8B · Geometric Progressions", desc:"Tier 2 · solid"},
+  {key:"M6", name:"M-6 · Functions-II — Inequalities & Modulus", desc:"Tier 2 · solid"},
+  {key:"M5A", name:"M-5A · Trigonometric Ratios of Compound Angles", desc:"Tier 1 · master first"},
+  {key:"M5B", name:"M-5B · Transformation Formulae", desc:"Tier 1 · master first"},
+  {key:"M1", name:"M-1 · Measurement of Angles", desc:"Tier 3 · maintain"},
+  {key:"M3", name:"M-3 · Trigonometric Ratios & Identities", desc:"Tier 3 · maintain"},
+  {key:"M4", name:"M-4 · Functions-I", desc:"Tier 3 · maintain"}
+];
+
+const QUIZ = [
+
+/* ---------------- M-9 · Complex Number-I ---------------- */
+{id:1, lec:"M9", blk:"L-3 · Modulus", topic:"Modulus of a complex number",
+ q:"|3 + 4i| equals",
+ opts:["5","7","25","√7"],
+ ans:0,
+ why:[
+  "Correct. |z| = √(a² + b²) = √(9 + 16) = √25 = 5.",
+  "7 = a + b, not √(a² + b²).",
+  "25 = a² + b² = |z|², not |z|.",
+  "√7 mixes the parts incorrectly; the modulus is √(a² + b²) = 5."],
+ sol:"|3 + 4i| = √(3² + 4²) = √25 = <b>5</b>."},
+{id:2, lec:"M9", blk:"L-7 · Cube roots of unity", topic:"Defining ω",
+ q:"A non-real cube root of unity ω satisfies",
+ opts:["ω³ = 1 and ω ≠ 1","ω² = 1","ω = 1","ω³ = −1"],
+ ans:0,
+ why:[
+  "Correct. The cube roots of unity solve x³ = 1; the non-real ones satisfy ω³ = 1 with ω ≠ 1.",
+  "ω² = 1 would make ω a square root of unity (±1), not a cube root.",
+  "ω = 1 is the real (trivial) cube root, not the non-real ω.",
+  "ω³ = −1 defines a cube root of −1, not of unity."],
+ sol:"The cube roots of unity are 1, ω, ω² where <b>ω³ = 1, ω ≠ 1</b>, with ω = (−1 + i√3)/2."},
+{id:3, lec:"M9", blk:"L-3 · |z|²", topic:"Modulus squared as z·z̄",
+ q:"For z = 2 + 3i, |z|² equals",
+ opts:["13","√13","5","12"],
+ ans:0,
+ why:[
+  "Correct. |z|² = a² + b² = 4 + 9 = 13 = z·z̄.",
+  "√13 is |z|, not |z|².",
+  "5 = a + b, unrelated to |z|².",
+  "12 = 2·6 is not a² + b²."],
+ sol:"|z|² = z·z̄ = a² + b² = 2² + 3² = <b>13</b>."},
+{id:4, lec:"M9", blk:"L-7 · Omega identities", topic:"Sum of cube roots of unity",
+ q:"1 + ω + ω² equals",
+ opts:["0","1","3","ω³"],
+ ans:0,
+ why:[
+  "Correct. The three cube roots of unity sum to zero (sum of roots of x³ − 1 = 0 with no x² term).",
+  "1 ignores the two non-real roots.",
+  "3 would hold only if all three roots equalled 1.",
+  "ω³ = 1, not 0 — and it is not the value of the sum."],
+ sol:"x³ − 1 = (x − 1)(x − ω)(x − ω²); the coefficient of x² is 0, so 1 + ω + ω² = <b>0</b>."},
+{id:5, lec:"M9", blk:"L-3 · Modulus of product", topic:"|z₁z₂| = |z₁||z₂|",
+ q:"If |z₁| = 2 and |z₂| = 5, then |z₁z₂| equals",
+ opts:["10","7","2.5","√29"],
+ ans:0,
+ why:[
+  "Correct. The modulus is multiplicative: |z₁z₂| = |z₁||z₂| = 2·5 = 10.",
+  "7 = |z₁| + |z₂|; modulus of a product multiplies, not adds.",
+  "2.5 = |z₁|/|z₂| would be |z₁/z₂|.",
+  "√29 = √(2² + 5²) is not the product rule."],
+ sol:"|z₁z₂| = |z₁|·|z₂| = 2·5 = <b>10</b>."},
+
+/* ---------------- M-8D · Some Special Series ---------------- */
+{id:6, lec:"M8D", blk:"L-3 · Telescoping", topic:"Σ 1/[r(r+1)] finite",
+ q:"1/(1·2) + 1/(2·3) + 1/(3·4) + … + 1/[n(n+1)] equals",
+ opts:["n/(n+1)","1/(n+1)","1 − 1/n","(n−1)/n"],
+ ans:0,
+ why:[
+  "Correct. 1/[r(r+1)] = 1/r − 1/(r+1); the sum telescopes to 1 − 1/(n+1) = n/(n+1).",
+  "1/(n+1) is the leftover subtracted term, not the sum.",
+  "1 − 1/n would come from a wrong last term 1/(n−1)·… ",
+  "(n−1)/n telescopes the wrong pair."],
+ sol:"1/[r(r+1)] = 1/r − 1/(r+1). Telescoping: (1 − 1/2) + (1/2 − 1/3) + … + (1/n − 1/(n+1)) = 1 − 1/(n+1) = <b>n/(n+1)</b>."},
+{id:7, lec:"M8D", blk:"L-1 · Standard sums", topic:"Sum of squares, numeric",
+ q:"The value of 1² + 2² + 3² + … + 10² is",
+ opts:["385","285","3025","505"],
+ ans:0,
+ why:[
+  "Correct. Σr² = n(n+1)(2n+1)/6 = 10·11·21/6 = 385.",
+  "285 = Σr² up to n = 9 (9·10·19/6); an off-by-one in n.",
+  "3025 = (Σr)² = 55² = Σr³ up to 10, not Σr².",
+  "505 does not match any standard sum here."],
+ sol:"<b>Σr² = n(n+1)(2n+1)/6.</b> With n = 10: 10·11·21 = 2310, ÷6 = <b>385</b>."},
+{id:8, lec:"M8D", blk:"L-5 · AM-GM", topic:"Minimum of x + 1/x",
+ q:"For x > 0, the minimum value of x + 1/x is",
+ opts:["2","1","0","4"],
+ ans:0,
+ why:[
+  "Correct. By A.M. ≥ G.M., x + 1/x ≥ 2√(x·1/x) = 2, attained at x = 1.",
+  "1 is below the achievable minimum.",
+  "0 is impossible for positive x (the expression exceeds 2).",
+  "4 is the minimum of x + 4/x, a different expression."],
+ sol:"A.M. ≥ G.M.: (x + 1/x)/2 ≥ √(x·1/x) = 1, so x + 1/x ≥ <b>2</b>, with equality at x = 1."},
+
+/* ---------------- M-7 · Exponential & Log Equations and Inequations ---------------- */
+{id:9, lec:"M7", blk:"L-3 · The formula", topic:"Change of base",
+ q:"The change-of-base formula states that log<sub>b</sub>x equals",
+ opts:[
+  "log<sub>a</sub>x / log<sub>a</sub>b",
+  "log<sub>a</sub>b / log<sub>a</sub>x",
+  "log<sub>a</sub>x · log<sub>a</sub>b",
+  "log<sub>a</sub>x − log<sub>a</sub>b"],
+ ans:0,
+ why:[
+  "Correct — the <b>new argument</b> goes on top and the <b>new base</b> underneath. Test log₄16 = log₂16/log₂4 = 4/2 = 2 ✓",
+  "This is the reciprocal; the same test gives 2/4 = 1/2, not 2.",
+  "A product would give 4 × 2 = 8.",
+  "A difference would give 4 − 2 = 2 — correct here by coincidence, but log₄64 = 3 while log₂64 − log₂4 = 6 − 2 = 4."],
+ sol:"<b>log<sub>b</sub>x = log<sub>a</sub>x / log<sub>a</sub>b</b> for any admissible new base a. Argument over base."},
+{id:10, lec:"M7", blk:"L-2 · Definition", topic:"The domain restriction",
+ q:"For log<sub>a</sub>b to be defined, one needs",
+ opts:[
+  "b &gt; 0, a &gt; 0 and a ≠ 1",
+  "b &gt; 0 only",
+  "a &gt; 0 only",
+  "b ≠ 0 and a ≠ 0"],
+ ans:0,
+ why:[
+  "Correct — all three conditions are required. A base of 1 fails because 1<sup>x</sup> is always 1, so no exponent could produce any other value.",
+  "The base needs restricting too; log₁5 has no meaning.",
+  "The argument must be strictly positive: log₃(−27) does not exist.",
+  "Zero is not the only forbidden value — negatives are excluded for the argument, and 1 for the base."],
+ sol:"<b>Argument &gt; 0, base &gt; 0 and base ≠ 1.</b> log₃(−27) and log₆0 both have no value."},
+{id:11, lec:"M7", blk:"L-1 · Index laws", topic:"Product with the same base",
+ q:"The product a<sup>p</sup>·a<sup>q</sup> equals",
+ opts:["a<sup>p+q</sup>","a<sup>pq</sup>","a<sup>p−q</sup>","(2a)<sup>p+q</sup>"],
+ ans:0,
+ why:[
+  "Correct — multiplying powers of the same base <b>adds</b> the exponents. Test 2²·2³ = 4·8 = 32 = 2⁵ ✓",
+  "Multiplying exponents corresponds to a power of a power, (a<sup>p</sup>)<sup>q</sup>.",
+  "Subtracting corresponds to division.",
+  "The base is unchanged by multiplication of powers."],
+ sol:"<b>a<sup>p</sup>·a<sup>q</sup> = a<sup>p+q</sup></b> and <b>a<sup>p</sup>/a<sup>q</sup> = a<sup>p−q</sup></b>."},
+
+/* ---------------- M-5C · Multiple & Submultiple Angles ---------------- */
+{id:12, lec:"M5C", blk:"L-3 · Triple angle", topic:"sin 3θ",
+ q:"sin 3θ equals",
+ opts:[
+  "3 sin θ − 4 sin³θ",
+  "4 sin³θ − 3 sin θ",
+  "4 cos³θ − 3 cos θ",
+  "3 sin θ + 4 sin³θ"],
+ ans:0,
+ why:[
+  "Correct — “3 minus 4” for the sine. Check θ = 30°: 3(1/2) − 4(1/8) = 1.5 − 0.5 = 1 = sin 90° ✓",
+  "This is the negative of the answer. Same check: 0.5 − 1.5 = −1 ≠ 1.",
+  "That is cos 3θ — the cubic in cosine rather than in sine.",
+  "Same check: 1.5 + 0.5 = 2, impossible for a sine."],
+ sol:"<b>sin 3θ = 3 sin θ − 4 sin³θ</b> — memory hook: <b>sine is 3 − 4</b> (minus first), <b>cosine is 4 − 3</b> (plus first)."},
+{id:13, lec:"M5C", blk:"L-2 · 22.5° values", topic:"cos 22.5°",
+ q:"The exact value of cos 22.5° is",
+ opts:[
+  "½√(2 + √2)",
+  "½√(2 − √2)",
+  "√2 + 1",
+  "½√(2 + √3)"],
+ ans:0,
+ why:[
+  "Correct. cos²22.5° = (1 + cos45°)/2 = (2 + √2)/4, giving ½√(2 + √2) ≈ 0.924 ✓",
+  "That is sin 22.5° ≈ 0.383.",
+  "√2 + 1 ≈ 2.41 exceeds 1, which no cosine can.",
+  "This uses cos 30°; it is the value of cos 15°."],
+ sol:"cos²22.5° = (1 + cos45°)/2 = (2 + √2)/4 ⇒ <b>cos 22.5° = ½√(2 + √2)</b>. The two differ only in the internal sign."},
+{id:14, lec:"M5C", blk:"L-1 · Double angle", topic:"Choosing the right form",
+ q:"If you are given sin A and need cos 2A, the most efficient form is",
+ opts:["1 − 2 sin²A","2 cos²A − 1","cos²A − sin²A","(1 − tan²A)/(1 + tan²A)"],
+ ans:0,
+ why:[
+  "Correct — it uses only sin A, so no conversion is needed.",
+  "This needs cos A, which you would first have to compute from sin A (with a sign decision).",
+  "This needs both ratios.",
+  "This needs tan A, requiring both sine and cosine first."],
+ sol:"Match the form to what you are given: <b>have sin A → 1 − 2sin²A · have cos A → 2cos²A − 1 · have tan A → (1 − tan²A)/(1 + tan²A)</b>."},
+
+/* ---------------- M-8A · Arithmetic Progressions ---------------- */
+{id:15, lec:"M8A", blk:"L-3 · Shifting & scaling", topic:"Adding a constant to every term",
+ q:"If a constant K is added to every term of an A.P., the result is",
+ opts:[
+  "an A.P. with the same common difference",
+  "an A.P. with common difference d + K",
+  "an A.P. with common difference dK",
+  "generally not a progression"],
+ ans:0,
+ why:[
+  "Correct. (a<sub>i+1</sub> + K) − (a<sub>i</sub> + K) = a<sub>i+1</sub> − a<sub>i</sub> = d — the K cancels in every gap.",
+  "The K appears in both terms of each difference and cancels; it never reaches d.",
+  "That is what <b>multiplying</b> by K does, not adding.",
+  "Shifting is one of the safest operations on an A.P. — it is Property 1."],
+ sol:"<b>Property 1:</b> a<sub>i</sub> ± K stays an A.P. with <b>d unchanged</b>. This is what licenses the “add 1 (or 2) to every term” manoeuvre."},
+{id:16, lec:"M8A", blk:"L-3 · Shifting & scaling", topic:"Multiplying every term by a constant",
+ q:"If every term of an A.P. is multiplied by a non-zero constant K, the result is an A.P. with common difference",
+ opts:["dK","d","d + K","d/K"],
+ ans:0,
+ why:[
+  "Correct. Ka<sub>i+1</sub> − Ka<sub>i</sub> = K(a<sub>i+1</sub> − a<sub>i</sub>) = Kd — the factor comes straight out.",
+  "That is what <b>adding</b> K does; multiplication does scale d.",
+  "Mixing the two operations: addition leaves d alone, multiplication scales it.",
+  "That is the effect of <b>dividing</b> by K."],
+ sol:"<b>Property 1:</b> a<sub>i</sub>K → A.P. with d × K; a<sub>i</sub>/K → A.P. with d ÷ K (K ≠ 0). This is what licenses clearing a common factor."},
+
+/* ---------------- M-8B · Geometric Progressions ---------------- */
+{id:17, lec:"M8B", blk:"L-3 · What survives, what breaks", topic:"Scaling a G.P.",
+ q:"If every term of a G.P. is multiplied by a non-zero constant K, the result is",
+ opts:[
+  "a G.P. with the same common ratio",
+  "a G.P. with common ratio rK",
+  "an A.P.",
+  "generally not a progression"],
+ ans:0,
+ why:[
+  "Correct. (Ka<sub>i+1</sub>)/(Ka<sub>i</sub>) = a<sub>i+1</sub>/a<sub>i</sub> = r — the K cancels in every ratio.",
+  "This is the <b>A.P.</b> behaviour (scaling multiplies d by K). In a G.P. it is <i>shifting</i> that breaks things and scaling that is harmless — the exact opposite.",
+  "Multiplying a G.P. by a constant keeps it geometric, not arithmetic.",
+  "Scaling is one of the safest operations on a G.P."],
+ sol:"<b>Property 1:</b> a<sub>i</sub>K and a<sub>i</sub>/K are still G.P.s with <b>r unchanged</b>. Note the contrast with M-8A, where scaling changes d and shifting does not."},
+{id:18, lec:"M8B", blk:"L-3 · What survives, what breaks", topic:"Shifting a G.P.",
+ q:"If the same constant K is added to every term of a G.P., the result is",
+ opts:[
+  "generally not a G.P.",
+  "a G.P. with the same common ratio",
+  "a G.P. with common ratio r + K",
+  "an A.P."],
+ ans:0,
+ why:[
+  "Correct. 2, 4, 8 is a G.P., but adding 1 gives 3, 5, 9 with ratios 5/3 and 9/5 — not constant. This is the exact opposite of an A.P., where shifting is harmless.",
+  "The ratio is destroyed, not preserved: (a<sub>i+1</sub> + K)/(a<sub>i</sub> + K) depends on i.",
+  "Ratios are not shifted by additive constants at all. The counterexample 3, 5, 9 settles it.",
+  "3, 5, 9 has gaps 2 and 4, so it is not an A.P. either."],
+ sol:"<b>a<sub>i</sub> ± K is NOT a G.P.</b> — this is the one property that breaks, and options built on it are always wrong. Adding is what an A.P. tolerates; multiplying is what a G.P. tolerates."},
+
+/* ---------------- M-6 · Functions-II — Inequalities & Modulus ---------------- */
+{id:19, lec:"M6", blk:"L-3 · Definition", topic:"The piecewise definition",
+ q:"The modulus function is defined by",
+ opts:[
+  "|x| = x for x ≥ 0 and |x| = −x for x &lt; 0",
+  "|x| = x for every x",
+  "|x| = −x for every x",
+  "|x| = x² for every x"],
+ ans:0,
+ why:[
+  "Correct — the minus sign on the negative branch makes the output positive, since −(−3) = 3.",
+  "This fails for negative inputs: |−3| = 3, not −3.",
+  "This fails for positive inputs: |3| = 3, not −3.",
+  "|2| = 2 but 2² = 4; the modulus is not a square."],
+ sol:"<b>|x| = x (x ≥ 0), −x (x &lt; 0).</b> Domain ℝ, range [0, ∞) — the familiar V-shape."},
+{id:20, lec:"M6", blk:"L-1 · Operation rules", topic:"Adding to both sides",
+ q:"Adding the same number to both sides of an inequality",
+ opts:[
+  "leaves the direction unchanged",
+  "reverses the direction",
+  "reverses the direction only if the number is negative",
+  "is not a permitted operation"],
+ ans:0,
+ why:[
+  "Correct — shifting both sides along the number line by the same amount preserves their order.",
+  "Reversal happens only when multiplying or dividing by a <b>negative</b>.",
+  "Adding a negative is the same as subtracting, which also preserves the order. Test 5 &gt; 3: adding −10 gives −5 &gt; −7 ✓",
+  "It is one of the safest operations available."],
+ sol:"<b>p &lt; q ⇒ p + r &lt; q + r</b> for every r. Addition and subtraction never flip the sign."},
+
+/* ---------------- M-5A · Trigonometric Ratios of Compound Angles ---------------- */
+{id:21, lec:"M5A", blk:"L-3 · The master result", topic:"Range of a cos θ + b sin θ",
+ q:"For every θ, the expression a cos θ + b sin θ lies between",
+ opts:[
+  "−√(a² + b²) and √(a² + b²)",
+  "−(a + b) and a + b",
+  "−1 and 1",
+  "−(|a| + |b|) and |a| + |b|"],
+ ans:0,
+ why:[
+  "Correct. The expression is r sin(θ + α) with r = √(a² + b²), and the sine sweeps the whole of [−1, 1].",
+  "The two terms peak at different values of θ, so their maxima cannot simply add. Test a = b = 1: the true maximum is √2, not 2.",
+  "That is the range of the sine alone, before the amplitudes are applied.",
+  "Same over-estimate as the second option, written with moduli. Test a = b = 1: it gives 2 rather than √2."],
+ sol:"<b>a cos θ + b sin θ = r sin(θ + α)</b> with r = √(a² + b²), so the range is <b>[−r, r]</b>."},
+
+/* ---------------- M-5B · Transformation Formulae ---------------- */
+{id:22, lec:"M5B", blk:"L-1 · Product → sum", topic:"2 cos A sin B",
+ q:"The product 2 cos A sin B equals",
+ opts:[
+  "sin(A + B) − sin(A − B)",
+  "sin(A + B) + sin(A − B)",
+  "cos(A + B) − cos(A − B)",
+  "cos(A − B) − cos(A + B)"],
+ ans:0,
+ why:[
+  "Correct — subtract sin(A−B) from sin(A+B); the sinA cosB terms cancel, leaving 2 cosA sinB.",
+  "That is 2 sin A cos B, obtained by <b>adding</b> rather than subtracting.",
+  "The product of a cosine and a sine yields sines, not cosines.",
+  "That is 2 sin A sin B."],
+ sol:"<b>2 cos A sin B = sin(A + B) − sin(A − B).</b> Note which factor carries A: here the cosine does, so the difference term is subtracted."},
+
+/* ---------------- M-1 · Measurement of Angles ---------------- */
+{id:23, lec:"M1", blk:"L-1 · Angle basics", topic:"Standard position",
+ q:"An angle is in <b>standard position</b> when",
+ opts:[
+  "its vertex is at the origin and its initial side lies along the positive x-axis",
+  "its vertex is at the origin and its initial side lies along the positive y-axis",
+  "its terminal side lies along the positive x-axis",
+  "both of its arms lie in the first quadrant"],
+ ans:0,
+ why:[
+  "Correct. Vertex at O, initial side along OX. Fixing the starting ray this way is what makes “which quadrant is the angle in?” a meaningful question.",
+  "The reference ray is the positive <b>x</b>-axis, not the y-axis. Using OY would shift every quadrant reading by 90°.",
+  "It is the <b>initial</b> side that is pinned to OX; the terminal side is free to land anywhere — that is what the angle measures.",
+  "Nothing restricts the arms to one quadrant; an angle in standard position may terminate in any quadrant."],
+ sol:"<b>Vertex at the origin, initial side along the positive x-axis.</b> The quadrant of the <i>terminal</i> side then names the angle: I (0°–90°), II (90°–180°), III (180°–270°), IV (270°–360°)."},
+
+/* ---------------- M-3 · Trigonometric Ratios & Identities ---------------- */
+{id:24, lec:"M3", blk:"L-1 · The six ratios", topic:"Definitions from a right triangle",
+ q:"For an acute angle θ in a right triangle with perpendicular P, base B and hypotenuse H, tan θ equals",
+ opts:["P/B","P/H","B/H","H/P"],
+ ans:0,
+ why:[
+  "Correct — tangent is perpendicular over base, the only one of the six ratios that avoids the hypotenuse.",
+  "That is sin θ — perpendicular over <b>hypotenuse</b>, not over base.",
+  "That is cos θ — base over hypotenuse. Cosine is the one that uses the base and the hypotenuse.",
+  "That is cosec θ, the reciprocal of sin θ. Tangent never involves the hypotenuse at all."],
+ sol:"sin θ = P/H · cos θ = B/H · <b>tan θ = P/B</b> · cot θ = B/P · sec θ = H/B · cosec θ = H/P."},
+
+/* ---------------- M-4 · Functions-I ---------------- */
+{id:25, lec:"M4", blk:"L-2 · Finding the range", topic:"The standard range method",
+ q:"The standard way to find the range of y = f(x) is to",
+ opts:[
+  "solve for x in terms of y, then keep those y for which x is real and lies in the domain",
+  "substitute a few values of x and list the outputs obtained",
+  "take the domain and remove the zeros of f",
+  "assume the range equals the co-domain"],
+ ans:0,
+ why:[
+  "Correct. The range is the set of outputs actually attained, and inverting then demanding a legal x is exactly the test for “attained”.",
+  "Sampling can suggest a pattern but never proves you have found every output — or that you have excluded the impossible ones.",
+  "Zeros of f are outputs equal to 0; they have nothing to do with which outputs are attainable.",
+  "Range equals co-domain only when the function is onto, which is precisely what is usually being asked."],
+ sol:"<b>1)</b> put y = f(x) · <b>2)</b> solve x = φ(y) · <b>3)</b> find every y giving a real x inside Dom(f) · <b>4)</b> that y-set is the range."},
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {};
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "RT-5 Maths Set 3 complete" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+  examStop();
+  show("done");
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

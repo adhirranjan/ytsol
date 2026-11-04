@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RT-5 Physics · Revision Quiz — Set 4</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · RT-5 (16 Nov 2026) · Physics revision</p>
+    <h1>RT-5 Physics · Set 4</h1>
+    <p id="heroSub">25 questions across 11 chapters · priority-weighted · one of 4 parallel sets · loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the chapters to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All chapters are selected by default — that runs the full 25-question set.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">136 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">This round: <b id="pCount">0</b> Q</span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+    </div>
+    <div id="qlist"></div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" onclick="backToIntro()">Choose different chapters</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · RT-5 revision · Physics Set 4 of 4 · priority-weighted from your chapter &amp; study-priority analysis · answers carried verbatim from the per-chapter mastery quizzes.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-6 THERMODYNAMICS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"P8", name:"P-8 · Work, Energy and Power", desc:"Tier 1 · master first"},
+  {key:"P10", name:"P-10 · Circular Motion", desc:"Tier 1 · master first"},
+  {key:"P9", name:"P-9 · Collision", desc:"Tier 1 · master first"},
+  {key:"P11", name:"P-11 · Centre of Mass", desc:"Tier 1 · master first"},
+  {key:"P4", name:"P-4 · Motion in 1D & 2D (Kinematics)", desc:"Tier 1 · master first"},
+  {key:"P6", name:"P-6 · Newton's Laws of Motion", desc:"Tier 1 · master first"},
+  {key:"P7", name:"P-7 · Friction", desc:"Tier 2 · solid"},
+  {key:"P3", name:"P-3 · Vectors", desc:"Tier 2 · solid"},
+  {key:"P5", name:"P-5 · Force Systems", desc:"Tier 2 · solid"},
+  {key:"P1", name:"P-1 · Basic Mathematical Tools-I", desc:"Tier 3 · maintain"},
+  {key:"P2", name:"P-2 · Basic Mathematical Tools-II", desc:"Tier 3 · maintain"}
+];
+
+const QUIZ = [
+
+/* ---------------- P-8 · Work, Energy and Power ---------------- */
+{id:1, lec:"P8", blk:"L-4 · Statement & validity", topic:"W_net = ΔKE holds always",
+ q:"For a particle acted on by any combination of forces, the work–energy theorem W_net = ΔKE is valid:",
+ opts:["always, whatever the nature of the forces acting","only when every force acting is conservative","only when gravity is the sole force acting","only when the body travels in a straight line"],
+ ans:0,
+ why:["Correct — the theorem is Newton's 2nd law integrated over displacement, so it needs no assumption about the type of force.","Slip: this is the condition for mechanical-energy conservation (ΔKE+ΔPE=0), not for the work–energy theorem itself.","Slip: gravity is irrelevant; friction, tension or spring forces all obey the same integrated identity.","Slip: the derivation uses the vector line integral ∫F·dr, which is path-shape independent, so curvature does not matter."],
+ sol:"From F_net = m dv/dt, multiply by dx and integrate: ∫F_net·dx = ∫mv dv = ½mv_f² − ½mv_i². No step assumes the force is conservative, gravitational, or the path straight, so the result is <b>valid always</b>."},
+{id:2, lec:"P8", blk:"L-8 · Average vs Instantaneous Power", topic:"Average power = rate of KE delivered",
+ q:"A machine accelerates a 2 kg body from rest to 30 m/s in 6 s along a straight line. The average power delivered to the body is:",
+ opts:["150 W","300 W","900 W","75 W"],
+ ans:0,
+ why:["Correct: the body gains ½·2·30² = 900 J of KE, and average power is that energy divided by the 6 s.","300 W is the final instantaneous power F·v = (2·5)(30); it is twice the average, not the average itself.","900 W is the total kinetic energy in joules quoted as power — the division by time was skipped.","75 W comes from halving the true average, an unjustified extra factor of one-half."],
+ sol:"Average power is the rate of KE delivery: ΔKE = ½mv² = ½·2·30² = 900 J, so P_avg = ΔKE/t = 900/6 = <b>150 W</b>. (Since power rises linearly from 0, the final instantaneous power F·v = 10·30 = 300 W is exactly twice this.)"},
+{id:3, lec:"P8", blk:"L-3 · KE & momentum", topic:"p = √(2mK), equal masses",
+ q:"Two bodies of equal mass have kinetic energies in the ratio 4 : 9. The ratio of their momenta is:",
+ opts:["2 : 3","4 : 9","3 : 2","9 : 4"],
+ ans:0,
+ why:["Correct: at equal mass p ∝ √K, so the momentum ratio is √4 : √9 = 2 : 3.","Slip: took p ∝ K (linear) instead of p ∝ √K, so kept the energy ratio unchanged.","Slip: inverted the correct 2 : 3 ratio, pairing larger p with smaller K.","Slip: took p ∝ K and also inverted, doubling the error."],
+ sol:"p = √(2mK); equal m ⇒ p ∝ √K, so p₁ : p₂ = √K₁ : √K₂ = √4 : √9 = <b>2 : 3</b>."},
+{id:4, lec:"P8", blk:"L-7 · Pendulum", topic:"Speed at lowest point",
+ q:"A simple pendulum of length ℓ = 1.0 m is released from rest with the string making 60° with the vertical. Taking g = 10 m/s², the speed of the bob at the lowest point is:",
+ opts:["4.47 m/s","3.16 m/s","2.24 m/s","5.48 m/s"],
+ ans:1,
+ why:["4.47 m/s = √(2gℓ) takes the drop as the whole length ℓ, dropping the geometric factor (1−cosθ); the bob descends only 0.5 m, not 1.0 m.","Correct: h = ℓ(1−cos60°) = 0.5 m, so v = √(2gh) = √10 = 3.16 m/s at the lowest point.","2.24 m/s = √(gh) omits the factor of 2, i.e. it writes mgh = mv² instead of mgh = ½mv², halving the kinetic-energy term.","5.48 m/s = √(2g·1.5) uses h = ℓ(1+cosθ), adding the cosine rather than subtracting it, which would place the bob above the pivot."],
+ sol:"Height fallen h = ℓ(1−cosθ) = 1.0(1−cos60°) = 0.5 m. Energy: ½mv² = mgh ⇒ v = √(2gh) = √(2·10·0.5) = √10 = <b>3.16 m/s</b>."},
+
+/* ---------------- P-10 · Circular Motion ---------------- */
+{id:5, lec:"P10", blk:"L-4 · Critical speed", topic:"min speed at top",
+ q:"A particle of mass m is tied to a light string of length R and whirled in a vertical circle. What is the minimum speed it must have at the highest point to keep the string taut and complete the circle?",
+ opts:["√(2gR)","√(gR)","√(5gR)","√(3gR)"],
+ ans:1,
+ why:["√(2gR) is the launch speed that just lifts a bob to the horizontal level from rest — not a top-point condition.","Correct: T=0 at the top gives mg = mv²/R, so v_min = √(gR).","√(5gR) is the minimum speed needed at the lowest point, not at the top.","√(3gR) is the speed at the horizontal (side) position during a critical loop, not at the top."],
+ sol:"At the highest point the centre is below the particle, so tension and weight both point inward: T + mg = mv²/R. A string cannot push, so the least it supplies is T=0, leaving mg = mv²/R. Hence v²=gR and the minimum top speed is <b>√(gR)</b>."},
+{id:6, lec:"P10", blk:"L-1 · Linear from angular speed", topic:"v = ωr",
+ q:"A point lies at radius r = 0.5 m on a disc turning at ω = 4 rad/s. Its linear (tangential) speed is:",
+ opts:["8 m/s", "4 m/s", "2 m/s", "1 m/s"],
+ ans:2,
+ why:["used v = ω/r = 4/0.5 instead of the product ωr","quoted ω itself as the speed, ignoring the radius entirely","correct: v = ωr = 4 × 0.5 = 2 m/s","used ωr² = 4 × 0.25, squaring the radius by mistake"],
+ sol:"The arc relation s = rθ differentiates to v = ωr, valid with ω in rad/s and r in metres. Here v = ωr = 4 × 0.5 = 2 m/s. Note ω must already be in rad/s (it is), and it is the radius, not the diameter, that enters. The common slip is v = ω/r, which even carries the wrong units (1/(m·s)). Final: <b>2 m/s</b>."},
+{id:7, lec:"P10", blk:"L-5 · Well of Death", topic:"v_min numeric",
+ q:"In a Well of Death of radius r=5 m the tyre-wall friction coefficient is μ=0.5. Taking g=10 m/s², the minimum speed the rider needs to avoid slipping down is:",
+ opts:["5 m/s","7.07 m/s","10 m/s","100 m/s"],
+ ans:2,
+ why:["√(μgr)=√(10·5·0.5)=√25=5; here μ has been multiplied instead of divided","√(gr)=√50≈7.07; the friction coefficient was dropped from the formula","correct: √(gr/μ)=√(10·5/0.5)=√100=10 m/s","100 is v²=gr/μ, not v; the square root was not taken"],
+ sol:"Split the forces: horizontally N=mv²/r, vertically the wall friction must hold the weight so μN=mg at the minimum. Eliminating N gives v_min=√(gr/μ). Substituting: v_min=√(10·5/0.5)=√(50/0.5)=√100=<b>10 m/s</b>. Note the mass never enters, and dividing by μ (0.5) increases the requirement — a rougher wall (larger μ) would instead lower it."},
+
+/* ---------------- P-9 · Collision ---------------- */
+{id:8, lec:"P9", blk:"L-4 · Restitution from rebound height", topic:"e = √(h′/h)",
+ q:"A ball is dropped onto a floor from a height of 4 m and rebounds to a height of 1 m. The coefficient of restitution between ball and floor is:",
+ opts:["0.25","0.5","0.75","2.0"],
+ ans:1,
+ why:["This is the raw height ratio h′/h = 1/4; the restitution needs its square root.",
+      "Correct: e = √(h′/h) = √(1/4) = 0.5, since each side of the bounce converts height to speed by v = √(2gh).",
+      "This is 1 − h′/h = 0.75, the fraction of energy lost, not the restitution.",
+      "This is the inverted root √(h/h′) = √4 = 2, which would need e greater than 1 — physically impossible."],
+ sol:"On a fixed floor the speed ratio after/before is e, while heights scale as speed², so h′/h = e². Hence e = √(h′/h) = √(1/4) = <b>0.5</b>. The g and the ½ cancel because both fall and rise use v = √(2gh)."},
+{id:9, lec:"P9", blk:"L-2 · Equal-mass exchange", topic:"Velocity swap",
+ q:"Two identical 2 kg blocks approach head-on and collide elastically: block A moves at +5 m/s and block B at −3 m/s. What is the final velocity of block A?",
+ opts:["+5 m/s (unchanged)","−3 m/s","+1 m/s","+2 m/s"],
+ ans:1,
+ why:["Forgot that equal masses exchange velocities — A cannot keep its own velocity.","Correct: equal-mass 1-D elastic collision swaps velocities, so A takes B's −3 m/s.","This is the perfectly-inelastic common velocity (m₁u₁+m₂u₂)/(m₁+m₂), not the elastic result.","Took B's speed as a magnitude with the wrong sign."],
+ sol:"For a 1-D elastic collision of equal masses the velocities are simply exchanged: v_A′ = u_B and v_B′ = u_A. Hence v_A′ = <b>−3 m/s</b> and v_B′ = +5 m/s. Check momentum: 2(−3)+2(5) = 4 = 2(5)+2(−3) ✓, and KE is unchanged since the same two speeds reappear."},
+
+/* ---------------- P-11 · Centre of Mass ---------------- */
+{id:10, lec:"P11", blk:"L-2 · Non-uniform rod", topic:"λ = kx²/L",
+ q:"A rod of length L has linear mass density λ = kx²/L, x measured from one end. Its centre of mass is at x =",
+ opts:["L/2", "2L/3", "3L/4", "L/4"],
+ ans:2,
+ why:["the uniform-rod answer — ignores that the far end is much denser","the result for λ ∝ x; here λ ∝ x², which pushes the COM further out","correct: ∫x³dx/∫x²dx over 0 → L = (L⁴/4)/(L³/3) = 3L/4","measured from the heavy end — from x = 0 the COM is at 3L/4"],
+ sol:"dm = (kx²/L)dx. x<sub>cm</sub> = ∫₀<sup>L</sup> x(kx²/L)dx / ∫₀<sup>L</sup>(kx²/L)dx = (k/L)(L⁴/4) / (k/L)(L³/3) = 3L/4. Pattern: λ ∝ xⁿ gives x<sub>cm</sub> = (n + 1)L/(n + 2); n = 0 → L/2, n = 1 → 2L/3, n = 2 → 3L/4. Final: <b>3L/4 from the light end</b>."},
+{id:11, lec:"P11", blk:"L-1 · Two-particle COM", topic:"Inverse ratio of distances",
+ q:"Two particles of mass m and 3m are a distance d apart. How far is their centre of mass from the particle of mass m?",
+ opts:["d/4", "3d/4", "d/3", "d/2"],
+ ans:1,
+ why:["d/4 is the distance from the heavier 3m particle, not from m","correct: r<sub>m</sub> = (3m)d/(m + 3m) = 3d/4 — the COM sits far from the light particle","used the mass ratio 1:3 as a fraction of d instead of dividing d in the inverse ratio 3:1 over the total 4 parts","midpoint — only true when the two masses are equal"],
+ sol:"Distances from the COM are inversely proportional to the masses: r₁/r₂ = m₂/m₁ = 3m/m = 3, so d is split into 3 + 1 = 4 parts. From m: r₁ = m₂d/(m₁ + m₂) = 3m·d/4m = 3d/4; from 3m: r₂ = m·d/4m = d/4. Check m₁r₁ = m(3d/4) = 3m(d/4) = m₂r₂ ✓. Final: <b>3d/4 from m</b>."},
+{id:12, lec:"P11", blk:"SB · JEE Adv 2024", topic:"Spring pair, collision at t₀ = 0",
+ q:"Same system: particles 1 and 2 (mass m each) with x₁ = (x₀ + d) + a sinωt, x₂ = (x₀ − d) − a sinωt; particle 3 (mass m) moving at u₀ = aω/2 collides elastically with particle 2, this time at t₀ = 0. The COM speed of particles 1 and 2 afterwards, v<sub>cm</sub>/(aω), is:",
+ opts:["0", "0.25", "0.75", "1.5"],
+ ans:2,
+ why:["the pair's COM was at rest before, but the collision is an external impulse on the pair","took v₁ = 0, which is the extreme-position case t₀ = π/(2ω), not t₀ = 0","correct: v₁ = +aω, v₂′ = +aω/2 ⇒ v<sub>cm</sub> = (aω + aω/2)/2 = 3aω/4","forgot to divide the pair's momentum by 2m"],
+ sol:"At t = 0: v₁ = aω cos0 = +aω, v₂ = −aω (spring at natural length, both at maximum speed). Elastic, equal masses ⇒ velocities swap: v₂′ = u₀ = aω/2, v₃′ = −aω. Pair COM: v<sub>cm</sub> = (v₁ + v₂′)/2 = (aω + aω/2)/2 = 3aω/4. Final: <b>0.75</b>."},
+
+/* ---------------- P-4 · Motion in 1D & 2D (Kinematics) ---------------- */
+{id:13, lec:"P4", blk:"L-4 · Vertical projection", topic:"Maximum height",
+ q:"A body projected vertically upward with speed u rises to a maximum height of",
+ opts:["u²/2g","u²/g","2u²/g","u/2g"],
+ ans:0,
+ why:[
+  "Correct. At the top v = 0, so 0 = u² − 2gh gives h = u²/2g.",
+  "u²/g is twice the correct value; the 2 from 2as has been dropped.",
+  "2u²/g is four times too large.",
+  "u/2g is not even dimensionally a length — it has units of time."],
+ sol:"<b>h<sub>max</sub> = u²/2g · t<sub>ascent</sub> = u/g · t<sub>flight</sub> = 2u/g.</b> Note h ∝ u²: doubling the launch speed <b>quadruples</b> the height."},
+{id:14, lec:"P4", blk:"L-8 · Complementary angles", topic:"Why the ranges match",
+ q:"Two projectiles are fired with the same speed at 30° and 60°. Their horizontal ranges are",
+ opts:[
+  "equal",
+  "in the ratio 1 : 2",
+  "in the ratio 1 : 3",
+  "in the ratio 1 : √3"],
+ ans:0,
+ why:[
+  "Correct. The angles are complementary, and sin 2(90° − θ) = sin(180° − 2θ) = sin 2θ, so R depends identically on both.",
+  "1 : 2 is roughly the ratio of the <b>maximum heights</b>, 1.25 m and 3.75 m — those genuinely differ.",
+  "1 : 3 is exactly the height ratio here, since H ∝ sin²θ and sin²60/sin²30 = 3.",
+  "1 : √3 is the ratio of the <b>times of flight</b>, T₁/T₂ = tanθ = tan30° = 1/√3."],
+ sol:"<b>θ and 90° − θ give the same range</b> because sin2θ is symmetric about 45°. Everything else differs: the steeper angle gives the greater height and the longer flight."},
+{id:15, lec:"P4", blk:"L-12 · River crossing", topic:"Minimum-time crossing",
+ q:"To cross a river in the <b>minimum time</b>, a boat should be headed",
+ opts:[
+  "straight across, perpendicular to the bank",
+  "upstream at an angle",
+  "downstream at an angle",
+  "along the current"],
+ ans:0,
+ why:[
+  "Correct. Only the component of the boat's velocity across the river shortens the crossing, and heading straight across makes that component as large as possible.",
+  "Aiming upstream wastes part of the boat's speed fighting the current and lengthens the crossing — that is the <b>shortest-path</b> strategy, not the fastest.",
+  "Aiming downstream also reduces the across-river component while adding to the drift.",
+  "Along the current the boat never crosses at all."],
+ sol:"<b>Minimum time: θ = 0, t<sub>min</sub> = d/v<sub>br</sub></b>, but you drift downstream by v<sub>r</sub>t. <b>Shortest path: sinθ = v<sub>r</sub>/v<sub>br</sub> upstream</b>, zero drift but a longer crossing. The two goals genuinely conflict."},
+
+/* ---------------- P-6 · Newton's Laws of Motion ---------------- */
+{id:16, lec:"P6", blk:"L-4 · Wedge constraint", topic:"The contact constraint",
+ q:"For a block staying in contact with a moving wedge, the constraint is obtained by",
+ opts:[
+  "equating the components of the two accelerations along the common normal",
+  "equating the two accelerations completely",
+  "equating the components along the incline surface",
+  "setting the block's acceleration to zero"],
+ ans:0,
+ why:[
+  "Correct. Contact is maintained precisely when neither body moves into or away from the other, i.e. their normal-direction accelerations match.",
+  "The two accelerations are different in both magnitude and direction; only one component of each is tied.",
+  "The surface-parallel components are free to differ — that is exactly how the block slides along the wedge.",
+  "The block accelerates in general; it is only its relative motion perpendicular to the surface that vanishes."],
+ sol:"<b>Along the common normal, the accelerations must match</b> (giving a<sub>A</sub> = a<sub>B</sub> sin θ in the standard geometry). Perpendicular to that, the block is free to slide. This is the wedge analogue of a string constraint."},
+{id:17, lec:"P6", blk:"SB · Incline", topic:"Block on an incline with a horizontal force",
+ q:"A 5 kg block sits on a fixed smooth 53° incline. A 100 N force is applied <b>horizontally</b>, pressing it toward the incline (g = 10, sin53° = 0.8, cos53° = 0.6). Its acceleration is",
+ opts:[
+  "4 m s⁻² up the incline",
+  "4 m s⁻² down the incline",
+  "12 m s⁻² up the incline",
+  "20 m s⁻² up the incline"],
+ ans:0,
+ why:[
+  "Correct. Along the incline: 100cos53° − mg sin53° = 60 − 40 = 20 N up the slope, so a = 20/5 = 4 m s⁻².",
+  "The applied component up the slope (60 N) exceeds the gravity component down it (40 N), so the block goes up.",
+  "12 m s⁻² would follow from using the full 100 N without resolving it along the incline.",
+  "20 is the net force in newtons; it still has to be divided by the 5 kg mass."],
+ sol:"⚠ The force is <b>horizontal</b>, not along the slope — resolve it. Along: 100cos53° − 50sin53° = 60 − 40 = 20 N ⇒ <b>a = 4 m s⁻² up the incline</b>. Perpendicular: N = 50cos53° + 100sin53° = 110 N &gt; 0, so contact is maintained ✓"},
+{id:18, lec:"P6", blk:"L-4 · Movable pulley", topic:"Block on a table via a movable pulley",
+ q:"A 2 kg block on a smooth table is joined through a movable pulley to a 1 kg hanging block, so that the table block feels 2T. With g = 10, the acceleration of the 1 kg block is",
+ opts:["20/3 m s⁻²","10/3 m s⁻²","5 m s⁻²","10 m s⁻²"],
+ ans:0,
+ why:[
+  "Correct. With a(2 kg) = a/2 and a = a(1 kg): 10 − T = a and 2T = 2(a/2) = a, so T = a/2 and 10 − a/2 = a, giving a = 20/3 m s⁻².",
+  "10/3 is the tension T in newtons, not the acceleration.",
+  "5 m s⁻² would follow from ignoring the movable pulley and treating this as a simple 1 kg / 2 kg system.",
+  "10 m s⁻² is g itself, which would require the string to be slack."],
+ sol:"Constraint: the table block moves at <b>half</b> the hanging block's rate. 1 kg: 10 − T = a. 2 kg: 2T = 2(a/2) ⇒ T = a/2. Substituting: 10 = 3a/2 ⇒ <b>a = 20/3 ≈ 6.67 m s⁻²</b>, T = 10/3 N."},
+
+/* ---------------- P-7 · Friction ---------------- */
+{id:19, lec:"P7", blk:"L-4 · belt slipping", topic:"Block dropped on a moving conveyor belt: kinetic friction accelerates it until speeds match; find the sliding distance.",
+ src:"L-4 · SUGGESTED PROBLEMS Q4 (Level-4)",
+ q:"A conveyor belt is moving with a constant speed of 3 ms<sup>&minus;1</sup>. A block is gently placed on it. The coefficient of friction between the block and the belt is &mu; = 0.3. The distance travelled by the block on the belt before it starts moving with the belt (take g = 10 ms<sup>&minus;2</sup>) is",
+ opts:["0.45 m",
+  "1.5 m",
+  "0.9 m",
+  "0 m"],
+ ans:1,
+ why:["0.45 m &mdash; the printed key, but no combination of v = 3 m/s, &mu; = 0.3 and g = 10 gives 0.45 m; it would need a = 10 m/s&sup2; with t = 0.3 s, which contradicts a = &mu;g = 3 m/s&sup2;.",
+  "1.5 m &mdash; correct. a = &mu;g = 3 m/s&sup2;, the block needs t = v/a = 1 s to reach 3 m/s, in which it covers (1/2)at&sup2; = 1.5 m; the slip relative to the belt is also 3 &minus; 1.5 = 1.5 m.",
+  "0.9 m &mdash; comes from multiplying v&sup2;/(2g) by &mu; instead of dividing by it; dimensionally fine but the wrong operation.",
+  "0 m &mdash; would hold only if the block were placed already moving at belt speed, or if &mu; were infinite; here the block starts at rest so it must slide."],
+ sol:"<b>Step 1.</b> Placed gently means the block starts at rest while the belt runs at v = 3 m/s, so the belt slides forward under the block and kinetic friction acts <b>forward</b> on the block.<br><b>Step 2.</b> a = &mu;g = (0.3)(10) = 3 m/s&sup2;, constant until the speeds match.<br><b>Step 3.</b> Time to match speeds: t = v/a = 3/3 = 1 s. After that instant there is no relative sliding, friction drops to zero and they travel together.<br><b>Step 4.</b> Distance covered by the block in that 1 s: s = (1/2)at&sup2; = (1/2)(3)(1)&sup2; = v&sup2;/(2&mu;g) = 9/6 = 1.5 m.<br><b>Step 5.</b> Cross-check the other reading of the question: the belt covers vt = 3(1) = 3 m, so the slip relative to the belt = 3 &minus; 1.5 = 1.5 m. Both readings give the same number, so the answer is unambiguous.<br>&#9888; ICAD key says (a) 0.45 m; working gives (b) 1.5 m because a = &mu;g = 3 m/s&sup2; forces t = 1 s, hence s = v&sup2;/(2&mu;g) = 1.5 m and the relative slip equals the same 1.5 m."},
+{id:20, lec:"P7", blk:"L-3 · Incline force balance", topic:"Which quantity falls as the inclination of the plane is increased",
+ src:"L-3 · LEVEL-1 Q1",
+ q:"Which factor decreases when the angle of inclination &theta; increases?",
+ opts:["Driving force",
+  "Normal reaction",
+  "Coefficient of friction",
+  "Weight of the block"],
+ ans:1,
+ why:["Wrong. The driving force is F = mg sin&theta;, and sin&theta; INCREASES from 0 to 1 as &theta; goes from 0&deg; to 90&deg;.",
+  "Correct. N = mg cos&theta;, and cos&theta; falls from 1 to 0 as &theta; goes from 0&deg; to 90&deg;, so the normal reaction (and with it the limiting friction &mu;N) decreases.",
+  "Wrong. &mu; is a property of the pair of surfaces in contact; it does not depend on the geometry of the plane.",
+  "Wrong. The weight mg is fixed by the mass and g; tilting the plane only changes how mg is resolved, not its magnitude."],
+ sol:"<b>Step 1 — Resolve the weight.</b> Along the plane mg sin&theta;, perpendicular to it mg cos&theta;.<br><b>Step 2 — Normal reaction.</b> N = mg cos&theta;; at &theta; = 0&deg; N = mg, at &theta; = 60&deg; N = mg/2, at &theta; = 90&deg; N = 0, so N steadily decreases.<br><b>Step 3 — Limiting friction follows N.</b> f<sub>L</sub> = &mu;N = &mu;mg cos&theta;, so it decreases along with N.<br><b>Step 4 — Driving force moves the other way.</b> F = mg sin&theta; increases, which is exactly why a crossing (the angle of repose) exists at tan&alpha; = &mu;.<br><b>Step 5 — Conclusion.</b> The only listed quantity that decreases is the normal reaction, option (b)."},
+
+/* ---------------- P-3 · Vectors ---------------- */
+{id:21, lec:"P3", blk:"L-5 · Resolution", topic:"Rectangular components",
+ q:"A vector V makes angle θ with the x-axis. Its components are",
+ opts:[
+  "V<sub>x</sub> = V cos θ, V<sub>y</sub> = V sin θ",
+  "V<sub>x</sub> = V sin θ, V<sub>y</sub> = V cos θ",
+  "V<sub>x</sub> = V tan θ, V<sub>y</sub> = V cot θ",
+  "V<sub>x</sub> = V<sub>y</sub> = V/2"],
+ ans:0,
+ why:[
+  "Correct — the component <b>along</b> the axis the angle is measured from uses the cosine, and the perpendicular one uses the sine.",
+  "These are swapped. Test θ = 0: the vector lies along x, so V<sub>x</sub> must equal V, and cos 0 = 1 delivers that.",
+  "Tangents are unbounded, so this would give a component larger than the vector itself for θ &gt; 45°.",
+  "Equal halves hold for no angle at all; even at 45° each component is V/√2."],
+ sol:"<b>Along the reference axis → cos. Perpendicular to it → sin.</b> ⚠ Always identify which axis the angle is stated from: “37° with the vertical” makes the <b>vertical</b> component A cos 37°."},
+{id:22, lec:"P3", blk:"L-2 · Resultant", topic:"The resultant formula",
+ q:"For two vectors of magnitudes A and B with angle θ between them, the magnitude of the resultant is",
+ opts:[
+  "√(A² + B² + 2AB cos θ)",
+  "√(A² + B² − 2AB cos θ)",
+  "√(A² + B² + 2AB sin θ)",
+  "A + B cos θ"],
+ ans:0,
+ why:[
+  "Correct — note the <b>plus</b> sign for a sum. At θ = 0 it collapses to A + B, exactly as it must.",
+  "The minus sign belongs to the <b>difference</b> |A − B|. Testing θ = 0 exposes it: this gives |A − B|, not A + B.",
+  "A sine here fails the θ = 0 test, giving √(A² + B²) instead of A + B.",
+  "This is the <b>component</b> of the resultant along A, not the full magnitude."],
+ sol:"<b>|A + B| = √(A² + B² + 2AB cos θ)</b> and <b>|A − B| = √(A² + B² − 2AB cos θ)</b>. The only difference is the sign of the middle term — check with θ = 0 whenever you are unsure."},
+
+/* ---------------- P-5 · Force Systems ---------------- */
+{id:23, lec:"P5", blk:"L-1 · What a force is", topic:"Contact versus long-range forces",
+ q:"Which of these is a <b>non-contact</b> (long-range) force?",
+ opts:["Gravitational attraction","Normal reaction","Tension in a rope","Friction"],
+ ans:0,
+ why:[
+  "Correct. Gravity acts across empty space — the Earth pulls the Moon with nothing in between.",
+  "The normal force exists only where two surfaces actually touch.",
+  "Tension requires a physical rope connecting the two bodies.",
+  "Friction acts along a contact surface and vanishes the moment the surfaces separate."],
+ sol:"<b>Contact:</b> normal, tension, friction, applied push. <b>Non-contact:</b> gravitational, electrostatic, magnetic. Only the second group can act through a vacuum."},
+
+/* ---------------- P-1 · Basic Mathematical Tools-I ---------------- */
+{id:24, lec:"P1", blk:"L-1 · Radian measure", topic:"Converting degrees to radians",
+ q:"45° expressed in radians is",
+ opts:["π/4","π/2","π/3","45π"],
+ ans:0,
+ why:[
+  "Correct. 45 × π/180 = π/4, since 45° is one-eighth of a full turn and 2π/8 = π/4.",
+  "π/2 is 90°, twice the angle given.",
+  "π/3 is 60°, which comes from 60 × π/180 = π/3 — a different angle entirely.",
+  "Multiplying by π without dividing by 180 gives a number about 141 radians — some 22 full turns."],
+ sol:"<b>degree → radian: × π/180. radian → degree: × 180/π.</b> So 45° = π/4 rad, and 1 rad ≈ 57°."},
+
+/* ---------------- P-2 · Basic Mathematical Tools-II ---------------- */
+{id:25, lec:"P2", blk:"L-4 · Stationary points", topic:"Condition for an extremum",
+ q:"At a maximum or a minimum of a smooth curve,",
+ opts:[
+  "dy/dx = 0",
+  "d²y/dx² = 0",
+  "y = 0",
+  "dy/dx is undefined"],
+ ans:0,
+ why:[
+  "Correct. The tangent is horizontal at a turning point, so the slope vanishes — this defines a stationary point.",
+  "A vanishing second derivative signals a possible point of <b>inflection</b>, not an extremum.",
+  "The function's value at an extremum can be anything at all; it need not be zero.",
+  "An undefined derivative means a cusp or a vertical tangent, not a smooth turning point."],
+ sol:"<b>dy/dx = 0</b> locates the stationary point; the <b>second derivative</b> then classifies it. Both steps are needed."},
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = [];
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {};
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("submitHint").textContent = round === 1
+    ? "Unanswered questions count as wrong and come back in the next round."
+    : "These are the questions you have not yet got right. Unanswered still counts as wrong.";
+
+  const list = $("qlist");
+  list.innerHTML = "";
+  let curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      const h = document.createElement("div");
+      h.className = "sechead";
+      h.innerHTML = lecName(q.lec);
+      list.appendChild(h);
+    }
+    order[id] = shuffle(q.opts.map((_, k) => k));
+    const div = document.createElement("div");
+    div.className = "q"; div.id = "q" + id;
+    let h = '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+    if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+    h += '</div><div class="qtext">' + q.q + '</div>';
+    order[id].forEach((orig, k) => {
+      h += '<label class="opt" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+           '<input type="radio" name="q' + id + '">' +
+           '<span class="lt">' + LETTERS[k] + '.</span>' +
+           '<span>' + q.opts[orig] + '</span></label>';
+    });
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  updateProgress();
+  show("quiz");
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const card = $("q" + id);
+  if (card) card.classList.remove("unans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+}
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0;
+  pool.forEach(id => {
+    if (!(id in picked)) { leftIds.push(id); $("q" + id).classList.add("unans"); }
+    else if (picked[id] === BY_ID[id].ans) right++;
+    else wrongIds.push(id);
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b></div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? "RT-5 Physics Set 4 complete" : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s).";
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td></tr>';
+  });
+  t += '</table>';
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  $("dnHist").innerHTML = t + '<p style="margin-top:10px">' + repeats +
+    ' of the ' + selIds.length + ' questions needed more than one attempt.' +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') + '</p>';
+  examStop();
+  show("done");
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

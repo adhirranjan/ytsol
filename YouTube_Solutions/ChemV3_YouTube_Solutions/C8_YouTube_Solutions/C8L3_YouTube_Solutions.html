@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C8 &middot; L3 &mdash; Redox Reaction</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1c2230; --muted:#5b6472;
+    --line:#e4e7ec; --head:#1f2a44; --headtxt:#ffffff;
+    --exact-bg:#e7f6ec; --exact-ink:#1f7a3d;
+    --sim-bg:#fff4e0; --sim-ink:#9a6300;
+    --link:#1a56db; --zebra:#fafbfc;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1420; --card:#161c2b; --ink:#e6e9f0; --muted:#9aa3b2;
+      --line:#283048; --head:#0d1526; --headtxt:#eef2ff;
+      --exact-bg:#123322; --exact-ink:#63d68f; --sim-bg:#3a2c11; --sim-ink:#f0b95a;
+      --link:#6ea8fe; --zebra:#1a2130;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:32px 18px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:1.7rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 14px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px;font-size:.85rem}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:600;font-size:.78rem;white-space:nowrap}
+  .exact{background:var(--exact-bg);color:var(--exact-ink)}
+  .sim{background:var(--sim-bg);color:var(--sim-ink)}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;color:var(--muted);font-size:.88rem;margin:12px 0 26px}
+  h2{font-size:1.15rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .tablecard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+  thead th{background:var(--head);color:var(--headtxt);text-align:left;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
+  tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  td.num{font-weight:700;color:var(--muted);width:34px;text-align:center}
+  td.topic{color:var(--muted);font-size:.84rem;white-space:normal;width:16%;}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .q{font-weight:500}
+  code{background:rgba(125,125,125,.15);padding:1px 5px;border-radius:5px;font-size:.85em}
+  footer{color:var(--muted);font-size:.8rem;margin-top:30px;text-align:center}
+  /* --- Answer key (toggle) --- */
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 2px}
+  .ansbtn{appearance:none;cursor:pointer;border:1px solid var(--line);background:var(--head);color:var(--headtxt);
+    font:600 .86rem/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:10px 16px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .ansbtn:hover{filter:brightness(1.12)}
+  .ansbtn:active{transform:translateY(1px)}
+  .controls .hint{font-size:.8rem;color:var(--muted)}
+  th.ans-h{min-width:170px;text-align:left}
+  td.ans{text-align:left;min-width:170px}
+  .ansval{display:inline-block;font-weight:600;font-size:.82rem;color:var(--exact-ink);background:var(--exact-bg);border-radius:7px;padding:3px 10px;filter:blur(6px);cursor:pointer;user-select:none;transition:filter .12s;line-height:1.4}
+  .ansval:hover{filter:blur(3px)}
+  .ansval.revealed{filter:none;cursor:default;user-select:text}
+  body.show-ans .ansval{filter:none;cursor:default;user-select:text}
+  .ansval .lt{font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-right:6px;color:inherit}
+  .ansval.flagged{background:var(--sim-bg);color:var(--sim-ink)}
+  .warn{cursor:help}
+  .na{color:var(--muted)}
+  /* --- Collapsible worked solutions (full-width rows) --- */
+  tbody tr.solnrow{background:var(--card)!important}
+  tbody tr.solnrow>td{border-top:none;padding:0 12px 4px}
+  details.soln{margin:0}
+  details.soln>summary{cursor:pointer;color:var(--link);font-size:.78rem;font-weight:700;list-style:none;display:inline-block;user-select:none;padding:6px 0}
+  details.soln>summary::-webkit-details-marker{display:none}
+  details.soln>summary::before{content:"\25B8  Show full solution"}
+  details.soln[open]>summary::before{content:"\25BE  Hide full solution"}
+  details.soln>summary:hover{text-decoration:underline}
+  .solnbody{margin:2px 0 12px;padding:14px 16px;background:var(--zebra);border:1px solid var(--line);border-left:3px solid var(--exact-ink);border-radius:9px;font-size:.85rem;font-weight:400;color:var(--ink);line-height:1.65;max-width:860px}
+  .solnbody .seg{margin:8px 0}
+  .solnbody .lbl{display:inline-block;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;margin-right:7px;vertical-align:1px}
+  .solnbody .step{margin:5px 0 5px 4px}
+  .solnbody .step .why{display:block;color:var(--muted);font-size:.93em;margin:1px 0 0 14px}
+  .solnbody code{font-size:.9em}
+  .solnbody pre{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:8px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.5;overflow-x:auto;white-space:pre;color:var(--ink)}
+  .solnbody .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(125,125,125,.10);padding:1px 5px;border-radius:4px}
+  .solnbody .trick{margin-top:10px;padding:10px 12px;background:var(--sim-bg);color:var(--sim-ink);border-radius:8px;font-size:.84rem}
+  .solnbody .trick .lbl{color:var(--sim-ink)}
+  .solnbody .final{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--exact-ink)}
+  /* --- PYQ provenance tag (pyq_tags/add_pyq_tags.py) --- */
+  .pyq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:7px;font-size:.76rem;font-weight:600}
+  .pyq .paper{display:inline-block;padding:2px 10px;border-radius:999px;background:rgba(99,102,241,.13);color:#4f46e5;white-space:nowrap}
+  .pyq a{white-space:nowrap}
+  tr:target td{background:rgba(99,102,241,.10)}
+  @media (prefers-color-scheme: dark){ .pyq .paper{background:rgba(129,140,248,.18);color:#a5b4fc} }
+  /* --- end PYQ tag --- */
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<header>
+  <h1>C8 &middot; L3 &mdash; Redox Reaction</h1>
+  <p class="sub">Practice Problems mapped to YouTube solution videos</p>
+  <div class="legend">
+    <span class="badge exact">&#128994; Exact</span><span style="color:var(--muted);font-size:.82rem">video solves the same question (same numbers)</span>
+    <span class="badge sim">&#128993; Similar</span><span style="color:var(--muted);font-size:.82rem">same method / concept, different numbers</span><span class="pyqleg" style="display:contents"><span class="pyq" style="margin:0"><span class="paper">📝 JEE Main / Advanced paper</span></span><span class="pyqlegend" style="color:var(--muted);font-size:.82rem">real JEE question, with ExamGoal&rsquo;s worked solution &middot; <b>3</b> on this page</span></span><!--/pyqleg-->
+  </div>
+  <div class="note"><b>Scope:</b> Quick Recap, Suggested Problems, Board level and Levels 1&ndash;6 &mdash; every unsolved question in the lecture. The chapter&rsquo;s Solved Examples are excluded (the book already works those).</div>
+</header>
+
+<div class="controls">
+  <button id="ansBtn" class="ansbtn" type="button">&#128273; Show Answers</button>
+  <span class="hint">Answers (letter <b>+</b> the option text/value, taken from the ICAD C-V3 Answer Key and independently re-worked) are hidden by default &mdash; click to reveal all, or click any single blurred answer to reveal just that one. &#9888; marks a key entry that does not reconcile with the working &mdash; hover it.</span>
+</div>
+
+<h2>Quick Recap</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1 (i)</td><td class="q">Fill in the blank: As<sub>2</sub>S<sub>3</sub>(s) + NO<sub>3</sub><sup>&minus;</sup>(aq) &rarr; AsO<sub>4</sub><sup>3&minus;</sup>(aq) + NO(g) + S(s) (acidic medium). On the basis of above redox reaction taking place in acidic medium answer the following question.<br>The oxidation number of As increases from ________ to ________.</td><td class="topic">Oxidation number change</td><td><a href="https://www.youtube.com/watch?v=RkWS6o5UsoQ" target="_blank">Balance the following reaction by ion electrons method ( acidic medium). As_(2)S_(3)-NO_ | Doubtnut</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">+3 to +5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> An oxidation number is fixed by the sum rule: the signed numbers of all atoms add up to the charge on the species. For this reaction two facts are enough &mdash; oxygen is &minus;2 and the molecule&rsquo;s net charge is known. The trap is the sulphur: in As<sub>2</sub>S<sub>3</sub> it is sulphide S at &minus;2, not the +6 it would carry in a sulphate, so arsenic is pinned at +3 there. Treating S as +6 by habit is the single most common slip and it throws the whole answer off.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge on the species</span> <span class="why">Oxygen is &minus;2 in AsO<sub>4</sub><sup>3&minus;</sup> and sulphur is &minus;2 in As<sub>2</sub>S<sub>3</sub>, both standard values.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. As<sub>2</sub>S<sub>3</sub> is neutral, so 2(As) + 3(&minus;2) = 0.</div>
+<div class="step">2. That gives 2(As) = +6, so <b>As = +3</b> in the reactant. <span class="why">S is the sulphide ion here.</span></div>
+<div class="step">3. In the product AsO<sub>4</sub><sup>3&minus;</sup> the charge is &minus;3, so As + 4(&minus;2) = &minus;3.</div>
+<div class="step">4. As = &minus;3 + 8 = <b>+5</b> in the product.</div>
+<div class="step">5. Arsenic rises from +3 to +5, a loss of 2 electrons per As atom, so it is <b>oxidised</b>.</div>
+<div class="step">6. Both As atoms climb, so one formula unit releases 2 &times; 2 = 4 electrons from the arsenic centres alone.</div>
+<pre>
+ As2S3 : 2(As) + 3(-2) = 0  -> As = +3
+ AsO4^3- : As + 4(-2) = -3  -> As = +5
+ -----------------------------------------
+ As : +3 -> +5   (oxidised, 2e- lost each)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> As<sub>2</sub>S<sub>3</sub> is a double reductant: both As (+3&rarr;+5) and S (&minus;2&rarr;0) are oxidised, so count electrons from both centres when balancing. Reading S as +6 would wrongly force As negative, which is impossible for a metalloid bonded to sulphur. Always assign the clearly electronegative partner (here S as sulphide, O as oxide) first, then back-solve the central atom.</div>
+<div class="final">Answer: +3 to +5.</div></div></details></td></tr>
+<tr><td class="num">1 (ii)</td><td class="q">Fill in the blank: As<sub>2</sub>S<sub>3</sub>(s) + NO<sub>3</sub><sup>&minus;</sup>(aq) &rarr; AsO<sub>4</sub><sup>3&minus;</sup>(aq) + NO(g) + S(s) (acidic medium). On the basis of above redox reaction taking place in acidic medium answer the following question.<br>The oxidation number of N decreases from ________ to ________.</td><td class="topic">Oxidation number change</td><td><a href="https://www.youtube.com/watch?v=RkWS6o5UsoQ" target="_blank">Balance the following reaction by ion electrons method ( acidic medium). As_(2)S_(3)-NO_ | Doubtnut</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">+5 to +2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Nitrogen is the oxidant here: it is reduced while arsenic and sulphur are oxidised. Its oxidation number is read from the nitrate ion first and from NO afterwards, with oxygen taken as &minus;2 throughout. Because nitrate supplies the electrons that both As and S demand, its oxidation state must drop, and the size of that drop tells you how many moles of nitrate the balanced equation will need.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge on the species</span> <span class="why">NO<sub>3</sub><sup>&minus;</sup> carries &minus;1; NO is neutral; O is &minus;2 in both.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In NO<sub>3</sub><sup>&minus;</sup> the charge is &minus;1, so N + 3(&minus;2) = &minus;1.</div>
+<div class="step">2. N = &minus;1 + 6 = <b>+5</b> in the reactant nitrate.</div>
+<div class="step">3. In NO the molecule is neutral, so N + (&minus;2) = 0.</div>
+<div class="step">4. N = <b>+2</b> in the product. <span class="why">Only one oxygen now, so N drops sharply.</span></div>
+<div class="step">5. Nitrogen falls from +5 to +2, a gain of 3 electrons per N, so it is <b>reduced</b>; nitrate is the oxidising agent.</div>
+<div class="step">6. Each N accepts 3 electrons, which is what must balance the 4 electrons released per As<sub>2</sub>S<sub>3</sub> plus the 6 from its three sulphurs.</div>
+<div class="step">7. So 10 electrons leave each As<sub>2</sub>S<sub>3</sub> and, at 3 per N, roughly 10/3 nitrate ions are consumed per formula unit &mdash; the stoichiometry flows directly from this per-atom change.</div>
+<pre>
+ NO3^- : N + 3(-2) = -1   -> N = +5
+ NO    : N + (-2) = 0     -> N = +2
+ -----------------------------------------
+ N : +5 -> +2   (reduced, 3e- gained each)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Dilute HNO<sub>3</sub> typically gives NO (N: +5&rarr;+2, 3e<sup>&minus;</sup>) while concentrated HNO<sub>3</sub> gives NO<sub>2</sub> (+5&rarr;+4, 1e<sup>&minus;</sup>). Spot the gas and you know the electron count instantly, without balancing the whole equation. A quick sanity check: N in any oxoanion of nitrogen never exceeds +5, so +5 is always the ceiling it falls from.</div>
+<div class="final">Answer: +5 to +2.</div></div></details></td></tr>
+<tr><td class="num">1 (iii)</td><td class="q">Fill in the blank: As<sub>2</sub>S<sub>3</sub>(s) + NO<sub>3</sub><sup>&minus;</sup>(aq) &rarr; AsO<sub>4</sub><sup>3&minus;</sup>(aq) + NO(g) + S(s) (acidic medium). On the basis of above redox reaction taking place in acidic medium answer the following question.<br>The oxidation number of S-atom increases from ________ to ________.</td><td class="topic">Oxidation number change</td><td><a href="https://www.youtube.com/watch?v=RkWS6o5UsoQ" target="_blank">Balance the following reaction by ion electrons method ( acidic medium). As_(2)S_(3)-NO_ | Doubtnut</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">&minus;2 to 0</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The sulphur of the sulphide is also oxidised in this reaction, ending up as free sulphur. A free element in its elementary form always has oxidation number zero, which fixes the product side at a glance. The reactant side needs the sum rule with arsenic already known to be +3, so sulphur is forced to &minus;2. Seeing both the As and the S of one species climb is the hallmark of a compound that is its own double reducing agent.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge on the species; free element = 0</span> <span class="why">In As<sub>2</sub>S<sub>3</sub> the more electropositive As forces S to the sulphide state &minus;2.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In As<sub>2</sub>S<sub>3</sub> set 2(+3) + 3(S) = 0 using As = +3.</div>
+<div class="step">2. 3(S) = &minus;6, so <b>S = &minus;2</b> in the reactant. <span class="why">Sulphur is less electronegative than oxygen but more than arsenic, so it is the anion here.</span></div>
+<div class="step">3. The product is S(s), elemental sulphur, so <b>S = 0</b>.</div>
+<div class="step">4. Sulphur rises from &minus;2 to 0, losing 2 electrons per atom, so it too is <b>oxidised</b>.</div>
+<div class="step">5. Three S atoms per formula unit give 3 &times; 2 = 6 electrons, on top of the 4 from arsenic.</div>
+<div class="step">6. One As<sub>2</sub>S<sub>3</sub> therefore releases 4 + 6 = 10 electrons in all, each pair taken up by nitrate.</div>
+<pre>
+ As2S3 : 2(+3) + 3(S) = 0  -> S = -2
+ S(s)  : free element       -> S = 0
+ -----------------------------------------
+ S : -2 -> 0   (oxidised, 2e- lost each)
+ total e- lost per As2S3 = 4(As) + 6(S) = 10
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Whenever a sulphide, nitride or halide turns into the free element, the change is simply from its anion value to 0. Here two different atoms of one reductant oxidise at once &mdash; add their electrons, do not pick one. Forgetting the sulphur contribution is the classic error that makes the final nitrate coefficient come out wrong.</div>
+<div class="final">Answer: &minus;2 to 0.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Fill in the blank: P + x HNO<sub>3</sub> &rarr; Y H<sub>3</sub>PO<sub>4</sub> + NO<sub>2</sub> + H<sub>2</sub>O. In this reaction value of x &amp; y will be ........ and ............</td><td class="topic">Balancing coefficients</td><td><a href="https://www.youtube.com/watch?v=FnCk-AcqWxg" target="_blank">Balance the equation: P + HNO3 → NO2 + H2O + H3PO4 | Class 9 / 10 Chemistry - Science by JP Sir</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">5, 1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Balancing by oxidation number means the total electrons lost equal the total gained. Phosphorus is oxidised and nitrogen reduced; the stoichiometric coefficients x and y just make those electron totals match, then the rest follows by atom counting. Here x is the moles of nitric acid and y the moles of phosphoric acid, so finding the electron change on each central atom fixes both at once without trial and error.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">(electrons lost by P) = (electrons gained by N)</span> <span class="why">P: 0&rarr;+5 in H<sub>3</sub>PO<sub>4</sub>; N: +5&rarr;+4 in NO<sub>2</sub>.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Free P has oxidation number 0; in H<sub>3</sub>PO<sub>4</sub>, P = +5, so each P <b>loses 5 electrons</b>.</div>
+<div class="step">2. In HNO<sub>3</sub>, N = +5; in NO<sub>2</sub>, N = +4, so each N <b>gains 1 electron</b>.</div>
+<div class="step">3. To match, 1 P (5 e<sup>&minus;</sup> lost) needs 5 N (5 e<sup>&minus;</sup> gained): y = 1 and x = 5.</div>
+<div class="step">4. Write P + 5 HNO<sub>3</sub> &rarr; 1 H<sub>3</sub>PO<sub>4</sub> + 5 NO<sub>2</sub> + H<sub>2</sub>O and check atoms.</div>
+<div class="step">5. N: 5 = 5. H: left 5; right 3 + 2(1) = 5. O: left 15; right 4 + 10 + 1 = 15. All balance.</div>
+<div class="step">6. So <b>x = 5, y = 1</b>, with one H<sub>2</sub>O completing the equation.</div>
+<pre>
+ P : 0 -> +5   loses 5 e-
+ N : +5 -> +4  gains 1 e-   (x N needed)
+ 5 = x(1) -> x = 5 ,  y(P) = 1
+ -----------------------------------------
+ P + 5 HNO3 -> H3PO4 + 5 NO2 + H2O   (x=5,y=1)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Concentrated HNO<sub>3</sub> is reduced only to NO<sub>2</sub> (1 e<sup>&minus;</sup>), so the moles of acid equal the electrons the other element loses &mdash; 5 for P here. No need to balance O and H first; they fall out automatically once x and y are set. The lone water molecule is the giveaway that only one P was oxidised, pinning y = 1.</div>
+<div class="final">Answer: x = 5, y = 1.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Match the column. On the basis of balanced redox reaction XFe<sup>2+</sup> + ZCr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + YH<sup>+</sup> &rarr; Fe<sup>3+</sup> WCr<sup>3+</sup> + VH<sub>2</sub>O. Match column I with appropriate term in column II (x, y, z, w, v are number of moles of the components)<br><b>Column-I:</b> (A) X &nbsp; (B) Y &nbsp; (C) Z &nbsp; (D) W &nbsp; (E) V<br><b>Column-II:</b> (p) 1 &nbsp; (q) 6 &nbsp; (r) 14 &nbsp; (s) 7 &nbsp; (t) 2</td><td class="topic">Balanced redox mole ratios</td><td><a href="https://www.youtube.com/watch?v=LYpWFKHfwfo" target="_blank">Balance the Redox Reaction for Cr2O7 2- + Fe2+ → Cr3+ + Fe3+</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">(A) &rarr; (q), (B) &rarr; (r), (C) &rarr; (p), (D) &rarr; (t), (E) &rarr; (s)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is the classic dichromate&ndash;ferrous titration reaction. Cr goes +6&rarr;+3 (gain 3 e<sup>&minus;</sup> each, 6 per Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>) and Fe goes +2&rarr;+3 (lose 1 e<sup>&minus;</sup>), so 6 Fe<sup>2+</sup> are needed per dichromate; the rest is atom balance.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">6 Fe<sup>2+</sup> + Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + 14 H<sup>+</sup> &rarr; 6 Fe<sup>3+</sup> + 2 Cr<sup>3+</sup> + 7 H<sub>2</sub>O</span> <span class="why">Here X=Fe<sup>2+</sup>, Z=Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>, Y=H<sup>+</sup>, W=Cr<sup>3+</sup>, V=H<sub>2</sub>O.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> takes 6 electrons (two Cr, 3 each); each Fe<sup>2+</sup> gives 1, so <b>X = 6</b> &rarr; (q).</div>
+<div class="step">2. The seven oxygens of dichromate leave as water, needing 14 H<sup>+</sup>, so <b>Y = 14</b> &rarr; (r).</div>
+<div class="step">3. One dichromate balances the six electrons, so <b>Z = 1</b> &rarr; (p).</div>
+<div class="step">4. Two Cr<sup>3+</sup> are produced from one dichromate, so <b>W = 2</b> &rarr; (t).</div>
+<div class="step">5. 14 H<sup>+</sup> and 7 O give <b>V = 7</b> water molecules &rarr; (s).</div>
+<div class="step">6. Charge check: left 12 &minus; 2 + 14 = +24; right 18 + 6 = +24. Balanced.</div>
+<pre>
+ Cr: +6 -> +3  (6 e- per Cr2O7^2-)
+ Fe: +2 -> +3  (1 e- each) -> 6 Fe needed
+ -----------------------------------------
+ X=6(q) Y=14(r) Z=1(p) W=2(t) V=7(s)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Memorise the dichromate line 6/1/14 &rarr; 6/2/7; it recurs in every Fe<sup>2+</sup>, C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> or I<sup>&minus;</sup> dichromate titration. The 14 H<sup>+</sup> and 7 H<sub>2</sub>O come straight from the 7 oxygens.</div>
+<div class="final">Answer: A-q, B-r, C-p, D-t, E-s.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Suggested Problems</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">In the oxidation number method of balancing redox reactions, which of the following is the first step? (Level-1)<br>(a) Balance hydrogen and oxygen atoms &nbsp; (b) Equalise total increase and decrease in oxidation numbers &nbsp; (c) Identify the elements whose oxidation numbers have changed &nbsp; (d) Multiply oxidising and reducing agents by suitable integers</td><td class="topic">Oxidation number method steps</td><td><a href="https://www.youtube.com/watch?v=v6D5eETBQk0" target="_blank">Redox Reactions 04 ||Balancing a Chemical Equation By Oxidation Number Method IIT JEE MAINS /NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> Identify the elements whose oxidation numbers have changed</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The oxidation-number method has a fixed order of steps. Before any electron accounting can start you must know which atoms actually changed, so the very first job is to assign oxidation numbers and spot the ones that moved. The other options describe genuine later steps, which is exactly why the question is testing whether you know the sequence rather than the individual actions.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Step 1: assign ON &rarr; find the changed elements</span> <span class="why">Everything after it (equalising, balancing H/O, charges) depends on knowing the redox pair first.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write oxidation numbers over every atom on both sides of the skeletal equation.</div>
+<div class="step">2. Compare them and <b>identify the elements whose oxidation numbers have changed</b> &mdash; the oxidised and reduced species. This is step one, option <b>(c)</b>.</div>
+<div class="step">3. Only then compute the increase and decrease per atom and equalise them, option (b) &mdash; that is a later step.</div>
+<div class="step">4. Multiplying oxidising and reducing agents by integers, option (d), comes after equalising, not first.</div>
+<div class="step">5. Balancing H and O, option (a), is among the final steps once electrons already match.</div>
+<div class="step">6. So the correct first step is to locate the atoms that change oxidation number.</div>
+<pre>
+ order of the oxidation-number method:
+  1. assign ON, find changed elements   &lt;-- (c)
+  2. find increase / decrease per atom
+  3. equalise total increase = decrease  (b)
+  4. balance other atoms, then H and O   (a)
+  5. multiply agents as needed           (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Options (a), (b) and (d) are all real steps &mdash; just not first. The method always begins by identifying the redox pair; everything else is bookkeeping built on that. A reliable memory hook: nothing about electrons, H or O can be done until you know which atoms actually moved, so &quot;identify changes&quot; has to lead.</div>
+<div class="final">Answer: (c) Identify the elements whose oxidation numbers have changed.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">In balancing the half reaction, S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup> &rarr; S(s), the number of electrons that must be added is: (Level-2)<br>(a) 2 on the right &nbsp; (b) 2 on the left &nbsp; (c) 3 on the right &nbsp; (d) 4 on the left</td><td class="topic">Half reaction electrons</td><td><a href="https://www.youtube.com/watch?v=fdbrhQAM9Gw" target="_blank">Half Reaction Method, Balancing Redox Reactions In Basic &amp; Acidic Solution, Chemistry</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 4 on the left</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In a half reaction, electrons are added to whichever side makes the charge balance after atoms are balanced. Here each sulphur in S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup> is +2 and falls to 0, so this is a reduction and electrons sit on the reactant (left) side. The number of electrons is not read off the ion charge but from the oxidation-number change summed over every atom that moves &mdash; two sulphurs here, not one.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup> + 4e<sup>&minus;</sup> + 6H<sup>+</sup> &rarr; 2S + 3H<sub>2</sub>O</span> <span class="why">Two S atoms, each +2&rarr;0, gain 2 e<sup>&minus;</sup>, giving 4 electrons total.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup>: 2(S) + 3(&minus;2) = &minus;2, so S = +2 each.</div>
+<div class="step">2. The product S(s) is the free element, S = 0, so each atom gains 2 electrons.</div>
+<div class="step">3. One thiosulphate has two S atoms, so 2 &times; 2 = <b>4 electrons</b> are gained in all.</div>
+<div class="step">4. Because electrons are gained, they go on the <b>left (reactant) side</b> &mdash; option (d).</div>
+<div class="step">5. Balance O with 3 H<sub>2</sub>O on the right and H with 6 H<sup>+</sup> on the left.</div>
+<div class="step">6. Charge check: left &minus;2 &minus; 4 + 6 = 0; right 0. Balanced, confirming 4 e<sup>&minus;</sup> on the left.</div>
+<pre>
+ S in S2O3^2- : 2S + 3(-2) = -2 -> S = +2
+ S(s) : 0   -> each S gains 2 e-
+ 2 atoms -> 4 e- gained (reduction)
+ -----------------------------------------
+ S2O3^2- + 4e- + 6H+ -> 2S + 3H2O   (left)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Electrons gained &rarr; they appear with the reactants (reduction); electrons lost &rarr; with the products (oxidation). Count atoms first: two S each dropping 2 units is 4, not 2 &mdash; that is the distractor trap in options (a) and (b). Options placing electrons on the right would make this an oxidation, which the +2&rarr;0 change rules out.</div>
+<div class="final">Answer: (d) 4 on the left.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">If three electrons are lost by a metal ion M<sup>3+</sup>, its final oxidation number will be: (Level-3)<br>(a) zero &nbsp; (b) +6 &nbsp; (c) +2 &nbsp; (d) +4</td><td class="topic">Oxidation number change</td><td><a href="https://www.youtube.com/watch?v=9pa2Mv9HxUU" target="_blank">WCLN - Chemistry - REDOX - number of electrons transferred</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> +6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Losing electrons is oxidation, which <i>raises</i> the oxidation number. Each electron lost makes the species one unit more positive, so three electrons lost from M<sup>3+</sup> push it three units higher, not lower. The trap is to subtract instead of add, which happens when a student confuses the number of electrons with a reduction. An electron carries a &minus;1 charge, so taking one away must leave the ion more positive &mdash; the arithmetic is forced by charge conservation alone.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">final ON = initial ON + (electrons lost)</span> <span class="why">Electrons are negative; removing three negatives adds +3 to the charge.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. The ion starts at M<sup>3+</sup>, oxidation number <b>+3</b>.</div>
+<div class="step">2. Losing an electron removes negative charge, so the species becomes <b>more positive</b> &mdash; this is oxidation.</div>
+<div class="step">3. Three electrons lost raise the number by 3: +3 + 3 = <b>+6</b>.</div>
+<div class="step">4. So the final oxidation number is +6, option <b>(b)</b>.</div>
+<div class="step">5. Option (a) 0 and (c) +2 would mean electrons were <i>gained</i> (reduction), the opposite of the stem.</div>
+<div class="step">6. Option (d) +4 corresponds to losing only one electron, not three.</div>
+<div class="step">7. So M<sup>3+</sup> becomes M<sup>6+</sup>, consistent with charge conservation: 3 electrons of &minus;1 removed shift the ion by exactly +3.</div>
+<pre>
+ M^3+  -> lose 3 e-
+ final = +3 + 3 = +6
+ -----------------------------------------
+ loss of e- = oxidation = ON increases
+ M^3+ -> M^6+   (answer +6)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> &quot;OIL RIG&quot;: Oxidation Is Loss, Reduction Is Gain. Loss of electrons always drives the oxidation number up. If an option is lower than the start, it cannot come from losing electrons, so you can strike (a), (c) and (d) on sight and keep only the value above +3.</div>
+<div class="final">Answer: (b) +6.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">While balancing a redox reaction in basic medium using the oxidation number method, which of the following procedures is correct? (Level-4)<br>(a) Balance hydrogen atoms by adding H<sup>+</sup> ions &nbsp; (b) Balance oxygen atoms by adding H<sub>2</sub>O molecules &nbsp; (c) Balance oxygen atoms by adding OH<sup>&minus;</sup> ions directly &nbsp; (d) Balance hydrogen atoms before oxygen atoms</td><td class="topic">Basic medium balancing</td><td><a href="https://www.youtube.com/watch?v=uZ3cVRFatsE" target="_blank">Balancing redox reaction by oxidation number method(Basic medium)</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> Balance oxygen atoms by adding H<sub>2</sub>O molecules</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In both acidic and basic media, oxygen is first balanced by adding H<sub>2</sub>O to the deficient side. The difference comes only at the hydrogen step: acidic uses H<sup>+</sup>, basic adds H<sub>2</sub>O and then OH<sup>&minus;</sup>. So the step common and correct here is balancing O with water.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">balance O with H<sub>2</sub>O &rarr; balance H with H<sub>2</sub>O/OH<sup>&minus;</sup> in base</span> <span class="why">OH<sup>&minus;</sup> is never added <i>directly</i> to fix oxygen; that would unbalance hydrogen too.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. After atoms other than H and O are balanced, <b>balance oxygen by adding H<sub>2</sub>O</b> to the side short of O &mdash; option (b), true in both media.</div>
+<div class="step">2. Option (a) adds H<sup>+</sup> for hydrogen; that is the acidic route, wrong for basic medium.</div>
+<div class="step">3. Option (c) adds OH<sup>&minus;</sup> directly for oxygen; OH<sup>&minus;</sup> carries one H as well, so it cannot fix O alone &mdash; false.</div>
+<div class="step">4. Option (d) balances H before O, reversing the standard order &mdash; false.</div>
+<div class="step">5. In base the hydrogens are then matched by adding H<sub>2</sub>O to the H-rich side and an equal number of OH<sup>&minus;</sup> to the other.</div>
+<div class="step">6. Hence the correct procedure listed is (b), balancing oxygen with water.</div>
+<pre>
+ 1. balance redox atoms + electrons
+ 2. balance O with H2O            &lt;-- (b) correct
+ 3. balance H : add H2O, then OH- (basic)
+ 4. check total charge
+ -----------------------------------------
+ acidic uses H+ ; basic uses OH- for charge
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Water fixes oxygen in every medium; only the hydrogen/charge step changes. Adding OH<sup>&minus;</sup> &quot;directly&quot; for oxygen is the favourite wrong option because OH<sup>&minus;</sup> smuggles in a hydrogen with every oxygen.</div>
+<div class="final">Answer: (b) Balance oxygen atoms by adding H<sub>2</sub>O molecules.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">The value of n in, MnO<sub>4</sub><sup>&minus;</sup> + 8H<sup>+</sup> + ne &rarr; Mn<sup>2+</sup> + 4H<sub>2</sub>O is: (Level-5)<br>(a) 5 &nbsp; (b) 4 &nbsp; (c) 3 &nbsp; (d) 2</td><td class="topic">Electron balance</td><td><a href="https://www.youtube.com/watch?v=RwMsmZAcu6U" target="_blank">KECChem Balancing 1/2 equations MnO4-/Mn2+</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The electron count n in a half reaction equals the change in oxidation number of the central atom. Manganese in MnO<sub>4</sub><sup>&minus;</sup> is +7 and in Mn<sup>2+</sup> is +2, a drop of 5, so five electrons are needed; a charge check confirms it. The H<sup>+</sup> and H<sub>2</sub>O in the equation only balance oxygen and hydrogen and do not affect n at all, which is a common point of confusion.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">MnO<sub>4</sub><sup>&minus;</sup> + 8H<sup>+</sup> + 5e<sup>&minus;</sup> &rarr; Mn<sup>2+</sup> + 4H<sub>2</sub>O</span> <span class="why">n = |&Delta;ON of Mn| = 7 &minus; 2 = 5.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In MnO<sub>4</sub><sup>&minus;</sup>: Mn + 4(&minus;2) = &minus;1, so Mn = <b>+7</b>.</div>
+<div class="step">2. The product Mn<sup>2+</sup> has Mn = <b>+2</b>.</div>
+<div class="step">3. The oxidation number falls by 7 &minus; 2 = 5, so <b>n = 5 electrons</b> are gained &mdash; option (a).</div>
+<div class="step">4. Confirm by charge: left side &minus;1 + 8 + n(&minus;1); right side +2.</div>
+<div class="step">5. Set &minus;1 + 8 &minus; n = +2, which gives 7 &minus; n = 2, so n = 5. Consistent.</div>
+<div class="step">6. Atoms also check: 1 Mn, 4 O (as 4 H<sub>2</sub>O), 8 H both sides.</div>
+<pre>
+ Mn in MnO4^- : Mn + 4(-2) = -1 -> +7
+ Mn^2+        : +2
+ n = 7 - 2 = 5
+ charge: -1 + 8 - n = +2 -> n = 5
+ -----------------------------------------
+ MnO4^- + 8H+ + 5e- -> Mn^2+ + 4H2O
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For a permanganate half reaction in acid the electron count is always 5 (Mn: +7&rarr;+2). You never need to balance H and O to get n &mdash; just take the oxidation-number drop of the metal. Contrast neutral or basic media, where MnO<sub>4</sub><sup>&minus;</sup> stops at MnO<sub>2</sub> (Mn +7&rarr;+4) and n is 3 instead; the medium decides the product and so the electron count.</div>
+<div class="final">Answer: (a) 5.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level: Board</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Explain balancing of redox reaction.</td><td class="topic">Balancing redox reactions</td><td><a href="https://www.youtube.com/watch?v=v6D5eETBQk0" target="_blank">Redox Reactions 04 ||Balancing a Chemical Equation By Oxidation Number Method IIT JEE MAINS /NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">Oxidation-number method (6 steps)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A redox equation is balanced when both atoms and charge balance and the electrons lost equal the electrons gained. The oxidation-number method enforces the last condition directly: equate the total rise in oxidation number to the total fall, then tidy up atoms and charge.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">total increase in ON = total decrease in ON</span> <span class="why">This single rule is what makes the electron transfer balanced before H, O and charge are fixed.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write the skeletal equation and assign oxidation numbers to every atom.</div>
+<div class="step">2. <b>Identify</b> the elements whose oxidation numbers change &mdash; one oxidised, one reduced.</div>
+<div class="step">3. Compute the increase per oxidised atom and the decrease per reduced atom.</div>
+<div class="step">4. Multiply each by suitable integers so the <b>total increase equals the total decrease</b>; place these as coefficients on the redox species.</div>
+<div class="step">5. Balance all other atoms, then oxygen with H<sub>2</sub>O and hydrogen with H<sup>+</sup> (acidic) or H<sub>2</sub>O plus OH<sup>&minus;</sup> (basic).</div>
+<div class="step">6. Finally check that total charge is equal on both sides; a correct charge balance confirms the equation.</div>
+<pre>
+ 1 assign ON       4 equalise rise = fall
+ 2 find changed    5 balance other, O(H2O), H
+ 3 rise / fall     6 check total charge
+ -----------------------------------------
+ acidic: H+ for H ;  basic: OH- for charge
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The whole method hinges on step 4: make electrons lost equal electrons gained first, and the rest is plain atom and charge bookkeeping. Balancing H and O before equalising electrons is the usual mistake.</div>
+<div class="final">Answer: Equate total increase and decrease in oxidation number, then balance atoms, H/O and charge.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Balance the reactions/equations by oxidation number method :<br>(a) Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup><sub>(aq)</sub> + SO<sub>3</sub><sup>2&minus;</sup><sub>(aq)</sub> &rarr; Cr<sup>3+</sup><sub>(aq)</sub> + SO<sub>4</sub><sup>2&minus;</sup><sub>(aq)</sub> (acidic).<br>(b) MnO<sub>4</sub><sup>&minus;</sup><sub>(aq)</sub> + Br<sup>&minus;</sup><sub>(aq)</sub> &rarr; MnO<sub>2(s)</sub> + BrO<sub>3</sub><sup>&minus;</sup><sub>(aq)</sub> (basic)<br>(c) H<sub>2</sub>SO<sub>4(aq)</sub> + C<sub>(s)</sub> &rarr; CO<sub>2(g)</sub> + SO<sub>2(g)</sub> + H<sub>2</sub>O<sub>(l)</sub> (acidic).<br>(d) Bi(OH)<sub>3(s)</sub> + Sn(OH)<sub>3</sub><sup>&minus;</sup><sub>(aq)</sub> &rarr; Bi<sub>(s)</sub> + Sn(OH)<sub>6</sub><sup>2&minus;</sup><sub>(aq)</sub> (basic).</td><td class="topic">Balancing acidic and basic</td><td><a href="https://www.youtube.com/watch?v=twZQBl2KuTg" target="_blank">Balancing Redox Reaction for Acidic &amp; Basic Medium by Anushka Mam [Vision NEET] #class11chemistry</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">4 balanced equations (see working)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Each part is balanced by equating electrons lost and gained, then fixing O with H<sub>2</sub>O, H with H<sup>+</sup> (acidic) or with H<sub>2</sub>O and OH<sup>&minus;</sup> (basic). Watch the medium stated after each equation &mdash; it decides the final H/charge step.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n(oxidised) &times; &Delta;ON = n(reduced) &times; &Delta;ON</span> <span class="why">The coefficients come from matching these electron totals; atoms follow.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (a) Cr: +6&rarr;+3 (3e<sup>&minus;</sup> each, 6 per dichromate); S: +4&rarr;+6 (2e<sup>&minus;</sup>). 6/2 &rarr; 3 SO<sub>3</sub><sup>2&minus;</sup>.</div>
+<div class="step">2. (a) result: Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + 3 SO<sub>3</sub><sup>2&minus;</sup> + 8 H<sup>+</sup> &rarr; 2 Cr<sup>3+</sup> + 3 SO<sub>4</sub><sup>2&minus;</sup> + 4 H<sub>2</sub>O.</div>
+<div class="step">3. (b, basic) Mn: +7&rarr;+4 (3e<sup>&minus;</sup>); Br: &minus;1&rarr;+5 (6e<sup>&minus;</sup>). 2 MnO<sub>4</sub><sup>&minus;</sup> per Br<sup>&minus;</sup>: 2 MnO<sub>4</sub><sup>&minus;</sup> + Br<sup>&minus;</sup> + H<sub>2</sub>O &rarr; 2 MnO<sub>2</sub> + BrO<sub>3</sub><sup>&minus;</sup> + 2 OH<sup>&minus;</sup>.</div>
+<div class="step">4. (c, acidic) C: 0&rarr;+4 (4e<sup>&minus;</sup>); S: +6&rarr;+4 (2e<sup>&minus;</sup>). 1 C per 2 S: 2 H<sub>2</sub>SO<sub>4</sub> + C &rarr; CO<sub>2</sub> + 2 SO<sub>2</sub> + 2 H<sub>2</sub>O.</div>
+<div class="step">5. (d, basic) Bi: +3&rarr;0 (3e<sup>&minus;</sup>); Sn: +2&rarr;+4 (2e<sup>&minus;</sup>). 2 Bi per 3 Sn: 2 Bi(OH)<sub>3</sub> + 3 Sn(OH)<sub>3</sub><sup>&minus;</sup> + 3 OH<sup>&minus;</sup> &rarr; 2 Bi + 3 Sn(OH)<sub>6</sub><sup>2&minus;</sup>.</div>
+<div class="step">6. Each is checked for atoms and charge; e.g. (d) charge &minus;6 = &minus;6, (b) charge &minus;3 = &minus;3.</div>
+<pre>
+ (a) Cr2O7^2- +3SO3^2- +8H+ ->
+       2Cr^3+ +3SO4^2- +4H2O
+ (b) 2MnO4^- +Br- +H2O ->
+       2MnO2 +BrO3^- +2OH-
+ (c) 2H2SO4 +C -> CO2 +2SO2 +2H2O
+ (d) 2Bi(OH)3 +3Sn(OH)3^- +3OH- ->
+       2Bi +3Sn(OH)6^2-
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Fix the electron ratio from &Delta;ON first (6:2, 3:6, 4:2, 3:2); the odd coefficients drop out at once. Only then add H<sub>2</sub>O/OH<sup>&minus;</sup> for the stated basic cases.</div>
+<div class="final">Answer: (a) 1/3/8&rarr;2/3/4; (b) 2/1/1&rarr;2/1/2; (c) 2/1&rarr;1/2/2; (d) 2/3/3&rarr;2/3.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Balance the following equation for the redox reaction in acidic medium by oxidation number method : MnO<sub>4</sub><sup>&minus;</sup><sub>(aq)</sub> + SO<sub>3</sub><sup>2&minus;</sup><sub>(aq)</sub> &rarr; Mn<sup>2+</sup> + SO<sub>4</sub><sup>2&minus;</sup>. Balance the following redox equations by oxidation number method. The reactions occur in acidic medium.</td><td class="topic">Acidic medium balancing</td><td><a href="https://www.youtube.com/watch?v=v6D5eETBQk0" target="_blank">Redox Reactions 04 ||Balancing a Chemical Equation By Oxidation Number Method IIT JEE MAINS /NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">2MnO4&minus; + 5SO3&sup2;&minus; + 6H&#8314; &rarr; 2Mn&sup2;&#8314; + 5SO4&sup2;&minus; + 3H2O</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Permanganate oxidises sulphite in acid. Mn drops +7&rarr;+2 (gains 5 e<sup>&minus;</sup>) and S rises +4&rarr;+6 (loses 2 e<sup>&minus;</sup>). Matching electrons fixes the 2:5 ratio; then H<sup>+</sup> and H<sub>2</sub>O balance O, H and charge.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">5 &times; (loss 2) = 2 &times; (gain 5) = 10 electrons</span> <span class="why">LCM of 5 and 2 is 10, giving 2 MnO<sub>4</sub><sup>&minus;</sup> and 5 SO<sub>3</sub><sup>2&minus;</sup>.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Mn: +7 in MnO<sub>4</sub><sup>&minus;</sup> &rarr; +2 in Mn<sup>2+</sup>, gain of 5 electrons each.</div>
+<div class="step">2. S: +4 in SO<sub>3</sub><sup>2&minus;</sup> &rarr; +6 in SO<sub>4</sub><sup>2&minus;</sup>, loss of 2 electrons each.</div>
+<div class="step">3. Balance electrons: 2 Mn (10 gained) with 5 S (10 lost), so 2 MnO<sub>4</sub><sup>&minus;</sup> + 5 SO<sub>3</sub><sup>2&minus;</sup>.</div>
+<div class="step">4. Write 2 MnO<sub>4</sub><sup>&minus;</sup> + 5 SO<sub>3</sub><sup>2&minus;</sup> &rarr; 2 Mn<sup>2+</sup> + 5 SO<sub>4</sub><sup>2&minus;</sup>; charges left &minus;12, right &minus;6.</div>
+<div class="step">5. Add 6 H<sup>+</sup> on the left to balance charge (&minus;12 + 6 = &minus;6).</div>
+<div class="step">6. Balance O and H with 3 H<sub>2</sub>O on the right: O left 8 + 15 = 23 = 20 + 3; H 6 = 6.</div>
+<pre>
+ Mn: +7 -> +2  gain 5 e-
+ S : +4 -> +6  lose 2 e-
+ LCM 10 -> 2 Mn , 5 S
+ -----------------------------------------
+ 2MnO4^- +5SO3^2- +6H+ ->
+    2Mn^2+ +5SO4^2- +3H2O
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The MnO<sub>4</sub><sup>&minus;</sup>(5e<sup>&minus;</sup>)/SO<sub>3</sub><sup>2&minus;</sup>(2e<sup>&minus;</sup>) pair always gives the 2:5 ratio. Add H<sup>+</sup> last to balance charge, then water follows automatically &mdash; no guesswork on coefficients.</div>
+<div class="final">Answer: 2 MnO<sub>4</sub><sup>&minus;</sup> + 5 SO<sub>3</sub><sup>2&minus;</sup> + 6 H<sup>+</sup> &rarr; 2 Mn<sup>2+</sup> + 5 SO<sub>4</sub><sup>2&minus;</sup> + 3 H<sub>2</sub>O.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 1</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">What is the first step in the oxidation number method of balancing redox reactions?<br>(a) Balance oxygen atoms &nbsp; (b) Identify oxidation number changes &nbsp; (c) Balance hydrogen atoms &nbsp; (d) Add H<sub>2</sub>O molecules</td><td class="topic">Oxidation number method steps</td><td><a href="https://www.youtube.com/watch?v=v6D5eETBQk0" target="_blank">Redox Reactions 04 ||Balancing a Chemical Equation By Oxidation Number Method IIT JEE MAINS /NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> Identify oxidation number changes</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The oxidation-number method begins by assigning oxidation numbers and seeing which atoms changed. Balancing oxygen or hydrogen comes only after the electron transfer is settled, so those options cannot be the first step. This is the same idea as Suggested-Problem 1 phrased differently: three of the four choices are later steps, and only recognising the redox pair can come first.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Step 1: assign ON &rarr; identify the changes</span> <span class="why">The redox pair must be known before any atom or charge balancing starts.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Over the skeletal equation, assign an oxidation number to every atom.</div>
+<div class="step">2. Compare the two sides and <b>identify the oxidation-number changes</b> &mdash; which element is oxidised and which reduced. That is option <b>(b)</b>.</div>
+<div class="step">3. Balancing oxygen, option (a), uses H<sub>2</sub>O and belongs to the later atom-balancing stage.</div>
+<div class="step">4. Balancing hydrogen, option (c), with H<sup>+</sup> or OH<sup>&minus;</sup>, is later still.</div>
+<div class="step">5. Adding H<sub>2</sub>O molecules, option (d), is part of that same later oxygen/hydrogen step.</div>
+<div class="step">6. So the method opens by identifying the atoms whose oxidation numbers change.</div>
+<pre>
+ 1. assign ON -> identify changes   &lt;-- (b)
+ 2. find increase / decrease
+ 3. equalise electrons
+ 4. balance O (H2O), then H (H+/OH-)
+ 5. check charge
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Any option about balancing H or O is automatically a <i>later</i> step. The method always starts at the electrons: find who changed oxidation number first. If two options both mention atom balancing (here (a), (c) and (d) all do), the odd one out &mdash; identifying the change &mdash; is almost always the intended first step.</div>
+<div class="final">Answer: (b) Identify oxidation number changes.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">How is the total increase and decrease in oxidation numbers handled?<br>(a) Set total increase equal to total decrease &nbsp; (b) Ignore it &nbsp; (c) Balance only hydrogen &nbsp; (d) Balance only oxygen</td><td class="topic">Oxidation number method steps</td><td><a href="https://www.youtube.com/watch?v=v6D5eETBQk0" target="_blank">Redox Reactions 04 ||Balancing a Chemical Equation By Oxidation Number Method IIT JEE MAINS /NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> Set total increase equal to total decrease</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Electrons are conserved in a redox change: every electron lost by the reducing agent is taken by the oxidising agent. In the oxidation-number method this conservation is imposed by making the total rise in oxidation number equal the total fall. &quot;Total&quot; matters because it counts every atom that changes, so a coefficient multiplies both the per-atom change and the number of atoms in the formula.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">total increase in ON = total decrease in ON</span> <span class="why">Equivalent to electrons lost = electrons gained; it sets the redox coefficients.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. The oxidised element&rsquo;s oxidation number rises; the reduced element&rsquo;s falls.</div>
+<div class="step">2. Multiply each by whole numbers so the <b>total increase equals the total decrease</b> &mdash; option <b>(a)</b>.</div>
+<div class="step">3. This is just electron conservation: electrons lost must equal electrons gained.</div>
+<div class="step">4. Option (b), ignoring it, would leave the electron transfer unbalanced &mdash; wrong.</div>
+<div class="step">5. Options (c) and (d), balancing only hydrogen or only oxygen, skip the electron step entirely and come later.</div>
+<div class="step">6. So the increase and decrease are set equal, fixing the coefficients of the redox species.</div>
+<pre>
+ oxidised: ON up by a (per atom)
+ reduced : ON down by b (per atom)
+ choose n,m so  n*a = m*b   &lt;-- (a)
+ -----------------------------------------
+ = electrons lost = electrons gained
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> &quot;Increase = decrease&quot; is the heart of the method and the same thing as &quot;electrons lost = electrons gained&quot;. Get this ratio and the hard part is done; H and O are routine afterwards. Option (b) &quot;ignore it&quot; is a decoy that would violate electron conservation, and (c)/(d) jump ahead to atom balancing before the electrons are even matched.</div>
+<div class="final">Answer: (a) Set total increase equal to total decrease.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">What is added to balance oxygen atoms in acidic medium?<br>(a) OH<sup>&minus;</sup> &nbsp; (b) O<sub>2</sub> &nbsp; (c) H<sub>2</sub>O &nbsp; (d) H<sup>+</sup></td><td class="topic">Acidic medium balancing</td><td><a href="https://www.youtube.com/watch?v=v6D5eETBQk0" target="_blank">Redox Reactions 04 ||Balancing a Chemical Equation By Oxidation Number Method IIT JEE MAINS /NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> H₂O</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In the ion-electron (half-reaction) method the solvent supplies the missing O and H atoms. In <b>acidic</b> medium the oxygen-deficient side is topped up with water, and the extra hydrogen that water brings is settled afterwards with H<sup>+</sup>. Hydroxide ion belongs to the <i>basic</i> route, while O<sub>2</sub> and bare H<sup>+</sup> cannot patch an oxygen shortfall.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">balance O &rarr; add H<sub>2</sub>O to the O-poor side; then balance H &rarr; add H<sup>+</sup></span> <span class="why">one H<sub>2</sub>O per missing O atom, one H<sup>+</sup> per missing H atom.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Fixed order of a half-reaction: balance the main atom first, then O, then H, then charge with electrons.</div>
+<div class="step">2. Count O on both sides; the side short of oxygen receives <b>H<sub>2</sub>O</b>, one molecule for every missing O atom. <span class="why">Water is the only oxygen carrier present in acidic solution.</span></div>
+<div class="step">3. Adding water injects extra H atoms, so hydrogen is balanced in the very next step by placing <b>H<sup>+</sup></b> on the opposite side.</div>
+<div class="step">4. Worked case: MnO<sub>4</sub><sup>-</sup> &rarr; Mn<sup>2+</sup> loses 4 O, so write 4 H<sub>2</sub>O on the right, which then forces 8 H<sup>+</sup> on the left.</div>
+<div class="step">5. Rejecting distractors: (a) OH<sup>-</sup> is the basic-medium reagent, (b) O<sub>2</sub> is never a balancing species, (d) H<sup>+</sup> balances H not O. Oxygen is balanced by <b>H<sub>2</sub>O</b>.</div>
+<pre>
+ acidic medium balancing:
+   step O : add H2O to O-deficient side
+   step H : add H+  to balance hydrogen
+ e.g. MnO4- + 8H+ -> Mn2+ + 4H2O
+          O supplied by H2O -----^
+ ------------------------------------------
+ oxygen is balanced by : H2O        (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Pair them up: acidic = H<sub>2</sub>O then H<sup>+</sup>; basic = H<sub>2</sub>O then OH<sup>-</sup>. Water always carries the oxygen; the charged species only mops up the leftover hydrogen. Choosing (d) confuses the O-step with the later H-step.</div>
+<div class="final">Answer: (c) H<sub>2</sub>O.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">In basic medium, how are hydrogen atoms balanced?<br>(a) Add H<sub>2</sub>O and OH<sup>&minus;</sup> &nbsp; (b) Add H<sub>2</sub> &nbsp; (c) Add HCl &nbsp; (d) Add electrons</td><td class="topic">Basic medium balancing</td><td><a href="https://www.youtube.com/watch?v=uZ3cVRFatsE" target="_blank">Balancing redox reaction by oxidation number method(Basic medium)</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> Add H₂O and OH⁻</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In <b>basic</b> medium there is no free H<sup>+</sup> to add, so hydrogen is balanced with the pair <b>H<sub>2</sub>O + OH<sup>-</sup></b>. For each hydrogen needed you add one H<sub>2</sub>O on the side that is short of H and one OH<sup>-</sup> on the other side, so that atoms and charge both settle. H<sub>2</sub>, HCl and electrons play no part in atom balancing here.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">for each missing H: add one H<sub>2</sub>O to the H-poor side and one OH<sup>-</sup> to the opposite side</span> <span class="why">H<sub>2</sub>O donates the H while OH<sup>-</sup> keeps O and charge balanced.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In an alkaline solution the dominant ion is OH<sup>-</sup>, so the hydrogen-balancing reagents must be built from water and hydroxide, not from acidic H<sup>+</sup>.</div>
+<div class="step">2. A common shortcut: first balance as in acid, then add equal OH<sup>-</sup> to both sides to neutralise every H<sup>+</sup>; H<sup>+</sup> + OH<sup>-</sup> &rarr; H<sub>2</sub>O. <span class="why">This converts H<sup>+</sup> into H<sub>2</sub>O and leaves spare OH<sup>-</sup>.</span></div>
+<div class="step">3. The net effect is exactly option (a): water appears on one side and hydroxide on the other.</div>
+<div class="step">4. Example: in base, the O/H balancing of a half-reaction places H<sub>2</sub>O on the H-deficient side and OH<sup>-</sup> opposite, keeping the overall charge correct.</div>
+<div class="step">5. Rejecting distractors: (b) H<sub>2</sub> is not a balancing species, (c) HCl would add chloride and acidify, (d) electrons balance charge, not hydrogen. So <b>(a)</b> is correct.</div>
+<pre>
+ basic medium, balance H:
+   add  H2O   to  H-deficient side
+   add  OH-   to  the opposite side
+ ------------------------------------------
+ (acid-first trick)  H+ + OH- -> H2O
+ ------------------------------------------
+ hydrogen balanced by : H2O and OH-  (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Never write bare H<sup>+</sup> in a basic half-reaction. The fastest route is to balance in acid, then neutralise every H<sup>+</sup> by adding the same number of OH<sup>-</sup> to both sides and collapsing H<sup>+</sup>+OH<sup>-</sup> into H<sub>2</sub>O.</div>
+<div class="final">Answer: (a) Add H<sub>2</sub>O and OH<sup>-</sup>.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">What is done after balancing atoms other than hydrogen and oxygen?<br>(a) Multiply entire equation &nbsp; (b) Balance charges &nbsp; (c) Balance H and O &nbsp; (d) Balance electrons</td><td class="topic">Oxidation number method steps</td><td><a href="https://www.youtube.com/watch?v=v6D5eETBQk0" target="_blank">Redox Reactions 04 ||Balancing a Chemical Equation By Oxidation Number Method IIT JEE MAINS /NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> Balance H and O</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The ion-electron method follows a fixed sequence. Once the element being oxidised or reduced (and any other atoms apart from H and O) is balanced, the <b>next</b> step is to balance oxygen and hydrogen using the medium. Only after all atoms match do we balance charge with electrons and finally combine the half-reactions. The order is what this question tests.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">main atom &rarr; balance O and H &rarr; balance charge (e<sup>-</sup>) &rarr; add &amp; multiply half-reactions</span> <span class="why">atoms must all balance before charge can be balanced meaningfully.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Split the reaction into oxidation and reduction half-reactions.</div>
+<div class="step">2. Balance the principal atom and any element other than H and O first.</div>
+<div class="step">3. <b>Next, balance O and H</b>: O with H<sub>2</sub>O, then H with H<sup>+</sup> (acidic) or with H<sub>2</sub>O/OH<sup>-</sup> (basic). <span class="why">This is the step asked for &mdash; option (c).</span></div>
+<div class="step">4. Only then balance the charge by adding electrons to the more positive side.</div>
+<div class="step">5. Finally multiply the halves so electrons cancel, then add them. Hence (a) multiply and (d) balance electrons come <i>later</i>, and (b) balance charges is the step after H and O, not before.</div>
+<pre>
+ ion-electron method, correct order:
+   1. balance main / other atoms
+   2. balance O and H     <-- this step  (c)
+   3. balance charge with electrons
+   4. multiply and add half-reactions
+ ------------------------------------------
+ step right after other atoms : balance H and O
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Memorise the chain "atoms &rarr; O/H &rarr; charge &rarr; combine". Electrons (d) and multiplying (a) are always the tail of the process, so any option naming them cannot be the step that immediately follows atom balancing.</div>
+<div class="final">Answer: (c) Balance H and O.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 2</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">In a reaction, Fe<sup>2+</sup> is converted to Fe<sup>3+</sup>. How many electrons are lost per Fe atom?<br>(a) 1 &nbsp; (b) 2 &nbsp; (c) 3 &nbsp; (d) 0</td><td class="topic">Electrons lost in oxidation</td><td><a href="https://www.youtube.com/watch?v=9pa2Mv9HxUU" target="_blank">WCLN - Chemistry - REDOX - number of electrons transferred</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Oxidation is loss of electrons, and the number of electrons lost by one atom equals the rise in its oxidation number. Iron goes from the +2 state to the +3 state, an increase of one unit, so exactly one electron leaves each iron atom. For a bare monatomic ion the charge <i>is</i> the oxidation number, which makes the count direct &mdash; no oxygen or hydrogen bookkeeping is needed. This one-electron step is why Fe<sup>2+</sup>/Fe<sup>3+</sup> has an n-factor of 1.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons lost = (final ON) &minus; (initial ON) = (+3) &minus; (+2) = 1</span> <span class="why">loss of electrons raises the oxidation number by the same amount.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Identify the states: initial Fe<sup>2+</sup> has ON = +2, final Fe<sup>3+</sup> has ON = +3.</div>
+<div class="step">2. The change in oxidation number is (+3) &minus; (+2) = <b>+1</b>, a rise, confirming oxidation.</div>
+<div class="step">3. Each unit rise in ON corresponds to one electron given away, so electrons lost per Fe = <b>1</b>. <span class="why">e<sup>-</sup> carry negative charge, so losing one raises charge by +1.</span></div>
+<div class="step">4. Half-reaction: Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup> + e<sup>-</sup>, showing a single electron on the product side.</div>
+<div class="step">5. Sanity check: electrons lost must be a small whole number equal to the charge increase, and +3 &minus; +2 leaves no room for more than one.</div>
+<div class="step">6. So (b) 2 and (c) 3 overshoot the one-unit change, and (d) 0 would mean no reaction at all. The answer is <b>1</b>.</div>
+<pre>
+ Fe2+  ->  Fe3+  +  e-
+ ------------------------------------------
+ ON change = (+3) - (+2) = +1
+ electrons lost per Fe atom = 1     (a)
+ n-factor of Fe2+/Fe3+ = 1
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For a simple ion the oxidation number equals its charge, so just subtract the charges: +3 minus +2 is 1 electron. No structure or oxygen bookkeeping is needed when both species are bare ions, and this single electron is what makes ferrous&ndash;ferric a one-equivalent couple in titrations.</div>
+<div class="final">Answer: (a) 1.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Calculate total electrons lost if 2 atoms of Fe are oxidized from Fe<sup>2+</sup> to Fe<sup>3+</sup>.<br>(a) 1 &nbsp; (b) 2 &nbsp; (c) 3 &nbsp; (d) 4</td><td class="topic">Electrons lost in oxidation</td><td><a href="https://www.youtube.com/watch?v=9pa2Mv9HxUU" target="_blank">WCLN - Chemistry - REDOX - number of electrons transferred</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Each iron atom oxidised from Fe<sup>2+</sup> to Fe<sup>3+</sup> gives up one electron, because the oxidation number rises by one unit. Electron transfer is an <i>extensive</i> count: for a group of atoms the total is simply the per-atom value multiplied by the number of atoms, so two atoms release twice as many electrons as one. The per-atom figure never changes; only the tally grows.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">total e<sup>-</sup> lost = (e<sup>-</sup> per atom) &times; (number of atoms) = 1 &times; 2 = 2</span> <span class="why">electron loss scales linearly with the number of atoms oxidised.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Per-atom change: Fe<sup>2+</sup> (ON +2) &rarr; Fe<sup>3+</sup> (ON +3) is a one-unit rise, so one electron per atom.</div>
+<div class="step">2. Write the half-reaction for one atom: Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup> + e<sup>-</sup>.</div>
+<div class="step">3. Scale to two atoms: 2 Fe<sup>2+</sup> &rarr; 2 Fe<sup>3+</sup> + 2 e<sup>-</sup>. <span class="why">Multiply every species, electrons included, by 2.</span></div>
+<div class="step">4. Total electrons lost = 1 &times; 2 = <b>2</b>.</div>
+<div class="step">5. Cross-check by charge: left side 2 Fe<sup>2+</sup> is +4, right side 2 Fe<sup>3+</sup> is +6, and the 2 electrons make up the difference of &minus;2.</div>
+<div class="step">6. So (a) 1 counts only one atom, while (c) 3 and (d) 4 overcount; the correct total is <b>2</b>.</div>
+<pre>
+ one atom  : Fe2+ -> Fe3+ + e-     (1 e-)
+ two atoms : 2Fe2+ -> 2Fe3+ + 2e-
+ charge    : +4 (left) vs +6 (right) -> 2e-
+ ------------------------------------------
+ total electrons lost = 1 x 2 = 2   (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Electrons transferred are additive across atoms: find the per-atom value once, then multiply by how many atoms react. This same scaling turns a half-reaction into the whole balanced equation, and the charge difference between the two sides is a quick independent check on the electron count.</div>
+<div class="final">Answer: (b) 2.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">In the reaction MnO<sub>4</sub><sup>&minus;</sup> &rarr; Mn<sup>2+</sup>, what is the total change in oxidation number?<br>(a) 5 &nbsp; (b) 7 &nbsp; (c) 2 &nbsp; (d) 3</td><td class="topic">Oxidation number change</td><td><a href="https://www.youtube.com/watch?v=pUDWcfDQS2Q" target="_blank">n Factor Calculate in Redox Reaction : JEE Mains April 2025</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In permanganate the four oxygen atoms fix the oxidation number of manganese by charge balance. With four O at &minus;2 and an overall ion charge of &minus;1, Mn must be +7, its highest state. It is reduced to Mn<sup>2+</sup> (ON +2), so the oxidation number falls by five units &mdash; the total change asked for, which also equals the electrons gained per Mn and the n-factor in acidic medium.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Mn in MnO<sub>4</sub><sup>-</sup>: Mn + 4(&minus;2) = &minus;1 &rArr; Mn = +7; change = 7 &minus; 2 = 5</span> <span class="why">sum of oxidation numbers equals the ion charge.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let the ON of Mn be x in MnO<sub>4</sub><sup>-</sup>; oxygen is &minus;2 each.</div>
+<div class="step">2. Charge balance: x + 4(&minus;2) = &minus;1, so x &minus; 8 = &minus;1 and x = <b>+7</b>.</div>
+<div class="step">3. The product Mn<sup>2+</sup> has ON = +2. <span class="why">For a monatomic ion the ON equals its charge.</span></div>
+<div class="step">4. Total change in oxidation number = 7 &minus; 2 = <b>5</b>, a decrease, so Mn is reduced.</div>
+<div class="step">5. This change of 5 also equals the electrons gained per Mn, confirmed by the half-reaction MnO<sub>4</sub><sup>-</sup> + 8 H<sup>+</sup> + 5 e<sup>-</sup> &rarr; Mn<sup>2+</sup> + 4 H<sub>2</sub>O.</div>
+<div class="step">6. So (b) 7 is the starting ON not the change, (c) 2 is the final ON, (d) 3 is wrong; the change is <b>5</b>.</div>
+<pre>
+ MnO4- :  x + 4(-2) = -1  ->  x = +7
+ Mn2+  :  ON = +2
+ ------------------------------------------
+ change = (+7) - (+2) = 5           (a)
+ MnO4- + 8H+ + 5e- -> Mn2+ + 4H2O
+ ( = 5 electrons gained per Mn )
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The +7 &rarr; +2 drop of permanganate (5 electrons) is a number worth memorising &mdash; it sets its n-factor of 5 in acidic titrations. Do not mistake the initial ON (+7) for the change (5).</div>
+<div class="final">Answer: (a) 5.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">In Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> &rarr; Cr<sup>3+</sup>, what is the change in oxidation number per Cr atom?<br>(a) 3 &nbsp; (b) 6 &nbsp; (c) 2 &nbsp; (d) 4</td><td class="topic">Oxidation number change</td><td><a href="https://www.youtube.com/watch?v=pUDWcfDQS2Q" target="_blank">n Factor Calculate in Redox Reaction : JEE Mains April 2025</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In dichromate the two chromium atoms share the ionic charge, and oxygen at &minus;2 fixes their oxidation number at +6 each. Reduction to Cr<sup>3+</sup> (ON +3) lowers each chromium by three units, so the change <i>per Cr atom</i> is 3. Reading the change per atom rather than for the whole ion is the trap, because the ion contains two chromiums and its n-factor of 6 counts both.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Cr in Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>: 2x + 7(&minus;2) = &minus;2 &rArr; x = +6; change = 6 &minus; 3 = 3</span> <span class="why">split the ion charge over the two Cr atoms.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let each Cr have ON = x; oxygen is &minus;2 in dichromate.</div>
+<div class="step">2. Charge balance: 2x + 7(&minus;2) = &minus;2, so 2x &minus; 14 = &minus;2 and 2x = 12, giving x = <b>+6</b>.</div>
+<div class="step">3. The product Cr<sup>3+</sup> has ON = +3. <span class="why">Monatomic ion, so ON equals the charge.</span></div>
+<div class="step">4. Change per Cr atom = 6 &minus; 3 = <b>3</b>, a decrease, so each Cr is reduced and gains 3 electrons.</div>
+<div class="step">5. Cross-check: the ion as a whole changes by 6 (its n-factor), and dividing by its 2 Cr atoms returns 3 per atom.</div>
+<div class="step">6. So (b) 6 is the change for both Cr atoms together (2 &times; 3), (c) 2 and (d) 4 are wrong; per atom it is <b>3</b>.</div>
+<pre>
+ Cr2O7^2- : 2x + 7(-2) = -2 -> x = +6
+ Cr3+     : ON = +3
+ ------------------------------------------
+ per Cr change = (+6) - (+3) = 3    (a)
+ both Cr together = 2 x 3 = 6 (n-factor)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Dichromate carries 2 Cr, so watch "per atom" versus "per ion": 3 per Cr but 6 electrons for the whole ion. The ion's n-factor of 6 comes from this total, a classic distractor split.</div>
+<div class="final">Answer: (a) 3.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">In a redox reaction, H<sub>2</sub>S changes S from &minus;2 to 0. What is the number of electrons lost per sulfur atom?<br>(a) 0 &nbsp; (b) 1 &nbsp; (c) 2 &nbsp; (d) 3</td><td class="topic">Electrons lost in oxidation</td><td><a href="https://www.youtube.com/watch?v=9pa2Mv9HxUU" target="_blank">WCLN - Chemistry - REDOX - number of electrons transferred</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In H<sub>2</sub>S hydrogen is +1, so by charge balance sulphur sits at its lowest state, &minus;2. When it is oxidised to free sulphur (ON 0, because a free element is always zero) its oxidation number rises by two units. Electrons lost equal that rise, so each sulphur atom gives up two electrons. The trap is the sign: crossing from a negative number up to zero is still a rise of two, not of nothing.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons lost = (final ON) &minus; (initial ON) = 0 &minus; (&minus;2) = 2</span> <span class="why">a rise in oxidation number equals electrons released.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. ON of S in H<sub>2</sub>S: 2(+1) + S = 0, so S = <b>&minus;2</b>.</div>
+<div class="step">2. The product is elemental sulphur, S<sup>0</sup>, with ON = 0. <span class="why">A free element always has oxidation number zero.</span></div>
+<div class="step">3. Change = 0 &minus; (&minus;2) = <b>+2</b>, an increase, so sulphur is oxidised.</div>
+<div class="step">4. Electrons lost per S atom = size of the rise = <b>2</b>.</div>
+<div class="step">5. Half-reaction: S<sup>2&minus;</sup> &rarr; S + 2 e<sup>-</sup>, whose charge balance (&minus;2 on the left, 0 + 2 e<sup>-</sup> = &minus;2 on the right) confirms two electrons.</div>
+<div class="step">6. So (a) 0 and (b) 1 undercount, (d) 3 overcounts; the answer is <b>2</b>.</div>
+<pre>
+ H2S : 2(+1) + S = 0  ->  S = -2
+ S (element)         ->  ON = 0
+ ------------------------------------------
+ e- lost = 0 - (-2) = 2             (c)
+ S^2-  ->  S  +  2e-
+ charge: -2  =  0 + (2 x -1)  OK
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Crossing from a negative ON to zero still counts as a rise: 0 minus (&minus;2) is +2, not 2 minus 0. Sign slips here are the most common error, turning the real answer 2 into a wrong 0. The same two-electron oxidation of sulphide underlies why H<sub>2</sub>S is a good reducing agent.</div>
+<div class="final">Answer: (c) 2.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 3</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">If MnO<sub>4</sub><sup>&minus;</sup> is reduced to Mn<sup>2+</sup>, how many electrons are gained per Mn atom and what is the change in oxidation number for 2 Mn atoms?<br>(a) 5 and 10 &nbsp; (b) 3 and 6 &nbsp; (c) 5 and 5 &nbsp; (d) 2 and 4</td><td class="topic">Electrons in reduction</td><td><a href="https://www.youtube.com/watch?v=pUDWcfDQS2Q" target="_blank">n Factor Calculate in Redox Reaction : JEE Mains April 2025</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 5 and 10</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Permanganate manganese is +7 (four O at &minus;2 in a &minus;1 ion). Reduced to Mn<sup>2+</sup> it falls to +2, a five-unit drop, so each Mn gains five electrons. For two Mn atoms the total oxidation-number change is twice that, namely ten. The question wants both figures, so keep the per-atom electron count and the two-atom total in separate slots &mdash; mixing them is exactly what the distractors exploit.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">per Mn: 7 &minus; 2 = 5 e<sup>-</sup>; for 2 Mn: 2 &times; 5 = 10</span> <span class="why">electron gain per atom times the number of atoms.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Find Mn in MnO<sub>4</sub><sup>-</sup>: x + 4(&minus;2) = &minus;1, so x = <b>+7</b>.</div>
+<div class="step">2. Product Mn<sup>2+</sup> has ON = +2.</div>
+<div class="step">3. Per-atom change = 7 &minus; 2 = <b>5</b>, so 5 electrons are gained per Mn (reduction). <span class="why">A fall in ON equals electrons taken in.</span></div>
+<div class="step">4. Half-reaction: MnO<sub>4</sub><sup>-</sup> + 8 H<sup>+</sup> + 5 e<sup>-</sup> &rarr; Mn<sup>2+</sup> + 4 H<sub>2</sub>O.</div>
+<div class="step">5. For 2 Mn atoms the total change = 2 &times; 5 = <b>10</b>.</div>
+<div class="step">6. So the pair is <b>5 and 10</b>: (b) 3 and 6 misreads the ON of Mn, (c) 5 and 5 forgets to double, and (d) 2 and 4 is wrong on both counts.</div>
+<pre>
+ MnO4- : x + 4(-2) = -1  ->  x = +7
+ Mn2+  : ON = +2
+ ------------------------------------------
+ per Mn  : 7 - 2 = 5 electrons gained
+ two Mn  : 2 x 5 = 10 total ON change (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Keep "per atom" and "for n atoms" in separate columns: 5 electrons per Mn, 10 for two. The distractor (c) 5 and 5 forgets to double the second figure, while (b) betrays a wrong ON of +5 for Mn. The permanganate 5-electron drop is worth memorising as its acidic-medium n-factor.</div>
+<div class="final">Answer: (a) 5 and 10.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">In the reaction Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup>, calculate the total increase in oxidation number when 3 Fe atoms are oxidized.<br>(a) 2 &nbsp; (b) 3 &nbsp; (c) 1 &nbsp; (d) 6</td><td class="topic">Oxidation number change</td><td><a href="https://www.youtube.com/watch?v=9pa2Mv9HxUU" target="_blank">WCLN - Chemistry - REDOX - number of electrons transferred</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Each iron oxidised from Fe<sup>2+</sup> to Fe<sup>3+</sup> rises by one unit in oxidation number, releasing one electron. The <i>total</i> increase for several atoms is the per-atom rise times the number of atoms, so three iron atoms give a combined increase of three. This total change also equals the total electrons the iron supplies to whatever oxidant it reduces.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">total increase = (per-atom &Delta;ON) &times; (atoms) = 1 &times; 3 = 3</span> <span class="why">oxidation-number change is additive over atoms.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Per atom: Fe<sup>2+</sup> (ON +2) &rarr; Fe<sup>3+</sup> (ON +3), a rise of +1.</div>
+<div class="step">2. This equals one electron lost per iron atom.</div>
+<div class="step">3. For three atoms, multiply: 3 &times; (+1) = <b>+3</b>. <span class="why">Each atom contributes its own one-unit rise independently.</span></div>
+<div class="step">4. Scaled half-reaction: 3 Fe<sup>2+</sup> &rarr; 3 Fe<sup>3+</sup> + 3 e<sup>-</sup>, which also shows 3 electrons released.</div>
+<div class="step">5. Cross-check by charge on the scaled half-reaction: left 3 Fe<sup>2+</sup> = +6, right 3 Fe<sup>3+</sup> = +9, the +3 difference carried by 3 electrons.</div>
+<div class="step">6. So (a) 2 and (c) 1 undercount, (d) 6 doubles wrongly (that would need a 2-unit change per atom); the total increase is <b>3</b>.</div>
+<pre>
+ per Fe : (+3) - (+2) = +1
+ 3 Fe   : 3 x (+1) = +3
+ ------------------------------------------
+ 3Fe2+ -> 3Fe3+ + 3e-
+ charge : +6 -> +9, diff = 3 (3 e-)
+ total increase in ON = 3           (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> "Total increase in oxidation number" over n atoms is just n times the per-atom change, and it equals the total electrons transferred. Here 3 atoms &times; 1 unit = 3, no oxygen bookkeeping needed.</div>
+<div class="final">Answer: (b) 3.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> is reduced to Cr<sup>3+</sup>. Calculate the total electrons gained by 2 Cr atoms.<br>(a) 4 &nbsp; (b) 5 &nbsp; (c) 6 &nbsp; (d) 2</td><td class="topic">Electrons in reduction</td><td><a href="https://www.youtube.com/watch?v=pUDWcfDQS2Q" target="_blank">n Factor Calculate in Redox Reaction : JEE Mains April 2025</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Chromium in dichromate is +6 (oxygen at &minus;2, charge split over two Cr). Reduced to Cr<sup>3+</sup> it falls to +3, a three-unit drop, so each Cr gains three electrons. Both chromium atoms together therefore take in six electrons &mdash; the dichromate n-factor of 6, which is why one mole of dichromate oxidises six moles of a one-electron reductant.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">per Cr: 6 &minus; 3 = 3 e<sup>-</sup>; for 2 Cr: 2 &times; 3 = 6</span> <span class="why">electrons gained per atom times number of atoms.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Cr in Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>: 2x + 7(&minus;2) = &minus;2, so 2x = 12 and x = <b>+6</b>.</div>
+<div class="step">2. Product Cr<sup>3+</sup> has ON = +3.</div>
+<div class="step">3. Per-atom change = 6 &minus; 3 = <b>3</b>, a fall, so each Cr gains 3 electrons. <span class="why">Reduction means electrons are taken in.</span></div>
+<div class="step">4. For both Cr atoms: 2 &times; 3 = <b>6</b> electrons.</div>
+<div class="step">5. Half-reaction confirms it: Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + 14 H<sup>+</sup> + 6 e<sup>-</sup> &rarr; 2 Cr<sup>3+</sup> + 7 H<sub>2</sub>O, with exactly 6 electrons on the reactant side.</div>
+<div class="step">6. So (a) 4, (b) 5 and (d) 2 are wrong; the total for both Cr atoms is <b>6</b>.</div>
+<pre>
+ Cr2O7^2- : 2x + 7(-2) = -2 -> x = +6
+ Cr3+     : ON = +3
+ ------------------------------------------
+ per Cr : 6 - 3 = 3 electrons
+ 2 Cr   : 2 x 3 = 6 electrons       (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Dichromate's 6-electron gain fixes its n-factor of 6, the mirror image of permanganate's 5. Remember the whole ion takes 6 even though each Cr only gains 3, so the question's word "2 Cr atoms" points straight at the total, not the per-atom value (a) 3 would give.</div>
+<div class="final">Answer: (c) 6.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">In H<sub>2</sub>S &rarr; S, how many electrons are lost by 2 sulfur atoms and what is the equivalent oxidation number change?<br>(a) 4 electrons and +4 &nbsp; (b) 2 electrons and +4 &nbsp; (c) 4 electrons and +2 &nbsp; (d) 2 electrons and +2</td><td class="topic">Electrons in oxidation</td><td><a href="https://www.youtube.com/watch?v=9pa2Mv9HxUU" target="_blank">WCLN - Chemistry - REDOX - number of electrons transferred</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 4 electrons and +4</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Sulphur in H<sub>2</sub>S is &minus;2; oxidised to free sulphur (ON 0) each atom rises two units and loses two electrons. For two sulphur atoms both the electrons lost and the combined oxidation-number change double, giving four electrons and a total change of +4. Because electrons transferred and total ON change are numerically the same quantity, the correct option must show matching numbers.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">per S: 0 &minus; (&minus;2) = 2 e<sup>-</sup>; for 2 S: 2 &times; 2 = 4 e<sup>-</sup>, total &Delta;ON = +4</span> <span class="why">both quantities scale with the number of atoms.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. ON of S in H<sub>2</sub>S: 2(+1) + S = 0, so S = <b>&minus;2</b>.</div>
+<div class="step">2. Product is elemental S, ON = 0, so per-atom rise = 0 &minus; (&minus;2) = <b>+2</b> (2 electrons lost).</div>
+<div class="step">3. For 2 S atoms, electrons lost = 2 &times; 2 = <b>4</b>. <span class="why">Each atom independently sheds 2 electrons.</span></div>
+<div class="step">4. The equivalent total oxidation-number change = 2 &times; (+2) = <b>+4</b>, matching the 4 electrons.</div>
+<div class="step">5. Half-reaction: 2 S<sup>2&minus;</sup> &rarr; 2 S + 4 e<sup>-</sup>, charge &minus;4 on both sides, confirming four electrons.</div>
+<div class="step">6. So (b) 2 and (d) 2 undercount the electrons, (c) mislabels the total change as +2; the self-consistent pair is <b>4 electrons and +4</b>.</div>
+<pre>
+ H2S : S = -2 ;  S(element) : 0
+ per S : 0 - (-2) = +2  (2 e- lost)
+ ------------------------------------------
+ 2 S : 2 x 2 = 4 electrons lost
+       total ON change = +4         (a)
+ 2S^2- -> 2S + 4e-
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Electrons transferred and total oxidation-number change are numerically equal, so once you have one you have the other. Here both read 4 for two sulphur atoms &mdash; the only self-consistent option.</div>
+<div class="final">Answer: (a) 4 electrons and +4.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">In the balanced redox equation, 2 I<sup>&minus;</sup> &rarr; I<sub>2</sub> and MnO<sub>4</sub><sup>&minus;</sup> &rarr; Mn<sup>2+</sup>, how many electrons are transferred in total if 2 MnO<sub>4</sub><sup>&minus;</sup> are used?<br>(a) 5 &nbsp; (b) 10 &nbsp; (c) 2 &nbsp; (d) 8</td><td class="topic">Electron transfer</td><td><a href="https://www.youtube.com/watch?v=9pa2Mv9HxUU" target="_blank">WCLN - Chemistry - REDOX - number of electrons transferred</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 10</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In the iodide&ndash;permanganate reaction each MnO<sub>4</sub><sup>-</sup> is reduced from +7 to +2, accepting five electrons. The total electrons transferred is set by the number of permanganate ions, so two MnO<sub>4</sub><sup>-</sup> move 2 &times; 5 = 10 electrons, which the iodide side supplies by being oxidised.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">e<sup>-</sup> per MnO<sub>4</sub><sup>-</sup> = 7 &minus; 2 = 5; for 2 MnO<sub>4</sub><sup>-</sup>: 2 &times; 5 = 10</span> <span class="why">each permanganate carries 5 electrons of oxidising power.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Reduction half: MnO<sub>4</sub><sup>-</sup> + 8 H<sup>+</sup> + 5 e<sup>-</sup> &rarr; Mn<sup>2+</sup> + 4 H<sub>2</sub>O, so 5 electrons per Mn.</div>
+<div class="step">2. Oxidation half: 2 I<sup>-</sup> &rarr; I<sub>2</sub> + 2 e<sup>-</sup>, two electrons per iodine molecule.</div>
+<div class="step">3. The electrons taken by permanganate equal those released by iodide; the count is fixed by the permanganate used. <span class="why">Electrons gained = electrons lost in any balanced redox.</span></div>
+<div class="step">4. For 2 MnO<sub>4</sub><sup>-</sup>: total electrons = 2 &times; 5 = <b>10</b>.</div>
+<div class="step">5. These 10 electrons oxidise 10 I<sup>-</sup> into 5 I<sub>2</sub>. So (a) 5 is for one Mn only, (c) 2 and (d) 8 are wrong; the total is <b>10</b>.</div>
+<pre>
+ MnO4- + 8H+ + 5e- -> Mn2+ + 4H2O   (5 e-)
+ 2 MnO4- : 2 x 5 = 10 electrons
+ ------------------------------------------
+ 2I- -> I2 + 2e-   (iodide supplies them)
+ total electrons transferred = 10   (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Total electrons in a redox are counted from one side only &mdash; here the oxidant. Two permanganate ions always move 10 electrons, so 2 MnO<sub>4</sub><sup>-</sup> oxidise exactly 10 I<sup>-</sup> to 5 I<sub>2</sub>.</div>
+<div class="final">Answer: (b) 10.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 4</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Which compound has oxidation number of carbon equal to zero?<br>(a) C<sub>6</sub>H<sub>6</sub> &nbsp; (b) CH<sub>3</sub> &nbsp; (c) C<sub>2</sub>H<sub>4</sub> &nbsp; (d) C<sub>6</sub>H<sub>12</sub>O<sub>6</sub></td><td class="topic">Oxidation number of carbon</td><td><a href="https://www.youtube.com/watch?v=bTlDUitLg7k" target="_blank">How to find the Oxidation Number for C in C6H12O6 (Glucose)</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> C₆H₁₂O₆</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The <i>average</i> oxidation number of carbon in a formula is found by charge balance with H at +1 and O at &minus;2. In glucose the hydrogens and oxygens cancel exactly, leaving carbon at zero. In the hydrocarbons listed, carbon is negative because hydrogen pulls the number down.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>: 6C + 12(+1) + 6(&minus;2) = 0 &rArr; 6C = 0 &rArr; C = 0</span> <span class="why">+12 from H and &minus;12 from O cancel.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Glucose (d): 6C + 12(+1) + 6(&minus;2) = 0 gives 6C + 12 &minus; 12 = 0, so C = <b>0</b>.</div>
+<div class="step">2. Benzene (a) C<sub>6</sub>H<sub>6</sub>: 6C + 6(+1) = 0, so C = &minus;1.</div>
+<div class="step">3. Ethylene (c) C<sub>2</sub>H<sub>4</sub>: 2C + 4(+1) = 0, so C = &minus;2.</div>
+<div class="step">4. Methyl (b) CH<sub>3</sub> (treated neutral): C + 3(+1) = 0, so C = &minus;3. <span class="why">All hydrocarbons give a negative average for carbon.</span></div>
+<div class="step">5. Only glucose gives exactly zero because its H (+12) and O (&minus;12) contributions are equal and opposite, leaving the six carbons at 0.</div>
+<div class="step">6. The three hydrocarbons all return negative values, so none can match; the answer is <b>(d)</b>.</div>
+<pre>
+ C6H12O6 : 6C + 12(+1) + 6(-2) = 0 -> C = 0
+ C6H6    : 6C + 6(+1)      = 0 -> C = -1
+ C2H4    : 2C + 4(+1)      = 0 -> C = -2
+ CH3     : C  + 3(+1)      = 0 -> C = -3
+ ------------------------------------------
+ average C = 0 only in glucose      (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Carbohydrates have the formula C<sub>n</sub>(H<sub>2</sub>O)<sub>n</sub>, so H and O always cancel and the average carbon oxidation number is zero. Spot the C:H<sub>2</sub>:O = 1:1:1 pattern and you can answer without any algebra.</div>
+<div class="final">Answer: (d) C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">The oxidation number of sulphur in H<sub>2</sub>S<sub>2</sub>O<sub>8</sub> is:<br>(a) +2 &nbsp; (b) +6 &nbsp; (c) +7 &nbsp; (d) +14</td><td class="topic">Oxidation number of sulphur</td><td><a href="https://www.youtube.com/watch?v=zvcmNh6tu2s" target="_blank">The oxidation state of S in H2S2O8 is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> +6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> H<sub>2</sub>S<sub>2</sub>O<sub>8</sub> is peroxydisulphuric (Marshall's) acid and contains one peroxide (&minus;O&minus;O&minus;) linkage. Those two peroxide oxygens are &minus;1, not &minus;2. Ignoring that gives a false +7; accounting for it gives the real value +6 for each sulphur. This peroxide trap is the whole point of the question.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">2(+1) + 2S + 2(&minus;1) + 6(&minus;2) = 0 &rArr; 2S = 12 &rArr; S = +6</span> <span class="why">2 peroxide O at &minus;1, the other 6 O at &minus;2.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Structure: HO<sub>3</sub>S&minus;O&minus;O&minus;SO<sub>3</sub>H, a dimer joined by a peroxide bond.</div>
+<div class="step">2. Of the 8 oxygens, 2 form the O&minus;O bridge (ON &minus;1 each) and 6 are ordinary oxygens (ON &minus;2 each).</div>
+<div class="step">3. Charge balance: 2(+1) + 2S + 2(&minus;1) + 6(&minus;2) = 0, i.e. 2 + 2S &minus; 2 &minus; 12 = 0. <span class="why">H is +1, molecule is neutral.</span></div>
+<div class="step">4. So 2S = 12 and S = <b>+6</b>.</div>
+<div class="step">5. Reason it is +6 and not +7: sulphur's group number is 16, so its maximum oxidation state is +6; a value of +7 is chemically impossible, flagging the peroxide correction.</div>
+<div class="step">6. The naive assumption of all O at &minus;2 gives 2S = 14, S = +7 &mdash; the distractor (c). The correct value is <b>+6</b>, ruling out (a), (c) and (d).</div>
+<pre>
+ HO3S-O-O-SO3H  (one peroxide O-O bond)
+ 2 O at -1, 6 O at -2
+ 2(+1) + 2S + 2(-1) + 6(-2) = 0
+   2 + 2S - 2 - 12 = 0  ->  2S = 12
+ ------------------------------------------
+ S = +6                             (b)
+ (all O = -2 would wrongly give +7)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Peroxy acids (H<sub>2</sub>SO<sub>5</sub>, H<sub>2</sub>S<sub>2</sub>O<sub>8</sub>) hide an O&minus;O bond, so sulphur stays +6, never +7. Spot "per-" or a formula with one extra O and set those two oxygens to &minus;1 before you balance.</div>
+<div class="final">Answer: (b) +6.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">The oxidation state of hydrogen in CaH<sub>2</sub> is:<br>(a) +1 &nbsp; (b) &minus;1 &nbsp; (c) zero &nbsp; (d) +2</td><td class="topic">Oxidation state of hydrogen</td><td><a href="https://www.youtube.com/watch?v=Aqkg75yanDI" target="_blank">Oxidation state of hydrogen in CaH2 is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> &minus;1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Hydrogen is +1 in almost every compound, but when it bonds to an element <i>less</i> electronegative than itself &mdash; an active metal &mdash; it keeps the shared pair and becomes a hydride, with H at &minus;1. CaH<sub>2</sub> (calcium hydride) is exactly this situation, so the reflex answer (a) +1 is the planted trap. The one rule to apply is that in a neutral formula every oxidation number must sum to zero.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = 0 for a neutral formula</span> <span class="why">Ca is a group-2 metal locked at +2, which forces hydrogen to take a negative value.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Fix calcium at its only oxidation number: Ca = <b>+2</b>. <span class="why">Alkaline-earth metals show just +2.</span></div>
+<div class="step">2. Let each hydrogen be x; the formula carries two H atoms, so their total is 2x.</div>
+<div class="step">3. The molecule is neutral, so the balance is (+2) + 2x = 0.</div>
+<div class="step">4. Solve on one line: 2x = 0 &minus; 2 = &minus;2 &rArr; x = &minus;2/2 = <b>&minus;1</b>.</div>
+<div class="step">5. The sign is physically right: Ca (electronegativity &asymp; 1.0) sits well below H (2.1), so hydrogen holds the bonding electrons and is the more negative partner.</div>
+<div class="step">6. Compare with the normal case: in H<sub>2</sub>O or HCl, hydrogen bonds to a more electronegative atom and is +1 &mdash; the opposite of here.</div>
+<div class="step">7. Hence hydrogen is in the <b>&minus;1</b> state, a genuine saline hydride &mdash; option (b).</div>
+<pre>
+ CaH2  (neutral molecule)
+ Ca = +2
+ (+2) + 2x = 0
+ 2x = -2
+ x  = -1                         &lt;-- H is -1
+ (contrast H2O, HCl: H = +1)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Hydrogen is &minus;1 only with metals less electronegative than it (NaH, CaH<sub>2</sub>, LiH, AlH<sub>3</sub>); with non-metals and in water it is +1. Spot the metal hydride and flip the sign without any algebra &mdash; the only two options worth testing are &plusmn;1.</div>
+<div class="final">Answer: (b) &minus;1.</div></div></details></td></tr>
+<tr id="pyq-level-4-4"><td class="num">4</td><td class="q">Oxidation number of Cl in CaOCl<sub>2</sub> is:<br>(a) &minus;1 and +1 &nbsp; (b) +2 &nbsp; (c) &minus;2 &nbsp; (d) none<div class="pyq"><span class="paper">📝 PYQ: AIEEE 2002</span><a href="https://questions.examside.com/past-years/jee/question/GXWI3vRQPRPREhET" target="_blank" rel="noopener">Solution ↗</a></div></td><td class="topic">Oxidation number of chlorine</td><td><a href="https://www.youtube.com/watch?v=CDsKi8YAZ8Q" target="_blank">Oxidation number of Cl in CaOCl2 (bleaching powder)</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> &minus;1 and +1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> CaOCl<sub>2</sub> is bleaching powder, really the mixed salt Ca(OCl)Cl. Its two chlorines are in <i>different</i> chemical environments &mdash; one is a plain chloride ion, the other sits in the hypochlorite ion OCl<sup>&minus;</sup> &mdash; so a single &quot;average&quot; number hides the truth. The trap (c) &minus;2 comes from forcing one value on both; chlorine can never be &minus;2 at all.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = 0 ; Ca = +2, O = &minus;2</span> <span class="why">Write the salt as Ca<sup>2+</sup>, Cl<sup>&minus;</sup> and OCl<sup>&minus;</sup> and assign chlorine in each part separately.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Split the formula into its real ions: Ca(OCl)Cl = Ca<sup>2+</sup> + OCl<sup>&minus;</sup> + Cl<sup>&minus;</sup>.</div>
+<div class="step">2. The ionic chloride is simply Cl<sup>&minus;</sup>, so that chlorine is <b>&minus;1</b>.</div>
+<div class="step">3. In hypochlorite OCl<sup>&minus;</sup>, with O = &minus;2: (&minus;2) + x = &minus;1 &rArr; x = &minus;1 + 2 = <b>+1</b>.</div>
+<div class="step">4. So the compound holds one Cl at &minus;1 and one Cl at +1 &mdash; it is its own oxidised/reduced pair, which is why bleaching powder both bleaches and liberates Cl<sub>2</sub>.</div>
+<div class="step">5. Check the average: (&minus;1 + 1)/2 = 0, the mean oxidation number of Cl, consistent with an overall balance.</div>
+<div class="step">6. Had we (wrongly) averaged first, 2x + (&minus;2) + (+2 from Ca,... ) we would miss that the two atoms differ; splitting the ions is essential.</div>
+<div class="step">7. Therefore the two chlorines are <b>&minus;1 and +1</b>, matching option (a); &minus;2 (c) is impossible for chlorine here.</div>
+<pre>
+ Ca(OCl)Cl = Ca(2+) + OCl(-) + Cl(-)
+ Cl(-)  ion          -> Cl = -1
+ OCl(-): (-2)+x = -1 -> Cl = +1
+ mean = (-1 + 1)/2 = 0
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Whenever a formula packs the same element in two sites (bleaching powder, thiosulphate), do not average blindly &mdash; split it into real ions first. Bleaching powder is the textbook &quot;one up, one down&quot; chlorine, +1 and &minus;1.</div>
+<div class="final">Answer: (a) &minus;1 and +1.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Oxidation state of oxygen atom in potassium superoxide (KO<sub>2</sub>) is:<br>(a) &minus;1/2 &nbsp; (b) zero &nbsp; (c) +1/2 &nbsp; (d) &minus;2</td><td class="topic">Oxidation state of oxygen</td><td><a href="https://www.youtube.com/watch?v=s5IORkInp0c" target="_blank">Oxidation state of oxygen atom in potassium superoxide (KO2) is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> &minus;1/2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Oxygen is usually &minus;2, but in the superoxide ion O<sub>2</sub><sup>&minus;</sup> a single extra electron is shared over two oxygen atoms, giving a fractional average. KO<sub>2</sub> (potassium superoxide) is the classic case; blindly writing O = &minus;2 (option d) is the trap, because the alkali metal is fixed and cannot supply four units of charge.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = 0 ; K = +1 (group 1)</span> <span class="why">The potassium is fixed at +1, so the two oxygens must jointly carry only &minus;1.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Potassium is an alkali metal, always <b>+1</b>.</div>
+<div class="step">2. Let each oxygen be x; two O atoms give a total 2x.</div>
+<div class="step">3. The neutral formula requires (+1) + 2x = 0.</div>
+<div class="step">4. Solve on one line: 2x = 0 &minus; 1 = &minus;1 &rArr; x = &minus;1/2 = <b>&minus;0.5</b>.</div>
+<div class="step">5. The fraction is physical: KO<sub>2</sub> contains the O<sub>2</sub><sup>&minus;</sup> ion, with one unpaired electron spread over two equivalent O atoms, so each averages &minus;(1/2).</div>
+<div class="step">6. Contrast the oxygen ladder: oxide O<sup>2&minus;</sup> = &minus;2, peroxide O<sub>2</sub><sup>2&minus;</sup> = &minus;1 each, superoxide O<sub>2</sub><sup>&minus;</sup> = &minus;1/2 each.</div>
+<div class="step">7. So the superoxide value is uniquely <b>&minus;1/2</b>, which is option (a).</div>
+<pre>
+ KO2  (neutral)
+ K = +1
+ (+1) + 2x = 0
+ 2x = -1
+ x  = -1/2                       &lt;-- superoxide O
+ oxide -2, peroxide -1 for compare
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Remember the oxygen ladder: oxide O<sup>2&minus;</sup> = &minus;2, peroxide = &minus;1, superoxide = &minus;1/2, and OF<sub>2</sub> = +2. KO<sub>2</sub> (and NaO<sub>2</sub>) is the only common &minus;1/2 species, so a &minus;1/2 option is nearly always the superoxide.</div>
+<div class="final">Answer: (a) &minus;1/2.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">Oxidation number of S in S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup> is:<br>(a) +2 &nbsp; (b) &minus;2 &nbsp; (c) 4 &nbsp; (d) zero</td><td class="topic">Oxidation number of sulphur</td><td><a href="https://www.youtube.com/watch?v=qsh8P1TPRTY" target="_blank">How to find the Oxidation Number for S in the S2O3 2- ion (Thiosulphate ion)</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> +2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> For a polyatomic ion the oxidation numbers add up to the ion&rsquo;s charge, not zero. In thiosulphate S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup> the two sulphurs are actually unequal (+6 and &minus;2), but the question asks for the ordinary <i>average</i> oxidation number, which the simple sum against the charge delivers directly.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge of ion ; O = &minus;2</span> <span class="why">The &minus;2 ionic charge, not 0, sets the right-hand side of the balance.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let each S be x; the ion has two S and three O atoms.</div>
+<div class="step">2. Take oxygen at its normal <b>&minus;2</b>.</div>
+<div class="step">3. Balance to the ionic charge: 2x + 3(&minus;2) = &minus;2.</div>
+<div class="step">4. Solve on one line: 2x &minus; 6 = &minus;2 &rArr; 2x = &minus;2 + 6 = +4 &rArr; x = <b>+2</b>.</div>
+<div class="step">5. So the mean oxidation number of sulphur is +2, which is what option (a) states.</div>
+<div class="step">6. Structural note: thiosulphate is sulphate with one O replaced by S, so the real values are a central S at +6 and a terminal S at &minus;2.</div>
+<div class="step">7. Their mean (+6 &minus; 2)/2 = +2 matches the balance &mdash; a built-in consistency check.</div>
+<div class="step">8. Note the contrast with sulphate SO<sub>4</sub><sup>2&minus;</sup>, where the lone S is +6; replacing one O by S lowers the average to +2, which is why thiosulphate is a mild reducing agent.</div>
+<pre>
+ S2O3(2-)  ion charge = -2
+ 2x + 3(-2) = -2
+ 2x - 6 = -2
+ 2x = +4
+ x  = +2            &lt;-- average S
+ (true: +6 and -2, mean +2)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> &quot;Thio&quot; means an O swapped for S. The average from the balance (+2) and the structural pair (+6, &minus;2) must agree &mdash; a quick self-check that you put the ionic charge, not 0, on the right side.</div>
+<div class="final">Answer: (a) +2.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">The oxidation state of nitrogen in NH<sub>4</sub>NO<sub>3</sub> is:<br>(a) &minus;3 and +5 &nbsp; (b) +3 and +5 &nbsp; (c) +5 &nbsp; (d) +3</td><td class="topic">Oxidation state of nitrogen</td><td><a href="https://www.youtube.com/watch?v=HeBRj0gN55c" target="_blank">The oxidation state(s) of nitrogen in ammonium nitrate is/are</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> &minus;3 and +5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Ammonium nitrate holds nitrogen in two opposite environments: the cation NH<sub>4</sub><sup>+</sup> and the anion NO<sub>3</sub><sup>&minus;</sup>. A single average (+1) would be wrong chemistry &mdash; each ion must be treated on its own, so the honest answer is a <i>pair</i> of values, not one. This is why options quoting a single number can be discarded at sight.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge of ion ; H = +1, O = &minus;2</span> <span class="why">Split the salt into NH<sub>4</sub><sup>+</sup> and NO<sub>3</sub><sup>&minus;</sup> and balance each separately.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Separate the formula into its ions: NH<sub>4</sub>NO<sub>3</sub> = NH<sub>4</sub><sup>+</sup> + NO<sub>3</sub><sup>&minus;</sup>.</div>
+<div class="step">2. In the cation, H = +1: x + 4(+1) = +1 &rArr; x = +1 &minus; 4 = <b>&minus;3</b> for that nitrogen.</div>
+<div class="step">3. In the anion, O = &minus;2: y + 3(&minus;2) = &minus;1 &rArr; y &minus; 6 = &minus;1 &rArr; y = <b>+5</b>.</div>
+<div class="step">4. So one nitrogen is at its lowest state (&minus;3) and the other at its highest (+5).</div>
+<div class="step">5. The nitrogens are genuinely different; quoting only +1 (their average) would hide the real chemistry.</div>
+<div class="step">6. Both results are internally consistent: the cation is +1 overall and the anion &minus;1 overall, so the neutral salt balances.</div>
+<div class="step">7. Hence the oxidation states are <b>&minus;3 and +5</b>, option (a).</div>
+<pre>
+ NH4NO3 = NH4(+) + NO3(-)
+ NH4(+): x + 4(+1) = +1 -> x = -3
+ NO3(-): y + 3(-2) = -1 -> y = +5
+ (single average +1 would be wrong)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> On controlled heating NH<sub>4</sub>NO<sub>3</sub> &rarr; N<sub>2</sub>O + 2H<sub>2</sub>O is an <i>internal</i> redox: the &minus;3 N is oxidised and the +5 N is reduced, both meeting at +1 in N<sub>2</sub>O. Seeing the two states explains the reaction at once.</div>
+<div class="final">Answer: (a) &minus;3 and +5.</div></div></details></td></tr>
+<tr id="pyq-level-4-8"><td class="num">8</td><td class="q">The oxidation state of phosphorus in Ba(H<sub>2</sub>PO<sub>2</sub>)<sub>2</sub> is:<br>(a) +3 &nbsp; (b) +2 &nbsp; (c) +1 &nbsp; (d) &minus;1<div class="pyq"><span class="paper">📝 PYQ: IIT-JEE 1990</span><a href="https://questions.examside.com/past-years/jee/question/nDUPW0CJvLCQNxK9" target="_blank" rel="noopener">Solution ↗</a></div></td><td class="topic">Oxidation state of phosphorus</td><td><a href="https://www.youtube.com/watch?v=Baz2r6o0q6I" target="_blank">The oxidation number of phosphorus in Ba(H2PO2)2 is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> +1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Ba(H<sub>2</sub>PO<sub>2</sub>)<sub>2</sub> is barium hypophosphite; the working anion is H<sub>2</sub>PO<sub>2</sub><sup>&minus;</sup>. The two hydrogens here are bonded directly to phosphorus (P&ndash;H), but in oxidation-number bookkeeping H is still taken as +1, so the algebra proceeds normally. Forgetting the &minus;1 anion charge, or mis-counting the oxygens, gives the wrong distractor.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge ; H = +1, O = &minus;2, Ba = +2</span> <span class="why">Ba is +2 and pairs two hypophosphite ions, so each anion must carry &minus;1.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Barium is group 2, so Ba = <b>+2</b>, balanced by two H<sub>2</sub>PO<sub>2</sub><sup>&minus;</sup> ions.</div>
+<div class="step">2. Work inside one anion H<sub>2</sub>PO<sub>2</sub><sup>&minus;</sup>; let P = x.</div>
+<div class="step">3. Balance to the &minus;1 charge: x + 2(+1) + 2(&minus;2) = &minus;1.</div>
+<div class="step">4. Solve on one line: x + 2 &minus; 4 = &minus;1 &rArr; x &minus; 2 = &minus;1 &rArr; x = &minus;1 + 2 = <b>+1</b>.</div>
+<div class="step">5. Treat the P&ndash;H hydrogens as +1 regardless of the bond &mdash; the convention is based on the formula, not the drawing.</div>
+<div class="step">6. Cross-check the whole salt: +2 + 2(&minus;1) = 0, so the formula is neutral &mdash; consistent.</div>
+<div class="step">7. Hence phosphorus is <b>+1</b> in hypophosphite, option (c).</div>
+<pre>
+ Ba(H2PO2)2 : Ba=+2, two (H2PO2)-
+ H2PO2(-): x + 2(+1) + 2(-2) = -1
+ x + 2 - 4 = -1
+ x = +1                 &lt;-- P
+ salt: +2 + 2(-1) = 0  OK
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The phosphorus oxo-anion ladder: hypophosphite H<sub>2</sub>PO<sub>2</sub><sup>&minus;</sup> (+1), phosphite HPO<sub>3</sub><sup>2&minus;</sup> (+3), phosphate PO<sub>4</sub><sup>3&minus;</sup> (+5). Count the O and remember to still treat every P&ndash;H hydrogen as +1.</div>
+<div class="final">Answer: (c) +1.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">The oxidation number of S in S<sub>8</sub>, S<sub>2</sub>F<sub>2</sub> and H<sub>2</sub>S respectively are :<br>(a) 0, +1, &minus;2 &nbsp; (b) +2, +1, &minus;2 &nbsp; (c) 0, +1, +2 &nbsp; (d) +2, +1, &minus;2</td><td class="topic">Oxidation number of sulphur</td><td><a href="https://www.youtube.com/watch?v=OlKA15UitDo" target="_blank">The oxidation number of Sulphur in S8, S2F2 and H2S respectively are</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 0, +1, &minus;2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> One element, three contexts: sulphur as a free element, bonded to the most electronegative atom (F), and bonded to the less electronegative H. The reference partner decides the sign, so the three answers run the full span from 0 to +1 to &minus;2. Two fixed rules settle everything without guessing.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">free element = 0 ; F = &minus;1 (always) ; H = +1 with non-metals</span> <span class="why">Fluorine, the most electronegative element, is &minus;1 in every compound, which forces S positive in S<sub>2</sub>F<sub>2</sub>.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. <b>S<sub>8</sub></b> is the free element (a ring of identical S atoms), so each S = <b>0</b>.</div>
+<div class="step">2. <b>S<sub>2</sub>F<sub>2</sub></b>: fluorine is &minus;1, neutral molecule, 2x + 2(&minus;1) = 0 &rArr; 2x = +2 &rArr; x = <b>+1</b>.</div>
+<div class="step">3. <b>H<sub>2</sub>S</b>: hydrogen is +1 here, 2(+1) + x = 0 &rArr; x = <b>&minus;2</b>.</div>
+<div class="step">4. So the ordered triple is 0, +1, &minus;2, which is option (a).</div>
+<div class="step">5. Rule out (b) and (d): they put S at +2 in S<sub>8</sub>, impossible for a free element.</div>
+<div class="step">6. Rule out (c): it makes H<sub>2</sub>S positive, impossible since S is more electronegative than H.</div>
+<div class="step">7. The matching sequence is therefore <b>0, +1, &minus;2</b>.</div>
+<pre>
+ S8    : free element     -> S = 0
+ S2F2  : 2x+2(-1)=0       -> S = +1
+ H2S   : 2(+1)+x=0        -> S = -2
+ ordered:  0, +1, -2
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Lock the two anchors first &mdash; any free element is 0 and F is &minus;1 without exception &mdash; and the rest falls out. Those two rules alone eliminate every wrong option in this list before you finish the arithmetic.</div>
+<div class="final">Answer: (a) 0, +1, &minus;2.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">Oxidation number of S in H<sub>2</sub>SO<sub>5</sub> is:<br>(a) +8 &nbsp; (b) +2 &nbsp; (c) +6 &nbsp; (d) +4</td><td class="topic">Oxidation number of sulphur</td><td><a href="https://www.youtube.com/watch?v=OAcV6yJIPw4" target="_blank">How to Calculate Oxidation Number of Sulphur in Caro's Acid (H2SO5) | English</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> +6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> H<sub>2</sub>SO<sub>5</sub> is Caro&rsquo;s acid (peroxymonosulphuric acid). It contains one peroxide O&ndash;O linkage, where those two oxygens are &minus;1, not &minus;2. Ignoring that linkage and taking all five O as &minus;2 gives the trap answer +8, which exceeds sulphur&rsquo;s maximum of +6 and is therefore impossible.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = 0 ; H = +1 ; normal O = &minus;2, peroxide O = &minus;1</span> <span class="why">The structure HO&ndash;O&ndash;SO<sub>2</sub>&ndash;OH has one O&ndash;O pair (&minus;1 each) and three ordinary O (&minus;2 each).</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Sketch the structure: two H (+1), one peroxide O&ndash;O bond, and three S=O / S&ndash;OH oxygens.</div>
+<div class="step">2. Peroxide oxygens: 2 atoms at <b>&minus;1</b> &rArr; contribute 2(&minus;1) = &minus;2.</div>
+<div class="step">3. Normal oxygens: 3 atoms at <b>&minus;2</b> &rArr; contribute 3(&minus;2) = &minus;6.</div>
+<div class="step">4. Balance the neutral acid: 2(+1) + x + (&minus;2) + (&minus;6) = 0.</div>
+<div class="step">5. Solve on one line: 2 + x &minus; 2 &minus; 6 = 0 &rArr; x &minus; 6 = 0 &rArr; x = <b>+6</b>.</div>
+<div class="step">6. The naive &quot;all O = &minus;2&quot; route gives 2 + x &minus; 10 = 0, x = +8, which is unreal because S has only six valence electrons.</div>
+<div class="step">7. So S is <b>+6</b> (option c), the same as in ordinary H<sub>2</sub>SO<sub>4</sub>.</div>
+<pre>
+ H2SO5 = HO-O-S(=O)2-OH (one O-O)
+ peroxide: 2 x (-1) = -2
+ normal  : 3 x (-2) = -6
+ 2(+1) + x - 2 - 6 = 0
+ x = +6              &lt;-- correct
+ (all-O=-2 wrongly gives +8)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Any &quot;per-oxo&quot; acid (H<sub>2</sub>SO<sub>5</sub>, H<sub>2</sub>S<sub>2</sub>O<sub>8</sub> &mdash; Caro&rsquo;s, Marshall&rsquo;s) hides an O&ndash;O bond. If your sum gives S above +6, you forgot a peroxide linkage &mdash; sulphur can never exceed +6.</div>
+<div class="final">Answer: (c) +6.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 5</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr id="pyq-level-5-1"><td class="num">1</td><td class="q">One mole of N<sub>2</sub>H<sub>4</sub> loses 10 mole of electrons to form as new compound Y. Assuming that all nitrogen appears in the new compound, what is the oxidation number of nitrogen in Y (There is no change in the oxidation state of hydrogen)?<br>(a) &minus;3 &nbsp; (b) +3 &nbsp; (c) +5 &nbsp; (d) +1<div class="pyq"><span class="paper">📝 PYQ: IIT-JEE 1981</span><a href="https://questions.examside.com/past-years/jee/question/KFqhencJ7bklShEh" target="_blank" rel="noopener">Solution ↗</a></div></td><td class="topic">Oxidation number from electrons</td><td><a href="https://www.youtube.com/watch?v=S1GbLXfrMV0" target="_blank">One mole of N2H4 loses 10 mol of electrons to form a new compound Y</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> +3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Losing electrons is oxidation, and the number lost per atom is exactly the rise in oxidation number. The real trick is to split the 10 electrons over the <i>two</i> nitrogen atoms in one N<sub>2</sub>H<sub>4</sub>, then add that rise to nitrogen&rsquo;s starting state. Hydrogen is told to stay +1, so every electron removed is charged to nitrogen.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Delta;(oxidation number per atom) = electrons lost per atom ; new ON = old ON + &Delta;</span> <span class="why">Oxidation raises the oxidation number by exactly the electrons released.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Find N in hydrazine N<sub>2</sub>H<sub>4</sub>: 2x + 4(+1) = 0 &rArr; 2x = &minus;4 &rArr; x = <b>&minus;2</b> each.</div>
+<div class="step">2. One mole of N<sub>2</sub>H<sub>4</sub> contains <b>2</b> mole of N atoms.</div>
+<div class="step">3. It loses 10 mole of electrons in total, so per nitrogen that is 10/2 = <b>5</b> electrons.</div>
+<div class="step">4. Oxidation raises the state by the electrons lost: new ON = &minus;2 + 5 = <b>+3</b>.</div>
+<div class="step">5. Check against totals: 2 N start at 2(&minus;2) = &minus;4 and end at 2(+3) = +6, a change of +10, matching the 10 electrons lost.</div>
+<div class="step">6. A +3 nitrogen is familiar (HNO<sub>2</sub>, N<sub>2</sub>O<sub>3</sub>), so Y is a reasonable product.</div>
+<div class="step">7. Hence nitrogen in Y is <b>+3</b>, option (b).</div>
+<pre>
+ N2H4 : 2x + 4(+1) = 0 -> x = -2
+ 2 N atoms, 10 e lost  -> 5 e per N
+ new ON = -2 + 5 = +3
+ total change: -4 -> +6 = +10 e  OK
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Electrons &quot;per compound&quot; must be divided by the number of redox atoms before touching the oxidation number. Ten electrons over two N is five each, not ten &mdash; the common slip adds 10 to &minus;2 and gives a nonsense +8.</div>
+<div class="final">Answer: (b) +3.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">The number of compounds among the following having O. N. of S as +6 is<br>S<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>, Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>, H<sub>2</sub>SO<sub>3</sub>, HSO<sub>4</sub><sup>&minus;</sup>, (NH<sub>4</sub>)<sub>2</sub>SO<sub>4</sub>, H<sub>2</sub>SO<sub>4</sub>, HSO<sub>3</sub><sup>&minus;</sup>, S<sub>4</sub>O<sub>6</sub><sup>2&minus;</sup></td><td class="topic">Oxidation number of sulphur</td><td><a href="https://www.youtube.com/watch?v=vOOZFFCt72M" target="_blank">Tricks to find oxidation state | Redox Reactions | Class 11 chemistry</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">4</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Sulphur spans &minus;2 to +6; only the fully oxidised sulphate-type units (one S tied to four oxygens, with no S&ndash;S bond and no extra reducible H on S) reach +6. Run the charge balance on each of the eight species and simply count the ones that land on +6.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge ; O = &minus;2, H = +1, Na/NH<sub>4</sub> = +1</span> <span class="why">Thio- and poly-thionate units carry S&ndash;S bonds that drag the average below +6.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. S<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>: 2x + 7(&minus;2) = &minus;2 &rArr; 2x = +12 &rArr; x = <b>+6</b>. &#10003;</div>
+<div class="step">2. Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> (thiosulphate): 2x + 3(&minus;2) = &minus;2 &rArr; x = +2. &#10007;</div>
+<div class="step">3. H<sub>2</sub>SO<sub>3</sub>: 2 + x &minus; 6 = 0 &rArr; x = +4. &#10007; &nbsp; HSO<sub>3</sub><sup>&minus;</sup>: 1 + x &minus; 6 = &minus;1 &rArr; x = +4. &#10007;</div>
+<div class="step">4. HSO<sub>4</sub><sup>&minus;</sup>: 1 + x &minus; 8 = &minus;1 &rArr; x = <b>+6</b>. &#10003;</div>
+<div class="step">5. (NH<sub>4</sub>)<sub>2</sub>SO<sub>4</sub> and H<sub>2</sub>SO<sub>4</sub> both hold SO<sub>4</sub><sup>2&minus;</sup> &rArr; x = <b>+6</b>. &#10003;&#10003;</div>
+<div class="step">6. S<sub>4</sub>O<sub>6</sub><sup>2&minus;</sup> (tetrathionate): 4x + 6(&minus;2) = &minus;2 &rArr; x = +2.5. &#10007;</div>
+<div class="step">7. The +6 set is S<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>, HSO<sub>4</sub><sup>&minus;</sup>, (NH<sub>4</sub>)<sub>2</sub>SO<sub>4</sub>, H<sub>2</sub>SO<sub>4</sub> &mdash; a count of <b>4</b>.</div>
+<pre>
+ S2O7(2-)   -> +6   *   HSO4(-)     -> +6  *
+ Na2S2O3    -> +2       (NH4)2SO4   -> +6  *
+ H2SO3      -> +4       H2SO4       -> +6  *
+ HSO3(-)    -> +4       S4O6(2-)    -> +2.5
+ count of +6 = 4
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> &quot;Sulphate family&quot; (SO<sub>4</sub>, HSO<sub>4</sub>, pyrosulphate S<sub>2</sub>O<sub>7</sub>) is +6; anything with &quot;thio&quot; or &quot;-thionate&quot; (S&ndash;S bonds) or an &quot;-ous/-ite&quot; name is below +6. Name-recognition beats arithmetic here.</div>
+<div class="final">Answer: 4 compounds have S at +6.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">The value of n in the molecular formula Be<sub>n</sub>Al<sub>2</sub>Si<sub>6</sub>O<sub>18</sub> is ________</td><td class="topic">Formula / charge balance</td><td><a href="https://www.youtube.com/watch?v=F0gMLRQuKGc" target="_blank">The value of n in the molecular formula BenAl2Si6O18 is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A stable neutral mineral must have its charges cancel exactly. Assign each element its fixed oxidation number and demand that the total be zero; the single unknown n drops straight out. No structure is needed &mdash; this is the gemstone beryl, Be<sub>3</sub>Al<sub>2</sub>Si<sub>6</sub>O<sub>18</sub>.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = 0 ; Be = +2, Al = +3, Si = +4, O = &minus;2</span> <span class="why">All four elements have one invariable oxidation state, so only n is free.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Beryllium (group 2) = +2, so n atoms give <b>+2n</b>.</div>
+<div class="step">2. Aluminium (group 13) = +3, two atoms give 2(+3) = <b>+6</b>.</div>
+<div class="step">3. Silicon (group 14) = +4, six atoms give 6(+4) = <b>+24</b>.</div>
+<div class="step">4. Oxygen = &minus;2, eighteen atoms give 18(&minus;2) = <b>&minus;36</b>.</div>
+<div class="step">5. Set the neutral-formula balance: 2n + 6 + 24 &minus; 36 = 0.</div>
+<div class="step">6. Solve on one line: 2n &minus; 6 = 0 &rArr; 2n = 6 &rArr; n = <b>3</b>.</div>
+<div class="step">7. Check: 3(+2) + 6 + 24 &minus; 36 = 6 + 6 + 24 &minus; 36 = 0. &#10003; The mineral is beryl Be<sub>3</sub>Al<sub>2</sub>Si<sub>6</sub>O<sub>18</sub>.</div>
+<div class="step">8. Note that only n = 3 (a whole number) makes the charges balance; a fractional or negative n would be chemically meaningless, so the arithmetic itself fixes the subscript uniquely.</div>
+<pre>
+ Be(+2)n  Al(+3)2  Si(+4)6  O(-2)18
+ 2n + 2(3) + 6(4) + 18(-2) = 0
+ 2n + 6 + 24 - 36 = 0
+ 2n - 6 = 0
+ n = 3
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For a neutral formula with one unknown subscript, you never need structures &mdash; just &quot;sum of all oxidation numbers = 0&quot; and solve. The positive totals (6 + 24) must meet the oxygen total (36), leaving Be to make up the last 6.</div>
+<div class="final">Answer: n = 3.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">The decomposition of KClO<sub>3</sub> to KCl and O<sub>2</sub> on heating is an example of<br>(a) intermolecular redox change &nbsp; (b) intramolecular redox change &nbsp; (c) disproportionation or auto redox change &nbsp; (d) All the above</td><td class="topic">Types of redox change</td><td><a href="https://www.youtube.com/watch?v=dCYj62xX4Xo" target="_blank">The decomposition of KClO3 to KCl and O2 on heating is an example of</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> intramolecular redox change</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Classify a redox decomposition by <i>where</i> the oxidised and reduced atoms sit. When two <b>different</b> elements inside the <b>same</b> compound change in opposite directions, it is an intramolecular redox. Disproportionation (c) needs one element in one state splitting into two &mdash; which is not what happens here.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">2KClO<sub>3</sub> &rarr; 2KCl + 3O<sub>2</sub></span> <span class="why">Track Cl and O separately; both begin in the single reactant KClO<sub>3</sub>.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In KClO<sub>3</sub>, K = +1, O = &minus;2, so Cl: +1 + x + 3(&minus;2) = 0 &rArr; x = <b>+5</b>.</div>
+<div class="step">2. In the product KCl, chlorine is <b>&minus;1</b>: Cl is reduced (+5 &rarr; &minus;1, a gain of 6 e).</div>
+<div class="step">3. In the product O<sub>2</sub>, oxygen is <b>0</b>: O is oxidised (&minus;2 &rarr; 0, a loss of 2 e each).</div>
+<div class="step">4. Two different elements (Cl down, O up) change, and both came from one and the same molecule KClO<sub>3</sub>.</div>
+<div class="step">5. That is the definition of an <b>intramolecular</b> redox change &mdash; option (b).</div>
+<div class="step">6. Rule out intermolecular (that needs two separate reactants, here there is only one).</div>
+<div class="step">7. Rule out disproportionation (that needs one element in a single state going both up and down).</div>
+<pre>
+ KClO3 : Cl = +5, O = -2
+ KCl   : Cl = -1   (reduced, +6 e)
+ O2    : O  =  0   (oxidised)
+ two different elements, one molecule
+   -> intramolecular redox
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Same molecule + two different elements changing = intramolecular. Same element, one state, going both up and down = disproportionation (e.g. 3Cl<sub>2</sub> + 6OH<sup>&minus;</sup>). Don&rsquo;t confuse the two just because KClO<sub>3</sub> also has a separate disproportionation reaction.</div>
+<div class="final">Answer: (b) intramolecular redox change.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">The number of electrons involved in the reduction of nitrate ion to hydrazine is<br>(a) 8 &nbsp; (b) 7 &nbsp; (c) 5 &nbsp; (d) 3</td><td class="topic">Electrons in reduction</td><td><a href="https://www.youtube.com/watch?v=j8QwjuCUEkM" target="_blank">The number of electrons involved in the reduction of one nitrate ion to hydrazine is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 7</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The electrons exchanged equal the change in oxidation number of the atom reduced. Here nitrogen falls from its top state in nitrate to its hydrazine value, and the question is framed per nitrogen (one NO<sub>3</sub><sup>&minus;</sup> &rarr; one N of hydrazine), so no doubling is needed.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons gained = ON(reactant) &minus; ON(product) for a reduction</span> <span class="why">Reduction is a drop in oxidation number; the size of the drop is the electron count.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Nitrate NO<sub>3</sub><sup>&minus;</sup>: x + 3(&minus;2) = &minus;1 &rArr; x &minus; 6 = &minus;1 &rArr; N = <b>+5</b>.</div>
+<div class="step">2. Hydrazine N<sub>2</sub>H<sub>4</sub>: 2x + 4(+1) = 0 &rArr; x = <b>&minus;2</b> per N.</div>
+<div class="step">3. Nitrogen goes from +5 down to &minus;2, which is a reduction.</div>
+<div class="step">4. Electrons gained per N = (+5) &minus; (&minus;2) = 5 + 2 = <b>7</b>.</div>
+<div class="step">5. The half-reaction per nitrogen confirms it: NO<sub>3</sub><sup>&minus;</sup> + 10H<sup>+</sup> + 7e<sup>&minus;</sup> &rarr; (1/2)N<sub>2</sub>H<sub>4</sub> + 3H<sub>2</sub>O.</div>
+<div class="step">6. Option (a) 8 over-counts the drop by one; (c) 5 and (d) 3 under-count it.</div>
+<div class="step">7. So <b>7</b> electrons are involved, option (b).</div>
+<div class="step">8. Sanity: the drop of 7 units is the largest among nitrogen reductions on this scale (from top +5 to the low &minus;2 of hydrazine), consistent with hydrazine being a strongly reduced form.</div>
+<pre>
+ NO3(-): x - 6 = -1   -> N = +5
+ N2H4 : 2x + 4 = 0    -> N = -2
+ reduction: +5 -> -2
+ e- gained = 5 - (-2) = 7
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Electron count in a redox step is just |&Delta;(oxidation number)|. Watch the framing: &quot;nitrate ion&quot; (singular) means per-N, so 7; if it asked for 2NO<sub>3</sub><sup>&minus;</sup> &rarr; one N<sub>2</sub>H<sub>4</sub> it would be 14.</div>
+<div class="final">Answer: (b) 7.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">Oxidation number of N in N<sub>3</sub>H is:<br>(a) &minus;3 &nbsp; (b) +3 &nbsp; (c) zero &nbsp; (d) &minus;1/3</td><td class="topic">Oxidation number of nitrogen</td><td><a href="https://www.youtube.com/watch?v=xijbORksClg" target="_blank">Oxidation number of N in N3H (hydrazoic acid) is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> &minus;1/3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> N<sub>3</sub>H is hydrazoic acid (HN<sub>3</sub>). Its three nitrogens are not equivalent, so the balance gives only the <i>average</i> oxidation number &mdash; and here it comes out fractional. A fractional oxidation state is perfectly legal; it is simply a mean taken over inequivalent atoms, so an option need not be rejected for being a fraction.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = 0 ; H = +1</span> <span class="why">Three N atoms share the balance against a single +1 hydrogen.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let each nitrogen be x; the molecule has three N and one H.</div>
+<div class="step">2. Hydrogen bonded to nitrogen is <b>+1</b>.</div>
+<div class="step">3. The molecule is neutral, so 3x + (+1) = 0.</div>
+<div class="step">4. Solve on one line: 3x = 0 &minus; 1 = &minus;1 &rArr; x = &minus;1/3 &asymp; <b>&minus;0.33</b> (average).</div>
+<div class="step">5. The fraction simply reflects that the three N are inequivalent; the structure N=N=N&ndash;H has two terminal and one central nitrogen in different states.</div>
+<div class="step">6. Only their mean is a clean, formula-level number, and that mean is &minus;1/3.</div>
+<div class="step">7. Hence the (average) oxidation number of N is <b>&minus;1/3</b>, option (d).</div>
+<div class="step">8. Rule out the distractors: &minus;3 (a) is nitrogen&rsquo;s value only in NH<sub>3</sub>-type species, +3 (b) would need a positive sum, and 0 (c) would need no hydrogen at all.</div>
+<pre>
+ HN3  (neutral)
+ H = +1
+ 3x + 1 = 0
+ 3x = -1
+ x  = -1/3            &lt;-- average N
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> A fractional oxidation number (Fe<sub>3</sub>O<sub>4</sub> = +8/3, HN<sub>3</sub> = &minus;1/3, S<sub>4</sub>O<sub>6</sub><sup>2&minus;</sup> = +2.5) always signals inequivalent atoms being averaged. Never strike out an option just because it is a fraction.</div>
+<div class="final">Answer: (d) &minus;1/3.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">The oxoacid which acts both as oxidising and reducing agent is:<br>(a) H<sub>2</sub>SO<sub>4</sub> &nbsp; (b) H<sub>3</sub>PO<sub>4</sub> &nbsp; (c) HNO<sub>2</sub> &nbsp; (d) HClO<sub>4</sub></td><td class="topic">Oxidising and reducing agents</td><td><a href="https://www.youtube.com/watch?v=5OcfY7vw8IY" target="_blank">Nitrous acid acts both as an oxidising and a reducing agent</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> HNO<sub>2</sub></span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A species can act <i>both</i> ways only if its key element sits in an <b>intermediate</b> oxidation state &mdash; able to go up (then it is a reducing agent) or down (then it is an oxidising agent). An element already at its maximum can only be reduced, so such an acid is purely oxidising.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">dual behaviour &hArr; central element in a middle oxidation state</span> <span class="why">Compare each acid&rsquo;s central atom with the highest state possible for its group.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. H<sub>2</sub>SO<sub>4</sub>: S = +6, the maximum for sulphur &rArr; can only be reduced (oxidising only).</div>
+<div class="step">2. H<sub>3</sub>PO<sub>4</sub>: P = +5, the maximum for phosphorus &rArr; not a reducing agent, and a weak oxidant.</div>
+<div class="step">3. HClO<sub>4</sub>: Cl = +7, the maximum for chlorine &rArr; oxidising only.</div>
+<div class="step">4. HNO<sub>2</sub>: x + 2(&minus;2) + 1 = 0 &rArr; x &minus; 3 = 0 &rArr; N = <b>+3</b>, an intermediate state (N ranges &minus;3 to +5).</div>
+<div class="step">5. From +3, nitrogen can rise to +5 (HNO<sub>3</sub>): HNO<sub>2</sub> then acts as a <b>reducing</b> agent.</div>
+<div class="step">6. From +3, nitrogen can fall to +2/+1 (NO, N<sub>2</sub>O): HNO<sub>2</sub> then acts as an <b>oxidising</b> agent.</div>
+<div class="step">7. Only HNO<sub>2</sub> has that middle state, so it alone is both &mdash; option (c).</div>
+<pre>
+ H2SO4 : S = +6 (max)   -> oxidant only
+ H3PO4 : P = +5 (max)   -> not reducing
+ HClO4 : Cl = +7 (max)  -> oxidant only
+ HNO2  : N = +3 (mid)   -> BOTH
+         up to +5 reduces, down to +2 oxidises
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> &quot;Both oxidant and reductant&quot; = find the intermediate oxidation state. Maximum-state acids (H<sub>2</sub>SO<sub>4</sub>, HClO<sub>4</sub>, HNO<sub>3</sub>) are oxidants only; the &quot;-ous&quot; acids (HNO<sub>2</sub>, H<sub>2</sub>SO<sub>3</sub>) are the dual ones.</div>
+<div class="final">Answer: (c) HNO<sub>2</sub>.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">Total number of electrons involved in change :<br>2Al + Fe<sub>2</sub>O<sub>3</sub> &rarr; Al<sub>2</sub>O<sub>3</sub> + 2Fe</td><td class="topic">Electron transfer</td><td><a href="https://www.youtube.com/watch?v=xE2EwNKyjJ0" target="_blank">n-factor question | JEE ADVANCED LEVEL | n factor of redox reaction</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The "total number of electrons involved" in a redox change is the number actually transferred from the reducing agent to the oxidising agent, not the sum of the two half-reactions. Electrons lost by the oxidised atoms must exactly equal electrons gained by the reduced atoms, so either count gives the same figure. This reaction is the thermite process: aluminium reduces iron(III) oxide to molten iron.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons = (change in oxidation no. per atom) &times; (number of atoms)</span> <span class="why">Al is oxidised and Fe is reduced; the two half-counts are a single pool of electrons, counted once on each side, never added.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Assign states: free Al = 0; Fe in Fe<sub>2</sub>O<sub>3</sub> = +3 (O is &minus;2); Al in Al<sub>2</sub>O<sub>3</sub> = +3; free Fe = 0.</div>
+<div class="step">2. Oxidation half: Al 0 &rarr; +3 loses 3 e<sup>&minus;</sup> per atom. <span class="why">aluminium is the reducing agent.</span></div>
+<div class="step">3. Two Al atoms react &rArr; total electrons lost = 2 &times; 3 = 6.</div>
+<div class="step">4. Reduction half: Fe +3 &rarr; 0 gains 3 e<sup>&minus;</sup> per atom; two Fe atoms gain 2 &times; 3 = 6.</div>
+<div class="step">5. The two tallies match: 6 lost = 6 gained, which is the condition for a correctly balanced redox equation.</div>
+<div class="step">6. Hence the balanced change transfers <b>6 electrons</b>.</div>
+<pre>
+ 2 Al : 2 x (0 -> +3) = 6 e- lost
+ 2 Fe : 2 x (+3 -> 0) = 6 e- gained
+ balanced: 6 = 6
+ -----------------------------------------
+ electrons transferred = 6      &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Do not add 6 lost + 6 gained = 12. They are the same electrons seen from each side, so the transferred count is 6. The fastest sanity check in any redox count is that electrons lost must equal electrons gained &mdash; if they do not, re-check an oxidation state before answering.</div>
+<div class="final">Answer: 6 electrons.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">In the process, NO<sub>2</sub><sup>&minus;</sup> &rarr; NH<sub>3</sub>, the number of OH<sup>&minus;</sup> ions and the side in which they should be added in balancing are<br>(a) 7, right &nbsp; (b) 7, left &nbsp; (c) 4, left &nbsp; (d) 5, right</td><td class="topic">Basic medium balancing</td><td><a href="https://www.youtube.com/watch?v=Yes4jMZpguY" target="_blank">Simple Tricks for Balancing redox reaction / basic medium / ion electron method</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 7, right</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> To balance a half-reaction in basic medium, first balance it as if acidic (using H<sup>+</sup> and H<sub>2</sub>O), then neutralise every H<sup>+</sup> by adding an equal number of OH<sup>&minus;</sup> to <i>both</i> sides and merging water. The OH<sup>&minus;</sup> you are asked to count ends up on the side opposite to where the H<sup>+</sup> stood.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">N: +3 (NO<sub>2</sub><sup>&minus;</sup>) &rarr; &minus;3 (NH<sub>3</sub>) = gain of 6 e<sup>&minus;</sup></span> <span class="why">a 6-electron reduction, together with the two oxygens to be removed, fixes how much H and OH<sup>&minus;</sup> must move.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Balance O with water: NO<sub>2</sub><sup>&minus;</sup> &rarr; NH<sub>3</sub> + 2H<sub>2</sub>O (2 O on each side).</div>
+<div class="step">2. Balance H with H<sup>+</sup>: the right now has 3 + 4 = 7 H, so add 7 H<sup>+</sup> on the left: NO<sub>2</sub><sup>&minus;</sup> + 7H<sup>+</sup> &rarr; NH<sub>3</sub> + 2H<sub>2</sub>O.</div>
+<div class="step">3. Balance charge: left = +6, right = 0, so add 6 e<sup>&minus;</sup> on the left. <span class="why">matches the 6-electron change found above.</span></div>
+<div class="step">4. Switch to basic: add 7 OH<sup>&minus;</sup> to both sides; the 7 H<sup>+</sup> + 7 OH<sup>&minus;</sup> on the left become 7 H<sub>2</sub>O.</div>
+<div class="step">5. Merge water (7 &minus; 2 = 5 net on the left): NO<sub>2</sub><sup>&minus;</sup> + 5H<sub>2</sub>O + 6e<sup>&minus;</sup> &rarr; NH<sub>3</sub> + 7OH<sup>&minus;</sup>.</div>
+<div class="step">6. So <b>7 OH<sup>&minus;</sup></b> ions appear, on the <b>right</b> (product) side.</div>
+<pre>
+ NO2- + 7H+ + 6e- -> NH3 + 2H2O   (acidic)
+ + 7 OH- both sides, merge water:
+ NO2- + 5H2O + 6e- -> NH3 + 7OH-
+ -----------------------------------------
+ 7 OH- , right side      &lt;-- answer (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The OH<sup>&minus;</sup> always lands opposite the H<sup>+</sup>: here H<sup>+</sup> was on the left, so OH<sup>&minus;</sup> ends on the right. Option (b) "7, left" is the trap for anyone who forgets to cancel water and leaves the OH<sup>&minus;</sup> on the acid-ion side.</div>
+<div class="final">Answer: (a) 7, right.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">Oxidation state of Fe in Fe<sub>3</sub>O<sub>4</sub> are:<br>(a) +2 and +3 &nbsp; (b) +1 and +2 &nbsp; (c) +1 and +3 &nbsp; (d) none of these</td><td class="topic">Oxidation state of iron</td><td><a href="https://www.youtube.com/watch?v=R_3Tcr7LiuI" target="_blank">Oxidation number of Fe (Iron) in Fe3O4</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> +2 and +3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Fe<sub>3</sub>O<sub>4</sub> (magnetite) is a mixed oxide, FeO&middot;Fe<sub>2</sub>O<sub>3</sub>. The single "average" oxidation number you get from the formula hides two <i>different</i> real states of iron, so the correct answer must name both, not the fractional mean. The question tests whether you recognise a mixed-valence oxide.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">sum of oxidation numbers = net charge (0 for a neutral oxide)</span> <span class="why">this gives only the average; the crystal structure (one FeO plus one Fe<sub>2</sub>O<sub>3</sub>) gives the individual integer values.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Let the average Fe state be x. With O = &minus;2: 3x + 4(&minus;2) = 0.</div>
+<div class="step">2. 3x = +8, so x = +8/3 &mdash; a fraction, which no single real cation can carry.</div>
+<div class="step">3. A fractional mean is the signature of a mixture of two integer states. <span class="why">iron is never genuinely +8/3.</span></div>
+<div class="step">4. Split the formula: Fe<sub>3</sub>O<sub>4</sub> = FeO + Fe<sub>2</sub>O<sub>3</sub>, i.e. one Fe<sup>2+</sup> and two Fe<sup>3+</sup> ions.</div>
+<div class="step">5. Confirm the mean: (1&times;2 + 2&times;3)/3 = 8/3, consistent with step 2.</div>
+<div class="step">6. Hence iron is present as <b>+2 and +3</b>, so option (a) is correct and (d) "none" is wrong.</div>
+<pre>
+ average : 3x - 8 = 0 -> x = +8/3
+ FeO.Fe2O3 : one Fe(+2), two Fe(+3)
+ mean (2 + 3 + 3)/3 = 8/3   consistent
+ -----------------------------------------
+ Fe is +2 and +3        &lt;-- answer (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Whenever an oxide gives a fractional average oxidation state (Fe<sub>3</sub>O<sub>4</sub> = 8/3, Pb<sub>3</sub>O<sub>4</sub> = 8/3, Mn<sub>3</sub>O<sub>4</sub> = 8/3), read it as a mixed oxide of two integer states, not as a genuine fractional charge. The fraction is the clue, not the answer.</div>
+<div class="final">Answer: (a) +2 and +3.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 6</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Some redox reactions are given in Column I. Match them with the correct mole ratio of oxidizing to reducing agents given in Column II<br><b>Column-I:</b> (A) MnO<sub>4</sub><sup>&minus;</sup> + C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> &rarr; MnO<sub>2</sub> + CO<sub>2</sub> &nbsp; (B) ClO<sup>&minus;</sup> + Fe(OH)<sub>3</sub> &rarr; Cl<sup>&minus;</sup> + FeO<sub>4</sub><sup>2&minus;</sup> &nbsp; (C) HO<sub>2</sub><sup>&minus;</sup> + Cr(OH)<sub>3</sub><sup>&minus;</sup> &rarr; CrO<sub>4</sub><sup>2&minus;</sup> + HO<sup>&minus;</sup> &nbsp; (D) N<sub>2</sub>H<sub>4</sub> + Cu(OH)<sub>2</sub> &rarr; N<sub>2</sub>O + Cu<br><b>Column-II:</b> (p) 2 : 1 &nbsp; (q) 3 : 1 &nbsp; (r) 2 : 3 &nbsp; (s) 3 : 2<br>(a) (A)&rarr;(r), (B)&rarr;(s), (C)&rarr;(p), (D)&rarr;(q) &nbsp; (b) (A)&rarr;(pr), (B)&rarr;(s), (C)&rarr;(pqr), (D)&rarr;(q) &nbsp; (c) (A)&rarr;(rs), (B)&rarr;(ps), (C)&rarr;(s), (D)&rarr;(p) &nbsp; (d) (A)&rarr;(q), (B)&rarr;(s), (C)&rarr;(qr), (D)&rarr;(s)</td><td class="topic">Mole ratio matching</td><td><a href="https://www.youtube.com/watch?v=oKIVpLcxBco" target="_blank">Number of moles of MnO4- required to oxidize one mole of ferrous oxalate</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> (A)→(r), (B)→(s), (C)→(p), (D)→(q)</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The mole ratio of oxidising to reducing agent equals the inverse ratio of their n-factors (electrons exchanged per formula unit), because total electrons gained must equal total lost. Find each n-factor from the oxidation-number change, then cross-multiply. The catch is species C, whose printed charge decides the chromium state.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n<sub>ox</sub> &times; (moles ox) = n<sub>red</sub> &times; (moles red) &rArr; ox : red = n<sub>red</sub> : n<sub>ox</sub></span> <span class="why">the book prints Cr(OH)<sub>3</sub><sup>&minus;</sup>, so Cr there is +2, not the usual +3.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (A) MnO<sub>4</sub><sup>&minus;</sup>: Mn +7&rarr;+4 (n=3, oxidant); C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup>: 2C +3&rarr;+4 (n=2, reductant). ox:red = 2:3 &rarr; (r).</div>
+<div class="step">2. (B) ClO<sup>&minus;</sup>: Cl +1&rarr;&minus;1 (n=2, oxidant); Fe(OH)<sub>3</sub>: Fe +3&rarr;+6 (n=3). ox:red = 3:2 &rarr; (s).</div>
+<div class="step">3. (C) HO<sub>2</sub><sup>&minus;</sup>: peroxide O &minus;1&rarr;&minus;2 (n=2, oxidant); Cr(OH)<sub>3</sub><sup>&minus;</sup> has Cr = +2 &rarr; +6 (n=4). ox:red = 4:2 = 2:1 &rarr; (p).</div>
+<div class="step">4. (D) Cu(OH)<sub>2</sub>: Cu +2&rarr;0 (n=2, oxidant); N<sub>2</sub>H<sub>4</sub>: 2N &minus;2&rarr;+1 (n=6, reductant). ox:red = 6:2 = 3:1 &rarr; (q).</div>
+<div class="step">5. Collecting all four: A&rarr;r, B&rarr;s, C&rarr;p, D&rarr;q, which is option (a).</div>
+<pre>
+ A: n_ox 3, n_red 2 -> 2:3  (r)
+ B: n_ox 2, n_red 3 -> 3:2  (s)
+ C: n_ox 2, n_red 4 -> 2:1  (p)
+ D: n_ox 2, n_red 6 -> 3:1  (q)
+ -----------------------------------------
+ A-r B-s C-p D-q        &lt;-- answer (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Watch the charge on Cr(OH)<sub>3</sub><sup>&minus;</sup>: the minus makes Cr +2, not +3, so n = 4 and C maps to 2:1 (p). Reading it as neutral Cr(OH)<sub>3</sub> (Cr +3, n=3) wrongly gives 3:2 and breaks the whole match into option (c)-style errors.</div>
+<div class="final">Answer: (a) (A)&rarr;(r), (B)&rarr;(s), (C)&rarr;(p), (D)&rarr;(q).</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">The value of n in the reaction : Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + ne + 14H<sup>+</sup> &rarr; 2Cr<sup>3+</sup> + 7H<sub>2</sub>O</td><td class="topic">Electron balance</td><td><a href="https://www.youtube.com/watch?v=nds0yG_y4e8" target="_blank">Cr2O7 2- + 14H+ + 6e- to 2Cr3+ + 7H2O half reaction</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In a reduction half-reaction the electron coefficient n equals the total drop in oxidation number across every atom reduced. For dichromate, both chromium atoms fall from +6 to +3, so n is simply twice the per-atom change. The 14 H<sup>+</sup> and 7 H<sub>2</sub>O only balance the mass and the oxygen; they carry no electrons, so they never enter the count. This is the acidified-dichromate half-cell used in titrations and in the dichromate cell.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n = (&Delta; oxidation no. per atom) &times; (number of atoms reduced)</span> <span class="why">the electron count equals the total decrease in oxidation state, and charge balance must agree with it.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Cr in Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>: 2x + 7(&minus;2) = &minus;2 &rArr; 2x = 12 &rArr; x = +6.</div>
+<div class="step">2. Cr in the product Cr<sup>3+</sup> = +3.</div>
+<div class="step">3. Each Cr drops +6 &rarr; +3, a gain of 3 e<sup>&minus;</sup> per atom.</div>
+<div class="step">4. There are two Cr atoms, so n = 2 &times; 3 = 6 electrons gained.</div>
+<div class="step">5. Independent charge check: left side &minus;2 + 14(+1) + n(&minus;1) = 12 &minus; n; right side 2(+3) = 0 + 0 = +6. <span class="why">the 7 H<sub>2</sub>O are neutral.</span></div>
+<div class="step">6. Setting 12 &minus; n = 6 gives n = 6, so the oxidation-number and the charge methods agree.</div>
+<pre>
+ Cr : +6 -> +3  = 3 e- per atom
+ 2 Cr : 2 x 3 = 6 e-
+ charge: (12 - n) = +6 -> n = 6
+ -----------------------------------------
+ n = 6                  &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> &rarr; 2Cr<sup>3+</sup> is the standard 6-electron oxidant, worth memorising next to MnO<sub>4</sub><sup>&minus;</sup> &rarr; Mn<sup>2+</sup> (5 e<sup>&minus;</sup>). The 14 H<sup>+</sup> are a decoy; they never enter the electron count, only the mass balance.</div>
+<div class="final">Answer: n = 6.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">In the disproportionation reaction (unbalanced), Br<sub>2</sub> + OH<sup>&minus;</sup> &rarr; Br<sup>&minus;</sup> + BrO<sub>3</sub><sup>&minus;</sup> + H<sub>2</sub>O, the ratio of Br<sub>2</sub> molecules undergoing oxidation and reduction is<br>(a) 5 : 1 &nbsp; (b) 1 : 5 &nbsp; (c) 2 : 3 &nbsp; (d) 3 : 2</td><td class="topic">Disproportionation ratio</td><td><a href="https://www.youtube.com/watch?v=ZjpvyHrs33Q" target="_blank">In the disproportionation reaction Br2+OH- to Br-+BrO3-+H2O, the ratio</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 1 : 5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In a disproportionation one element is both oxidised and reduced from the same starting state. The split ratio is fixed entirely by electron balance: electrons released by the atoms oxidised must equal electrons absorbed by the atoms reduced, which dictates how many Br go each way. The question asks for the oxidation : reduction share.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">(atoms oxidised) &times; &Delta;<sub>ox</sub> = (atoms reduced) &times; &Delta;<sub>red</sub></span> <span class="why">Br 0&rarr;+5 loses 5 e<sup>&minus;</sup>; Br 0&rarr;&minus;1 gains 1 e<sup>&minus;</sup>.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Br<sub>2</sub> starts at 0. In BrO<sub>3</sub><sup>&minus;</sup>, Br = +5 (oxidation, 5 e<sup>&minus;</sup> lost per Br); in Br<sup>&minus;</sup>, Br = &minus;1 (reduction, 1 e<sup>&minus;</sup> gained per Br).</div>
+<div class="step">2. Balance electrons per atom: 5 Br reduced (5&times;1 = 5 e<sup>&minus;</sup>) match 1 Br oxidised (1&times;5 = 5 e<sup>&minus;</sup>).</div>
+<div class="step">3. So the Br atoms divide as 1 oxidised : 5 reduced.</div>
+<div class="step">4. Full balanced equation: 3Br<sub>2</sub> + 6OH<sup>&minus;</sup> &rarr; 5Br<sup>&minus;</sup> + BrO<sub>3</sub><sup>&minus;</sup> + 3H<sub>2</sub>O (1 Br oxidised, 5 Br reduced). <span class="why">6 e<sup>&minus;</sup> pass each way.</span></div>
+<div class="step">5. Expressed as Br<sub>2</sub> molecules: oxidation uses (1/2) Br<sub>2</sub>, reduction uses (5/2) Br<sub>2</sub>, ratio = (1/2):(5/2) = <b>1 : 5</b>.</div>
+<pre>
+ ox : Br 0 -> +5  (5 e- lost)
+ red: Br 0 -> -1  (1 e- gained)
+ 1 Br ox : 5 Br red  (6 e- balanced)
+ -> Br2 ox : Br2 red = 1 : 5
+ -----------------------------------------
+ 1 : 5                  &lt;-- answer (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The species with the bigger oxidation-number jump is always the minority. BrO<sub>3</sub><sup>&minus;</sup> needs 5 e<sup>&minus;</sup> per atom, so far more Br goes to Br<sup>&minus;</sup> &mdash; oxidation is the small share. Option (a) 5:1 simply reverses the roles and is the classic trap.</div>
+<div class="final">Answer: (b) 1 : 5 (oxidation : reduction).</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">The stoichiometric coefficient n in the reaction is : nH<sub>2</sub>CO<sub>2</sub> + 2KMnO<sub>4</sub> &rarr; nCO<sub>2</sub> + K<sub>2</sub>O + 2MnO + H<sub>2</sub>O</td><td class="topic">Stoichiometric coefficient</td><td><a href="https://www.youtube.com/watch?v=0ekZOr7CSK8" target="_blank">For the redox reaction MnO4- + C2O4 2- + H+ the correct coefficients</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The stoichiometric coefficient n is fixed by electron balance between the oxidant (KMnO<sub>4</sub>) and the fuel (H<sub>2</sub>CO<sub>2</sub>, formic acid). Equate the electrons gained by all the manganese to the electrons lost by all the carbon; the mass balance of H and O follows afterwards but does not set n.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">(moles oxidant) &times; n<sub>Mn</sub> = n &times; n<sub>C</sub></span> <span class="why">Mn +7&rarr;+2 gains 5 e<sup>&minus;</sup> each; C +2&rarr;+4 loses 2 e<sup>&minus;</sup> each.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In the product MnO, Mn = +2, so Mn +7 &rarr; +2 gains 5 e<sup>&minus;</sup>; two MnO<sub>4</sub><sup>&minus;</sup> gain 2&times;5 = 10 e<sup>&minus;</sup>.</div>
+<div class="step">2. In H<sub>2</sub>CO<sub>2</sub> (formic acid, HCOOH): 2(+1) + C + 2(&minus;2) = 0 &rArr; C = +2.</div>
+<div class="step">3. In CO<sub>2</sub>, C = +4, so each carbon loses 2 e<sup>&minus;</sup>. <span class="why">one C per H<sub>2</sub>CO<sub>2</sub> unit.</span></div>
+<div class="step">4. The n molecules lose 2n e<sup>&minus;</sup> in total; set equal to electrons gained: 2n = 10.</div>
+<div class="step">5. Therefore n = 5.</div>
+<div class="step">6. Mass note: balancing H then needs 5H<sub>2</sub>O on the right, not the printed 1 &mdash; a book shortcut that leaves n = 5 untouched.</div>
+<pre>
+ 2 Mn : 2 x (+7 -> +2) = 10 e- gained
+ n C  : n x (+2 -> +4) = 2n e- lost
+ 2n = 10 -> n = 5
+ -----------------------------------------
+ n = 5                  &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Pin n straight from the 10 : 2 electron ratio &mdash; there is no need to fully balance H and O to find it. The printed "H<sub>2</sub>O" should read 5H<sub>2</sub>O to balance oxygen, but that misprint does not change the requested n = 5.</div>
+<div class="final">Answer: n = 5.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Total number of electrons involved per molecule oxidation of FeC<sub>2</sub>O<sub>4</sub> to Fe<sup>3+</sup> and CO<sub>2</sub>.</td><td class="topic">Electron transfer</td><td><a href="https://www.youtube.com/watch?v=i_-O0IccTgw" target="_blank">Equivalent weight of FeC2O4 in the change FeC2O4 to Fe3+ + CO2</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Ferrous oxalate, FeC<sub>2</sub>O<sub>4</sub>, is oxidised at <i>two</i> sites at once: the iron centre and the oxalate carbons. The total electrons given up per formula unit is the sum of both contributions, which is why its n-factor is 3 and not 1. This makes it a favourite twist in permanganate-titration problems.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n-factor = (&Delta; for Fe) + (&Delta; for both C)</span> <span class="why">FeC<sub>2</sub>O<sub>4</sub> is Fe<sup>2+</sup> paired with oxalate C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup>, each oxidised independently.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Split the salt into ions: Fe<sup>2+</sup> and C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> (oxalate).</div>
+<div class="step">2. Iron: Fe +2 &rarr; +3 loses 1 e<sup>&minus;</sup>.</div>
+<div class="step">3. Oxalate carbon: in C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> each C = +3; in CO<sub>2</sub> each C = +4.</div>
+<div class="step">4. Two carbons each lose 1 e<sup>&minus;</sup>, giving 2 e<sup>&minus;</sup> from carbon. <span class="why">C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> &rarr; 2CO<sub>2</sub> + 2e<sup>&minus;</sup>.</span></div>
+<div class="step">5. Total electrons per FeC<sub>2</sub>O<sub>4</sub> = 1 (Fe) + 2 (C) = 3.</div>
+<div class="step">6. So each formula unit releases 3 electrons on oxidation to Fe<sup>3+</sup> and CO<sub>2</sub>.</div>
+<pre>
+ Fe  : +2 -> +3        = 1 e-
+ 2 C : 2 x (+3 -> +4)  = 2 e-
+ -----------------------------------------
+ total = 1 + 2 = 3     &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> FeC<sub>2</sub>O<sub>4</sub> has n-factor 3 because iron and oxalate are oxidised together; in a KMnO<sub>4</sub> titration this means 5 FeC<sub>2</sub>O<sub>4</sub> react with 3 MnO<sub>4</sub><sup>&minus;</sup>. Counting only the Fe (giving 1) is the standard mistake students make here.</div>
+<div class="final">Answer: 3 electrons.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">No. of peroxide bonds in blue perchromate is ________</td><td class="topic">Peroxide bonds</td><td><a href="https://www.youtube.com/watch?v=y578X_qzpE8" target="_blank">The number of peroxide linkages in CrO5 and H2SO5 respectively</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> "Blue perchromate" is chromium peroxide, CrO<sub>5</sub>, the deep-blue species formed when H<sub>2</sub>O<sub>2</sub> is added to acidified dichromate. Its formula looks impossible until you realise most of its oxygens sit in peroxide (O&minus;O) linkages rather than as ordinary oxide, so chromium stays at its normal maximum of +6.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">CrO<sub>5</sub> = CrO(O<sub>2</sub>)<sub>2</sub>, with Cr = +6</span> <span class="why">four of the five oxygens form two peroxide units, each O at the &minus;1 state.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. If all five O were ordinary oxide (&minus;2), Cr would be +10, which is impossible (Cr maxes at +6).</div>
+<div class="step">2. So some oxygens must be peroxidic, i.e. O in the &minus;1 state as O<sub>2</sub><sup>2&minus;</sup> groups.</div>
+<div class="step">3. Fix Cr = +6 and let p oxygens be peroxidic (&minus;1) and the rest oxide (&minus;2).</div>
+<div class="step">4. The known butterfly structure is CrO(O<sub>2</sub>)<sub>2</sub>: one doubly-bonded oxo O (&minus;2) plus two side-on O<sub>2</sub><sup>2&minus;</sup> groups (4 O at &minus;1).</div>
+<div class="step">5. Charge check: +6 + (&minus;2) + 4(&minus;1) = 0 &check;.</div>
+<div class="step">6. Each O<sub>2</sub><sup>2&minus;</sup> unit is one O&minus;O bond, so there are <b>2 peroxide bonds</b>.</div>
+<pre>
+ CrO5 = O=Cr(O-O)(O-O)
+ Cr +6, 1 oxo O (-2), 4 peroxo O (-1)
+ +6 - 2 + 4(-1) = 0   consistent
+ -----------------------------------------
+ peroxide (O-O) bonds = 2   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Any oxo species whose formula forces the metal past its normal maximum is hiding peroxide bonds. CrO<sub>5</sub> (butterfly) has exactly two O&minus;O bonds; the related CrO<sub>8</sub><sup>3&minus;</sup> has four. Count O&minus;O linkages, not oxygen atoms.</div>
+<div class="final">Answer: 2 peroxide bonds.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">In the reaction : Mn<sup>2+</sup> + S<sub>2</sub>O<sub>8</sub><sup>2&minus;</sup> &rarr; SO<sub>4</sub><sup>2&minus;</sup> + MnO<sub>4</sub><sup>&minus;</sup> (acid med.) the number of mole of S<sub>2</sub>O<sub>8</sub><sup>2&minus;</sup> required to oxidise 2 mole Mn<sup>2+</sup>.</td><td class="topic">Mole ratio in redox</td><td><a href="https://www.youtube.com/watch?v=JRXN3Filmk8" target="_blank">Manganese ions (Mn2+) can be oxidised by Persulphate ions (S2O8 2-)</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a mole-bridge built on electron conservation: every electron released by Mn<sup>2+</sup> as it is oxidised to permanganate must be taken up by peroxydisulphate. Find each n-factor, then scale by the 2 mol of Mn<sup>2+</sup> the question specifies. The key subtlety is where S<sub>2</sub>O<sub>8</sub><sup>2&minus;</sup> actually accepts electrons.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">(mol Mn<sup>2+</sup>) &times; n<sub>Mn</sub> = (mol S<sub>2</sub>O<sub>8</sub><sup>2&minus;</sup>) &times; n<sub>S</sub></span> <span class="why">electrons lost by Mn = electrons gained by peroxydisulphate.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Mn<sup>2+</sup> &rarr; MnO<sub>4</sub><sup>&minus;</sup>: Mn +2 &rarr; +7 loses 5 e<sup>&minus;</sup>, so n<sub>Mn</sub> = 5.</div>
+<div class="step">2. S<sub>2</sub>O<sub>8</sub><sup>2&minus;</sup> (peroxydisulphate) &rarr; 2SO<sub>4</sub><sup>2&minus;</sup>: the peroxo O&minus;O (O at &minus;1) goes to &minus;2, gaining 2 e<sup>&minus;</sup> per ion. <span class="why">sulphur stays +6; the peroxide bond is what is reduced.</span></div>
+<div class="step">3. For 2 mol Mn<sup>2+</sup>: electrons released = 2 &times; 5 = 10 mol e<sup>&minus;</sup>.</div>
+<div class="step">4. Each S<sub>2</sub>O<sub>8</sub><sup>2&minus;</sup> absorbs 2 e<sup>&minus;</sup>, so moles required = 10 / 2 = 5.</div>
+<div class="step">5. Hence 5 mol S<sub>2</sub>O<sub>8</sub><sup>2&minus;</sup> oxidise 2 mol Mn<sup>2+</sup>.</div>
+<pre>
+ 2 Mn2+ : 2 x 5 = 10 e- released
+ S2O8(2-) : 2 e- each
+ mol needed = 10 / 2 = 5
+ -----------------------------------------
+ 5 mol S2O8(2-)         &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Peroxydisulphate's n-factor is 2, coming from the O&minus;O bond, not from sulphur, which remains +6 throughout. Treating it as a 1-electron oxidant (answer 10) or hunting for a sulphur oxidation-state change is the usual slip.</div>
+<div class="final">Answer: 5 mol.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">For the redox reaction given below, what is the value of x/z ?<br>xNO<sub>3</sub><sup>&minus;</sup> + y As<sub>2</sub>S<sub>3</sub> + zH<sub>2</sub>O &rarr; ---- AsO<sub>4</sub><sup>3&minus;</sup> + ---- NO + ---- SO<sub>4</sub><sup>2&minus;</sup> + ---- H<sup>+</sup></td><td class="topic">Balancing coefficients ratio</td><td><a href="https://www.youtube.com/watch?v=7FUdxvJ9mlM" target="_blank">Balanced redox reaction x As2S3 + y NO3- + H2O to AsO4 + NO + SO4</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">7</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Balance first by electron transfer, then fix the remaining coefficients by charge and atom counts. As<sub>2</sub>S<sub>3</sub> is oxidised at both the arsenic and the sulphur, while NO<sub>3</sub><sup>&minus;</sup> &rarr; NO is the reduction. Once x (nitrate) and z (water) are known, x/z follows at once.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons lost by As<sub>2</sub>S<sub>3</sub> = electrons gained by NO<sub>3</sub><sup>&minus;</sup></span> <span class="why">As +3&rarr;+5, S &minus;2&rarr;+6, N +5&rarr;+2.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Per As<sub>2</sub>S<sub>3</sub>: 2 As (+3&rarr;+5) lose 4 e<sup>&minus;</sup>; 3 S (&minus;2&rarr;+6) lose 24 e<sup>&minus;</sup>; total 28 e<sup>&minus;</sup> lost.</div>
+<div class="step">2. Per NO<sub>3</sub><sup>&minus;</sup>: N +5 &rarr; +2 gains 3 e<sup>&minus;</sup>.</div>
+<div class="step">3. LCM(28, 3) = 84: take 3 As<sub>2</sub>S<sub>3</sub> (y = 3) and 28 NO<sub>3</sub><sup>&minus;</sup> (x = 28).</div>
+<div class="step">4. Atoms then fix 6 AsO<sub>4</sub><sup>3&minus;</sup>, 9 SO<sub>4</sub><sup>2&minus;</sup>, 28 NO. Charge: left &minus;28; right &minus;18 &minus;18 + w(H<sup>+</sup>) &rArr; w = 8 H<sup>+</sup>.</div>
+<div class="step">5. H from z H<sub>2</sub>O: 2z = 8 &rArr; z = 4. Oxygen check: 84 + 4 = 88 = 24 + 28 + 36 &check;.</div>
+<div class="step">6. Therefore x/z = 28 / 4 = 7.</div>
+<pre>
+ 28NO3- + 3As2S3 + 4H2O ->
+   6AsO4(3-) + 28NO + 9SO4(2-) + 8H+
+ x = 28 , z = 4
+ x/z = 28 / 4 = 7
+ -----------------------------------------
+ x/z = 7                &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Count every oxidised atom in As<sub>2</sub>S<sub>3</sub>: 4 (from As) + 24 (from S) = 28 e<sup>&minus;</sup> per unit &mdash; miss the sulphur and the balance collapses. With x = 28 fixed, charge balance alone then nails 8 H<sup>+</sup> and z = 4.</div>
+<div class="final">Answer: x/z = 7.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">Balance the following equation and choose the quantity which is the sum of the coefficients of the products :<br>......CS<sub>2</sub> + ......Cl<sub>2</sub> &rarr; CCl<sub>4</sub> + ......S<sub>2</sub>Cl<sub>2</sub></td><td class="topic">Sum of product coefficients</td><td><a href="https://www.youtube.com/watch?v=LwkrN8CeDBw" target="_blank">Balance CS2+Cl2 to CCl4+S2Cl2 and choose sum of coefficients of products</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">2</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Balance the equation by inspection &mdash; conserving atoms is enough here, no oxidation numbers are needed &mdash; then add only the coefficients that stand in front of the <i>products</i>. Carbon and sulphur each appear in just one product, so they anchor the product coefficients immediately, leaving chlorine as the only number left to solve. The trap is purely in reading which coefficients the question wants summed.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">conserve C, S, Cl:&nbsp; a CS<sub>2</sub> + b Cl<sub>2</sub> &rarr; c CCl<sub>4</sub> + d S<sub>2</sub>Cl<sub>2</sub></span> <span class="why">one C and two S per CS<sub>2</sub> force c = d = 1 straight away.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Carbon: 1 CS<sub>2</sub> supplies the 1 C in CCl<sub>4</sub>, so c = 1.</div>
+<div class="step">2. Sulphur: the 2 S from CS<sub>2</sub> go into 1 S<sub>2</sub>Cl<sub>2</sub>, so d = 1.</div>
+<div class="step">3. Chlorine on the right: CCl<sub>4</sub> has 4 Cl and S<sub>2</sub>Cl<sub>2</sub> has 2 Cl, total 6.</div>
+<div class="step">4. Chlorine on the left: b Cl<sub>2</sub> gives 2b Cl, so 2b = 6 &rArr; b = 3.</div>
+<div class="step">5. Balanced equation: CS<sub>2</sub> + 3Cl<sub>2</sub> &rarr; CCl<sub>4</sub> + S<sub>2</sub>Cl<sub>2</sub>, with every atom accounted for. <span class="why">C 1=1, S 2=2, Cl 6=6.</span></div>
+<div class="step">6. The products are CCl<sub>4</sub> (coefficient 1) and S<sub>2</sub>Cl<sub>2</sub> (coefficient 1), so their coefficient sum = 1 + 1 = 2.</div>
+<pre>
+ CS2 + 3Cl2 -> CCl4 + S2Cl2
+ C: 1=1   S: 2=2   Cl: 6=6
+ product coeffs: 1 + 1 = 2
+ -----------------------------------------
+ sum = 2                &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The question asks only for the <i>product</i> coefficients (1 + 1 = 2); the reactant total is 1 + 3 = 4 and the grand total is 6. Adding all four coefficients to get 6 is the planted trap &mdash; read exactly which coefficients are being summed.</div>
+<div class="final">Answer: 2.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">The value of n in the following processes : AO<sub>4</sub><sup>n&minus;</sup> + 2e &rarr; HAO<sub>n</sub><sup>2&minus;</sup> is</td><td class="topic">Charge balance</td><td><a href="https://www.youtube.com/watch?v=vf6PiQVK6oU" target="_blank">Balancing a chemical equation by ion-electron / Half Reaction Method</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The same symbol n appears twice here: as the charge of AO<sub>4</sub><sup>n&minus;</sup> and as the number of oxygens in HAO<sub>n</sub><sup>2&minus;</sup>. Gaining 2 e<sup>&minus;</sup> means element A's oxidation state must fall by exactly 2; writing that condition in terms of n gives a single equation to solve.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">(state of A in AO<sub>4</sub>) &minus; (state of A in HAO<sub>n</sub>) = 2</span> <span class="why">a 2-electron reduction lowers the central atom's oxidation number by exactly 2.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In AO<sub>4</sub><sup>n&minus;</sup>: A + 4(&minus;2) = &minus;n &rArr; A = 8 &minus; n.</div>
+<div class="step">2. In HAO<sub>n</sub><sup>2&minus;</sup>: (+1) + A + n(&minus;2) = &minus;2 &rArr; A = 2n &minus; 3.</div>
+<div class="step">3. Gaining 2 e<sup>&minus;</sup> drops A by 2, so (8 &minus; n) &minus; (2n &minus; 3) = 2.</div>
+<div class="step">4. Simplify: 11 &minus; 3n = 2 &rArr; 3n = 9 &rArr; n = 3.</div>
+<div class="step">5. Check n = 3: AO<sub>4</sub><sup>3&minus;</sup> gives A = +5; HAO<sub>3</sub><sup>2&minus;</sup> gives A = +3; the drop is 2, matching 2 e<sup>&minus;</sup>. <span class="why">a PO<sub>4</sub><sup>3&minus;</sup>-type skeleton.</span></div>
+<div class="step">6. So n = 3 is consistent on both sides.</div>
+<pre>
+ AO4^n-   : A = 8 - n
+ HAOn^2-  : A = 2n - 3
+ drop of 2: (8-n) - (2n-3) = 2
+ 11 - 3n = 2 -> n = 3
+ -----------------------------------------
+ n = 3                  &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> When one unknown plays two roles (charge and subscript), write A's oxidation state for each side and equate the <i>difference</i> to the electrons gained &mdash; one line, one solve. Guessing n from the charge alone (&minus;n + 2 = &minus;2 &rArr; n = 0) ignores the changing oxygen count and fails.</div>
+<div class="final">Answer: n = 3.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<div class="note" style="margin-top:22px">
+  <b>Answer key.</b> Answers are keyed to the <b>ICAD C-V3 Answer Key</b> (book page 352) and every one was independently re-worked from first principles; every entry reconciles with the working. Board-level questions are descriptive and the key prints no answer for them, so their answers are worked here.<br>
+  <b>Videos.</b> Every video ID was verified live against the YouTube oEmbed endpoint before publishing &mdash; 58 rows, 25 exact matches and 33 closest-concept matches, drawn from 40 distinct videos.
+</div>
+
+<footer>ICAD &middot; ChemV3 &middot; Module C8 &middot; Lesson L3 &mdash; Redox Reaction &middot; book pages 192&ndash;198 &middot; 58 questions &middot; 58 worked solutions</footer>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('ansBtn');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-ans');
+    btn.textContent = on ? '🙈 Hide Answers' : '🔑 Show Answers';
+  });
+  // click a single blurred answer to reveal just that one
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('warn')) return;
+    var host = t && t.closest ? t.closest('.ansval') : null;
+    if (host && !document.body.classList.contains('show-ans')){
+      host.classList.toggle('revealed');
+    }
+  });
+})();
+</script>
+</body>
+</html>

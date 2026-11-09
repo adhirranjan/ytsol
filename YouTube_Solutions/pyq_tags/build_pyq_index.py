@@ -13,6 +13,7 @@ OUT = os.path.join(ROOT, "PYQ_Index.html")
 CHAPTERS = {
     "C1": "States of Matter", "C2": "Structure of Atom", "C3": "Mole Concept", "C4": "Periodic Properties",
     "C5": "Chemical Bonding", "C6": "Thermodynamics", "C7": "Chemical & Ionic Equilibrium",
+    "C8": "Redox Reaction",
     "P1": "Maths Tools-I", "P2": "Maths Tools-II", "P3": "Vectors", "P4": "Motion in 1D & 2D",
     "P5": "Force Systems", "P6": "Newton's Laws", "P7": "Friction", "P8": "Work, Energy & Power",
     "P9": "Collision", "P10": "Circular Motion", "P11": "Centre of Mass", "P12": "Rotational Motion",

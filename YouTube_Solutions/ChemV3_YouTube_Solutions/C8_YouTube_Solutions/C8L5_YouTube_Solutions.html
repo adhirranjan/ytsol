@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C8 &middot; L5 &mdash; Redox Reaction</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1c2230; --muted:#5b6472;
+    --line:#e4e7ec; --head:#1f2a44; --headtxt:#ffffff;
+    --exact-bg:#e7f6ec; --exact-ink:#1f7a3d;
+    --sim-bg:#fff4e0; --sim-ink:#9a6300;
+    --link:#1a56db; --zebra:#fafbfc;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1420; --card:#161c2b; --ink:#e6e9f0; --muted:#9aa3b2;
+      --line:#283048; --head:#0d1526; --headtxt:#eef2ff;
+      --exact-bg:#123322; --exact-ink:#63d68f; --sim-bg:#3a2c11; --sim-ink:#f0b95a;
+      --link:#6ea8fe; --zebra:#1a2130;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;padding:32px 18px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{margin-bottom:22px}
+  h1{font-size:1.7rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 14px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px;font-size:.85rem}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:600;font-size:.78rem;white-space:nowrap}
+  .exact{background:var(--exact-bg);color:var(--exact-ink)}
+  .sim{background:var(--sim-bg);color:var(--sim-ink)}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;color:var(--muted);font-size:.88rem;margin:12px 0 26px}
+  h2{font-size:1.15rem;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .tablecard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:640px}
+  thead th{background:var(--head);color:var(--headtxt);text-align:left;padding:10px 12px;font-weight:600;font-size:.82rem;letter-spacing:.02em}
+  tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  td.num{font-weight:700;color:var(--muted);width:34px;text-align:center}
+  td.topic{color:var(--muted);font-size:.84rem;white-space:normal;width:16%;}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .q{font-weight:500}
+  code{background:rgba(125,125,125,.15);padding:1px 5px;border-radius:5px;font-size:.85em}
+  footer{color:var(--muted);font-size:.8rem;margin-top:30px;text-align:center}
+  /* --- Answer key (toggle) --- */
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 2px}
+  .ansbtn{appearance:none;cursor:pointer;border:1px solid var(--line);background:var(--head);color:var(--headtxt);
+    font:600 .86rem/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:10px 16px;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .ansbtn:hover{filter:brightness(1.12)}
+  .ansbtn:active{transform:translateY(1px)}
+  .controls .hint{font-size:.8rem;color:var(--muted)}
+  th.ans-h{min-width:170px;text-align:left}
+  td.ans{text-align:left;min-width:170px}
+  .ansval{display:inline-block;font-weight:600;font-size:.82rem;color:var(--exact-ink);background:var(--exact-bg);border-radius:7px;padding:3px 10px;filter:blur(6px);cursor:pointer;user-select:none;transition:filter .12s;line-height:1.4}
+  .ansval:hover{filter:blur(3px)}
+  .ansval.revealed{filter:none;cursor:default;user-select:text}
+  body.show-ans .ansval{filter:none;cursor:default;user-select:text}
+  .ansval .lt{font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-right:6px;color:inherit}
+  .ansval.flagged{background:var(--sim-bg);color:var(--sim-ink)}
+  .warn{cursor:help}
+  .na{color:var(--muted)}
+  /* --- Collapsible worked solutions (full-width rows) --- */
+  tbody tr.solnrow{background:var(--card)!important}
+  tbody tr.solnrow>td{border-top:none;padding:0 12px 4px}
+  details.soln{margin:0}
+  details.soln>summary{cursor:pointer;color:var(--link);font-size:.78rem;font-weight:700;list-style:none;display:inline-block;user-select:none;padding:6px 0}
+  details.soln>summary::-webkit-details-marker{display:none}
+  details.soln>summary::before{content:"\25B8  Show full solution"}
+  details.soln[open]>summary::before{content:"\25BE  Hide full solution"}
+  details.soln>summary:hover{text-decoration:underline}
+  .solnbody{margin:2px 0 12px;padding:14px 16px;background:var(--zebra);border:1px solid var(--line);border-left:3px solid var(--exact-ink);border-radius:9px;font-size:.85rem;font-weight:400;color:var(--ink);line-height:1.65;max-width:860px}
+  .solnbody .seg{margin:8px 0}
+  .solnbody .lbl{display:inline-block;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:.68rem;margin-right:7px;vertical-align:1px}
+  .solnbody .step{margin:5px 0 5px 4px}
+  .solnbody .step .why{display:block;color:var(--muted);font-size:.93em;margin:1px 0 0 14px}
+  .solnbody code{font-size:.9em}
+  .solnbody pre{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:8px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.78rem;line-height:1.5;overflow-x:auto;white-space:pre;color:var(--ink)}
+  .solnbody .eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(125,125,125,.10);padding:1px 5px;border-radius:4px}
+  .solnbody .trick{margin-top:10px;padding:10px 12px;background:var(--sim-bg);color:var(--sim-ink);border-radius:8px;font-size:.84rem}
+  .solnbody .trick .lbl{color:var(--sim-ink)}
+  .solnbody .final{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);font-weight:700;color:var(--exact-ink)}
+  /* --- PYQ provenance tag (pyq_tags/add_pyq_tags.py) --- */
+  .pyq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:7px;font-size:.76rem;font-weight:600}
+  .pyq .paper{display:inline-block;padding:2px 10px;border-radius:999px;background:rgba(99,102,241,.13);color:#4f46e5;white-space:nowrap}
+  .pyq a{white-space:nowrap}
+  tr:target td{background:rgba(99,102,241,.10)}
+  @media (prefers-color-scheme: dark){ .pyq .paper{background:rgba(129,140,248,.18);color:#a5b4fc} }
+  /* --- end PYQ tag --- */
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<header>
+  <h1>C8 &middot; L5 &mdash; Redox Reaction</h1>
+  <p class="sub">Practice Problems mapped to YouTube solution videos</p>
+  <div class="legend">
+    <span class="badge exact">&#128994; Exact</span><span style="color:var(--muted);font-size:.82rem">video solves the same question (same numbers)</span>
+    <span class="badge sim">&#128993; Similar</span><span style="color:var(--muted);font-size:.82rem">same method / concept, different numbers</span><span class="pyqleg" style="display:contents"><span class="pyq" style="margin:0"><span class="paper">📝 JEE Main / Advanced paper</span></span><span class="pyqlegend" style="color:var(--muted);font-size:.82rem">real JEE question, with ExamGoal&rsquo;s worked solution &middot; <b>1</b> on this page</span></span><!--/pyqleg-->
+  </div>
+  <div class="note"><b>Scope:</b> Quick Recap, Suggested Problems, Board level and Levels 1&ndash;6 &mdash; every unsolved question in the lecture. The chapter&rsquo;s Solved Examples are excluded (the book already works those).</div>
+</header>
+
+<div class="controls">
+  <button id="ansBtn" class="ansbtn" type="button">&#128273; Show Answers</button>
+  <span class="hint">Answers (letter <b>+</b> the option text/value, taken from the ICAD C-V3 Answer Key and independently re-worked) are hidden by default &mdash; click to reveal all, or click any single blurred answer to reveal just that one. &#9888; marks a key entry that does not reconcile with the working &mdash; hover it.</span>
+</div>
+
+<h2>Quick Recap</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1 (i)</td><td class="q">Fill in the blank: The valence factor of an acid is the number of replaceable ________ ions.</td><td class="topic">Valence factor of acid</td><td><a href="https://www.youtube.com/watch?v=rigz3sPqfIM" target="_blank">N Factor Calculation | Trick to calculate n factor | How to calculate valency factor?</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">H⁺ ions</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The valence factor (n-factor) of an acid is the count of <b>replaceable H<sup>+</sup></b> it can furnish per molecule in water. The trap is to count every hydrogen atom in the formula; only the ionisable ones (those released as H<sup>+</sup>) are counted.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n-factor(acid) = number of replaceable H<sup>+</sup>, and Equivalent mass = Molar mass / n-factor</span> <span class="why">This is why basicity, not the total H count, fixes the equivalent mass.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. An acid in the Arrhenius sense donates H<sup>+</sup> when dissolved in water.</div>
+<div class="step">2. The valence factor equals the number of such H<sup>+</sup> ions one molecule can release. <span class="why">This is the acid&rsquo;s basicity.</span></div>
+<div class="step">3. HCl releases 1, so n = 1; H<sub>2</sub>SO<sub>4</sub> releases 2, so n = 2; H<sub>3</sub>PO<sub>4</sub> releases 3, so n = 3.</div>
+<div class="step">4. Only replaceable H counts: CH<sub>3</sub>COOH has 4 H atoms but only the &ndash;COOH hydrogen ionises, so n = 1.</div>
+<div class="step">5. H<sub>3</sub>PO<sub>3</sub> has 3 H atoms but only 2 are on &ndash;OH and replaceable, so n = 2, not 3.</div>
+<div class="step">6. Hence the blank is filled by <b>H<sup>+</sup> (hydrogen) ions</b>.</div>
+<pre>
+ acid  :  replaceable H+   n-factor
+ ---------------------------------------
+ HCl               1          1
+ H2SO4             2          2
+ H3PO4             3          3
+ CH3COOH           1          1  (4 H total)
+ ---------------------------------------
+ n-factor of acid = replaceable H+ ions
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Count acidic (ionisable) H, never total H. The giveaway for oxoacids: only H attached to oxygen (&ndash;OH) is replaceable; H bonded straight to the central atom (as in H<sub>3</sub>PO<sub>3</sub>, H<sub>3</sub>PO<sub>2</sub>) is not.</div>
+<div class="final">Answer: the valence factor of an acid is the number of replaceable <b>H<sup>+</sup> ions</b>.</div></div></details></td></tr>
+<tr><td class="num">1 (ii)</td><td class="q">Fill in the blank: The valence factor of a base is the number of replaceable ________ ions</td><td class="topic">Valence factor of base</td><td><a href="https://www.youtube.com/watch?v=rigz3sPqfIM" target="_blank">N Factor Calculation | Trick to calculate n factor | How to calculate valency factor?</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">OH⁻ ions</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The valence factor (n-factor) of a base is the count of <b>replaceable OH<sup>&minus;</sup></b> it furnishes per formula unit in water, i.e. its acidity. The trap is counting every O or H in the formula instead of the hydroxide groups actually released.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n-factor(base) = number of replaceable OH<sup>&minus;</sup>, and Equivalent mass = Molar mass / n-factor</span> <span class="why">Acidity of the base, not its molar mass alone, sets the equivalent mass.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. A base in the Arrhenius sense releases OH<sup>&minus;</sup> when dissolved in water.</div>
+<div class="step">2. The valence factor equals the number of OH<sup>&minus;</sup> one formula unit can furnish. <span class="why">This is the base&rsquo;s acidity.</span></div>
+<div class="step">3. NaOH gives 1, so n = 1; Ca(OH)<sub>2</sub> gives 2, so n = 2; Al(OH)<sub>3</sub> gives 3, so n = 3.</div>
+<div class="step">4. The equivalent mass follows: for Ca(OH)<sub>2</sub> (M = 74) it is 74/2 = 37.</div>
+<div class="step">5. This mirrors the acid rule exactly, with OH<sup>&minus;</sup> playing the role H<sup>+</sup> plays for acids.</div>
+<div class="step">6. Hence the blank is filled by <b>OH<sup>&minus;</sup> (hydroxide) ions</b>.</div>
+<pre>
+ base      :  replaceable OH-   n-factor
+ ---------------------------------------
+ NaOH                1             1
+ Ca(OH)2             2             2
+ Al(OH)3             3             3
+ ---------------------------------------
+ n-factor of base = replaceable OH- ions
+ Eq. mass = Molar mass / n-factor
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Acidity of a base = number of OH<sup>&minus;</sup> it supplies; basicity of an acid = number of H<sup>+</sup> it supplies. Keep the pair straight and the equivalent mass follows instantly as M divided by that count.</div>
+<div class="final">Answer: the valence factor of a base is the number of replaceable <b>OH<sup>&minus;</sup> ions</b>.</div></div></details></td></tr>
+<tr><td class="num">1 (iii)</td><td class="q">Fill in the blank: The valence factor of a redox reaction is the number of electrons ________ or ________ by one molecule of oxidant or reductant.</td><td class="topic">Valence factor of redox</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">lost, gained</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> For a redox change the valence factor (n-factor) is the number of electrons <b>lost</b> (by the reductant) or <b>gained</b> (by the oxidant) per molecule. The trap is to use basicity/acidity here; in redox it is the total change in oxidation number that counts.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n-factor = total change in oxidation number per molecule = electrons lost or gained, Eq. mass = M / n-factor</span> <span class="why">One electron transferred corresponds to one unit of oxidation-number change.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In a redox reaction electrons move from the reductant to the oxidant.</div>
+<div class="step">2. The reductant <b>loses</b> electrons (oxidised); the oxidant <b>gains</b> electrons (reduced). <span class="why">Both counts are equal overall, so charge balances.</span></div>
+<div class="step">3. The valence factor of each is the number of electrons it loses or gains per molecule.</div>
+<div class="step">4. KMnO<sub>4</sub> in acid: Mn goes +7 &rarr; +2, gaining 5 e<sup>&minus;</sup>, so n = 5.</div>
+<div class="step">5. FeSO<sub>4</sub>: Fe goes +2 &rarr; +3, losing 1 e<sup>&minus;</sup>, so n = 1.</div>
+<div class="step">6. Hence the two blanks are <b>lost</b> and <b>gained</b>.</div>
+<pre>
+ species   oxid. no. change   e- per molecule
+ ---------------------------------------------
+ KMnO4     +7 -> +2           5 gained  (n=5)
+ FeSO4     +2 -> +3           1 lost    (n=1)
+ ---------------------------------------------
+ n-factor (redox) = e- lost OR gained
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Never mix the two n-factor rules: use replaceable H<sup>+</sup>/OH<sup>&minus;</sup> for acid&ndash;base, but electrons lost/gained for redox. For a salt acting in a redox titration, always switch to the electron-transfer count.</div>
+<div class="final">Answer: the number of electrons <b>lost</b> or <b>gained</b> by one molecule of oxidant or reductant.</div></div></details></td></tr>
+<tr><td class="num">1 (iv)</td><td class="q">Fill in the blank: A metal M<sup>n+</sup> has equivalent mass M/3 then value of n will be ________</td><td class="topic">Equivalent mass and valency</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Equivalent mass of an ion equals its molar mass divided by its n-factor, and for a simple metal ion M<sup>n+</sup> the n-factor is just the magnitude of the charge n. Given the equivalent mass as M/3, read n straight off the denominator. The common trap is to confuse the molar mass symbol M with the chemical symbol of the metal, and a second trap is to think the equivalent mass is some fixed number rather than a ratio.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Equivalent mass = Molar mass / n-factor = M / n, with n-factor = charge of M<sup>n+</sup></span> <span class="why">For a bare cation the only &lsquo;reaction&rsquo; is carrying its charge, so the n-factor equals that charge.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Write the definition: equivalent mass = M / n, where M is the molar mass and n the n-factor.</div>
+<div class="step">2. For a metal ion M<sup>n+</sup> taking part only as a charged species, the n-factor equals its charge n.</div>
+<div class="step">3. The problem states the equivalent mass is M/3.</div>
+<div class="step">4. Equate the denominators: M / n = M / 3, so n = 3. <span class="why">The molar mass M cancels, leaving n directly.</span></div>
+<div class="step">5. For the cation M<sup>n+</sup> the n-factor is its charge, so the ion is tripositive: M<sup>3+</sup>.</div>
+<div class="step">6. Check with a real ion: Al<sup>3+</sup> (M = 27) has equivalent mass 27/3 = 9, matching the M/3 form exactly.</div>
+<div class="step">7. Hence n = <b>3</b>.</div>
+<pre>
+ Eq. mass = M / n       (n = charge of cation)
+ given    : M / 3
+ ---------------------------------------------
+ M/n = M/3   ->   n = 3
+ ---------------------------------------------
+ e.g. Al3+ : 27/3 = 9   (n = 3)        &lt;-- n=3
+ Fe3+      : 56/3 = 18.7 also n = 3
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The denominator of an equivalent-mass expression IS the n-factor. Whenever you see M/k, read n = k at once &mdash; no oxidation-state bookkeeping is needed for a bare metal ion whose charge equals its n-factor. Here M/3 means the ion is M<sup>3+</sup>, so n = 3.</div>
+<div class="final">Answer: n = <b>3</b>.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Match column-I with appropriate term in column-II.<br><b>Column-I (Species, underlined):</b> (A) 2 CuI<sub>2</sub> &rarr; Cu<sub>2</sub>I<sub>2</sub> &nbsp; (B) As<sub>2</sub>O<sub>3</sub> &rarr; H<sub>3</sub>AsO<sub>4</sub> &nbsp; (C) HNO<sub>3</sub> &rarr; NO &nbsp; (D) PH<sub>3</sub> &rarr; H<sub>3</sub>PO<sub>3</sub><br><b>Column-II (Equivalent weight):</b> (p) M/3 &nbsp; (q) M/1 &nbsp; (r) M/6 &nbsp; (s) M/4</td><td class="topic">Match equivalent weights</td><td><a href="https://www.youtube.com/watch?v=ItS62BwTVqs" target="_blank">n-factors Calculation of Oxidising and Reducing Agent | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">A-q, B-s, C-p, D-r</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Equivalent weight of a redox species = M / (total change in oxidation number per formula unit). Find the oxidation state before and after, multiply the per-atom change by the number of atoms changing, and divide M by that total. The trap is forgetting there are two atoms of the element in some formulas.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. wt = M / (&Delta;(ox. no.) &times; number of atoms changing)</span> <span class="why">n-factor is the total electrons transferred per formula unit, not per atom.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (A) 2CuI<sub>2</sub> &rarr; Cu<sub>2</sub>I<sub>2</sub>: Cu goes +2 &rarr; +1, &Delta; = 1 per Cu; iodine stays &minus;1. n = 1, so Eq. wt = M/1 &rarr; <b>(q)</b>.</div>
+<div class="step">2. (B) As<sub>2</sub>O<sub>3</sub> &rarr; H<sub>3</sub>AsO<sub>4</sub>: As +3 &rarr; +5, &Delta; = 2, and 2 As atoms, total = 4. Eq. wt = M/4 &rarr; <b>(s)</b>.</div>
+<div class="step">3. (C) HNO<sub>3</sub> &rarr; NO: N +5 &rarr; +2, &Delta; = 3, one N. Eq. wt = M/3 &rarr; <b>(p)</b>.</div>
+<div class="step">4. (D) PH<sub>3</sub> &rarr; H<sub>3</sub>PO<sub>3</sub>: P &minus;3 &rarr; +3, &Delta; = 6, one P. Eq. wt = M/6 &rarr; <b>(r)</b>.</div>
+<div class="step">5. Collecting: A&ndash;q, B&ndash;s, C&ndash;p, D&ndash;r.</div>
+<pre>
+ species       ox.no.    change  atoms  n   Eq.wt
+ -----------------------------------------------
+ A CuI2->Cu2I2  +2->+1     1      1     1   M/1 q
+ B As2O3->AsO4  +3->+5     2      2     4   M/4 s
+ C HNO3->NO     +5->+2     3      1     3   M/3 p
+ D PH3->H3PO3   -3->+3     6      1     6   M/6 r
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Always multiply the per-atom change by the number of redox atoms in the formula &mdash; As<sub>2</sub>O<sub>3</sub> is the trap, where 2 As each change by 2 giving n = 4, not 2. PH<sub>3</sub>&rarr;H<sub>3</sub>PO<sub>3</sub> spans the widest swing (6 units).</div>
+<div class="final">Answer: <b>A&ndash;q, B&ndash;s, C&ndash;p, D&ndash;r</b>.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Suggested Problems</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">In the reduction of dichromate by Fe (II), the number of electrons involved per chromium atom is (Level-1)<br>(a) 3 &nbsp; (b) 1 &nbsp; (c) 2 &nbsp; (d) 4</td><td class="topic">Electrons per chromium atom</td><td><a href="https://www.youtube.com/watch?v=UO7w_kA43hk" target="_blank">In the reduction of dichromate by Fe (II), the number of electrons involved per chromium atom is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Dichromate Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> is reduced to Cr<sup>3+</sup> when it oxidises Fe(II) to Fe(III). The electrons involved <i>per chromium atom</i> is simply the drop in chromium&rsquo;s oxidation number from reactant to product. The trap is to quote 6, the per-ion total for both Cr atoms (the n-factor of dichromate), when the stem explicitly asks per atom.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons per Cr = (ox. no. of Cr in Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>) &minus; (ox. no. of Cr in Cr<sup>3+</sup>)</span> <span class="why">Each unit of oxidation-number fall corresponds to exactly one electron gained.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>: 2Cr + 7(&minus;2) = &minus;2, so 2Cr = +12 and each Cr = +6.</div>
+<div class="step">2. In the product Cr<sup>3+</sup> chromium is +3.</div>
+<div class="step">3. Change per Cr = 6 &minus; 3 = 3, so each chromium atom gains 3 electrons. <span class="why">This is the per-atom answer the stem wants.</span></div>
+<div class="step">4. The balanced half-reaction confirms it: Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + 14H<sup>+</sup> + 6e<sup>&minus;</sup> &rarr; 2Cr<sup>3+</sup> + 7H<sub>2</sub>O.</div>
+<div class="step">5. The ion accepts 6 electrons for its 2 Cr atoms, so 6/2 = 3 electrons per chromium atom.</div>
+<div class="step">6. The partner half-reaction is Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup> + e<sup>&minus;</sup>, needing 6 Fe(II) per dichromate. <span class="why">Consistent with 6 electrons transferred.</span></div>
+<div class="step">7. Hence the answer is <b>3</b> electrons per chromium atom, option (a).</div>
+<pre>
+ Cr2O7^2-  : 2Cr + 7(-2) = -2  -> Cr = +6
+ product   : Cr3+               -> Cr = +3
+ ------------------------------------------
+ per Cr    : 6 - 3 = 3 electrons
+ half rxn  : ...+ 6e- -> 2Cr3+  (6/2 = 3)
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Read &ldquo;per chromium atom&rdquo; carefully: the full ion takes 6 e<sup>&minus;</sup> (the n-factor of dichromate), but per atom it is 6/2 = 3. Option (d) 4 and the distractor 6 both tempt if you blur the two.</div>
+<div class="final">Answer: <b>(a) 3</b>.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">The eq. mass of Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> as reductant, in the reaction,<br>Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> + 5H<sub>2</sub>O + 4Cl<sub>2</sub> &rarr; 2NaHSO<sub>4</sub> + 8HCl : (Level-2)<br>(a) (molar mass)/1 &nbsp; (b) (molar mass)/2 &nbsp; (c) (molar mass)/6 &nbsp; (d) (molar mass)/8</td><td class="topic">Equivalent mass of thiosulphate</td><td><a href="https://www.youtube.com/watch?v=jiP62qEpFYQ" target="_blank">In the reaction of sodium thiosulphate with I2 in aqueous medium the equivalent weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> (molar mass)/8</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> As a reductant, Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> has n-factor equal to the total electrons its sulphur atoms lose. Chlorine oxidises thiosulphate all the way to sulphate here, a far larger change than the usual iodometric case. The trap is to assume the familiar n = 1 (iodine titration), which does not apply with Cl<sub>2</sub>.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. mass = M / n, n = &Delta;(ox. no. of S) &times; (number of S atoms)</span> <span class="why">Both sulphur atoms are oxidised, so the per-atom change is doubled.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>: 2(+1) + 2S + 3(&minus;2) = 0, so 2S = +4 and S = +2 (average).</div>
+<div class="step">2. The sulphur-bearing product is NaHSO<sub>4</sub>: with Na +1, H +1, O<sub>4</sub> &minus;8, sulphur is S = +6.</div>
+<div class="step">3. Change per S atom = 6 &minus; 2 = 4, and there are 2 S atoms per formula unit of thiosulphate.</div>
+<div class="step">4. Total electrons lost = 4 &times; 2 = 8, so n-factor = 8. <span class="why">Not 1, because Cl<sub>2</sub> drives S all the way to +6, not to the +2.5 of tetrathionate.</span></div>
+<div class="step">5. The reaction is consistent: 4 Cl<sub>2</sub> accept 8 electrons (each Cl 0 &rarr; &minus;1), matching the 8 lost by sulphur.</div>
+<div class="step">6. Equivalent mass = M / n = M/8.</div>
+<div class="step">7. Hence option (d).</div>
+<pre>
+ S in Na2S2O3 : (2S) = +4  -> S = +2 (avg)
+ S in NaHSO4  :              S = +6
+ -----------------------------------------
+ per S : 6 - 2 = 4 ;  2 S atoms
+ n = 4 x 2 = 8  ->  Eq. mass = M/8
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Thiosulphate&rsquo;s n-factor depends on the oxidant: with I<sub>2</sub> it is 1 (S +2&rarr;+2.5, two S), but with a strong oxidant like Cl<sub>2</sub> it jumps to 8 (S all the way to +6). Always read the product before fixing n.</div>
+<div class="final">Answer: <b>(d) (molar mass)/8</b>.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">The equivalent mass of MnSO<sub>4</sub> is half of its molar mass when it is converted to : (Level-3)<br>(a) Mn<sub>2</sub>O<sub>3</sub> &nbsp; (b) MnO<sub>2</sub> &nbsp; (c) MnO<sub>4</sub><sup>&minus;</sup> &nbsp; (d) MnO<sub>4</sub><sup>2&minus;</sup></td><td class="topic">Equivalent mass of MnSO4</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> MnO₂</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Equivalent mass = M/2 means the n-factor is 2, so manganese must change its oxidation number by exactly 2. Mn starts at +2 in MnSO<sub>4</sub>, so we need the product in which Mn is +4. The trap is picking the strongest oxidation (permanganate) by habit.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. mass = M / n, so Eq. mass = M/2 &hArr; n = 2 = &Delta;(ox. no. of Mn)</span> <span class="why">n-factor is fixed by how far the oxidation state moves, nothing else.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In MnSO<sub>4</sub> the sulphate group is &minus;2, so manganese is Mn = +2.</div>
+<div class="step">2. Eq. mass = M/2 requires n-factor = 2, i.e. Mn must change by 2 and end at +2 + 2 = +4.</div>
+<div class="step">3. (a) Mn<sub>2</sub>O<sub>3</sub>: O<sub>3</sub> = &minus;6 over 2 Mn gives Mn = +3, so &Delta; = 1 &mdash; no.</div>
+<div class="step">4. (b) MnO<sub>2</sub>: O<sub>2</sub> = &minus;4 gives Mn = +4, so &Delta; = 2 &mdash; yes. <span class="why">Exactly the required change of 2.</span></div>
+<div class="step">5. (c) MnO<sub>4</sub><sup>&minus;</sup>: Mn = +7, &Delta; = 5; (d) MnO<sub>4</sub><sup>2&minus;</sup>: Mn = +6, &Delta; = 4 &mdash; both give the wrong denominator.</div>
+<div class="step">6. Only MnO<sub>2</sub> yields Eq. mass = M/2, since only it has &Delta; = 2.</div>
+<div class="step">7. Hence the product is MnO<sub>2</sub>, option (b).</div>
+<pre>
+ Mn in MnSO4 = +2   (need final +4 for n=2)
+ -------------------------------------------
+ a Mn2O3   Mn=+3   change 1
+ b MnO2    Mn=+4   change 2   &lt;-- M/2
+ c MnO4-   Mn=+7   change 5
+ d MnO4^2- Mn=+6   change 4
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Match the requested denominator to the oxidation-state jump: M/2 &rArr; jump of 2 &rArr; +2 to +4 &rArr; MnO<sub>2</sub>. Permanganate (jump 5) and manganate (jump 4) are the usual decoys when students reach for the familiar oxidation state.</div>
+<div class="final">Answer: <b>(b) MnO<sub>2</sub></b>.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">The eq. mass of FeC<sub>2</sub>O<sub>4</sub> in,<br>FeC<sub>2</sub>O<sub>4</sub> &rarr; Fe<sup>3+</sup> + 2CO<sub>2</sub> is: (Level-4)<br>(a) its molar mass &nbsp; (b) molar mass/3 &nbsp; (c) molar mass/4 &nbsp; (d) none of these</td><td class="topic">Equivalent mass of ferrous oxalate</td><td><a href="https://www.youtube.com/watch?v=KlJtDXbraUo" target="_blank">Equivalent weight of FeC2O4 in the change, FeC2O4-&gt;Fe3++CO2 is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> molar mass/3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Ferrous oxalate FeC<sub>2</sub>O<sub>4</sub> is oxidised at <i>two</i> sites at once: the Fe<sup>2+</sup> and the oxalate carbons. The total n-factor is the sum of both electron contributions. The trap is to count only the iron (n = 1) and miss the two carbons.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n-factor = &Delta;(Fe) + &Delta;(all C) = 1 + 2 = 3, Eq. mass = M / n</span> <span class="why">When several elements in one species change, their electron losses add.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In FeC<sub>2</sub>O<sub>4</sub> the oxalate group C<sub>2</sub>O<sub>4</sub> carries &minus;2, so Fe = +2 and each C = +3.</div>
+<div class="step">2. Iron is oxidised: Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup>, losing 1 electron, contributing 1 to the n-factor.</div>
+<div class="step">3. Carbon is also oxidised: each C +3 &rarr; +4 in CO<sub>2</sub>, losing 1 electron, and 2 C atoms contribute 2.</div>
+<div class="step">4. Total electrons lost per formula unit = 1 + 2 = 3, so the n-factor is 3. <span class="why">Both oxidations occur in the same molecule and add.</span></div>
+<div class="step">5. This is why ferrous oxalate consumes three times the oxidant that a simple Fe<sup>2+</sup> salt would, mole for mole.</div>
+<div class="step">6. Equivalent mass = M / n = M / 3.</div>
+<div class="step">7. Hence option (b), molar mass/3.</div>
+<pre>
+ FeC2O4 :  Fe = +2 ,  each C = +3
+ -----------------------------------------
+ Fe : +2 -> +3          1 e-
+ C  : +3 -> +4 (x2)     2 e-
+ -----------------------------------------
+ n = 1 + 2 = 3  ->  Eq. mass = M/3
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For mixed salts add up every oxidation that occurs: ferrous oxalate gives 3 e<sup>&minus;</sup> (1 from Fe, 2 from the two C), which is why it consumes more oxidant than plain FeSO<sub>4</sub>. Option (a) M (n = 1) is the carbon-blind trap.</div>
+<div class="final">Answer: <b>(b) molar mass/3</b>.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">In the equation,<br>SnCl<sub>2</sub> + 2HgCl<sub>2</sub> &rarr; HgCl<sub>2</sub> + SnCl<sub>4</sub> .<br>The equivalent mass of stannous chloride (molar mass = 190) will be: (Level-5)<br>(a) 190 &nbsp; (b) 95 &nbsp; (c) 47.5 &nbsp; (d) 154.5</td><td class="topic">Equivalent mass of stannous chloride</td><td><a href="https://www.youtube.com/watch?v=rjH68XV2JkI" target="_blank">In the equation, SnCl2+2HgCl2-&gt;HgCl2+SnCl4 The equivalent weight of stannous chloride</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 95</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The equivalent mass of stannous chloride is M divided by the electrons tin loses. Sn<sup>2+</sup> is oxidised to Sn<sup>4+</sup>, a change of 2, so n = 2. The printed product &ldquo;HgCl<sub>2</sub>&rdquo; is a misprint for mercurous chloride Hg<sub>2</sub>Cl<sub>2</sub>, but this does not affect tin&rsquo;s n-factor.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. mass = M / n, n = &Delta;(ox. no. of Sn) = 4 &minus; 2 = 2</span> <span class="why">Equivalent mass of the reductant depends only on its own oxidation-state change.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In SnCl<sub>2</sub> each Cl is &minus;1, so tin is Sn = +2.</div>
+<div class="step">2. In the product SnCl<sub>4</sub> each Cl is &minus;1, so tin is Sn = +4.</div>
+<div class="step">3. Change = 4 &minus; 2 = 2, so each Sn loses 2 electrons and the n-factor is 2.</div>
+<div class="step">4. Note: the balanced reaction is SnCl<sub>2</sub> + 2HgCl<sub>2</sub> &rarr; Hg<sub>2</sub>Cl<sub>2</sub> + SnCl<sub>4</sub>; the book&rsquo;s printed product &ldquo;HgCl<sub>2</sub>&rdquo; is a typo for mercurous chloride Hg<sub>2</sub>Cl<sub>2</sub>, with Hg reduced +2 &rarr; +1 taking the 2 electrons. <span class="why">Tin&rsquo;s n-factor is 2 regardless of the typo.</span></div>
+<div class="step">5. Equivalent mass = M / n, and here M = 190 is given.</div>
+<div class="step">6. Equivalent mass = 190 / 2 = 95.</div>
+<div class="step">7. Hence option (b), 95.</div>
+<pre>
+ Sn in SnCl2 = +2 ;  Sn in SnCl4 = +4
+ -------------------------------------------
+ change = 4 - 2 = 2  ->  n = 2
+ Eq. mass = 190 / 2 = 95            &lt;-- answer
+ (product should read Hg2Cl2, a misprint)
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For the equivalent mass of a reductant, only its own oxidation-number change matters &mdash; ignore what the oxidant becomes. Sn<sup>2+</sup>&rarr;Sn<sup>4+</sup> is always n = 2, so 190/2 = 95; the distractor 47.5 (dividing by 4) over-counts.</div>
+<div class="final">Answer: <b>(b) 95</b>.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level: Board</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Calculate the oxidation number of underlined atoms.<br>(a) H<sub>2</sub><u>S</u>O<sub>4</sub> &nbsp; (b) H<u>N</u>O<sub>3</sub> &nbsp; (c) H<sub>3</sub><u>P</u>O<sub>3</sub> &nbsp; (d) K<sub>2</sub><u>C</u><sub>2</sub>O<sub>4</sub> &nbsp; (e) H<sub>2</sub><u>S</u><sub>4</sub>O<sub>6</sub> &nbsp; (f) <u>Cr</u><sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> &nbsp; (g) NaH<sub>2</sub><u>P</u>O<sub>4</sub></td><td class="topic">Oxidation number of atoms</td><td><a href="https://www.youtube.com/watch?v=c06C1t0PnGk" target="_blank">Class 11 chap 8 | Redox Reactions 01 : How to Find Oxidation Number- Methods n Tricks JEE MAINS/NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">S +6, N +5, P +3, C +3, S +2.5, Cr +6, P +5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Assign oxidation numbers by fixing O = &minus;2, H = +1, group-1 metal = +1, and solving so the species sums to its overall charge. For the underlined atom treat it as the unknown. The trap is H<sub>2</sub>S<sub>4</sub>O<sub>6</sub>, where sulphur comes out as a non-integer average.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge of species, with O = &minus;2, H = +1, K/Na = +1</span> <span class="why">One linear equation per species gives the unknown atom.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (a) H<sub>2</sub>SO<sub>4</sub>: 2(+1) + S + 4(&minus;2) = 0 &rArr; S = <b>+6</b>.</div>
+<div class="step">2. (b) HNO<sub>3</sub>: +1 + N + 3(&minus;2) = 0 &rArr; N = <b>+5</b>.</div>
+<div class="step">3. (c) H<sub>3</sub>PO<sub>3</sub>: 3(+1) + P + 3(&minus;2) = 0 &rArr; P = <b>+3</b>.</div>
+<div class="step">4. (d) K<sub>2</sub>C<sub>2</sub>O<sub>4</sub>: 2(+1) + 2C + 4(&minus;2) = 0 &rArr; 2C = +6, C = <b>+3</b>.</div>
+<div class="step">5. (e) H<sub>2</sub>S<sub>4</sub>O<sub>6</sub>: 2(+1) + 4S + 6(&minus;2) = 0 &rArr; 4S = +10, S = <b>+2.5</b> (average). (f) Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>: 2Cr + 7(&minus;2) = &minus;2 &rArr; Cr = <b>+6</b>.</div>
+<div class="step">6. (g) NaH<sub>2</sub>PO<sub>4</sub>: +1 + 2(+1) + P + 4(&minus;2) = 0 &rArr; P = <b>+5</b>.</div>
+<pre>
+ (a) H2SO4      S  = +6
+ (b) HNO3       N  = +5
+ (c) H3PO3      P  = +3
+ (d) K2C2O4     C  = +3
+ (e) H2S4O6     S  = +2.5 (average)
+ (f) Cr2O7^2-   Cr = +6
+ (g) NaH2PO4    P  = +5
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> A fractional oxidation number (S = +2.5 in tetrathionate) is an <i>average</i> over inequivalent atoms, not a real charge &mdash; perfectly valid for these sums. Watch H<sub>3</sub>PO<sub>3</sub>: P is +3 here, not +5, because one H sits on phosphorus.</div>
+<div class="final">Answer: S +6, N +5, P +3, C +3, S +2.5 (avg), Cr +6, P +5.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">Assign oxidation number to each atom in the following species.<br>(a) Cr(OH)<sub>4</sub><sup>&minus;</sup> &nbsp; (b) Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> &nbsp; (c) H<sub>3</sub>BO<sub>3</sub></td><td class="topic">Oxidation number of species</td><td><a href="https://www.youtube.com/watch?v=c06C1t0PnGk" target="_blank">Class 11 chap 8 | Redox Reactions 01 : How to Find Oxidation Number- Methods n Tricks JEE MAINS/NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">Cr +3; S +2; B +3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Assign every atom by fixing O = &minus;2, H = +1, Na = +1 and balancing the sum to the species&rsquo; overall charge. Here the central atoms (Cr, S, B) are the unknowns, found one equation at a time. The trap is Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>, whose sulphur comes out as a non-integer average of +2 because the two S atoms are not equivalent.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">&Sigma;(oxidation numbers) = charge, with O = &minus;2, H = +1, Na = +1</span> <span class="why">One linear equation fixes the central atom once the fixed atoms are inserted.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (a) Cr(OH)<sub>4</sub><sup>&minus;</sup>: each OH unit is &minus;1, so four give &minus;4; with overall charge &minus;1, Cr + (&minus;4) = &minus;1 &rArr; Cr = <b>+3</b>.</div>
+<div class="step">2. Within that ion, each oxygen is O = &minus;2 and each hydrogen H = +1 as usual.</div>
+<div class="step">3. (b) Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>: inserting Na = +1 and O = &minus;2, 2(+1) + 2S + 3(&minus;2) = 0 &rArr; 2S = +4, S = <b>+2</b> (average).</div>
+<div class="step">4. The two S atoms in thiosulphate are chemically inequivalent (one central, one terminal), so +2 is their mean oxidation number. <span class="why">A fractional value is a legitimate average.</span></div>
+<div class="step">5. (c) H<sub>3</sub>BO<sub>3</sub>: inserting H = +1 and O = &minus;2, 3(+1) + B + 3(&minus;2) = 0 &rArr; B = <b>+3</b>.</div>
+<div class="step">6. Collecting the central atoms: Cr +3, S +2 (average), B +3.</div>
+<pre>
+ (a) Cr(OH)4-  : Cr=+3 , O=-2 , H=+1
+ (b) Na2S2O3   : Na=+1, S=+2(avg), O=-2
+ (c) H3BO3     : H=+1 , B=+3 , O=-2
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Treat the hydroxide group OH as a &minus;1 unit to shortcut Cr(OH)<sub>4</sub><sup>&minus;</sup>: four &times; (&minus;1) plus Cr = &minus;1 gives Cr = +3 instantly. Thiosulphate&rsquo;s +2 is an average, mirroring its reduction behaviour.</div>
+<div class="final">Answer: (a) Cr +3, O &minus;2, H +1; (b) Na +1, S +2 (avg), O &minus;2; (c) H +1, B +3, O &minus;2.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">In which chemical reaction does carbon exhibit variation of oxidation state from &minus;4 to +4 ? Write balanced chemical reaction.</td><td class="topic">Carbon oxidation state variation</td><td><a href="https://www.youtube.com/watch?v=c06C1t0PnGk" target="_blank">Class 11 chap 8 | Redox Reactions 01 : How to Find Oxidation Number- Methods n Tricks JEE MAINS/NEET</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">CH₄ + 2O₂ → CO₂ + 2H₂O</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> We need a reaction where one carbon atom moves across the full range from its most reduced state (&minus;4) to its most oxidised state (+4). The combustion of methane does exactly this: carbon in CH<sub>4</sub> is &minus;4, carbon in CO<sub>2</sub> is +4. The trap is a reaction that only partly oxidises carbon (e.g. to CO).</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">C in CH<sub>4</sub> = &minus;4 (H = +1); C in CO<sub>2</sub> = +4 (O = &minus;2)</span> <span class="why">A swing of 8 units per carbon marks the extreme redox range.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In CH<sub>4</sub>, H = +1, so C + 4(+1) = 0 &rArr; C = &minus;4 (fully reduced).</div>
+<div class="step">2. In CO<sub>2</sub>, O = &minus;2, so C + 2(&minus;2) = 0 &rArr; C = +4 (fully oxidised).</div>
+<div class="step">3. Combustion of methane carries carbon from &minus;4 to +4, the maximum possible swing.</div>
+<div class="step">4. Write and balance: CH<sub>4</sub> + 2O<sub>2</sub> &rarr; CO<sub>2</sub> + 2H<sub>2</sub>O.</div>
+<div class="step">5. Check atoms: C 1=1, H 4=4, O 4=4 (2+2). <span class="why">The equation is balanced.</span></div>
+<div class="step">6. Oxygen is reduced 0 &rarr; &minus;2 while carbon is oxidised &minus;4 &rarr; +4, confirming the redox change.</div>
+<pre>
+ CH4 + 2O2 -> CO2 + 2H2O
+ -----------------------------------------
+ C : -4 (CH4)  ->  +4 (CO2)   change +8
+ O :  0 (O2)   ->  -2         reduced
+ balance: C 1=1, H 4=4, O 4=4
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> &ldquo;&minus;4 to +4 for carbon&rdquo; is code for complete combustion of a hydrocarbon &mdash; CH<sub>4</sub> + 2O<sub>2</sub> &rarr; CO<sub>2</sub> + 2H<sub>2</sub>O is the cleanest example. Partial oxidation to CO (C = +2) would not reach the +4 endpoint.</div>
+<div class="final">Answer: Combustion of methane, CH<sub>4</sub> + 2O<sub>2</sub> &rarr; CO<sub>2</sub> + 2H<sub>2</sub>O (C: &minus;4 &rarr; +4).</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">Justify that the following reactions are redox reaction; identify the species oxidized/reduced, which acts as an oxidant and which acts as a reductant.<br>(a) 2Cu<sub>2</sub>O<sub>(s)</sub> + Cu<sub>2</sub>S<sub>(s)</sub> &rarr; 6Cu<sub>(s)</sub> + SO<sub>2(g)</sub><br>(b) HF<sub>(aq)</sub> + OH<sup>&minus;</sup><sub>(aq)</sub> &rarr; H<sub>2</sub>O<sub>(l)</sub> + F<sup>&minus;</sup><sub>(aq)</sub><br>(c) I<sub>2(aq)</sub> + 2S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup><sub>(aq)</sub> &rarr; S<sub>4</sub>O<sub>6</sub><sup>2&minus;</sup><sub>(aq)</sub> + 2I<sup>&minus;</sup><sub>(aq)</sub></td><td class="topic">Justify redox reactions</td><td><a href="https://www.youtube.com/watch?v=dUViBynIYHw" target="_blank">Identification of Redox Reaction | Oxidant &amp; Reductant | Class 11 Chemistry</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval">(a) & (c) redox; (b) not redox</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> A reaction is redox only if some atom&rsquo;s oxidation number changes. Track each element; if every state is unchanged, it is acid&ndash;base, not redox. The oxidant is the species reduced, the reductant the species oxidised. The trap is (b), which looks like a reaction but has no oxidation-state change.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">oxidised = ox. no. increases (reductant); reduced = ox. no. decreases (oxidant)</span> <span class="why">No change anywhere &rArr; the reaction is not redox.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (a) 2Cu<sub>2</sub>O + Cu<sub>2</sub>S &rarr; 6Cu + SO<sub>2</sub>: Cu +1 &rarr; 0 (reduced); S &minus;2 &rarr; +4 (oxidised).</div>
+<div class="step">2. So Cu<sub>2</sub>O/Cu<sub>2</sub>S supply the Cu reduced, and sulphur of Cu<sub>2</sub>S is oxidised: Cu<sub>2</sub>O is the oxidant, Cu<sub>2</sub>S the reductant. <b>Redox.</b></div>
+<div class="step">3. (b) HF + OH<sup>&minus;</sup> &rarr; H<sub>2</sub>O + F<sup>&minus;</sup>: H stays +1, F stays &minus;1, O stays &minus;2. <span class="why">No oxidation number changes.</span></div>
+<div class="step">4. So (b) is <b>not</b> a redox reaction &mdash; it is a Br&oslash;nsted acid&ndash;base (proton-transfer) neutralisation.</div>
+<div class="step">5. (c) I<sub>2</sub> + 2S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup> &rarr; S<sub>4</sub>O<sub>6</sub><sup>2&minus;</sup> + 2I<sup>&minus;</sup>: I 0 &rarr; &minus;1 (reduced); S +2 &rarr; +2.5 (oxidised).</div>
+<div class="step">6. So I<sub>2</sub> is the oxidant and S<sub>2</sub>O<sub>3</sub><sup>2&minus;</sup> the reductant. <b>Redox.</b></div>
+<pre>
+ (a) Cu +1->0 reduced ; S -2->+4 oxidised  REDOX
+     oxidant Cu2O , reductant Cu2S
+ (b) H,F,O all unchanged      NOT redox (acid-base)
+ (c) I 0->-1 reduced ; S +2->+2.5 oxidised REDOX
+     oxidant I2 , reductant S2O3^2-
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Before labelling anything redox, scan every oxidation number &mdash; (b) is the planted non-redox case (pure proton transfer). In (a), copper is reduced while sulphur of the same ore is oxidised, a self-reduction of the smelting process.</div>
+<div class="final">Answer: (a) and (c) are redox; (b) is a non-redox acid&ndash;base reaction.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 1</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">What is the equivalent weight of an oxidizing agent?<br>(a) Molecular weight &times; electrons gained &nbsp; (b) Molecular weight &divide; electrons gained &nbsp; (c) Atomic weight &times; valency &nbsp; (d) Molecular weight &times; oxidation number</td><td class="topic">Equivalent weight of oxidant</td><td><a href="https://www.youtube.com/watch?v=ItS62BwTVqs" target="_blank">n-factors Calculation of Oxidising and Reducing Agent | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> Molecular weight ÷ electrons gained</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The equivalent weight of any redox species is its molecular weight divided by the number of electrons it exchanges. For an oxidising agent that exchange is the number of electrons <b>gained</b> per molecule. The trap is multiplying instead of dividing, which inverts the relationship.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. wt (oxidant) = Molecular weight / electrons gained</span> <span class="why">n-factor of an oxidant is the electrons it accepts, and equivalent weight is M over that n-factor.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Equivalent weight is always molecular weight divided by n-factor.</div>
+<div class="step">2. For an oxidising agent the n-factor is the number of electrons it gains (is reduced by).</div>
+<div class="step">3. So Eq. wt = Molecular weight &divide; electrons gained &mdash; option (b).</div>
+<div class="step">4. Check with KMnO<sub>4</sub> in acid (M = 158, gains 5 e<sup>&minus;</sup>): Eq. wt = 158/5 = 31.6. <span class="why">Dividing, not multiplying, gives the known value.</span></div>
+<div class="step">5. (a) multiplying by electrons gained is dimensionally and conceptually wrong.</div>
+<div class="step">6. (c) and (d) mix in valency or oxidation number instead of electrons exchanged, so both fail.</div>
+<pre>
+ Eq. wt = Molecular weight / n-factor
+ oxidant : n-factor = electrons gained
+ -------------------------------------------
+ Eq. wt(oxidant) = Mol. wt / electrons gained
+ KMnO4 : 158 / 5 = 31.6   (acidic medium)
+</pre></div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Equivalent weight always <i>divides</i> by the electron count &mdash; more electrons transferred means a smaller equivalent weight. Option (a) with &ldquo;&times;&rdquo; is the standard inversion trap; the correct relation is M &divide; (electrons gained).</div>
+<div class="final">Answer: <b>(b) Molecular weight &divide; electrons gained</b>.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">What is the equivalent weight of a reducing agent?<br>(a) Molecular weight &divide; electrons lost &nbsp; (b) Molecular weight &times; electrons lost &nbsp; (c) Atomic weight &divide; oxidation number &nbsp; (d) Atomic weight &times; oxidation state</td><td class="topic">Equivalent weight of reductant</td><td><a href="https://www.youtube.com/watch?v=ItS62BwTVqs" target="_blank">n-factors Calculation of Oxidising and Reducing Agent | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> Molecular weight ÷ electrons lost</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In a redox change the equivalent weight of any species is its formula mass divided by the number of electrons it exchanges per formula unit (its n-factor). A reducing agent is the species that is itself oxidised, so it <b>loses</b> electrons, and that electron loss is its n-factor. The trap is that two options use &ldquo;atomic weight&rdquo; and &ldquo;oxidation number,&rdquo; which describe a bare element, and two options <i>multiply</i> instead of divide.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">eq. wt = (molecular weight)/(electrons lost) = M/n</span> <span class="why">n = number of electrons donated per formula unit of the reductant.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. A reducing agent donates electrons, i.e. it is oxidised, so the relevant count is the number of electrons <b>lost</b>.</div>
+<div class="step">2. The equivalent weight of a redox species is always (formula mass)/(n-factor), and here n-factor = electrons lost.</div>
+<div class="step">3. Hence eq. wt = <b>molecular weight &divide; electrons lost</b>, which is option (a). <span class="why">more electrons transferred means a smaller equivalent weight.</span></div>
+<div class="step">4. (b) multiplies mass by electrons &mdash; dimensionally and physically wrong, so it is rejected.</div>
+<div class="step">5. (c) and (d) use &ldquo;atomic weight&rdquo; with oxidation number/state; that form fits a single element, not a molecular reductant, and (d) again multiplies.</div>
+<div class="step">6. So only (a) gives the correct equivalent weight.</div>
+<pre>
+ eq. wt = M / n
+ n (reductant) = electrons LOST
+ -----------------------------------------
+ (a) M / electrons lost            &lt;-- correct
+ (b) M x electrons lost  -> NO (multiplies)
+ (c)(d) atomic wt forms  -> NO (element only)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Equivalent weight is a <i>division</i>; any option that multiplies mass by the electron count is the planted distractor. Reductant &rarr; electrons lost, oxidant &rarr; electrons gained &mdash; both divide M.</div>
+<div class="final">Answer: (a) Molecular weight &divide; electrons lost.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">Which type of reaction involves a substance acting both as an oxidizing and reducing agent?<br>(a) Redox &nbsp; (b) Decomposition &nbsp; (c) Disproportionation &nbsp; (d) Combination</td><td class="topic">Disproportionation definition</td><td><a href="https://www.youtube.com/watch?v=k7Yu7X0IhfI" target="_blank">n-factors Calculation of Disproportionate reaction | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> Disproportionation</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In most redox reactions two different species swap electrons &mdash; one is oxidised, the other reduced. A <b>disproportionation</b> is special: a single element in one intermediate oxidation state is <i>simultaneously</i> oxidised and reduced, so the <i>same</i> substance is both the oxidising agent and the reducing agent. The trap is &ldquo;redox,&rdquo; which is the broad class, not the specific name asked for.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">disproportionation: 2 X<sup>n</sup> &rarr; X<sup>(n+a)</sup> + X<sup>(n&minus;b)</sup></span> <span class="why">one portion goes up, the other down, from the same starting state.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. The question asks for the reaction type in which one substance is both oxidant and reductant.</div>
+<div class="step">2. That is the definition of <b>disproportionation</b>, so option (c) is correct. A classic example is 2H<sub>2</sub>O<sub>2</sub> &rarr; 2H<sub>2</sub>O + O<sub>2</sub>.</div>
+<div class="step">3. (a) Redox is the general family; every disproportionation is a redox, but not every redox is a disproportionation, so it is too broad.</div>
+<div class="step">4. (b) Decomposition only means a compound breaks into parts; it need not involve any change in oxidation state.</div>
+<div class="step">5. (d) Combination joins species and, like decomposition, is not defined by self oxidation&ndash;reduction.</div>
+<div class="step">6. Only (c) names the single-substance both-roles behaviour precisely, which is why it is the intended answer.</div>
+<div class="step">7. Quick test: if the same element appears twice in the products at different oxidation states, the reaction is a disproportionation.</div>
+<pre>
+ same element, one oxidation state:
+   part oxidised  (loses e-)  -> higher state
+   part reduced   (gains e-)  -> lower state
+ -----------------------------------------
+ one substance = oxidant AND reductant
+ => DISPROPORTIONATION            (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> If the same element appears on the product side in both a higher and a lower oxidation state, it is disproportionation. &ldquo;Redox&rdquo; is always technically true but is never the intended specific answer.</div>
+<div class="final">Answer: (c) Disproportionation.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">In disproportionation, what happens to the oxidation state of the element?<br>(a) Only increases &nbsp; (b) Only decreases &nbsp; (c) Both increases and decreases &nbsp; (d) Remains constant</td><td class="topic">Disproportionation oxidation state</td><td><a href="https://www.youtube.com/watch?v=k7Yu7X0IhfI" target="_blank">n-factors Calculation of Disproportionate reaction | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> Both increases and decreases</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Disproportionation requires an element in an <i>intermediate</i> oxidation state &mdash; one that has room to go both up and down. Part of it is oxidised (state increases) and part is reduced (state decreases) in the same reaction. The trap options claim only one direction, which would be an ordinary oxidation or reduction, not a disproportionation.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons lost = electrons gained, so &Delta;(up) and &Delta;(down) occur together</span> <span class="why">the element must start in a state that is neither its highest nor its lowest.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. By definition a disproportionating element is oxidised in one part and reduced in another part of the same reaction.</div>
+<div class="step">2. Oxidation raises the oxidation number; reduction lowers it &mdash; so the state must do <b>both</b>. Option (c).</div>
+<div class="step">3. Example: Cl<sub>2</sub> (0) &rarr; Cl<sup>&minus;</sup> (&minus;1) and ClO<sup>&minus;</sup> (+1); chlorine goes both down and up from 0.</div>
+<div class="step">4. (a) only increases describes a pure oxidation &mdash; that is not disproportionation.</div>
+<div class="step">5. (b) only decreases describes a pure reduction &mdash; also not disproportionation.</div>
+<div class="step">6. (d) remains constant means no electron transfer at all, so it cannot be any redox change, let alone a disproportionation.</div>
+<div class="step">7. Thus only &ldquo;both increases and decreases&rdquo; captures the simultaneous up-and-down movement of the oxidation state.</div>
+<pre>
+ intermediate state X (say 0):
+   some X  ->  +a   (oxidation, state UP)
+   some X  ->  -b   (reduction, state DOWN)
+ -----------------------------------------
+ oxidation state BOTH rises and falls   (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Only an element in a middle oxidation state can disproportionate &mdash; the highest state can only fall, the lowest can only rise. Seeing the same element end up at two different states is the fingerprint.</div>
+<div class="final">Answer: (c) Both increases and decreases.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Which of the following does NOT undergo disproportionation?<br>(a) HClO &nbsp; (b) HClO<sub>2</sub> &nbsp; (c) HClO<sub>3</sub> &nbsp; (d) HClO<sub>4</sub></td><td class="topic">Non-disproportionating species</td><td><a href="https://www.youtube.com/watch?v=k7Yu7X0IhfI" target="_blank">n-factors Calculation of Disproportionate reaction | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> HClO₄</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Disproportionation needs the key element in an <i>intermediate</i> oxidation state so it can be both oxidised (go up) and reduced (go down). If the element is already at its <b>maximum</b> oxidation state it has nowhere higher to go, so it cannot be oxidised and cannot disproportionate. For chlorine in these oxoacids, check the Cl oxidation number in each.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Cl: HClO(+1), HClO<sub>2</sub>(+3), HClO<sub>3</sub>(+5), HClO<sub>4</sub>(+7)</span> <span class="why">+7 is chlorine&rsquo;s highest state, so HClO<sub>4</sub> can only be reduced.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Assign Cl oxidation numbers using O = &minus;2 and H = +1 in each HClO<sub>x</sub>.</div>
+<div class="step">2. HClO: +1; HClO<sub>2</sub>: +3; HClO<sub>3</sub>: +5 &mdash; all intermediate, so each can go both up and down and <i>can</i> disproportionate.</div>
+<div class="step">3. HClO<sub>4</sub>: Cl = +1 + x &minus; 8 = 0 &rArr; x = +7, the maximum for chlorine.</div>
+<div class="step">4. At +7 chlorine cannot be oxidised further, so no part of it can go up &mdash; disproportionation is impossible.</div>
+<div class="step">5. Therefore the species that does NOT disproportionate is <b>HClO<sub>4</sub></b>, option (d).</div>
+<div class="step">6. The other three all have real disproportionation routes (e.g. 3HClO &rarr; 2HCl + HClO<sub>3</sub>), since +1, +3 and +5 can each move both up and down.</div>
+<div class="step">7. So the single non-disproportionating species is the one at the ceiling state +7, namely HClO<sub>4</sub>.</div>
+<pre>
+ species    Cl state   can oxidise?  disprop?
+ HClO        +1         yes           yes
+ HClO2       +3         yes           yes
+ HClO3       +5         yes           yes
+ HClO4       +7 (max)   NO            NO   &lt;--
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> An element already at its top oxidation state (Cl +7, S +6, N +5, Mn +7) can never disproportionate &mdash; it can only be reduced. Spot the maximum state and that species is your answer.</div>
+<div class="final">Answer: (d) HClO<sub>4</sub>.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 2</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">Calculate the equivalent weight of KMnO<sub>4</sub> in acidic medium. (Molecular weight = 158, n-factor = 5)<br>(a) 31.6 &nbsp; (b) 27.2 &nbsp; (c) 34.5 &nbsp; (d) 28.0</td><td class="topic">Equivalent weight of KMnO4</td><td><a href="https://www.youtube.com/watch?v=_QQveVfmvEE" target="_blank">Equivalent weight of KMnO4 | In Acidic , Basic and Neutral Medium</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 31.6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The equivalent weight of an oxidant is its molecular weight divided by the number of electrons it gains per formula unit (its n-factor). Equivalent weight is just the mass that supplies one mole of electrons, so a species that grabs more electrons has a proportionally smaller equivalent weight. In acidic medium permanganate MnO<sub>4</sub><sup>&minus;</sup> is reduced from Mn(+7) to Mn(+2), a 5-electron change, so the n-factor of KMnO<sub>4</sub> is 5. The question even hands us M = 158 and n = 5, so this is a direct substitution &mdash; the real test is remembering why n = 5 and not 3 or 1.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">eq. wt = M/n = 158/5</span> <span class="why">n = 5 because Mn goes +7 &rarr; +2 in acidic medium.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Identify the role: KMnO<sub>4</sub> is the oxidising agent, so its n-factor is the number of electrons gained per formula unit.</div>
+<div class="step">2. Write the acidic half-reaction: MnO<sub>4</sub><sup>&minus;</sup> + 8H<sup>+</sup> + 5e<sup>&minus;</sup> &rarr; Mn<sup>2+</sup> + 4H<sub>2</sub>O, so 5 electrons are gained and n = 5.</div>
+<div class="step">3. Confirm by oxidation number: Mn drops from +7 to +2, a change of 5, which must equal the electrons gained.</div>
+<div class="step">4. Apply the formula: eq. wt = M/n = 158/5 = <b>31.6</b>, matching option (a) exactly.</div>
+<div class="step">5. (b) 27.2 and (c) 34.5 correspond to no sensible n for this change and are random distractors.</div>
+<div class="step">6. (d) 28.0 would need n &asymp; 5.64, which has no chemical meaning, so it is rejected too.</div>
+<div class="step">7. Sanity check: 158/5 is a clean 31.6, and dividing by the smaller medium-dependent n (3 or 1) would give a larger value, so only the acidic route lands here.</div>
+<pre>
+ MnO4- + 8H+ + 5e-  ->  Mn2+ + 4H2O
+ Mn: +7 -> +2  => 5 e-,  n = 5
+ -----------------------------------------
+ eq. wt = M/n = 158/5 = 31.6          (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Permanganate&rsquo;s n-factor depends on medium: 5 (acidic, &rarr;Mn<sup>2+</sup>), 3 (neutral/weak base, &rarr;MnO<sub>2</sub>), 1 (strong base, &rarr;MnO<sub>4</sub><sup>2&minus;</sup>). Here the word &ldquo;acidic&rdquo; fixes n = 5, giving 31.6 &mdash; memorise this trio and the medium word decides instantly.</div>
+<div class="final">Answer: (a) 31.6.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">If molecular weight of K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> is 294 and change in oxidation number per molecule is 6, what is its equivalent weight?<br>(a) 49 &nbsp; (b) 147 &nbsp; (c) 42 &nbsp; (d) 58</td><td class="topic">Equivalent weight of dichromate</td><td><a href="https://www.youtube.com/watch?v=i54LVcm31ck" target="_blank">42. What is the Equivalent Weight of Potassium Dichromate - K2Cr2O7 | AKSC | Chemistry | NEET, JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 49</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Equivalent weight of an oxidant equals its molecular weight divided by the n-factor, where the n-factor is the total change in oxidation number (equivalently, the total electrons gained) per formula unit. The question states outright that the change in oxidation number per molecule of K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> is 6, so n = 6 and the rest is arithmetic. The deliberate trap is to divide by 3 &mdash; the per-chromium change &mdash; instead of 6, the per-molecule change that the question actually gives.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">eq. wt = M/n = 294/6</span> <span class="why">each Cr changes by 3 (+6&rarr;+3) and there are 2 Cr, so per molecule n = 2&times;3 = 6.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> each chromium sits at +6 and is reduced to +3, a change of 3 per Cr atom.</div>
+<div class="step">2. There are two Cr atoms per formula unit, so the oxidation-number change per molecule is 2 &times; 3 = 6, exactly the value the stem supplies.</div>
+<div class="step">3. The n-factor therefore equals this per-molecule total, n = 6, not the per-atom 3.</div>
+<div class="step">4. Apply eq. wt = M/n = 294/6 = <b>49</b>, which is option (a).</div>
+<div class="step">5. (b) 147 = 294/2 uses n = 2, and (c) 42 = 294/7 uses n = 7; neither matches a +6&rarr;+3 change on two chromiums.</div>
+<div class="step">6. (d) 58 corresponds to no integer n for this molecule and is a pure filler.</div>
+<div class="step">7. Sanity check: 294/6 divides cleanly to 49, the classic dichromate equivalent weight used in volumetric titrations.</div>
+<pre>
+ Cr: +6 -> +3  (3 e- per Cr)
+ 2 Cr per formula  => n = 2 x 3 = 6
+ -----------------------------------------
+ eq. wt = M/n = 294/6 = 49            (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For dichromate the exam-standard n-factor is 6, not 3: the whole Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> ion gains 6 electrons. Equivalent weight 294/6 = 49 is worth memorising outright &mdash; it recurs throughout redox titration problems.</div>
+<div class="final">Answer: (a) 49.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">What is the equivalent weight of a substance with molecular weight 106 and undergoing a 2-electron change?<br>(a) 53 &nbsp; (b) 106 &nbsp; (c) 212 &nbsp; (d) 26.5</td><td class="topic">Equivalent weight 2-electron change</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 53</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Equivalent weight in any redox process is the formula mass divided by the number of electrons transferred per formula unit (its n-factor). Physically it is the mass that exchanges exactly one mole of electrons, so it can never exceed the molar mass itself. Here the molecular weight is 106 and the species undergoes a 2-electron change, so n = 2 and the answer is one division. The distractors are built either by multiplying instead of dividing, or by slipping in the wrong n, both classic exam traps.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">eq. wt = M/n = 106/2</span> <span class="why">n = 2 is the stated number of electrons exchanged per formula unit.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Read off the data: molar mass M = 106 and n-factor = 2, since it is a 2-electron change.</div>
+<div class="step">2. Recall the rule: equivalent weight is always M divided by n, never multiplied by it.</div>
+<div class="step">3. Substitute the numbers: eq. wt = 106/2 = <b>53</b>.</div>
+<div class="step">4. This is option (a), which is just under half of the molar mass, as expected for n = 2.</div>
+<div class="step">5. (b) 106 would require n = 1, contradicting the 2-electron change.</div>
+<div class="step">6. (c) 212 = 106 &times; 2 multiplies the mass by the electrons &mdash; dimensionally and physically wrong, since no equivalent weight exceeds M.</div>
+<div class="step">7. (d) 26.5 = 106/4 uses n = 4 instead of the stated 2, so it is also rejected.</div>
+<pre>
+ M = 106,  n = 2
+ -----------------------------------------
+ eq. wt = M/n = 106/2 = 53            (a)
+ (212 = 106 x 2 is the multiply trap)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The single most common slip is multiplying mass by electrons. Equivalent weight always <i>shrinks</i> the molar mass (M/n), so any option larger than M &mdash; here 212 &mdash; can be struck out on sight before any arithmetic.</div>
+<div class="final">Answer: (a) 53.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">What is the equivalent weight of MnO<sub>2</sub> in acid medium if it changes from Mn<sup>4+</sup> to Mn<sup>2+</sup>? (Molecular weight = 87)<br>(a) 43.5 &nbsp; (b) 87 &nbsp; (c) 29 &nbsp; (d) 58</td><td class="topic">Equivalent weight of MnO2</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 43.5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Equivalent weight of an oxidant equals its molecular weight divided by the electrons gained per formula unit (its n-factor), and that n-factor is set by the <i>change</i> in oxidation state, not by the state value itself. Here MnO<sub>2</sub> acts as an oxidant and is reduced, with manganese going from +4 to +2, a change of 2, so n = 2. With M = 87 given, the calculation is a direct division. The trap the question plants is tempting you to use the state value 4 (giving n = 4) rather than the +4&rarr;+2 difference of 2.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">eq. wt = M/n = 87/2</span> <span class="why">n = |+4 &minus; (+2)| = 2 electrons gained by each Mn.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Identify the oxidation-state change: Mn<sup>4+</sup> &rarr; Mn<sup>2+</sup>, so each Mn gains 2 electrons.</div>
+<div class="step">2. There is exactly one Mn per MnO<sub>2</sub>, so the n-factor of the whole formula unit is also 2.</div>
+<div class="step">3. The half-reaction is MnO<sub>2</sub> + 4H<sup>+</sup> + 2e<sup>&minus;</sup> &rarr; Mn<sup>2+</sup> + 2H<sub>2</sub>O, confirming 2 electrons.</div>
+<div class="step">4. Apply eq. wt = M/n = 87/2 = <b>43.5</b>, matching option (a).</div>
+<div class="step">5. (b) 87 uses n = 1 and (c) 29 = 87/3 uses n = 3; neither fits a +4&rarr;+2 reduction.</div>
+<div class="step">6. (d) 58 = 87/1.5 needs a non-integral n and is chemically meaningless here.</div>
+<div class="step">7. So (a) 43.5, exactly half the molar mass, is the only consistent value.</div>
+<pre>
+ MnO2 + 4H+ + 2e- -> Mn2+ + 2H2O
+ Mn: +4 -> +2  => n = 2 e- gained
+ -----------------------------------------
+ eq. wt = M/n = 87/2 = 43.5           (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> n-factor is the <i>difference</i> of oxidation states, never the state itself. Mn being &ldquo;+4&rdquo; does not make n = 4; the +4&rarr;+2 drop makes n = 2, so the equivalent weight is simply half of 87, i.e. 43.5.</div>
+<div class="final">Answer: (a) 43.5.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">A compound has molar mass 90 and undergoes a 3-electron change. What is its equivalent weight?<br>(a) 30 &nbsp; (b) 45 &nbsp; (c) 60 &nbsp; (d) 90</td><td class="topic">Equivalent weight 3-electron change</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 30</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> For any redox species the equivalent weight equals the molar mass divided by its n-factor, i.e. the number of electrons transferred per formula unit. The equivalent weight is the mass carrying one mole of electrons, so the two quantities are inversely linked: triple the electrons and the equivalent weight falls to a third. The compound here has molar mass 90 and undergoes a 3-electron change, so n = 3 and the answer is a single division. The distractors simply test whether you divide by the right n or accidentally multiply or use the wrong value.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">eq. wt = M/n = 90/3</span> <span class="why">n = 3 is the stated number of electrons transferred per formula unit.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Note the data: molar mass M = 90 and a 3-electron change, so the n-factor is 3.</div>
+<div class="step">2. Recall equivalent weight = molar mass divided by n, a division and never a product.</div>
+<div class="step">3. Substitute the numbers: eq. wt = 90/3 = <b>30</b>.</div>
+<div class="step">4. This is option (a), exactly one-third of the molar mass, consistent with n = 3.</div>
+<div class="step">5. (b) 45 = 90/2 uses n = 2, and (c) 60 = 90/1.5 needs a non-integral n; both contradict a clean 3-electron change.</div>
+<div class="step">6. (d) 90 would mean n = 1, i.e. no reduction in equivalent weight at all, which is wrong here.</div>
+<div class="step">7. Sanity check: as n rises 1 &rarr; 2 &rarr; 3 the value falls 90 &rarr; 45 &rarr; 30, so 30 is the n = 3 entry.</div>
+<pre>
+ M = 90,  n = 3
+ -----------------------------------------
+ eq. wt = M/n = 90/3 = 30             (a)
+ (n=1->90, n=2->45, n=3->30)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Equivalent weight = molar mass / electrons exchanged, so a bigger electron change gives a smaller equivalent weight. A 3-electron change on M = 90 lands neatly on 30 &mdash; watch for the n = 2 distractor (45) that looks almost as tidy.</div>
+<div class="final">Answer: (a) 30.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 3</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">If 1 mol of KMnO<sub>4</sub> (MW = 158) is reduced in acidic medium from Mn<sup>7+</sup> to Mn<sup>2+</sup>, calculate total electrons gained and the equivalent weight.<br>(a) 5 e<sup>&minus;</sup> and 31.6 &nbsp; (b) 3 e<sup>&minus;</sup> and 52.6 &nbsp; (c) 4 e<sup>&minus;</sup> and 39.5 &nbsp; (d) 6 e<sup>&minus;</sup> and 29.0</td><td class="topic">Electrons gained and equivalent weight</td><td><a href="https://www.youtube.com/watch?v=_QQveVfmvEE" target="_blank">Equivalent weight of KMnO4 | In Acidic , Basic and Neutral Medium</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 5 e⁻ and 31.6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Reducing permanganate in acidic medium takes manganese from +7 to +2. The number of electrons gained equals the drop in oxidation state, and that very same number is the n-factor used in the equivalent weight. So this question is really two linked steps: first count the electrons from the oxidation-state change, then divide the molar mass by that count. Because both the electron blank and the equivalent-weight blank follow from one number, getting n right settles the whole option.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons = |+7 &minus; (+2)| = 5; eq. wt = M/n = 158/5</span> <span class="why">in acid MnO<sub>4</sub><sup>&minus;</sup> + 8H<sup>+</sup> + 5e<sup>&minus;</sup> &rarr; Mn<sup>2+</sup> + 4H<sub>2</sub>O.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. The oxidation state of Mn changes from +7 in MnO<sub>4</sub><sup>&minus;</sup> to +2 in Mn<sup>2+</sup>, a decrease of 5.</div>
+<div class="step">2. A decrease of 5 means 5 electrons are gained per Mn, so total electrons gained = <b>5 e<sup>&minus;</sup></b>.</div>
+<div class="step">3. The n-factor of KMnO<sub>4</sub> equals these electrons, so n = 5.</div>
+<div class="step">4. Equivalent weight = M/n = 158/5 = <b>31.6</b>.</div>
+<div class="step">5. Both parts match option (a): 5 e<sup>&minus;</sup> and 31.6, a self-consistent pair.</div>
+<div class="step">6. (b) 3 e<sup>&minus;</sup>, 52.6 is the neutral-medium route (&rarr;MnO<sub>2</sub>), not acidic; it is the main trap.</div>
+<div class="step">7. (c) and (d) pair invented electron counts with mismatched equivalent weights and are rejected on inspection.</div>
+<pre>
+ MnO4- + 8H+ + 5e- -> Mn2+ + 4H2O
+ Mn: +7 -> +2   => 5 e- gained, n = 5
+ -----------------------------------------
+ eq. wt = M/n = 158/5 = 31.6
+ answer: 5 e- and 31.6                (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Electrons transferred and n-factor are the same number here, so once you see the +7&rarr;+2 drop (= 5) both blanks are locked. 158/5 = 31.6 is the standard acidic-KMnO<sub>4</sub> equivalent weight; the 3-electron option is the neutral-medium decoy.</div>
+<div class="final">Answer: (a) 5 e<sup>&minus;</sup> and 31.6.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> (MW = 294) reduces Cr<sup>6+</sup> to Cr<sup>3+</sup>. If 2 Cr atoms are involved, find total electron gain and equivalent weight.<br>(a) 3 e<sup>&minus;</sup> and 147 &nbsp; (b) 6 e<sup>&minus;</sup> and 147 &nbsp; (c) 6 e<sup>&minus;</sup> and 49 &nbsp; (d) 2 e<sup>&minus;</sup> and 294</td><td class="topic">Electron gain and equivalent weight</td><td><a href="https://www.youtube.com/watch?v=i54LVcm31ck" target="_blank">42. What is the Equivalent Weight of Potassium Dichromate - K2Cr2O7 | AKSC | Chemistry | NEET, JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 6 e⁻ and 49</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In dichromate both chromium atoms are reduced from +6 to +3. Each Cr gains 3 electrons, and because there are two Cr per formula unit the total electron gain is 6. That per-formula-unit total is the n-factor, so the equivalent weight is the molar mass divided by 6. The classic trap is to stop at 3 (the per-atom change) rather than 6 (the whole-ion change), or to count 6 electrons correctly yet still divide by 2 &mdash; the options are built to catch exactly those slips.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">total e<sup>&minus;</sup> = 2 &times; 3 = 6; eq. wt = M/n = 294/6</span> <span class="why">n counts electrons for the whole Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>, not one Cr.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Each Cr is reduced +6 &rarr; +3, gaining 3 electrons per atom.</div>
+<div class="step">2. There are 2 Cr atoms per K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>, so total electrons gained = 2 &times; 3 = <b>6 e<sup>&minus;</sup></b>.</div>
+<div class="step">3. The balanced half-reaction Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + 14H<sup>+</sup> + 6e<sup>&minus;</sup> &rarr; 2Cr<sup>3+</sup> + 7H<sub>2</sub>O confirms 6 electrons.</div>
+<div class="step">4. The n-factor equals this total, n = 6, so equivalent weight = M/n = 294/6 = <b>49</b>.</div>
+<div class="step">5. The pair (6 e<sup>&minus;</sup>, 49) is option (c).</div>
+<div class="step">6. (a) 3 e<sup>&minus;</sup>, 147 counts one Cr only; (b) 6 e<sup>&minus;</sup>, 147 keeps the right electrons but wrongly divides by 2.</div>
+<div class="step">7. (d) 2 e<sup>&minus;</sup>, 294 is wrong on both counts and is a pure filler.</div>
+<pre>
+ Cr2O7^2- + 14H+ + 6e- -> 2Cr3+ + 7H2O
+ each Cr: +6 -> +3 (3 e-); 2 Cr => 6 e-
+ -----------------------------------------
+ eq. wt = M/n = 294/6 = 49
+ answer: 6 e- and 49                  (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Always count electrons for the whole ion. Dichromate gains 6 (two Cr &times; 3), not 3 &mdash; option (b) is the trap that keeps the 6 electrons but still divides by 2 to get 147.</div>
+<div class="final">Answer: (c) 6 e<sup>&minus;</sup> and 49.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">A substance with molar mass 120 undergoes disproportionation where one part loses 2 electrons and another gains 4. Find n-factor and equivalent weight.<br>(a) 2, 60 &nbsp; (b) 4, 30 &nbsp; (c) 3, 40 &nbsp; (d) 6, 20</td><td class="topic">n-factor in disproportionation</td><td><a href="https://www.youtube.com/watch?v=k7Yu7X0IhfI" target="_blank">n-factors Calculation of Disproportionate reaction | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 3, 40</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> When one substance disproportionates it is partly oxidised (losing electrons) and partly reduced (gaining electrons) at the same time. For the equivalent weight of that single disproportionating species, the book takes its n-factor as the <i>average</i> of the two electron changes, n = (electrons lost + electrons gained)/2, because one and the same substance supplies both half-reactions. The distractor option simply adds the two changes (2 + 4 = 6), which would halve the true equivalent weight, so the mean-versus-sum choice is the whole point of the question.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n = (n<sub>ox</sub> + n<sub>red</sub>)/2 = (2 + 4)/2; eq. wt = M/n</span> <span class="why">the single species carries both half-reactions, so its effective n-factor is their mean.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. One portion of the substance loses 2 electrons (the oxidation branch), so n<sub>ox</sub> = 2.</div>
+<div class="step">2. Another portion gains 4 electrons (the reduction branch), so n<sub>red</sub> = 4.</div>
+<div class="step">3. For a disproportionating species the effective n-factor is the average of these two: n = (2 + 4)/2 = <b>3</b>.</div>
+<div class="step">4. Apply the equivalent-weight formula: eq. wt = M/n = 120/3 = <b>40</b>.</div>
+<div class="step">5. The pair (3, 40) is option (c).</div>
+<div class="step">6. (d) 6, 20 adds the two changes instead of averaging them, so it both overstates n and halves the equivalent weight.</div>
+<div class="step">7. (a) 2, 60 and (b) 4, 30 use only one half-reaction&rsquo;s value and ignore the other branch entirely.</div>
+<pre>
+ oxidation part: loses 2 e-   (n_ox = 2)
+ reduction part: gains 4 e-   (n_red = 4)
+ n = (2 + 4)/2 = 3
+ -----------------------------------------
+ eq. wt = M/n = 120/3 = 40
+ answer: n = 3,  eq. wt = 40          (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For a species that disproportionates, <i>average</i> the two electron changes for its n-factor &mdash; never add them. Adding (giving 6) is the planted distractor in (d) that wrongly halves the correct equivalent weight to 20.</div>
+<div class="final">Answer: (c) 3, 40.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">In a redox reaction, if Fe<sup>3+</sup> is reduced to Fe and MW of Fe = 56, how many electrons are gained per atom, and what is its equivalent weight?<br>(a) 2, 28 &nbsp; (b) 3, 18.7 &nbsp; (c) 1, 56 &nbsp; (d) 3, 18.66</td><td class="topic">Electrons gained equivalent weight Fe</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 3, 18.66</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Reducing Fe<sup>3+</sup> all the way to metallic iron Fe(0) is a 3-electron gain per atom, so the n-factor is 3 and the equivalent weight is the atomic mass divided by 3. The subtlety here is purely numerical: two options quote &ldquo;3 electrons&rdquo; and differ only in how the non-terminating quotient 56/3 is rounded, so the task is to divide carefully and recognise that the gap between them is rounding, not chemistry.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">electrons = |+3 &minus; 0| = 3; eq. wt = M/n = 56/3</span> <span class="why">Fe<sup>3+</sup> + 3e<sup>&minus;</sup> &rarr; Fe, so each Fe atom gains 3 electrons.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Iron changes from +3 in Fe<sup>3+</sup> to 0 in the metal, a decrease of 3 in oxidation state.</div>
+<div class="step">2. So each Fe atom gains <b>3 electrons</b>, and the n-factor is 3.</div>
+<div class="step">3. Equivalent weight = M/n = 56/3 = 18.666&hellip; &asymp; <b>18.67</b>.</div>
+<div class="step">4. Option (d) prints this as &ldquo;3, 18.66&rdquo; (truncated) and (b) as &ldquo;3, 18.7&rdquo; (rounded up); the key selects (d).</div>
+<div class="step">5. The small 18.66 vs 18.7 gap is only rounding of 56/3, not a chemistry error, so the key&rsquo;s letter stands and needs no flag.</div>
+<div class="step">6. (a) 2, 28 assumes Fe<sup>3+</sup> &rarr; Fe<sup>+</sup> (2 electrons), and (c) 1, 56 assumes a single-electron change &mdash; both misread the reduction to the free metal.</div>
+<div class="step">7. Only a full +3 &rarr; 0 reduction gives n = 3 and the clean 56/3 value.</div>
+<pre>
+ Fe: +3 -> 0   => 3 e- gained,  n = 3
+ -----------------------------------------
+ eq. wt = 56/3 = 18.666... ~ 18.67
+ key prints 18.66 (truncated)         (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Reduction to the free metal uses the full ionic charge as n (Fe<sup>3+</sup> &rarr; Fe is 3, not 2). 56/3 is a non-terminating 18.66&overline;7, so &ldquo;18.66&rdquo; and &ldquo;18.7&rdquo; are the same number rounded two ways &mdash; pick the 3-electron option and move on.</div>
+<div class="final">Answer: (d) 3, 18.66.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">In the disproportionation of Cl<sub>2</sub> to Cl<sup>&minus;</sup> and ClO<sub>3</sub><sup>&minus;</sup>, if 1 mol Cl<sub>2</sub> loses 10 e<sup>&minus;</sup> and gains 6 e<sup>&minus;</sup>, what is n-factor and equivalent weight for MW = 71?<br>(a) 8, 8.88 &nbsp; (b) 4, 17.75 &nbsp; (c) 16, 4.43 &nbsp; (d) 10, 7.1</td><td class="topic">n-factor of Cl2 disproportionation</td><td><a href="https://www.youtube.com/watch?v=k7Yu7X0IhfI" target="_blank">n-factors Calculation of Disproportionate reaction | Redox Reaction | Easy Marks in JEE</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 8, 8.88</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Chlorine disproportionates here, one portion being oxidised to ClO<sub>3</sub><sup>&minus;</sup> and another reduced to Cl<sup>&minus;</sup>, so the same Cl<sub>2</sub> acts as both oxidant and reductant. For the equivalent weight of that single disproportionating species the book takes its n-factor as the <i>average</i> of the electrons lost and gained, n = (lost + gained)/2, because one substance supplies both half-reactions. The trap option instead adds the two counts (giving 16), which would wrongly halve the equivalent weight &mdash; so the mean-versus-sum decision drives the answer.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n = (e<sup>&minus;</sup> lost + e<sup>&minus;</sup> gained)/2 = (10 + 6)/2; eq. wt = M/n</span> <span class="why">one species carries both half-reactions, so its effective n-factor is their mean.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. The oxidation branch (Cl &rarr; ClO<sub>3</sub><sup>&minus;</sup>) loses 10 electrons per mole of Cl<sub>2</sub>, as given.</div>
+<div class="step">2. The reduction branch (Cl &rarr; Cl<sup>&minus;</sup>) gains 6 electrons per mole of Cl<sub>2</sub>, as given.</div>
+<div class="step">3. For the disproportionating Cl<sub>2</sub> take the average of the two: n = (10 + 6)/2 = <b>8</b>.</div>
+<div class="step">4. Equivalent weight = M/n = 71/8 = 8.875 &asymp; <b>8.88</b>.</div>
+<div class="step">5. The pair (8, 8.88) is option (a).</div>
+<div class="step">6. (c) 16, 4.43 adds the electron counts (16) instead of averaging &mdash; the planted trap that halves the value.</div>
+<div class="step">7. (b) 4, 17.75 and (d) 10, 7.1 use a single branch&rsquo;s count and ignore the averaging rule.</div>
+<pre>
+ oxidation: lost  = 10 e-
+ reduction: gained = 6 e-
+ n = (10 + 6)/2 = 8
+ -----------------------------------------
+ eq. wt = M/n = 71/8 = 8.875 ~ 8.88
+ answer: n = 8,  eq. wt = 8.88        (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Disproportionation n-factor = average of the two electron changes, never the sum. Adding 10 + 6 = 16 gives 4.43 and is exactly the distractor the question plants in (c) &mdash; halve-the-sum is the shortcut, not add-the-sum.</div>
+<div class="final">Answer: (a) 8, 8.88.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 4</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">The eq. mass of KMnO<sub>4</sub> in the reaction ,<br>MnO<sub>4</sub><sup>&minus;</sup> + Mn<sup>2+</sup> + H<sub>2</sub>O &rarr; MnO<sub>2</sub> + H<sup>+</sup><br>(unbalanced) is:<br>(a) 52.7 &nbsp; (b) 158 &nbsp; (c) 31.6 &nbsp; (d) none</td><td class="topic">Equivalent mass KMnO4 neutral</td><td><a href="https://www.youtube.com/watch?v=q9z4KJt30Fk" target="_blank">The equivalent weight of KMnO_4 in a redox reaction in a neutral medium is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 52.7</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> This is a <i>comproportionation</i>: permanganate MnO<sub>4</sub><sup>&minus;</sup> (Mn +7) and Mn<sup>2+</sup> (+2) meet in the middle to give MnO<sub>2</sub> (Mn +4). The n-factor of KMnO<sub>4</sub> here is set by <i>its own</i> oxidation-state change, +7 &rarr; +4, which is only 3 electrons &mdash; not the habitual acidic value of 5 that takes Mn all the way to +2. So the equivalent weight is M/3, and the whole trap is reading the real product (MnO<sub>2</sub>) instead of reaching for the memorised number.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n(MnO<sub>4</sub><sup>&minus;</sup>) = |+7 &minus; (+4)| = 3; eq. wt = M/n = 158/3</span> <span class="why">permanganate is reduced only to MnO<sub>2</sub> (+4), not to Mn<sup>2+</sup>, in this reaction.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Track manganese in KMnO<sub>4</sub>: it starts at +7 and ends in MnO<sub>2</sub> at +4.</div>
+<div class="step">2. That drop is 3, so KMnO<sub>4</sub> gains 3 electrons per formula unit and its n-factor is 3.</div>
+<div class="step">3. The Mn<sup>2+</sup> (+2 &rarr; +4) is the reducing partner; it is oxidised and does not set KMnO<sub>4</sub>&rsquo;s n-factor.</div>
+<div class="step">4. Apply the formula: equivalent weight = M/n = 158/3 = 52.67 &asymp; <b>52.7</b>.</div>
+<div class="step">5. This is option (a).</div>
+<div class="step">6. (c) 31.6 = 158/5 is the acidic &rarr;Mn<sup>2+</sup> habit-trap, which does not apply since the product is MnO<sub>2</sub>.</div>
+<div class="step">7. (b) 158 uses n = 1 and (d) &ldquo;none&rdquo; is unnecessary because (a) is exact, so both are rejected.</div>
+<pre>
+ MnO4- (Mn +7) -> MnO2 (Mn +4)
+ n-factor = 7 - 4 = 3
+ -----------------------------------------
+ eq. wt = M/n = 158/3 = 52.67 ~ 52.7  (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Read the actual product, not the habit. Permanganate &rarr; MnO<sub>2</sub> is a 3-electron change (n = 3, eq. wt 52.7), used in neutral and comproportionation cases; only &rarr; Mn<sup>2+</sup> gives n = 5 and 31.6. The planted 31.6 punishes auto-piloting to n = 5.</div>
+<div class="final">Answer: (a) 52.7.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">In the reaction,<br>VO + Fe<sub>2</sub>O<sub>3</sub> &rarr; FeO + V<sub>2</sub>O<sub>5</sub> .<br>The eq. mass of V<sub>2</sub>O<sub>5</sub> is equal to its:<br>(a) molar mass &nbsp; (b) molar mass/8 &nbsp; (c) molar mass/6 &nbsp; (d) none of these</td><td class="topic">Equivalent mass of V2O5</td><td><a href="https://www.youtube.com/watch?v=p-ViMB5M7O0" target="_blank">In the reaction VO+Fe_(2)O_(3) rarr FeO+V_(2)O_(5), the eq.wt. of V_(2)O_(5) is equal to its</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> molar mass/6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In any redox change the equivalent mass of a species is its molar mass divided by its n-factor &mdash; the total electrons one formula unit gains or loses. Oxygen is a spectator fixed at &minus;2, so the whole electron count rests on vanadium. The classic slip is to use the per-atom change of 3 and forget that V<sub>2</sub>O<sub>5</sub> packs <b>two</b> vanadium atoms. Doubling that change is what separates the correct M/6 from the wrong M/3.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq mass = M / n, &nbsp; n = (&Delta; oxidation number per atom) &times; (number of such atoms)</span> <span class="why">Only the atom that changes state counts, and it counts once for every time it appears in the formula.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Assign oxygen its usual &minus;2. In VO the sum is zero, so V + (&minus;2) = 0, giving V = <b>+2</b>.</div>
+<div class="step">2. In V<sub>2</sub>O<sub>5</sub>, five oxygens give &minus;10, so 2V = +10 and each V = <b>+5</b>. <span class="why">Vanadium pentoxide is the fully oxidised form.</span></div>
+<div class="step">3. Each vanadium is oxidised +2 &rarr; +5, a loss of <b>3 electrons</b> per atom. <span class="why">Oxidation is a rise in oxidation number.</span></div>
+<div class="step">4. The formula unit V<sub>2</sub>O<sub>5</sub> contains two V atoms, so electrons lost per unit = 2 &times; 3 = <b>6</b>.</div>
+<div class="step">5. Therefore the n-factor of V<sub>2</sub>O<sub>5</sub> is 6, and the equivalent mass follows directly.</div>
+<div class="step">6. Eq mass = M / n = M / 6. <span class="why">We answer for the pentoxide, whose two atoms were already counted.</span></div>
+<div class="step">7. So the equivalent mass equals one-sixth of the molar mass, option (c).</div>
+<pre>
+ VO      : V = +2
+ V2O5    : V = +5
+ per V   : 3 e- lost (oxidation)
+ atoms   : 2  in V2O5
+ n = 2 x 3 = 6
+ ------------------------------------
+ Eq mass = M / 6              &lt;-- (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Always multiply the per-atom oxidation jump by how many such atoms the formula holds. M/3 is the planted distractor for counting only one vanadium; the two-atom pentoxide forces n = 6.</div>
+<div class="final">Answer: (c) molar mass/6.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">In the equation,<br>H<sub>2</sub>S + 2HNO<sub>3</sub> &rarr; 2H<sub>2</sub>O + 2NO<sub>2</sub> + S<br>The equivalent mass of hydrogen sulphide is:<br>(a) 17 &nbsp; (b) 34 &nbsp; (c) 68 &nbsp; (d) 18</td><td class="topic">Equivalent mass of H2S</td><td><a href="https://www.youtube.com/watch?v=3NWgp-JsWNg" target="_blank">In the equation H_(2)S+2HNO_(3) rarr 2H_(2)O+2NO_(2)+S The equivalent weight of hydrogen sulphide</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 17</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The equivalent mass of a reactant is its molar mass divided by the electrons it transfers per formula unit. Here nitric acid oxidises hydrogen sulphide to free sulphur, so only the change on sulphur fixes the n-factor. Hydrogen keeps its +1 state throughout and plays no part. Recognising that S goes from &minus;2 to 0 &mdash; a two-electron loss &mdash; is the whole problem.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq mass = M(H<sub>2</sub>S) / n, &nbsp; n = electrons lost by sulphur</span> <span class="why">HNO<sub>3</sub> merely receives those electrons; its coefficient never enters H<sub>2</sub>S's equivalent mass.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In H<sub>2</sub>S hydrogen is +1, so the two H give +2 and sulphur must be <b>&minus;2</b>.</div>
+<div class="step">2. The product is free sulphur, S, with oxidation state <b>0</b>. <span class="why">Elemental forms are always zero.</span></div>
+<div class="step">3. Sulphur rises &minus;2 &rarr; 0, a loss of <b>2 electrons</b> &mdash; this is the oxidation.</div>
+<div class="step">4. Hence the n-factor of H<sub>2</sub>S equals <b>2</b>.</div>
+<div class="step">5. Molar mass M = 2(1) + 32 = <b>34</b> g.</div>
+<div class="step">6. Equivalent mass = M / n = 34 / 2 = <b>17</b>.</div>
+<div class="step">7. That matches option (a), 17. <span class="why">The reduction of N from +5 to +4 is handled by HNO<sub>3</sub>'s own equivalent mass, separately.</span></div>
+<pre>
+ H2S  : S = -2
+ S    : S =  0  (free element)
+ n = 2 electrons lost
+ M(H2S) = 2 + 32 = 34
+ ------------------------------------
+ Eq mass = 34 / 2 = 17        &lt;-- (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Equivalent mass depends only on a species' own electron change, never on the other reactant's coefficient. Taking n = 1 gives the distractor 34; the &minus;2-to-0 jump pins n at 2.</div>
+<div class="final">Answer: (a) 17.</div></div></details></td></tr>
+<tr id="pyq-level-4-4"><td class="num">4</td><td class="q">M is the molar mass of KMnO<sub>4</sub>. The equivalent mass of KMnO<sub>4</sub> when it is converted into K<sub>2</sub>MnO<sub>4</sub> is:<br>(a) M &nbsp; (b) M/3 &nbsp; (c) M/5 &nbsp; (d) M/7<div class="pyq"><span class="paper">📝 PYQ: IIT-JEE 1980</span><a href="https://questions.examside.com/past-years/jee/question/xI2ddelLoK10L2iK" target="_blank" rel="noopener">Solution ↗</a></div></td><td class="topic">Equivalent mass KMnO4 to manganate</td><td><a href="https://www.youtube.com/watch?v=z7iAL_3lwsw" target="_blank">EQUIVALENT WEIGHT OF KMnO4 / ACIDIC ,NEUTRAL &amp; BASIC MEDIUM // class 11th chemistry // NEET JEE Exam</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> M</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> KMnO<sub>4</sub> has no single fixed equivalent mass &mdash; it depends entirely on the product, which depends on the medium. Converting permanganate (Mn +7) to manganate, K<sub>2</sub>MnO<sub>4</sub> (Mn +6), is only a one-electron reduction. So the n-factor is 1 and the equivalent mass equals the full molar mass, not M/5.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq mass = M / n, &nbsp; n = electrons gained by manganese</span> <span class="why">Potassium stays +1 and oxygen &minus;2, so manganese alone sets n.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In KMnO<sub>4</sub>: +1 + Mn + 4(&minus;2) = 0, so Mn = <b>+7</b>.</div>
+<div class="step">2. In K<sub>2</sub>MnO<sub>4</sub>: +2 + Mn + 4(&minus;2) = 0, so Mn = <b>+6</b>. <span class="why">Manganate ion is MnO<sub>4</sub><sup>2&minus;</sup>.</span></div>
+<div class="step">3. Manganese falls +7 &rarr; +6, gaining just <b>1 electron</b> &mdash; a reduction.</div>
+<div class="step">4. The n-factor of KMnO<sub>4</sub> in this change is therefore <b>1</b>.</div>
+<div class="step">5. Equivalent mass = M / n = M / 1.</div>
+<div class="step">6. So Eq mass = <b>M</b>, equal to the molar mass itself.</div>
+<div class="step">7. This is option (a). <span class="why">Only strongly basic conditions give this +6 product.</span></div>
+<div class="step">8. Sanity: with M(KMnO<sub>4</sub>) = 158 the equivalent mass here is the full 158 &mdash; five times its acidic-medium value of 31.6.</div>
+<div class="step">9. This is exactly why one oxidant titrates differently in acid and in base: the gram-equivalents depend on the product, so the medium must always be read before dividing.</div>
+<pre>
+ KMnO4   : Mn = +7
+ K2MnO4  : Mn = +6
+ n = 1 electron gained
+ ------------------------------------
+ Eq mass = M / 1 = M          &lt;-- (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The reflex &ldquo;KMnO<sub>4</sub> = M/5&rdquo; holds only when Mn ends at +2 in acid. Read the product first: manganate stops at +6, so n = 1 and Eq = M. Medium decides the n-factor.</div>
+<div class="final">Answer: (a) M.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">The equivalent mass of iron in Fe<sub>2</sub>O<sub>3</sub> would be:<br>(a) 18.6 &nbsp; (b) 28 &nbsp; (c) 56 &nbsp; (d) 11</td><td class="topic">Equivalent mass of iron</td><td><a href="https://www.youtube.com/watch?v=FFp_M1jbnRE" target="_blank">Equivalent weight of Iron (Fe) in Fe2O3.</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 18.6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The equivalent mass of an element inside a compound is its atomic mass divided by its valency &mdash; the magnitude of its oxidation number &mdash; in that compound. In Fe<sub>2</sub>O<sub>3</sub> iron is ferric, carrying +3 to balance the three oxide ions. So we divide the atomic mass 56 by 3, not by 2 (as in FeO) and not by 1.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq mass of element = atomic mass / valency</span> <span class="why">Valency is whatever charge the element must carry to make the formula neutral.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In Fe<sub>2</sub>O<sub>3</sub> oxygen is &minus;2, and three oxygens total <b>&minus;6</b>.</div>
+<div class="step">2. The two iron atoms must together supply +6 for neutrality.</div>
+<div class="step">3. So each iron is <b>+3</b> &mdash; the ferric state. <span class="why">This is the valency we divide by.</span></div>
+<div class="step">4. The valency of iron in this oxide is therefore <b>3</b>.</div>
+<div class="step">5. The atomic mass of iron is <b>56</b>.</div>
+<div class="step">6. Eq mass = atomic mass / valency = 56 / 3 = <b>18.67</b>.</div>
+<div class="step">7. Printed to one decimal this is <b>18.6</b>, option (a). <span class="why">18.67 shown as 18.6 is rounding, not a defect.</span></div>
+<div class="step">8. Sanity: multiplying back, 18.67 &times; 3 = 56 recovers the atomic mass, confirming valency 3 was used.</div>
+<div class="step">9. This equivalent mass is the amount of iron carrying one mole of charge, and it is the figure used in every stoichiometric ratio for ferric compounds &mdash; FeO would instead give 56/2 = 28.</div>
+<pre>
+ Fe2O3 : O = -2, three O give -6
+ two Fe balance +6  ->  Fe = +3
+ atomic mass = 56, valency = 3
+ ------------------------------------
+ Eq mass = 56 / 3 = 18.67     &lt;-- (a) 18.6
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Equivalent mass = atomic mass / valency. Option (c) 56 forgets to divide; (b) 28 assumes the +2 valency of FeO. The oxide Fe<sub>2</sub>O<sub>3</sub> pins the valency at 3.</div>
+<div class="final">Answer: (a) 18.6.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">The equivalent mass of KMnO<sub>4</sub> (acidic medium) is (at mass of K = 39; Mn = 55):<br>(a) 158 &nbsp; (b) 15.8 &nbsp; (c) 31.6 &nbsp; (d) 3.16</td><td class="topic">Equivalent mass KMnO4 acidic</td><td><a href="https://www.youtube.com/watch?v=_QQveVfmvEE" target="_blank">Equivalent weight of KMnO4 | In Acidic , Basic and Neutral Medium</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 31.6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In acidic medium permanganate is reduced all the way to Mn<sup>2+</sup>, a five-electron change, so the n-factor of KMnO<sub>4</sub> is 5 and its equivalent mass is one-fifth of the molar mass. The word &ldquo;acidic&rdquo; is the signal; a different medium would give a different product and a different n-factor. We only need the molar mass and the number 5.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">MnO<sub>4</sub><sup>&minus;</sup> + 8H<sup>+</sup> + 5e<sup>&minus;</sup> &rarr; Mn<sup>2+</sup> + 4H<sub>2</sub>O, &nbsp; Eq = M / 5</span> <span class="why">The half-reaction shows five electrons consumed per permanganate.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In acid, manganese goes +7 &rarr; <b>+2</b>, gaining <b>5 electrons</b>.</div>
+<div class="step">2. Hence the n-factor of KMnO<sub>4</sub> is <b>5</b>. <span class="why">This is its most oxidising route.</span></div>
+<div class="step">3. Build the molar mass from the given atomic masses.</div>
+<div class="step">4. K = 39, Mn = 55, four O = 4 &times; 16 = 64.</div>
+<div class="step">5. M = 39 + 55 + 64 = <b>158</b> g.</div>
+<div class="step">6. Equivalent mass = M / n = 158 / 5 = <b>31.6</b>.</div>
+<div class="step">7. That is option (c). <span class="why">15.8 would demand n = 10, which is impossible for one Mn.</span></div>
+<div class="step">8. Sanity: 31.6 &times; 5 = 158 returns the molar mass, confirming n = 5 was the divisor.</div>
+<div class="step">9. In practice this 31.6 g is the mass delivering one mole of electrons, so one gram-equivalent of any reductant consumes exactly 31.6 g of KMnO<sub>4</sub> in acidic titration.</div>
+<pre>
+ Mn : +7 -> +2   =>  n = 5
+ M = 39 + 55 + 4x16
+   = 39 + 55 + 64 = 158
+ ------------------------------------
+ Eq mass = 158 / 5 = 31.6     &lt;-- (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> &ldquo;Acidic&rdquo; always means n = 5 for permanganate. In neutral medium Mn stops at +4 (n = 3), in strong base at +6 (n = 1). Always match the medium to the manganese product before dividing.</div>
+<div class="final">Answer: (c) 31.6.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">In the reaction,<br>2CuSO<sub>4</sub> + 4KI &rarr; Cu<sub>2</sub>I<sub>2</sub> + 2K<sub>2</sub>SO<sub>4</sub> + I<sub>2</sub>, the ratio of equivalent mass of CuSO<sub>4</sub> to its molar mass is :<br>(a) 1/8 &nbsp; (b) 1/4 &nbsp; (c) 1/2 &nbsp; (d) 1</td><td class="topic">Ratio equivalent to molar mass</td><td><a href="https://www.youtube.com/watch?v=tl0GVJm3StE" target="_blank">In the reaction 2CuSO_(4)+4KI rarr 2Cu_(2)I_(2)+I_(2)+2K_(2)SO_(4) the equivalent weight</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The ratio of equivalent mass to molar mass is just 1/n, where n is the electrons transferred per formula unit. Here copper is reduced from +2 to +1 &mdash; a single-electron change &mdash; while iodide does the actual oxidising. So for CuSO<sub>4</sub> itself n = 1 and the ratio is 1. The trap is to borrow the overall electron count instead of copper's own.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq mass / M = 1 / n, &nbsp; n = electrons gained by one copper atom</span> <span class="why">Each CuSO<sub>4</sub> carries exactly one copper, so we count per copper.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In CuSO<sub>4</sub> the sulphate is &minus;2, so copper is <b>+2</b>.</div>
+<div class="step">2. In Cu<sub>2</sub>I<sub>2</sub> (cuprous iodide) iodine is &minus;1, so copper is <b>+1</b>.</div>
+<div class="step">3. Copper falls +2 &rarr; +1, gaining <b>1 electron</b> per atom &mdash; a reduction.</div>
+<div class="step">4. One CuSO<sub>4</sub> has a single copper, so its n-factor is <b>1</b>.</div>
+<div class="step">5. Equivalent mass = M / n = M / 1 = M.</div>
+<div class="step">6. Therefore Eq mass / M = M / M = <b>1</b>.</div>
+<div class="step">7. The answer is option (d), 1. <span class="why">Iodide, not copper, supplies the larger electron change.</span></div>
+<div class="step">8. Sanity: an equivalent mass equal to the molar mass means one mole of CuSO<sub>4</sub> carries exactly one mole of exchangeable electrons.</div>
+<div class="step">9. The 2:4 copper-to-iodide ratio in the equation comes from iodine's electron demand, not from copper's own n-factor, which stays 1 throughout the reaction.</div>
+<pre>
+ CuSO4   : Cu = +2
+ Cu2I2   : Cu = +1
+ per Cu  : 1 e- gained, one Cu per unit
+ n = 1
+ ------------------------------------
+ Eq / M = 1 / 1 = 1           &lt;-- (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> In this reaction 2I<sup>&minus;</sup> &rarr; I<sub>2</sub> is the oxidation; copper merely drops one state. Never fold the iodide's electrons into CuSO<sub>4</sub>'s n-factor &mdash; it is simply 1.</div>
+<div class="final">Answer: (d) 1.</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">The equivalent mass of HClO in the reaction :<br>HClO + 2I<sup>&minus;</sup> + H<sup>+</sup> &rarr; Cl<sup>&minus;</sup> + I<sub>2</sub> + H<sub>2</sub>O is :<br>(a) 52.50 &nbsp; (b) 26.25 &nbsp; (c) 17.5 &nbsp; (d) 13.125</td><td class="topic">Equivalent mass of HClO</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 26.25</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Hypochlorous acid HClO acts as an oxidiser: its chlorine is reduced from +1 to &minus;1 while iodide is oxidised to I<sub>2</sub>. That full two-unit drop in chlorine's oxidation number is a two-electron gain, which is the n-factor. The equivalent mass is then the molar mass divided by 2, not by 1. Spanning the whole +1-to-&minus;1 jump is the key insight.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq mass = M(HClO) / n, &nbsp; n = electrons gained by chlorine</span> <span class="why">Chlorine is the reduced species; iodide's oxidation is counted on iodine separately.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In HClO: H = +1, O = &minus;2, so chlorine is <b>+1</b>.</div>
+<div class="step">2. The chlorine product is Cl<sup>&minus;</sup>, oxidation state <b>&minus;1</b>.</div>
+<div class="step">3. Chlorine falls +1 &rarr; &minus;1, a gain of <b>2 electrons</b> &mdash; reduction.</div>
+<div class="step">4. Hence the n-factor of HClO is <b>2</b>.</div>
+<div class="step">5. Molar mass M = 1 + 35.5 + 16 = <b>52.5</b> g.</div>
+<div class="step">6. Equivalent mass = M / n = 52.5 / 2 = <b>26.25</b>.</div>
+<div class="step">7. That is option (b). <span class="why">The two iodides losing one electron each balance chlorine's two-electron gain.</span></div>
+<div class="step">8. Sanity: 26.25 &times; 2 = 52.5 recovers the molar mass, confirming the two-electron n-factor.</div>
+<div class="step">9. One gram-equivalent of HClO (26.25 g) therefore liberates one gram-equivalent of iodine from excess iodide &mdash; the basis of the iodometric estimation of available chlorine.</div>
+<pre>
+ HClO : H +1, O -2  ->  Cl = +1
+ Cl-  : Cl = -1
+ n = 2 electrons gained
+ M = 1 + 35.5 + 16 = 52.5
+ ------------------------------------
+ Eq mass = 52.5 / 2 = 26.25   &lt;-- (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Span the full +1 to &minus;1 (n = 2), not +1 to 0. Option (a) 52.5 uses n = 1, and (d) 13.125 uses n = 4; the chloride product fixes n at 2.</div>
+<div class="final">Answer: (b) 26.25.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">In the equation<br>H<sub>2</sub>S + 2HNO<sub>3</sub> &rarr; 2H<sub>2</sub>O + 2NO<sub>2</sub> + S<br>The equivalent weight of hydrogen sulphide is<br>(a) 16 &nbsp; (b) 68 &nbsp; (c) 34 &nbsp; (d) 17</td><td class="topic">Equivalent weight of H2S</td><td><a href="https://www.youtube.com/watch?v=NmhYpBtGBfo" target="_blank">In the reaction H2S + 2HNO3 =2H2O + 2NO2 + S. The equivalent weight | Equivalance master</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 17</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Sulphur in H<sub>2</sub>S is oxidised to free sulphur by nitric acid. The equivalent weight is the molar mass divided by the electrons lost per molecule, so only sulphur's oxidation change counts; hydrogen stays +1 and never enters the n-factor. This is the same chemistry as the earlier H<sub>2</sub>S item, but the correct value 17 sits at a different option label here.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq wt = M(H<sub>2</sub>S) / n, &nbsp; n = electrons lost by sulphur</span> <span class="why">Nitric acid absorbs those electrons (N +5 &rarr; +4) but does not change H<sub>2</sub>S's n-factor.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In H<sub>2</sub>S hydrogen is +1, so sulphur is <b>&minus;2</b>.</div>
+<div class="step">2. The product is free sulphur, S, oxidation state <b>0</b>.</div>
+<div class="step">3. Sulphur rises &minus;2 &rarr; 0, losing <b>2 electrons</b> &mdash; the oxidation.</div>
+<div class="step">4. So the n-factor of H<sub>2</sub>S is <b>2</b>.</div>
+<div class="step">5. Molar mass M = 2(1) + 32 = <b>34</b> g.</div>
+<div class="step">6. Equivalent weight = M / n = 34 / 2 = <b>17</b>.</div>
+<div class="step">7. In this option set 17 is listed as (d). <span class="why">The physics is identical; only the labelling moved.</span></div>
+<div class="step">8. Sanity: 17 &times; 2 = 34 returns M(H<sub>2</sub>S), confirming n = 2.</div>
+<div class="step">9. Here nitric acid is reduced N +5 &rarr; +4, a one-electron gain, so its own equivalent mass is 63 &mdash; but that figure never enters the equivalent mass of hydrogen sulphide.</div>
+<pre>
+ H2S  : S = -2
+ S    : S =  0  (free element)
+ n = 2 electrons lost
+ M(H2S) = 34
+ ------------------------------------
+ Eq wt = 34 / 2 = 17          &lt;-- (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Watch the option labels, not just the number: the same 17 appears at (a) elsewhere and (d) here. Distractors 34 (n = 1) and 68 (n = 1/2) both misread the sulphur jump.</div>
+<div class="final">Answer: (d) 17.</div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">The equivalent weight of Cl<sub>2</sub> acting as oxidizing agent is<br>(a) 72 &nbsp; (b) 35.5 &nbsp; (c) 7.1 &nbsp; (d) 23.67</td><td class="topic">Equivalent weight of Cl2 oxidant</td><td><a href="https://www.youtube.com/watch?v=zgmb2pifW0U" target="_blank">The equivalent weight of Cl_2 acting as oxidizing agent is (a) 72 (b) 35.5 (c) 7.1 (d) 23.67</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 35.5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> When chlorine acts as an oxidising agent it is reduced: Cl<sub>2</sub> + 2e<sup>&minus;</sup> &rarr; 2Cl<sup>&minus;</sup>. The whole diatomic molecule accepts two electrons, one for each atom going 0 to &minus;1, so its n-factor is 2 and the equivalent weight is half the molar mass. The usual error is to work per atom or to forget to divide at all.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq wt = M(Cl<sub>2</sub>) / n, &nbsp; n = total electrons gained per Cl<sub>2</sub></span> <span class="why">Both chlorine atoms are reduced, so the molecule's n is twice the per-atom change.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In elemental Cl<sub>2</sub> each chlorine is <b>0</b>.</div>
+<div class="step">2. As an oxidiser it forms chloride Cl<sup>&minus;</sup>, each chlorine <b>&minus;1</b>.</div>
+<div class="step">3. Per atom that is a gain of 1 electron (reduction).</div>
+<div class="step">4. For the two atoms in Cl<sub>2</sub>, total electrons = <b>2</b>, so n = 2.</div>
+<div class="step">5. Molar mass M = 2 &times; 35.5 = <b>71</b> g.</div>
+<div class="step">6. Equivalent weight = M / n = 71 / 2 = <b>35.5</b>.</div>
+<div class="step">7. That is option (b). <span class="why">Numerically the equivalent weight equals one chlorine atom's mass &mdash; a handy coincidence.</span></div>
+<div class="step">8. Sanity: 35.5 &times; 2 = 71 returns M(Cl<sub>2</sub>), confirming the two-electron reduction.</div>
+<div class="step">9. Against a stronger oxidiser such as fluorine, chlorine would instead be oxidised with a different n-factor, so the phrase &ldquo;oxidising agent&rdquo; is exactly what fixes n = 2 here.</div>
+<pre>
+ Cl2   : each Cl = 0
+ 2 Cl- : each Cl = -1
+ n = 2 electrons per Cl2
+ M = 2 x 35.5 = 71
+ ------------------------------------
+ Eq wt = 71 / 2 = 35.5        &lt;-- (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For a diatomic oxidiser use the whole-molecule count (2), not one atom. Option (a) 72 forgets the division and (c) 7.1 invents n = 10; the standard equivalent weight of Cl<sub>2</sub> is 35.5.</div>
+<div class="final">Answer: (b) 35.5.</div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 5</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">In the following reaction (unbalanced), equivalent weight of As<sub>2</sub>S<sub>3</sub> is related to its molecular weight, M, by<br>As<sub>2</sub>S<sub>3</sub> + H<sup>+</sup> + NO<sub>3</sub><sup>&minus;</sup> &rarr; NO + H<sub>2</sub>O + AsO<sub>4</sub><sup>3&minus;</sup> + SO<sub>4</sub><sup>2&minus;</sup><br>(a) M/2 &nbsp; (b) M/4 &nbsp; (c) M/28 &nbsp; (d) M/24</td><td class="topic">Equivalent weight of As2S3</td><td><a href="https://www.youtube.com/watch?v=6BqX9Kya3U8" target="_blank">In the following reaction, As_2 S_3+H^++NO_3^- NO+H_2O+AsO_4^3-+SO_4^2- the equivalent mass of As2S3</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> M/28</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> As<sub>2</sub>S<sub>3</sub> is oxidised at <b>both</b> arsenic and sulphur, so its n-factor is the sum of all electrons lost across every atom in the formula unit. Each element's per-atom change must be multiplied by how many of that atom the formula holds, then the two contributions are added. Nitrogen's reduction belongs to HNO<sub>3</sub> and is irrelevant to As<sub>2</sub>S<sub>3</sub>'s equivalent weight.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n = &Sigma;(&Delta; per atom &times; number of atoms), &nbsp; Eq = M / n</span> <span class="why">Both arsenic and sulphur increase their oxidation number, so both feed the sum.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In As<sub>2</sub>S<sub>3</sub>, sulphur is &minus;2, so 2As + 3(&minus;2) = 0 gives As = <b>+3</b>.</div>
+<div class="step">2. Arsenic &rarr; AsO<sub>4</sub><sup>3&minus;</sup> takes As to <b>+5</b>: 2 e<sup>&minus;</sup> per As.</div>
+<div class="step">3. For the two arsenics that is 2 &times; 2 = <b>4 electrons</b>.</div>
+<div class="step">4. Sulphur &rarr; SO<sub>4</sub><sup>2&minus;</sup> takes S from &minus;2 to <b>+6</b>: 8 e<sup>&minus;</sup> per S.</div>
+<div class="step">5. For the three sulphurs that is 3 &times; 8 = <b>24 electrons</b>.</div>
+<div class="step">6. Total electrons lost = 4 + 24 = <b>28</b>, so n = 28.</div>
+<div class="step">7. Equivalent weight = M / 28, option (c). <span class="why">The NO<sub>3</sub><sup>&minus;</sup> &rarr; NO reduction is counted on nitrogen, not here.</span></div>
+<pre>
+ As : +3 -> +5 , 2 e- x 2 As = 4
+ S  : -2 -> +6 , 8 e- x 3 S  = 24
+ ------------------------------------
+ n = 4 + 24 = 28
+ Eq wt = M / 28              &lt;-- (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> On a molecule where several atoms oxidise, add every atom's electron change. Dividing by only arsenic (4) gives M/4 and only sulphur (24) gives M/24 &mdash; both planted distractors.</div>
+<div class="final">Answer: (c) M/28.</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">In the reaction, N<sub>2</sub> &rarr; NH<sub>3</sub> .<br>The eq. mass of N<sub>2</sub> and NH<sub>3</sub> are respectively equal to:<br>(a) 28/3, 17/3 &nbsp; (b) 28/6, 17/3 &nbsp; (c) 28/2, 17/2 &nbsp; (d) 28/5, 17/5</td><td class="topic">Equivalent mass N2 and NH3</td><td><a href="https://www.youtube.com/watch?v=XR80wQwYMzo" target="_blank">In the reaction N2 NH3, the equivalent weights of N2 and NH3 are respectively equal to</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 28/6, 17/3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Equivalent mass hinges on how many nitrogen atoms a formula unit carries. N<sub>2</sub> holds two nitrogens that share the electron change, while NH<sub>3</sub> holds one, so the two n-factors differ even though each atom makes the same 3-electron jump. Treating N<sub>2</sub> as if it had one atom is the classic trap that produces 28/3.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq = M / n, &nbsp; n = (&Delta; per nitrogen) &times; (number of N atoms)</span> <span class="why">Each nitrogen moves between 0 and &minus;3, a 3-electron change.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In N<sub>2</sub> nitrogen is <b>0</b>; in NH<sub>3</sub> it is <b>&minus;3</b>.</div>
+<div class="step">2. The per-atom change is therefore 3 electrons.</div>
+<div class="step">3. N<sub>2</sub> contains two nitrogens, so n(N<sub>2</sub>) = 2 &times; 3 = <b>6</b>.</div>
+<div class="step">4. Eq(N<sub>2</sub>) = M / n = 28 / 6 = <b>28/6</b>.</div>
+<div class="step">5. NH<sub>3</sub> contains one nitrogen, so n(NH<sub>3</sub>) = <b>3</b>.</div>
+<div class="step">6. Eq(NH<sub>3</sub>) = 17 / 3 = <b>17/3</b>.</div>
+<div class="step">7. Together the pair is (28/6, 17/3), option (b). <span class="why">Only the molecule's atom count differs between them.</span></div>
+<div class="step">8. Sanity: multiply back &mdash; (28/6) &times; 6 = 28 and (17/3) &times; 3 = 17, both molar masses, confirming the n-factors.</div>
+<div class="step">9. The same per-atom 3-electron change yields different equivalents purely because N<sub>2</sub> bundles two nitrogen atoms into one formula unit while NH<sub>3</sub> holds just one.</div>
+<pre>
+ N : 0 (in N2) -> -3 (in NH3), 3 e- per N
+ N2  : n = 2 x 3 = 6 , Eq = 28/6
+ NH3 : n = 1 x 3 = 3 , Eq = 17/3
+ ------------------------------------
+ (28/6 , 17/3)              &lt;-- (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The molecule, not the single atom, fixes n: N<sub>2</sub> carries two atoms so n = 6, giving 28/6. Option (a) 28/3 wrongly uses n = 3 for N<sub>2</sub> &mdash; the one-atom slip.</div>
+<div class="final">Answer: (b) 28/6, 17/3.</div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">In alkaline medium ClO<sub>2</sub> oxidizes H<sub>2</sub>O<sub>2</sub> to O<sub>2</sub> and it self reduced to Cl<sup>&minus;</sup>. Number of mole of H<sub>2</sub>O<sub>2</sub> oxidized by 1 mole of ClO<sub>2</sub> is :<br>(a) 1 &nbsp; (b) 1.5 &nbsp; (c) 2.5 &nbsp; (d) 3.5</td><td class="topic">Moles H2O2 oxidized by ClO2</td><td><a href="https://www.youtube.com/watch?v=TxH_30pHmgo" target="_blank">In alkaline medium ClO2 oxidises H2O2 to O2 and reduced itself to Cl-, then how many moles of H2O2</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 2.5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In any redox pairing the electrons lost by the reductant equal those gained by the oxidant. ClO<sub>2</sub> is the oxidant, reduced to Cl<sup>&minus;</sup>; each H<sub>2</sub>O<sub>2</sub> oxidised to O<sub>2</sub> gives up two electrons. Balancing those electron counts fixes how many moles of peroxide one mole of ClO<sub>2</sub> can oxidise. The peroxide oxygen starting at &minus;1, not &minus;2, is the subtle point.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">moles H<sub>2</sub>O<sub>2</sub> = (e<sup>&minus;</sup> gained by ClO<sub>2</sub>) / (e<sup>&minus;</sup> lost per H<sub>2</sub>O<sub>2</sub>)</span> <span class="why">One mole of ClO<sub>2</sub> must be fed exactly enough peroxide to supply its electrons.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In ClO<sub>2</sub> oxygen is &minus;2, so chlorine is <b>+4</b>.</div>
+<div class="step">2. It is reduced to Cl<sup>&minus;</sup> (&minus;1), a gain of <b>5 electrons</b> per ClO<sub>2</sub>.</div>
+<div class="step">3. In H<sub>2</sub>O<sub>2</sub> oxygen is <b>&minus;1</b>; in O<sub>2</sub> it is 0.</div>
+<div class="step">4. Each H<sub>2</sub>O<sub>2</sub> loses two O-electrons, so <b>2 electrons</b> per molecule.</div>
+<div class="step">5. Electron balance for 1 mole ClO<sub>2</sub>: 1 &times; 5 = x &times; 2.</div>
+<div class="step">6. Solve x = 5 / 2 = <b>2.5</b> moles of H<sub>2</sub>O<sub>2</sub>.</div>
+<div class="step">7. That is option (c). <span class="why">Here peroxide is the reductant, releasing O<sub>2</sub>.</span></div>
+<pre>
+ ClO2 : Cl +4 -> -1 , gains 5 e-
+ H2O2 : O  -1 ->  0 , loses 2 e-
+ balance : 1 x 5 = x x 2
+ ------------------------------------
+ x = 5 / 2 = 2.5            &lt;-- (c)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Peroxide oxygen is &minus;1, so H<sub>2</sub>O<sub>2</sub> &rarr; O<sub>2</sub> is a two-electron loss, not one. Equate total electrons, never moles directly &mdash; that shortcut gives the wrong ratio.</div>
+<div class="final">Answer: (c) 2.5.</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">In the following change if the atomic mass of iron is 56 then its equivalent mass will be<br>3Fe + 4H<sub>2</sub>O &rarr; Fe<sub>3</sub>O<sub>4</sub> + 4H<sub>2</sub> is:<br>(a) 42 &nbsp; (b) 21 &nbsp; (c) 63 &nbsp; (d) 84</td><td class="topic">Equivalent mass of iron</td><td><a href="https://www.youtube.com/watch?v=Hu5jeVvdjJ8" target="_blank">In the following change, 3Fe + 4H2O Fe3O4 + 4H2. If the atomic weight of iron is 56, then its eq mass</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 21</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Iron is oxidised from 0 in the metal to its average state in Fe<sub>3</sub>O<sub>4</sub>, which is fractional because the oxide is a mix of +2 and +3 iron. The equivalent mass uses that fractional n-factor per atom, found by counting the total electrons released by three iron atoms and sharing them out. Rounding the state to +3 is the error to avoid.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq mass = atomic mass / n, &nbsp; n = electrons lost per Fe atom</span> <span class="why">Fe<sub>3</sub>O<sub>4</sub> is FeO&middot;Fe<sub>2</sub>O<sub>3</sub>, with mean iron state +8/3.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In Fe<sub>3</sub>O<sub>4</sub> four oxygens give &minus;8, so three iron atoms total <b>+8</b>.</div>
+<div class="step">2. The average iron state is +8/3; metallic iron is 0.</div>
+<div class="step">3. Going 0 &rarr; Fe<sub>3</sub>O<sub>4</sub>, the three iron atoms lose <b>8 electrons</b> in all.</div>
+<div class="step">4. Per iron atom that is n = 8/3 electrons.</div>
+<div class="step">5. Eq mass = atomic mass / n = 56 / (8/3) = 56 &times; 3 / 8.</div>
+<div class="step">6. 56 &times; 3 / 8 = 168 / 8 = <b>21</b>.</div>
+<div class="step">7. So the answer is option (b), 21. <span class="why">Check: three Fe give 3 &times; 21 = 63 per 8 equivalents.</span></div>
+<div class="step">8. Sanity: 21 &times; (8/3) = 56 recovers the atomic mass, confirming n = 8/3 per iron.</div>
+<div class="step">9. Fe<sub>3</sub>O<sub>4</sub> is really FeO&middot;Fe<sub>2</sub>O<sub>3</sub>: one iron at +2 and two at +3 average to +8/3, exactly the fractional state the n-factor above is built on.</div>
+<pre>
+ Fe3O4 : 4 O = -8  =>  3 Fe = +8
+ 3 Fe lose 8 e- (starting from 0)
+ n per Fe = 8/3
+ ------------------------------------
+ Eq = 56 x 3 / 8 = 168/8 = 21 &lt;-- (b)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Do not round iron to +3 (that gives 56/3 = 18.67). Use the true 8-electron total for three Fe: Eq = 56 &times; 3/8 = 21. Fractional oxidation states are perfectly legal.</div>
+<div class="final">Answer: (b) 21.</div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">Number of moles of MnO<sub>4</sub><sup>&minus;</sup> required to oxides one mole of ferrous oxalate completely in acidic medium will be:<br>(a) 0.4 mole &nbsp; (b) 7.5 mole &nbsp; (c) 0.2 mole &nbsp; (d) 0.6 mole</td><td class="topic">Moles MnO4 for ferrous oxalate</td><td><a href="https://www.youtube.com/watch?v=oKIVpLcxBco" target="_blank">Number of moles of MnO4- required to oxidize one mole of ferrous oxalate completely in acidic medium</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 0.6 mole</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Ferrous oxalate, FeC<sub>2</sub>O<sub>4</sub>, is oxidised at two sites at once: Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup> and the oxalate C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> &rarr; 2CO<sub>2</sub>. Its total n-factor is the sum of both, and the permanganate required follows from an electron balance against MnO<sub>4</sub><sup>&minus;</sup>'s five-electron gain. Counting only the iron is the trap that gives 0.2.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">moles MnO<sub>4</sub><sup>&minus;</sup> = (n of reductant) / (n of MnO<sub>4</sub><sup>&minus;</sup>)</span> <span class="why">In acid MnO<sub>4</sub><sup>&minus;</sup> gains 5 e<sup>&minus;</sup>; ferrous oxalate loses 3.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup> loses <b>1 electron</b>.</div>
+<div class="step">2. In oxalate carbon is +3; in CO<sub>2</sub> it is +4.</div>
+<div class="step">3. C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> &rarr; 2CO<sub>2</sub> loses 1 per carbon, so <b>2 electrons</b>.</div>
+<div class="step">4. Each FeC<sub>2</sub>O<sub>4</sub> thus loses 1 + 2 = <b>3 electrons</b>; n = 3.</div>
+<div class="step">5. In acid MnO<sub>4</sub><sup>&minus;</sup> &rarr; Mn<sup>2+</sup> gains <b>5 electrons</b>.</div>
+<div class="step">6. Electron balance: x &times; 5 = 1 &times; 3, so x = 3 / 5 = <b>0.6</b>.</div>
+<div class="step">7. Hence 0.6 mole of MnO<sub>4</sub><sup>&minus;</sup>, option (d). <span class="why">Both reducing sites must be counted.</span></div>
+<pre>
+ FeC2O4 : Fe 1 e- + oxalate 2 e- = 3
+ MnO4-  : gains 5 e- (acidic medium)
+ balance : x * 5 = 1 * 3
+ ------------------------------------
+ x = 3 / 5 = 0.6 mole       &lt;-- (d)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Ferrous oxalate is a double reductant &mdash; count both the iron and the oxalate (n = 3), not the iron alone (which gives 0.2). Then divide by permanganate's 5.</div>
+<div class="final">Answer: (d) 0.6 mole.</div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">For the reaction, N<sub>2</sub> + 3H<sub>2</sub> &rarr; 2NH<sub>3</sub> if E<sub>1</sub> and E<sub>2</sub> equivalent masses of NH<sub>3</sub> and N<sub>2</sub> respectively, then E<sub>1</sub> &minus; E<sub>2</sub> is :<br>(a) 1 &nbsp; (b) 2 &nbsp; (c) 3 &nbsp; (d) 4</td><td class="topic">Difference of equivalent masses</td><td><a href="https://www.youtube.com/watch?v=ct_gzPex3bQ" target="_blank">For the reaction, N_2+3H_2 2NH_3; if E_1 &amp; E_2 are the equivalent masses of NH_3 &amp; N_2; then E_1-E_2</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 1</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Both NH<sub>3</sub> and N<sub>2</sub> are weighed against nitrogen's 3-electron change, but N<sub>2</sub> carries two nitrogen atoms while NH<sub>3</sub> carries one. Writing each equivalent mass and subtracting gives a clean whole number, because once N<sub>2</sub>'s fraction is reduced both denominators are 3. The pitfall is leaving 28/6 unsimplified.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">E = M / n; &nbsp; E<sub>1</sub> &minus; E<sub>2</sub> = 17/3 &minus; 28/6</span> <span class="why">E<sub>1</sub> is NH<sub>3</sub> with n = 3, E<sub>2</sub> is N<sub>2</sub> with n = 6.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Each nitrogen changes between 0 (N<sub>2</sub>) and &minus;3 (NH<sub>3</sub>): 3 electrons per atom.</div>
+<div class="step">2. NH<sub>3</sub> has one nitrogen, so n = 3 and E<sub>1</sub> = 17 / 3 = <b>17/3</b>.</div>
+<div class="step">3. N<sub>2</sub> has two nitrogens, so n = 6 and E<sub>2</sub> = 28 / 6.</div>
+<div class="step">4. Reduce the fraction: 28 / 6 = <b>14/3</b>.</div>
+<div class="step">5. Put the difference over the common denominator 3.</div>
+<div class="step">6. E<sub>1</sub> &minus; E<sub>2</sub> = 17/3 &minus; 14/3 = 3/3.</div>
+<div class="step">7. So E<sub>1</sub> &minus; E<sub>2</sub> = <b>1</b>, option (a). <span class="why">28/6 reduces to 14/3, not 28/3.</span></div>
+<div class="step">8. Sanity: 17/3 &approx; 5.67 and 14/3 &approx; 4.67, whose difference is exactly 1 mass unit.</div>
+<div class="step">9. The result is independent of the balancing coefficients in N<sub>2</sub> + 3H<sub>2</sub> &rarr; 2NH<sub>3</sub>; equivalent masses depend only on each species' own electron change, never on stoichiometry.</div>
+<pre>
+ E1 (NH3) = 17 / 3
+ E2 (N2)  = 28 / 6 = 14 / 3
+ E1 - E2  = (17 - 14) / 3
+ ------------------------------------
+          = 3 / 3 = 1        &lt;-- (a)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Reduce 28/6 to 14/3 before subtracting; pairing an unreduced 28/6 with 17/3 tempts a wrong 3 or 1/3. Matched denominators make the difference exactly 1.</div>
+<div class="final">Answer: (a) 1.</div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">Equivalent mass of H<sub>3</sub>PO<sub>2</sub> (Molar mass = 66) when it disproportionate into PH<sub>3</sub> and H<sub>3</sub>PO<sub>3</sub> is :<br>(a) 66 &nbsp; (b) 33 &nbsp; (c) 16.5 &nbsp; (d) 49.5</td><td class="topic">Equivalent mass of H3PO2</td><td><a href="https://www.youtube.com/watch?v=GO8IwT2e3YM" target="_blank">Equivalent mass of H_3PO_2 when it disproportionate into PH_3 and H_3PO_3 is: (a) M (b) M/2 (c)...</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 49.5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In hypophosphorous acid H<sub>3</sub>PO<sub>2</sub> phosphorus sits at +1. Disproportionation drives the very same P in two opposite directions at once: down to &minus;3 (PH<sub>3</sub>) and up to +3 (H<sub>3</sub>PO<sub>3</sub>). The trap is the n-factor &mdash; it is the total electrons shifted divided by the total moles reacting, never the value of just one half-change.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. mass = M / n, with n = (total e<sup>&minus;</sup> transferred)/(total moles)</span> <span class="why">Both the reduced and the oxidised phosphorus come from one reactant, so the electrons are pooled over every mole of it.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. O.S. of P in H<sub>3</sub>PO<sub>2</sub>: 3(+1) + P + 2(&minus;2) = 0 &rarr; P = <b>+1</b>.</div>
+<div class="step">2. In the products: PH<sub>3</sub> has P = &minus;3, and H<sub>3</sub>PO<sub>3</sub> has P = +3.</div>
+<div class="step">3. Reduction P: +1 &rarr; &minus;3 gains <b>4e<sup>&minus;</sup></b>; oxidation P: +1 &rarr; +3 loses <b>2e<sup>&minus;</sup></b>. <span class="why">unequal, so scale to balance the electrons transferred</span></div>
+<div class="step">4. Scale the oxidation by 2 so both halves move 4e<sup>&minus;</sup>: 3H<sub>3</sub>PO<sub>2</sub> &rarr; PH<sub>3</sub> + 2H<sub>3</sub>PO<sub>3</sub>.</div>
+<div class="step">5. Total electrons shifted = 4, spread over 3 moles of H<sub>3</sub>PO<sub>2</sub>, so n = 4/3.</div>
+<div class="step">6. Eq. mass = M &divide; n = 66 &divide; (4/3) = 66 &times; 3/4 = <b>49.5</b>.</div>
+<pre>
+ P = +1 in H3PO2
+   reduce  -> PH3   (-3) : +4e per P
+   oxidise -> H3PO3 (+3) : -2e per P
+ balance : 3 H3PO2 -> PH3 + 2 H3PO3
+ e- moved = 4 , moles = 3 , n = 4/3
+ Eq = 66 / (4/3) = 66 x 3/4 = 49.5   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> For any disproportionation, divide the total electrons shifted by the total moles of the species, here 4/3. Taking only the reduction value 4 (gives 16.5) or the oxidation value 2 (gives 33) are exactly the planted distractors (c) and (b); the symmetric M (66) would mean no net redox, so (a) is a trap too.</div>
+<div class="final">Answer: <b>(d) 49.5.</b></div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">Match the columns :<br><b>Column-I (Process):</b> (A) Cl<sub>2</sub> &rarr; Cl<sup>&minus;</sup> &nbsp; (B) Cl<sub>2</sub> &rarr; ClO<sub>3</sub><sup>&minus;</sup> &nbsp; (C) Cl<sub>2</sub> &rarr; Cl<sup>&minus;</sup> + ClO<sub>3</sub><sup>&minus;</sup> &nbsp; (D) Cl<sub>2</sub> &rarr; Cl<sup>&minus;</sup> + ClO<sup>&minus;</sup><br><b>Column-II (Equivalent weight of Cl<sub>2</sub>):</b> (p) 71 &nbsp; (q) 35.5 &nbsp; (r) 42.6 &nbsp; (s) 7.1<br>(a) (A)&rarr;(r), (B)&rarr;(s), (C)&rarr;(q), (D)&rarr;(p) &nbsp; (b) (A)&rarr;(q), (B)&rarr;(s), (C)&rarr;(r), (D)&rarr;(p) &nbsp; (c) (A)&rarr;(qs), (B)&rarr;(sp), (C)&rarr;(pr), (D)&rarr;(q) &nbsp; (d) (A)&rarr;(sr), (B)&rarr;(qr), (C)&rarr;(pq), (D)&rarr;(r)</td><td class="topic">Match equivalent weight Cl2</td><td><a href="https://www.youtube.com/watch?v=kb8yF4ycneo" target="_blank">In the following disproportionation of Cl2 in basic medium | Equivalence weight | Equivalance master</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> (A)→q, (B)→s, (C)→r, (D)→p</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Cl<sub>2</sub> starts at O.S. 0, so its equivalent weight 71/n is fixed entirely by how far, and in how many directions, chlorine moves. The two single-direction cases give whole-number n, while the two disproportionations (producing both Cl<sup>&minus;</sup> and an oxo-anion) pool electrons over several moles and so give a fractional n.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. wt = 71 / n, with n = (e<sup>&minus;</sup> transferred)/(moles Cl<sub>2</sub>)</span> <span class="why">In a disproportionation the reduced and the oxidised Cl both trace back to the same Cl<sub>2</sub>, so their electrons are pooled.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (A) Cl<sub>2</sub> &rarr; 2Cl<sup>&minus;</sup>: 2 Cl each 0&rarr;&minus;1, n = 2, Eq = 71/2 = <b>35.5 (q)</b>.</div>
+<div class="step">2. (B) Cl<sub>2</sub> &rarr; 2ClO<sub>3</sub><sup>&minus;</sup>: 2 Cl each 0&rarr;+5, n = 10, Eq = 71/10 = <b>7.1 (s)</b>.</div>
+<div class="step">3. (C) disproportionation 3Cl<sub>2</sub> &rarr; 5Cl<sup>&minus;</sup> + ClO<sub>3</sub><sup>&minus;</sup>: 5e<sup>&minus;</sup> move over 3 moles, n = 5/3, Eq = 71&times;3/5 = <b>42.6 (r)</b>.</div>
+<div class="step">4. (D) disproportionation Cl<sub>2</sub> &rarr; Cl<sup>&minus;</sup> + ClO<sup>&minus;</sup>: 1e<sup>&minus;</sup> per Cl<sub>2</sub>, n = 1, Eq = 71/1 = <b>71 (p)</b>.</div>
+<div class="step">5. Collecting the four: (A)&rarr;q, (B)&rarr;s, (C)&rarr;r, (D)&rarr;p.</div>
+<div class="step">6. That exact set is option <b>(b)</b>.</div>
+<pre>
+ (A) Cl2 -> 2Cl-       n=2    71/2  = 35.5 (q)
+ (B) Cl2 -> 2ClO3-     n=10   71/10 = 7.1  (s)
+ (C) 3Cl2->5Cl-+ClO3-  n=5/3  71*3/5= 42.6 (r)
+ (D) Cl2 -> Cl-+ClO-   n=1    71/1  = 71   (p)
+ => A-q, B-s, C-r, D-p = option (b)  &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Only the disproportionations (C, D) give a fractional n: count electrons on the minority branch (1 Cl rising to +5 in C = 5e<sup>&minus;</sup>, over 3 moles Cl<sub>2</sub>) and divide by total moles. The single-direction cases A and B are the easy anchors that already pin option (b) before you even touch C and D.</div>
+<div class="final">Answer: <b>(b) (A)&rarr;q, (B)&rarr;s, (C)&rarr;r, (D)&rarr;p.</b></div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">Equivalent weight of MnO<sub>4</sub><sup>&minus;</sup> in acidic, basic, neutral medium is in the ratio of<br>(a) 3 : 5 : 15 &nbsp; (b) 5 : 3 : 1 &nbsp; (c) 5 : 1 : 3 &nbsp; (d) 3 : 15 : 5</td><td class="topic">Ratio equivalent weights MnO4</td><td><a href="https://www.youtube.com/watch?v=bpGfhzK2q80" target="_blank">Equivalent mass of KMnO4 in acidic, basic and neutral are in the ratio of:</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 3 : 15 : 5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> MnO<sub>4</sub><sup>&minus;</sup> has Mn at +7, but how far it is reduced depends entirely on the medium. Acidic conditions supply plenty of H<sup>+</sup> and send it all the way to colourless Mn<sup>2+</sup> (n = 5); neutral conditions can only take it to brown MnO<sub>2</sub>, i.e. Mn<sup>4+</sup> (n = 3); and strongly basic conditions stop it at the green manganate MnO<sub>4</sub><sup>2&minus;</sup>, i.e. Mn<sup>6+</sup> (n = 1). Equivalent weight varies inversely with n, so the weakest reduction gives the heaviest equivalent.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. wt = M / n</span> <span class="why">A smaller electron change means a larger equivalent weight; and the order asked is acidic : basic : neutral, which is not the order in which you naturally derive them.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Acidic: Mn +7 &rarr; +2, a 5-electron gain, n = 5, so Eq = M/5.</div>
+<div class="step">2. Neutral: Mn +7 &rarr; +4 (MnO<sub>2</sub>), a 3-electron gain, n = 3, so Eq = M/3.</div>
+<div class="step">3. Basic: Mn +7 &rarr; +6 (MnO<sub>4</sub><sup>2&minus;</sup>), a 1-electron gain, n = 1, so Eq = M/1 = M.</div>
+<div class="step">4. Write the required ratio in the asked order, acidic : basic : neutral = M/5 : M : M/3.</div>
+<div class="step">5. Divide out the common M: = 1/5 : 1 : 1/3.</div>
+<div class="step">6. Multiply each term by 15 to clear the fractions: = <b>3 : 15 : 5</b>.</div>
+<div class="step">7. Sanity check: the biggest term (15) sits on basic, where n is smallest, as it must.</div>
+<pre>
+ medium    Mn change   n   Eq = M/n
+ acidic    +7 -> +2    5   M/5
+ basic     +7 -> +6    1   M
+ neutral   +7 -> +4    3   M/3
+ ratio A:B:N = M/5 : M : M/3 = 1/5:1:1/3
+            x15 -> 3 : 15 : 5       &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Equivalent weight is largest where the electron change is smallest, so the basic term (n = 1) must be the biggest number in the ratio. Only option (d) places the largest value on the basic (middle) slot. Option (b) 5 : 3 : 1 is simply the ratio of the three n-values written straight, the standard inversion trap for anyone who forgets that Eq is inversely proportional to n.</div>
+<div class="final">Answer: <b>(d) 3 : 15 : 5.</b></div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">H<sub>2</sub>O<sub>2</sub> disproportaionates into H<sub>2</sub>O and O<sub>2</sub>. The equivalent weight of H<sub>2</sub>O<sub>2</sub> in this reaction is<br>(a) 34 &nbsp; (b) 17 &nbsp; (c) 68 &nbsp; (d) 8.5</td><td class="topic">Equivalent weight of H2O2</td><td><a href="https://www.youtube.com/watch?v=dTaJy2RjAvU" target="_blank">H_2O_2 disproportionates into H_2O and O_2. The equivalent weight of H_2O_2 in this reaction is</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> 34</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In hydrogen peroxide H<sub>2</sub>O<sub>2</sub> oxygen is at the unusual value &minus;1. Disproportionation sends half of that oxygen down to &minus;2 (in H<sub>2</sub>O) and half up to 0 (in O<sub>2</sub>). Because the two branches are perfectly matched, exactly one electron is transferred per mole of H<sub>2</sub>O<sub>2</sub>, so n = 1 and the equivalent weight equals the full molar mass.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. wt = M / n, with n = (e<sup>&minus;</sup> transferred)/(total moles)</span> <span class="why">Here M(H<sub>2</sub>O<sub>2</sub>) = 34, and the pooled electron count over both branches fixes n.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. O.S. of O in H<sub>2</sub>O<sub>2</sub> = &minus;1 (peroxide linkage).</div>
+<div class="step">2. Reduction: O &minus;1 &rarr; &minus;2 (in H<sub>2</sub>O) gains 1e<sup>&minus;</sup> per O.</div>
+<div class="step">3. Oxidation: O &minus;1 &rarr; 0 (in O<sub>2</sub>) loses 1e<sup>&minus;</sup> per O.</div>
+<div class="step">4. Balanced equation: 2H<sub>2</sub>O<sub>2</sub> &rarr; 2H<sub>2</sub>O + O<sub>2</sub>.</div>
+<div class="step">5. 2e<sup>&minus;</sup> move over 2 moles of H<sub>2</sub>O<sub>2</sub>, so n = 2/2 = 1.</div>
+<div class="step">6. Eq. wt = M &divide; n = 34 &divide; 1 = <b>34</b>.</div>
+<pre>
+ O = -1 in H2O2
+   down -> H2O (-2) : +1e per O
+   up   -> O2  (0)  : -1e per O
+ 2 H2O2 -> 2 H2O + O2
+ e- moved = 2 , moles = 2 , n = 1
+ Eq = 34 / 1 = 34                   &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> A symmetric disproportionation (one atom up and one down by equal steps) always has n = 1, so Eq = M. The distractor 17 comes from wrongly using n = 2 (treating H<sub>2</sub>O<sub>2</sub> as a simple two-electron reductant, as in its reaction with KMnO<sub>4</sub>), which does not apply when it reacts with itself.</div>
+<div class="final">Answer: <b>(a) 34.</b></div></div></details></td></tr>
+</tbody></table></div></div>
+
+<h2>Level 6</h2>
+<div class="tablecard"><div class="scroll"><table>
+<thead><tr><th>#</th><th>Question</th><th>Topic</th><th>YouTube</th><th>Match</th><th class="ans-h">Answer</th></tr></thead>
+<tbody>
+<tr><td class="num">1</td><td class="q">In FeC<sub>2</sub>O<sub>4</sub> &rarr; Fe<sup>3+</sup> + CO<sub>2</sub>; the equivalent mass of FeC<sub>2</sub>O<sub>4</sub> is ________</td><td class="topic">Equivalent mass of ferrous oxalate</td><td><a href="https://www.youtube.com/watch?v=i_-O0IccTgw" target="_blank">Equivalent weight of FeC2O4 in the change: FeC2O4 Fe3+ + CO2</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">48</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Ferrous oxalate FeC<sub>2</sub>O<sub>4</sub> is a double reductant: the Fe<sup>2+</sup> is oxidised to Fe<sup>3+</sup>, and at the same time the oxalate carbon is oxidised to CO<sub>2</sub>. Both electron losses add into one n-factor for the whole formula unit &mdash; exactly the case the passage works out as 1 + 1&times;2 = 3.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. mass = M / n, with n = e<sup>&minus;</sup> lost by Fe + e<sup>&minus;</sup> lost by both C</span> <span class="why">Every oxidisable centre in the formula contributes to the same single n-factor; this is the very example (Example 2) that the Level-6 passage works out as 1 + 1&times;2 = 3.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Molar mass: Fe 56 + 2C (2&times;12 = 24) + 4O (4&times;16 = 64) = <b>144</b>.</div>
+<div class="step">2. Iron oxidation: Fe<sup>2+</sup> &rarr; Fe<sup>3+</sup> loses 1e<sup>&minus;</sup>.</div>
+<div class="step">3. In the oxalate ion C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup> each carbon is +3; on going to CO<sub>2</sub> (C = +4) each loses 1e<sup>&minus;</sup>.</div>
+<div class="step">4. There are two such carbons, so they lose 2e<sup>&minus;</sup> between them.</div>
+<div class="step">5. Total electrons lost by one FeC<sub>2</sub>O<sub>4</sub> = 1 + 2 = <b>3</b>, so n = 3.</div>
+<div class="step">6. Eq. mass = M &divide; n = 144 &divide; 3 = <b>48</b>.</div>
+<div class="step">7. One equivalent of ferrous oxalate thus releases one mole of electrons, matching 48 g.</div>
+<pre>
+ M(FeC2O4) = 56 + 2(12) + 4(16) = 144
+ Fe2+ -> Fe3+            : 1 e-
+ 2C(+3) -> 2CO2(+4)     : 2 e-
+ n = 1 + 2 = 3
+ Eq = 144 / 3 = 48                  &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Do not stop at the iron: in ferrous oxalate the oxalate is redox-active too, which is why it needs more KMnO<sub>4</sub> than a plain ferrous salt. Counting only Fe gives n = 1 (Eq 144) and only the two carbons gives n = 2 (Eq 72); the full molecule needs both, so n = 3 and the equivalent mass is exactly 48.</div>
+<div class="final">Answer: <b>48</b> (n-factor 3, M = 144).</div></div></details></td></tr>
+<tr><td class="num">2</td><td class="q">In the following unbalanced redox reaction,<br>Cu<sub>3</sub>P + Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> &rarr; Cu<sup>2+</sup> + H<sub>3</sub>PO<sub>4</sub> + Cr<sup>3+</sup>,<br>the equivalent weight of H<sub>3</sub>PO<sub>4</sub> is<br>(a) M/3 &nbsp; (b) M/6 &nbsp; (c) M/7 &nbsp; (d) M/8</td><td class="topic">Equivalent weight of H3PO4</td><td><a href="https://www.youtube.com/watch?v=iyiRHPqi1zg" target="_blank">In the following unbalanced redox reaction, Cu_(3)P+Cr_(2)O_(7)^(2-) Cu^(2+)+H_(3)PO_(4)+Cr^(3+)</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> M/8</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The equivalent weight of a product is set by the oxidation-state change of its own characteristic element across the reaction, not by the whole reactant molecule. Here H<sub>3</sub>PO<sub>4</sub> carries the phosphorus that started in Cu<sub>3</sub>P, so only phosphorus's change counts when you assign the equivalent weight of H<sub>3</sub>PO<sub>4</sub>.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq. wt(H<sub>3</sub>PO<sub>4</sub>) = M / n, with n = |&Delta;O.S. of P|</span> <span class="why">The copper's oxidation belongs to the Cu<sup>2+</sup> product, not to H<sub>3</sub>PO<sub>4</sub>.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. In Cu<sub>3</sub>P copper takes its usual +1, so for phosphorus: 3(+1) + P = 0 &rarr; P = <b>&minus;3</b> (it is a phosphide).</div>
+<div class="step">2. In the product H<sub>3</sub>PO<sub>4</sub>: 3(+1) + P + 4(&minus;2) = 0 &rarr; P = +5.</div>
+<div class="step">3. Phosphorus's change across the reaction: &minus;3 &rarr; +5 is a loss of <b>8e<sup>&minus;</sup></b>.</div>
+<div class="step">4. The equivalent weight of a product tracks only its own element, so n(H<sub>3</sub>PO<sub>4</sub>) = 8.</div>
+<div class="step">5. For context the whole Cu<sub>3</sub>P loses 3 (3 Cu, +1&rarr;+2) + 8 (P) = 11e<sup>&minus;</sup>, but that 11 is Cu<sub>3</sub>P's own n-factor, not H<sub>3</sub>PO<sub>4</sub>'s.</div>
+<div class="step">6. Eq. wt(H<sub>3</sub>PO<sub>4</sub>) = M &divide; n = M &divide; 8 = <b>M/8</b>.</div>
+<pre>
+ Cu3P : Cu = +1  =>  P = -3
+ H3PO4 : P = +5
+ P change : -3 -> +5 = 8 e-
+ n(H3PO4) = 8
+ Eq = M / 8                         &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Assign the equivalent weight of a species by the one element it actually owns, ignoring the partner reactant entirely. The whole Cu<sub>3</sub>P loses 11 e<sup>&minus;</sup>, which is why the mixed options (c) M/7 and (a) M/3 tempt you; but H<sub>3</sub>PO<sub>4</sub> alone tracks phosphorus's clean 8-electron jump from &minus;3 to +5, so its equivalent weight is M/8.</div>
+<div class="final">Answer: <b>(d) M/8.</b></div></div></details></td></tr>
+<tr><td class="num">3</td><td class="q">In a reaction Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> was reduced to Cr<sup>3+</sup> in acid medium. The concentration of 0.1 M Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> expressed in equivalent litre<sup>&minus;1</sup> is ________</td><td class="topic">Normality of dichromate</td><td><a href="https://www.youtube.com/watch?v=iTEqlix6fgo" target="_blank">What would be the normality of a 0.1 M K_(2)Cr_(2)O_(7) solution used as an oxidizing agent</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">0.6</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Concentration in equivalents per litre is the normality, and expressing a given molarity that way simply means multiplying by the n-factor. The n-factor is not a property of the salt alone but of the reaction it undergoes: here dichromate is reduced to Cr<sup>3+</sup> in acid, so two chromium atoms each fall from +6 to +3, giving a fixed six-electron change per Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Normality N = Molarity &times; n</span> <span class="why">One equivalent is the amount that transfers one mole of electrons, so n is exactly the electrons gained per Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> on reduction in acid.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Reduction half-reaction: Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup> + 14H<sup>+</sup> + 6e<sup>&minus;</sup> &rarr; 2Cr<sup>3+</sup> + 7H<sub>2</sub>O.</div>
+<div class="step">2. Each Cr: +6 &rarr; +3 gains 3e<sup>&minus;</sup>.</div>
+<div class="step">3. There are two Cr per ion, so n = 2 &times; 3 = <b>6</b> (the half-reaction shows 6e<sup>&minus;</sup> directly).</div>
+<div class="step">4. The stated molarity is 0.1 M.</div>
+<div class="step">5. Apply N = M &times; n = 0.1 &times; 6.</div>
+<div class="step">6. N = <b>0.6</b> equivalent L<sup>&minus;1</sup>.</div>
+<div class="step">7. So 1 L of this solution carries 0.6 mol of electron-accepting capacity.</div>
+<pre>
+ Cr2O7^2- + 14H+ + 6e- -> 2Cr3+ + 7H2O
+ each Cr : +6 -> +3  (3 e-)
+ n = 2 x 3 = 6
+ N = M x n = 0.1 x 6
+ N = 0.6 eq/L                       &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Dichromate in acid is always a six-electron oxidant (n = 6), so its normality is six times its molarity, independent of the volume taken. Forgetting that there are two chromiums and using n = 3 halves the answer to 0.3, the standard slip; writing the full half-reaction, with its explicit 6e<sup>&minus;</sup>, guards against it.</div>
+<div class="final">Answer: <b>0.6</b> equivalent L<sup>&minus;1</sup> (n = 6).</div></div></details></td></tr>
+<tr><td class="num">4</td><td class="q">[Passage (4-6)] Equivalent mass = (Molecular mass/Atomic mass) &divide; n-factor. n-factor is very important in redox as well as non-redox reactions. With the help of n-factor we can predict the molar ratio of the reactant species taking part in reactions. The reciprocal of n-factor's ratio of the reactants is the molar ratio of the reactants. In general n-factor of acid/base is number of moles of H<sup>+</sup>/OH<sup>&minus;</sup> furnished per mole of acid/base. n-factor of a reactant is number of moles of electrons lost or gained per mole of reactant.<br><b>Example 1:</b> (1) In acidic medium: KMnO<sub>4</sub> (n = 5) &rarr; Mn<sup>2+</sup>; (2) In neutral medium: KMnO<sub>4</sub> (n = 3) &rarr; Mn<sup>2+</sup>; (3) In basic medium: KMnO<sub>4</sub> (n = 1) &rarr; Mn<sup>6+</sup>.<br><b>Example 2:</b> FeC<sub>2</sub>O<sub>4</sub> &rarr; Fe<sup>3+</sup> + 2CO<sub>2</sub>. Total number of moles of e<sup>&minus;</sup> lost by 1 mole of FeC<sub>2</sub>O<sub>4</sub> = 1 + 1&times;2 &rArr; 3.<br>n-factor of Ba(MnO<sub>4</sub>)<sub>2</sub> in acidic medium is :<br>(a) 2 &nbsp; (b) 6 &nbsp; (c) 10 &nbsp; (d) None of these</td><td class="topic">n-factor of Ba(MnO4)2</td><td><a href="https://www.youtube.com/watch?v=OONvUV-7SuM" target="_blank">What will be n-factor for Ba(MnO_(4))_(2) in acidic medium? (Where it behaves as oxidant)</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 10</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Barium permanganate Ba(MnO<sub>4</sub>)<sub>2</sub> contains <b>two</b> permanganate units per formula. In acid each Mn goes +7 &rarr; +2 (n = 5, exactly as Example 1 of the passage states for KMnO<sub>4</sub>), and because there are two of them the per-formula n-factor doubles. Barium itself is a spectator and adds nothing.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n(salt) = (e<sup>&minus;</sup> per MnO<sub>4</sub><sup>&minus;</sup>) &times; (number of MnO<sub>4</sub><sup>&minus;</sup> units)</span> <span class="why">n-factor counts the total electrons gained per mole of the whole compound.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Ba is +2 and does not change its oxidation state, so the redox lives entirely on the two MnO<sub>4</sub><sup>&minus;</sup>.</div>
+<div class="step">2. In acidic medium each Mn goes +7 &rarr; +2, gaining 5e<sup>&minus;</sup> (the passage's Example 1, case 1).</div>
+<div class="step">3. The formula Ba(MnO<sub>4</sub>)<sub>2</sub> contains 2 permanganate units (note the subscript 2).</div>
+<div class="step">4. Total electrons gained per formula = 5 &times; 2 = <b>10</b>.</div>
+<div class="step">5. Hence the n-factor of Ba(MnO<sub>4</sub>)<sub>2</sub> in acid is 10, and its equivalent mass would be M/10.</div>
+<div class="step">6. This matches option (c); (a) 2 and (b) 6 drop either the count 2 or the acidic depth 5.</div>
+<pre>
+ Ba(MnO4)2 : 2 permanganate units
+ acidic : Mn +7 -> +2  = 5 e- each
+ units = 2
+ n = 5 x 2 = 10                     &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Always multiply the single-ion n by the number of redox units in the formula. Answering 5 counts only one MnO<sub>4</sub><sup>&minus;</sup> and forgets the subscript 2; answering 2 just reports the count itself. Only (c) 10 uses both the reduction depth (5) and the multiplicity (2), which is why "None of these" is a trap here.</div>
+<div class="final">Answer: <b>(c) 10.</b></div></div></details></td></tr>
+<tr><td class="num">5</td><td class="q">[Passage (4-6)] Equivalent mass = (Molecular mass/Atomic mass) &divide; n-factor. n-factor is very important in redox as well as non-redox reactions. With the help of n-factor we can predict the molar ratio of the reactant species taking part in reactions. The reciprocal of n-factor's ratio of the reactants is the molar ratio of the reactants. In general n-factor of acid/base is number of moles of H<sup>+</sup>/OH<sup>&minus;</sup> furnished per mole of acid/base. n-factor of a reactant is number of moles of electrons lost or gained per mole of reactant.<br><b>Example 1:</b> (1) In acidic medium: KMnO<sub>4</sub> (n = 5) &rarr; Mn<sup>2+</sup>; (2) In neutral medium: KMnO<sub>4</sub> (n = 3) &rarr; Mn<sup>2+</sup>; (3) In basic medium: KMnO<sub>4</sub> (n = 1) &rarr; Mn<sup>6+</sup>.<br><b>Example 2:</b> FeC<sub>2</sub>O<sub>4</sub> &rarr; Fe<sup>3+</sup> + 2CO<sub>2</sub>. Total number of moles of e<sup>&minus;</sup> lost by 1 mole of FeC<sub>2</sub>O<sub>4</sub> = 1 + 1&times;2 &rArr; 3.<br>For the reaction,<br>Fe<sub>0.95</sub>O (molar mass = M) &rarr; Fe<sub>2</sub>O<sub>3</sub>,<br>what is the eq. mass of Fe<sub>0.95</sub>O?.<br>(a) M/0.85 &nbsp; (b) M/0.95 &nbsp; (c) M/0.8075 &nbsp; (d) None of these</td><td class="topic">Equivalent mass of wustite</td><td><a href="https://www.youtube.com/watch?v=tvSGAOvvmZY" target="_blank">Equivalent Mass and n-Factor | JEE Main 2027 Chemistry (English) | RankDeterminant</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(a)</span> M/0.85</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In non-stoichiometric wustite Fe<sub>0.95</sub>O some iron sits as Fe<sup>3+</sup> to make up for the missing cations, but the crystal as a whole must stay electrically neutral, so the 0.95 iron atoms together carry exactly +2 (balancing one O<sup>2&minus;</sup>). On oxidation to Fe<sub>2</sub>O<sub>3</sub> every iron becomes +3. The n-factor is the <b>total</b> charge gained per formula unit, which neatly sidesteps the awkward fractional average oxidation state.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n = (total Fe charge in product) &minus; (total Fe charge in reactant)</span> <span class="why">Counting net electrons lost per formula unit is cleaner than using the average O.S. of +2/0.95.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Neutrality of Fe<sub>0.95</sub>O: total Fe charge = +2 (one O is &minus;2).</div>
+<div class="step">2. In the product Fe<sub>2</sub>O<sub>3</sub> every Fe is +3.</div>
+<div class="step">3. The same 0.95 Fe atoms end at +3 each: final total Fe charge = 0.95 &times; 3 = 2.85.</div>
+<div class="step">4. Electrons lost per formula = 2.85 &minus; 2.00 = <b>0.85</b> = n.</div>
+<div class="step">5. Eq. mass = M &divide; n = M &divide; 0.85 = <b>M/0.85</b>.</div>
+<div class="step">6. The messy alternative via average O.S. gives the same 0.85 but invites arithmetic slips.</div>
+<pre>
+ Fe0.95O neutral : Fe total = +2
+ product Fe2O3   : every Fe = +3
+ final Fe charge = 0.95 x 3 = 2.85
+ e- lost = 2.85 - 2.00 = 0.85 = n
+ Eq = M / 0.85                      &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Use the net change in total cation charge, not the fractional average O.S. (+2/0.95 &asymp; 2.105). The trap M/0.95 comes from wrongly using the atom count 0.95 as the n-factor, and M/0.8075 from multiplying 0.95&times;0.85; the true n is just the 0.85 electrons actually released per formula unit.</div>
+<div class="final">Answer: <b>(a) M/0.85.</b></div></div></details></td></tr>
+<tr><td class="num">6</td><td class="q">[Passage (4-6)] Equivalent mass = (Molecular mass/Atomic mass) &divide; n-factor. n-factor is very important in redox as well as non-redox reactions. With the help of n-factor we can predict the molar ratio of the reactant species taking part in reactions. The reciprocal of n-factor's ratio of the reactants is the molar ratio of the reactants. In general n-factor of acid/base is number of moles of H<sup>+</sup>/OH<sup>&minus;</sup> furnished per mole of acid/base. n-factor of a reactant is number of moles of electrons lost or gained per mole of reactant.<br><b>Example 1:</b> (1) In acidic medium: KMnO<sub>4</sub> (n = 5) &rarr; Mn<sup>2+</sup>; (2) In neutral medium: KMnO<sub>4</sub> (n = 3) &rarr; Mn<sup>2+</sup>; (3) In basic medium: KMnO<sub>4</sub> (n = 1) &rarr; Mn<sup>6+</sup>.<br><b>Example 2:</b> FeC<sub>2</sub>O<sub>4</sub> &rarr; Fe<sup>3+</sup> + 2CO<sub>2</sub>. Total number of moles of e<sup>&minus;</sup> lost by 1 mole of FeC<sub>2</sub>O<sub>4</sub> = 1 + 1&times;2 &rArr; 3.<br>In the reaction,<br>xVO + yFe<sub>2</sub>O<sub>3</sub> &rarr; FeO + V<sub>2</sub>O<sub>5</sub>,<br>what is the value of x and y respectively ?<br>(a) 1, 1 &nbsp; (b) 2, 3 &nbsp; (c) 3, 2 &nbsp; (d) None of these</td><td class="topic">Stoichiometric coefficients x and y</td><td><a href="https://www.youtube.com/watch?v=p-ViMB5M7O0" target="_blank">In the reaction VO+Fe_(2)O_(3) FeO+V_(2)O_(5), the eq.wt. of V_(2)O_(5) is equal to its</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(b)</span> 2, 3</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The passage's rule is that the reciprocal of the reactants' n-factor ratio is their mole ratio. VO is oxidised (V +2 &rarr; +5) and Fe<sub>2</sub>O<sub>3</sub> is reduced (Fe +3 &rarr; +2), so simply matching electrons lost to electrons gained fixes the coefficients x and y without balancing the whole equation first.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">x &times; n(VO) = y &times; n(Fe<sub>2</sub>O<sub>3</sub>) &rArr; x : y = n(Fe<sub>2</sub>O<sub>3</sub>) : n(VO)</span> <span class="why">Total electrons lost by the reductant must equal total electrons gained by the oxidant.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. VO &rarr; V<sub>2</sub>O<sub>5</sub>: V +2 &rarr; +5 loses 3e<sup>&minus;</sup> per V; so n(VO) = 3.</div>
+<div class="step">2. Fe<sub>2</sub>O<sub>3</sub> &rarr; FeO: each of 2 Fe +3 &rarr; +2 gains 1e<sup>&minus;</sup>; so n(Fe<sub>2</sub>O<sub>3</sub>) = 2.</div>
+<div class="step">3. Electron balance: 3x = 2y.</div>
+<div class="step">4. Smallest integer solution: x = 2, y = 3.</div>
+<div class="step">5. Mole ratio x : y = n(Fe<sub>2</sub>O<sub>3</sub>) : n(VO) = 2 : 3, consistent with step 4.</div>
+<div class="step">6. Check: 2VO + 3Fe<sub>2</sub>O<sub>3</sub> &rarr; 6FeO + V<sub>2</sub>O<sub>5</sub>; O = 2+9 = 11 on each side.</div>
+<pre>
+ VO : V +2 -> +5  = 3 e- lost
+ Fe2O3 : 2Fe +3 -> +2 = 2 e- gained
+ 3x = 2y  ->  x = 2 , y = 3
+ 2VO + 3Fe2O3 -> 6FeO + V2O5        &lt;-- answer
+ O: 2+9 = 11  = 6+5 = 11  (OK)
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Just set electrons-lost = electrons-gained: 3x = 2y gives x : y = 2 : 3 instantly, with no full balancing required. Option (c) 3, 2 is the reversed pair, the classic trap from swapping which reactant is oxidised and which is reduced; remember vanadium goes up (+2 to +5) and iron comes down (+3 to +2).</div>
+<div class="final">Answer: <b>(b) x = 2, y = 3.</b></div></div></details></td></tr>
+<tr><td class="num">7</td><td class="q">The equivalent weight of Br<sub>2</sub> is 96 in the following disproportionation reaction<br>Br<sub>2</sub> + OH<sup>&minus;</sup> &rarr; Br<sup>&minus;</sup> + H<sub>2</sub>O + ? (Oxidized product)<br>The oxidation state of Br in the oxidized product is (Br = 80)</td><td class="topic">Oxidation state of oxidized Br</td><td><a href="https://www.youtube.com/watch?v=baHoB5XAoEo" target="_blank">Equivalent weight of Br2 is 96 in the following disproportionation reaction: Br2+OH- Br-+H2O</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval">+5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Br<sub>2</sub> (M = 160) disproportionates in alkali: part becomes Br<sup>&minus;</sup> (each Br gains 1e<sup>&minus;</sup>) and part rises to an oxidised product of unknown state +x. The equivalent weight 96 that is quoted pins the overall n-factor, and from that single number the oxidation state x drops out.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n = 160/Eq = 160/96 = 5/3; and for this disproportionation n = 2x/(x+1)</span> <span class="why">n = (total e<sup>&minus;</sup> moved)/(moles Br<sub>2</sub>); x reduced Br pair with 1 oxidised Br of charge +x.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. From Eq = M/n: n = 160/96 = 5/3.</div>
+<div class="step">2. Reduced Br: 0 &rarr; &minus;1 gains 1e<sup>&minus;</sup>; oxidised Br: 0 &rarr; +x loses x e<sup>&minus;</sup>.</div>
+<div class="step">3. For charge balance x reduced Br accompany 1 oxidised Br, giving (x+1) Br atoms = (x+1)/2 moles Br<sub>2</sub>.</div>
+<div class="step">4. Electrons moved = x, so n = x &divide; [(x+1)/2] = 2x/(x+1).</div>
+<div class="step">5. Set 2x/(x+1) = 5/3 &rArr; 6x = 5(x+1) = 5x + 5.</div>
+<div class="step">6. Hence x = <b>5</b>, the oxidised product being BrO<sub>3</sub><sup>&minus;</sup>.</div>
+<pre>
+ Eq = M/n : n = 160/96 = 5/3
+ reduce Br : 0 -> -1   (+1e each)
+ oxidise Br: 0 -> +x   (-x e each)
+ n = 2x/(x+1) = 5/3
+ 6x = 5x + 5  ->  x = +5            &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Work backwards from the fractional n: a value like 5/3 (neither 1 nor a whole number) is the tell-tale fingerprint of a disproportionation. Solving 2x/(x+1) = 5/3 lands on +5, the bromate ion BrO<sub>3</sub><sup>&minus;</sup>, which is the usual oxidised product of Br<sub>2</sub> in hot alkali (cold alkali would give the +1 hypobromite instead).</div>
+<div class="final">Answer: <b>+5</b> (oxidised product BrO<sub>3</sub><sup>&minus;</sup>).</div></div></details></td></tr>
+<tr><td class="num">8</td><td class="q">In the following redox reactions, NH<sub>3</sub> appears either in reactant or product. In which case, the equivalent weight of NH<sub>3</sub> is maximum ?<br>(a) N<sub>2</sub> + 3H<sub>2</sub> &rarr; 2NH<sub>3</sub> &nbsp; (b) 4NH<sub>3</sub> + 5O<sub>2</sub> &rarr; 4NO + 6H<sub>2</sub>O &nbsp; (c) 2NH<sub>3</sub> + 2Na &rarr; 2NaNH<sub>2</sub> + H<sub>2</sub> &nbsp; (d) Equal in all cases</td><td class="topic">Maximum equivalent weight of NH3</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(c)</span> 2NH₃ + 2Na → 2NaNH₂ + H₂</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> The equivalent weight of NH<sub>3</sub> is 17/n, so it is largest where n is smallest. The n-factor is the electron change on nitrogen, or &mdash; when nitrogen's state does not move &mdash; the H<sup>+</sup> that NH<sub>3</sub> furnishes. The biggest equivalent weight therefore comes from the smallest redox role, which turns out to be the case where N does not change at all.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq = 17 / n, with n = |&Delta;O.S. of N| (or H<sup>+</sup> released if N is unchanged)</span> <span class="why">Compare n across the three reactions; the smallest n gives the largest Eq.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (a) N<sub>2</sub> + 3H<sub>2</sub> &rarr; 2NH<sub>3</sub>: N 0 &rarr; &minus;3, n = 3, Eq = 17/3 &asymp; 5.67.</div>
+<div class="step">2. (b) 4NH<sub>3</sub> + 5O<sub>2</sub> &rarr; 4NO + 6H<sub>2</sub>O: N &minus;3 &rarr; +2, n = 5, Eq = 17/5 = 3.4.</div>
+<div class="step">3. (c) 2NH<sub>3</sub> + 2Na &rarr; 2NaNH<sub>2</sub> + H<sub>2</sub>: in NaNH<sub>2</sub> the amide N is still &minus;3.</div>
+<div class="step">4. So nitrogen does not change; the redox is Na 0 &rarr; +1 and H<sup>+</sup> &rarr; (1/2)H<sub>2</sub>.</div>
+<div class="step">5. NH<sub>3</sub> merely donates one H, acting as an acid with n = 1, so Eq = 17.</div>
+<div class="step">6. Comparing 5.67, 3.4 and 17, the largest equivalent weight is case (c).</div>
+<pre>
+ (a) N: 0 -> -3   n=3   Eq=17/3=5.67
+ (b) N:-3 -> +2   n=5   Eq=17/5=3.4
+ (c) N:-3 -> -3   n=1   Eq=17/1=17   &lt;-- max
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> The biggest equivalent weight means the smallest n. In (c) nitrogen's oxidation state never moves (NH<sub>3</sub> &rarr; NH<sub>2</sub><sup>&minus;</sup>, both &minus;3), so NH<sub>3</sub> behaves only as a very weak acid (n = 1) and keeps its full mass of 17.</div>
+<div class="final">Answer: <b>(c)</b> 2NH<sub>3</sub> + 2Na &rarr; 2NaNH<sub>2</sub> + H<sub>2</sub>.</div></div></details></td></tr>
+<tr><td class="num">9</td><td class="q">Equivalent masses of NH<sub>3</sub> in the reactions are :<br>(i) 4NH<sub>3</sub> + 5O<sub>2</sub> &rarr; 4NO + 6H<sub>2</sub>O,<br>(ii) 2NH<sub>3</sub> &rarr; N<sub>2</sub> + 3H<sub>2</sub><br>(a) 5 : 6 &nbsp; (b) 6 : 5 &nbsp; (c) 5 : 3 &nbsp; (d) 3 : 5</td><td class="topic">Ratio equivalent masses NH3</td><td><a href="https://www.youtube.com/watch?v=JqAvvr_6y6M" target="_blank">Redox Reactions (Mole Concept-2) | Class 11 (L4) | n factor for redox Reaction | Equivalent Weight</a></td><td><span class="badge sim">&#128993; Similar</span></td><td class="ans"><span class="ansval"><span class="lt">(d)</span> 3 : 5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> Both reactions oxidise the nitrogen of NH<sub>3</sub>, but carry it to different final oxidation states, so their n-factors differ. Since equivalent mass is 17/n (the molar mass of NH<sub>3</sub> is 17), the ratio of the two equivalent masses is the inverse of the ratio of the nitrogen electron changes &mdash; the n-values flip over when you turn them into equivalents, and that single flip is the whole question.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">Eq = 17/n; so Eq(i):Eq(ii) = (1/n<sub>i</sub>):(1/n<sub>ii</sub>) = n<sub>ii</sub>:n<sub>i</sub></span> <span class="why">Equivalent mass is inversely proportional to the n-factor, so the larger n gives the smaller equivalent mass.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. (i) 4NH<sub>3</sub> + 5O<sub>2</sub> &rarr; 4NO + 6H<sub>2</sub>O: nitrogen goes &minus;3 &rarr; +2, a change of 5, so n = 5 and Eq = 17/5.</div>
+<div class="step">2. (ii) 2NH<sub>3</sub> &rarr; N<sub>2</sub> + 3H<sub>2</sub>: nitrogen goes &minus;3 &rarr; 0, a change of 3, so n = 3 and Eq = 17/3.</div>
+<div class="step">3. Form the required ratio Eq(i) : Eq(ii) = (17/5) : (17/3).</div>
+<div class="step">4. Cancel the common factor 17: = 1/5 : 1/3.</div>
+<div class="step">5. Multiply both terms by 15 to clear the fractions: = 3 : 5.</div>
+<div class="step">6. So the equivalent masses are in the ratio <b>3 : 5</b>.</div>
+<div class="step">7. Check: reaction (i) has the bigger n (5), so it correctly gets the smaller share (3).</div>
+<pre>
+ (i)  N -3 -> +2  n=5   Eq = 17/5
+ (ii) N -3 ->  0  n=3   Eq = 17/3
+ ratio = (17/5):(17/3) = (1/5):(1/3)
+       x15 -> 3 : 5                 &lt;-- answer
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Equivalent mass flips the n-factors: n = 5 and 3 give an Eq ratio of 3 : 5, not 5 : 3. Option (c) 5 : 3 is the n-factor ratio itself left un-inverted, the planted trap for students who skip the reciprocal; the oxygen and hydrogen coefficients (5 : 6 etc.) in (a) and (b) are pure red herrings.</div>
+<div class="final">Answer: <b>(d) 3 : 5.</b></div></div></details></td></tr>
+<tr><td class="num">10</td><td class="q">Which of the following are correct about the reaction,<br>FeS<sub>2</sub> + O<sub>2</sub> &rarr; Fe<sub>2</sub>O<sub>3</sub> + SO<sub>2</sub> [MULTIPLE CORRECT]<br>(a) Eq. wt. of FeS<sub>2</sub> is M/11 &nbsp; (b) Eq. wt. of SO<sub>2</sub> is M/5 &nbsp; (c) S has &minus;2 oxidation state in FeS<sub>2</sub> &nbsp; (d) 1 mole of FeS<sub>2</sub> requires 7/4 mole of O<sub>2</sub> .</td><td class="topic">Correct statements about FeS2 roasting</td><td><a href="https://www.youtube.com/watch?v=yrdCafGpkE4" target="_blank">Equivalent weight of FeS2 in the half reaction, FeS2 Fe2O3 + SO2 is:</a></td><td><span class="badge exact">&#128994; Exact</span></td><td class="ans"><span class="ansval"><span class="lt">(a), (b)</span> Eq FeS₂ = M/11; Eq SO₂ = M/5</span></td></tr>
+<tr class="solnrow"><td colspan="6"><details class="soln"><summary></summary><div class="solnbody"><div class="seg"><span class="lbl">Concept</span> In pyrite FeS<sub>2</sub> iron is +2 and the disulphide unit holds sulphur at &minus;1 (there is an S&ndash;S bond), not &minus;2. On roasting, both Fe and S are oxidised, so the whole formula carries a large n-factor, while each product's equivalent weight tracks only its own element. Testing each statement against these facts settles the multiple-correct choice.</div>
+<div class="seg"><span class="lbl">Key relation</span> <span class="eq">n(FeS<sub>2</sub>) = &Delta;(Fe) + 2&times;&Delta;(S); Eq = M/n</span> <span class="why">All oxidisable centres add into one n-factor, and the balanced equation fixes the O<sub>2</sub> demand.</span></div>
+<div class="seg"><span class="lbl">Solution</span>
+<div class="step">1. Oxidation states in FeS<sub>2</sub>: Fe = +2, each S = &minus;1, so statement (c) claiming &minus;2 is <b>wrong</b>.</div>
+<div class="step">2. Fe +2 &rarr; +3 loses 1e<sup>&minus;</sup>; each S &minus;1 &rarr; +4 (SO<sub>2</sub>) loses 5e<sup>&minus;</sup>, two S give 10.</div>
+<div class="step">3. n(FeS<sub>2</sub>) = 1 + 10 = 11, so Eq(FeS<sub>2</sub>) = <b>M/11</b>: (a) is <b>correct</b>.</div>
+<div class="step">4. For SO<sub>2</sub>, its sulphur rose &minus;1 &rarr; +4 (5e<sup>&minus;</sup>), so Eq(SO<sub>2</sub>) = <b>M/5</b>: (b) is <b>correct</b>.</div>
+<div class="step">5. Balanced roasting: 4FeS<sub>2</sub> + 11O<sub>2</sub> &rarr; 2Fe<sub>2</sub>O<sub>3</sub> + 8SO<sub>2</sub>.</div>
+<div class="step">6. Thus 1 mol FeS<sub>2</sub> needs 11/4 O<sub>2</sub>, not 7/4: (d) is <b>wrong</b>. Correct set: (a), (b).</div>
+<pre>
+ FeS2 : Fe +2 , S -1 (not -2)
+ Fe +2->+3 : 1e ; 2S -1->+4 : 10e
+ n = 11  -> Eq(FeS2) = M/11   (a) OK
+ SO2 : S -1->+4 (5e) -> M/5   (b) OK
+ 4FeS2 + 11O2 -> 2Fe2O3 + 8SO2
+ per FeS2 : 11/4 O2 , not 7/4  (d) NO
+</pre>
+</div>
+<div class="trick"><span class="lbl">&#9889; JEE Trick</span> Pyrite sulphur is &minus;1 (a peroxide-like S&ndash;S link), which kills (c); and the roasting needs 11/4 O<sub>2</sub> per FeS<sub>2</sub> from 4FeS<sub>2</sub> + 11O<sub>2</sub>, which kills (d). Only the two equivalent-weight statements (a) and (b) survive the check.</div>
+<div class="final">Answer: <b>(a) and (b).</b></div></div></details></td></tr>
+</tbody></table></div></div>
+
+<div class="note" style="margin-top:22px">
+  <b>Answer key.</b> Answers are keyed to the <b>ICAD C-V3 Answer Key</b> (book page 352) and every one was independently re-worked from first principles; every entry reconciles with the working. Board-level questions are descriptive and the key prints no answer for them, so their answers are worked here.<br>
+  <b>Videos.</b> Every video ID was verified live against the YouTube oEmbed endpoint before publishing &mdash; 59 rows, 25 exact matches and 34 closest-concept matches, drawn from 37 distinct videos.
+</div>
+
+<footer>ICAD &middot; ChemV3 &middot; Module C8 &middot; Lesson L5 &mdash; Redox Reaction &middot; book pages 208&ndash;214 &middot; 59 questions &middot; 59 worked solutions</footer>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('ansBtn');
+  btn.addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-ans');
+    btn.textContent = on ? '🙈 Hide Answers' : '🔑 Show Answers';
+  });
+  // click a single blurred answer to reveal just that one
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if (t && t.classList && t.classList.contains('warn')) return;
+    var host = t && t.closest ? t.closest('.ansval') : null;
+    if (host && !document.body.classList.contains('show-ans')){
+      host.classList.toggle('revealed');
+    }
+  });
+})();
+</script>
+</body>
+</html>

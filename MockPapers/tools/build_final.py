@@ -35,7 +35,7 @@ nat = lambda c: [int(t) if t.isdigit() else t for t in re.findall(r"\d+|\D+", c)
 
 # ---- the master sheet: every set's codes (for the exam prior) and its verified key text
 master = io.open(os.path.join(MP, "%s-Mock-Sets.html" % EXAM), encoding="utf-8").read()
-ANS = dict(CELL.findall(master))
+ANS = dict.fromkeys(re.findall(r'<span class="code">([^<]+)</span>', master))   # CELL missed keys holding <sub>
 
 # the printed papers' key is build_questions.ans() (book key + KEY_FIX); use it, not the grid text.
 # A KEY_FIX carrying a warning means the book key itself is wrong - the "miss" may have been right
@@ -103,14 +103,17 @@ def quotas(codes, subj, n=25):
 # ---- Strong Box / PYQ. CATs lift verbatim from the Strong Box of their own chapters (33 of 525
 # questions in seven past ICAD exams, Level 7-11 as often as the PYQ section) and from PYQs, so a CAT
 # Final carries SBMIX[subject] of them besides the misses: book-checked, never in a mock set.
-SBMIX = {"CAT6": {"P": 7, "C": 6, "M": 7}}.get(EXAM, {})
+# An RT is cumulative and repeats past ICAD papers (real RT-4: 16 of 75), so an RT Final's fresh share
+# also draws unseen past-ICAD questions (X = <CH>XV<EXAM>Q codes).
+SBMIX = {"CAT6": {"P": 7, "C": 6, "M": 7}, "RT5": {"P": 7, "C": 7, "M": 7}}.get(EXAM, {})
 META = g["META"]
 # what kind each of those is: L = SB Level 7-11, S = SB PYQ section, T = JEE-PYQ-tagged lecture row.
 # The 33 SB questions in past ICAD papers were 26 L / 7 S, and 17 of their 39 JEE PYQs sat in lecture
 # exercises (2026-10-23) - so from Final-B on, the mix is fixed per subject instead of left to sbscore
 KINDMIX = {("CAT6", "B"): {"P": {"L": 3, "S": 2, "T": 2}, "C": {"L": 4, "S": 1, "T": 1},
-                           "M": {"L": 5, "S": 1, "T": 1}}}.get((EXAM, WHICH), {})
-KIND = lambda c: "T" if not LEC(c).endswith("SB") else "S" if META[c]["sec"] == "PYQ" else "L"
+                           "M": {"L": 5, "S": 1, "T": 1}},
+           **{("RT5", w): {s: {"X": 3, "L": 2, "S": 1, "T": 1} for s in "PCM"} for w in "AB"}}.get((EXAM, WHICH), {})
+KIND = lambda c: "X" if LEC(c).endswith("X") else "T" if not LEC(c).endswith("SB") else "S" if META[c]["sec"] == "PYQ" else "L"
 BOOKCH = {re.match(r"[PCM]\d+[A-D]?", c).group(0) for c in ANS}          # M8D, not M8
 def secnorm(s):
     s = s.upper(); m = re.search(r"LEVEL[\s-]*(\d+)", s)
@@ -123,11 +126,21 @@ for ch in BOOKCH:
 
 def sbscore(c):
     p, yr = TAG.get(c, ""), re.search(r"(19|20)\d\d", TAG.get(c, ""))
-    return (2 if re.search(r"JEE Main|AIEEE", p) else 1 if p else 0) + (.5 if yr and int(yr.group(0)) >= 2018 else 0)         + {"7": 1.5, "8": 1.5, "9": 1, "10": .5, "11": .5}.get(META[c]["sec"], 0) + LEC(c).endswith("SB")
+    return (2 if re.search(r"JEE Main|AIEEE", p) else 1 if p else 0) + (.5 if yr and int(yr.group(0)) >= 2018 else 0)         + {"7": 1.5, "8": 1.5, "9": 1, "10": .5, "11": .5}.get(META[c]["sec"], 0) + LEC(c).endswith("SB") + past(c)
+PAST = json.load(io.open(os.path.join(MP, "pool_check", "past_meta.json"), encoding="utf-8"))
+def past(c):   # a past-ICAD question: newer exam first, then ones the student got wrong / left blank
+    if not LEC(c).endswith("X"): return 0
+    m = PAST.get(c) or PAST.get(META[c].get("orig", ""), {})
+    return {"RT4": 2, "CAT6": 1.5, "RT3": 1.2, "CAT5": 1}.get(m.get("exam"), .4) + {"u": 2.2, "w": 2, "": 1.2, "c": .6}.get(m.get("st", ""), 1)
+# everything the student has seen in another exam's mocks, Finals or chapter papers
+SEEN = set()
+for f in glob.glob(os.path.join(MP, "*.html")) + glob.glob(os.path.join(MP, "ChapterPapers", "*.html")):
+    if not os.path.basename(f).startswith(EXAM + "-"):
+        SEEN |= set(re.findall(r'<span class="code">([^<]+)</span>', io.open(f, encoding="utf-8").read()))
 
 SBPOOL = [c for c, r in META.items() if SBMIX and re.match(r"[PCM]\d+[A-D]?", c).group(0) in BOOKCH
-          and (LEC(c).endswith("SB") or c in TAG) and r.get("verified") == "ok" and r["sec"] != "Recap"
-          and c not in ANS and c not in used and (g["has_choices"](c) or r.get("integer"))
+          and (LEC(c).endswith("SB") or c in TAG or EXAM.startswith("RT") and LEC(c).endswith("X")) and r.get("verified") == "ok" and r["sec"] != "Recap"
+          and c not in ANS and c not in used and c not in SEEN and (g["has_choices"](c) or r.get("integer"))
           and "⚠" not in g["ans"](c)]
 
 def sbpick(subj, n, chosen):

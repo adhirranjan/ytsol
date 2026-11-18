@@ -17,7 +17,7 @@ CHAPTERS = {
     "P1": "Maths Tools-I", "P2": "Maths Tools-II", "P3": "Vectors", "P4": "Motion in 1D & 2D",
     "P5": "Force Systems", "P6": "Newton's Laws", "P7": "Friction", "P8": "Work, Energy & Power",
     "P9": "Collision", "P10": "Circular Motion", "P11": "Centre of Mass", "P12": "Rotational Motion",
-    "P13": "Gravitation",
+    "P13": "Gravitation", "P14": "Elasticity",
     "M1": "Measurement of Angles", "M2": "Sets", "M3": "Trig Ratios & Identities", "M4": "Functions-I",
     "M5A": "Compound Angles", "M5B": "Transformation Formulae", "M5C": "Multiple & Submultiple Angles",
     "M6": "Inequalities", "M7": "Exp & Log Equations", "M8A": "Arithmetic Progressions",

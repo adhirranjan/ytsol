@@ -122,6 +122,44 @@ html.append(f'''  <header class="hero">
   </div>
 ''')
 
+# ---- exam revision sets: any sub-folder carrying its own *_Quiz_Index.html ----
+setcards = []
+for folder in sorted(os.listdir(Q)):
+    d = os.path.join(Q, folder)
+    if not os.path.isdir(d):
+        continue
+    idxs = [f for f in os.listdir(d) if f.endswith("_Quiz_Index.html")]
+    if not idxs:
+        continue
+    idx = idxs[0]
+    quizzes = sorted(f for f in os.listdir(d) if f.endswith("_Quiz.html") and f != idx)
+    if not quizzes:
+        continue
+    nq = 0
+    for f in quizzes:
+        t = open(os.path.join(d, f), encoding="utf-8").read()
+        nq += len(re.findall(r'\{id:\d+,', t))   # the bank itself; the banner is a stale literal
+    head = open(os.path.join(d, idx), encoding="utf-8").read()
+    h1 = re.search(r'<h1>(.*?)</h1>', head, re.S).group(1).strip()
+    h1 = re.sub(r'^[^\w]+', '', h1)                      # drop a leading emoji
+    tag, _, name = h1.partition(" ")
+    blurb = re.search(r'<p>(ICAD[^<]*)</p>', head)
+    blurb = blurb.group(1).strip() if blurb else name
+    setcards.append(dict(href=f"{folder}/{idx}", tag=tag, name=name,
+                         blurb=blurb, n=len(quizzes), q=nq))
+
+if setcards:
+    html.append('  <h2 class="sub">Exam revision sets</h2>')
+    for sc in setcards:
+        html.append(f'''  <a class="card" href="{sc["href"]}">
+    <span class="tag">{sc["tag"]}</span>
+    <span>
+      <span class="nm">{sc["name"]}</span>
+      <span class="ds">{sc["blurb"]}</span>
+    </span>
+    <span class="ct">{sc["n"]} quizzes &middot; {sc["q"]} Q</span>
+  </a>''')
+
 # compact table of contents — one chip per chapter, grouped by subject·volume
 html.append('  <div class="toc">\n    <h2>All chapters</h2>')
 _ABBR = {"Chemistry": "Chem", "Mathematics": "Math", "Physics": "Phys"}
@@ -159,3 +197,4 @@ out = "\n".join(html)
 open(os.path.join(Q,"Quiz_Index.html"),"w",encoding="utf-8").write(out)
 print("rebuilt Quiz_Index.html:", len(out), "bytes")
 print("chapters", nchap, "Q", totQ, "units", totU, "explanations", expl)
+print("exam sets:", [(c["tag"], c["n"], c["q"]) for c in setcards])

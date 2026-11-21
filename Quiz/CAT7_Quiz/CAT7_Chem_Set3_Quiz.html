@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT-7 Chemistry · Revision Quiz — Set 3</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · CAT-7 (Mon 30 Nov 2026) · Chemistry revision</p>
+    <h1>CAT-7 Chemistry · Set 3</h1>
+    <p id="heroSub">25 questions · 14 from LEVEL-5/6 and the Strong Box · one of 3 non-overlapping sets · loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the chapters to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All chapters are selected by default — that runs the full 25-question set.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">136 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
+    </div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
+        <button class="btn" onclick="backToIntro()">Choose different chapters</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · CAT-7 revision · Chemistry Set 3 of 3 · every question quoted from the ICAD exercises and carried verbatim from the per-chapter mastery quizzes, where each answer was independently re-derived — mismatches against the printed key are flagged &#9888; in the working.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-6 THERMODYNAMICS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"C7", name:"C-7 · Chemical and Ionic Equilibrium", desc:"the whole CAT-7 chemistry syllabus"}
+];
+
+const QUIZ = [
+
+/* ---------------- C-7 · Chemical and Ionic Equilibrium ---------------- */
+{id:1, lec:"C7", blk:"C-7 L-1 L5 · Homogeneous vs heterogeneous", topic:"Ester hydrolysis among completely miscible liquids", t:90,
+ src:"L-1 · LEVEL-5 Q9",
+ q:"The following reaction is at equilibrium: CH<sub>3</sub>COOCH<sub>3</sub>(l) + H<sub>2</sub>O(l) &#8652; CH<sub>3</sub>COOH(l) + CH<sub>3</sub>OH(l). If all these liquids are completely miscible, the equilibrium is:<br>",
+ opts:["Multiphase",
+  "Static",
+  "Homogeneous",
+  "Heterogeneous"],
+ ans:2,
+ why:["Multiphase requires more than one phase, which complete miscibility rules out.",
+  "Wrong on principle: every chemical equilibrium is dynamic, with both reactions continuing at equal rates.",
+  "Correct. Four completely miscible liquids form a single uniform liquid phase, and one phase means homogeneous.",
+  "Heterogeneous would need a phase boundary, i.e. immiscible layers; the stem states the liquids are completely miscible."],
+ sol:"<b>Concept:</b> Ester hydrolysis with all four species as liquids. &lsquo;Completely miscible&rsquo; is the operative phrase: it guarantees a single liquid phase, and a single phase means homogeneous.<br><b>Key relation:</b> CH<sub>3</sub>COOCH<sub>3</sub>(l) + H<sub>2</sub>O(l) &#8652; CH<sub>3</sub>COOH(l) + CH<sub>3</sub>OH(l), all miscible &rArr; 1 phase &rArr; homogeneous.<br>1. Every species carries the state symbol (l), so nothing is solid or gaseous and there is no obvious boundary.<br>2. Four liquids are not automatically one phase &mdash; oil and water form two. The stem removes that possibility by stating complete miscibility.<br>3. Completely miscible liquids form one uniform solution, so a single liquid phase contains all four species.<br>4. One phase &rArr; <b>homogeneous</b>: option (c). The closely related esterification C<sub>2</sub>H<sub>5</sub>OH(l) + CH<sub>3</sub>COOH(l) &#8652; ester(l) + H<sub>2</sub>O(l) is the standard homogeneous liquid-phase example.<br>5. (a) and (d) both demand more than one phase, which miscibility excludes.<br>6. (b) is a conceptual trap: &lsquo;static&rsquo; is never right, because the forward and backward reactions continue indefinitely at equal rates.<br><b>Answer: (c) Homogeneous</b> &mdash; complete miscibility puts all four species in one liquid phase."},
+{id:2, lec:"C7", blk:"C-7 L-1 L6 · Dynamic nature", topic:"The dynamic condition at equilibrium in the Haber process", t:90,
+ src:"L-1 · LEVEL-6 Q3",
+ q:"In the chemical reaction N<sub>2</sub> + 3H<sub>2</sub> &#8652; 2NH<sub>3</sub> at equilibrium point, state whether<br>",
+ opts:["Equal volumes of N<sub>2</sub> and H<sub>2</sub> are reacting",
+  "Equal masses of N<sub>2</sub> and H<sub>2</sub> are reacting",
+  "The reaction has stopped",
+  "The same amount of ammonia is formed as is decomposed into N<sub>2</sub> and H<sub>2</sub>"],
+ ans:3,
+ why:["Contradicts the stoichiometry: the equation consumes 1 volume of N<sub>2</sub> per 3 volumes of H<sub>2</sub>, never equal volumes.",
+  "Wrong mass ratio: 1 mol N<sub>2</sub> (28 g) reacts with 3 mol H<sub>2</sub> (6 g), i.e. 14 : 3, not 1 : 1.",
+  "The static misconception. Concentrations stop changing, but both reactions continue at the molecular level.",
+  "Correct. At equilibrium ammonia is formed and decomposed at the same rate, so [NH<sub>3</sub>] is constant while both reactions run on."],
+ sol:"<b>Concept:</b> The Haber equilibrium used to test the dynamic picture: at equilibrium the rate of NH<sub>3</sub> formation equals its rate of decomposition, so the amount of ammonia holds steady while nothing has actually stopped.<br><b>Key relation:</b> for N<sub>2</sub> + 3H<sub>2</sub> &#8652; 2NH<sub>3</sub>, equilibrium &rArr; rate of formation of NH<sub>3</sub> = rate of decomposition of NH<sub>3</sub>, which is r<sub>f</sub> = r<sub>b</sub> written for one species.<br>1. (a) Equal volumes reacting: the balanced equation fixes the reacting ratio at 1 volume N<sub>2</sub> to 3 volumes H<sub>2</sub>. Reject.<br>2. (b) Equal masses reacting: 28 g of N<sub>2</sub> per 3 &times; 2 = 6 g of H<sub>2</sub>, a ratio of 14 : 3. Reject.<br>3. (c) Reaction stopped: if both reactions had stopped, adding a trace of labelled N<sub>2</sub> would never show up in the ammonia &mdash; but it does. Reject.<br>4. (d) Equal rates of formation and decomposition of NH<sub>3</sub>: this is exactly r<sub>f</sub> = r<sub>b</sub>, and it is what keeps [NH<sub>3</sub>] constant. Accept.<br>5. Note the difference in kind: (d) explains the constant composition without claiming anything has halted, whereas (c) explains the same observation with a mechanism that is false.<br><b>Answer: (d)</b> The same amount of ammonia is formed as is decomposed &mdash; the dynamic condition r<sub>f</sub> = r<sub>b</sub>."},
+{id:3, lec:"C7", blk:"C-7 L-1 L4 · Homogeneous vs heterogeneous", topic:"Classifying the CaCO<sub>3</sub> decomposition equilibrium by phase count", t:90,
+ src:"L-1 · LEVEL-4 Q2",
+ q:"Which type of equilibrium is represented by the decomposition of calcium carbonate?<br>CaCO<sub>3</sub>(s) &#8652; CaO(s) + CO<sub>2</sub>(g)<br>",
+ opts:["Homogeneous equilibrium",
+  "Phase equilibrium",
+  "Heterogeneous equilibrium",
+  "Aqueous equilibrium"],
+ ans:2,
+ why:["Homogeneous needs every species in a single phase, as in H<sub>2</sub> + I<sub>2</sub> &#8652; 2HI; here two solids and a gas sit together.",
+  "&lsquo;Phase equilibrium&rsquo; is another name for a physical equilibrium, but the chemical formulae change here, so this is a chemical change, not a physical one.",
+  "Correct. CaCO<sub>3</sub>(s), CaO(s) and CO<sub>2</sub>(g) are three distinct phases, and more than one phase means heterogeneous.",
+  "Invented label: there is no water or any other solvent in the equation, so nothing is aqueous."],
+ sol:"<b>Concept:</b> Homogeneous versus heterogeneous is decided purely by counting phases, not by how many substances or elements appear.<br><b>Key relation:</b> reactants and products present in different phases &#8660; heterogeneous equilibrium.<br>1. List the phases in CaCO<sub>3</sub>(s) &#8652; CaO(s) + CO<sub>2</sub>(g): solid CaCO<sub>3</sub> (1), solid CaO (2), gaseous CO<sub>2</sub> (3).<br>2. Two different solids are always two phases &mdash; they are separated by a real physical boundary and do not mix at the molecular level, so the count does not collapse to two.<br>3. Three phases is more than one, so the equilibrium is <b>heterogeneous</b>: option (c).<br>4. (a) would need all three species in one uniform phase, which solids plus a gas can never be.<br>5. (b) describes physical equilibria such as H<sub>2</sub>O(l) &#8652; H<sub>2</sub>O(g), where the substance is unchanged; here CaCO<sub>3</sub> is destroyed and two new compounds appear.<br>6. (d) requires a solvent, and none is present.<br><b>Answer: (c) Heterogeneous equilibrium</b> &mdash; two solids and one gas, hence three phases. Practical consequence: the pure solids have constant active mass, so K<sub>p</sub> = p(CO<sub>2</sub>) alone."},
+{id:4, lec:"C7", blk:"C-7 L-10 L2 · Ostwald dilution law", topic:"Inverting Ostwald's law to get the degree of dissociation from K and C", t:60,
+ src:"L-10 · LEVEL-2 Q2",
+ q:"Find the degree of dissociation alpha if K = 4&times;10<sup>&minus;3</sup> and C = 0.1 mol/L.",
+ opts:["0.01",
+  "0.03",
+  "0.1",
+  "0.2"],
+ ans:3,
+ why:["Wrong. 0.01 is K/C = 4&times;10<sup>&minus;3</sup>/0.1 = 0.04 mishandled, or &alpha;<sup>2</sup> read as &alpha;. The square root has not been taken.",
+  "Wrong. 0.03 is roughly &radic;(K) = &radic;(4&times;10<sup>&minus;3</sup>) = 0.063 halved, or K/C computed with the wrong power of ten. The ratio K/C is 0.04, whose root is 0.2.",
+  "Wrong. 0.1 is the concentration C copied into the answer slot. It is also &radic;(0.01), which would need K/C = 0.01, i.e. K = 10<sup>&minus;3</sup> rather than the 4&times;10<sup>&minus;3</sup> given.",
+  "Correct. &alpha; = &radic;(K/C) = &radic;(4&times;10<sup>&minus;3</sup>/0.1) = &radic;(0.04) = <b>0.2</b>; keeping the (1 &minus; &alpha;) term gives 0.181, which still rounds to this option."],
+ sol:"<b>Concept:</b> The same Ostwald relation read the other way. With the small-&alpha; approximation it inverts to a single square root, which is why K/C must be formed before any rooting. <b>Key relation:</b> K &#8776; C&alpha;<sup>2</sup> &rArr; &alpha; = &radic;(K/C). <b>Solution:</b> 1. Given K = <b>4&times;10<sup>&minus;3</sup></b> and C = <b>0.1</b> mol/L. 2. Form the ratio: K/C = 4&times;10<sup>&minus;3</sup>/10<sup>&minus;1</sup> = <b>4&times;10<sup>&minus;2</sup></b> = 0.04. 3. Take the square root: &alpha; = &radic;(0.04) = <b>0.2</b>, i.e. 20% dissociated &mdash; option (d). 4. Check against the exact law, K = C&alpha;<sup>2</sup>/(1 &minus; &alpha;): 0.1&alpha;<sup>2</sup> + 0.004&alpha; &minus; 0.004 = 0, giving &alpha; = (&minus;0.04 + &radic;(0.0016 + 0.16))/2 = <b>0.181</b>. 5. The approximation therefore overestimates by about 10%, but 0.181 and 0.200 both sit far closer to option (d) than to 0.1, so the choice is secure. 6. Interpretation: &alpha; = 0.2 means this is a <i>moderately</i> weak electrolyte &mdash; borderline for the approximation, which assumes &alpha; &lt; 0.05. 7. Dilution would raise it further: at C = 0.001 M the same K gives &alpha; = &radic;(4) &gt; 1, which is impossible and signals that the approximation has collapsed and the quadratic must be used. <b>&#9889; JEE Trick:</b> Form K/C first, then root. Writing &radic;K/C or &radic;(KC) is the standard algebra slip, and both land on options that are on the page. <b>Answer:</b> <b>(d) 0.2.</b>"},
+{id:5, lec:"C7", blk:"C-7 L-11 L6 · Salt hydrolysis", topic:"Nature of a weak-acid/weak-base salt solution when Ka equals Kb", t:90,
+ src:"L-11 · LEVEL-6 Q5",
+ q:"Given that K<sub>a</sub> for acetic acid as 1.8&times;10<sup>&minus;5</sup> and K<sub>b</sub> of NH<sub>4</sub>OH as 1.8&times;10<sup>&minus;5</sup> at 25&deg;C, predict the nature of aqueous solution of ammonium acetate",
+ opts:["Acidic",
+  "Basic",
+  "Slightly acidic or basic",
+  "Neutral"],
+ ans:3,
+ why:["Acidic would need K<sub>a</sub> &gt; K<sub>b</sub>; this comes from counting only the NH<sub>4</sub><sup>+</sup> hydrolysis that makes H<sup>+</sup> and ignoring the equal acetate hydrolysis.",
+  "Basic would need K<sub>b</sub> &gt; K<sub>a</sub>; this is the mirror slip of counting only CH<sub>3</sub>COO<sup>&minus;</sup> + H<sub>2</sub>O &#8652; CH<sub>3</sub>COOH + OH<sup>&minus;</sup>.",
+  "Reads &ldquo;both ions hydrolyse&rdquo; as &ldquo;the pH must drift one way or the other&rdquo;. The two hydrolyses are exactly equal here, so they cancel and the pH is pinned at 7, not left uncertain.",
+  "Correct. pK<sub>a</sub> = pK<sub>b</sub> = 4.74, so pH = 7 + (1/2)(4.74 &minus; 4.74) = 7.00 at 25 &deg;C."],
+ sol:"<b>Concept:</b> Ammonium acetate CH<sub>3</sub>COONH<sub>4</sub> is the salt of a weak acid and a weak base, so <i>both</i> ions hydrolyse: NH<sub>4</sub><sup>+</sup> liberates H<sup>+</sup> and CH<sub>3</sub>COO<sup>&minus;</sup> liberates OH<sup>&minus;</sup>. Only the relative size of K<sub>a</sub> and K<sub>b</sub> decides the outcome.<br><b>1.</b> Cation hydrolysis NH<sub>4</sub><sup>+</sup> + H<sub>2</sub>O &#8652; NH<sub>4</sub>OH + H<sup>+</sup>: K<sub>h</sub> = K<sub>w</sub>/K<sub>b</sub> = 10<sup>&minus;14</sup>/1.8&times;10<sup>&minus;5</sup> = 5.6&times;10<sup>&minus;10</sup>.<br><b>2.</b> Anion hydrolysis CH<sub>3</sub>COO<sup>&minus;</sup> + H<sub>2</sub>O &#8652; CH<sub>3</sub>COOH + OH<sup>&minus;</sup>: K<sub>h</sub> = K<sub>w</sub>/K<sub>a</sub> = 10<sup>&minus;14</sup>/1.8&times;10<sup>&minus;5</sup> = 5.6&times;10<sup>&minus;10</sup> &mdash; identical, so H<sup>+</sup> and OH<sup>&minus;</sup> appear to exactly the same extent.<br><b>3.</b> Exact expression: [H<sup>+</sup>] = &radic;(K<sub>w</sub>K<sub>a</sub>/K<sub>b</sub>) = &radic;(10<sup>&minus;14</sup>&times;1.8&times;10<sup>&minus;5</sup>/1.8&times;10<sup>&minus;5</sup>) = &radic;(10<sup>&minus;14</sup>) = 10<sup>&minus;7</sup> M.<br><b>4.</b> Equivalently pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>) = 7 + (1/2)(4.74 &minus; 4.74) = <b>7.00</b> &mdash; the concentration never enters.<br><b>5.</b> The salt is nevertheless strongly hydrolysed: h = &radic;(K<sub>w</sub>/K<sub>a</sub>K<sub>b</sub>) = &radic;(10<sup>&minus;14</sup>/3.24&times;10<sup>&minus;10</sup>) = 5.6&times;10<sup>&minus;3</sup>, i.e. 0.56 %, yet the pH stays exactly 7.<br><b>&#9889; JEE Trick:</b> For any weak-acid + weak-base salt just compare K<sub>a</sub> with K<sub>b</sub>: equal &rarr; neutral, K<sub>a</sub> larger &rarr; slightly acidic, K<sub>b</sub> larger &rarr; slightly basic. No concentration data is ever needed.<br><b>Answer: (d) Neutral.</b>"},
+{id:6, lec:"C7", blk:"C-7 L-11 L6 · Salt hydrolysis", topic:"How the strength of the parent acid or base controls the extent of ionic hydrolysis", t:90,
+ src:"L-11 · LEVEL-6 Q6",
+ q:"Passage (6-8): Hydrolysis is an acid-base reaction of a cation or anion or both ions of a salt with water. Resultant solution of hydrolysis may be acidic, basic or neutral. The anion A<sup>&minus;</sup> which is, a weaker base than OH<sup>&minus;</sup> and which has it's conjugate acid HA stronger than water but weaker than H<sub>3</sub>O<sup>+</sup> shows the phenomenon of hydrolysis Ex. : CH<sub>3</sub>COO<sup>&minus;</sup>, CN<sup>&minus;</sup>, NO<sub>2</sub><sup>&minus;</sup>, etc. The cation B<sup>+</sup> which is a weaker acid than H<sub>3</sub>O<sup>+</sup> and which has it's conjugate base BOH stronger than water but weaker than OH<sup>&minus;</sup> shows the phenomenon of hydrolysis Ex. : NH<sub>4</sub><sup>+</sup>, C<sub>6</sub>H<sub>5</sub>NH<sup>+</sup>, N<sub>2</sub>H<sub>5</sub><sup>+</sup> etc. The hydrolysis constant of anion and cation are given by A<sup>&minus;</sup>(aq.) + H<sub>2</sub>O(l) &rlarr; HA(aq.) + OH<sup>&minus;</sup>(aq.) &nbsp; K<sub>h</sub> = K<sub>w</sub>/K<sub>a</sub> &rArr; [HA(aq.)][OH<sup>&minus;</sup>(aq.)] / [A<sup>&minus;</sup>(aq.)] B<sup>+</sup>(aq.) + H<sub>2</sub>O(l) &rlarr; BOH(aq.) + H<sup>+</sup>(aq.) &nbsp; K<sub>h</sub> = K<sub>w</sub>/K<sub>b</sub> &rArr; [BOH(aq.)][H<sup>+</sup>(aq.)] / [B<sup>+</sup>(aq.)] 6. Which of the following statement is true?",
+ opts:["Weaker the acid, greater will be hydrolysis of its anion",
+  "Weaker the base, greater will be hydrolysis of its cation",
+  "Both (a) and (b)",
+  "None of these"],
+ ans:2,
+ why:["True by itself &mdash; K<sub>h</sub> = K<sub>w</sub>/K<sub>a</sub> rises as K<sub>a</sub> falls &mdash; but stopping here ignores the cation half of the passage, which obeys the same rule.",
+  "Also true by itself (K<sub>h</sub> = K<sub>w</sub>/K<sub>b</sub>), but choosing it alone is the slip of reading only the second equation printed in the passage.",
+  "Correct. Both hydrolysis constants equal K<sub>w</sub> divided by the parent's dissociation constant, so a weaker parent &mdash; smaller K<sub>a</sub> or smaller K<sub>b</sub> &mdash; always gives a larger K<sub>h</sub> and more hydrolysis.",
+  "Would require at least one statement to be false, but both follow directly from the K<sub>h</sub> = K<sub>w</sub>/K<sub>a</sub> and K<sub>h</sub> = K<sub>w</sub>/K<sub>b</sub> expressions given in the passage."],
+ sol:"<b>Concept:</b> The passage supplies K<sub>h</sub> = K<sub>w</sub>/K<sub>a</sub> for an anion and K<sub>h</sub> = K<sub>w</sub>/K<sub>b</sub> for a cation. K<sub>w</sub> is a constant, so K<sub>h</sub> is <i>inversely</i> proportional to the parent's strength.<br><b>1.</b> Anion: K<sub>h</sub> = K<sub>w</sub>/K<sub>a</sub>, and the degree of hydrolysis h = &radic;(K<sub>h</sub>/C) &rArr; h &prop; 1/&radic;K<sub>a</sub>. A smaller K<sub>a</sub> (weaker acid) gives a larger h.<br><b>2.</b> Numbers: CH<sub>3</sub>COO<sup>&minus;</sup> with K<sub>a</sub> = 1.8&times;10<sup>&minus;5</sup> gives K<sub>h</sub> = 10<sup>&minus;14</sup>/1.8&times;10<sup>&minus;5</sup> = 5.6&times;10<sup>&minus;10</sup>, whereas CN<sup>&minus;</sup> with K<sub>a</sub> = 4.9&times;10<sup>&minus;10</sup> gives K<sub>h</sub> = 10<sup>&minus;14</sup>/4.9&times;10<sup>&minus;10</sup> = 2.0&times;10<sup>&minus;5</sup> &mdash; about 10<sup>4</sup> times more. Statement (a) is <b>true</b>.<br><b>3.</b> Cation: K<sub>h</sub> = K<sub>w</sub>/K<sub>b</sub>. NH<sub>4</sub><sup>+</sup> (K<sub>b</sub> = 1.8&times;10<sup>&minus;5</sup>) gives K<sub>h</sub> = 5.6&times;10<sup>&minus;10</sup>, while C<sub>6</sub>H<sub>5</sub>NH<sub>3</sub><sup>+</sup> (K<sub>b</sub> &asymp; 4&times;10<sup>&minus;10</sup>) gives K<sub>h</sub> = 10<sup>&minus;14</sup>/4&times;10<sup>&minus;10</sup> = 2.5&times;10<sup>&minus;5</sup>. Statement (b) is <b>true</b>.<br><b>4.</b> The identity behind both is K<sub>a</sub>&times;K<sub>b</sub>(conjugate) = K<sub>w</sub>: a weak parent necessarily has a strong conjugate, and it is the conjugate that hydrolyses.<br><b>5.</b> Both statements hold, so the answer is <b>(c)</b> and (d) is ruled out.<br><b>&#9889; JEE Trick:</b> &ldquo;Weak parent &rarr; strong conjugate &rarr; more hydrolysis&rdquo; applies to cations and anions alike; whenever two such mirror statements are offered with a &ldquo;both&rdquo; option, check the symmetry before picking just one.<br><b>Answer: (c) Both (a) and (b).</b>"},
+{id:7, lec:"C7", blk:"C-7 L-11 L4 · Salt hydrolysis", topic:"Both ions hydrolysing equally when Ka = Kb, giving a neutral solution", t:90,
+ src:"L-11 · LEVEL-4 Q3",
+ q:"A solution of ammonium acetate (K<sub>a</sub>(acetic acid) = K<sub>b</sub>(ammonium hydroxide)) is",
+ opts:["acidic in nature",
+  "alkaline in nature",
+  "neutral in nature",
+  "acidic at low temperature, neutral at room temperature and alkaline at high temperature"],
+ ans:2,
+ why:["Wrong. Acidic would need K<sub>a</sub> &lt; K<sub>b</sub>, so that the cation hydrolysed more than the anion. The stem states them equal, so neither can dominate.",
+  "Wrong. Alkaline would need K<sub>a</sub> &gt; K<sub>b</sub>, the mirror image of (a). The equality given rules it out just as firmly.",
+  "Correct. Both ions hydrolyse here, but with K<sub>a</sub>(CH<sub>3</sub>COOH) = K<sub>b</sub>(NH<sub>4</sub>OH) the two effects are equal and opposite. pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>) = 7, so the solution is <b>neutral</b>.",
+  "Wrong. Raising the temperature increases both hydrolysis constants by the same factor when K<sub>a</sub> = K<sub>b</sub>, so the balance &mdash; and the neutrality &mdash; is preserved. No drift from acidic to alkaline occurs."],
+ sol:"<b>Concept:</b> In a salt of a weak acid and a weak base both ions hydrolyse, and the pH is fixed by the <i>comparison</i> of K<sub>a</sub> and K<sub>b</sub>, not by either alone. Equal constants give exact cancellation. <b>Key relation:</b> pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>). <b>Solution:</b> 1. Ammonium acetate, CH<sub>3</sub>COONH<sub>4</sub>, is the salt of the weak acid CH<sub>3</sub>COOH and the weak base NH<sub>4</sub>OH, so <b>both</b> ions hydrolyse. 2. The cation produces acid: NH<sub>4</sub><sup>+</sup> + H<sub>2</sub>O &#8652; NH<sub>4</sub>OH + H<sup>+</sup>. 3. The anion produces base: CH<sub>3</sub>COO<sup>&minus;</sup> + H<sub>2</sub>O &#8652; CH<sub>3</sub>COOH + OH<sup>&minus;</sup>. 4. The pH of such a salt follows pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>). With K<sub>a</sub> = K<sub>b</sub> the bracket is zero, so pH = <b>7</b> &mdash; option (c). 5. Numerically both constants are about 1.8&times;10<sup>&minus;5</sup> for this pair, which is why ammonium acetate is the textbook example of a genuinely neutral weak-weak salt. 6. Note what is <i>not</i> true: the solution is not neutral because nothing happens. Both hydrolyses proceed substantially &mdash; they simply generate H<sup>+</sup> and OH<sup>&minus;</sup> at matching rates. 7. Note also that the pH here is independent of the salt's concentration, since the concentration terms cancel in the weak-weak expression &mdash; unlike the weak-strong cases of the previous question. <b>&#9889; JEE Trick:</b> For a weak acid + weak base salt, compare K<sub>a</sub> with K<sub>b</sub>: larger K<sub>a</sub> means acidic, larger K<sub>b</sub> means alkaline, equal means neutral. The concentration never enters. <b>Answer:</b> <b>(c) neutral in nature.</b>"},
+{id:8, lec:"C7", blk:"C-7 L-12 L6 · Buffer calculations", topic:"pH of a basic buffer after a strong acid partly consumes the weak base", t:90,
+ src:"L-12 · LEVEL-6 Q6",
+ q:"Passage (5-8): Solution of an acid and it's anion (that is, it's conjugate base) or of a base and it's common cation are buffered. When we add a small amount of acid or base to any one of them, the pH of solution changes very little. pH of buffer solution can be computed as for acidic buffer : pH = pK<sub>a</sub> + log [Conjugate base]/[Acid] for basic buffer : pOH = pK<sub>b</sub> + log [Conjugate acid]/[Base] It is generally accepted that a solution has useful buffer capacity (pH change resisting power) provided that the value of [salt or conjugate base]/[acid] for acidic buffer lies within the range of 1 : 10 to 10 : 1. Buffer capacity is max. when [conjugate base] = [acid]  Calculate the pH of a solution made by adding 0.01 mole of HCl in 100 mL of a solution which is 0.2 M in NH<sub>3</sub> (pK<sub>b</sub> = 4.74) and 0.3 M in NH<sub>4</sub><sup>+</sup> : (Assuming no change in volume)",
+ opts:["5.34",
+  "8.66",
+  "7.46",
+  "None of these"],
+ ans:1,
+ why:["This is the pOH, not the pH: pOH = 4.74 + log 4 = 5.34. Stopping at pOH is the classic slip with basic buffers.",
+  "Correct. pOH = pK<sub>b</sub> + log([NH<sub>4</sub><sup>+</sup>]/[NH<sub>3</sub>]) = 4.74 + log(0.04/0.01) = 5.34, so pH = 14 &minus; 5.34 = 8.66.",
+  "Comes from ignoring the HCl and using the original 0.3/0.2 ratio, or from mixing pK<sub>a</sub> and pK<sub>b</sub> in the same line.",
+  "Only correct if none of the values matched; 8.66 does."],
+ sol:"<b>Concept:</b> Strong acid added to an NH<sub>3</sub>/NH<sub>4</sub><sup>+</sup> buffer destroys base and creates its conjugate acid mole for mole. Recompute the amounts first, then apply the basic-buffer equation and convert pOH to pH.<br><b>1.</b> Initial moles in 100 mL: n(NH<sub>3</sub>) = 0.100 &times; 0.2 = 0.02 mol, n(NH<sub>4</sub><sup>+</sup>) = 0.100 &times; 0.3 = 0.03 mol.<br><b>2.</b> Reaction NH<sub>3</sub> + H<sup>+</sup> &rarr; NH<sub>4</sub><sup>+</sup> with 0.01 mol HCl: n(NH<sub>3</sub>) = 0.02 &minus; 0.01 = 0.01 mol, n(NH<sub>4</sub><sup>+</sup>) = 0.03 + 0.01 = 0.04 mol.<br><b>3.</b> Volume unchanged at 100 mL, so [NH<sub>3</sub>] = 0.1 M and [NH<sub>4</sub><sup>+</sup>] = 0.4 M; the ratio 4 is inside the useful buffer range, so Henderson still holds.<br><b>4.</b> pOH = pK<sub>b</sub> + log([NH<sub>4</sub><sup>+</sup>]/[NH<sub>3</sub>]) = 4.74 + log(0.4/0.1) = 4.74 + 0.60 = 5.34.<br><b>5.</b> pH = 14 &minus; pOH = 14 &minus; 5.34 = <b>8.66</b>.<br><b>6.</b> Sense check: before the acid the ratio was 0.3/0.2 = 1.5, giving pOH = 4.92 and pH = 9.08; adding acid must lower the pH, and 8.66 &lt; 9.08. Consistent.<br><b>&#9889; JEE Trick:</b> For basic buffers the formula returns pOH &mdash; the unconverted value is always planted as a distractor (here 5.34). Added strong acid shifts the ratio but the volume cancels, so work in moles and convert only at the end.<br><b>Answer: (b) 8.66.</b>"},
+{id:9, lec:"C7", blk:"C-7 L-12 L3 · Buffer pH (Henderson)", topic:"Buffer pH from a 3 : 1 salt-to-acid ratio, then pOH from pH + pOH = 14", t:60,
+ src:"L-12 · LEVEL-3 Q2",
+ q:"A buffer contains 0.05 M acid and 0.15 M salt. If pKa = 4.5, calculate pH and then find pOH.",
+ opts:["pH = 4.98, pOH = 9.02",
+  "pH = 4.5, pOH = 9.5",
+  "pH = 4.68, pOH = 9.32",
+  "pH = 5.0, pOH = 9.0"],
+ ans:0,
+ why:["Correct. pH = 4.5 + log(0.15/0.05) = 4.5 + log 3 = 4.5 + 0.48 = 4.98, and pOH = 14 &minus; 4.98 = 9.02.",
+  "Drops the log term, i.e. treats the buffer as equimolar when the salt is three times the acid.",
+  "Uses log 1.5 = 0.18 instead of log 3 = 0.48 &mdash; the slip of dividing 0.15 by 0.1 rather than by 0.05.",
+  "A rounded guess: 4.5 + 0.48 is 4.98, and a pH of 5.0 would need a ratio of 10<sup>0.5</sup> = 3.16, not 3."],
+ sol:"<b>Concept:</b> A weak acid with three times as much of its salt is an acidic buffer whose pH sits log 3 above pK<sub>a</sub>; pOH then follows from pH + pOH = pK<sub>w</sub> = 14 at 25 &deg;C.<br><b>1.</b> Data: [acid] = 0.05 M, [salt] = 0.15 M, pK<sub>a</sub> = 4.5. The ratio 3 lies inside the useful buffer window 1 : 10 to 10 : 1, so Henderson applies.<br><b>2.</b> Ratio: [salt]/[acid] = 0.15/0.05 = 3, and log 3 = 0.48.<br><b>3.</b> pH = pK<sub>a</sub> + log([salt]/[acid]) = 4.5 + log 3 = 4.5 + 0.48 = <b>4.98</b>.<br><b>4.</b> pOH = 14 &minus; pH = 14 &minus; 4.98 = <b>9.02</b>.<br><b>5.</b> Sense check: excess conjugate base must push the pH above pK<sub>a</sub> (4.98 &gt; 4.5) but by less than one unit since the ratio is under 10, and pH + pOH = 4.98 + 9.02 = 14.00. Both tests pass.<br><b>&#9889; JEE Trick:</b> Keep log 2 = 0.30, log 3 = 0.48, log 5 = 0.70 in your head. Every option here sums to 14, so the pOH half cannot discriminate &mdash; decide on the pH alone, and remember the ratio is salt over acid, so 0.15/0.05 = 3, never 0.15/0.1.<br><b>Answer: (a) pH = 4.98, pOH = 9.02.</b>"},
+{id:10, lec:"C7", blk:"C-7 L-13 L6 · Titration and buffers", topic:"K<sub>b</sub> from the end-point pH of a weak base, then the pOH after adding NaOH", t:90,
+ src:"L-13 · LEVEL-6 Q1",
+ q:"When a 20 mL of 0.08 M weak base BOH is titrated with 0.08 HCl, the pH of the solution at the end point is 5. What will be the pOH if 10 mL of 0.04 M NaOH is added to the resulting solution? [Given : log 2 = 0.30 and log 3 = 0.48]",
+ opts:["5.40",
+  "5.88",
+  "4.92",
+  "None of these"],
+ ans:1,
+ why:["5.40 is pK<sub>b</sub> itself, the pOH of an <i>equimolar</i> B<sup>+</sup>/BOH buffer. Here the ratio is 1.2 : 0.4 = 3, so the Henderson log term (+log 3 = 0.48) has simply been omitted.",
+  "Correct. pK<sub>b</sub> = 5.40 follows from the end-point data, and pOH = 5.40 + log(1.2/0.4) = 5.40 + 0.48 = 5.88.",
+  "4.92 = 5.40 &minus; 0.48 inverts the Henderson ratio, using log([BOH]/[B<sup>+</sup>]) instead of log([B<sup>+</sup>]/[BOH]). Adding base cannot make the pOH smaller than pK<sub>b</sub> while B<sup>+</sup> still outweighs BOH.",
+  "5.88 is on the list, so &ldquo;none of these&rdquo; comes from using the wrong end-point concentration &mdash; typically 0.08 M instead of 0.04 M, which gives K<sub>b</sub> = 8&times;10<sup>&minus;6</sup> and pOH = 5.58."],
+ sol:"<b>Concept:</b> At the end point of the titration only the salt BCl remains; its acidic pH yields K<sub>h</sub> and hence K<sub>b</sub>. Adding NaOH afterwards converts some B<sup>+</sup> back into BOH, producing a basic buffer that Henderson handles. The book's &ldquo;0.08 HCl&rdquo; is read as 0.08 M.<br><b>Key relations:</b> [H<sup>+</sup>] = &radic;(K<sub>h</sub>C) with K<sub>h</sub> = K<sub>w</sub>/K<sub>b</sub> for a strong-acid/weak-base salt; pOH = pK<sub>b</sub> + log([B<sup>+</sup>]/[BOH]) for the buffer; K<sub>w</sub> = 10<sup>&minus;14</sup> at 25 &deg;C.<br><b>1.</b> BOH taken = 20 &times; 0.08 = 1.6 mmol, so the end point needs 20 mL of 0.08 M HCl. Total volume = 40 mL and [BCl] = 1.6/40 = <b>0.04 M</b>.<br><b>2.</b> pH = 5 means [H<sup>+</sup>] = 10<sup>&minus;5</sup> = &radic;(K<sub>h</sub> &times; 0.04), so K<sub>h</sub> = 10<sup>&minus;10</sup>/0.04 = <b>2.5&times;10<sup>&minus;9</sup></b>.<br><b>3.</b> K<sub>b</sub> = K<sub>w</sub>/K<sub>h</sub> = 10<sup>&minus;14</sup>/2.5&times;10<sup>&minus;9</sup> = 4&times;10<sup>&minus;6</sup>, so pK<sub>b</sub> = 6 &minus; log 4 = 6 &minus; 2(0.30) = <b>5.40</b>.<br><b>4.</b> NaOH added = 10 &times; 0.04 = 0.4 mmol, reacting B<sup>+</sup> + OH<sup>&minus;</sup> &rarr; BOH; NaOH is far stronger than BOH, so the conversion is complete.<br><b>5.</b> After reaction: BOH = 0.4 mmol and B<sup>+</sup> = 1.6 &minus; 0.4 = 1.2 mmol. Both share the same 50 mL, so the mmol ratio <i>is</i> the concentration ratio &mdash; a genuine buffer.<br><b>6.</b> pOH = pK<sub>b</sub> + log([B<sup>+</sup>]/[BOH]) = 5.40 + log(1.2/0.4) = 5.40 + log 3 = 5.40 + 0.48 = <b>5.88</b>.<br><b>&#9889; JEE Trick:</b> When titrant and analyte have equal concentration, the salt at the end point always sits at C/2 &mdash; here 0.04 M, not 0.08 M. Using 0.08 M doubles K<sub>b</sub> and the whole answer drifts off the option list.<br><b>Answer: (b) 5.88.</b>"},
+{id:11, lec:"C7", blk:"C-7 L-13 L6 · Basic buffer", topic:"pH of an NH<sub>4</sub>Cl / NH<sub>3</sub> buffer from pK<sub>b</sub>", t:90,
+ src:"L-13 · LEVEL-6 Q3",
+ q:"At 25&deg;C, the value of pK<sub>b</sub> (K<sub>b</sub> being the dissociation constant of the base) for NH<sub>3</sub> in aqueous solution is 4.7. What is the pH of a 0.1 M aqueous solution of NH<sub>4</sub>Cl with 0.01 M NH<sub>3</sub> (approx.)?",
+ opts:["8.3",
+  "9",
+  "9.5",
+  "10"],
+ ans:0,
+ why:["Correct. pOH = pK<sub>b</sub> + log([NH<sub>4</sub><sup>+</sup>]/[NH<sub>3</sub>]) = 4.7 + log 10 = 5.7, so pH = 14 &minus; 5.7 = 8.3.",
+  "9 comes from dropping the log term and quoting pK<sub>a</sub>(NH<sub>4</sub><sup>+</sup>) &asymp; 9.3 rounded down &mdash; the pH of an <i>equimolar</i> buffer. Here the conjugate acid is in ten-fold excess, which must pull the pH a full unit lower.",
+  "9.5 is again roughly pK<sub>a</sub>(NH<sub>4</sub><sup>+</sup>) = 9.3, i.e. the ratio taken as 1, and it also ignores that excess conjugate acid can only lower the pH.",
+  "10 adds the log term instead of subtracting it: 9.3 + 1 = 10.3 &asymp; 10. The ratio [NH<sub>4</sub><sup>+</sup>]/[NH<sub>3</sub>] = 10 has been written upside down."],
+ sol:"<b>Concept:</b> NH<sub>4</sub>Cl together with NH<sub>3</sub> is a basic buffer &mdash; a weak base plus its conjugate acid &mdash; not a salt-hydrolysis problem. The conjugate acid is in ten-fold excess, so the pH sits one unit below pK<sub>a</sub>(NH<sub>4</sub><sup>+</sup>).<br><b>Key relation:</b> pOH = pK<sub>b</sub> + log([NH<sub>4</sub><sup>+</sup>]/[NH<sub>3</sub>]), then pH = 14 &minus; pOH at 25 &deg;C. Henderson is reliable here because both species are present at 0.01 M or more, far above the amounts that ionisation itself would create.<br><b>1.</b> Identify the pair: base NH<sub>3</sub> = 0.01 M; conjugate acid NH<sub>4</sub><sup>+</sup> (from fully dissociated NH<sub>4</sub>Cl) = 0.1 M.<br><b>2.</b> Given pK<sub>b</sub> = 4.7, so K<sub>b</sub> = 2&times;10<sup>&minus;5</sup>.<br><b>3.</b> pOH = pK<sub>b</sub> + log([NH<sub>4</sub><sup>+</sup>]/[NH<sub>3</sub>]) = 4.7 + log(0.1/0.01) = 4.7 + 1 = <b>5.7</b>.<br><b>4.</b> pH = 14 &minus; 5.7 = <b>8.3</b>.<br><b>5.</b> Cross-check through the acid form: pK<sub>a</sub>(NH<sub>4</sub><sup>+</sup>) = 14 &minus; 4.7 = 9.3, and pH = pK<sub>a</sub> + log([NH<sub>3</sub>]/[NH<sub>4</sub><sup>+</sup>]) = 9.3 + log(1/10) = 9.3 &minus; 1 = <b>8.3</b>. Both routes agree.<br><b>6.</b> Plausibility: 0.1 M NH<sub>4</sub>Cl alone would be acidic (pH &asymp; 5.1); the added NH<sub>3</sub> lifts it above 7, but the 10:1 excess of NH<sub>4</sub><sup>+</sup> keeps it well below 9.3.<br><b>&#9889; JEE Trick:</b> Every ten-fold excess of the conjugate acid moves the pH one unit <i>below</i> pK<sub>a</sub>(BH<sup>+</sup>), so 9.3 &minus; 1 = 8.3 in a single step, with no pOH detour.<br><b>Answer: (a) 8.3.</b>"},
+{id:12, lec:"C7", blk:"C-7 L-13 L4 · Salt hydrolysis", topic:"What an alkaline salt solution proves about the parent acid and base", t:90,
+ src:"L-13 · LEVEL-4 Q6",
+ q:"The aqueous solution of a salt is alkaline. This shows that the salt is made from",
+ opts:["A weak acid and a weak base",
+  "A weak acid and a strong base",
+  "A strong acid and a strong base",
+  "A strong acid and a weak base"],
+ ans:1,
+ why:["A weak&ndash;weak salt is alkaline only when K<sub>b</sub> &gt; K<sub>a</sub>: CH<sub>3</sub>COONH<sub>4</sub> is neutral and NH<sub>4</sub>F is acidic. Alkalinity therefore does not <i>show</i> this combination &mdash; the slip is treating one favourable example (NH<sub>4</sub>CN) as the general rule.",
+  "Correct. The anion of a weak acid is a Br&oslash;nsted base: A<sup>&minus;</sup> + H<sub>2</sub>O &#8652; HA + OH<sup>&minus;</sup>, while the cation of a strong base is inert. pH = 7 + (1/2)pK<sub>a</sub> + (1/2)log C &gt; 7 for every such salt.",
+  "Strong acid + strong base (NaCl, KNO<sub>3</sub>): neither ion reacts with water, so pH = 7 exactly &mdash; neutral, never alkaline. Chosen by confusing &ldquo;a strong base among the parents&rdquo; with &ldquo;a basic solution&rdquo;.",
+  "Strong acid + weak base (NH<sub>4</sub>Cl): the cation hydrolyses and pH = 7 &minus; (1/2)pK<sub>b</sub> &minus; (1/2)log C &lt; 7 &mdash; acidic, the exact opposite. It is the answer to the mirror-image question."],
+ sol:"<b>Concept:</b> A salt solution turns alkaline when its <i>anion</i> hydrolyses while its cation does not. That combination is exactly &ldquo;weak parent acid, strong parent base&rdquo; &mdash; the solution takes the character of the stronger parent.<br><b>Key relation:</b> pH = 7 + (1/2)pK<sub>a</sub> + (1/2)log C for a weak-acid/strong-base salt, which exceeds 7 whenever pK<sub>a</sub> + log C &gt; 0 &mdash; true for every realistic weak acid at any ordinary concentration.<br><b>1.</b> Strong acid + strong base (NaCl): Na<sup>+</sup> is too large and weakly charged to polarise water, and Cl<sup>&minus;</sup> is the conjugate base of a strong acid, hence a negligible base. No hydrolysis, <b>pH = 7</b>. (c) is out.<br><b>2.</b> Strong acid + weak base (NH<sub>4</sub>Cl): NH<sub>4</sub><sup>+</sup> + H<sub>2</sub>O &#8652; NH<sub>4</sub>OH + H<sup>+</sup>; for 0.1 M, pH = 7 &minus; (1/2)(4.74) &minus; (1/2)log 0.1 = 7 &minus; 2.37 + 0.5 = <b>5.13</b>, acidic. (d) is out.<br><b>3.</b> Weak acid + strong base (CH<sub>3</sub>COONa): CH<sub>3</sub>COO<sup>&minus;</sup> + H<sub>2</sub>O &#8652; CH<sub>3</sub>COOH + OH<sup>&minus;</sup>; for 0.1 M, pH = 7 + 2.37 &minus; 0.5 = <b>8.87</b> &mdash; alkaline, and alkaline for any weak acid at any concentration.<br><b>4.</b> Weak acid + weak base (CH<sub>3</sub>COONH<sub>4</sub>): pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>) = 7 + (1/2)(4.74 &minus; 4.74) = <b>7.0</b>. Such a salt is alkaline only if K<sub>b</sub> &gt; K<sub>a</sub> and acidic if K<sub>a</sub> &gt; K<sub>b</sub>, so the observation does not pin it down.<br><b>5.</b> Exactly one option is alkaline unconditionally, so an alkaline solution <i>shows</i> the salt came from <b>a weak acid and a strong base</b> &mdash; option (b).<br><b>&#9889; JEE Trick:</b> Read the verb. &ldquo;Shows that&rdquo; demands a guarantee, so an option that is only sometimes true, like (a), fails even though NH<sub>4</sub>CN really is alkaline.<br><b>Answer: (b) A weak acid and a strong base.</b>"},
+{id:13, lec:"C7", blk:"C-7 L-14 L6 · Combining equilibria", topic:"Equilibrium constant of a proton-transfer reaction from the two acids' K<sub>a</sub> values", t:90,
+ src:"L-14 · LEVEL-6 Q5",
+ q:"The dissociation constants of acetic acid and HCN at 25&deg;C are 1.5&times;10<sup>&minus;4</sup> and 4.5&times;10<sup>&minus;10</sup> respectively. The equilibrium constant for the equilibrium CN<sup>&minus;</sup> + CH<sub>3</sub>COOH &#8652; HCN + CH<sub>3</sub>COO<sup>&minus;</sup> would be",
+ opts:["3&times;10<sup>&minus;5</sup>",
+  "3&times;10<sup>&minus;4</sup>",
+  "3.33&times;10<sup>&minus;5</sup>",
+  "3.33&times;10<sup>5</sup>"],
+ ans:3,
+ why:["3&times;10<sup>&minus;5</sup> uses the ratio the wrong way round, K<sub>a</sub>(HCN)/K<sub>a</sub>(CH<sub>3</sub>COOH) = (4.5/1.5)&times;10<sup>&minus;6</sup> = 3&times;10<sup>&minus;6</sup> &mdash; the constant of the <i>reverse</i> reaction &mdash; and then slips one power of ten.",
+  "3&times;10<sup>&minus;4</sup> is the same reverse ratio 3&times;10<sup>&minus;6</sup> with two powers of ten lost. Either way it describes HCN protonating acetate, which is the uphill direction.",
+  "3.33&times;10<sup>&minus;5</sup> has the correct mantissa but the exponent's sign flipped. Since the reaction converts the stronger acid (CH<sub>3</sub>COOH) into the weaker one (HCN), K must be far greater than 1, so a negative exponent is impossible.",
+  "Correct. K = K<sub>a</sub>(CH<sub>3</sub>COOH)/K<sub>a</sub>(HCN) = 1.5&times;10<sup>&minus;4</sup>/4.5&times;10<sup>&minus;10</sup> = 0.333&times;10<sup>6</sup> = 3.33&times;10<sup>5</sup>."],
+ sol:"<b>Concept:</b> The reaction is a proton hand-off from one weak acid to the anion of another. Build it by adding the dissociation of the <i>donor</i> acid to the reverse of the dissociation of the <i>acceptor's</i> acid; adding reactions multiplies their constants, so the answer is a ratio of the two K<sub>a</sub> values.<br><b>Key relation:</b> K = K<sub>a</sub>(acid that loses the proton)/K<sub>a</sub>(acid that is formed). Equivalently K = K<sub>a</sub>(CH<sub>3</sub>COOH) &times; K<sub>b</sub>(CN<sup>&minus;</sup>)/K<sub>w</sub>, since K<sub>b</sub>(CN<sup>&minus;</sup>) = K<sub>w</sub>/K<sub>a</sub>(HCN).<br><b>1.</b> Step one: CH<sub>3</sub>COOH &#8652; H<sup>+</sup> + CH<sub>3</sub>COO<sup>&minus;</sup>, constant K<sub>a</sub>(CH<sub>3</sub>COOH) = 1.5&times;10<sup>&minus;4</sup>.<br><b>2.</b> Step two: H<sup>+</sup> + CN<sup>&minus;</sup> &#8652; HCN, constant 1/K<sub>a</sub>(HCN) = 1/(4.5&times;10<sup>&minus;10</sup>).<br><b>3.</b> Adding the two steps gives exactly CN<sup>&minus;</sup> + CH<sub>3</sub>COOH &#8652; HCN + CH<sub>3</sub>COO<sup>&minus;</sup>, with H<sup>+</sup> cancelling, so K is the product of the two constants.<br><b>4.</b> K = K<sub>a</sub>(CH<sub>3</sub>COOH)/K<sub>a</sub>(HCN) = (1.5&times;10<sup>&minus;4</sup>)/(4.5&times;10<sup>&minus;10</sup>) = (1.5/4.5) &times; 10<sup>(&minus;4+10)</sup> = 0.3333 &times; 10<sup>6</sup> = <b>3.33&times;10<sup>5</sup></b>.<br><b>5.</b> Alternative route: K<sub>b</sub>(CN<sup>&minus;</sup>) = K<sub>w</sub>/K<sub>a</sub>(HCN) = 10<sup>&minus;14</sup>/4.5&times;10<sup>&minus;10</sup> = 2.22&times;10<sup>&minus;5</sup>; then K = K<sub>a</sub>(CH<sub>3</sub>COOH)K<sub>b</sub>(CN<sup>&minus;</sup>)/K<sub>w</sub> = (1.5&times;10<sup>&minus;4</sup>)(2.22&times;10<sup>&minus;5</sup>)/10<sup>&minus;14</sup> = <b>3.33&times;10<sup>5</sup></b>. Same value.<br><b>6.</b> Direction check: acetic acid (K<sub>a</sub> = 1.5&times;10<sup>&minus;4</sup>) is about 330,000 times the stronger acid, and a stronger acid always drives a weaker one's anion to pick up the proton. So K &#8811; 1 is required &mdash; which eliminates (a), (b) and (c) at a glance.<br><b>&#9889; JEE Trick:</b> For any proton-transfer equilibrium between two weak acids, K = K<sub>a</sub>(reactant acid)/K<sub>a</sub>(product acid). Fix the direction before computing: stronger acid on the left means K &gt; 1, and the only option above 1 here is (d).<br><b>Answer: (d) 3.33&times;10<sup>5</sup>.</b>"},
+{id:14, lec:"C7", blk:"C-7 L-14 L4 · Ksp and solubility", topic:"K<sub>sp</sub> of Mg(OH)<sub>2</sub> written in terms of its molar solubility", t:90,
+ src:"L-14 · LEVEL-4 Q7",
+ q:"Solubility of an aqueous solution of Mg(OH)<sub>2</sub> is X mol litre<sup>&minus;1</sup>, then its K<sub>sp</sub> is:",
+ opts:["4X<sup>3</sup>",
+  "108X<sup>5</sup>",
+  "27X<sup>4</sup>",
+  "9X"],
+ ans:0,
+ why:["Correct. Mg(OH)<sub>2</sub>(s) &#8652; Mg<sup>2+</sup> + 2OH<sup>&minus;</sup> gives [Mg<sup>2+</sup>] = X and [OH<sup>&minus;</sup>] = 2X, so K<sub>sp</sub> = (X)(2X)<sup>2</sup> = 4X<sup>3</sup>.",
+  "108X<sup>5</sup> is the K<sub>sp</sub> of an A<sub>3</sub>B<sub>2</sub> salt such as Ca<sub>3</sub>(PO<sub>4</sub>)<sub>2</sub>: (3X)<sup>3</sup>(2X)<sup>2</sup> = 27 &times; 4 X<sup>5</sup>. It imports a 3:2 stoichiometry that Mg(OH)<sub>2</sub> does not have.",
+  "27X<sup>4</sup> belongs to an AB<sub>3</sub> salt such as Al(OH)<sub>3</sub>: (X)(3X)<sup>3</sup> = 27X<sup>4</sup>. It counts three hydroxides instead of the two in Mg(OH)<sub>2</sub>.",
+  "9X keeps the ions' coefficients as plain multipliers and loses the powers entirely. It is also dimensionally impossible: K<sub>sp</sub> for a three-ion salt must scale as concentration cubed, not linearly."],
+ sol:"<b>Concept:</b> For a sparingly soluble salt, write the dissolution equation, express every ion concentration as a multiple of the molar solubility, then substitute into K<sub>sp</sub> with each ion <i>raised to its coefficient</i>. Mg(OH)<sub>2</sub> is a 1:2 salt, so hydroxide appears both multiplied by 2 and squared &mdash; the factor 4 comes from that square, not from the formula.<br><b>Key relation:</b> AB<sub>2</sub>(s) &#8652; A<sup>2+</sup> + 2B<sup>&minus;</sup>; K<sub>sp</sub> = [A<sup>2+</sup>][B<sup>&minus;</sup>]<sup>2</sup> = (X)(2X)<sup>2</sup> = 4X<sup>3</sup>, valid for a saturated solution in pure water (no common ion, no added acid).<br><b>1.</b> Dissolution: Mg(OH)<sub>2</sub>(s) &#8652; Mg<sup>2+</sup>(aq) + 2OH<sup>&minus;</sup>(aq).<br><b>2.</b> If X mol L<sup>&minus;1</sup> dissolves, each formula unit yields one Mg<sup>2+</sup>, so [Mg<sup>2+</sup>] = <b>X</b>.<br><b>3.</b> Each formula unit yields two OH<sup>&minus;</sup>, so [OH<sup>&minus;</sup>] = <b>2X</b>.<br><b>4.</b> K<sub>sp</sub> = [Mg<sup>2+</sup>][OH<sup>&minus;</sup>]<sup>2</sup> = (X)(2X)<sup>2</sup> = X &times; 4X<sup>2</sup> = <b>4X<sup>3</sup></b> &mdash; option (a).<br><b>5.</b> Numerical check: the real solubility of Mg(OH)<sub>2</sub> is X &asymp; 1.4&times;10<sup>&minus;4</sup> M, so K<sub>sp</sub> = 4(1.4&times;10<sup>&minus;4</sup>)<sup>3</sup> = 4 &times; 2.74&times;10<sup>&minus;12</sup> = 1.1&times;10<sup>&minus;11</sup>, which matches the tabulated value &mdash; confirming the form.<br><b>6.</b> Inverting the relation when K<sub>sp</sub> is the given quantity: X = (K<sub>sp</sub>/4)<sup>1/3</sup>, the cube root because three ions are released per formula unit.<br><b>&#9889; JEE Trick:</b> The numerical factor is always &prod;(coefficient)<sup>coefficient</sup>: 1<sup>1</sup>&middot;2<sup>2</sup> = 4 for AB<sub>2</sub>, 1<sup>1</sup>&middot;3<sup>3</sup> = 27 for AB<sub>3</sub>, 3<sup>3</sup>&middot;2<sup>2</sup> = 108 for A<sub>3</sub>B<sub>2</sub>, and the power of X is the total number of ions. Those three numbers are precisely the distractors here.<br><b>Answer: (a) 4X<sup>3</sup>.</b>"},
+{id:15, lec:"C7", blk:"C-7 L-15 L5 · Selective precipitation", topic:"Which salt precipitates first when the common cation is added dropwise to four anions", t:90,
+ src:"L-15 · LEVEL-5 Q6",
+ q:"The solubility products of MA, MB, MC, and MD are 1.8&times;10<sup>&minus;10</sup>, 4&times;10<sup>&minus;3</sup>, 4&times;10<sup>&minus;8</sup> and 6&times;10<sup>&minus;5</sup> respectively. If a 0.01 M solution of MX is added dropwise to a mixture containing A<sup>&minus;</sup>, B<sup>&minus;</sup>, C<sup>&minus;</sup> and D<sup>&minus;</sup> ions, then the one to be precipitated first will be",
+ opts:["MA",
+  "MB",
+  "MC",
+  "MD"],
+ ans:0,
+ why:["Correct. K<sub>sp</sub>(MA) = 1.8&times;10<sup>&minus;10</sup> is the smallest of the four, so MA reaches saturation at the lowest [M<sup>+</sup>] and appears first.",
+  "MB has the <i>largest</i> K<sub>sp</sub>, 4&times;10<sup>&minus;3</sup> &mdash; about 2&times;10<sup>7</sup> times MA's. It needs by far the most added M<sup>+</sup>, so it precipitates last. Chosen by reading &ldquo;largest K<sub>sp</sub>&rdquo; as &ldquo;precipitates most readily&rdquo;.",
+  "MC at 4&times;10<sup>&minus;8</sup> is the second smallest, so it is the second salt to appear, after MA. It is picked by comparing mantissas (4 against 1.8) instead of the full powers of ten.",
+  "MD at 6&times;10<sup>&minus;5</sup> is the third smallest, so it precipitates third. Like (b) and (c) it would need a much higher [M<sup>+</sup>] than MA."],
+ sol:"<b>Concept:</b> Adding the common cation M<sup>+</sup> dropwise raises [M<sup>+</sup>] gradually from near zero. Each salt starts to precipitate as soon as the product [M<sup>+</sup>][anion] reaches its own K<sub>sp</sub>, so the first solid to appear is the one needing the least M<sup>+</sup>. All four salts share the formula type MA (1:1), and the anions are present in the same mixture, so the ranking reduces to the K<sub>sp</sub> values themselves.<br><b>Key relation:</b> MA(s) &#8652; M<sup>+</sup> + A<sup>&minus;</sup>; precipitation begins when [M<sup>+</sup>] = K<sub>sp</sub>/[A<sup>&minus;</sup>]. For equal anion concentrations, the smallest K<sub>sp</sub> gives the smallest threshold.<br><b>1.</b> List the four values in order: MA 1.8&times;10<sup>&minus;10</sup> &lt; MC 4&times;10<sup>&minus;8</sup> &lt; MD 6&times;10<sup>&minus;5</sup> &lt; MB 4&times;10<sup>&minus;3</sup>.<br><b>2.</b> Take the anions at a common 0.01 M for comparison. Threshold for MA: [M<sup>+</sup>] = 1.8&times;10<sup>&minus;10</sup>/0.01 = <b>1.8&times;10<sup>&minus;8</sup> M</b>.<br><b>3.</b> MC needs 4&times;10<sup>&minus;8</sup>/0.01 = <b>4&times;10<sup>&minus;6</sup> M</b>; MD needs 6&times;10<sup>&minus;5</sup>/0.01 = <b>6&times;10<sup>&minus;3</sup> M</b>; MB needs 4&times;10<sup>&minus;3</sup>/0.01 = <b>0.4 M</b>.<br><b>4.</b> So MA requires about 220 times less M<sup>+</sup> than MC, and over 2&times;10<sup>7</sup> times less than MB &mdash; <b>MA precipitates first</b>, option (a).<br><b>5.</b> The order of appearance as more MX is added is MA &rarr; MC &rarr; MD &rarr; MB, exactly the order of increasing K<sub>sp</sub>.<br><b>6.</b> Practical note: MB would in fact never be reached, since the titrant itself is only 0.01 M, well below the 0.4 M needed &mdash; which is why fractional precipitation can separate these ions cleanly.<br><b>&#9889; JEE Trick:</b> &ldquo;Precipitated first&rdquo; with one shared ion and the same stoichiometry always means &ldquo;smallest K<sub>sp</sub>&rdquo;. Compare the exponents before the mantissas &mdash; 10<sup>&minus;10</sup> beats 10<sup>&minus;8</sup> whatever the leading digits say.<br><b>Answer: (a) MA.</b>"},
+{id:16, lec:"C7", blk:"C-7 L-15 L1 · Complexation and solubility", topic:"Effect of aqueous ammonia on the solubility of AgCl", t:60,
+ src:"L-15 · LEVEL-1 Q4",
+ q:"What happens to solubility of AgCl in presence of NH<sub>3</sub>?",
+ opts:["No effect",
+  "Decreases",
+  "Increases",
+  "AgCl decomposes"],
+ ans:0,
+ why:["No effect would require NH<sub>3</sub> to leave [Ag<sup>+</sup>] untouched. It does not: NH<sub>3</sub> is a Lewis base that binds Ag<sup>+</sup> with K<sub>f</sub> &asymp; 1.6&times;10<sup>7</sup>, so the free-ion concentration collapses. This is the letter ICAD's key prints.",
+  "Decreasing is the <i>common-ion</i> result, which needs Ag<sup>+</sup> or Cl<sup>&minus;</sup> to be added (as in AgNO<sub>3</sub> or NaCl). NH<sub>3</sub> supplies neither ion; it removes one.",
+  "&#9888; Correct by working. [Ag(NH<sub>3</sub>)<sub>2</sub>]<sup>+</sup> formation strips out free Ag<sup>+</sup>, so the ionic product falls below K<sub>sp</sub> and more AgCl dissolves &mdash; in 1 M NH<sub>3</sub> roughly 4,000 times more than in water.",
+  "AgCl does not decompose: no bond is broken by redox or thermal change. The silver simply enters solution as the diammine complex and reprecipitates unchanged when HNO<sub>3</sub> destroys the complex."],
+ sol:"<b>Concept:</b> Ammonia is a Lewis base that binds Ag<sup>+</sup> as the very stable diammine complex [Ag(NH<sub>3</sub>)<sub>2</sub>]<sup>+</sup>. Removing free Ag<sup>+</sup> pushes the ionic product below K<sub>sp</sub>, so more AgCl must dissolve. K<sub>sp</sub> itself is unchanged &mdash; what changes is how little of the dissolved silver remains as the free ion.<br><b>Key relation:</b> AgCl(s) + 2NH<sub>3</sub> &#8652; [Ag(NH<sub>3</sub>)<sub>2</sub>]<sup>+</sup> + Cl<sup>&minus;</sup>, with K = K<sub>sp</sub> &times; K<sub>f</sub> = (1.8&times;10<sup>&minus;10</sup>)(1.6&times;10<sup>7</sup>) = 2.9&times;10<sup>&minus;3</sup>.<br><b>1.</b> In pure water: s = &radic;K<sub>sp</sub> = &radic;(1.8&times;10<sup>&minus;10</sup>) = <b>1.34&times;10<sup>&minus;5</sup> M</b>.<br><b>2.</b> With NH<sub>3</sub> present, essentially all dissolved silver is complexed, so [[Ag(NH<sub>3</sub>)<sub>2</sub>]<sup>+</sup>] = [Cl<sup>&minus;</sup>] = s.<br><b>3.</b> In 1 M NH<sub>3</sub>: s<sup>2</sup>/[NH<sub>3</sub>]<sup>2</sup> = 2.9&times;10<sup>&minus;3</sup> &rArr; s = &radic;(2.9&times;10<sup>&minus;3</sup>) = <b>0.054 M</b> &mdash; about 4,000 times the value in water.<br><b>4.</b> Consistency check: that solution still obeys K<sub>sp</sub>, because free [Ag<sup>+</sup>] = K<sub>sp</sub>/[Cl<sup>&minus;</sup>] = 1.8&times;10<sup>&minus;10</sup>/0.054 = 3.3&times;10<sup>&minus;9</sup> M &mdash; vanishingly small, held down by the complex.<br><b>5.</b> So solubility <b>increases</b>: a white AgCl precipitate visibly clears on adding aqueous ammonia. This is the classical test that distinguishes AgCl (dissolves) from AgBr (partly) and AgI (does not), because their K<sub>sp</sub> values fall too low for K<sub>sp</sub>K<sub>f</sub> to help.<br><b>6.</b> Adding HNO<sub>3</sub> afterwards protonates the ammonia, destroys the complex and re-precipitates AgCl &mdash; proof the salt was dissolved, not decomposed. The working gives <b>(c)</b>.<br><b>&#9889; JEE Trick:</b> Anything that removes a free ion from solution &mdash; a complexing ligand, or acid acting on a weak-acid anion &mdash; raises solubility; only adding one of the salt's own ions lowers it.<br>&#9888; ICAD's key says (a) No effect; the working gives (c) Increases, because NH<sub>3</sub> complexes Ag<sup>+</sup> (K<sub>f</sub> &asymp; 1.6&times;10<sup>7</sup>), making the overall constant K<sub>sp</sub>K<sub>f</sub> = 2.9&times;10<sup>&minus;3</sup> and lifting the solubility in 1 M NH<sub>3</sub> from 1.3&times;10<sup>&minus;5</sup> M to about 0.05 M.<br><b>Answer: (a) No effect per the key &mdash; derived (c) Increases.</b>"},
+{id:17, lec:"C7", blk:"C-7 L-16 L6 · Titration curves", topic:"pH at the equivalence point of a weak acid titrated with NaOH, read off a titration curve", t:90,
+ src:"L-16 · LEVEL-6 Q5",
+ q:"Passage (2&ndash;6): Acid-base indicators are weak organic acids or bases; for an acid indicator HIn, HIn &#8652; H<sup>+</sup> + In<sup>&minus;</sup> and pH = pK<sub>In</sub> + log([In<sup>&minus;</sup>]/[HIn]), with the colour change spanning pK<sub>In</sub> &plusmn; 1. Two acids HA and HB (5 milli-moles each) are titrated against strong base NaOH (0.1 M). From the titration curve of HB: the initial pH is 3 and the pH is 5 after 25 mL of NaOH has been added (the half-equivalence point). Calculate the pH at the equivalent point when HB is titrated with NaOH.",
+ opts:["8.75",
+  "8.85",
+  "9.0",
+  "None of these"],
+ ans:1,
+ why:["8.75 is the right method with log 0.05 taken as &minus;1.5 instead of &minus;1.30, giving 9.5 &minus; 0.75. The correct value is log 5 &minus; 2 = 0.70 &minus; 2 = &minus;1.30.",
+  "Correct. pK<sub>a</sub> = 5 from the half-equivalence pH, C<sub>salt</sub> = 5 mmol/100 mL = 0.05 M, so pH = 7 + 2.5 + (1/2)(&minus;1.30) = 8.85.",
+  "9.0 uses C<sub>salt</sub> = 0.1 M, i.e. it forgets that the 50 mL of titrant doubles the volume: 7 + 2.5 + (1/2)(&minus;1) = 9.0. The dilution at equivalence costs exactly 0.15 of a pH unit here.",
+  "8.85 is on the list, so &ldquo;none of these&rdquo; follows from mis-reading the curve &mdash; most often taking the initial pH as pK<sub>a</sub>, which makes C<sub>HB</sub> and hence the acid volume wrong."],
+ sol:"<b>Concept:</b> At the equivalence point only the salt NaB remains, and B<sup>&minus;</sup> hydrolyses to make the solution basic. Its concentration needs the <i>total</i> volume, which needs the volume of acid taken &mdash; and that comes from the initial pH on the curve. The trap is to ignore the dilution and use the original 0.1 M.<br><b>Key relation:</b> pH = 7 + (1/2)pK<sub>a</sub> + (1/2)log C<sub>salt</sub>, the hydrolysis result for the salt of a weak acid and a strong base, valid while h &#8810; 1.<br><b>1.</b> At half-equivalence [HB] = [B<sup>&minus;</sup>], so pH = pK<sub>a</sub>. The curve reads pH 5 at 25 mL, giving <b>pK<sub>a</sub> = 5</b>, K<sub>a</sub> = 10<sup>&minus;5</sup>.<br><b>2.</b> Initial pH 3 means [H<sup>+</sup>] = 10<sup>&minus;3</sup> M, so C<sub>HB</sub> = [H<sup>+</sup>]<sup>2</sup>/K<sub>a</sub> = 10<sup>&minus;6</sup>/10<sup>&minus;5</sup> = <b>0.1 M</b>. Check: &alpha; = 10<sup>&minus;3</sup>/0.1 = 1%, so the weak-acid approximation holds.<br><b>3.</b> Volume of acid = 5 mmol / 0.1 M = <b>50 mL</b>, and the NaOH needed is also 5 mmol / 0.1 M = <b>50 mL</b> &mdash; consistent with half-equivalence falling at 25 mL.<br><b>4.</b> Total volume at equivalence = 50 + 50 = 100 mL, so [NaB] = 5 mmol / 100 mL = <b>0.05 M</b>.<br><b>5.</b> pH = 7 + (1/2)(5) + (1/2)log 0.05 = 9.5 + (1/2)(&minus;1.30) = 9.5 &minus; 0.65 = <b>8.85</b>.<br><b>6.</b> Hydrolysis check: K<sub>h</sub> = K<sub>w</sub>/K<sub>a</sub> = 10<sup>&minus;9</sup>, so h = &radic;(10<sup>&minus;9</sup>/0.05) = 1.4&times;10<sup>&minus;4</sup> &#8810; 1 &mdash; the formula is safely applicable, and [OH<sup>&minus;</sup>] = Ch = 7&times;10<sup>&minus;6</sup> M gives pH 8.85 again.<br><b>&#9889; JEE Trick:</b> Read two numbers off any weak-acid titration curve: the pH at half-equivalence is pK<sub>a</sub>, and the initial pH fixes the concentration. Then never forget that equal-concentration titrant halves the salt concentration at equivalence &mdash; that single step separates 8.85 from the decoy 9.0.<br><b>Answer: (b) 8.85.</b>"},
+{id:18, lec:"C7", blk:"C-7 L-16 L2 · pH and pOH", topic:"pOH of a 0.001 M strong base solution", t:60,
+ src:"L-16 · LEVEL-2 Q2",
+ q:"The pOH of 0.001 M NaOH solution is: (Use: pOH = &minus;log [OH<sup>&minus;</sup>])",
+ opts:["1",
+  "2",
+  "3",
+  "4"],
+ ans:0,
+ why:["1 would require [OH<sup>&minus;</sup>] = 0.1 M, a hundred times the stated concentration. It comes from reading 0.001 as 0.1, i.e. counting one decimal place instead of three. This is the letter ICAD's key prints.",
+  "2 would need [OH<sup>&minus;</sup>] = 0.01 M, ten times too concentrated &mdash; one decimal place lost.",
+  "&#9888; Correct by working. NaOH dissociates completely, so [OH<sup>&minus;</sup>] = 1&times;10<sup>&minus;3</sup> M and pOH = &minus;log(10<sup>&minus;3</sup>) = 3.",
+  "4 would need [OH<sup>&minus;</sup>] = 10<sup>&minus;4</sup> M. It appears if the 0.001 M is treated as though it were partially dissociated, or if an extra decimal place is added."],
+ sol:"<b>Concept:</b> NaOH is a strong, monoacidic base: it dissociates completely, so the hydroxide concentration simply equals the molarity of NaOH. pOH is then minus the logarithm of that number &mdash; no equilibrium constant is involved at all.<br><b>Key relation:</b> pOH = &minus;log[OH<sup>&minus;</sup>] and pH + pOH = 14 at 25 &deg;C (K<sub>w</sub> = 10<sup>&minus;14</sup>).<br><b>1.</b> NaOH &rarr; Na<sup>+</sup> + OH<sup>&minus;</sup> goes to completion, one OH<sup>&minus;</sup> per formula unit.<br><b>2.</b> So [OH<sup>&minus;</sup>] = C = 0.001 M = <b>1&times;10<sup>&minus;3</sup> M</b>.<br><b>3.</b> Water's own contribution (about 10<sup>&minus;7</sup> M) is ten thousand times smaller and is ignored; it only matters when C falls below about 10<sup>&minus;6</sup> M.<br><b>4.</b> pOH = &minus;log(1&times;10<sup>&minus;3</sup>) = 3 &minus; log 1 = <b>3</b>.<br><b>5.</b> Cross-check through pH: pH = 14 &minus; 3 = <b>11</b>, a sensible value for a dilute strong base &mdash; alkaline but far from the pH 14 of 1 M NaOH.<br><b>6.</b> The other options each correspond to a different concentration: pOH 1 to 0.1 M, pOH 2 to 0.01 M and pOH 4 to 10<sup>&minus;4</sup> M &mdash; none of them to the 0.001 M given.<br><b>&#9889; JEE Trick:</b> For a strong base the exponent <i>is</i> the pOH: 10<sup>&minus;3</sup> M &rarr; pOH 3, straight off. Count the decimal places in 0.001 carefully &mdash; that single slip is what produces options (a) and (b).<br>&#9888; ICAD's key says (a) 1; the working gives (c) 3, because 0.001 M NaOH is 10<sup>&minus;3</sup> M in OH<sup>&minus;</sup> and &minus;log(10<sup>&minus;3</sup>) = 3; pOH 1 would need 0.1 M NaOH.<br><b>Answer: (a) 1 per the key &mdash; derived (c) 3.</b>"},
+{id:19, lec:"C7", blk:"C-7 L-5 L6 · van't Hoff equation", topic:"Enthalpy change from K at two temperatures, then reversed for the reverse reaction", t:90,
+ src:"L-5 · LEVEL-6 Q9",
+ q:"<b>Passage (Q6&ndash;Q9), continued.</b> The equilibrium constant K<sub>p</sub> for the reaction A(g) &#8652; B(g) + C(g) is 1 at 27&nbsp;&deg;C and 4 at 47&nbsp;&deg;C. For the reaction B(g) + C(g) &#8652; A(g), calculate the enthalpy change. (Given: R = 2 cal/mol&middot;K)",
+ opts:["&minus;13.31 kcal/mol",
+  "13.31 kcal/mol",
+  "&minus;19.2 kcal/mol",
+  "55.63 kcal/mol"],
+ ans:0,
+ why:["Correct. The forward dissociation is endothermic at +13.31 kcal/mol, so the reverse reaction asked for is &minus;13.31 kcal/mol.",
+  "The right magnitude but for the wrong reaction: +13.31 kcal/mol belongs to A &rarr; B + C, and the question asks about B + C &rarr; A.",
+  "An arithmetic slip in the reciprocal-temperature difference: it corresponds to [1/T<sub>1</sub> &minus; 1/T<sub>2</sub>] &asymp; 1.44&times;10<sup>&minus;4</sup> instead of the correct 2.08&times;10<sup>&minus;4</sup>.",
+  "Both faults together &mdash; the sign left unreversed and the 2.303/R bookkeeping mishandled, which inflates the magnitude about four-fold."],
+ sol:"<b>Concept:</b> Two equilibrium constants at two temperatures fix &Delta;H&deg; through the integrated van&rsquo;t Hoff equation. The final twist is that the question asks for the <i>reverse</i> reaction, whose &Delta;H&deg; has the opposite sign.<br><b>Formula:</b> log(K<sub>2</sub>/K<sub>1</sub>) = (&Delta;H&deg;/2.303R)[1/T<sub>1</sub> &minus; 1/T<sub>2</sub>].<br><b>Solution:</b><br>1. Convert the temperatures: T<sub>1</sub> = 27 + 273 = <b>300 K</b>, T<sub>2</sub> = 47 + 273 = <b>320 K</b>, with K<sub>1</sub> = 1 and K<sub>2</sub> = 4.<br>2. Left-hand side: log(4/1) = <b>0.6021</b>.<br>3. Bracket: 1/300 &minus; 1/320 = (320 &minus; 300)/(300 &times; 320) = 20/96 000 = <b>2.0833&times;10<sup>&minus;4</sup> K<sup>&minus;1</sup></b>.<br>4. Solve: &Delta;H&deg; = 0.6021 &times; 2.303 &times; 2 / 2.0833&times;10<sup>&minus;4</sup> = 2.773/2.0833&times;10<sup>&minus;4</sup> = <b>13 310 cal/mol = +13.31 kcal/mol</b> for A &#8652; B + C.<br>5. Sign check on the forward reaction: K rose from 1 to 4 as the temperature rose, and only an <b>endothermic</b> reaction has K increasing with T &mdash; so the positive sign is right.<br>6. Reverse the reaction as the question demands: B + C &#8652; A has &Delta;H&deg; = <b>&minus;13.31 kcal/mol</b> (exothermic, since the recombination releases what the dissociation absorbed).<br>7. Cross-check with Le Chatelier: for the reverse reaction, raising T must now <i>reduce</i> its K from 1 to 1/4, exactly as an exothermic reaction requires.<br><b>&#9889; JEE Trick:</b> Decide the sign before touching the calculator &mdash; K up with T means endothermic, K down means exothermic &mdash; and then read the final line of the question again to see which direction it asks about. Both of the discarded options here differ from the answer only in sign or direction.<br><b>Answer: (a) &minus;13.31 kcal/mol.</b>"},
+{id:20, lec:"C7", blk:"C-7 L-6 L6 · Kp and degree of dissociation", topic:"Finding the percentage dissociation from K<sub>p</sub> and the total pressure for a 1&rarr;2 gaseous dissociation", t:90,
+ src:"L-6 · LEVEL-6 Q6",
+ q:"In the reaction AB(g) &#8652; A(g) + B(g) at 30&nbsp;&deg;C, K<sub>p</sub> for the dissociation equilibrium is 2.56&times;10<sup>&minus;2</sup> atm. If the total pressure at equilibrium is 1 atm, then the percentage dissociation of AB is:",
+ opts:["87%",
+  "13%",
+  "43.5%",
+  "16%"],
+ ans:3,
+ why:["Wrong. 87% = 1 &minus; 0.13: it comes from solving correctly for one quantity and then reporting its complement, i.e. quoting (1&minus;&alpha;) as the dissociated fraction.",
+  "Wrong. 13% comes from writing K<sub>p</sub> = &alpha;<sup>2</sup>P/(1&minus;&alpha;) &mdash; the first power of (1&minus;&alpha;) instead of (1&minus;&alpha;<sup>2</sup>) &mdash; which gives a quadratic whose root is near 0.147&ndash;0.13 instead of the correct 0.158.",
+  "Wrong. 43.5% needs K<sub>p</sub> &asymp; 0.23 atm; it arises from losing the 10<sup>&minus;2</sup> partly, i.e. rooting 0.256 instead of 0.0256 (&radic;0.256 = 0.506, halved to 0.43 region).",
+  "Correct. K<sub>p</sub> = &alpha;<sup>2</sup>P/(1&minus;&alpha;<sup>2</sup>) gives &alpha;<sup>2</sup> = K<sub>p</sub>/(K<sub>p</sub>+P) = 0.0256/1.0256 = 0.02496, so &alpha; = 0.158 &mdash; 15.8%, which rounds to 16%."],
+ sol:"<b>Concept:</b> AB &#8652; A + B takes 1 mol of gas to 2, so the degree of dissociation &alpha; fixes both the mole fractions and the total number of moles. With the total pressure given, K<sub>p</sub> depends on &alpha; and P alone. <b>Key relation:</b> K<sub>p</sub> = &alpha;<sup>2</sup>P/(1 &minus; &alpha;<sup>2</sup>) &rArr; &alpha;<sup>2</sup> = K<sub>p</sub>/(K<sub>p</sub> + P) <b>Solution:</b> 1. Start with 1 mol AB; at equilibrium AB = (1&minus;&alpha;), A = &alpha;, B = &alpha;, total = (1+&alpha;) mol. 2. Partial pressures: p<sub>A</sub> = p<sub>B</sub> = &alpha;P/(1+&alpha;), p<sub>AB</sub> = (1&minus;&alpha;)P/(1+&alpha;). 3. So K<sub>p</sub> = p<sub>A</sub>p<sub>B</sub>/p<sub>AB</sub> = [&alpha;P/(1+&alpha;)]<sup>2</sup> &times; (1+&alpha;)/[(1&minus;&alpha;)P] = &alpha;<sup>2</sup>P/(1&minus;&alpha;<sup>2</sup>). 4. Substituting K<sub>p</sub> = 2.56&times;10<sup>&minus;2</sup> atm, P = 1 atm: 0.0256 = &alpha;<sup>2</sup>/(1&minus;&alpha;<sup>2</sup>) &rArr; &alpha;<sup>2</sup>(1.0256) = 0.0256 &rArr; &alpha;<sup>2</sup> = 0.0256/1.0256 = 0.02496. 5. Taking the root: &alpha; = &radic;0.02496 = 0.158, i.e. <b>15.8% &asymp; 16%</b> &mdash; option (d). 6. Check by the short route: K<sub>p</sub> &#8810; P, so (1&minus;&alpha;<sup>2</sup>) &asymp; 1 and &alpha; &asymp; &radic;K<sub>p</sub> = &radic;0.0256 = 0.16 &mdash; the same answer, the exact treatment shaving only 0.2%. <b>&#9889; JEE Trick:</b> At P = 1 atm the formula collapses to &alpha; = &radic;[K<sub>p</sub>/(K<sub>p</sub>+1)], and for small K<sub>p</sub> that is just &radic;K<sub>p</sub>. Spotting 2.56 = 1.6<sup>2</sup> lands 0.16 at once. <b>Answer: (d) 16%</b> (exactly 15.8%)."},
+{id:21, lec:"C7", blk:"C-7 L-7 L2 · Strong vs weak electrolytes", topic:"Identifying the class of substances that ionise only partially in water", t:60,
+ src:"L-7 · LEVEL-2 Q1",
+ q:"______ are substances that only partially ionize in water.",
+ opts:["Strong electrolytes",
+  "Weak electrolytes",
+  "Salts",
+  "Metals"],
+ ans:1,
+ why:["Wrong. Strong electrolytes ionise <b>completely</b> (&alpha; &asymp; 1) &mdash; the exact opposite of &ldquo;only partially&rdquo;. Picking this means reading past the word <i>partially</i>.",
+  "Correct. A weak electrolyte is by definition one that ionises only partially in water, 0 &lt; &alpha; &lt; 1 &mdash; CH<sub>3</sub>COOH, HCN, H<sub>2</sub>CO<sub>3</sub>, NH<sub>4</sub>OH.",
+  "Wrong. Soluble salts are strong electrolytes: NaCl, KCl and CH<sub>3</sub>COONa are ionic already in the solid and dissociate essentially completely. A couple of covalent salts (HgCl<sub>2</sub>, CdBr<sub>2</sub>) are exceptions, but the class is a strong-electrolyte class.",
+  "Wrong. Metals do not ionise in water at all; they conduct by mobile electrons, which is metallic, not electrolytic, conduction. A metal is not an electrolyte of any kind."],
+ sol:"<b>Concept:</b> The single word <i>partially</i> decides this. Partial ionisation, 0 &lt; &alpha; &lt; 1, is the textbook definition of a weak electrolyte. <b>Key relation:</b> strong: &alpha; &asymp; 1 (complete) | weak: 0 &lt; &alpha; &lt; 1 (an ionic equilibrium exists) | non-electrolyte: &alpha; = 0 <b>Solution:</b> 1. (a) Strong electrolytes ionise completely, so almost no undissociated species is left. Contradicts the stem. Reject. 2. (c) Salts are, bar a few covalent exceptions, strong electrolytes &mdash; ionic in the solid, fully dissociated in water. Reject. 3. (d) Metals give no ions in water; their conduction is electronic. Not electrolytes. Reject. 4. (b) <b>Weak electrolytes</b> are precisely those ionising partially, setting up AB &#8652; A<sup>+</sup> + B<sup>&minus;</sup>. <b>Accept.</b> 5. Standard members: acids CH<sub>3</sub>COOH, HCN, H<sub>2</sub>CO<sub>3</sub>, H<sub>3</sub>BO<sub>3</sub>; bases NH<sub>4</sub>OH, Cu(OH)<sub>2</sub>, Al(OH)<sub>3</sub>. 6. Their solutions conduct poorly, and &alpha; rises on dilution by Ostwald&rsquo;s law, &alpha; &asymp; &radic;(K/C) &mdash; behaviour a strong electrolyte does not show. 7. Keep weak apart from non-electrolyte: &ldquo;partially&rdquo; still means some ions, whereas urea or glucose gives none at all. <b>&#9889; JEE Trick:</b> Scan the stem for the adverb &mdash; <i>completely</i>, <i>partially</i>, <i>not at all</i> &mdash; and it maps straight onto strong / weak / non-electrolyte with no further thought. <b>Answer: (b) Weak electrolytes.</b>"},
+{id:22, lec:"C7", blk:"C-7 L-8 L4 · Lewis acid and base", topic:"Picking the lone-pair donor in the BCl3-PH3 adduct", t:90,
+ src:"L-8 · LEVEL-4 Q6",
+ q:"Which acts as Lewis base in the reaction BCl<sub>3</sub> + PH<sub>3</sub> &rarr; Cl<sub>3</sub>B:PH<sub>3</sub>?",
+ opts:["PH<sub>3</sub>",
+  "BCl<sub>3</sub>",
+  "Both (a) and (b)",
+  "None of these"],
+ ans:0,
+ why:["Correct. P in PH<sub>3</sub> keeps one lone pair after its three bonds, and that pair is donated into the vacant p orbital of boron to make the B&larr;P dative bond. Donating an electron pair makes PH<sub>3</sub> the <b>Lewis base</b>.",
+  "Wrong. BCl<sub>3</sub> is the <b>acceptor</b> here: boron has only six electrons and a vacant orbital, so it is the Lewis acid. This swaps the two roles.",
+  "Wrong. In a single dative bond one species gives the pair and the other takes it; they cannot both be bases. The adduct Cl<sub>3</sub>B:PH<sub>3</sub> is formed by exactly one electron-pair donation.",
+  "Wrong. The adduct forms precisely because one of the two is a Lewis base &mdash; PH<sub>3</sub>. Saying neither is leaves the new B&ndash;P bond with no source of electrons."],
+ sol:"<b>Concept:</b> In every Lewis adduct exactly one partner donates the electron pair and the other accepts it. Count the valence electrons on each central atom and the roles are settled. <b>Key relation:</b> Lewis base = electron-pair <b>donor</b>; Lewis acid = electron-pair <b>acceptor</b>. <b>Solution:</b> 1. Boron in BCl<sub>3</sub> forms three bonds, giving six valence electrons and a <b>vacant</b> 2p orbital &mdash; electron deficient. 2. Phosphorus in PH<sub>3</sub> has five valence electrons, uses three in P&ndash;H bonds, and retains <b>one lone pair</b>. 3. The adduct Cl<sub>3</sub>B:PH<sub>3</sub> contains a new B&ndash;P bond. The two electrons in it can only have come from the phosphorus lone pair. 4. Therefore PH<sub>3</sub> is the donor, the <b>Lewis base</b> (option a), and BCl<sub>3</sub> is the acceptor, the Lewis acid. 5. Electron count after the adduct forms: B has four bonds and a completed octet; P has four bonds and no lone pair left. 6. Geometry confirms it: BCl<sub>3</sub> is trigonal planar (sp<sup>2</sup>) on its own, and on accepting the pair boron rehybridises to sp<sup>3</sup>, so the adduct is pyramidal about boron. A planar-to-pyramidal change about the central atom is the signature of a Lewis acid accepting a pair. 7. The same pairing explains why NH<sub>3</sub>, PH<sub>3</sub>, H<sub>2</sub>O and ethers &mdash; all lone-pair carriers &mdash; form adducts with BF<sub>3</sub> and BCl<sub>3</sub>. <b>&#9889; JEE Trick:</b> Lone pair available &rarr; base; vacant orbital with a six-electron centre &rarr; acid. The colon written in Cl<sub>3</sub>B:PH<sub>3</sub> even points at the donor. <b>Answer:</b> <b>(a) PH<sub>3</sub>.</b>"},
+{id:23, lec:"C7", blk:"C-7 L-9 L4 · Mixing and pH", topic:"Which addition lowers the pH of a strong acid — compare concentrations, not amounts", t:90,
+ src:"L-9 · LEVEL-4 Q7",
+ q:"Which one of the following will decrease the pH of 50 mL of 0.01 M hydrochloric acid?",
+ opts:["Addition of 50 mL of 0.01 M HCl",
+  "Addition of 50 mL of 0.002 M HCl",
+  "Addition of 150 mL of 0.002 M HCl",
+  "Addition of 5 mL of 1 M HCl"],
+ ans:3,
+ why:["Wrong. 0.5 + 0.5 = 1.0 mmol in 100 mL is still 0.01 M. Adding the identical concentration leaves the pH untouched, however much is added.",
+  "Wrong. 0.5 + 0.1 = 0.6 mmol in 100 mL = 0.006 M, <i>lower</i> than 0.01 M, so the pH <i>rises</i> to 2.22.",
+  "Wrong. 0.5 + 0.3 = 0.8 mmol in 200 mL = 0.004 M; more dilute still, so the pH rises further, to 2.40.",
+  "Correct. 0.5 + 5.0 = 5.5 mmol in 55 mL = 0.1 M, ten times the starting value, so the pH falls from 2 to 1."],
+ sol:"<b>Concept:</b> Decreasing the pH means <i>increasing</i> [H<sup>+</sup>]. So the test is not how much acid is added but at what concentration: compare each addition with the 0.01 M already present.<br><b>Key relation:</b> [H<sup>+</sup>]<sub>final</sub> = (total mmol H<sup>+</sup>)/(total volume in mL), with mmol = M &times; V(mL)<br><b>Solution:</b><br>1. Start: 50 mL &times; 0.01 M = <b>0.5 mmol</b> H<sup>+</sup> in 50 mL, so [H<sup>+</sup>] = 0.01 M and pH = 2.<br>2. (a) +50 mL of 0.01 M: (0.5 + 0.5)/100 = <b>0.010 M</b>. Unchanged &mdash; the boundary case.<br>3. (b) +50 mL of 0.002 M: (0.5 + 0.1)/100 = <b>0.006 M</b>, so the pH rises to 2.22. Rejected.<br>4. (c) +150 mL of 0.002 M: (0.5 + 0.3)/200 = <b>0.004 M</b>, pH 2.40. Rejected &mdash; and note that the <i>largest</i> amount of added acid here gives the <i>highest</i> pH, which is the whole point of the question.<br>5. (d) +5 mL of 1 M: (0.5 + 5.0)/55 = <b>0.100 M</b>, so pH = 1. <b>Accepted.</b><br>6. The pattern worth memorising: acid more dilute than what you have raises the pH, acid more concentrated lowers it, identical leaves it alone. Mixing two solutions of the same solute always lands strictly between their two concentrations.<br><b>&#9889; JEE Trick:</b> compare concentrations first and no arithmetic is needed &mdash; only (d) is more concentrated than 0.01 M, so only (d) can lower the pH.<br>Answer: <b>(d) Addition of 5 mL of 1 M HCl.</b>"},
+{id:24, lec:"C7", blk:"C-7 SB SB · Polyprotic titration", topic:"pH at the second equivalence point of a Na<sub>2</sub>CO<sub>3</sub> vs HCl titration", t:90,
+ src:"Strong Box &middot; LEVEL-10 Q5(v)",
+ q:"The first and second dissociation constants of H<sub>2</sub>CO<sub>3</sub> are 4.0&times;10<sup>&minus;6</sup> and 2.5&times;10<sup>&minus;11</sup> respectively. 50 mL of 1.0 M Na<sub>2</sub>CO<sub>3</sub> is taken in a flask and 1.0 M HCl is added drop by drop; volumes are additive (log 2 = 0.3, log 3 = 0.48). Determine the pH of the resulting solution after adding 100 mL of the HCl solution.",
+ opts:["2.94",
+  "11.06",
+  "5.4",
+  "5.88"],
+ ans:0,
+ why:["Correct. 100 mmol H<sup>+</sup> on 50 mmol CO<sub>3</sub><sup>2&minus;</sup> is exactly 2 equivalents, leaving only H<sub>2</sub>CO<sub>3</sub> at 1/3 M; [H<sup>+</sup>] = &radic;(K<sub>a1</sub>C) = 1.15&times;10<sup>&minus;3</sup> M gives pH 2.94.",
+  "This is 14 &minus; 2.94: the pOH has been reported as the pH. At the second equivalence point the flask holds a pure weak acid, so it cannot be alkaline.",
+  "This is pK<sub>a1</sub> = &minus;log(4.0&times;10<sup>&minus;6</sup>) = 5.4, the pH at the 75 mL point where [HCO<sub>3</sub><sup>&minus;</sup>] = [H<sub>2</sub>CO<sub>3</sub>]. It stops one half-equivalence short of 100 mL.",
+  "Skips the square root: it is &minus;log(K<sub>a1</sub>C) = &minus;log(1.33&times;10<sup>&minus;6</sup>) = 5.88 instead of &minus;log&radic;(K<sub>a1</sub>C). It also lies above the 5.4 already reached, impossible since adding HCl can only lower the pH."],
+ sol:"<b>Concept:</b> Each mole of CO<sub>3</sub><sup>2&minus;</sup> needs two moles of H<sup>+</sup> to become H<sub>2</sub>CO<sub>3</sub>. 100 mmol of acid on 50 mmol of carbonate is precisely that, so the flask holds pure carbonic acid &mdash; a plain weak-acid problem on K<sub>a1</sub>.<br><b>Formula:</b> [H<sup>+</sup>] = &radic;(K<sub>a1</sub>C); pH = &minus;log[H<sup>+</sup>].<br><b>Solution:</b><br>1. Moles: CO<sub>3</sub><sup>2&minus;</sup> = 50 mL &times; 1.0 M = 50 mmol; H<sup>+</sup> added = 100 mL &times; 1.0 M = 100 mmol.<br>2. The first 50 mmol H<sup>+</sup> convert CO<sub>3</sub><sup>2&minus;</sup> &rarr; HCO<sub>3</sub><sup>&minus;</sup>; the next 50 mmol convert HCO<sub>3</sub><sup>&minus;</sup> &rarr; H<sub>2</sub>CO<sub>3</sub>. Nothing is left over of either.<br>3. Volume = 50 + 100 = 150 mL, so C(H<sub>2</sub>CO<sub>3</sub>) = 50/150 = 1/3 = 0.333 M.<br>4. [H<sup>+</sup>] = &radic;(K<sub>a1</sub>C) = &radic;(4.0&times;10<sup>&minus;6</sup> &times; 1/3) = (2/&radic;3)&times;10<sup>&minus;3</sup> = 1.15&times;10<sup>&minus;3</sup> M; K<sub>a2</sub> is 10<sup>5</sup> times smaller and is ignored.<br>5. pH = &minus;log[(2/&radic;3)&times;10<sup>&minus;3</sup>] = 3 &minus; log 2 + (1/2)log 3 = 3 &minus; 0.30 + 0.24 = <b>2.94</b>.<br>6. Validity and monotonicity checks: &alpha; = 1.15&times;10<sup>&minus;3</sup>/0.333 = 3.5&times;10<sup>&minus;3</sup>, far below 1, so the approximation holds; and the pH has fallen below the 5.4 of the 75 mL point, as adding acid must.<br><b>&#9889; JEE Trick:</b> locate the volume on the titration curve first (half-equivalence gives pK<sub>a</sub>, equivalence gives the salt, beyond it excess acid). pH falls monotonically, so any option above the previous reading is out by inspection.<br>Answer: <b>(a)</b> 2.94."},
+{id:25, lec:"C7", blk:"C-7 SB SB · Acid strength comparison", topic:"Equilibrium constant of a proton-exchange reaction between two weak acids from their K<sub>a</sub> values", t:90,
+ src:"Strong Box &middot; LEVEL-7 Q10(iv)",
+ q:"In a passage on acid-base indicators two weak acids are titrated, the curves giving pK<sub>a</sub>(HB) = 5 and pK<sub>a</sub>(HA) = 6. What is the equilibrium constant for the reaction HB(aq.) + NaA(aq.) &#8652; HA(aq.) + NaB(aq.)?",
+ opts:["10",
+  "0.1",
+  "10<sup>&minus;7</sup>",
+  "10<sup>&minus;11</sup>"],
+ ans:0,
+ why:["Correct. Na<sup>+</sup> is a spectator, so K = K<sub>a</sub>(HB)/K<sub>a</sub>(HA) = 10<sup>&minus;5</sup>/10<sup>&minus;6</sup> = 10: the stronger acid HB protonates A<sup>&minus;</sup>, so K &gt; 1.",
+  "The reciprocal, K<sub>a</sub>(HA)/K<sub>a</sub>(HB) &mdash; the reaction read backwards. It would mean the weaker acid HA protonates B<sup>&minus;</sup>, contradicting pK<sub>a</sub>(HB) &lt; pK<sub>a</sub>(HA).",
+  "Brings in &radic;K<sub>w</sub> = 10<sup>&minus;7</sup>, i.e. treats the exchange as a hydrolysis measured against water instead of as a ratio of the two K<sub>a</sub> values. Water does not appear in this equation at all.",
+  "Multiplies the constants, K<sub>a</sub>(HB)&times;K<sub>a</sub>(HA) = 10<sup>&minus;5</sup>&times;10<sup>&minus;6</sup> = 10<sup>&minus;11</sup>. Constants multiply when equations are <i>added</i>; here one dissociation is subtracted from the other, so they divide."],
+ sol:"<b>Concept:</b> A proton-transfer reaction between two weak acids is the first acid's dissociation <i>minus</i> the second's, so its K is the quotient of their K<sub>a</sub> values. Adding equations multiplies K; subtracting divides.<br><b>Formula:</b> for HB + A<sup>&minus;</sup> &#8652; HA + B<sup>&minus;</sup>, K = K<sub>a</sub>(HB)/K<sub>a</sub>(HA).<br><b>Solution:</b><br>1. Strip the spectator: NaA and NaB are fully dissociated, so the real reaction is HB + A<sup>&minus;</sup> &#8652; HA + B<sup>&minus;</sup>.<br>2. Build it from the two dissociations: HB &#8652; H<sup>+</sup> + B<sup>&minus;</sup> (K<sub>a</sub>(HB)) and H<sup>+</sup> + A<sup>&minus;</sup> &#8652; HA (1/K<sub>a</sub>(HA)).<br>3. Add those two equations &mdash; H<sup>+</sup> cancels &mdash; so the constants multiply: K = K<sub>a</sub>(HB) &times; 1/K<sub>a</sub>(HA) = K<sub>a</sub>(HB)/K<sub>a</sub>(HA).<br>4. Substitute the curve readings: K<sub>a</sub>(HB) = 10<sup>&minus;5</sup>, K<sub>a</sub>(HA) = 10<sup>&minus;6</sup>, giving K = 10<sup>&minus;5</sup>/10<sup>&minus;6</sup> = <b>10</b>.<br>5. In logs it is one subtraction: log K = pK<sub>a</sub>(HA) &minus; pK<sub>a</sub>(HB) = 6 &minus; 5 = 1, so K = 10<sup>1</sup>.<br>6. Direction check: HB is the stronger acid (lower pK<sub>a</sub>), and a stronger acid always protonates the weaker acid's anion, so K must exceed 1 &mdash; which eliminates every other option at once.<br><b>&#9889; JEE Trick:</b> for any exchange between two weak acids, K = 10<sup>&Delta;pK<sub>a</sub></sup> with &Delta;pK<sub>a</sub> = pK<sub>a</sub>(weaker) &minus; pK<sub>a</sub>(stronger). One pK<sub>a</sub> unit apart means K = 10, two units means 100.<br>Answer: <b>(a)</b> 10."},
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "CAT-7 Chemistry Set 3 complete";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("pTime").textContent = "0:00";
+
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
+    }
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
+  });
+  showQ(0);
+  updateProgress();
+  show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const b = $("pb" + id); if (b) b.classList.add("ans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length, left = pool.length - n;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
+}
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0, slow = 0;
+  pool.forEach(id => {
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
+    else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? DONE_TITLE : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
+  examStop();
+  show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

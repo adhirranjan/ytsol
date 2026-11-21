@@ -1,4 +1,4 @@
-/* Exam-lock regression check for every <Ch>_Quiz.html in this folder.
+/* Exam-lock regression check for every *_Quiz.html under Quiz/ (set folders included).
    Run: node Quiz/test_exam_lock.js            (all chapters, one line each)
         node Quiz/test_exam_lock.js P7         (one chapter, every check listed)
    Extracts the real EXAM LOCK block from each shipped file and drives it against
@@ -6,8 +6,12 @@
 const fs = require("fs"), assert = require("assert"), path = require("path");
 
 const only  = process.argv[2];
-const files = fs.readdirSync(__dirname).filter(f => /_Quiz\.html$/.test(f))
-                .filter(f => !only || f === only + "_Quiz.html" || f === only);
+const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e =>
+  e.isDirectory() ? walk(path.join(d, e.name)).map(x => path.join(e.name, x))
+                  : (/_Quiz\.html$/.test(e.name) ? [e.name] : []));
+const files = walk(__dirname)      // Quiz/ plus its set folders (RT5_Quiz, CAT7_Quiz, ...)
+                .filter(f => !only || path.basename(f) === only + "_Quiz.html"
+                          || path.basename(f) === only || f === only);
 if (!files.length) { console.error("no quiz files matched " + only); process.exit(1); }
 
 function mkEl(cls) {
@@ -188,7 +192,8 @@ files.sort().forEach(f => {
   });
   totalFail += fails.length;
   if (files.length > 1) {
-    console.log((fails.length ? "  FAIL " : "  ok   ") + f.replace("_Quiz.html", "").padEnd(5) +
+    console.log((fails.length ? "  FAIL " : "  ok   ") +
+                f.replace("_Quiz.html", "").split(path.sep).join("/").padEnd(28) +
                 " (" + Object.keys(T).length + " checks, grace " + GRACE + "ms)");
   }
   fails.forEach(x => console.log("        " + x));

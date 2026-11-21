@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT-7 Chemistry · Revision Quiz — Set 2</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · CAT-7 (Mon 30 Nov 2026) · Chemistry revision</p>
+    <h1>CAT-7 Chemistry · Set 2</h1>
+    <p id="heroSub">25 questions · 14 from LEVEL-5/6 and the Strong Box · one of 3 non-overlapping sets · loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the chapters to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All chapters are selected by default — that runs the full 25-question set.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">136 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
+    </div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
+        <button class="btn" onclick="backToIntro()">Choose different chapters</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · CAT-7 revision · Chemistry Set 2 of 3 · every question quoted from the ICAD exercises and carried verbatim from the per-chapter mastery quizzes, where each answer was independently re-derived — mismatches against the printed key are flagged &#9888; in the working.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-6 THERMODYNAMICS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"C7", name:"C-7 · Chemical and Ionic Equilibrium", desc:"the whole CAT-7 chemistry syllabus"}
+];
+
+const QUIZ = [
+
+/* ---------------- C-7 · Chemical and Ionic Equilibrium ---------------- */
+{id:1, lec:"C7", blk:"C-7 L-1 L5 · Homogeneous vs heterogeneous", topic:"Why sublimation equilibrium of iodine is heterogeneous", t:90,
+ src:"L-1 · LEVEL-5 Q3",
+ q:"Why is the equilibrium I<sub>2</sub>(s) &#8652; I<sub>2</sub>(g) considered heterogeneous?<br>",
+ opts:["Because it is a physical change, not a chemical one",
+  "Because there is a boundary between the solid iodine and the gaseous iodine",
+  "Because I<sub>2</sub> is a diatomic molecule",
+  "Because it only involves one substance"],
+ ans:1,
+ why:["Physical versus chemical is a different classification altogether; chemical equilibria such as CaCO<sub>3</sub>(s) &#8652; CaO(s) + CO<sub>2</sub>(g) are heterogeneous too.",
+  "Correct. Solid iodine and iodine vapour are two phases separated by a real surface, and more than one phase is precisely what heterogeneous means.",
+  "Molecularity has nothing to do with phase count: H<sub>2</sub> + I<sub>2</sub> &#8652; 2HI is all-diatomic and homogeneous.",
+  "Points the wrong way &mdash; involving a single substance, if anything, suggests homogeneity; it is the two phases of that one substance that matter."],
+ sol:"<b>Concept:</b> Heterogeneous means &lsquo;more than one phase&rsquo;, and a phase boundary is what separates two phases. The label is earned by the phases present, not by the chemistry or the molecules involved.<br><b>Key relation:</b> reactants and products in different phases &#8660; heterogeneous; for I<sub>2</sub>(s) &#8652; I<sub>2</sub>(g) the solid surface is the boundary.<br>1. Count the phases: solid I<sub>2</sub> is one phase, gaseous I<sub>2</sub> is a second. Two phases, so heterogeneous &mdash; option (b).<br>2. (a) fails because the physical/chemical split is independent of the homogeneous/heterogeneous split: CaCO<sub>3</sub>(s) &#8652; CaO(s) + CO<sub>2</sub>(g) is chemical <i>and</i> heterogeneous.<br>3. (c) fails because being diatomic is a property of the molecule, not of the phase count &mdash; H<sub>2</sub> + I<sub>2</sub> &#8652; 2HI involves only diatomic species and is homogeneous.<br>4. (d) fails because one substance in one phase would be homogeneous; what makes this heterogeneous is the same substance existing in two phases at once.<br>5. Consistency check: every physical equilibrium (melting, boiling, sublimation, dissolution) involves two phases of a substance, which is why all of them are heterogeneous.<br><b>Answer: (b)</b> &mdash; solid and vapour are two phases separated by a boundary, which is what heterogeneous means."},
+{id:2, lec:"C7", blk:"C-7 L-1 L3 · Dynamic nature", topic:"Equal forward and backward rates do not mean equal concentrations", t:60,
+ src:"L-1 · LEVEL-3 Q3",
+ q:"A reversible reaction A &#8652; B is studied at constant temperature. At equilibrium, [B] is double that of [A]. Which statement is correct if the rates of forward and backward reactions are plotted over time?<br>",
+ opts:["Both rates are zero at equilibrium because concentrations are constant",
+  "Forward rate is twice backward rate at equilibrium",
+  "Forward and backward rates are equal but [B] &gt; [A]",
+  "Forward rate starts lower and increases until it equals backward rate"],
+ ans:2,
+ why:["Confuses constant concentrations with zero rates; both reactions are still running at equilibrium, each exactly cancelling the other, so neither rate is zero.",
+  "Swaps the rate for the rate constant: it is k<sub>f</sub> that is twice k<sub>b</sub>. If the rates themselves differed by a factor 2 the composition would still be changing.",
+  "Correct. k<sub>f</sub>[A] = k<sub>b</sub>[B] with [B] = 2[A] gives k<sub>f</sub> = 2k<sub>b</sub>, so the rates are equal while the concentrations are not.",
+  "Reverses the approach curves: starting from A the forward rate is largest at t = 0 and falls, while the backward rate starts at zero and rises to meet it."],
+ sol:"<b>Concept:</b> Equal <i>rates</i> at equilibrium do not require equal <i>concentrations</i> &mdash; rate = rate constant &times; concentration, so two unequal concentrations give identical rates when the rate constants differ.<br><b>Key relation:</b> at equilibrium k<sub>f</sub>[A] = k<sub>b</sub>[B] &rArr; K = k<sub>f</sub>/k<sub>b</sub> = [B]/[A].<br>1. Write the equality of rates for A &#8652; B: k<sub>f</sub>[A] = k<sub>b</sub>[B].<br>2. Substitute the given [B] = 2[A]: k<sub>f</sub>[A] = k<sub>b</sub>(2[A]) &rArr; k<sub>f</sub> = 2k<sub>b</sub>, hence K = k<sub>f</sub>/k<sub>b</sub> = [B]/[A] = 2.<br>3. So the system is perfectly consistent: rates equal, concentrations in the ratio 2 : 1. Option (c) states precisely that.<br>4. On a rate-vs-time plot the forward rate starts at its maximum (only A present) and decreases, the backward rate starts at zero and increases; they meet at a common non-zero value and stay there.<br>5. That common non-zero value rules out (a); the rate/rate-constant mix-up rules out (b); the reversed curve shapes rule out (d).<br><b>Answer: (c)</b> &mdash; forward and backward rates are equal while [B] &gt; [A], because k<sub>f</sub> = 2k<sub>b</sub> and K = 2."},
+{id:3, lec:"C7", blk:"C-7 L-10 L6 · Highest percentage dissociation", topic:"Comparing alpha = sqrt(Ka/C): the larger K and the smaller C together win", t:90,
+ src:"L-10 · LEVEL-6 Q8",
+ q:"Which of the following shows the highest percentage dissociation?",
+ opts:["1.0 M HCN (K<sub>diss</sub> = 4.0&times;10<sup>&minus;10</sup>)",
+  "0.1 M HCN",
+  "1.0 M HNO<sub>2</sub> (K<sub>diss</sub> = 4.5&times;10<sup>&minus;4</sup>)",
+  "0.1 M HNO<sub>2</sub>"],
+ ans:3,
+ why:["Wrong. 1.0 M HCN has both the smaller K (4.0&times;10<sup>&minus;10</sup>) and the larger C, the worst combination: &alpha; = &radic;(4.0&times;10<sup>&minus;10</sup>/1.0) = 2&times;10<sup>&minus;5</sup>, i.e. 0.002%.",
+  "Wrong. 0.1 M HCN improves on (a) by a factor &radic;10 but is still crippled by the tiny K: &alpha; = 6.3&times;10<sup>&minus;5</sup>, i.e. 0.0063%, a thousand times below the HNO<sub>2</sub> solutions.",
+  "Wrong. 1.0 M HNO<sub>2</sub> has the larger K but also the larger concentration: &alpha; = &radic;(4.5&times;10<sup>&minus;4</sup>/1.0) = 0.021, i.e. 2.1%. Picking the strongest acid without checking the dilution stops one step short.",
+  "Correct. 0.1 M HNO<sub>2</sub> combines the larger K with the smaller C: &alpha; = &radic;(4.5&times;10<sup>&minus;4</sup>/0.1) = &radic;(4.5&times;10<sup>&minus;3</sup>) = <b>0.067</b>, i.e. <b>6.7%</b> &mdash; the highest of the four."],
+ sol:"<b>Concept:</b> Percentage dissociation rises with K and falls with concentration. The winner must therefore be the option holding the larger K at the lower concentration &mdash; both factors pointing the same way. <b>Key relation:</b> &alpha; = &radic;(K<sub>diss</sub>/C) for a weak monobasic acid. <b>Solution:</b> 1. The two acids differ hugely in strength: HNO<sub>2</sub> has K = 4.5&times;10<sup>&minus;4</sup> against HCN's 4.0&times;10<sup>&minus;10</sup>, a factor of about 10<sup>6</sup>. 2. Since &alpha; &#8733; &radic;K, that alone gives HNO<sub>2</sub> roughly a thousandfold advantage in &alpha;, so both HCN options are out. 3. Between the two HNO<sub>2</sub> solutions, &alpha; &#8733; 1/&radic;C, so the more dilute 0.1 M wins. 4. Numbers: 1.0 M HNO<sub>2</sub> gives &alpha; = &radic;(4.5&times;10<sup>&minus;4</sup>) = 0.021 (<b>2.1%</b>); 0.1 M HNO<sub>2</sub> gives &alpha; = &radic;(4.5&times;10<sup>&minus;3</sup>) = <b>0.067</b> (<b>6.7%</b>). 5. For comparison, 1.0 M HCN gives 2&times;10<sup>&minus;5</sup> (0.002%) and 0.1 M HCN gives 6.3&times;10<sup>&minus;5</sup> (0.0063%). 6. Ranking: 0.1 M HNO<sub>2</sub> &gt; 1.0 M HNO<sub>2</sub> &gt; 0.1 M HCN &gt; 1.0 M HCN, so option (d) has the highest percentage dissociation. 7. Note that highest percentage dissociation is <i>not</i> the same as lowest pH: [H<sup>+</sup>] = &radic;(KC) makes 1.0 M HNO<sub>2</sub> (2.1&times;10<sup>&minus;2</sup> M) the most acidic, while 0.1 M HNO<sub>2</sub> (6.7&times;10<sup>&minus;3</sup> M) merely dissociates the largest <i>fraction</i>. <b>&#9889; JEE Trick:</b> &alpha; goes as &radic;(K/C), [H<sup>+</sup>] as &radic;(KC). Read which of the two the question wants; the two orderings disagree exactly when the stronger acid is also the more concentrated. <b>Answer:</b> <b>(d) 0.1 M HNO<sub>2</sub></b> (&alpha; &#8776; 6.7%)."},
+{id:4, lec:"C7", blk:"C-7 L-11 L6 · Cationic hydrolysis", topic:"Maximum pH that still leaves at least 80% of iron(III) as free Fe<sup>3+</sup>", t:90,
+ src:"L-11 · LEVEL-6 Q2",
+ q:"K<sub>a</sub> for the reaction; Fe<sup>3+</sup>(aq.) + H<sub>2</sub>O(<i>l</i>) &#8652; Fe(OH)<sup>2+</sup>(aq.) + H<sub>3</sub>O<sup>+</sup>(aq.) is 6.5&times;10<sup>&minus;3</sup>. What is the max. pH value which could be used so that at least 80% of the total iron (III) in a dilute solution exists as Fe<sup>3+</sup>?",
+ opts:["2",
+  "2.41",
+  "2.79",
+  "1.59"],
+ ans:3,
+ why:["At pH 2, [H<sup>+</sup>] = 1.0&times;10<sup>&minus;2</sup> and [Fe(OH)<sup>2+</sup>]/[Fe<sup>3+</sup>] = K<sub>a</sub>/[H<sup>+</sup>] = 0.65, leaving only 1/1.65 = 61% as Fe<sup>3+</sup>. It is what you get by rounding the required 2.6&times;10<sup>&minus;2</sup> M down to 10<sup>&minus;2</sup> M.",
+  "At pH 2.41, [H<sup>+</sup>] = 3.9&times;10<sup>&minus;3</sup>, so the ratio is 1.67 and barely 37% stays as Fe<sup>3+</sup>. It arises from multiplying K<sub>a</sub> by log 4 = 0.60 instead of dividing by the ratio 0.25.",
+  "pH 2.79 corresponds to [H<sup>+</sup>] = K<sub>a</sub> &times; 0.25 = 1.6&times;10<sup>&minus;3</sup> &mdash; the 80:20 ratio used upside down. It makes the ratio 4, i.e. only 20% Fe<sup>3+</sup>, the exact opposite of what is asked.",
+  "Correct. Requiring [Fe(OH)<sup>2+</sup>]/[Fe<sup>3+</sup>] &le; 0.25 forces [H<sup>+</sup>] &ge; K<sub>a</sub>/0.25 = 2.6&times;10<sup>&minus;2</sup> M, i.e. pH &le; 1.59."],
+ sol:"<b>Concept:</b> Fe<sup>3+</sup>(aq) is a cationic acid. Raising the pH (lowering [H<sup>+</sup>]) drives it towards Fe(OH)<sup>2+</sup>. Demanding at least 80% as Fe<sup>3+</sup> caps the ratio [Fe(OH)<sup>2+</sup>]/[Fe<sup>3+</sup>], which sets a <i>minimum</i> [H<sup>+</sup>] and therefore a <i>maximum</i> pH.<br><b>Key relation:</b> K<sub>a</sub> = [Fe(OH)<sup>2+</sup>][H<sub>3</sub>O<sup>+</sup>]/[Fe<sup>3+</sup>] &rArr; [H<sub>3</sub>O<sup>+</sup>] = K<sub>a</sub> &times; [Fe<sup>3+</sup>]/[Fe(OH)<sup>2+</sup>]. &ldquo;Dilute solution&rdquo; means the pH is fixed externally, so only the ratio matters and the total iron concentration drops out.<br><b>1.</b> Take total iron(III) = 100 parts. The limiting case is Fe<sup>3+</sup> = 80 parts, Fe(OH)<sup>2+</sup> = 20 parts.<br><b>2.</b> Limiting ratio: [Fe(OH)<sup>2+</sup>]/[Fe<sup>3+</sup>] = 20/80 = <b>0.25</b>, which must not be exceeded.<br><b>3.</b> Rearranging, [H<sup>+</sup>] = K<sub>a</sub>/0.25 = 6.5&times;10<sup>&minus;3</sup>/0.25 = <b>2.6&times;10<sup>&minus;2</sup> M</b> &mdash; the <i>minimum</i> acidity allowed.<br><b>4.</b> pH = &minus;log(2.6&times;10<sup>&minus;2</sup>) = 2 &minus; log 2.6 = 2 &minus; 0.415 = <b>1.585 &asymp; 1.59</b>.<br><b>5.</b> One-line cross-check: fraction present as Fe<sup>3+</sup> = [H<sup>+</sup>]/([H<sup>+</sup>] + K<sub>a</sub>) = 0.8 gives [H<sup>+</sup>] = 4K<sub>a</sub>, so pH = pK<sub>a</sub> &minus; log 4 = 2.19 &minus; 0.60 = <b>1.59</b>. Same result.<br><b>6.</b> Direction check at the next option up, pH 2: ratio = 6.5&times;10<sup>&minus;3</sup>/10<sup>&minus;2</sup> = 0.65, so only 61% remains as Fe<sup>3+</sup> &mdash; short of the requirement. More acid is needed, which confirms 1.59 as the ceiling.<br><b>&#9889; JEE Trick:</b> &ldquo;At least x% in the acid form&rdquo; always means [H<sup>+</sup>] &ge; K<sub>a</sub>&middot;x/(100 &minus; x). Inverting that fraction is the planted error and lands exactly on option (c).<br><b>Answer: (d) 1.59.</b>"},
+{id:5, lec:"C7", blk:"C-7 L-12 L6 · Buffer calculations", topic:"Back-calculating the volume of weak acid that gives a stated buffer pH", t:90,
+ src:"L-12 · LEVEL-6 Q4",
+ q:"Fixed volume of 0.1 M benzoic acid (pK<sub>a</sub> = 4.2) solution is added into 0.2 M sodium benzoate solution and formed a 300 mL resultant acidic buffer solution. If pH of this buffer solution is 4.5 then find added volume of benzoic acid:",
+ opts:["100 mL",
+  "150 mL",
+  "200 mL",
+  "None of these"],
+ ans:1,
+ why:["Would give [salt]/[acid] = 0.2&times;200/(0.1&times;100) = 4, hence pH = 4.2 + log 4 = 4.80, not 4.5.",
+  "Correct. V = 150 mL leaves equal volumes, so the ratio is 0.2/0.1 = 2 and pH = 4.2 + log 2 = 4.50.",
+  "Would give a ratio of 0.2&times;100/(0.1&times;200) = 1, hence pH = pK<sub>a</sub> = 4.2, below the stated 4.5.",
+  "Only correct if no listed volume worked; 150 mL reproduces pH 4.5 exactly."],
+ sol:"<b>Concept:</b> The acid and its salt sit in the same final volume, so the Henderson ratio is simply the ratio of their millimoles. Read off the required ratio from the pH, then solve for the unknown volume.<br><b>1.</b> Required log term: pH = pK<sub>a</sub> + log([benzoate]/[benzoic acid]) &rArr; 4.5 = 4.2 + log R &rArr; log R = 0.3 &rArr; R = 2.<br><b>2.</b> Let V mL of 0.1 M benzoic acid be added; the sodium benzoate contributes (300 &minus; V) mL of 0.2 M solution.<br><b>3.</b> Millimoles: n(acid) = 0.1V and n(salt) = 0.2(300 &minus; V).<br><b>4.</b> Set the ratio: 0.2(300 &minus; V)/(0.1V) = 2 &rArr; 60 &minus; 0.2V = 0.2V &rArr; 0.4V = 60 &rArr; V = <b>150 mL</b>.<br><b>5.</b> Verify: n(acid) = 0.1 &times; 150 = 15 mmol, n(salt) = 0.2 &times; 150 = 30 mmol, ratio 2, so pH = 4.2 + log 2 = 4.2 + 0.30 = 4.50. Matches the data.<br><b>&#9889; JEE Trick:</b> Because both components share the final 300 mL, the volume cancels &mdash; compare millimoles, not molarities. A pH exactly 0.3 above pK<sub>a</sub> always means a salt : acid ratio of 2, so here the 0.2 M salt and 0.1 M acid must be used in equal volumes.<br><b>Answer: (b) 150 mL.</b>"},
+{id:6, lec:"C7", blk:"C-7 L-12 L2 · Buffer pH (Henderson)", topic:"Henderson-Hasselbalch pH of an equimolar acidic buffer", t:60,
+ src:"L-12 · LEVEL-2 Q2",
+ q:"Find pH of a buffer with pKa = 4.8, [acid] = 0.1 M, [salt] = 0.1 M.",
+ opts:["4.8",
+  "3.8",
+  "5.8",
+  "6.8"],
+ ans:0,
+ why:["Correct. [salt]/[acid] = 0.1/0.1 = 1 and log 1 = 0, so pH = pK<sub>a</sub> = 4.8.",
+  "Subtracts 1 instead of adding log 1, i.e. assumes a salt : acid ratio of 1 : 10 that the data do not give.",
+  "Adds 1, which would need [salt]/[acid] = 10, not 1.",
+  "Would need [salt]/[acid] = 100; it also drags the pH close to neutral, impossible for a buffer built on an acid of pK<sub>a</sub> 4.8."],
+ sol:"<b>Concept:</b> A weak acid together with its own salt is an acidic buffer and obeys the Henderson&ndash;Hasselbalch equation. With the two concentrations equal the log term vanishes, so the pH equals pK<sub>a</sub> &mdash; which is also the point of maximum buffer capacity.<br><b>1.</b> System: weak acid HA plus the conjugate base A<sup>&minus;</sup> supplied by the salt, so pH = pK<sub>a</sub> + log([salt]/[acid]).<br><b>2.</b> Data: pK<sub>a</sub> = 4.8, [acid] = 0.1 M, [salt] = 0.1 M.<br><b>3.</b> Ratio: [salt]/[acid] = 0.1/0.1 = 1, and log 1 = 0.<br><b>4.</b> Substitute: pH = pK<sub>a</sub> + log([salt]/[acid]) = 4.8 + log(0.1/0.1) = 4.8 + 0 = <b>4.8</b>.<br><b>5.</b> Sense check: the solution must be acidic (pH &lt; 7) and, with neither component in excess, must sit exactly at pK<sub>a</sub>. Each distractor corresponds to a ratio not present here: 3.8 &rarr; 1/10, 5.8 &rarr; 10, 6.8 &rarr; 100.<br><b>&#9889; JEE Trick:</b> Equimolar buffer &rArr; pH = pK<sub>a</sub>, no arithmetic. Do not compute [H<sup>+</sup>] = &radic;(K<sub>a</sub>C) for the acid alone &mdash; the added salt suppresses its dissociation by the common-ion effect, which is exactly what Henderson already accounts for.<br><b>Answer: (a) 4.8.</b>"},
+{id:7, lec:"C7", blk:"C-7 L-13 L3 · Weak-weak salt pH", topic:"pH of a salt of a weak acid and a weak base from K<sub>a</sub> and K<sub>b</sub>", t:60,
+ src:"L-13 · LEVEL-3 Q5",
+ q:"Salt of weak acid and weak base has K<sub>a</sub> = 1&times;10<sup>&minus;6</sup>, K<sub>b</sub> = 1&times;10<sup>&minus;5</sup>. Determine pH of the solution.",
+ opts:["6.5",
+  "7.0",
+  "7.5",
+  "8.0"],
+ ans:1,
+ why:["6.5 has the correction's sign flipped: it is 7 &minus; (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>). With K<sub>b</sub> &gt; K<sub>a</sub> the base is the stronger parent, so the solution has to be basic, not acidic.",
+  "7.0 is the answer only when K<sub>a</sub> = K<sub>b</sub>, as in CH<sub>3</sub>COONH<sub>4</sub>. Here the two constants differ by a factor of ten, so the solution cannot be neutral. This is the letter ICAD's key prints.",
+  "&#9888; Correct by working. pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>) = 7 + (1/2)(6 &minus; 5) = 7.5, confirmed independently by [H<sup>+</sup>] = &radic;(K<sub>w</sub>K<sub>a</sub>/K<sub>b</sub>) = 3.16&times;10<sup>&minus;8</sup> M.",
+  "8.0 drops the factor (1/2), using pH = 7 + (pK<sub>a</sub> &minus; pK<sub>b</sub>) = 7 + 1. That (1/2) comes from the square root in [H<sup>+</sup>] = &radic;(K<sub>w</sub>K<sub>a</sub>/K<sub>b</sub>) and cannot be discarded."],
+ sol:"<b>Concept:</b> For a salt of a weak acid and a weak base both ions hydrolyse, and the concentration cancels out completely: the pH depends only on the <i>relative</i> strengths of the two parents. Equal constants give exactly 7; a stronger base pushes it above 7. The trap is assuming every weak&ndash;weak salt is neutral because CH<sub>3</sub>COONH<sub>4</sub> happens to be.<br><b>Key relation:</b> [H<sup>+</sup>] = &radic;(K<sub>w</sub>K<sub>a</sub>/K<sub>b</sub>) &rArr; pH = (1/2)(pK<sub>w</sub> + pK<sub>a</sub> &minus; pK<sub>b</sub>) = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>), with pK<sub>w</sub> = 14 at 25 &deg;C.<br><b>1.</b> From the data: K<sub>a</sub> = 1&times;10<sup>&minus;6</sup> &rArr; pK<sub>a</sub> = 6; K<sub>b</sub> = 1&times;10<sup>&minus;5</sup> &rArr; pK<sub>b</sub> = 5.<br><b>2.</b> Direction first: K<sub>b</sub> &gt; K<sub>a</sub>, so the cation hydrolyses <i>less</i> than the anion, a surplus of OH<sup>&minus;</sup> is left and the solution must be <b>basic</b>. That alone rules out 6.5 and 7.0.<br><b>3.</b> pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>) = 7 + (1/2)(6 &minus; 5) = <b>7.5</b>.<br><b>4.</b> Cross-check from the root form: [H<sup>+</sup>] = &radic;(10<sup>&minus;14</sup> &times; 10<sup>&minus;6</sup>/10<sup>&minus;5</sup>) = &radic;(10<sup>&minus;15</sup>) = 3.16&times;10<sup>&minus;8</sup> M, so pH = 8 &minus; log 3.16 = 8 &minus; 0.5 = <b>7.5</b>. Both routes agree.<br><b>5.</b> Magnitude check: pH &minus; 7 = (1/2)log(K<sub>b</sub>/K<sub>a</sub>) = (1/2)log 10 = 0.5, so the shift is half a unit &mdash; not the full unit option (d) assumes.<br><b>6.</b> The working therefore gives <b>(c) 7.5</b>.<br><b>&#9889; JEE Trick:</b> pH &minus; 7 = (1/2)log(K<sub>b</sub>/K<sub>a</sub>) is one line, and its sign tells you basic or acidic before any arithmetic.<br>&#9888; ICAD's key says (b) 7.0; the working gives (c) 7.5 because 7.0 would require K<sub>a</sub> = K<sub>b</sub>, whereas here K<sub>b</sub> is ten times K<sub>a</sub> and pH = 7 + (1/2)(pK<sub>a</sub> &minus; pK<sub>b</sub>) returns 7.5.<br><b>Answer: (b) 7.0 per the key &mdash; derived (c) 7.5.</b>"},
+{id:8, lec:"C7", blk:"C-7 L-14 L6 · Amphiprotic salts", topic:"pH of 0.1 M NaHS from K<sub>a1</sub> and K<sub>a2</sub> of H<sub>2</sub>S", t:90,
+ src:"L-14 · LEVEL-6 Q4",
+ q:"The pH of 0.1 M NaHS is, K<sub>a<sub>1</sub></sub> and K<sub>a<sub>2</sub></sub> for H<sub>2</sub>S are 1.3&times;10<sup>&minus;7</sup> and 7.1&times;10<sup>&minus;15</sup> respectively:",
+ opts:["10.52",
+  "9.52",
+  "12.52",
+  "13.52"],
+ ans:0,
+ why:["Correct. For the amphiprotic ion HS<sup>&minus;</sup>, [H<sup>+</sup>] = &radic;(K<sub>a1</sub>K<sub>a2</sub>) so pH = (pK<sub>a1</sub> + pK<sub>a2</sub>)/2 = (6.89 + 14.15)/2 = 10.52.",
+  "9.52 is the same average computed with K<sub>a2</sub> read as 7.1&times;10<sup>&minus;13</sup> (pK<sub>a2</sub> = 12.15): (6.89 + 12.15)/2 = 9.52. One power of ten has been lost off the second constant.",
+  "12.52 means [H<sup>+</sup>] = 3.0&times;10<sup>&minus;13</sup>, i.e. [OH<sup>&minus;</sup>] = 0.033 M &mdash; a third of the HS<sup>&minus;</sup> converted. It comes from the same wrong route as (d), treating HS<sup>&minus;</sup> as the conjugate base belonging to K<sub>a2</sub>, with a factor of ten mislaid.",
+  "13.52 follows from using K<sub>h</sub> = K<sub>w</sub>/K<sub>a2</sub> = 1.4 and [OH<sup>&minus;</sup>] = &radic;(K<sub>h</sub>C) = 0.37 M. But K<sub>w</sub>/K<sub>a2</sub> is the hydrolysis constant of S<sup>2&minus;</sup>, not of HS<sup>&minus;</sup>, so the wrong species has been hydrolysed."],
+ sol:"<b>Concept:</b> HS<sup>&minus;</sup> is amphiprotic: it can lose a proton (governed by K<sub>a2</sub>) or accept one (governed by 1/K<sub>a1</sub>). For such an ion the pH is the <i>mean</i> of the two pK<sub>a</sub> values and is independent of concentration. The trap is treating NaHS as an ordinary salt of a weak acid and using a single hydrolysis constant.<br><b>Key relation:</b> [H<sup>+</sup>] = &radic;(K<sub>a1</sub>K<sub>a2</sub>) &rArr; pH = (pK<sub>a1</sub> + pK<sub>a2</sub>)/2, obtained from the proton balance when C &#8811; K<sub>a1</sub> (here 0.1 &#8811; 1.3&times;10<sup>&minus;7</sup>).<br><b>1.</b> The two competing equilibria of HS<sup>&minus;</sup> are HS<sup>&minus;</sup> &#8652; H<sup>+</sup> + S<sup>2&minus;</sup> (K<sub>a2</sub>) and HS<sup>&minus;</sup> + H<sup>+</sup> &#8652; H<sub>2</sub>S (1/K<sub>a1</sub>).<br><b>2.</b> The proton balance [H<sub>2</sub>S] &asymp; [S<sup>2&minus;</sup>] turns into [H<sup>+</sup>]<sup>2</sup> = K<sub>a1</sub>K<sub>a2</sub> &mdash; note that C has cancelled out, the hallmark of an amphiprotic salt.<br><b>3.</b> pK<sub>a1</sub> = &minus;log(1.3&times;10<sup>&minus;7</sup>) = 7 &minus; 0.114 = <b>6.886</b>.<br><b>4.</b> pK<sub>a2</sub> = &minus;log(7.1&times;10<sup>&minus;15</sup>) = 15 &minus; 0.851 = <b>14.149</b>.<br><b>5.</b> pH = (6.886 + 14.149)/2 = 21.035/2 = <b>10.52</b>.<br><b>6.</b> Cross-check by the product: K<sub>a1</sub>K<sub>a2</sub> = 1.3 &times; 7.1 &times; 10<sup>&minus;22</sup> = 9.23&times;10<sup>&minus;22</sup>, so [H<sup>+</sup>] = 3.04&times;10<sup>&minus;11</sup> M and pH = 11 &minus; 0.48 = <b>10.52</b> &mdash; option (a).<br><b>7.</b> Note on the approximation: the mean-pK<sub>a</sub> formula also assumes K<sub>a2</sub>C &#8811; K<sub>w</sub>, which with so tiny a K<sub>a2</sub> is only marginal; it is nevertheless the relation this question is built on, and it lands squarely on 10.52.<br><b>&#9889; JEE Trick:</b> Any intermediate ion of a polyprotic acid &mdash; HS<sup>&minus;</sup>, HCO<sub>3</sub><sup>&minus;</sup>, H<sub>2</sub>PO<sub>4</sub><sup>&minus;</sup>, HPO<sub>4</sub><sup>2&minus;</sup> &mdash; has pH = (pK<sub>a</sub> of the step before + pK<sub>a</sub> of the step after)/2, with no dependence on concentration. If the given molarity never enters your arithmetic, you have used the right formula.<br><b>Answer: (a) 10.52.</b>"},
+{id:9, lec:"C7", blk:"C-7 L-14 L1 · Solubility product", topic:"Definition of the solubility product K<sub>sp</sub>", t:60,
+ src:"L-14 · LEVEL-1 Q3",
+ q:"What is solubility product?",
+ opts:["Product of solvent and solute",
+  "Product of concentrations of ions in unsaturated solution",
+  "Product of concentrations of ions in saturated solution",
+  "Total molar mass of salt"],
+ ans:2,
+ why:["The solvent never appears in an equilibrium constant for dissolution &mdash; water is in vast excess and its activity is taken as 1 &mdash; and &ldquo;solute&rdquo; is not a concentration. The phrase is a word-association trap on &ldquo;product&rdquo;.",
+  "In an unsaturated solution the same product of ion concentrations is the ionic product Q, and there Q &lt; K<sub>sp</sub>. Calling it K<sub>sp</sub> misses that K<sub>sp</sub> is an <i>equilibrium</i> constant, which needs undissolved solid present.",
+  "Correct. K<sub>sp</sub> is the product of the ion concentrations, each raised to its stoichiometric coefficient, in a saturated solution in contact with the solid.",
+  "Molar mass is a property of the formula unit, independent of concentration and temperature-insensitive; K<sub>sp</sub> is an equilibrium constant with units of concentration raised to the number of ions. The two are unrelated quantities."],
+ sol:"<b>Concept:</b> The solubility product K<sub>sp</sub> is the equilibrium constant for a sparingly soluble salt dissolving. Equilibrium between solid and its ions exists only when the solution is <b>saturated</b>, so that word is the load-bearing part of the definition.<br><b>Key relation:</b> A<sub>x</sub>B<sub>y</sub>(s) &#8652; xA<sup>y+</sup> + yB<sup>x&minus;</sup>, K<sub>sp</sub> = [A<sup>y+</sup>]<sup>x</sup>[B<sup>x&minus;</sup>]<sup>y</sup> at saturation. The pure solid has unit activity, so it does not enter the expression.<br><b>1.</b> Compare the same product in a general solution, the ionic product Q. Q &lt; K<sub>sp</sub> means unsaturated and more solid can dissolve; Q = K<sub>sp</sub> means saturated; Q &gt; K<sub>sp</sub> means supersaturated and the salt precipitates.<br><b>2.</b> (a) is meaningless: the solvent is excluded from the expression and &ldquo;solute&rdquo; is not a concentration.<br><b>3.</b> (b) describes Q in an unsaturated solution, which is <i>smaller</i> than K<sub>sp</sub> &mdash; so it is not K<sub>sp</sub>.<br><b>4.</b> (c) is the definition, provided each ion is raised to its coefficient &mdash; correct.<br><b>5.</b> (d) confuses a mass quantity with an equilibrium constant; molar mass has nothing to do with the position of this equilibrium.<br><b>6.</b> Worked illustration: a saturated AgCl solution has [Ag<sup>+</sup>] = [Cl<sup>&minus;</sup>] = 1.25&times;10<sup>&minus;5</sup> M, so K<sub>sp</sub> = (1.25&times;10<sup>&minus;5</sup>)<sup>2</sup> = <b>1.56&times;10<sup>&minus;10</sup></b>. For CaF<sub>2</sub> with solubility s, K<sub>sp</sub> = (s)(2s)<sup>2</sup> = 4s<sup>3</sup> &mdash; note the coefficient entering as a power.<br><b>&#9889; JEE Trick:</b> Two words decide this question: &ldquo;saturated&rdquo; (otherwise it is Q, not K<sub>sp</sub>) and &ldquo;raised to its coefficient&rdquo; (otherwise 4s<sup>3</sup> collapses to s<sup>2</sup>).<br><b>Answer: (c) Product of concentrations of ions in saturated solution.</b>"},
+{id:10, lec:"C7", blk:"C-7 L-15 L5 · Selective precipitation", topic:"Which metal sulphide precipitates first from a mixture on adding sulphide ion", t:90,
+ src:"L-15 · LEVEL-5 Q3",
+ q:"A solution which is 10<sup>&minus;3</sup> M each in Mn<sup>2+</sup>, Fe<sup>2+</sup>, Zn<sup>2+</sup> and Hg<sup>2+</sup> is treated with 10<sup>&minus;16</sup> M sulphide ion. If K<sub>sp</sub> of MnS, FeS, ZnS and HgS are 10<sup>&minus;13</sup>, 10<sup>&minus;18</sup>, 10<sup>&minus;24</sup> and 10<sup>&minus;53</sup> respectively, which one will precipitate first?",
+ opts:["FeS",
+  "MgS",
+  "HgS",
+  "ZnS"],
+ ans:2,
+ why:["FeS needs [S<sup>2&minus;</sup>] &gt; K<sub>sp</sub>/[Fe<sup>2+</sup>] = 10<sup>&minus;18</sup>/10<sup>&minus;3</sup> = 10<sup>&minus;15</sup> M. The sulphide present is only 10<sup>&minus;16</sup> M, so FeS does not precipitate at all here, let alone first.",
+  "MgS is printed for MnS, and magnesium is not even one of the four cations listed. MnS has the <i>largest</i> K<sub>sp</sub> (10<sup>&minus;13</sup>), needing [S<sup>2&minus;</sup>] &gt; 10<sup>&minus;10</sup> M &mdash; the last to appear, not the first.",
+  "Correct. HgS has the smallest K<sub>sp</sub>, 10<sup>&minus;53</sup>, so it needs only [S<sup>2&minus;</sup>] &gt; 10<sup>&minus;50</sup> M &mdash; it precipitates long before any of the others.",
+  "ZnS does precipitate at 10<sup>&minus;16</sup> M sulphide (it needs only 10<sup>&minus;21</sup> M), but HgS requires 10<sup>29</sup> times less sulphide still, so zinc comes second, not first."],
+ sol:"<b>Concept:</b> When a precipitating ion is added to a mixture, the salt that appears first is the one whose K<sub>sp</sub> is reached first. For each cation compute the <i>threshold</i> sulphide concentration K<sub>sp</sub>/[M<sup>2+</sup>]; the smallest threshold precipitates first. Since all four cations are at the same 10<sup>&minus;3</sup> M and all four sulphides are 1:1, the ranking follows K<sub>sp</sub> alone.<br><b>Key relation:</b> MS(s) &#8652; M<sup>2+</sup> + S<sup>2&minus;</sup>; precipitation starts when [M<sup>2+</sup>][S<sup>2&minus;</sup>] &gt; K<sub>sp</sub>, i.e. when [S<sup>2&minus;</sup>] &gt; K<sub>sp</sub>/[M<sup>2+</sup>].<br><b>1.</b> MnS: threshold = 10<sup>&minus;13</sup>/10<sup>&minus;3</sup> = <b>10<sup>&minus;10</sup> M</b>.<br><b>2.</b> FeS: threshold = 10<sup>&minus;18</sup>/10<sup>&minus;3</sup> = <b>10<sup>&minus;15</sup> M</b>.<br><b>3.</b> ZnS: threshold = 10<sup>&minus;24</sup>/10<sup>&minus;3</sup> = <b>10<sup>&minus;21</sup> M</b>; HgS: threshold = 10<sup>&minus;53</sup>/10<sup>&minus;3</sup> = <b>10<sup>&minus;50</sup> M</b>.<br><b>4.</b> The smallest threshold wins, so the order of appearance as sulphide builds up is HgS &rarr; ZnS &rarr; FeS &rarr; MnS. <b>HgS is first</b> &mdash; option (c).<br><b>5.</b> Checking against the stated 10<sup>&minus;16</sup> M sulphide: Q = 10<sup>&minus;3</sup> &times; 10<sup>&minus;16</sup> = 10<sup>&minus;19</sup>. This exceeds K<sub>sp</sub> for HgS (by 10<sup>34</sup>) and for ZnS (by 10<sup>5</sup>), but is below K<sub>sp</sub> for FeS (10<sup>&minus;18</sup>) and MnS (10<sup>&minus;13</sup>) &mdash; so only mercury and zinc come down, mercury far ahead.<br><b>6.</b> This is exactly the basis of qualitative analysis: Group II sulphides (Hg, Cu, Pb, Cd) precipitate from dilute acid, where [S<sup>2&minus;</sup>] is minute, while Group IV sulphides (Mn, Fe, Zn, Ni, Co) need ammoniacal conditions to raise [S<sup>2&minus;</sup>].<br><b>&#9889; JEE Trick:</b> With all cations at equal concentration and the same salt stoichiometry, &ldquo;precipitates first&rdquo; simply means &ldquo;smallest K<sub>sp</sub>&rdquo;. Compute thresholds only when the concentrations or the formula types differ.<br><b>Answer: (c) HgS.</b>"},
+{id:11, lec:"C7", blk:"C-7 L-15 L1 · pH and solubility", topic:"Effect of pH on the solubility of salts whose anion is the conjugate base of a weak acid", t:60,
+ src:"L-15 · LEVEL-1 Q2",
+ q:"How does pH affect solubility of salts with anions from weak acids?",
+ opts:["Increases with acid",
+  "Decreases with acid",
+  "No change",
+  "Increases with base"],
+ ans:2,
+ why:["&#9888; Correct by working. Added H<sup>+</sup> converts the anion into the undissociated weak acid (F<sup>&minus;</sup> + H<sup>+</sup> &rarr; HF), which removes it from the K<sub>sp</sub> product, so more solid must dissolve to restore it.",
+  "Decreasing in acid is the common-ion effect, which needs the <i>same</i> ion to be added. H<sup>+</sup> is not an ion of CaF<sub>2</sub> or CaCO<sub>3</sub>; it consumes one, so the equilibrium shifts the other way.",
+  "No change holds only for anions of <i>strong</i> acids (Cl<sup>&minus;</sup>, Br<sup>&minus;</sup>, NO<sub>3</sub><sup>&minus;</sup>), which do not accept protons &mdash; AgCl really is pH-independent. The question specifies weak-acid anions, for which the opposite is true. This is the letter ICAD's key prints.",
+  "Added base supplies OH<sup>&minus;</sup>, which suppresses protonation of the anion and, for hydroxide-forming cations, adds a common ion &mdash; both effects reduce solubility rather than increase it."],
+ sol:"<b>Concept:</b> When the anion of a sparingly soluble salt is the conjugate base of a weak acid &mdash; F<sup>&minus;</sup>, CO<sub>3</sub><sup>2&minus;</sup>, C<sub>2</sub>O<sub>4</sub><sup>2&minus;</sup>, S<sup>2&minus;</sup>, CH<sub>3</sub>COO<sup>&minus;</sup>, PO<sub>4</sub><sup>3&minus;</sup> &mdash; added H<sup>+</sup> ties it up as the weak acid. Only <i>free</i> anion counts in K<sub>sp</sub>, so removing it drags the dissolution equilibrium forward: the salt becomes <b>more</b> soluble as the pH falls.<br><b>Key relation:</b> CaF<sub>2</sub> &#8652; Ca<sup>2+</sup> + 2F<sup>&minus;</sup> with K<sub>sp</sub> = [Ca<sup>2+</sup>][F<sup>&minus;</sup>]<sup>2</sup>, coupled to F<sup>&minus;</sup> + H<sup>+</sup> &#8652; HF (K<sub>a</sub> = 7&times;10<sup>&minus;4</sup>). The fraction of fluoride still free is K<sub>a</sub>/(K<sub>a</sub> + [H<sup>+</sup>]).<br><b>1.</b> K<sub>sp</sub> is a constant at fixed temperature; lowering the free [F<sup>&minus;</sup>] forces [Ca<sup>2+</sup>] &mdash; and hence the amount dissolved &mdash; to rise.<br><b>2.</b> In acid, F<sup>&minus;</sup> + H<sup>+</sup> &rarr; HF. At pH 2, [H<sup>+</sup>] = 10<sup>&minus;2</sup>, so the free fraction is 7&times;10<sup>&minus;4</sup>/(7&times;10<sup>&minus;4</sup> + 10<sup>&minus;2</sup>) = <b>0.065</b> &mdash; 93% of the fluoride is locked up as HF.<br><b>3.</b> With only 6.5% of the fluoride free, roughly (1/0.065)<sup>2/3</sup> &asymp; 6 times more CaF<sub>2</sub> must dissolve to satisfy the same K<sub>sp</sub>. Solubility <b>increases with acid</b>.<br><b>4.</b> Familiar proof: marble and eggshell (CaCO<sub>3</sub>) barely dissolve in water but fizz away in dilute HCl, because CO<sub>3</sub><sup>2&minus;</sup> + 2H<sup>+</sup> &rarr; H<sub>2</sub>O + CO<sub>2</sub> removes the anion completely.<br><b>5.</b> Contrast AgCl: Cl<sup>&minus;</sup> is the conjugate base of a strong acid and does not protonate, so AgCl's solubility is genuinely pH-independent &mdash; that is the case option (c) describes.<br><b>6.</b> Adding base does the reverse, keeping the anion deprotonated and often adding OH<sup>&minus;</sup> as a common ion, so solubility falls. The working therefore gives <b>(a)</b>.<br><b>&#9889; JEE Trick:</b> Ask one question &mdash; can the anion grab a proton? If yes, acid dissolves the salt; if no (Cl<sup>&minus;</sup>, Br<sup>&minus;</sup>, I<sup>&minus;</sup>, NO<sub>3</sub><sup>&minus;</sup>), pH does nothing.<br>&#9888; ICAD's key says (c) No change; the working gives (a) Increases with acid, because a weak-acid anion is protonated by added H<sup>+</sup>, which lowers the free anion concentration and forces more solid to dissolve &mdash; &ldquo;no change&rdquo; is true only for strong-acid anions, which the stem explicitly excludes.<br><b>Answer: (c) No change per the key &mdash; derived (a) Increases with acid.</b>"},
+{id:12, lec:"C7", blk:"C-7 L-16 L6 · Indicators", topic:"Narrowing down a solution's pH from the colours of three indicators", t:90,
+ src:"L-16 · LEVEL-6 Q1",
+ q:"A solution gives the following colours with different indicators : Methyl orange &mdash; Yellow; Methyl red &mdash; Yellow; Bromothymol blue &mdash; Orange. What is the pH of the solution?",
+ opts:["&gt;4.5",
+  "&gt;6.0",
+  "6.0 to 6.3",
+  "4.5 to 6"],
+ ans:2,
+ why:["&gt;4.5 uses only the methyl orange reading and throws the other two away. It is true but far too loose &mdash; it would also admit pH 11, where bromothymol blue is blue, not orange-yellow.",
+  "&gt;6.0 adds the methyl red bound but keeps the range open upwards, so it still allows pH 8, at which bromothymol blue has completed its change to blue. The upper bound from the third indicator is unused.",
+  "Correct. Methyl red fully yellow needs pH &ge; 6.3 (top of its 4.2&ndash;6.3 range), while bromothymol blue not yet green or blue needs pH near the bottom of its 6.0&ndash;7.6 range &mdash; the two bounds pin the solution at 6.0&ndash;6.3.",
+  "4.5 to 6 is ruled out by the methyl red reading: at pH 5 methyl red would still be orange-red, not yellow, since 5 sits in the middle of its transition."],
+ sol:"<b>Concept:</b> Every indicator colour is really a pH inequality. An indicator showing its <i>basic</i> colour puts a lower bound on the pH; one still showing its <i>acid</i> colour puts an upper bound. Collect all three bounds and intersect them. The trap is settling for a broad option that is true but not the narrowest.<br><b>Key relation:</b> the transition range is pK<sub>In</sub> &plusmn; 1; above it the basic colour is seen, below it the acid colour. Ranges used: methyl orange 3.1&ndash;4.4 (red &rarr; yellow), methyl red 4.2&ndash;6.3 (red &rarr; yellow), bromothymol blue 6.0&ndash;7.6 (yellow &rarr; blue).<br><b>1.</b> Methyl orange is yellow, its basic colour, so the solution is past that range: <b>pH &gt; 4.4</b>.<br><b>2.</b> Methyl red is yellow too, which it only becomes at the top of its range: <b>pH &ge; 6.3</b> &mdash; a much tighter bound than step 1.<br><b>3.</b> Bromothymol blue shows no green or blue at all (the book's &ldquo;orange&rdquo; is its yellow acid-side shade), so its 6.0&ndash;7.6 change has barely begun: <b>pH &asymp; 6.0&ndash;6.3</b>, certainly below about 6.3.<br><b>4.</b> Intersecting steps 2 and 3 leaves the narrow band <b>6.0 to 6.3</b> &mdash; option (c).<br><b>5.</b> The redundancy is a useful check: pH 6.1 makes methyl orange yellow (it is far past 4.4), methyl red just yellow, and bromothymol blue still on its yellow side &mdash; all three observations reproduced.<br><b>6.</b> Options (a) and (b) are open-ended and fail the bromothymol blue reading at higher pH, while (d) contradicts the methyl red reading at lower pH.<br><b>&#9889; JEE Trick:</b> Write each colour as an inequality before thinking about the options, and let the <i>tightest</i> lower bound and tightest upper bound decide. When several indicators are quoted, the intended answer is always the narrowest interval consistent with all of them.<br><b>Answer: (c) 6.0 to 6.3.</b>"},
+{id:13, lec:"C7", blk:"C-7 L-16 L1 · Indicators", topic:"The pH transition range of phenolphthalein", t:60,
+ src:"L-16 · LEVEL-1 Q5",
+ q:"Phenolphthalein changes colour in the pH range:",
+ opts:["3.2 &minus; 4.5",
+  "5.5 &minus; 7.5",
+  "4.4 &minus; 6.5",
+  "8.3 &minus; 10.5"],
+ ans:0,
+ why:["3.2&ndash;4.5 is the range of <b>methyl orange</b> (pK<sub>In</sub> &asymp; 3.7). Phenolphthalein is still completely colourless there, which is why methyl orange, not phenolphthalein, is used for titrating Na<sub>2</sub>CO<sub>3</sub> to the bicarbonate stage. This is the letter ICAD's key prints.",
+  "5.5&ndash;7.5 brackets neutrality &mdash; roughly the litmus or bromothymol-blue window. An indicator changing there would be useless for the strong-acid/weak-acid titrations phenolphthalein is chosen for.",
+  "4.4&ndash;6.5 is close to <b>methyl red</b> (pK<sub>In</sub> &asymp; 5.1). Like (a) and (b) it lies below pH 8, where phenolphthalein has not begun to ionise.",
+  "&#9888; Correct by working. pK<sub>In</sub>(phenolphthalein) &asymp; 9.3, so the range is pK<sub>In</sub> &plusmn; 1 = 8.3 to 10.3 &mdash; the printed 8.3&ndash;10.5."],
+ sol:"<b>Concept:</b> Phenolphthalein is a weak organic acid, colourless as HIn and pink as In<sup>&minus;</sup>. The eye registers a change once the ratio of the two forms moves roughly from 1:10 to 10:1, which spans pK<sub>In</sub> &plusmn; 1. With pK<sub>In</sub> &asymp; 9.3 that window sits firmly on the basic side.<br><b>Key relation:</b> HIn &#8652; H<sup>+</sup> + In<sup>&minus;</sup>; pH = pK<sub>In</sub> + log([In<sup>&minus;</sup>]/[HIn]), so the transition range is pK<sub>In</sub> &plusmn; 1.<br><b>1.</b> K<sub>In</sub> &asymp; 5&times;10<sup>&minus;10</sup>, so pK<sub>In</sub> = 10 &minus; log 5 = 10 &minus; 0.70 = <b>9.3</b>.<br><b>2.</b> First faint pink at [In<sup>&minus;</sup>]/[HIn] = 1/10: pH = 9.3 &minus; 1 = <b>8.3</b>.<br><b>3.</b> Full pink at [In<sup>&minus;</sup>]/[HIn] = 10: pH = 9.3 + 1 = <b>10.3</b>.<br><b>4.</b> The range is therefore about 8.3&ndash;10.3, matching the printed <b>8.3&ndash;10.5</b> of option (d).<br><b>5.</b> The other three windows all lie below pH 8 and belong to other indicators: methyl orange 3.2&ndash;4.5, methyl red about 4.4&ndash;6.5, and the near-neutral 5.5&ndash;7.5 of litmus or bromothymol blue.<br><b>6.</b> Consistency with practice: phenolphthalein is the indicator for titrating a weak acid with a strong base, whose equivalence point falls near pH 9 &mdash; precisely because its range brackets that value. The book's own pages agree, describing phenolphthalein as changing &ldquo;above pH 8&rdquo; and quoting &ldquo;8 to 9.6&rdquo; elsewhere.<br><b>&#9889; JEE Trick:</b> Remember two anchors and derive the rest: methyl orange 3.1&ndash;4.4 (acid side, pK<sub>In</sub> &asymp; 3.7) and phenolphthalein 8.3&ndash;10 (basic side, pK<sub>In</sub> &asymp; 9.3). Any range centred near 7 is neither.<br>&#9888; ICAD's key says (a) 3.2 &minus; 4.5; the working gives (d) 8.3 &minus; 10.5, because pK<sub>In</sub> of phenolphthalein is 9.3 and the transition range pK<sub>In</sub> &plusmn; 1 is 8.3&ndash;10.3 &mdash; 3.2&ndash;4.5 is methyl orange's range.<br><b>Answer: (a) 3.2 &minus; 4.5 per the key &mdash; derived (d) 8.3 &minus; 10.5.</b>"},
+{id:14, lec:"C7", blk:"C-7 L-2 L5 · Kp and Kc", topic:"Evaluating K<sub>p</sub> by direct substitution of equilibrium partial pressures", t:90,
+ src:"L-2 · LEVEL-5 Q7",
+ q:"At 3000 K, the equilibrium partial pressures of CO<sub>2</sub>, CO and O<sub>2</sub> are 0.6, 0.4 and 0.2 atmospheres respectively. K<sub>p</sub> for the reaction 2CO<sub>2</sub>(g) &#8652; 2CO(g) + O<sub>2</sub>(g) is:",
+ opts:["0.088",
+  "0.0533",
+  "0.133",
+  "0.177"],
+ ans:0,
+ why:["Correct. (0.4)&sup2;&times;0.2/(0.6)&sup2; = 0.032/0.36 = 0.0889 atm, which the book rounds to 0.088.",
+  "Forgets to square p<sub>CO</sub>: 0.4&times;0.2/0.36 = 0.0533. The coefficient 2 on CO has to become an exponent.",
+  "Omits the O<sub>2</sub> factor: (0.4)&sup2;/(0.6)&sup2; = 0.133. O<sub>2</sub> is a product and enters to the first power.",
+  "Leaves p<sub>CO<sub>2</sub></sub> unsquared part-way through the arithmetic; no consistent K<sub>p</sub> expression for this equation yields 0.177."],
+ sol:"<b>Concept:</b> All three equilibrium partial pressures are supplied, so this is pure substitution into K<sub>p</sub>. Both CO<sub>2</sub> and CO carry the coefficient 2, so both pressures are squared; O<sub>2</sub> enters to the first power.<br><b>Formula:</b> for 2CO<sub>2</sub>(g) &#8652; 2CO(g) + O<sub>2</sub>(g), K<sub>p</sub> = (p<sub>CO</sub>)&sup2;(p<sub>O<sub>2</sub></sub>)/(p<sub>CO<sub>2</sub></sub>)&sup2;.<br><b>Solution:</b><br>1. Numerator = (0.4)&sup2; &times; 0.2 = 0.16 &times; 0.2 = <b>0.032</b>.<br>2. Denominator = (0.6)&sup2; = <b>0.36</b>.<br>3. K<sub>p</sub> = 0.032/0.36 = <b>0.0889 atm</b>, i.e. the printed option 0.088.<br>4. Unit check: &Delta;n<sub>g</sub> = (2+1) &minus; 2 = +1, so K<sub>p</sub> carries atm<sup>1</sup> &mdash; consistent with the answer cell.<br>5. Interpretation: K<sub>p</sub> &lt; 1, so even at 3000 K the equilibrium still sits on the CO<sub>2</sub> side, which matches p<sub>CO<sub>2</sub></sub> being the largest of the three pressures given.<br>6. No total pressure is needed here. Contrast the harder variants where only the total is measured and the individual partial pressures must first be built from an ICE table.<br><b>&#9889; JEE Trick:</b> Evaluate numerator and denominator completely before dividing. Every distractor here corresponds to dropping exactly one factor &mdash; the exponent on CO, or the O<sub>2</sub> term &mdash; which is what happens when the arithmetic is attempted in a single pass.<br><b>Answer: (a) 0.088 atm</b> (0.0889 to three figures)."},
+{id:15, lec:"C7", blk:"C-7 L-2 L1 · Nature of equilibrium", topic:"The system condition required for chemical equilibrium to be reached", t:60,
+ src:"L-2 &middot; LEVEL-1 Q2",
+ q:"Which system condition is essential to maintain chemical equilibrium?",
+ opts:["Open system",
+  "Constant stirring",
+  "Closed system",
+  "Vacuum chamber"],
+ ans:2,
+ why:["The opposite of what is needed: in an open vessel a gaseous product escapes, its concentration stays near zero, the backward rate can never rise to meet the forward rate, and the reaction runs to completion instead.",
+  "Stirring only speeds up mixing, so equilibrium arrives sooner. It is neither necessary (a sealed tube reaches equilibrium unstirred) nor sufficient (stirring an open beaker still loses the gas).",
+  "Correct. Only a closed system keeps all species in contact, letting the backward rate build up until r<sub>forward</sub> = r<sub>backward</sub>.",
+  "A vacuum is the opposite condition &mdash; evacuating the vessel removes the very species whose concentrations must build up, and it is not a containment requirement at all."],
+ sol:"<b>Concept:</b> Equilibrium is dynamic: it needs the backward reaction to become as fast as the forward one. That can only happen if nothing leaves, so the products' concentrations are free to rise. Hence a closed system.<br><b>Formula:</b> equilibrium requires r<sub>forward</sub> = r<sub>backward</sub>, and r<sub>backward</sub> depends on the product concentrations, which only accumulate in a closed vessel.<br><b>Solution:</b><br>1. Option (a), open system: a gaseous product diffuses away, so its concentration stays near zero and the backward rate stays near zero. The two rates can never match. Reject.<br>2. Option (b), constant stirring: stirring improves contact and shortens the time to equilibrium, but it changes neither the equilibrium position nor whether equilibrium is attainable. Reject.<br>3. Option (d), vacuum chamber: pumping the vessel down removes gaseous species, which is the open-system failure in a more extreme form. Reject.<br>4. Option (c), closed system: matter cannot enter or leave, so every species stays in the reaction mixture and the reverse rate can climb until it equals the forward rate. Accept.<br>5. Standard illustration: CaCO<sub>3</sub>(s) &rarr; CaO(s) + CO<sub>2</sub>(g) runs to completion in an open dish because CO<sub>2</sub> escapes, but in a sealed container it reaches CaCO<sub>3</sub> &#8652; CaO + CO<sub>2</sub> with a definite K<sub>p</sub> = p(CO<sub>2</sub>).<br>6. Note that &ldquo;closed&rdquo; restricts matter only, not energy &mdash; a sealed tube in a furnace is still a closed system, which is why temperature can be varied to change K.<br><b>&#9889; JEE Trick:</b> the requirement bites hardest when a gas or vapour is involved. An all-condensed-phase equilibrium (ice/water at 0&nbsp;&deg;C, an esterification in a flask) loses nothing to the air and manages in an open beaker.<br>Answer: <b>(c)</b> Closed system."},
+{id:16, lec:"C7", blk:"C-7 L-3 L1 · Manipulating K", topic:"Effect on K of reversing the chemical equation", t:60,
+ src:"L-3 · LEVEL-1 Q2",
+ q:"What happens to the equilibrium constant when a reaction is reversed?",
+ opts:["It remains unchanged",
+  "It gets squared",
+  "It becomes the reciprocal",
+  "It becomes zero"],
+ ans:2,
+ why:["Would make the forward and reverse reactions equally favourable, which is only true in the special case K = 1 &mdash; not a general rule.",
+  "That is the rule for <i>multiplying the equation by 2</i>, not for reversing it; the two manipulations are being swapped.",
+  "Correct. Numerator and denominator trade places, so K&prime; = 1/K.",
+  "Impossible: K = 0 would mean no product forms at all, i.e. no reaction, and the reverse of a real equilibrium is still a real equilibrium."],
+ sol:"<b>Concept:</b> Reversing an equation swaps which species are &lsquo;products&rsquo; and which are &lsquo;reactants&rsquo;, so the two sides of the K expression trade places. The same equilibrium mixture is being described either way.<br><b>Formula:</b> for A + B &#8652; C + D, K<sub>c</sub> = [C][D]/([A][B]); for the reverse C + D &#8652; A + B, K<sub>c</sub>&prime; = [A][B]/([C][D]) = 1/K<sub>c</sub>.<br><b>Solution:</b><br>1. Write the forward constant: K<sub>c</sub> = [C][D]/([A][B]).<br>2. Write the reversed constant from the reversed equation: K<sub>c</sub>&prime; = [A][B]/([C][D]).<br>3. The same four equilibrium concentrations appear in both, only inverted, so K<sub>c</sub>&prime; = 1/K<sub>c</sub> &mdash; the reciprocal.<br>4. Numerical illustration: if K<sub>c</sub> = 100 for N<sub>2</sub> + 2O<sub>2</sub> &#8652; 2NO<sub>2</sub>, then for 2NO<sub>2</sub> &#8652; N<sub>2</sub> + 2O<sub>2</sub>, K<sub>c</sub>&prime; = 1/100 = <b>0.01</b>.<br>5. Sense check: a nearly complete forward reaction (large K) must have a nearly impossible reverse (small K). Only the reciprocal delivers that.<br>6. Note what does <i>not</i> change: the temperature, and therefore the physical equilibrium state itself. Reversing is a bookkeeping choice about how the equation is written.<br><b>&#9889; JEE Trick:</b> Three manipulations, three rules &mdash; reverse &rarr; reciprocal; multiply the equation by n &rarr; K<sup>n</sup>; add two equations &rarr; multiply their K values. Most Level-3 problems simply chain two of these.<br><b>Answer: (c) It becomes the reciprocal.</b>"},
+{id:17, lec:"C7", blk:"C-7 L-4 L6 · Kp, Kc and Kx", topic:"Chaining Kp&harr;Kc and Kp&harr;Kx to relate Kc with Kx", t:90,
+ src:"L-4 · LEVEL-6 Q10",
+ q:"<b>Passage (Q8&ndash;Q10), continued.</b> For the following equilibrium the relation between K<sub>c</sub> and K<sub>x</sub> (in terms of mole fraction) is: PCl<sub>3</sub>(g) + Cl<sub>2</sub>(g) &#8652; PCl<sub>5</sub>(g)",
+ opts:["K<sub>c</sub> = K<sub>x</sub>(RT)<sup>&minus;1</sup>",
+  "K<sub>c</sub> = K<sub>x</sub>(RT)",
+  "K<sub>c</sub> = K<sub>x</sub>(RT/P)",
+  "K<sub>p</sub> = K<sub>x</sub>(P/RT)"],
+ ans:2,
+ why:["Uses the exponent with the wrong sign in the K<sub>p</sub>&rarr;K<sub>c</sub> step (treats &Delta;n<sub>g</sub> as +1) and drops the pressure factor entirely.",
+  "Does the K<sub>p</sub> = K<sub>c</sub>(RT)<sup>&minus;1</sup> conversion correctly but then writes K<sub>p</sub> = K<sub>x</sub>, forgetting K<sub>p</sub> = K<sub>x</sub>P<sup>&Delta;n</sup> = K<sub>x</sub>/P, so the 1/P is missing.",
+  "Correct. &Delta;n<sub>g</sub> = &minus;1 gives K<sub>c</sub> = K<sub>p</sub>(RT) and K<sub>p</sub> = K<sub>x</sub>/P, so K<sub>c</sub> = K<sub>x</sub>(RT/P).",
+  "Answers a different question: it reports K<sub>p</sub> rather than K<sub>c</sub>, and even as a K<sub>p</sub> statement it is wrong &mdash; with &Delta;n<sub>g</sub> = &minus;1, K<sub>p</sub> = K<sub>x</sub>P<sup>&minus;1</sup>, not K<sub>x</sub>(P/RT)."],
+ sol:"<b>Concept:</b> K<sub>c</sub> and K<sub>x</sub> are never linked directly &mdash; both are linked to K<sub>p</sub>, and each link carries the <i>same</i> exponent &Delta;n<sub>g</sub>. Convert twice and eliminate K<sub>p</sub>.<br><b>Key relations:</b> K<sub>p</sub> = K<sub>c</sub>(RT)<sup>&Delta;n<sub>g</sub></sup> and K<sub>p</sub> = K<sub>x</sub>P<sup>&Delta;n<sub>g</sub></sup><br><b>Solution:</b><br>1. Count the gas moles: PCl<sub>3</sub>(g) + Cl<sub>2</sub>(g) &#8652; PCl<sub>5</sub>(g) goes from 2 moles of gas to 1, so &Delta;n<sub>g</sub> = 1 &minus; 2 = <b>&minus;1</b>.<br>2. First conversion: K<sub>p</sub> = K<sub>c</sub>(RT)<sup>&Delta;n<sub>g</sub></sup> = K<sub>c</sub>(RT)<sup>&minus;1</sup> = K<sub>c</sub>/(RT), so <b>K<sub>c</sub> = K<sub>p</sub>(RT)</b>.<br>3. Second conversion: partial pressure p<sub>i</sub> = x<sub>i</sub>P, so K<sub>p</sub> = K<sub>x</sub>P<sup>&Delta;n<sub>g</sub></sup> = K<sub>x</sub>P<sup>&minus;1</sup> = <b>K<sub>x</sub>/P</b>.<br>4. Eliminate K<sub>p</sub>: K<sub>c</sub> = K<sub>p</sub>(RT) = (K<sub>x</sub>/P)(RT) = <b>K<sub>x</sub>(RT/P)</b>.<br>5. Units check: K<sub>x</sub> is dimensionless and K<sub>c</sub> must carry (mol/L)<sup>&minus;1</sup> = L/mol; RT/P indeed has units of volume per mole. The expression is dimensionally sound, which rules out options (a) and (b) at a glance.<br>6. So the answer is <b>(c) K<sub>c</sub> = K<sub>x</sub>(RT/P)</b>.<br><b>&#9889; JEE Trick:</b> Both conversion factors (RT) and P are raised to the same &Delta;n<sub>g</sub>. Fix the sign of &Delta;n<sub>g</sub> once, write the two K<sub>p</sub> equations, and divide &mdash; never try to jump from K<sub>c</sub> to K<sub>x</sub> in one step.<br><b>Answer: (c) K<sub>c</sub> = K<sub>x</sub>(RT/P).</b>"},
+{id:18, lec:"C7", blk:"C-7 L-4 L3 · Gibbs energy and K", topic:"Computing &Delta;G from &Delta;G&deg; and the reaction quotient", t:60,
+ src:"L-4 · LEVEL-3 Q4",
+ q:"For a reaction, Q = 5 and K = 0.5 at 298 K. Calculate &Delta;G using two steps. (R = 8.314 J/mol&middot;K)",
+ opts:["4.0 kJ/mol",
+  "5.7 kJ/mol",
+  "7.0 kJ/mol",
+  "10.2 kJ/mol"],
+ ans:1,
+ why:["Reports only the RT ln Q term (2477.6 &times; 1.609 = 3.99 kJ) and forgets to add &Delta;G&deg;.",
+  "Correct. &Delta;G = &Delta;G&deg; + RT ln Q = 1.72 + 3.99 = 5.7 kJ/mol, equivalently RT ln(Q/K) = 2477.6 &times; ln 10.",
+  "Double-counts the standard term: 2&times;1.72 + 3.99 &asymp; 7.4 kJ. &Delta;G&deg; enters once only.",
+  "Mixes the ln and log<sub>10</sub> forms, applying the 2.303 factor to the RT ln Q term as well; 1.72 + 2.303&times;3.99 &asymp; 11 kJ."],
+ sol:"<b>Concept:</b> Two quantities, two steps. &Delta;G&deg; is fixed by K alone; &Delta;G at the stated composition then needs the Q correction. Both use the same RT.<br><b>Formula:</b> &Delta;G&deg; = &minus;RT ln K, then &Delta;G = &Delta;G&deg; + RT ln Q.<br><b>Solution:</b><br>1. RT = 8.314 &times; 298 = <b>2477.6 J/mol</b>.<br>2. <b>Step 1.</b> &Delta;G&deg; = &minus;RT ln K = &minus;2477.6 &times; ln(0.5) = &minus;2477.6 &times; (&minus;0.6931) = <b>+1717 J/mol</b>. It is positive because K &lt; 1.<br>3. <b>Step 2.</b> RT ln Q = 2477.6 &times; ln(5) = 2477.6 &times; 1.6094 = <b>+3988 J/mol</b>.<br>4. Add: &Delta;G = 1717 + 3988 = <b>5705 J/mol = 5.7 kJ/mol</b>.<br>5. One-line check: &Delta;G = RT ln(Q/K) = 2477.6 &times; ln(5/0.5) = 2477.6 &times; ln 10 = 2477.6 &times; 2.3026 = <b>5704 J/mol</b> &mdash; the same value, which confirms both steps.<br>6. Sign interpretation: Q = 5 &gt; K = 0.5, so the forward reaction is non-spontaneous as written and &Delta;G must come out positive. It does, so the arithmetic is self-consistent.<br>7. Physically the mixture holds ten times too much product, and the system will run <b>backward</b> until Q falls to 0.5, at which point &Delta;G = 0.<br><b>&#9889; JEE Trick:</b> Collapse the two steps into &Delta;G = RT ln(Q/K) whenever both Q and K are given. One logarithm replaces two, and the sign of &Delta;G is then read straight off whether Q/K exceeds 1.<br><b>Answer: (b) 5.7 kJ/mol.</b>"},
+{id:19, lec:"C7", blk:"C-7 L-5 L6 · Le Chatelier", topic:"Le Chatelier applied to the solubility of an exothermically dissolving gas", t:90,
+ src:"L-5 · LEVEL-6 Q4",
+ q:"<b>Passage (Q4&ndash;Q5).</b> If a system at equilibrium is subjected to a change in concentration, pressure or temperature, the system adjusts itself so as to minimise the effect of that change. For solubility: when solid substances dissolve in water heat may be evolved or absorbed; for an endothermic dissolution the solubility increases with temperature and for an exothermic dissolution it decreases. When a gas dissolves in a liquid there is a decrease in volume, so an increase of pressure favours dissolution.<br>A gaseous solute &lsquo;X&rsquo; when dissolved in water evolves heat. Then the solubility of &lsquo;X&rsquo; will increase at:",
+ opts:["High temperature, low pressure",
+  "Low temperature, high pressure",
+  "High temperature, high pressure",
+  "Low temperature, low pressure"],
+ ans:1,
+ why:["Both factors inverted: heating an exothermic dissolution drives the gas back out, and lowering the pressure favours the larger-volume (undissolved) state.",
+  "Correct. Dissolution is exothermic, so cooling favours it; dissolution contracts the volume, so compressing favours it.",
+  "Gets the pressure right but the temperature wrong &mdash; heat is a product here, so raising T shifts the equilibrium backwards.",
+  "Gets the temperature right but the pressure wrong &mdash; dissolving a gas decreases the volume, so low pressure opposes it."],
+ sol:"<b>Concept:</b> Treat dissolution as a reaction and apply Le Chatelier twice: once to the heat term, once to the volume change.<br><b>Formula:</b> X(g) + water &#8652; X(aq) + heat; heat is a <i>product</i>, and the gas-to-solution step is a large volume contraction.<br><b>Solution:</b><br>1. &lsquo;Evolves heat&rsquo; means the dissolution is <b>exothermic</b>, so write the heat on the product side.<br>2. Raising the temperature adds heat, i.e. adds product, so the equilibrium shifts <b>backwards</b> and the gas comes out of solution.<br>3. Therefore solubility rises as the temperature <b>falls</b> &mdash; low temperature.<br>4. A gas entering solution loses its large gas-phase volume, so dissolution involves a <b>decrease in volume</b>.<br>5. Raising the pressure pushes the system towards the smaller-volume side, so the equilibrium shifts <b>forwards</b> and more gas dissolves &mdash; high pressure.<br>6. Combining the two: solubility is greatest at <b>low temperature and high pressure</b>, option (b).<br>7. Everyday confirmation: a chilled, sealed fizzy drink holds its CO<sub>2</sub>; warming it or releasing the cap (lowering the pressure) makes the gas escape. This is also Henry&rsquo;s law, whose constant rises with temperature for a gas that dissolves exothermically.<br><b>&#9889; JEE Trick:</b> Handle temperature and pressure as two separate one-line arguments &mdash; heat on which side, volume on which side &mdash; then combine. Options (c) and (d) exist purely to catch answers that treat only one of the two.<br><b>Answer: (b) Low temperature, high pressure.</b>"},
+{id:20, lec:"C7", blk:"C-7 L-5 L3 · Heterogeneous equilibrium", topic:"Expanding a CaCO<sub>3</sub>/CaO/CO<sub>2</sub> vessel: pressure and shift direction", t:60,
+ src:"L-5 · LEVEL-3 Q4",
+ q:"A container with CaCO<sub>3</sub>(s) &#8652; CaO(s) + CO<sub>2</sub>(g) has equilibrium at 1 atm. If the volume is increased, how do the pressure and direction change?",
+ opts:["Pressure increases, forward",
+  "Pressure decreases, forward",
+  "Pressure decreases, backward",
+  "No effect"],
+ ans:1,
+ why:["Expansion cannot raise the pressure; this option inverts Boyle&rsquo;s law, though it does get the direction right by accident.",
+  "Correct. Expansion drops p(CO<sub>2</sub>) below K<sub>p</sub>, so Q &lt; K and more CaCO<sub>3</sub> decomposes &mdash; a forward shift.",
+  "Pressure right, direction wrong: a backward shift needs Q &gt; K, i.e. p(CO<sub>2</sub>) <i>above</i> K<sub>p</sub>, which is what compression would give.",
+  "&ldquo;No effect&rdquo; applies to adding more solid, not to changing the volume &mdash; the gas-phase CO<sub>2</sub> pressure really does drop, and the system really does respond."],
+ sol:"<b>Concept:</b> Only CO<sub>2</sub> appears in the equilibrium constant, so K<sub>p</sub> = p(CO<sub>2</sub>). Expanding the vessel lowers p(CO<sub>2</sub>) at once; the system restores it by decomposing more limestone.<br><b>Key relation:</b> CaCO<sub>3</sub>(s) &#8652; CaO(s) + CO<sub>2</sub>(g), K<sub>p</sub> = p<sub>CO<sub>2</sub></sub> = 1 atm at this temperature.<br><b>Solution:</b><br>1. Pure solids are assigned unit activity, so both CaCO<sub>3</sub> and CaO drop out and K<sub>p</sub> = p(CO<sub>2</sub>), equal to 1 atm at equilibrium.<br>2. Increasing the volume spreads the same amount of CO<sub>2</sub> through a larger space, so p(CO<sub>2</sub>) <b>decreases</b> the instant the expansion happens.<br>3. Now Q = p(CO<sub>2</sub>) &lt; K<sub>p</sub>, so the reaction must run in the direction that makes more CO<sub>2</sub>.<br>4. Making more CO<sub>2</sub> means decomposing more CaCO<sub>3</sub> &mdash; a <b>forward</b> shift. That is option (b).<br>5. The endpoint is worth noting: once equilibrium is re-established, p(CO<sub>2</sub>) is back at exactly 1 atm, because K<sub>p</sub> never changed. What has changed is only how much solid has decomposed.<br>6. If so much limestone decomposes that the CaCO<sub>3</sub> runs out entirely, the equilibrium no longer exists and p(CO<sub>2</sub>) then does fall below 1 atm &mdash; the standard follow-up to this question.<br><b>&#9889; JEE Trick:</b> When K<sub>p</sub> equals a single partial pressure, that pressure is the same at every equilibrium at a given temperature. Changing the volume changes only the amount of solid left, never the final gas pressure.<br><b>Answer: (b) Pressure decreases, forward.</b>"},
+{id:21, lec:"C7", blk:"C-7 L-6 L5 · Degree of dissociation from total moles", topic:"Reading alpha straight off the ratio of total to initial moles for an n = 2 dissociation", t:90,
+ src:"L-6 · LEVEL-5 Q8",
+ q:"2.2 moles of phosphorus pentachloride were taken in a closed vessel and dissociated into phosphorus trichloride and chlorine. At equilibrium, the total number of moles of the reactant and the products was 2.53. The degree of dissociation is:",
+ opts:["0.33",
+  "0.165",
+  "0.15",
+  "0.30"],
+ ans:2,
+ why:["Wrong. 0.33 is the number of moles of PCl<sub>3</sub> (or Cl<sub>2</sub>) formed, 2.53 &minus; 2.2 = 0.33 mol &mdash; an amount in moles mistaken for a fraction. A degree of dissociation must be divided by the 2.2 mol taken.",
+  "Wrong. 0.165 is that same 0.33 mol divided by 2 instead of by 2.2 &mdash; dividing by the mole increase per mole reacted rather than by the initial amount.",
+  "Correct. n<sub>total</sub> = n<sub>0</sub>(1 + &alpha;) for PCl<sub>5</sub> &#8652; PCl<sub>3</sub> + Cl<sub>2</sub>, so 1 + &alpha; = 2.53/2.2 = 1.15 and <b>&alpha; = 0.15</b>; counting back, 1.87 + 0.33 + 0.33 = 2.53 mol.",
+  "Wrong. 0.30 would make the total 2.2 &times; 1.30 = 2.86 mol, not the 2.53 stated. It is 0.15 doubled &mdash; the slip of applying the mole-increase factor twice."],
+ sol:"<b>Concept:</b> For a dissociation in which 1 mole gives n moles, the total at equilibrium is n<sub>0</sub>[1 + (n &minus; 1)&alpha;]. The ratio of final to initial total moles therefore hands you &alpha; in one step &mdash; no vapour density needed. <b>Key relation:</b> PCl<sub>5</sub> &#8652; PCl<sub>3</sub> + Cl<sub>2</sub> has n = 2, so n<sub>total</sub> = n<sub>0</sub>(1 + &alpha;). <b>Solution:</b> 1. Initial: n<sub>0</sub> = <b>2.2</b> mol PCl<sub>5</sub>. At equilibrium the total of reactant plus products is <b>2.53</b> mol. 2. One mole of PCl<sub>5</sub> gives two moles of product, so n = 2 and n &minus; 1 = 1. 3. Hence n<sub>total</sub> = n<sub>0</sub>(1 + &alpha;), giving 1 + &alpha; = 2.53/2.2 = <b>1.15</b>. 4. Therefore &alpha; = 1.15 &minus; 1 = <b>0.15</b>, i.e. 15% dissociated. 5. Verify by mole counting: PCl<sub>5</sub> left = 2.2(1 &minus; 0.15) = 1.87 mol; PCl<sub>3</sub> = Cl<sub>2</sub> = 2.2 &times; 0.15 = 0.33 mol each; total = 1.87 + 0.33 + 0.33 = <b>2.53</b> mol. Confirmed. 6. The (n &minus; 1) factor matters: had the reaction given three moles from one, the relation would be n<sub>total</sub> = n<sub>0</sub>(1 + 2&alpha;) and the same ratio 1.15 would mean &alpha; = 0.075 instead. 7. This is the same 1 + (n &minus; 1)&alpha; factor that appears in D/d = 1 + (n &minus; 1)&alpha;, read in moles rather than densities. <b>&#9889; JEE Trick:</b> Total moles divided by initial moles <i>is</i> 1 + (n &minus; 1)&alpha;. Fix (n &minus; 1) from &Delta;n<sub>g</sub>, subtract 1, divide. <b>Answer:</b> <b>(c) 0.15.</b>"},
+{id:22, lec:"C7", blk:"C-7 L-6 L3 · Degree of dissociation from molar mass", topic:"Getting x from theoretical and observed molar mass, with the observed mass in the denominator", t:60,
+ src:"L-6 · LEVEL-3 Q1",
+ q:"A gas P<sub>2</sub> dissociates into 2P. The molar mass of P<sub>2</sub> is 60 g/mol, but at equilibrium it is found to be 50 g/mol. If n = 2, find x.<br><i>Formula: x = (M &minus; m)/[(n &minus; 1) m]</i>",
+ opts:["0.18",
+  "0.20",
+  "0.25",
+  "0.30"],
+ ans:1,
+ why:["Wrong. 0.18 is where you land after dividing by the <i>theoretical</i> mass instead of the observed one: (60 &minus; 50)/(1 &times; 60) = 0.167, which rounds into this option. The denominator of the formula is m, not M.",
+  "Correct. x = (M &minus; m)/[(n &minus; 1)m] = (60 &minus; 50)/(1 &times; 50) = 10/50 = <b>0.20</b>, and substituting back gives m = 60/(1 + 0.20) = 50 g/mol exactly as observed.",
+  "Wrong. 0.25 comes from using the difference over the <i>difference-corrected</i> mass, e.g. 10/40, or from rounding 60/50 = 1.2 up to 1.25. Neither step is in the formula.",
+  "Wrong. 0.30 would need m = 60/1.3 = 46.2 g/mol, not the 50 g/mol stated. This is the value you get by treating the 10 g/mol drop as a percentage of a 33 g/mol base &mdash; a guess, not a substitution."],
+ sol:"<b>Concept:</b> When a gas dissociates, the observed (equilibrium) molar mass falls below the theoretical value because the same mass is now spread over more moles. The drop measures how far the dissociation has gone. <b>Key relation:</b> x = (M &minus; m)/[(n &minus; 1)m], equivalently m = M/[1 + (n &minus; 1)x]; the denominator carries <b>m</b>, the observed mass. <b>Solution:</b> 1. P<sub>2</sub> &#8652; 2P turns 1 mole into 2, so n = 2 and n &minus; 1 = <b>1</b>. 2. Theoretical M = <b>60</b> g/mol; observed m = <b>50</b> g/mol. 3. Numerator: M &minus; m = 60 &minus; 50 = <b>10</b> g/mol. 4. Denominator: (n &minus; 1)m = 1 &times; 50 = <b>50</b> g/mol. 5. Substituting: x = (M &minus; m)/[(n &minus; 1)m] = 10/50 = <b>0.20</b>. 6. Check by running the formula the other way: m = M/[1 + (n &minus; 1)x] = 60/(1 + 0.20) = 60/1.2 = 50.0 g/mol, matching the stated observation. 7. The decoy: dividing by M gives 10/60 = 0.167, close enough to option (a) to look right. Since vapour densities obey the same relation (D/d = M/m), the same slip appears whenever the question is phrased with densities instead of molar masses. <b>&#9889; JEE Trick:</b> Substitute the answer back into m = M/[1 + (n &minus; 1)x]. One line, and it catches the M-versus-m swap every time. <b>Answer:</b> <b>(b) 0.20.</b>"},
+{id:23, lec:"C7", blk:"C-7 L-7 L5 · Simultaneous ionic equilibria", topic:"Dividing two equilibrium expressions that share the same species to get a concentration ratio", t:90,
+ src:"L-7 · LEVEL-5 Q4",
+ q:"Two equilibria, AB &#8652; A<sup>+</sup> + B<sup>&minus;</sup> and AB + B<sup>&minus;</sup> &#8652; AB<sub>2</sub><sup>&minus;</sup>, are simultaneously maintained in a solution with equilibrium constants K<sub>1</sub> and K<sub>2</sub> respectively. The ratio of [A<sup>+</sup>] to [AB<sub>2</sub><sup>&minus;</sup>] in the solution is",
+ opts:["directly proportional to [B<sup>&minus;</sup>]",
+  "inversely proportional to [B<sup>&minus;</sup>]",
+  "directly proportional to the square of [B<sup>&minus;</sup>]",
+  "inversely proportional to the square of [B<sup>&minus;</sup>]"],
+ ans:3,
+ why:["Wrong. Direct proportionality to [B<sup>&minus;</sup>] is what you get by reading [A<sup>+</sup>] off K<sub>1</sub> as if it were proportional to [B<sup>&minus;</sup>]. In fact [B<sup>&minus;</sup>] sits in the numerator of K<sub>1</sub>, so solving for [A<sup>+</sup>] puts it in the denominator.",
+  "Wrong. One inverse power is the answer for the first equilibrium alone, [A<sup>+</sup>] = K<sub>1</sub>[AB]/[B<sup>&minus;</sup>]. It forgets that the second equilibrium supplies a <i>further</i> factor of [B<sup>&minus;</sup>] in [AB<sub>2</sub><sup>&minus;</sup>].",
+  "Wrong. A direct square needs [B<sup>&minus;</sup>] in the numerator of both expressions. It is in the numerator of K<sub>1</sub> and in the numerator of [AB<sub>2</sub><sup>&minus;</sup>], so dividing one by the other makes the powers add in the <i>denominator</i>, not the numerator.",
+  "Correct. [A<sup>+</sup>] = K<sub>1</sub>[AB]/[B<sup>&minus;</sup>] and [AB<sub>2</sub><sup>&minus;</sup>] = K<sub>2</sub>[AB][B<sup>&minus;</sup>], so the ratio is (K<sub>1</sub>/K<sub>2</sub>)&times;1/[B<sup>&minus;</sup>]<sup>2</sup> &mdash; inversely proportional to the <b>square</b> of [B<sup>&minus;</sup>]."],
+ sol:"<b>Concept:</b> When two equilibria share a species, write each constant, solve both for the concentration you want, and divide. The shared species [AB] cancels and the powers of [B<sup>&minus;</sup>] combine. <b>Key relation:</b> K<sub>1</sub> = [A<sup>+</sup>][B<sup>&minus;</sup>]/[AB] and K<sub>2</sub> = [AB<sub>2</sub><sup>&minus;</sup>]/([AB][B<sup>&minus;</sup>]). <b>Solution:</b> 1. First equilibrium AB &#8652; A<sup>+</sup> + B<sup>&minus;</sup> gives K<sub>1</sub> = [A<sup>+</sup>][B<sup>&minus;</sup>]/[AB], so <b>[A<sup>+</sup>] = K<sub>1</sub>[AB]/[B<sup>&minus;</sup>]</b>. 2. Second equilibrium AB + B<sup>&minus;</sup> &#8652; AB<sub>2</sub><sup>&minus;</sup> gives K<sub>2</sub> = [AB<sub>2</sub><sup>&minus;</sup>]/([AB][B<sup>&minus;</sup>]), so <b>[AB<sub>2</sub><sup>&minus;</sup>] = K<sub>2</sub>[AB][B<sup>&minus;</sup>]</b>. 3. Divide the two: [A<sup>+</sup>]/[AB<sub>2</sub><sup>&minus;</sup>] = (K<sub>1</sub>[AB]/[B<sup>&minus;</sup>]) &divide; (K<sub>2</sub>[AB][B<sup>&minus;</sup>]). 4. The [AB] terms cancel, leaving [A<sup>+</sup>]/[AB<sub>2</sub><sup>&minus;</sup>] = <b>K<sub>1</sub>/(K<sub>2</sub>[B<sup>&minus;</sup>]<sup>2</sup>)</b>. 5. K<sub>1</sub> and K<sub>2</sub> are constants at a fixed temperature, so the ratio varies as 1/[B<sup>&minus;</sup>]<sup>2</sup> &mdash; inversely proportional to the square of [B<sup>&minus;</sup>], option (d). 6. Chemical sense check: adding more B<sup>&minus;</sup> suppresses the first ionisation (common-ion effect, cutting [A<sup>+</sup>]) <i>and</i> drives the second equilibrium forward (raising [AB<sub>2</sub><sup>&minus;</sup>]). Both effects push the ratio down, so two inverse powers, not one, is exactly what to expect. 7. The undissociated AB cancelling is the key economy here &mdash; it never has to be evaluated. <b>&#9889; JEE Trick:</b> With two coupled equilibria, solve each K for the species named in the question and divide; the common species cancels and the exponents on the shared ion add up with a sign set by which side it sits on. <b>Answer:</b> <b>(d) inversely proportional to the square of [B<sup>&minus;</sup>].</b>"},
+{id:24, lec:"C7", blk:"C-7 L-9 L5 · Working in equivalents", topic:"Using normality so the acid's basicity is already built in, then judging the sign of the excess", t:90,
+ src:"L-9 · LEVEL-5 Q7",
+ q:"The pH of the solution containing 10 ml of 0.1 N NaOH and 10 ml of 0.01 N H<sub>2</sub>SO<sub>4</sub> would be",
+ opts:["0",
+  "1",
+  "&gt; 7",
+  "7"],
+ ans:2,
+ why:["Wrong. pH 0 means [H<sup>+</sup>] = 1 M. Nothing here is remotely that concentrated, and in any case the base is in excess, so the solution is not acidic at all.",
+  "Wrong. pH 1 would need [H<sup>+</sup>] = 0.1 M, which is the <i>normality of the base</i> misassigned to H<sup>+</sup>. The leftover after mixing is hydroxide, not hydrogen ion.",
+  "Correct. NaOH supplies 10 &times; 0.1 = 1.0 meq against 10 &times; 0.01 = 0.1 meq of H<sub>2</sub>SO<sub>4</sub>, so 0.9 meq of OH<sup>&minus;</sup> survives in 20 mL = 0.045 N, pOH = 1.35 and pH = 12.65, i.e. clearly <b>&gt; 7</b>.",
+  "Wrong. pH 7 would require exact neutralisation, i.e. equal equivalents. Here the base brings ten times the equivalents of the acid, so a large excess of OH<sup>&minus;</sup> remains."],
+ sol:"<b>Concept:</b> Normality already folds in the basicity, so equivalents can be compared directly &mdash; no doubling for H<sub>2</sub>SO<sub>4</sub> is needed. Whichever reagent has more equivalents decides which side of 7 the answer falls on. <b>Key relation:</b> meq = mL &times; N; excess N = (meq<sub>base</sub> &minus; meq<sub>acid</sub>)/V<sub>total</sub>. <b>Solution:</b> 1. Base: 10 mL &times; 0.1 N = <b>1.0 meq</b> of OH<sup>&minus;</sup>. 2. Acid: 10 mL &times; 0.01 N = <b>0.1 meq</b> of H<sup>+</sup>. Because the strength is given in normality, the two protons of H<sub>2</sub>SO<sub>4</sub> are already counted &mdash; do not double again. 3. Excess = 1.0 &minus; 0.1 = <b>0.9 meq</b> of OH<sup>&minus;</sup>, so the solution must be basic and pH &gt; 7 at once. 4. Putting a number on it: total volume = 20 mL, so [OH<sup>&minus;</sup>] = 0.9/20 = <b>0.045 N</b>. 5. pOH = &minus;log 0.045 = <b>1.35</b>, hence pH = 14 &minus; 1.35 = <b>12.65</b>, comfortably greater than 7 &mdash; option (c). 6. The sign test is enough to answer: 1.0 meq of base against 0.1 meq of acid is a tenfold excess of base, which kills (a), (b) and (d) without any logarithm. 7. Had the acid been quoted as 0.01 <b>M</b> rather than 0.01 N, it would supply 0.2 meq instead of 0.1 &mdash; still a large base excess, so the answer would be unchanged. <b>&#9889; JEE Trick:</b> With strengths in normality, compare meq straight away and settle the side of 7 first. Compute the actual pH only if the options demand a number. <b>Answer:</b> <b>(c) &gt; 7</b> (pH = 12.65)."},
+{id:25, lec:"C7", blk:"C-7 SB SB · Buffers", topic:"pH of blood from the carbonic acid / bicarbonate buffer using Henderson&ndash;Hasselbalch", t:90,
+ src:"Strong Box &middot; LEVEL-10 Q4(i)",
+ q:"Human blood is buffered by the carbonic acid&ndash;hydrogen carbonate system: H<sub>2</sub>CO<sub>3</sub>(aq) + H<sub>2</sub>O(l) &#8652; HCO<sub>3</sub><sup>&minus;</sup>(aq) + H<sub>3</sub>O<sup>+</sup>(aq). At body temperature pK<sub>a</sub> for carbonic acid is 6.40, and the normal concentration of CO<sub>2</sub>(g) in the lungs maintains [HCO<sub>3</sub><sup>&minus;</sup>] : [H<sub>2</sub>CO<sub>3</sub>] in blood plasma at about 8 : 1 (log 2 = 0.3). The pH of blood at body temperature is",
+ opts:["6.4",
+  "7.4",
+  "7.3",
+  "7.2"],
+ ans:2,
+ why:["This is the bare pK<sub>a</sub>. It drops the +log([HCO<sub>3</sub><sup>&minus;</sup>]/[H<sub>2</sub>CO<sub>3</sub>]) term, i.e. assumes a 1:1 buffer; blood at pH 6.4 would be fatal acidosis.",
+  "The upper limit of the physiological range quoted in the passage, not the value the 8:1 ratio gives &mdash; it reads a number off the stem instead of substituting into Henderson&ndash;Hasselbalch.",
+  "Correct. pH = 6.40 + log 8 = 6.40 + 3 log 2 = 6.40 + 0.90 = 7.30, which sits inside the stated 7.3&ndash;7.4 window.",
+  "Uses log 8 &asymp; 0.8 (0.3 + 0.5, or rounding 0.90 down) instead of 3 log 2 = 0.90, so the answer falls 0.1 unit short."],
+ sol:"<b>Concept:</b> Blood plasma is a weak-acid/conjugate-base buffer, so its pH follows Henderson&ndash;Hasselbalch. pH equals pK<sub>a</sub> only at a 1:1 ratio; the given 8:1 excess of base shifts the pH up by log 8.<br><b>Formula:</b> pH = pK<sub>a</sub> + log([HCO<sub>3</sub><sup>&minus;</sup>]/[H<sub>2</sub>CO<sub>3</sub>]).<br><b>Solution:</b><br>1. Identify the pair: H<sub>2</sub>CO<sub>3</sub> is the acid, HCO<sub>3</sub><sup>&minus;</sup> its conjugate base, so the base/acid ratio is 8/1.<br>2. Evaluate the log term: log 8 = log 2<sup>3</sup> = 3 log 2 = 3(0.30) = 0.90.<br>3. pH = pK<sub>a</sub> + log 8 = 6.40 + 0.90 = <b>7.30</b>.<br>4. Sanity check against the stem: the passage states blood is held between 7.3 and 7.4, and 7.30 is the lower edge of exactly that window &mdash; an independent confirmation.<br>5. Direction check: more base than acid must push pH <i>above</i> pK<sub>a</sub>, so any answer at or below 6.40 is wrong on sight.<br>6. Physiology tie-in: hyperventilation blows off CO<sub>2</sub>, lowering [H<sub>2</sub>CO<sub>3</sub>], which raises the ratio and hence the pH &mdash; the alkalosis the passage describes.<br><b>&#9889; JEE Trick:</b> pK<sub>a</sub> is the pH only at half-neutralisation. Whenever a ratio is quoted the answer is pK<sub>a</sub> plus or minus a log; here log 8 = 3 log 2 = 0.9 with no calculator.<br>Answer: <b>(c)</b> 7.3."},
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "CAT-7 Chemistry Set 2 complete";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("pTime").textContent = "0:00";
+
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
+    }
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
+  });
+  showQ(0);
+  updateProgress();
+  show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const b = $("pb" + id); if (b) b.classList.add("ans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length, left = pool.length - n;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
+}
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0, slow = 0;
+  pool.forEach(id => {
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
+    else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? DONE_TITLE : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
+  examStop();
+  show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

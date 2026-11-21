@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT-7 Physics · Revision Quiz — Set 1</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · CAT-7 (Mon 30 Nov 2026) · Physics revision</p>
+    <h1>CAT-7 Physics · Set 1</h1>
+    <p id="heroSub">25 questions · 14 from LEVEL-5/6 and the Strong Box · one of 3 non-overlapping sets · loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the chapters to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All chapters are selected by default — that runs the full 25-question set.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">136 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the selection is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
+    </div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
+        <button class="btn" onclick="backToIntro()">Choose different chapters</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · CAT-7 revision · Physics Set 1 of 3 · every question quoted from the ICAD exercises and carried verbatim from the per-chapter mastery quizzes, where each answer was independently re-derived — mismatches against the printed key are flagged &#9888; in the working.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-6 THERMODYNAMICS — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"P12", name:"P-12 · Moment of Inertia & Rotational Motion", desc:"the whole CAT-7 physics syllabus"}
+];
+
+const QUIZ = [
+
+/* ---------------- P-12 · Moment of Inertia & Rotational Motion ---------------- */
+{id:1, lec:"P12", blk:"P-12 L-1 L5 · Axis along a diagonal", topic:"MOI of unequal masses on a square about one of its diagonals", t:180,
+ src:"L-1 · LEVEL-5 Q4",
+ q:"In the figure shown, four particles are fixed at the vertices of a massless square wire frame ABCD of side a: mass m at A, m at B, 2m at C and 2m at D. The M.O.I. of the system about the diagonal BD is:",
+ opts:["ma&sup2;/4",
+  "ma&sup2;",
+  "3ma&sup2;/2",
+  "2ma&sup2;"],
+ ans:2,
+ why:["Wrong &mdash; ma&sup2;/4 uses a perpendicular distance of a/2 instead of a/&radic;2 for the off-diagonal masses.",
+  "Wrong &mdash; ma&sup2; is what you get if both off-diagonal masses are taken as m; here C carries 2m.",
+  "Correct &mdash; B and D lie ON the axis and contribute nothing; A (m) and C (2m) are each a/&radic;2 from BD, giving (m + 2m)(a&sup2;/2) = 3ma&sup2;/2.",
+  "Wrong &mdash; 2ma&sup2; would need a perpendicular distance of a for the off-diagonal pair; the half-diagonal is only a/&radic;2."],
+ sol:"<b>Concept.</b> The axis BD lies IN the plane of the frame along a diagonal, so each mass's perpendicular distance is its distance from that diagonal line.<br><b>Set up coordinates.</b> A(0, 0), B(a, 0), C(a, a), D(0, a). The diagonal BD is the line x + y = a.<br><b>Masses on the axis.</b> B and D satisfy x + y = a, so r = 0 and they contribute nothing, however heavy D (2m) is.<br><b>Masses off the axis.</b> Distance of A(0, 0) from x + y &minus; a = 0 is |0 + 0 &minus; a|/&radic;2 = a/&radic;2; distance of C(a, a) is |a + a &minus; a|/&radic;2 = a/&radic;2. Both equal half the diagonal, as symmetry demands.<br><b>Apply I = &Sigma;mr&sup2;.</b> I = m(a/&radic;2)&sup2; + 2m(a/&radic;2)&sup2; = ma&sup2;/2 + 2m(a&sup2;/2) = ma&sup2;/2 + ma&sup2;.<br><b>Result.</b> I = <b>3ma&sup2;/2</b>.<br><b>&#9889; JEE trick.</b> For any axis along a diagonal, only the OTHER diagonal's two masses count, each at half-diagonal a/&radic;2, so I = (sum of those two masses) &times; a&sup2;/2 &mdash; here (m + 2m)a&sup2;/2 = 3ma&sup2;/2 immediately.<br><b>Check.</b> The 2m at D being on the axis is the whole point of the question; any answer that grows when D is made heavier is wrong."},
+{id:2, lec:"P12", blk:"P-12 L-1 L1 · Definition of MOI", topic:"What the moment of inertia of a system of particles actually sums", t:90,
+ src:"L-1 · LEVEL-1 Q3",
+ q:"The moment of inertia of a system of particles is:",
+ opts:["The sum of their masses",
+  "The product of total mass and total radius",
+  "The sum of each particle's mr&sup2;",
+  "Independent of the distance from axis"],
+ ans:2,
+ why:["Wrong &mdash; adding masses alone gives the total mass M, a translational property; it carries no information about where the mass sits relative to the axis.",
+  "Wrong &mdash; M &times; R is not a moment of inertia; it is not even dimensionally right (I has dimensions ML&sup2;, not ML), and for a system there is no single 'total radius'.",
+  "Correct &mdash; the defining relation is I = &Sigma;m<sub>i</sub>r<sub>i</sub>&sup2;: every particle contributes its own mass times the SQUARE of its own perpendicular distance from the axis, and these scalars add.",
+  "Wrong &mdash; this is QUICK RECAP statement 3, which the book marks False. Distance enters squared and is the dominant factor; move a mass twice as far out and its contribution quadruples."],
+ sol:"<b>Concept.</b> Moment of inertia measures resistance to rotation about a <i>named</i> axis, so both how much mass there is and how far it is from that axis must appear.<br><b>Formula.</b> For a single particle I = mr&sup2;, with r the perpendicular distance from the axis.<br><b>Extend to a system.</b> Moment of inertia is a scalar, so the particles' contributions simply add: I = &Sigma;m<sub>i</sub>r<sub>i</sub>&sup2; = m<sub>1</sub>r<sub>1</sub>&sup2; + m<sub>2</sub>r<sub>2</sub>&sup2; + m<sub>3</sub>r<sub>3</sub>&sup2; + ...<br><b>Test the options.</b> &Sigma;m<sub>i</sub> drops r entirely; M &times; R invents a radius the system does not have; 'independent of distance' contradicts the r&sup2; factor outright.<br><b>Result.</b> Only 'the sum of each particle's mr&sup2;' reproduces the definition, so (c) is correct.<br><b>Check.</b> A particle lying on the axis has r = 0 and contributes nothing no matter how heavy &mdash; a fact only the &Sigma;mr&sup2; form can express."},
+{id:3, lec:"P12", blk:"P-12 L-10 L6 · Ring on free wedge", topic:"Momentum plus energy for a rolling ring climbing a smooth curved surface on a free body - the spin energy is NOT available", t:180,
+ src:"L-10 · LEVEL-6 Q4",
+ q:"In the figure shown a ring A is rolling without sliding with a velocity v on the horizontal surface of the body B (of the same mass as A). All surfaces are smooth. B has no initial velocity. What will be the maximum height (from the initial position) reached by A on B?",
+ opts:["3v&sup2;/4g",
+  "v&sup2;/4g",
+  "v&sup2;/2g",
+  "v&sup2;/3g"],
+ ans:1,
+ why:["3v&sup2;/4g assumes the ring's rotational kinetic energy (1/2)mv&sup2; is also converted into height. On a smooth surface the normal force passes through the ring's centre, so there is no torque about the centre and &omega; cannot change - that energy is locked in and cannot be spent on climbing.",
+  "Correct: only the translational energy relative to the common final velocity is available, giving mgh = mv&sup2; &minus; (1/4)mv&sup2; &minus; (1/2)mv&sup2; = (1/4)mv&sup2;, so h = v&sup2;/4g.",
+  "v&sup2;/2g is the answer for a non-rotating particle climbing a FIXED smooth surface; it ignores both the spin and the recoil of B.",
+  "v&sup2;/3g does not follow from any consistent combination of the momentum and energy equations here."],
+ sol:"<b>Step 1.</b> Let each body have mass m. The ring rolls, so initially K<sub>i</sub> = (1/2)mv&sup2; + (1/2)(mR&sup2;)(v/R)&sup2; = (1/2)mv&sup2; + (1/2)mv&sup2; = mv&sup2;.<br><b>Step 2.</b> All contacts are smooth, so no horizontal external force acts on the system A+B: mv = (m + m)u at the highest point, giving u = v/2.<br><b>Step 3.</b> At the maximum height A rises no further, so A and B move together horizontally with that common u and A has no vertical velocity.<br><b>Step 4.</b> Because every surface is smooth, the normal force on the ring is radial and passes through its centre, so the torque about its centre is zero and &omega; stays v/R. Its rotational energy is still (1/2)mv&sup2; at the top and is unavailable for climbing.<br><b>Step 5.</b> Energy conservation: mv&sup2; = (1/2)(2m)(v/2)&sup2; + (1/2)mv&sup2; + mgh = (1/4)mv&sup2; + (1/2)mv&sup2; + mgh.<br><b>Step 6.</b> So mgh = mv&sup2; &minus; (3/4)mv&sup2; = (1/4)mv&sup2; = h = v&sup2;/(4g). <b>Answer: (b) v&sup2;/4g.</b><br>&#9888; ICAD key says (a) 3v&sup2;/4g; working gives (b) v&sup2;/4g because the key spends the ring's rotational kinetic energy on the climb, which is impossible when all the surfaces are smooth - with no friction there is no torque about the ring's centre, so &omega; (and hence (1/2)I&omega;&sup2; = (1/2)mv&sup2;) is unchanged at the top. The key's value 3v&sup2;/4g is the correct answer only for the different problem in which the curved surface is rough enough for the ring to keep rolling on it."},
+{id:4, lec:"P12", blk:"P-12 L-10 L1 · Rolling energy split", topic:"Identifying a rolling body from the ratio of its rotational to translational kinetic energy", t:90,
+ src:"L-10 · LEVEL-1 Q1",
+ q:"A body is rolling without slipping on a horizontal surface and its rotational kinetic energy is equal to the translational kinetic energy. The body is",
+ opts:["Disc",
+  "Sphere",
+  "Cylinder",
+  "Ring"],
+ ans:3,
+ why:["A disc has I = (1/2)mR&sup2;, so K<sub>rot</sub>/K<sub>trans</sub> = 1/2, not 1.",
+  "A solid sphere has I = (2/5)mR&sup2;, so the ratio is 2/5.",
+  "A solid cylinder also has I = (1/2)mR&sup2;, giving the same ratio 1/2 as the disc - if this were right the disc would be right too, so it cannot be the answer.",
+  "Correct: a ring has all its mass at distance R, I = mR&sup2;, so K<sub>rot</sub> = K<sub>trans</sub> exactly."],
+ sol:"<b>Step 1.</b> Write the moment of inertia as I = &beta;mR&sup2;, where &beta; is a pure number fixed by the shape.<br><b>Step 2.</b> Rolling without slipping fixes &omega; = v/R.<br><b>Step 3.</b> K<sub>rot</sub> = (1/2)I&omega;&sup2; = (1/2)(&beta;mR&sup2;)(v/R)&sup2; = (1/2)&beta;mv&sup2;, while K<sub>trans</sub> = (1/2)mv&sup2;.<br><b>Step 4.</b> So K<sub>rot</sub>/K<sub>trans</sub> = &beta;, and the condition K<sub>rot</sub> = K<sub>trans</sub> means &beta; = 1.<br><b>Step 5.</b> &beta; = 1 only when every mass element sits at distance R from the axis - a ring (or a thin hollow cylinder).<br><b>Answer: (d) Ring.</b>"},
+{id:5, lec:"P12", blk:"P-12 L-11 L5 · Rolling after impact", topic:"Time taken to regain pure rolling after a rolling sphere rebounds from a smooth wall with its spin unchanged", t:180,
+ src:"L-11 · LEVEL-5 Q6",
+ q:"A solid sphere is rolling purely on a rough horizontal surface (coefficient of kinetic friction = &mu;) with speed of centre = u. It collides inelastically with a smooth vertical wall at a certain moment, the coefficient of restitution being 1/2. The sphere will begin pure rolling after a time:",
+ opts:["3u/(7&mu;g)",
+  "2u/(7&mu;g)",
+  "3u/(5&mu;g)",
+  "2u/(5&mu;g)"],
+ ans:0,
+ why:["3u/(7&mu;g) &mdash; correct: the contact point starts with slip speed 3u/2 and the slip is killed at rate (7/2)&mu;g, giving t = 3u/(7&mu;g).",
+  "2u/(7&mu;g) &mdash; the right 7/2 denominator but with the initial slip taken as u instead of 3u/2 (forgetting that the spin survives the bounce).",
+  "3u/(5&mu;g) &mdash; uses (5/2)&mu;g for the slip-killing rate, i.e. it drops the translational contribution &mu;g.",
+  "2u/(5&mu;g) &mdash; the standard 'sphere launched with no spin' result, which is the wrong starting state for this problem."],
+ sol:"<b>Step 1 (state just after the bounce).</b> The wall is smooth, so it exerts no tangential (frictional) impulse: the spin is untouched, &omega; = u/R in the original sense, while the centre's velocity reverses and shrinks to e&middot;u = u/2.<br><b>Step 2 (slip at the contact point).</b> Take the rebound direction positive. The centre moves at u/2 forward, but the spin drives the contact point backward at &omega;R = u, so the contact point slips at u/2 + u = 3u/2 and friction acts forward on the centre.<br><b>Step 3 (two equations).</b> v(t) = u/2 + &mu;gt (friction speeds the centre up) and, with &alpha; = &mu;mgR/((2/5)mR&sup2;) = 5&mu;g/2R, the backward spin falls as &omega;(t)R = u &minus; (5/2)&mu;gt.<br><b>Step 4 (rolling condition).</b> Slipping stops when v = &minus;&omega;R in the new sense, i.e. u/2 + &mu;gt = u &minus; (5/2)&mu;gt = (7/2)&mu;gt = u/2 = <b>t = 3u/(7&mu;g)</b>. (Equivalently: initial slip 3u/2 removed at the rate (1 + 5/2)&mu;g = (7/2)&mu;g.)<br><b>Step 5 (final speed check).</b> v = u/2 + &mu;g(3u/7&mu;g) = u/2 + 3u/7 = 13u/14, and the sphere then rolls away from the wall &mdash; faster than it rebounded, because the surviving spin was converted into translation.<br><b>&#9889; JEE trick:</b> A smooth wall changes v only, never &omega;. Compute the slip velocity of the CONTACT POINT and divide by (1 + MR&sup2;/I)&mu;g &mdash; here (7/2)&mu;g for a solid sphere."},
+{id:6, lec:"P12", blk:"P-12 L-11 L6 · Collision of rolling bodies", topic:"In an elastic head-on collision of equal masses only the translational velocity is exchanged; the spin stays behind on the smooth sphere", t:90,
+ src:"L-11 · LEVEL-6 Q1",
+ q:"A hollow smooth uniform sphere A of mass m rolls without sliding on a smooth horizontal surface. It collides head on elastically with another stationary smooth solid sphere B of the same mass m and same radius. The ratio of kinetic energy of B to that of A just after the collision is:",
+ opts:["1 : 1",
+  "2 : 3",
+  "3 : 2",
+  "None"],
+ ans:2,
+ why:["1 : 1 &mdash; true only if ALL the kinetic energy were transferred; here A keeps its rotational share, so the two are not equal.",
+  "2 : 3 &mdash; the inverse ratio, i.e. A : B; the question asks for B to A.",
+  "3 : 2 &mdash; correct: K_B = (1/2)mv&#8320;&sup2; and K_A = (1/3)mv&#8320;&sup2; (pure spin left over), so K_B : K_A = 3 : 2.",
+  "None &mdash; incorrect, 3 : 2 is listed."],
+ sol:"<b>Step 1 (state of A before).</b> A is a hollow sphere, I = (2/3)mR&sup2;, rolling with v&#8320; so &omega; = v&#8320;/R. K_A(before) = (1/2)mv&#8320;&sup2; + (1/2)(2/3)mR&sup2;(v&#8320;/R)&sup2; = (1/2 + 1/3)mv&#8320;&sup2; = (5/6)mv&#8320;&sup2;.<br><b>Step 2 (what the collision transfers).</b> The spheres are smooth, so the contact force is along the line of centres and no tangential impulse acts: neither sphere's spin changes. Only translation is involved.<br><b>Step 3 (elastic, equal masses).</b> In a head-on elastic collision between equal masses the translational velocities are exchanged: A's centre stops, B moves off with v&#8320;.<br><b>Step 4 (energies just after).</b> B has no spin: K_B = (1/2)mv&#8320;&sup2;. A has no translation but keeps its spin: K_A = (1/2)(2/3)mR&sup2;(v&#8320;/R)&sup2; = (1/3)mv&#8320;&sup2;.<br><b>Step 5 (ratio).</b> K_B : K_A = (1/2) : (1/3) = <b>3 : 2</b>. (Check: (1/2 + 1/3)mv&#8320;&sup2; = (5/6)mv&#8320;&sup2;, exactly the energy A started with, so the 'elastic' label is honoured.)<br><b>&#9889; JEE trick:</b> 'Smooth spheres' is the whole question &mdash; a frictionless contact can only swap linear velocity, so any rotation a body had before the collision it still has after."},
+{id:7, lec:"P12", blk:"P-12 L-11 L2 · Conservation of L", topic:"Angular momentum conservation on a contracting rotating sphere and the resulting change in rotational kinetic energy", t:180,
+ src:"L-11 · LEVEL-2 Q3",
+ q:"The radius of a rotating sphere decreases by 2% keeping the mass constant. What is the change in its rotational kinetic energy?",
+ opts:["2%",
+  "1%",
+  "4%",
+  "8%"],
+ ans:2,
+ why:["2% &mdash; this is just the fractional change in R; kinetic energy depends on R&sup2;, so it changes twice as fast.",
+  "1% &mdash; half the change in R; no quantity in the problem varies this way.",
+  "4% &mdash; correct: K = L&sup2;/2I with L fixed, so &Delta;K/K = &minus;&Delta;I/I = 2(&Delta;R/R) = 4% (an increase).",
+  "8% &mdash; this is 4 &times; 2%, which would need K &prop; R&#8315;&#8308;; for a sphere I &prop; R&sup2;, so the factor is 2, not 4."],
+ sol:"<b>Step 1 (what is conserved).</b> No external torque acts while the sphere shrinks, so angular momentum L = I&omega; stays constant.<br><b>Step 2 (express K in terms of L).</b> K = (1/2)I&omega;&sup2; = L&sup2;/(2I), so with L fixed K &prop; 1/I.<br><b>Step 3 (how I changes).</b> I = (2/5)MR&sup2; with M constant = &Delta;I/I = 2(&Delta;R/R) = 2(&minus;2%) = &minus;4%.<br><b>Step 4 (how K changes).</b> &Delta;K/K = &minus;&Delta;I/I = +4%.<br><b>Step 5 (sense check).</b> The sphere pulls its mass inward, spins faster, and gains rotational KE &mdash; the extra energy comes from the internal work done in pulling the mass in (exactly the spinning-skater effect).<br><b>&#9889; JEE trick:</b> With L conserved never write K = (1/2)I&omega;&sup2; and chase &omega;; write K = L&sup2;/2I, and the percentage answer falls out in one line."},
+{id:8, lec:"P12", blk:"P-12 L-2 L5 · Recast body MOI", topic:"Moment of inertia after a disc is melted and recast into a solid sphere of the same mass, using volume conservation", t:180,
+ src:"L-2 · LEVEL-5 Q2",
+ q:"A circular disc of radius R and thickness R/6 has moment of inertia I about an axis passing through its centre and perpendicular to its plane. It is melted and recasted into a solid sphere. The moment of inertia of the sphere about its diameter as axis of rotation is",
+ opts:["I",
+  "2I/8",
+  "I/5",
+  "I/10"],
+ ans:2,
+ why:["Wrong — melting changes the shape and the radius, so I cannot be unchanged.",
+  "Wrong — 2I/8 = I/4 does not follow from any step; it mixes the sphere's factor 2/5 with an unrelated 8.",
+  "Correct — volume conservation gives the sphere radius r = R/2, and (2/5)M(R/2)&sup2; = MR&sup2;/10 = I/5 since I = MR&sup2;/2.",
+  "Wrong — I/10 is MR&sup2;/20; it comes from writing the answer as MR&sup2;/10 and then dividing by I = MR&sup2;/2 incorrectly, i.e. forgetting that MR&sup2;/10 is already one fifth of MR&sup2;/2."],
+ sol:"<b>Step 1.</b> Disc about its central perpendicular axis, from this lecture: I = MR&sup2;/2, where M is the mass of the disc. Melting conserves mass, so the sphere also has mass M.<br><b>Step 2.</b> Conserve volume: disc volume = &pi;R&sup2;(R/6) = &pi;R&sup3;/6, sphere volume = (4/3)&pi;r&sup3;.<br><b>Step 3.</b> Equate and solve for r: (4/3)&pi;r&sup3; = &pi;R&sup3;/6 &rArr; r&sup3; = 3R&sup3;/24 = R&sup3;/8 &rArr; r = R/2.<br><b>Step 4.</b> Solid sphere about a diameter: I<sub>sph</sub> = (2/5)Mr&sup2; = (2/5)M(R/2)&sup2; = (2/5)(MR&sup2;/4) = MR&sup2;/10.<br><b>Step 5.</b> Express it through I: since I = MR&sup2;/2, MR&sup2; = 2I, so I<sub>sph</sub> = 2I/10 = I/5.<br><b>&#9889; JEE trick:</b> in every 'melted and recast' problem do volume conservation FIRST to get the new radius, then substitute — the mass is the one quantity you may carry over untouched. <b>Answer (c).</b>"},
+{id:9, lec:"P12", blk:"P-12 L-2 L1 · MOI dependence", topic:"Which physical quantity the moment of inertia of a body is independent of", t:90,
+ src:"L-2 · LEVEL-1 Q3",
+ q:"The moment of inertia of a body does not depend on",
+ opts:["the mass of the body",
+  "the angular velocity of the body",
+  "the axis of rotation of the body",
+  "the distribution of the mass in the body"],
+ ans:1,
+ why:["Wrong — I = &int;r&sup2;dm is directly proportional to mass (mR&sup2;, ml&sup2;/12, mR&sup2;/2 all carry m).",
+  "Correct — I is a geometric/mass property fixed before the body ever starts spinning; &omega; appears in L = I&omega; and KE = (1/2)I&omega;&sup2;, never inside I itself.",
+  "Wrong — the same rod gives ml&sup2;/12 about its bisector and ml&sup2;/3 about its end, so the axis matters a great deal.",
+  "Wrong — r in &int;r&sup2;dm is measured element by element, so how the mass is spread out is exactly what I measures."],
+ sol:"<b>Step 1.</b> Write the definition: I = &int;r&sup2; dm. The only things on the right-hand side are the mass elements dm and their perpendicular distances r from the chosen axis.<br><b>Step 2.</b> Mass enters directly (every standard result mR&sup2;, ml&sup2;/12, ml&sup2;/3, mR&sup2;/2 is linear in m), so (a) is a genuine dependence.<br><b>Step 3.</b> The axis fixes what r means: the same rod of this lecture gives I = ml&sup2;/12 about the perpendicular bisector but I = ml&sup2;/3 about its end &mdash; a factor of 4. So (c) is a genuine dependence.<br><b>Step 4.</b> The distribution fixes the set of r values, so (d) is a genuine dependence.<br><b>Step 5.</b> Angular velocity never appears anywhere in &int;r&sup2;dm. A body at rest has the same I as the same body spinning fast; &omega; only shows up later in L = I&omega; and KE = (1/2)I&omega;&sup2;. <b>Answer (b).</b>"},
+{id:10, lec:"P12", blk:"P-12 L-3 L5 · Parallel axis theorem", topic:"Converting between a disc's two tangential axes (in-plane vs perpendicular) using the parallel axis theorem", t:90,
+ src:"L-3 · LEVEL-5 Q2",
+ q:"If the moment of inertia of a disc about an axis tangentially and parallel to its surface be I, then the moment of inertia about the axis tangential but perpendicular to the surface will be:",
+ opts:["(6/5) I",
+  "(3/4) I",
+  "(3/2) I",
+  "(5/4) I"],
+ ans:0,
+ why:["Correct: the two tangential values are (5/4)MR&sup2; and (3/2)MR&sup2;, and (3/2)/(5/4) = 6/5, so the answer is (6/5)I.",
+  "(3/4)I is less than I, impossible — the perpendicular tangential axis must give a LARGER moment of inertia than the in-plane one.",
+  "(3/2)I is the coefficient (3/2)MR&sup2; mistakenly divided by MR&sup2; instead of by the given (5/4)MR&sup2;.",
+  "(5/4)I is the in-plane tangential coefficient itself; it is the quantity already called I, so it cannot be the answer."],
+ sol:"<b>Step 1.</b> Set up both tangential axes for a disc of mass M and radius R; both are at perpendicular distance d = R from the corresponding central axis.<br><b>Step 2.</b> Tangential and parallel to the surface (in the plane of the disc): I = MR&sup2;/4 + MR&sup2; = (5/4)MR&sup2;. This is the given I.<br><b>Step 3.</b> Tangential but perpendicular to the surface: I&prime; = MR&sup2;/2 + MR&sup2; = (3/2)MR&sup2;.<br><b>Step 4.</b> Take the ratio to eliminate M and R: I&prime;/I = [(3/2)MR&sup2;] / [(5/4)MR&sup2;] = (3/2)(4/5) = 6/5.<br><b>Step 5.</b> Therefore I&prime; = <b>(6/5) I</b>.<br><b>Step 6.</b> Check the sign of the change: 6/5 &gt; 1, as it must be, because the perpendicular central axis (MR&sup2;/2) already beats the diameter (MR&sup2;/4) before the identical MR&sup2; shift is added to both.<br><b>&#9889; JEE Trick:</b> write the disc's four standard values once — 1/4, 1/2 (central) and 5/4, 3/2 (tangential) — and every disc ratio question becomes a one-line division."},
+{id:11, lec:"P12", blk:"P-12 L-3 L5 · Recast body MOI", topic:"Equating a sphere's central MOI to a recast disc's edge-perpendicular MOI to find the new radius", t:90,
+ src:"L-3 · LEVEL-5 Q5",
+ q:"A solid sphere of mass M, radius R and having moment of inertia about an axis passing through the centre of mass as I, is recast into a disc of thickness t, whose moment of inertia about an axis passing through its edge and perpendicular to its plane remains I. Then, radius of the disc will be:",
+ opts:["2R / &radic;15",
+  "R &radic;(2/15)",
+  "4R / &radic;15",
+  "R / 4"],
+ ans:0,
+ why:["Correct: (3/2)Mr&sup2; = (2/5)MR&sup2; gives r&sup2; = (4/15)R&sup2;, so r = 2R/&radic;15.",
+  "R&radic;(2/15) comes from using only Mr&sup2;/2 (central axis) instead of (3/2)Mr&sup2; for the edge axis — the parallel-axis term Mr&sup2; was dropped.",
+  "4R/&radic;15 is the square root taken on the wrong side: it squares to (16/15)R&sup2;, four times too big.",
+  "R/4 has no 15 in it at all; it cannot come from balancing 2/5 against 3/2."],
+ sol:"<b>Step 1.</b> Recasting conserves mass, so the disc also has mass M; its thickness t is a decoy and never enters.<br><b>Step 2.</b> Sphere about a central axis: I = (2/5)MR&sup2;.<br><b>Step 3.</b> Disc of radius r about an axis through its EDGE and perpendicular to its plane: the central perpendicular axis gives Mr&sup2;/2, and the edge is a distance r away, so I = Mr&sup2;/2 + Mr&sup2; = (3/2)Mr&sup2;.<br><b>Step 4.</b> The problem says the two are equal: (3/2)Mr&sup2; = (2/5)MR&sup2;.<br><b>Step 5.</b> Cancel M and solve: r&sup2; = (2/5)(2/3)R&sup2; = (4/15)R&sup2;, so r = 2R/&radic;15.<br><b>Step 6.</b> Sanity check: 2/&radic;15 &asymp; 0.516, so the recast disc is about half the sphere's radius — reasonable, since the edge axis is a very 'expensive' axis and needs a small radius to keep I the same.<br><b>&#9889; JEE Trick:</b> in 'recast / remoulded' problems the mass is always the invariant — cancel M first and the algebra collapses to one fraction equation."},
+{id:12, lec:"P12", blk:"P-12 L-3 L1 · Standard MOI formulas", topic:"Comparing the standard moment-of-inertia coefficients of ring, disc, spherical shell and solid sphere", t:90,
+ src:"L-3 · LEVEL-1 Q3",
+ q:"Which of the following has the smallest moment of inertia about the central axis if all have equal masses and radii?",
+ opts:["Ring",
+  "Disc",
+  "Spherical shell",
+  "Sphere"],
+ ans:3,
+ why:["Ring about its central axis gives I = MR&sup2;, coefficient 1 — the largest of the four, not the smallest.",
+  "Disc about its central axis gives I = MR&sup2;/2, coefficient 0.5 — larger than the sphere's 0.4.",
+  "Spherical shell (hollow sphere) about a diameter gives I = (2/3)MR&sup2;, coefficient 0.667 — larger than the solid sphere's.",
+  "Solid sphere about a diameter gives I = (2/5)MR&sup2;, coefficient 0.4 — the smallest, because its mass is packed closest to the axis."],
+ sol:"<b>Step 1.</b> Write all four central-axis results for the same M and R.<br><b>Step 2.</b> Ring (axis through centre, perpendicular to plane): I = MR&sup2; = 1.00 MR&sup2;.<br><b>Step 3.</b> Disc (axis through centre, perpendicular to plane): I = MR&sup2;/2 = 0.50 MR&sup2;.<br><b>Step 4.</b> Hollow sphere / spherical shell about a diameter: I = (2/3)MR&sup2; = 0.67 MR&sup2;.<br><b>Step 5.</b> Solid sphere about a diameter: I = (2/5)MR&sup2; = 0.40 MR&sup2;.<br><b>Step 6.</b> The smallest coefficient is 2/5, so the <b>solid sphere</b> has the smallest moment of inertia. Physically, moment of inertia measures how far the mass sits from the axis: a ring has every gram at the full radius R, a solid sphere has most of its mass well inside R.<br><b>&#9889; JEE Trick:</b> memorise the ladder 2/5 &lt; 1/2 &lt; 2/3 &lt; 1 (solid sphere &lt; disc &lt; shell &lt; ring) — it answers every 'which is largest / smallest' question in one line."},
+{id:13, lec:"P12", blk:"P-12 L-4 L1 · Pure rolling basics", topic:"Speed of the contact point of a body in pure rolling on a rough surface", t:90,
+ src:"L-4 · LEVEL-1 Q5",
+ q:"During pure rolling on a rough surface, the instantaneous speed of the point of contact is",
+ opts:["maximum",
+  "zero",
+  "equal to the centre-of-mass speed",
+  "twice the centre-of-mass speed"],
+ ans:1,
+ why:["(a) Wrong. The speed is maximum at the TOP of the rolling body, where v<sub>cm</sub> and &omega;R add to give 2v<sub>cm</sub>.",
+  "(b) Correct. Rolling without slipping means v<sub>cm</sub> = &omega;R, so at the contact point the translational velocity v<sub>cm</sub> (forward) and the rotational velocity &omega;R (backward) cancel exactly.",
+  "(c) Wrong. Every point of the body moves at v<sub>cm</sub> only in pure translation; in rolling the speed varies from 0 at the bottom to 2v<sub>cm</sub> at the top.",
+  "(d) Wrong. 2v<sub>cm</sub> is the speed of the topmost point, not the contact point."],
+ sol:"<b>Step 1.</b> In rolling, every point has velocity = (translation of the centre) + (rotation about the centre), so v<sub>P</sub> = v<sub>cm</sub> + &omega; &times; r<sub>P/cm</sub>.<br><b>Step 2.</b> At the contact point the rotational part has magnitude &omega;R and points <i>backward</i>, opposite to v<sub>cm</sub>.<br><b>Step 3.</b> So v<sub>contact</sub> = v<sub>cm</sub> &minus; &omega;R.<br><b>Step 4.</b> The condition for PURE rolling (no slipping) is exactly v<sub>cm</sub> = &omega;R, so v<sub>contact</sub> = v<sub>cm</sub> &minus; &omega;R = v<sub>cm</sub> &minus; v<sub>cm</sub> = 0.<br><b>Step 5.</b> That is why the contact point is called the instantaneous axis of rotation, and why static (not kinetic) friction acts in rolling.<br><b>⚡ JEE Trick:</b> bottom = 0, centre = v<sub>cm</sub>, top = 2v<sub>cm</sub> — memorise this ladder."},
+{id:14, lec:"P12", blk:"P-12 L-5 L6 · Hinge reaction", topic:"Force on the hinge just after release, from a<sub>cm</sub> = &alpha;(l/2) and Newton's second law", t:180,
+ src:"L-5 · LEVEL-6 Q7",
+ q:"A uniform rod of mass m and length l can rotate in a vertical plane about a smooth horizontal axis hinged at point H. It is released from rest making an angle of 37&deg; with the horizontal. The force exerted by the hinge just after the rod is released is: (take sin37&deg; = 0.6, cos37&deg; = 0.8)",
+ opts:["9mg/25",
+  "13mg/25",
+  "mg&radic;10/5",
+  "mg&radic;10/25"],
+ ans:2,
+ why:["(a) 9mg/25 = 0.36mg &mdash; only the HORIZONTAL component of the hinge force; the vertical part has been dropped.",
+  "(b) 13mg/25 = 0.52mg &mdash; only the VERTICAL component of the hinge force.",
+  "(c) mg&radic;10/5 = 0.632mg &mdash; correct: the resultant &radic;[(0.36mg)&sup2; + (0.52mg)&sup2;] = mg&radic;0.4 = mg&radic;10/5.",
+  "(d) mg&radic;10/25 = 0.126mg &mdash; the right form with the wrong denominator; smaller than either component, so it cannot be their resultant."],
+ sol:"<b>Step 1 &mdash; angular acceleration just after release.</b> Torque about H is mg times the HORIZONTAL distance of the centre of mass: &tau; = mg(l/2)cos37&deg; = mg(l/2)(0.8) = 0.4mgl. With I<sub>H</sub> = ml&sup2;/3, &alpha; = &tau;/I = 0.4mgl &divide; (ml&sup2;/3) = 1.2g/l.<br><b>Step 2 &mdash; acceleration of the centre of mass.</b> The rod starts from rest so &omega; = 0 and there is no centripetal term; a<sub>cm</sub> = &alpha;(l/2) = (1.2g/l)(l/2) = 0.6g, directed perpendicular to the rod, on the falling side.<br><b>Step 3 &mdash; resolve it.</b> With the rod at 37&deg; above the horizontal, the perpendicular direction is (sin37&deg;, &minus;cos37&deg;) = (0.6, &minus;0.8), so a<sub>cm</sub> = (0.36g, &minus;0.48g).<br><b>Step 4 &mdash; Newton's second law on the whole rod.</b> N&#772; + (0, &minus;mg) = m a&#772;<sub>cm</sub> &rarr; N<sub>x</sub> = 0.36mg and N<sub>y</sub> = mg &minus; 0.48mg = 0.52mg.<br><b>Step 5 &mdash; resultant hinge force.</b> |N| = mg&radic;(0.36&sup2; + 0.52&sup2;) = mg&radic;(0.1296 + 0.2704) = mg&radic;0.4 = <b>mg&radic;10/5</b> &asymp; 0.63mg.<br><b>Step 6 &mdash; sanity check.</b> The hinge pushes UP with only 0.52mg, less than the weight &mdash; correct, because the centre of mass is accelerating downward at 0.48g.<br><b>&#9889; JEE trick:</b> options (a) and (b) are deliberately the two components; whenever a question asks for the hinge FORCE, the answer is the resultant, so look for the option that is larger than both component-sized choices."},
+{id:15, lec:"P12", blk:"P-12 L-5 L2 · Rotational kinetic energy", topic:"KE = (1/2)I&omega;&sup2; for a wheel whose mass sits entirely on the rim (I = mR&sup2;)", t:90,
+ src:"L-5 · LEVEL-2 Q1",
+ q:"A wheel of mass 2 kg, having practically all the mass concentrated along the circumference of a circle of radius 20 cm, is rotating on its axis with an angular velocity of 100 rad/s. The rotational kinetic energy of the wheel is:",
+ opts:["4 joule",
+  "70 joule",
+  "400 joule",
+  "800 joule"],
+ ans:2,
+ why:["(a) 4 J &mdash; what you get if R is left in centimetres somewhere or &omega; is read as 10 rad/s; wrong.",
+  "(b) 70 J &mdash; no consistent route; a filler value.",
+  "(c) 400 J &mdash; correct: I = mR&sup2; = 2(0.2)&sup2; = 0.08 kg&middot;m&sup2;, KE = (1/2)(0.08)(100)&sup2; = 400 J.",
+  "(d) 800 J &mdash; the classic slip of writing KE = I&omega;&sup2; and dropping the factor (1/2)."],
+ sol:"<b>Step 1 &mdash; identify the moment of inertia.</b> All the mass lies on the circumference, so every mass element is at the same distance R from the axis: I = &Sigma;m<sub>i</sub>r<sub>i</sub>&sup2; = mR&sup2; (a ring/hoop, not a disc).<br><b>Step 2 &mdash; substitute.</b> I = mR&sup2; = (2)(0.20)&sup2; = 0.08 kg&middot;m&sup2;.<br><b>Step 3 &mdash; rotational kinetic energy.</b> KE = (1/2)I&omega;&sup2; = (1/2)(0.08)(100)&sup2; = (1/2)(0.08)(10000) = <b>400 J</b>.<br><b>Step 4 &mdash; sanity check.</b> If the same 2 kg were a uniform disc, I = (1/2)mR&sup2; = 0.04 and KE would be 200 J; concentrating mass at the rim doubles it &mdash; which is exactly why flywheels are built heavy at the rim.<br><b>Step 5 &mdash; trap.</b> Dropping the (1/2) gives 800 J (option d); that is the only distractor with a mechanism behind it."},
+{id:16, lec:"P12", blk:"P-12 L-6 L5 · Rolling sphere L", topic:"Angular momentum of a rolling body about a ground axis = spin term I<sub>cm</sub>&omega; plus orbital term M(r<sub>cm</sub> &times; v<sub>cm</sub>)", t:180,
+ src:"L-6 · LEVEL-5 Q8",
+ q:"A solid sphere of mass m and radius R is rolling without slipping along the x-axis with the velocity v of its centre directed along +x, the origin O lying on the ground. Find the angular momentum of the sphere about the z-axis.",
+ opts:["&minus;(7/5)mRv k&#770;",
+  "&minus;(2/5)mRv k&#770;",
+  "&minus;mRv k&#770;",
+  "&minus;(7/2)mRv k&#770;"],
+ ans:0,
+ why:["A &mdash; correct. Spin (2/5)mRv plus orbital mRv gives (7/5)mRv, clockwise, so &minus;(7/5)mRv k&#770;.",
+  "B &mdash; wrong. (2/5)mRv is the spin term I<sub>cm</sub>&omega; alone; the orbital term M(r<sub>cm</sub> &times; v<sub>cm</sub>) of the centre of mass about O has been dropped.",
+  "C &mdash; wrong. mRv is the orbital term alone; the sphere&#39;s own rotation about its centre has been ignored, which would be right only for a sliding (non-rotating) block.",
+  "D &mdash; wrong. (7/2)mRv would need I<sub>cm</sub> = (5/2)mR&sup2;; the solid-sphere value is (2/5)mR&sup2;, and 7/2 is just 7/5 with the fraction inverted."],
+ sol:"<b>Step 1.</b> For any rigid body, angular momentum about an external point O splits into two pieces: L = I<sub>cm</sub>&omega; + M(r<sub>cm</sub> &times; v<sub>cm</sub>).<br><b>Step 2.</b> Rolling without slipping along +x means the sphere spins CLOCKWISE, so &omega; = &minus;(v/R) k&#770;, and I<sub>cm</sub> = (2/5)mR&sup2;.<br><b>Step 3.</b> Spin term: I<sub>cm</sub>&omega; = (2/5)mR&sup2; &times; (&minus;v/R) k&#770; = &minus;(2/5)mRv k&#770;.<br><b>Step 4.</b> Orbital term: the centre sits at r<sub>cm</sub> = (x, R) with v<sub>cm</sub> = v i&#770;, so m(r<sub>cm</sub> &times; v<sub>cm</sub>) = m(R j&#770; &times; v i&#770;) = &minus;mRv k&#770; (the x i&#770; &times; v i&#770; part vanishes, which is why the answer does not depend on where along the x-axis the sphere is).<br><b>Step 5.</b> Add: L = &minus;(2/5)mRv k&#770; &minus; mRv k&#770; = <b>&minus;(7/5)mRv k&#770;</b>, i.e. magnitude (7/5)mRv directed into the page.<br><b>&#9889; JEE Trick:</b> for rolling about a ground point you can skip the split entirely &mdash; use the contact point as an instantaneous axis, I<sub>contact</sub> = I<sub>cm</sub> + mR&sup2; = (7/5)mR&sup2;, so L = I<sub>contact</sub>&omega; = (7/5)mRv in one line. The same shortcut turns LEVEL-5 Q9 (ring plus rod, I<sub>cm</sub> = (4/3)mR&sup2;, total mass 2m) into (10/3)mRv immediately."},
+{id:17, lec:"P12", blk:"P-12 L-6 L6 · Torque, square plate", topic:"Constant torque on a square plate about a diagonal: angular impulse L = &tau;t and kinetic energy after a given time", t:180,
+ src:"L-6 · LEVEL-6 Q2",
+ q:"A uniform square plate of mass 2.0 kg and edge 10 cm rotates about one of its diagonals under the action of a constant torque of 0.10 N-m. Calculate the angular momentum and the kinetic energy of the plate at the end of the fifth second after the start.",
+ opts:["0.5 kg&middot;m&sup2;/s and 75 J",
+  "0.5 kg&middot;m&sup2;/s and 150 J",
+  "1.0 kg&middot;m&sup2;/s and 75 J",
+  "0.25 kg&middot;m&sup2;/s and 37.5 J"],
+ ans:0,
+ why:["A &mdash; correct. L = &tau;t = (0.10)(5) = 0.5 kg&middot;m&sup2;/s and K = (1/2)L&omega; = (1/2)(0.5)(300) = 75 J.",
+  "B &mdash; wrong. 150 J is L&omega; without the factor (1/2) &mdash; the standard &quot;forgot the half&quot; slip.",
+  "C &mdash; wrong. 1.0 kg&middot;m&sup2;/s uses t = 10 s, or doubles &tau;; it is inconsistent with the 75 J paired with it.",
+  "D &mdash; wrong. Halving both values corresponds to t = 2.5 s, not to the end of the fifth second."],
+ sol:"<b>Step 1.</b> For a square plate of edge a about a diagonal, the perpendicular-axis theorem gives I = ma&sup2;/12 = (2.0)(0.10)&sup2;/12 = 0.0016667 kg&middot;m&sup2;.<br><b>Step 2.</b> Constant torque gives constant angular acceleration: &alpha; = &tau;/I = 0.10/0.0016667 = 60 rad/s&sup2;.<br><b>Step 3.</b> Starting from rest, &omega; = &alpha;t = (60)(5) = 300 rad/s at the end of the fifth second.<br><b>Step 4.</b> Angular momentum L = I&omega; = (0.0016667)(300) = <b>0.5 kg&middot;m&sup2;/s</b> &mdash; or in one line by angular impulse, L = &tau;t = (0.10)(5) = 0.5, with no need for I at all.<br><b>Step 5.</b> Kinetic energy K = (1/2)I&omega;&sup2; = (1/2)(0.0016667)(300)&sup2; = (1/2)(0.0016667)(90000) = <b>75 J</b>; cross-check with the work-energy theorem, K = &tau;&theta; = (0.10)[(1/2)(60)(5)&sup2;] = (0.10)(750) = 75 J. &#10003;<br><b>&#9889; JEE Trick:</b> whenever torque is constant, reach for L = &tau;t first &mdash; it is the rotational analogue of impulse = Ft and bypasses the moment of inertia entirely. Then K = (1/2)L&omega; or K = &tau;&theta; finishes the job. Also remember the square plate has the SAME I = ma&sup2;/12 about a diagonal as about a central line parallel to an edge, by symmetry plus the perpendicular-axis theorem."},
+{id:18, lec:"P12", blk:"P-12 L-6 L1 · Direction of L", topic:"Right-hand rule: the angular momentum of a mass rotating in a plane points perpendicular to that plane", t:90,
+ src:"L-6 · LEVEL-1 Q4",
+ q:"When a mass is rotating in a plane about a fixed point, its angular momentum is directed along",
+ opts:["A line perpendicular to the plane of rotation",
+  "The line making an angle of 45&deg; to the plane of rotation",
+  "The radius",
+  "The tangent to the orbit"],
+ ans:0,
+ why:["A &mdash; correct. L = r &times; p, and a cross product is perpendicular to BOTH vectors; since r and p both lie in the plane of rotation, L must be normal to that plane (outward for anticlockwise, inward for clockwise).",
+  "B &mdash; wrong. 45&deg; would require L to have a component inside the plane, which is impossible for a cross product of two in-plane vectors.",
+  "C &mdash; wrong. The radius is r itself, and L &perp; r always, so L can never lie along the radius.",
+  "D &mdash; wrong. The tangent is the direction of v (and of p), and L &perp; p always."],
+ sol:"<b>Step 1.</b> By definition L = r &times; p = m(r &times; v) &mdash; the cross product of the position vector from the fixed point and the linear momentum.<br><b>Step 2.</b> For a mass rotating in a plane about a fixed point, r (from the centre to the mass) and v (tangential) both lie in the plane of rotation.<br><b>Step 3.</b> A cross product is perpendicular to both of its factors, so L is perpendicular to the plane containing r and v, i.e. perpendicular to the plane of rotation.<br><b>Step 4.</b> Magnitude check: |L| = mvr sin&theta; = mvr sin90&deg; = mvr, maximum, confirming r &perp; v here.<br><b>Step 5.</b> Right-hand rule fixes the sense: fingers curled from r to p, thumb outward for counter-clockwise rotation and inward for clockwise rotation &mdash; but either way the vector is <b>normal to the plane</b>.<br><b>&#9889; JEE Trick:</b> any option that puts L inside the plane of motion (radius, tangent, 45&deg;) is instantly dead &mdash; a cross product never lies in the plane of its factors."},
+{id:19, lec:"P12", blk:"P-12 L-7 L6 · Bead on spinning ring", topic:"Angular velocity of a ring spinning about a vertical diameter as a bead slides from the top to θ = 45°", t:180,
+ src:"L-7 · LEVEL-6 Q9",
+ q:"The figure shows a thin ring of mass M = 1 kg and radius R = 0.4 m spinning about a vertical diameter. (Take I = (1/2)MR&sup2;.) A small bead of mass m = 0.2 kg can slide without friction along the ring. When the bead is at the top of the ring, the angular velocity is 5 rad/s. What is the angular velocity when the bead slips halfway, to &theta; = 45&deg;?",
+ opts:["(25/6) rad&middot;s&#8315;&sup1;",
+  "(23/6) rad&middot;s&#8315;&sup1;",
+  "(23/5) rad&middot;s&#8315;&sup1;",
+  "(22/5) rad&middot;s&#8315;&sup1;"],
+ ans:0,
+ why:["(a) Correct &mdash; L = 0.08 &times; 5 = 0.4 and I at 45&deg; is 0.096, so &omega; = 0.4/0.096 = 25/6 &asymp; 4.17 rad/s.",
+  "(b) Wrong &mdash; 23/6 &asymp; 3.83 would require I to grow to 0.1044; it comes from using mR&sup2; (0.032) instead of mR&sup2;sin&sup2;45&deg; (0.016).",
+  "(c) Wrong &mdash; 23/5 = 4.6 is larger than it should be; &omega; must FALL as the bead leaves the axis.",
+  "(d) Wrong &mdash; 22/5 = 4.4 is a near-miss distractor with no consistent inertia behind it."],
+ sol:"<b>Step 1.</b> The bead slides frictionlessly and the normal force from the ring is internal, so angular momentum about the vertical diameter is conserved: I&omega; = constant.<br><b>Step 2.</b> Ring about a diameter: I<sub>ring</sub> = (1/2)MR&sup2; = (1/2)(1)(0.4)&sup2; = <b>0.08 kg&middot;m&sup2;</b> (fixed &mdash; the ring never changes shape).<br><b>Step 3.</b> At the top, &theta; = 0, the bead sits ON the rotation axis, so its distance from the axis is R sin0&deg; = 0 and it contributes nothing: I<sub>i</sub> = 0.08. Hence L = I<sub>i</sub>&omega;<sub>i</sub> = 0.08 &times; 5 = 0.4 kg&middot;m&sup2;/s.<br><b>Step 4.</b> At &theta; = 45&deg; the bead's distance from the axis is d = R sin45&deg; = 0.4/&radic;2, so d&sup2; = 0.16/2 = 0.08 m&sup2; and its contribution is m d&sup2; = 0.2 &times; 0.08 = 0.016 kg&middot;m&sup2;.<br><b>Step 5.</b> I<sub>f</sub> = 0.08 + 0.016 = 0.096 kg&middot;m&sup2;.<br><b>Step 6.</b> &omega;<sub>f</sub> = L/I<sub>f</sub> = 0.4/0.096 = 4.1&#773;6 = <b>25/6 rad&middot;s&#8315;&sup1;</b>.<br><b>Answer: (a) 25/6 rad/s.</b><br>&#9889; <b>JEE Trick:</b> for rotation about a <i>diameter</i>, a point mass on the ring contributes m(R sin&theta;)&sup2;, not mR&sup2; &mdash; only the perpendicular distance FROM THE AXIS counts. That single sin&sup2;&theta; is what separates (a) from (b)."},
+{id:20, lec:"P12", blk:"P-12 L-7 L1 · Earth day length", topic:"Length of the day when the Earth's radius halves at constant mass (I ∝ R², ω ∝ 1/I)", t:180,
+ src:"L-7 · LEVEL-1 Q4",
+ q:"If the radius of the earth suddenly contracts to half of its present value, then the duration of day will be of",
+ opts:["6 hours",
+  "12 hours",
+  "18 hours",
+  "24 hours"],
+ ans:0,
+ why:["(a) Correct &mdash; I falls by 4, so &omega; rises by 4 and the period 24 h drops to 24/4 = 6 h.",
+  "(b) Wrong &mdash; 12 h would follow from &omega; &prop; 1/R (i.e. I &prop; R), but I &prop; R&sup2; for a sphere of fixed mass.",
+  "(c) Wrong &mdash; no scaling of I gives a factor 24/18 = 4/3 here; it is a guess distractor.",
+  "(d) Wrong &mdash; the day cannot stay 24 h because the moment of inertia changes while L is conserved."],
+ sol:"<b>Step 1.</b> No external torque acts on the Earth about its spin axis, so L = I&omega; = constant.<br><b>Step 2.</b> For a solid sphere of unchanged mass, I = (2/5)MR&sup2;, so I &prop; R&sup2;.<br><b>Step 3.</b> With R&#8322; = R/2 : I&#8322;/I&#8321; = (R/2)&sup2;/R&sup2; = 1/4, so I&#8322; = I&#8321;/4.<br><b>Step 4.</b> I&#8321;&omega;&#8321; = I&#8322;&omega;&#8322; &rArr; &omega;&#8322; = (I&#8321;/I&#8322;)&omega;&#8321; = 4&omega;&#8321;.<br><b>Step 5.</b> Period T = 2&pi;/&omega;, so T&#8322; = T&#8321;/4 = 24/4 = <b>6 hours</b>.<br><b>Answer: (a) 6 hours.</b><br>&#9889; <b>JEE Trick:</b> T &prop; R&sup2; at fixed mass. Halve R &rarr; quarter the day; shrink the <i>volume</i> to 1/64 instead (Suggested Problem 4) &rarr; R &rarr; R/4 &rarr; T = 24/16 = 1.5 h."},
+{id:21, lec:"P12", blk:"P-12 L-8 L6 · rolling on moving surface", topic:"Rolling constraint when the supporting surface itself moves: match the contact-point velocity to the plank, not to zero", t:180,
+ src:"L-8 · LEVEL-6 Q3",
+ q:"A uniform disc of radius R is spun with an angular velocity &omega; and simultaneously projected with a linear velocity v towards the LEFT on a plank, while the plank moves towards the RIGHT with a constant velocity 2v. If the disc initially rolls without slipping on the plank, then the angular velocity &omega; is (take &icirc; to the right, &jcirc; upward and k&#770; out of the page)",
+ opts:["(Rv/R)k&#770;",
+  "(Rv/R)(&minus;k&#770;)",
+  "(3v/R)k&#770;",
+  "(3v/R)(&minus;k&#770;)"],
+ ans:2,
+ why:["Wrong. The magnitude Rv/R = v is what you get by setting the contact velocity to zero instead of to the plank's 2v; it also has the wrong sense.",
+  "Wrong. Same incorrect magnitude v, and clockwise as well.",
+  "Correct. The contact point must move with the plank at +2v, which requires &omega;&#772; = +(3v/R)k&#770; (anticlockwise, out of the page).",
+  "Wrong sense. The magnitude 3v/R is right, but &minus;k&#770; is clockwise, which would drive the contact point further LEFT, away from the plank's motion."],
+ sol:"<b>Concept:</b> &quot;Rolls without slipping&quot; means ZERO RELATIVE velocity at the contact, i.e. v&#772;<sub>contact point of disc</sub> = v&#772;<sub>plank</sub>. It does NOT mean the contact point is at rest when the surface itself is moving.<br><b>Step 1 &mdash; data in vectors:</b> v&#772;<sub>cm</sub> = &minus;v&icirc; (disc projected left), v&#772;<sub>plank</sub> = +2v&icirc;, and the contact point sits at r&#772; = &minus;R&jcirc; relative to the centre. Write &omega;&#772; = &omega;<sub>z</sub>k&#770;.<br><b>Step 2 &mdash; rotational contribution at the contact:</b> &omega;&#772;&times;r&#772; = (&omega;<sub>z</sub>k&#770;)&times;(&minus;R&jcirc;) = &minus;&omega;<sub>z</sub>R(k&#770;&times;&jcirc;) = &minus;&omega;<sub>z</sub>R(&minus;&icirc;) = +&omega;<sub>z</sub>R&icirc;.<br><b>Step 3 &mdash; apply the constraint:</b> v&#772;<sub>cm</sub> + &omega;&#772;&times;r&#772; = v&#772;<sub>plank</sub> &rArr; (&minus;v + &omega;<sub>z</sub>R)&icirc; = 2v&icirc; &rArr; &omega;<sub>z</sub>R = 3v &rArr; &omega;<sub>z</sub> = +3v/R.<br><b>Step 4 &mdash; read the sign:</b> &omega;<sub>z</sub> is POSITIVE, so &omega;&#772; = (3v/R)k&#770;, i.e. anticlockwise / out of the page.<br><b>Step 5 &mdash; physical check in the plank frame:</b> relative to the plank the centre moves left at v + 2v = 3v. A wheel travelling LEFT rolls anticlockwise (its top goes left, its bottom goes right), and |&omega;| = 3v/R from v<sub>rel</sub> = &omega;R. Both the magnitude and the anticlockwise sense are confirmed.<br><b>&#9889; JEE Trick:</b> On a moving support always use v<sub>contact</sub> = v<sub>surface</sub>, or equivalently jump into the surface's frame where the ordinary v = &omega;R applies to the RELATIVE velocity. The sign then follows from &quot;which way is the body travelling in that frame&quot;.<br><b>Answer:</b> (3v/R)k&#770;.<br>&#9888; ICAD key says (d) = (3v/R)(&minus;k&#770;); working gives (c) = (3v/R)k&#770; because the disc moves LEFT relative to the plank at 3v, and a body rolling leftwards spins ANTICLOCKWISE (+k&#770;), not clockwise. Only the sign is in dispute &mdash; the magnitude 3v/R is agreed."},
+{id:22, lec:"P12", blk:"P-12 L-8 L4 · spool rolling", topic:"Spool rolling without slipping: use the contact point as the instantaneous axis to convert thread speed to &omega;", t:180,
+ src:"L-8 · LEVEL-4 Q7",
+ q:"In the figure shown there is a spool of inner radius 1 m and outer radius 2 m. The thread, which comes off the BOTTOM of the inner drum (at point Q), is pulled horizontally with velocity 2 m/s such that the spool rolls without slipping on the ground (contact point P). The angular velocity of the spool is",
+ opts:["4 rad/s",
+  "3 rad/s",
+  "2 rad/s",
+  "1 rad/s"],
+ ans:2,
+ why:["Wrong. 4 rad/s comes from dividing by (2 &minus; 1.5) or from using half the inner radius.",
+  "Wrong. 3 rad/s would need the lever arm to be 2/3 m; no such length exists in the figure.",
+  "Correct. &omega; = v<sub>thread</sub>/(R &minus; r) = 2/(2 &minus; 1) = 2 rad/s.",
+  "Wrong. 1 rad/s uses the outer radius 2 m as the lever arm, i.e. treats the thread as leaving from the centre level instead of from the inner drum."],
+ sol:"<b>Concept:</b> In rolling without slipping the contact point P is the instantaneous axis of rotation &mdash; every point of the spool momentarily moves in a circle about P, so its speed is &omega; &times; (its distance from P).<br><b>Step 1 &mdash; locate the thread point:</b> Q sits at the bottom of the inner drum, i.e. r = 1 m below the centre. P is R = 2 m below the centre.<br><b>Step 2 &mdash; lever arm:</b> distance PQ = R &minus; r = 2 &minus; 1 = 1 m.<br><b>Step 3 &mdash; speed condition:</b> v<sub>Q</sub> = &omega;(PQ), and the thread is inextensible so v<sub>Q</sub> equals the pull speed 2 m/s.<br><b>Step 4 &mdash; solve:</b> &omega; = v<sub>Q</sub>/(R &minus; r) = 2/(2 &minus; 1) = 2 rad/s.<br><b>Step 5 &mdash; consistency:</b> the centre then moves at v<sub>cm</sub> = &omega;R = 2(2) = 4 m/s, which is faster than the thread &mdash; correct, because the thread leaves below the centre.<br><b>&#9889; JEE Trick:</b> For every spool question just measure the distance from the CONTACT POINT to wherever the thread leaves: subtract r if the thread is under the axle, add r if it is over the axle. Never use the radii in isolation.<br><b>Answer:</b> 2 rad/s."},
+{id:23, lec:"P12", blk:"P-12 L-9 L1 · Friction in pure rolling", topic:"Friction on a sphere rolling freely on a rough horizontal surface", t:180,
+ src:"L-9 · LEVEL-1 Q1",
+ q:"A sphere is rolling on a rough surface. The only forces acting on the sphere are its weight and the contact force from the ground. The direction of frictional force on the sphere is",
+ opts:["right",
+  "left",
+  "zero",
+  "can't be predicted"],
+ ans:2,
+ why:["Wrong — a forward (rightward) friction would accelerate the centre forward while its torque spins the sphere backward, which immediately destroys v = r&omega;.",
+  "Wrong — a backward (leftward) friction would decelerate the centre while speeding up the spin, again breaking the rolling constraint.",
+  "Correct — the two equations of motion can only be satisfied together by f = 0, so the sphere rolls on for ever at constant speed.",
+  "Wrong — nothing is indeterminate here: &tau; = I&alpha; together with a = R&alpha; fixes f uniquely."],
+ sol:"<b>Step 1 — forces.</b> Weight acts at the centre and the contact force splits into N (vertical, through the centre) and f (horizontal). Only f can change the motion.<br><b>Step 2 — translation.</b> Take rightward as positive: f = ma.<br><b>Step 3 — rotation about the centre.</b> N and mg pass through the centre and give no torque, so only f does: &minus;fR = I&alpha; = ((2/5)mR&sup2;)&alpha;.<br><b>Step 4 — rolling constraint.</b> Pure rolling means a = R&alpha;, so &alpha; = a/R and the torque equation becomes &minus;fR = (2/5)mR&sup2;(a/R) = f = &minus;(2/5)ma.<br><b>Step 5 — combine.</b> ma = &minus;(2/5)ma = (7/5)ma = 0 = a = 0, and hence <b>f = 0</b>.<br><b>Step 6 — meaning.</b> A body already in pure rolling on a level surface needs no friction to keep rolling; static friction is a reaction force and takes only the value the equations demand (0 here), never automatically &mu;N.<br><i>Book note:</i> option (b) is printed in the ICAD book as 'debt' — a misprint for 'left'."},
+{id:24, lec:"P12", blk:"P-12 SB-1 SB · Rolling SHM", topic:"Small oscillations of a disc rolling inside a ring with a spring along the periphery", t:90,
+ src:"Strong Box 1 · PYQ Q1 (JEE Advanced 2025)",
+ q:"The centre of a disc of radius r and mass m is attached to a spring of spring constant k, inside a ring of radius R &gt; r. The other end of the spring is attached on the periphery of the ring. Both the ring and the disc are in the same vertical plane. The disc can only roll along the inside periphery of the ring, without slipping. The spring can only be stretched or compressed along the periphery of the ring, following Hooke's law. In equilibrium the disc is at the bottom of the ring. Assuming a small displacement of the disc, the time period of oscillation of the centre of mass of the disc is written as T = 2&pi;/&omega;. The correct expression for &omega; is (g is the acceleration due to gravity):",
+ opts:["&radic;[ (2/3)( g/(R&minus;r) + k/m ) ]",
+  "&radic;[ 2g/(3(R&minus;r)) + k/m ]",
+  "&radic;[ (1/6)( g/(R&minus;r) + k/m ) ]",
+  "&radic;[ (1/4)( g/(R&minus;r) + k/m ) ]"],
+ ans:0,
+ why:["Correct: the gravity term and the spring term are both divided by the same rolling factor (1 + I/mr&sup2;) = 3/2, so the common factor 2/3 sits outside the bracket.",
+  "Wrong: it applies 2/3 to the gravity term only and leaves k/m untouched, but rolling inertia damps the spring's restoring action by exactly the same factor.",
+  "Wrong: 1/6 would need an effective inertia of 3m, i.e. I = 2mr&sup2;, which no single rolling body has.",
+  "Wrong: 1/4 corresponds to (1 + I/mr&sup2;) = 4, again not a disc (3/2), ring (2) or sphere (7/5)."],
+ sol:"<b>Step 1 (geometry).</b> Let &theta; be the angle of the line joining the two centres, measured from the vertical. The disc's centre travels on a circle of radius (R&minus;r), so v = (R&minus;r)&theta;&#775; and the spring's extension along the periphery is x = (R&minus;r)&theta;.<br><b>Step 2 (kinetic energy).</b> Rolling without slipping, KE = (1/2)mv&sup2; + (1/2)(mr&sup2;/2)(v/r)&sup2; = (3/4)mv&sup2; = (3/4)m(R&minus;r)&sup2;&theta;&#775;&sup2;.<br><b>Step 3 (potential energy).</b> U = mg(R&minus;r)(1&minus;cos&theta;) + (1/2)kx&sup2; &asymp; (1/2)[ mg(R&minus;r) + k(R&minus;r)&sup2; ]&theta;&sup2; for small &theta;.<br><b>Step 4 (equation of motion).</b> d/dt(KE + U) = 0 gives (3/2)m(R&minus;r)&sup2;&theta;&#776; + [ mg(R&minus;r) + k(R&minus;r)&sup2; ]&theta; = 0.<br><b>Step 5 (result).</b> &omega;&sup2; = [mg(R&minus;r) + k(R&minus;r)&sup2;] / [(3/2)m(R&minus;r)&sup2;] = (2/3)[ g/(R&minus;r) + k/m ], hence &omega; = &radic;[(2/3)(g/(R&minus;r) + k/m)], option (a).<br><b>&#9889; JEE Trick:</b> for any rolling oscillator, write the rigid-pendulum &omega;&sup2; and divide the WHOLE thing by (1 + I/mr&sup2;) &mdash; 3/2 disc, 2 ring, 7/5 solid sphere."},
+{id:25, lec:"P12", blk:"P-12 SB-2 SB · Torque equilibrium", topic:"Balancing a uniform metre rod on an off-centre knife edge, remembering the rod's own weight at its midpoint", t:180,
+ src:"Strong Box 2 · Q33 (JEE Main 2025, 28th January Evening Shift)",
+ q:"A uniform rod of mass 250 g having length 100 cm is balanced on a sharp edge at the 40 cm mark. A mass of 400 g is suspended at the 10 cm mark. To maintain the balance of the rod, the mass to be suspended at the 90 cm mark is:",
+ opts:["290 g",
+  "200 g",
+  "190 g",
+  "300 g"],
+ ans:2,
+ why:["290 g &mdash; wrong. It comes from mishandling the rod's own weight (e.g. adding 2500/50 = 50 g to 240 g instead of subtracting); the balance equation gives 190 g.",
+  "200 g &mdash; wrong. This is what you get if the rod is treated as weightless and the 400 g lever arm is taken as 25 cm; the rod's 250 g at the 50 cm mark must be included.",
+  "190 g &mdash; correct. Moments about the 40 cm edge: 400 &times; 30 = 250 &times; 10 + m &times; 50, giving m = 190 g.",
+  "300 g &mdash; wrong. This is the classic slip of using 40 cm (the pivot's position) as the 400 g lever arm instead of 30 cm (its distance from the pivot)."],
+ sol:"<b>Step 1 &mdash; locate everything relative to the pivot.</b> The knife edge is at the 40 cm mark. The 400 g load hangs at 10 cm, so it sits 40 &minus; 10 = 30 cm to the <b>left</b>. The rod is uniform, so its own 250 g weight acts at its centre, the 50 cm mark, which is 50 &minus; 40 = 10 cm to the <b>right</b>. The unknown mass m hangs at 90 cm, i.e. 90 &minus; 40 = 50 cm to the right.<br><b>Step 2 &mdash; write &Sigma;&tau; = 0 about the edge.</b> g is common to every term, so it cancels and the masses can be used directly: anticlockwise moment = clockwise moment.<br><b>Step 3 &mdash; substitute.</b> 400 &times; 30 = 250 &times; 10 + m &times; 50 = 12000 = 2500 + 50m.<br><b>Step 4 &mdash; solve.</b> 50m = 12000 &minus; 2500 = 9500 = m = 9500/50 = <b>190 g</b>.<br><b>Step 5 &mdash; sanity check.</b> Had the rod been massless, m would be 400 &times; 30/50 = 240 g; the rod's own weight already pushes down on the right, so the extra mass needed must be <i>less</i> than 240 g. 190 g &lt; 240 g, consistent.<br>&#9889; <b>JEE Trick:</b> the instant a rod is called 'uniform' and the pivot is <i>not</i> at the 50 cm mark, write a third torque term for Mg at 50 cm before anything else &mdash; that one term is the whole question."},
+];
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "CAT-7 Physics Set 1 complete";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("pTime").textContent = "0:00";
+
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
+    }
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
+  });
+  showQ(0);
+  updateProgress();
+  show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const b = $("pb" + id); if (b) b.classList.add("ans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length, left = pool.length - n;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
+}
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0, slow = 0;
+  pool.forEach(id => {
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
+    else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? DONE_TITLE : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
+  examStop();
+  show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@ for page in pages:
     for i in range(1, len(parts), 2):
         sec = clean(parts[i]); subj = sec.split()[0]
         ch = corpus(subj); ct = [toks(c[3][:900]) for c in ch]
-        for num, q in re.findall(r'<tr><td class="num">([^<]+)</td><td class="q">(.*?)</td>', parts[i + 1], re.S):
+        for num, q in re.findall(r'<tr(?: id="[^"]*")?(?: data-st="[cwux]")?><td class="num">([^<]+)(?:<!--r-->.*?<!--/r-->)?</td><td class="q">(.*?)</td>', parts[i + 1], re.S):  # tolerate result overlay + PYQ ids
             q = clean(q); qt = toks(re.sub(r"\((?:a|A)\).*", "", q))
             if len(qt) < 4: continue
             best = sorted(((len(qt & c) / len(qt), len(qt & c) / max(len(c), 1), k) for k, c in enumerate(ct) if c), reverse=True)[:3]

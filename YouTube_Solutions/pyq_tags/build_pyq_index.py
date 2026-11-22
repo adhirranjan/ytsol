@@ -26,7 +26,7 @@ CHAPTERS = {
     "M14A": "The Straight Line", "M14B": "Pair of Straight Lines",
 }
 SUBJ = {"C": "Chemistry", "P": "Physics", "M": "Maths"}
-EXAMS = {"RT1": "13 Jul", "CAT3": "27 Jul", "RT2": "10 Aug", "CAT4": "31 Aug", "RT3": "21 Sep", "CAT5": "28 Sep", "RT4": "12 Oct", "CAT6": "26 Oct"}
+EXAMS = {"RT1": "13 Jul", "CAT3": "27 Jul", "RT2": "10 Aug", "CAT4": "31 Aug", "RT3": "21 Sep", "CAT5": "28 Sep", "RT4": "12 Oct", "CAT6": "26 Oct", "RT5": "16 Nov"}
 
 
 def text(s):

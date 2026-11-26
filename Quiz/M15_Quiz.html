@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-15 Circle — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>M-15 · Circle</h1>
+    <p id="heroSub">Lectures L-1 to L-7 + Strong Box · 97 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">97 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the chapter is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
+    </div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · M-15 Circle · mastery quiz built from lectures L-1 to L-7 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   M-15 CIRCLE — lecture units
+   ============================================================ */
+const LECTURES = [
+  {
+    "key": "L-1",
+    "name": "L-1 · Equation of a Circle — Standard, General, Diametric & Parametric Forms",
+    "desc": "Locus definition; standard, general, diameter and parametric forms; centre/radius; point & concentric circles; condition for a 2nd-degree equation to be a circle."
+  },
+  {
+    "key": "L-2",
+    "name": "L-2 · Circle Under Various Conditions & Intercepts",
+    "desc": "Circles touching the axes (g²=c, f²=c); axis intercepts 2√(g²−c); circle through three points; circumcircle; touch-both-axes λ-form."
+  },
+  {
+    "key": "L-3",
+    "name": "L-3 · Position of a Point, Line–Circle Intersection & Tangents",
+    "desc": "S₁ sign for inside/on/outside; nearest & farthest point; tangency c²=a²(1+m²); chord length; tangent forms; pair of tangents from an external point."
+  },
+  {
+    "key": "L-4",
+    "name": "L-4 · Director Circle",
+    "desc": "Locus of perpendicular tangents x²+y²=2a²; concentric radius √2·r; 90° angle; chord of contact from a director-circle point."
+  },
+  {
+    "key": "L-5",
+    "name": "L-5 · Normal, Length of Tangent, Power of a Point & Chord of Contact",
+    "desc": "Normal through the centre; length of tangent √S₁; power S₁; chord of contact T=0; chord bisected at a point T=S₁; shortest chord."
+  },
+  {
+    "key": "L-6",
+    "name": "L-6 · Pair of Tangents, Two Circles, Common Tangents & Common Chord",
+    "desc": "Pair of tangents SS₁=T²; two-circle positions & tangent counts; external/internal touch; common chord S−S′=0; tangent lengths."
+  },
+  {
+    "key": "L-7",
+    "name": "L-7 · Family of Circles, Angle of Intersection & Orthogonality",
+    "desc": "Family S+λL=0 and S+λS′=0; angle cosθ=|(r₁²+r₂²−d²)/(2r₁r₂)|; orthogonality 2g₁g₂+2f₁f₂=c₁+c₂; smallest circle."
+  },
+  {
+    "key": "SB",
+    "name": "Strong Box · Previous Year Questions",
+    "desc": "JEE Main/Advanced 2018–2026 Circle PYQs — every answer re-derived independently to a single printed option."
+  }
+];
+const QUIZ = [
+  {
+    "id": 1,
+    "lec": "L-1",
+    "blk": "General form",
+    "topic": "Centre & radius",
+    "t": 90,
+    "q": "The centre and radius of x<sup>2</sup>+y<sup>2</sup>−6x+8y−11=0 are:",
+    "opts": [
+      "(3,−4), r=6",
+      "(−3,4), r=6",
+      "(3,−4), r=36",
+      "(−3,4), r=√11"
+    ],
+    "ans": 0,
+    "why": [
+      "Centre (−g,−f)=(3,−4) and r=√(9+16+11)=6 — correct.",
+      "Sign slip: centre is (−g,−f)=(3,−4), so taking (g,f)=(−3,4) is wrong.",
+      "36 is r², not r; the radius is √36=6.",
+      "Mishandled c: r²=9+16−(−11)=36 so r=6, not √11."
+    ],
+    "sol": "Compare with x²+y²+2gx+2fy+c=0: 2g=−6 ⇒ g=−3, 2f=8 ⇒ f=4, c=−11. Centre=(−g,−f)=(3,−4). r=√(g²+f²−c)=√(9+16+11)=√36=6."
+  },
+  {
+    "id": 2,
+    "lec": "L-1",
+    "blk": "Standard form",
+    "topic": "Circle touching a line",
+    "t": 90,
+    "q": "The circle with centre (2,3) touching the line x+y−1=0 is:",
+    "opts": [
+      "(x−2)<sup>2</sup>+(y−3)<sup>2</sup>=8",
+      "(x−2)<sup>2</sup>+(y−3)<sup>2</sup>=16",
+      "(x−2)<sup>2</sup>+(y−3)<sup>2</sup>=2√2",
+      "(x−2)<sup>2</sup>+(y−3)<sup>2</sup>=32"
+    ],
+    "ans": 0,
+    "why": [
+      "Radius = ⊥ distance = 4/√2 = 2√2, so r²=8 — correct.",
+      "16 squares only the numerator |4|²; the denominator √2 is dropped.",
+      "This puts r (=2√2) on the right, but the equation needs r²=8.",
+      "32=(4√2)² multiplies by √2 instead of dividing, so the radius is wrong."
+    ],
+    "sol": "A tangent line ⇒ radius = ⊥ distance from (2,3) to x+y−1=0 = |2+3−1|/√(1²+1²) = 4/√2 = 2√2. Hence r²=8 and the circle is (x−2)²+(y−3)²=8."
+  },
+  {
+    "id": 3,
+    "lec": "L-1",
+    "blk": "Diameter form",
+    "topic": "Diameter endpoints",
+    "t": 90,
+    "q": "The circle on the segment joining (1,2) and (3,4) as diameter is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>−4x−6y+11=0",
+      "x<sup>2</sup>+y<sup>2</sup>+4x+6y+11=0",
+      "x<sup>2</sup>+y<sup>2</sup>−4x−6y−11=0",
+      "x<sup>2</sup>+y<sup>2</sup>−2x−3y+11=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Diameter form expands to x²+y²−4x−6y+11=0 — correct.",
+      "Linear coefficients are −(x₁+x₂),−(y₁+y₂)=−4,−6, not +4,+6.",
+      "Constant is x₁x₂+y₁y₂=3+8=11 (positive), not −11.",
+      "Coefficient of x is −(x₁+x₂)=−4, not −2; the sum is used, not half of it."
+    ],
+    "sol": "(x−x₁)(x−x₂)+(y−y₁)(y−y₂)=0 ⇒ (x−1)(x−3)+(y−2)(y−4)=0 = x²−4x+3+y²−6y+8 ⇒ x²+y²−4x−6y+11=0."
+  },
+  {
+    "id": 4,
+    "lec": "L-1",
+    "blk": "Solved Example-1",
+    "topic": "Centre on the normal",
+    "t": 90,
+    "q": "The centres of the two circles of radius 5 that touch 3x+4y−11=0 at P(1,2) are:",
+    "opts": [
+      "(4,6) and (−2,−2)",
+      "(4,6) and (2,2)",
+      "(5,6) and (−3,−2)",
+      "(1,2) and (−1,−2)"
+    ],
+    "ans": 0,
+    "why": [
+      "Centre = P ± 5·(3/5,4/5) = (1±3,2±4) = (4,6),(−2,−2) — correct.",
+      "The second centre is (1−3,2−4)=(−2,−2), not (2,2); the sign is wrong.",
+      "The move is along the unit normal (3,4)/5 scaled by 5, giving (4,6) not (5,6).",
+      "These are P offset by 1; the centre sits 5 units along the normal, not on the line."
+    ],
+    "sol": "The centre lies on the normal at P along the unit normal (3,4)/5. Centre = (1,2) ± 5·(3/5,4/5) = (1±3, 2±4) ⇒ (4,6) or (−2,−2)."
+  },
+  {
+    "id": 5,
+    "lec": "L-1",
+    "blk": "Parametric form",
+    "topic": "Point from the parameter",
+    "t": 90,
+    "q": "For the parameter θ=60°, the point on x<sup>2</sup>+y<sup>2</sup>=9 is:",
+    "opts": [
+      "(3/2, 3√3/2)",
+      "(3√3/2, 3/2)",
+      "(3/2, 3/2)",
+      "(3, 3√3)"
+    ],
+    "ans": 0,
+    "why": [
+      "(3cos60°,3sin60°)=(3·(1/2),3·(√3/2))=(3/2,3√3/2) — correct.",
+      "cos and sin are swapped; x=3cosθ=3/2 and y=3sinθ=3√3/2.",
+      "Uses sin60°=1/2, but sin60°=√3/2 so the y-coordinate is wrong.",
+      "Uses a=9 (=a²) instead of a=3; the parametric point uses the radius a=3."
+    ],
+    "sol": "A point on x²+y²=a² is (a cosθ, a sinθ) with a=3. θ=60° ⇒ (3cos60°, 3sin60°) = (3·(1/2), 3·(√3/2)) = (3/2, 3√3/2)."
+  },
+  {
+    "id": 6,
+    "lec": "L-1",
+    "blk": "Condition for a circle",
+    "topic": "2nd-degree test",
+    "t": 90,
+    "q": "ax<sup>2</sup>+2hxy+by<sup>2</sup>+2gx+2fy+c=0 represents a circle if and only if:",
+    "opts": [
+      "a=b≠0 and h=0",
+      "a=b and h≠0",
+      "a=−b and h=0",
+      "a·b=1 and h=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Equal x²,y² coefficients and no xy term: a=b≠0, h=0 — correct.",
+      "h must be 0; h≠0 gives a rotated conic, not a circle.",
+      "a=−b (with h=0) is a rectangular hyperbola condition, not a circle.",
+      "The requirement is equality a=b, not that the product ab equals 1."
+    ],
+    "sol": "A 2nd-degree equation is a circle ⇔ coeff x² = coeff y² (a=b≠0) AND coeff xy = 0 (h=0)."
+  },
+  {
+    "id": 7,
+    "lec": "L-1",
+    "blk": "General form",
+    "topic": "Real-circle condition",
+    "t": 90,
+    "q": "x<sup>2</sup>+y<sup>2</sup>+2x−4y+c=0 is a real circle for:",
+    "opts": [
+      "c&lt;5",
+      "c&gt;5",
+      "c&lt;−5",
+      "c≤5"
+    ],
+    "ans": 0,
+    "why": [
+      "Real circle ⇔ g²+f²−c&gt;0 = 1+4−c&gt;0 ⇒ c&lt;5 — correct.",
+      "The inequality is reversed; c&gt;5 makes g²+f²−c negative (imaginary circle).",
+      "Sign error: the condition is 5−c&gt;0, giving c&lt;5, not c&lt;−5.",
+      "c=5 gives a point circle (r=0), not a real circle, so the inequality is strict."
+    ],
+    "sol": "g=1, f=−2. A real circle needs g²+f²−c&gt;0 ⇒ 1+4−c&gt;0 ⇒ 5−c&gt;0 ⇒ c&lt;5."
+  },
+  {
+    "id": 8,
+    "lec": "L-1",
+    "blk": "Solved Example",
+    "topic": "Diameters + area",
+    "t": 90,
+    "q": "Two diameters of a circle are 2x−3y+12=0 and x+4y−5=0 and its area is 154 sq units (π=22/7). The circle is:",
+    "opts": [
+      "(x+3)<sup>2</sup>+(y−2)<sup>2</sup>=49",
+      "(x−3)<sup>2</sup>+(y+2)<sup>2</sup>=49",
+      "(x+3)<sup>2</sup>+(y−2)<sup>2</sup>=7",
+      "(x+3)<sup>2</sup>+(y−2)<sup>2</sup>=154"
+    ],
+    "ans": 0,
+    "why": [
+      "Centre = diameters' intersection (−3,2) and r²=49 — correct.",
+      "Sign error solving the system; the intersection is (−3,2), not (3,−2).",
+      "7 is r, but the equation needs r²=49 on the right.",
+      "154 is the area, not r²; r²=Area/π=154/(22/7)=49."
+    ],
+    "sol": "Diameters meet at the centre: solving 2x−3y+12=0 and x+4y−5=0 ⇒ (−3,2). Area πr²=154 ⇒ (22/7)r²=154 ⇒ r²=49 ⇒ (x+3)²+(y−2)²=49."
+  },
+  {
+    "id": 9,
+    "lec": "L-1",
+    "blk": "Solved Example",
+    "topic": "Locus eliminating θ",
+    "t": 90,
+    "q": "The locus of the intersection of x cosθ+y sinθ=a and x sinθ−y cosθ=b is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup>+b<sup>2</sup>",
+      "x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup>−b<sup>2</sup>",
+      "x<sup>2</sup>−y<sup>2</sup>=a<sup>2</sup>+b<sup>2</sup>",
+      "x<sup>2</sup>+y<sup>2</sup>=(a+b)<sup>2</sup>"
+    ],
+    "ans": 0,
+    "why": [
+      "Squaring and adding eliminates θ to give x²+y²=a²+b² — correct.",
+      "Adding the squares gives +b²; −b² would not clear θ.",
+      "Both squared terms are positive ⇒ x²+y², not x²−y².",
+      "(a+b)² carries a cross term 2ab that is absent; the result is a²+b²."
+    ],
+    "sol": "Square both and add: (x cosθ+y sinθ)²+(x sinθ−y cosθ)² = a²+b² ⇒ x²(cos²θ+sin²θ)+y²(sin²θ+cos²θ) = x²+y² = a²+b²."
+  },
+  {
+    "id": 10,
+    "lec": "L-1",
+    "blk": "Solved Example-3",
+    "topic": "Tangents at 60° apart",
+    "t": 90,
+    "q": "The tangents to x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup> at two points whose parametric angles differ by 60° meet at R. The locus of R is:",
+    "opts": [
+      "3(x<sup>2</sup>+y<sup>2</sup>)=4a<sup>2</sup>",
+      "3(x<sup>2</sup>+y<sup>2</sup>)=2a<sup>2</sup>",
+      "x<sup>2</sup>+y<sup>2</sup>=4a<sup>2</sup>",
+      "4(x<sup>2</sup>+y<sup>2</sup>)=3a<sup>2</sup>"
+    ],
+    "ans": 0,
+    "why": [
+      "∠POR=30°, OP=OR cos30° ⇒ a=√(x²+y²)·(√3/2) ⇒ 3(x²+y²)=4a² — correct.",
+      "Dropping the cos²30°=3/4 factor gives 2a² instead of 4a².",
+      "Omitting the 3/4 factor entirely leaves x²+y²=4a², which is wrong.",
+      "Inverting the ratio (OR=OP/cos30°) puts a² on the wrong side."
+    ],
+    "sol": "R is where tangents at P(θ) and Q(θ+60°) meet; ∠POR=30° and OP=OR·cos30° ⇒ a=√(x²+y²)·(√3/2) ⇒ x²+y²=4a²/3 ⇒ 3(x²+y²)=4a²."
+  },
+  {
+    "id": 11,
+    "lec": "L-2",
+    "blk": "Touching the axes",
+    "topic": "x-axis tangency",
+    "t": 90,
+    "q": "x<sup>2</sup>+y<sup>2</sup>+2gx+2fy+c=0 touches the x-axis if and only if:",
+    "opts": [
+      "g<sup>2</sup>=c",
+      "f<sup>2</sup>=c",
+      "g<sup>2</sup>=f<sup>2</sup>",
+      "c=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Radius=|f|=distance of centre to x-axis ⇒ g²+f²−c=f² ⇒ g²=c — correct.",
+      "f²=c is the y-axis tangency condition, not the x-axis.",
+      "g²=f² makes it touch both axes (equal distances), which is stronger.",
+      "c=0 means the circle passes through the origin, not tangency to the x-axis."
+    ],
+    "sol": "Touching the x-axis ⇒ radius = |centre's y-coordinate| = |f|. So √(g²+f²−c)=|f| ⇒ g²+f²−c=f² ⇒ g²=c."
+  },
+  {
+    "id": 12,
+    "lec": "L-2",
+    "blk": "Solved Example-3",
+    "topic": "x-intercept",
+    "t": 90,
+    "q": "The x-intercept made by x<sup>2</sup>+y<sup>2</sup>+10x−6y+9=0 is:",
+    "opts": [
+      "8",
+      "4",
+      "0",
+      "6"
+    ],
+    "ans": 0,
+    "why": [
+      "x-intercept=2√(g²−c)=2√(25−9)=2·4=8 — correct.",
+      "4 is the half-chord √(g²−c); the full intercept is 2·4=8.",
+      "0 would require g²=c, but here 25≠9.",
+      "6 uses f²−c, which is the y-intercept radicand, not the x-intercept."
+    ],
+    "sol": "x-intercept = 2√(g²−c) with g=5, c=9 ⇒ 2√(25−9) = 2√16 = 2·4 = 8."
+  },
+  {
+    "id": 13,
+    "lec": "L-2",
+    "blk": "Solved Example-3",
+    "topic": "y-intercept",
+    "t": 90,
+    "q": "The y-intercept made by x<sup>2</sup>+y<sup>2</sup>+10x−6y+9=0 is:",
+    "opts": [
+      "0 (touches the y-axis)",
+      "6",
+      "8",
+      "4"
+    ],
+    "ans": 0,
+    "why": [
+      "2√(f²−c)=2√(9−9)=0, so the circle is tangent to the y-axis — correct.",
+      "6 ignores that f²=c makes the intercept vanish.",
+      "8 is the x-intercept, not the y-intercept.",
+      "4 drops the factor 2 and uses the wrong radicand."
+    ],
+    "sol": "y-intercept = 2√(f²−c) with f=−3, c=9 ⇒ 2√(9−9) = 0, so the circle touches the y-axis."
+  },
+  {
+    "id": 14,
+    "lec": "L-2",
+    "blk": "Solved Example",
+    "topic": "Through O with intercepts",
+    "t": 180,
+    "q": "The circle through the origin cutting intercepts 3 and 4 on the positive x- and y-axes is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>−3x−4y=0",
+      "x<sup>2</sup>+y<sup>2</sup>−3x−4y+5=0",
+      "x<sup>2</sup>+y<sup>2</sup>+3x+4y=0",
+      "x<sup>2</sup>+y<sup>2</sup>−4x−3y=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Through O ⇒ c=0; (3,0)⇒2g=−3 and (0,4)⇒2f=−4 ⇒ x²+y²−3x−4y=0 — correct.",
+      "Through the origin forces c=0; a +5 constant fails the point (0,0).",
+      "For positive intercepts the linear coefficients are negative, not positive.",
+      "Intercepts are swapped; x-intercept 3 gives −3x and y-intercept 4 gives −4y."
+    ],
+    "sol": "Through O ⇒ c=0. For x²+y²+2gx+2fy=0: (3,0) ⇒ 9+6g=0 ⇒ 2g=−3; (0,4) ⇒ 16+8f=0 ⇒ 2f=−4 ⇒ x²+y²−3x−4y=0."
+  },
+  {
+    "id": 15,
+    "lec": "L-2",
+    "blk": "Solved Example-1",
+    "topic": "Touches both axes + line",
+    "t": 90,
+    "q": "A circle touches both coordinate axes and the line 4x+3y=6. Its possible radii are:",
+    "opts": [
+      "3 or 1/2",
+      "3 or 2",
+      "1 or 6",
+      "1/2 only"
+    ],
+    "ans": 0,
+    "why": [
+      "Centre (a,a): |7a−6|/5=a ⇒ 7a−6=±5a ⇒ a=3 or 1/2 — correct.",
+      "The −5a branch gives 12a=6 ⇒ a=1/2, not 2.",
+      "Arithmetic slip; 7a−6=±5a does not yield 1 or 6.",
+      "Both roots give valid circles; dropping a=3 is wrong."
+    ],
+    "sol": "Touches both axes ⇒ centre (a,a), radius |a|. Distance to 4x+3y−6=0: |4a+3a−6|/5=a ⇒ |7a−6|=5a ⇒ 7a−6=±5a ⇒ a=3 or a=1/2."
+  },
+  {
+    "id": 16,
+    "lec": "L-2",
+    "blk": "Solved Example-4",
+    "topic": "Locus from intercepts",
+    "t": 90,
+    "q": "A variable circle cuts intercepts of length 2 and 4 on the x- and y-axes. The locus of its centre is:",
+    "opts": [
+      "y<sup>2</sup>−x<sup>2</sup>=3",
+      "x<sup>2</sup>−y<sup>2</sup>=3",
+      "x<sup>2</sup>+y<sup>2</sup>=3",
+      "y<sup>2</sup>−x<sup>2</sup>=5"
+    ],
+    "ans": 0,
+    "why": [
+      "g²−c=1, f²−c=4 ⇒ f²−g²=3; centre (−g,−f)=(x,y) ⇒ y²−x²=3 — correct.",
+      "Sign flipped; f²−g²=3 gives y²−x², not x²−y².",
+      "It is a difference of squares (the intercepts differ), not a sum.",
+      "Subtracting gives 4−1=3, not 5."
+    ],
+    "sol": "2√(g²−c)=2 ⇒ g²−c=1; 2√(f²−c)=4 ⇒ f²−c=4. Subtract ⇒ f²−g²=3. Centre (−g,−f)=(x,y) ⇒ y²−x²=3."
+  },
+  {
+    "id": 17,
+    "lec": "L-2",
+    "blk": "Solved Example-5",
+    "topic": "Touch y-axis + chord",
+    "t": 90,
+    "q": "A circle touches the y-axis at (0,4) and cuts a chord of length 6 on the x-axis. Its radius is:",
+    "opts": [
+      "5",
+      "3",
+      "4",
+      "√7"
+    ],
+    "ans": 0,
+    "why": [
+      "Centre (α,4), half-chord 3, height 4 ⇒ r=√(3²+4²)=5 — correct.",
+      "3 is the half-chord on the x-axis, not the radius.",
+      "4 is the centre's height (distance to the x-axis), not the radius.",
+      "√7 comes from 4²−3²; the radius uses 4²+3²."
+    ],
+    "sol": "Touch y-axis at (0,4) ⇒ centre (α,4), radius |α|. Half the x-chord=3 and the centre's height=4 ⇒ radius=√(3²+4²)=5."
+  },
+  {
+    "id": 18,
+    "lec": "L-2",
+    "blk": "Three points",
+    "topic": "Fit a circle",
+    "t": 90,
+    "q": "The circle through A(7,−1), B(−2,8), C(1,2) is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>−17x−19y+50=0",
+      "x<sup>2</sup>+y<sup>2</sup>+17x+19y+50=0",
+      "x<sup>2</sup>+y<sup>2</sup>−17x−19y−50=0",
+      "x<sup>2</sup>+y<sup>2</sup>−8x−9y+50=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Fitting gives 2g=−17, 2f=−19, c=50 — correct.",
+      "Centre signs are wrong; the linear coefficients are negative here.",
+      "The constant is c=+50 from the system, not −50.",
+      "Used g,f instead of 2g,2f; the x,y coefficients are −17,−19, not −8,−9."
+    ],
+    "sol": "Fit x²+y²+2gx+2fy+c=0: 50+14g−2f+c=0, 68−4g+16f+c=0, 5+2g+4f+c=0 ⇒ g=−17/2, f=−19/2, c=50 ⇒ x²+y²−17x−19y+50=0."
+  },
+  {
+    "id": 19,
+    "lec": "L-2",
+    "blk": "Solved Example-2",
+    "topic": "Locus, touch x-axis",
+    "t": 90,
+    "q": "A variable circle passes through A(a,b) and touches the x-axis. The locus of the other end of the diameter through A is:",
+    "opts": [
+      "(x−a)<sup>2</sup>=4by",
+      "(y−b)<sup>2</sup>=4ax",
+      "(x−a)<sup>2</sup>=4ay",
+      "(x−b)<sup>2</sup>=4ay"
+    ],
+    "ans": 0,
+    "why": [
+      "Radius=(k+b)/2=AB/2 ⇒ (h−a)²=4bk ⇒ (x−a)²=4by — correct.",
+      "The parabola opens in y about x=a, giving (x−a)², not (y−b)².",
+      "The coefficient is 4b (from A's ordinate b), not 4a.",
+      "The vertex shift is a (A's abscissa), giving (x−a)², not (x−b)²."
+    ],
+    "sol": "Other end B(h,k); centre=((h+a)/2,(k+b)/2). Touch x-axis ⇒ radius=(k+b)/2=AB/2 ⇒ (k+b)²=(h−a)²+(k−b)² ⇒ (h−a)²=4bk ⇒ (x−a)²=4by."
+  },
+  {
+    "id": 20,
+    "lec": "L-2",
+    "blk": "Centre on a line",
+    "topic": "Fit with constraint",
+    "t": 90,
+    "q": "The circle through (1,−2) and (4,−3) whose centre lies on 3x+4y=7 is:",
+    "opts": [
+      "15x<sup>2</sup>+15y<sup>2</sup>−94x+18y+55=0",
+      "15x<sup>2</sup>+15y<sup>2</sup>+94x−18y+55=0",
+      "x<sup>2</sup>+y<sup>2</sup>−94x+18y+55=0",
+      "15x<sup>2</sup>+15y<sup>2</sup>−94x+18y−55=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Solving gives g=−47/15, f=3/5, c=11/3; ×15 ⇒ 15x²+15y²−94x+18y+55=0 — correct.",
+      "Centre signs reversed; −94x and +18y come from (−g,−f) on the line.",
+      "The 1/15 denominators must be cleared; the leading coefficient is 15, not 1.",
+      "The constant 15·(11/3)=55 is positive, not −55."
+    ],
+    "sol": "Through the points: 5+2g−4f+c=0, 25+8g−6f+c=0; centre on line: −3g−4f=7. Solve ⇒ g=−47/15, f=3/5, c=11/3. Multiply by 15 ⇒ 15x²+15y²−94x+18y+55=0."
+  },
+  {
+    "id": 21,
+    "lec": "L-2",
+    "blk": "Touching both axes",
+    "topic": "Third-quadrant circle",
+    "t": 90,
+    "q": "A circle of radius 3 touches both coordinate axes and lies in the third quadrant. Its equation is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>+6x+6y+9=0",
+      "x<sup>2</sup>+y<sup>2</sup>−6x−6y+9=0",
+      "x<sup>2</sup>+y<sup>2</sup>+6x+6y−9=0",
+      "x<sup>2</sup>+y<sup>2</sup>+3x+3y+9=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Centre (−3,−3), r=3 ⇒ (x+3)²+(y+3)²=9 ⇒ x²+y²+6x+6y+9=0 — correct.",
+      "A third-quadrant centre is (−3,−3) ⇒ +6x+6y; −6x−6y is the first quadrant.",
+      "c=g²=9 (axis tangency) is positive; −9 breaks tangency.",
+      "Linear terms are 2g=6, not 3; g was used in place of 2g."
+    ],
+    "sol": "Third quadrant and touches both axes ⇒ centre (−3,−3), radius 3. (x+3)²+(y+3)²=9 ⇒ x²+y²+6x+6y+9=0 (note c=g²=f²=9)."
+  },
+  {
+    "id": 22,
+    "lec": "L-3",
+    "blk": "Position of a point",
+    "topic": "Sign of S₁",
+    "t": 90,
+    "q": "The position of (1,2) with respect to x<sup>2</sup>+y<sup>2</sup>−4x+2y−11=0 is:",
+    "opts": [
+      "inside",
+      "on",
+      "outside",
+      "at the centre"
+    ],
+    "ans": 0,
+    "why": [
+      "S₁=1+4−4+4−11=−6&lt;0 ⇒ inside — correct.",
+      "On requires S₁=0; here S₁=−6.",
+      "Outside requires S₁&gt;0; S₁ is negative.",
+      "The centre is (2,−1), not (1,2); S₁&lt;0 only means inside."
+    ],
+    "sol": "S₁ = x₁²+y₁²−4x₁+2y₁−11 at (1,2) = 1+4−4+4−11 = −6. S₁&lt;0 ⇒ the point is inside the circle."
+  },
+  {
+    "id": 23,
+    "lec": "L-3",
+    "blk": "Solved Example-2 (dist)",
+    "topic": "Nearest distance",
+    "t": 90,
+    "q": "The shortest distance from (2,−7) to x<sup>2</sup>+y<sup>2</sup>−14x−10y−151=0 is:",
+    "opts": [
+      "2",
+      "28",
+      "13",
+      "15"
+    ],
+    "ans": 0,
+    "why": [
+      "CP=13&lt;r=15 ⇒ P inside, shortest=r−CP=15−13=2 — correct.",
+      "28=r+CP is the largest distance, not the shortest.",
+      "13 is CP itself, not the distance to the circle.",
+      "15 is the radius, not the nearest-point distance."
+    ],
+    "sol": "Centre (7,5), r=√(49+25+151)=15. CP=√((7−2)²+(5+7)²)=√(25+144)=13&lt;r ⇒ P inside. Shortest=r−CP=15−13=2."
+  },
+  {
+    "id": 24,
+    "lec": "L-3",
+    "blk": "Solved Example-2 (dist)",
+    "topic": "Farthest distance",
+    "t": 90,
+    "q": "The largest distance from (2,−7) to x<sup>2</sup>+y<sup>2</sup>−14x−10y−151=0 is:",
+    "opts": [
+      "28",
+      "2",
+      "13",
+      "25"
+    ],
+    "ans": 0,
+    "why": [
+      "Largest=r+CP=15+13=28 — correct.",
+      "2=r−CP is the shortest distance, not the largest.",
+      "13 is CP, the centre-to-point distance.",
+      "25 mistakes it for r²; the largest distance is 28."
+    ],
+    "sol": "With r=15 and CP=13 (P inside), the farthest point of the circle from P is at distance r+CP=15+13=28."
+  },
+  {
+    "id": 25,
+    "lec": "L-3",
+    "blk": "Condition of tangency",
+    "topic": "c²=a²(1+m²)",
+    "t": 90,
+    "q": "The line y=mx+c is tangent to x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup> if and only if:",
+    "opts": [
+      "c<sup>2</sup>=a<sup>2</sup>(1+m<sup>2</sup>)",
+      "c=a(1+m<sup>2</sup>)",
+      "c<sup>2</sup>=a<sup>2</sup>(1−m<sup>2</sup>)",
+      "c<sup>2</sup>=a<sup>2</sup>m<sup>2</sup>"
+    ],
+    "ans": 0,
+    "why": [
+      "⊥ distance |c|/√(1+m²)=a ⇒ c²=a²(1+m²) — correct.",
+      "The condition is on c² (square both sides); the radical gives (1+m²).",
+      "Sign error; √(1+m²) gives (1+m²), not (1−m²).",
+      "The +1 is dropped; the denominator is √(1+m²), not √(m²)."
+    ],
+    "sol": "Tangent ⇔ ⊥ distance from (0,0) equals a: |c|/√(1+m²)=a ⇒ c²=a²(1+m²)."
+  },
+  {
+    "id": 26,
+    "lec": "L-3",
+    "blk": "Chord length",
+    "topic": "Chord cut by a line",
+    "t": 90,
+    "q": "The chord that 3x+4y=10 cuts on x<sup>2</sup>+y<sup>2</sup>=25 has length:",
+    "opts": [
+      "2√21",
+      "2√29",
+      "√21",
+      "10"
+    ],
+    "ans": 0,
+    "why": [
+      "p=10/5=2 ⇒ chord=2√(25−4)=2√21 — correct.",
+      "2√29 uses r²+p²; the chord uses r²−p²=21.",
+      "√21 drops the factor 2 from the half-chord.",
+      "10 is the line's constant, unrelated to the chord length."
+    ],
+    "sol": "⊥ distance p=|3·0+4·0−10|/√(9+16)=10/5=2. Chord=2√(r²−p²)=2√(25−4)=2√21."
+  },
+  {
+    "id": 27,
+    "lec": "L-3",
+    "blk": "Parametric tangent",
+    "topic": "Tangent at (acosθ,asinθ)",
+    "t": 90,
+    "q": "The tangent to x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup> at (a cosθ, a sinθ) is:",
+    "opts": [
+      "x cosθ+y sinθ=a",
+      "x cosθ+y sinθ=a<sup>2</sup>",
+      "x sinθ+y cosθ=a",
+      "x cosθ−y sinθ=a"
+    ],
+    "ans": 0,
+    "why": [
+      "T=0 gives xx₁+yy₁=a² ⇒ x cosθ+y sinθ=a — correct.",
+      "RHS is a, not a²; dividing xx₁+yy₁=a² by a leaves a.",
+      "cos pairs with x and sin with y, not swapped.",
+      "The tangent is a sum x cosθ+y sinθ; the minus sign is the normal's direction."
+    ],
+    "sol": "Tangent at (a cosθ, a sinθ): x(a cosθ)+y(a sinθ)=a² ⇒ x cosθ+y sinθ=a."
+  },
+  {
+    "id": 28,
+    "lec": "L-3",
+    "blk": "Solved Example-3",
+    "topic": "Line cuts the circle",
+    "t": 90,
+    "q": "The values of m for which y=mx+2 cuts x<sup>2</sup>+y<sup>2</sup>=1 in two distinct or coincident points are:",
+    "opts": [
+      "|m|≥√3",
+      "|m|≤√3",
+      "|m|≥√2",
+      "m<sup>2</sup>≥4"
+    ],
+    "ans": 0,
+    "why": [
+      "2/√(1+m²)≤1 ⇒ 1+m²≥4 ⇒ m²≥3 ⇒ |m|≥√3 — correct.",
+      "The inequality is reversed; small |m| gives distance&gt;1 (misses).",
+      "From 1+m²≥4 we get m²≥3, so the bound is √3, not √2.",
+      "m²≥4 would need a different radius; here it is m²≥3."
+    ],
+    "sol": "Distance from (0,0) to y=mx+2 is 2/√(1+m²)≤r=1 ⇒ 2≤√(1+m²) ⇒ 1+m²≥4 ⇒ m²≥3 ⇒ |m|≥√3."
+  },
+  {
+    "id": 29,
+    "lec": "L-3",
+    "blk": "Solved Example-4",
+    "topic": "Parallel tangents",
+    "t": 90,
+    "q": "The tangents to x<sup>2</sup>+y<sup>2</sup>−6x+4y−12=0 parallel to 4x+3y+5=0 are:",
+    "opts": [
+      "4x+3y+19=0 and 4x+3y−31=0",
+      "4x+3y−19=0 and 4x+3y+31=0",
+      "4x+3y+5=0 and 4x+3y−5=0",
+      "4x+3y+25=0 and 4x+3y−25=0"
+    ],
+    "ans": 0,
+    "why": [
+      "|6+k|/5=5 ⇒ |k+6|=25 ⇒ k=19 or −31 — correct.",
+      "Signs flipped; |k+6|=25 gives +19 and −31, not −19 and +31.",
+      "The given line itself is not tangent; k must satisfy the distance condition.",
+      "The centre offset is ignored; it is |k+6|=25, not |k|=25."
+    ],
+    "sol": "Centre (3,−2), r=5. Parallel tangent 4x+3y+k=0 with |4·3+3·(−2)+k|/5=5 ⇒ |6+k|=25 ⇒ k=19 or −31 ⇒ 4x+3y+19=0 and 4x+3y−31=0."
+  },
+  {
+    "id": 30,
+    "lec": "L-3",
+    "blk": "Tangents from a point",
+    "topic": "Count of tangents",
+    "t": 60,
+    "q": "From a point lying outside a circle, the number of tangents to the circle is:",
+    "opts": [
+      "2",
+      "1",
+      "0",
+      "infinitely many"
+    ],
+    "ans": 0,
+    "why": [
+      "From an external point (S₁&gt;0) exactly two tangents can be drawn — correct.",
+      "One tangent is drawn only from a point on the circle.",
+      "Zero tangents come from a point inside the circle.",
+      "A circle never has infinitely many tangents from a single external point."
+    ],
+    "sol": "From an external point the quadratic for the tangent slopes has two real roots ⇒ exactly two tangents."
+  },
+  {
+    "id": 31,
+    "lec": "L-3",
+    "blk": "Pair of tangents",
+    "topic": "Product of slopes",
+    "t": 90,
+    "q": "For the tangents from P(h,k) to x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup>, the product tanθ₁·tanθ₂ of their slopes equals:",
+    "opts": [
+      "(k<sup>2</sup>−a<sup>2</sup>)/(h<sup>2</sup>−a<sup>2</sup>)",
+      "(h<sup>2</sup>−a<sup>2</sup>)/(k<sup>2</sup>−a<sup>2</sup>)",
+      "−2hk/(h<sup>2</sup>−a<sup>2</sup>)",
+      "(k<sup>2</sup>−a<sup>2</sup>)/(a<sup>2</sup>−h<sup>2</sup>)"
+    ],
+    "ans": 0,
+    "why": [
+      "Product of roots = constant/leading = (k²−a²)/(h²−a²) — correct.",
+      "That is the reciprocal; the product is (k²−a²)/(h²−a²).",
+      "−2hk/(h²−a²) is the sum of the roots, not the product.",
+      "Sign error in the denominator; it is (h²−a²), not (a²−h²)."
+    ],
+    "sol": "Tangent y=mx±a√(1+m²) through P: (k−mh)²=a²(1+m²) ⇒ (h²−a²)m²−2hk·m+(k²−a²)=0. Product of slopes = (k²−a²)/(h²−a²)."
+  },
+  {
+    "id": 32,
+    "lec": "L-3",
+    "blk": "Solved Example-2 (pts)",
+    "topic": "Nearest point",
+    "t": 90,
+    "q": "The point on x<sup>2</sup>+y<sup>2</sup>−2x+4y−20=0 nearest to (−5,6) is:",
+    "opts": [
+      "(−2,2)",
+      "(4,−6)",
+      "(1,−2)",
+      "(−5,6)"
+    ],
+    "ans": 0,
+    "why": [
+      "A=C+(r/CP)(P−C)=(1,−2)+(1/2)(−6,8)=(−2,2) — correct.",
+      "(4,−6)=2C−A is the farthest point, not the nearest.",
+      "(1,−2) is the centre, which is not on the circle.",
+      "(−5,6) is the external point P itself."
+    ],
+    "sol": "Centre C(1,−2), r=5, CP=√(36+64)=10. Nearest A=C+(r/CP)(P−C)=(1,−2)+(5/10)(−6,8)=(−2,2)."
+  },
+  {
+    "id": 33,
+    "lec": "L-3",
+    "blk": "Solved Example-2 (pts)",
+    "topic": "Farthest point",
+    "t": 90,
+    "q": "The point on x<sup>2</sup>+y<sup>2</sup>−2x+4y−20=0 farthest from (−5,6) is:",
+    "opts": [
+      "(4,−6)",
+      "(−2,2)",
+      "(1,−2)",
+      "(9,−10)"
+    ],
+    "ans": 0,
+    "why": [
+      "B=2C−A=2(1,−2)−(−2,2)=(4,−6) — correct.",
+      "(−2,2) is the nearest point, not the farthest.",
+      "(1,−2) is the centre, not a point on the circle.",
+      "(9,−10) overshoots; the farthest point is B=2C−A on the circle."
+    ],
+    "sol": "C is the midpoint of nearest A(−2,2) and farthest B ⇒ B=2C−A=(2,−4)−(−2,2)=(4,−6)."
+  },
+  {
+    "id": 34,
+    "lec": "L-3",
+    "blk": "Solved Example",
+    "topic": "Common tangent of touching circles",
+    "t": 90,
+    "q": "The circles x<sup>2</sup>+y<sup>2</sup>−4x+6y+8=0 and x<sup>2</sup>+y<sup>2</sup>−10x−6y+14=0 touch; their common tangent is:",
+    "opts": [
+      "x+2y−1=0",
+      "x−2y−1=0",
+      "2x+y−1=0",
+      "x+2y+1=0"
+    ],
+    "ans": 0,
+    "why": [
+      "S−S′=0 ⇒ 6x+12y−6=0 ⇒ x+2y−1=0 — correct.",
+      "The subtraction gives +12y ⇒ +2y, so −2y is wrong.",
+      "Coefficients are x+2y, not 2x+y.",
+      "After dividing by 6 the constant is −1, not +1."
+    ],
+    "sol": "Subtract: (−4x+6y+8)−(−10x−6y+14)=6x+12y−6=0 ⇒ x+2y−1=0, the common tangent at the contact point (3,−1)."
+  },
+  {
+    "id": 35,
+    "lec": "L-4",
+    "blk": "Director circle",
+    "topic": "Director circle of x²+y²=a²",
+    "t": 60,
+    "q": "The director circle of x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup> is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>=2a<sup>2</sup>",
+      "x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup>/2",
+      "x<sup>2</sup>+y<sup>2</sup>=4a<sup>2</sup>",
+      "x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup>√2"
+    ],
+    "ans": 0,
+    "why": [
+      "Locus of ⊥ tangents is concentric with radius √2·a: x²+y²=2a² — correct.",
+      "The radius is √2·a (larger), so the RHS is 2a², not a²/2.",
+      "4a² corresponds to radius 2a; the director radius is √2·a.",
+      "The RHS must be (√2 a)²=2a², a number, not a²√2."
+    ],
+    "sol": "The director circle is concentric with radius √2·a: x²+y²=(√2 a)²=2a²."
+  },
+  {
+    "id": 36,
+    "lec": "L-4",
+    "blk": "Solved Example-1",
+    "topic": "Angle from the director circle",
+    "t": 90,
+    "q": "The angle between the two tangents drawn from a point on x<sup>2</sup>+y<sup>2</sup>=50 to x<sup>2</sup>+y<sup>2</sup>=25 is:",
+    "opts": [
+      "90°",
+      "60°",
+      "45°",
+      "120°"
+    ],
+    "ans": 0,
+    "why": [
+      "x²+y²=50=2·25 is exactly the director circle of x²+y²=25 ⇒ 90° — correct.",
+      "60° would need a different ratio; here it is exactly the director circle.",
+      "45° is half the correct right angle.",
+      "120° exceeds 90°; the point lies on, not inside, the director circle."
+    ],
+    "sol": "x²+y²=50=2(25) is the director circle of x²+y²=25, so the two tangents from any of its points are perpendicular ⇒ 90°."
+  },
+  {
+    "id": 37,
+    "lec": "L-4",
+    "blk": "Director circle",
+    "topic": "Shifted director circle",
+    "t": 60,
+    "q": "The director circle of (x−h)<sup>2</sup>+(y−k)<sup>2</sup>=a<sup>2</sup> is:",
+    "opts": [
+      "(x−h)<sup>2</sup>+(y−k)<sup>2</sup>=2a<sup>2</sup>",
+      "(x−h)<sup>2</sup>+(y−k)<sup>2</sup>=a<sup>2</sup>",
+      "x<sup>2</sup>+y<sup>2</sup>=2a<sup>2</sup>",
+      "(x−h)<sup>2</sup>+(y−k)<sup>2</sup>=4a<sup>2</sup>"
+    ],
+    "ans": 0,
+    "why": [
+      "Same centre, radius √2·a ⇒ (x−h)²+(y−k)²=2a² — correct.",
+      "a² is the original circle, not its director circle.",
+      "The director circle is concentric at (h,k), not centred at the origin.",
+      "4a² is radius 2a, not √2·a."
+    ],
+    "sol": "The director circle is concentric with radius √2·a: (x−h)²+(y−k)²=2a²."
+  },
+  {
+    "id": 38,
+    "lec": "L-4",
+    "blk": "Solved Example-2",
+    "topic": "Angle range (obtuse)",
+    "t": 90,
+    "q": "The pair of tangents from (a,0) to x<sup>2</sup>+y<sup>2</sup>=4 makes an angle θ with π/2&lt;θ&lt;π for:",
+    "opts": [
+      "2&lt;|a|&lt;2√2",
+      "|a|&gt;2√2",
+      "0&lt;|a|&lt;2",
+      "|a|&lt;2√2"
+    ],
+    "ans": 0,
+    "why": [
+      "θ&gt;90° inside the director circle (|a|&lt;2√2) but P outside the circle (|a|&gt;2) ⇒ 2&lt;|a|&lt;2√2 — correct.",
+      "|a|&gt;2√2 gives θ&lt;90° (P outside the director circle).",
+      "|a|&lt;2 puts P inside the circle, so no real tangents exist.",
+      "The case |a|≤2 (P not external) must be excluded."
+    ],
+    "sol": "r=2; θ=90° on the director circle |a|=2√2. θ∈(90°,180°) ⇒ P inside the director circle but outside the circle ⇒ 2&lt;|a|&lt;2√2."
+  },
+  {
+    "id": 39,
+    "lec": "L-4",
+    "blk": "Solved Example-4",
+    "topic": "Locus of centres",
+    "t": 90,
+    "q": "The locus of the centres of x<sup>2</sup>+y<sup>2</sup>−2ax−2by+2=0 for which the tangents from the origin are perpendicular is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>=4",
+      "x<sup>2</sup>+y<sup>2</sup>=2",
+      "x<sup>2</sup>+y<sup>2</sup>=8",
+      "x<sup>2</sup>+y<sup>2</sup>=1"
+    ],
+    "ans": 0,
+    "why": [
+      "O on the director circle ⇒ a²+b²=2(a²+b²−2) ⇒ a²+b²=4 — correct.",
+      "2 comes from dropping the factor 2 on the RHS.",
+      "8=2·4 double-counts; the locus is a²+b²=4.",
+      "1 mis-solves a²+b²=4."
+    ],
+    "sol": "Circle (x−a)²+(y−b)²=a²+b²−2; its director circle is (x−a)²+(y−b)²=2(a²+b²−2). O lies on it ⇒ a²+b²=2(a²+b²−2) ⇒ a²+b²=4 ⇒ x²+y²=4."
+  },
+  {
+    "id": 40,
+    "lec": "L-4",
+    "blk": "Solved Example-3",
+    "topic": "Chord of contact length",
+    "t": 60,
+    "q": "From a point on the director circle of a circle of radius r, the two (perpendicular) tangents have a chord of contact of length:",
+    "opts": [
+      "r√2",
+      "r",
+      "2r",
+      "r/√2"
+    ],
+    "ans": 0,
+    "why": [
+      "The tangents are ⊥, so centre–point–contacts form a square of side r; the chord of contact is its diagonal r√2 — correct.",
+      "r is the side of the square (a tangent length), not the diagonal.",
+      "2r is the diameter, larger than the chord of contact.",
+      "r/√2 is half the diagonal, not the full chord."
+    ],
+    "sol": "From a director-circle point the tangents are ⊥, so centre, point and the two contact points form a square of side r. Chord of contact = diagonal = r√2."
+  },
+  {
+    "id": 41,
+    "lec": "L-5",
+    "blk": "Length of tangent",
+    "topic": "Formula √S₁",
+    "t": 60,
+    "q": "The length of the tangent from an external point P(x₁,y₁) to a circle S=0 (unit x<sup>2</sup>,y<sup>2</sup> coefficients) is:",
+    "opts": [
+      "√S₁",
+      "S₁",
+      "√(−S₁)",
+      "S₁<sup>2</sup>"
+    ],
+    "ans": 0,
+    "why": [
+      "Length of tangent = √S₁ for a point outside — correct.",
+      "S₁ is the power (square of the length), not the length itself.",
+      "√(−S₁) applies when the point is inside (no real tangent); here S₁&gt;0.",
+      "S₁² is the fourth power, dimensionally wrong."
+    ],
+    "sol": "For P outside, length of tangent = √(S₁) where S₁ = x₁²+y₁²+2gx₁+2fy₁+c with unit coefficients."
+  },
+  {
+    "id": 42,
+    "lec": "L-5",
+    "blk": "Solved Example (len)",
+    "topic": "Length with non-unit coeffs",
+    "t": 90,
+    "q": "The length of the tangent from (3,−4) to 2x<sup>2</sup>+2y<sup>2</sup>−7x−9y−13=0 is:",
+    "opts": [
+      "√26",
+      "√52",
+      "26",
+      "√13"
+    ],
+    "ans": 0,
+    "why": [
+      "Divide by 2 first: S₁=9+16−10.5+18−6.5=26 ⇒ length √26 — correct.",
+      "√52 forgets to halve the coefficients, doubling S₁.",
+      "26 is the power S₁, not the length.",
+      "√13 halves S₁ after taking the square root, which is wrong."
+    ],
+    "sol": "Make coefficients 1: S=x²+y²−(7/2)x−(9/2)y−13/2. S₁(3,−4)=9+16−(21/2)+18−(13/2)=43−17=26. Length=√S₁=√26."
+  },
+  {
+    "id": 43,
+    "lec": "L-5",
+    "blk": "Normal",
+    "topic": "Normal passes through…",
+    "t": 60,
+    "q": "The normal to a circle at any point always passes through its:",
+    "opts": [
+      "centre",
+      "the origin",
+      "point of contact only",
+      "focus"
+    ],
+    "ans": 0,
+    "why": [
+      "The radius is ⊥ to the tangent, so the normal passes through the centre — correct.",
+      "It passes through the origin only when the centre is the origin.",
+      "It passes through the point and the centre, not the point alone.",
+      "A circle has no focus distinct from its centre."
+    ],
+    "sol": "The radius is ⊥ to the tangent, so the normal at any point is the line joining that point to the centre."
+  },
+  {
+    "id": 44,
+    "lec": "L-5",
+    "blk": "Chord of contact",
+    "topic": "Chord of contact = T=0",
+    "t": 60,
+    "q": "The chord of contact of the tangents drawn from an external point (x₁,y₁) is:",
+    "opts": [
+      "T=0",
+      "T=S₁",
+      "S=0",
+      "S₁=0"
+    ],
+    "ans": 0,
+    "why": [
+      "The chord of contact is T=0 — correct.",
+      "T=S₁ is the chord bisected at the point, not the chord of contact.",
+      "S=0 is the circle itself.",
+      "S₁=0 is the condition that the point lies on the circle."
+    ],
+    "sol": "The chord of contact of tangents from (x₁,y₁) is T=0, i.e. xx₁+yy₁+g(x+x₁)+f(y+y₁)+c=0."
+  },
+  {
+    "id": 45,
+    "lec": "L-5",
+    "blk": "Chord bisected",
+    "topic": "Chord bisected = T=S₁",
+    "t": 60,
+    "q": "The chord of a circle whose midpoint is (x₁,y₁) is given by:",
+    "opts": [
+      "T=S₁",
+      "T=0",
+      "S=S₁",
+      "T=2S₁"
+    ],
+    "ans": 0,
+    "why": [
+      "The chord bisected at (x₁,y₁) is T=S₁ — correct.",
+      "T=0 is the chord of contact / tangent, a different right-hand side.",
+      "S=S₁ is not the correct line form for a bisected chord.",
+      "T=2S₁ has no such geometric meaning."
+    ],
+    "sol": "The chord bisected at (x₁,y₁) is T=S₁, using the same T but with S₁ on the right."
+  },
+  {
+    "id": 46,
+    "lec": "L-5",
+    "blk": "Solved Example-5",
+    "topic": "Shortest chord",
+    "t": 90,
+    "q": "The shortest chord of x<sup>2</sup>+y<sup>2</sup>−2x−4y−4=0 passing through (2,3) is:",
+    "opts": [
+      "x+y−5=0",
+      "x−y−5=0",
+      "x+y+5=0",
+      "x+y−1=0"
+    ],
+    "ans": 0,
+    "why": [
+      "T=S₁ gives x+y−12=−7 ⇒ x+y−5=0 — correct.",
+      "The chord is x+y, not x−y; the sign on y is wrong.",
+      "Moving terms leaves the constant −5, not +5.",
+      "S₁ evaluates to −7, giving −5, not −1."
+    ],
+    "sol": "Shortest chord through a point = chord bisected there. T=S₁: 2x+3y−(x+2)−2(y+3)−4=4+9−4−12−4 ⇒ x+y−12=−7 ⇒ x+y−5=0."
+  },
+  {
+    "id": 47,
+    "lec": "L-5",
+    "blk": "Solved Example-3",
+    "topic": "Pole / tangents meeting point",
+    "t": 90,
+    "q": "The line x−2y+1=0 meets x<sup>2</sup>+y<sup>2</sup>=25 at P,Q. The tangents at P and Q meet at:",
+    "opts": [
+      "(−25,50)",
+      "(25,−50)",
+      "(−5,10)",
+      "(1,−2)"
+    ],
+    "ans": 0,
+    "why": [
+      "Chord of contact hx+ky=25 ≡ x−2y=−1 ⇒ h/1=k/(−2)=25/(−1) ⇒ (−25,50) — correct.",
+      "Sign of the constant dropped; 25/(−1)=−25 gives h=−25, not +25.",
+      "(−5,10) divides by 5 wrongly; the pole is (−25,50).",
+      "(1,−2) are the line's coefficients, not the pole."
+    ],
+    "sol": "The tangents meet at the pole R: chord of contact hx+ky=25 is the line x−2y=−1. Compare h/1=k/(−2)=25/(−1) ⇒ h=−25, k=50 ⇒ R(−25,50)."
+  },
+  {
+    "id": 48,
+    "lec": "L-5",
+    "blk": "Solved Example-4",
+    "topic": "Chords of contact concurrent",
+    "t": 90,
+    "q": "Tangents are drawn to x<sup>2</sup>+y<sup>2</sup>=1 from points on 2x+y−4=0. Their chords of contact all pass through the fixed point:",
+    "opts": [
+      "(1/2,1/4)",
+      "(1/4,1/2)",
+      "(2,1)",
+      "(1,1/2)"
+    ],
+    "ans": 0,
+    "why": [
+      "(4y−1)+t(x−2y)=0 for all t ⇒ (1/2,1/4) — correct.",
+      "Coordinates swapped; x−2y=0 and 4y−1=0 give x=1/2, y=1/4.",
+      "(2,1) is a point on the given line, not the fixed point.",
+      "4y=1 gives y=1/4, not 1/2."
+    ],
+    "sol": "P(t,4−2t); chord of contact tx+(4−2t)y=1 ⇒ (4y−1)+t(x−2y)=0 for all t ⇒ 4y−1=0 and x−2y=0 ⇒ (1/2,1/4)."
+  },
+  {
+    "id": 49,
+    "lec": "L-5",
+    "blk": "Solved Example-2",
+    "topic": "Chord of contact touches a circle",
+    "t": 90,
+    "q": "The chord of contact of tangents from a point on x<sup>2</sup>+y<sup>2</sup>=a<sup>2</sup> to x<sup>2</sup>+y<sup>2</sup>=b<sup>2</sup> touches x<sup>2</sup>+y<sup>2</sup>=c<sup>2</sup>. Then:",
+    "opts": [
+      "b<sup>2</sup>=ac",
+      "a<sup>2</sup>=bc",
+      "c<sup>2</sup>=ab",
+      "b=a+c"
+    ],
+    "ans": 0,
+    "why": [
+      "b²/a=c ⇒ b²=ac, so a,b,c are in GP — correct.",
+      "a²=bc swaps the roles; b is the geometric mean, not a.",
+      "c²=ab misidentifies which radius is the mean.",
+      "GP requires b²=ac, not the arithmetic relation b=a+c."
+    ],
+    "sol": "Point (h,k) with h²+k²=a². Chord of contact to x²+y²=b²: hx+ky=b². It touches x²+y²=c² ⇒ b²/√(h²+k²)=c ⇒ b²/a=c ⇒ b²=ac."
+  },
+  {
+    "id": 50,
+    "lec": "L-5",
+    "blk": "Solved Example-1",
+    "topic": "Normals at a given ordinate",
+    "t": 90,
+    "q": "The normals to x<sup>2</sup>+y<sup>2</sup>−8x−2y+12=0 at the points whose ordinate is −1 are:",
+    "opts": [
+      "2x+y−9=0 and 2x−y−7=0",
+      "2x+y+9=0 and 2x−y+7=0",
+      "x+2y−9=0 and x−2y−7=0",
+      "2x+y−9=0 and 2x+y−7=0"
+    ],
+    "ans": 0,
+    "why": [
+      "y=−1 ⇒ x=3,5; centre (4,1); normals 2x+y−9=0 and 2x−y−7=0 — correct.",
+      "The constants' signs are wrong; the lines pass through (5,−1) and (3,−1).",
+      "Slopes are wrong; the normal through (5,−1),(4,1) has slope −2 ⇒ 2x+y.",
+      "The two normals are distinct lines; both cannot be 2x+y through those points."
+    ],
+    "sol": "y=−1: x²−8x+15=0 ⇒ x=3,5. Centre (4,1). Normal = line through point and centre. At (5,−1): 2x+y−9=0; at (3,−1): 2x−y−7=0."
+  },
+  {
+    "id": 51,
+    "lec": "L-5",
+    "blk": "Power of a point",
+    "topic": "Power = S₁",
+    "t": 90,
+    "q": "The power of the point (2,4) with respect to x<sup>2</sup>+y<sup>2</sup>−6x+4y−8=0 is:",
+    "opts": [
+      "16",
+      "4",
+      "−16",
+      "8"
+    ],
+    "ans": 0,
+    "why": [
+      "Power=S₁(2,4)=4+16−12+16−8=16 — correct.",
+      "4 is √|power| mistaken for the answer; power is S₁ itself.",
+      "The terms sum to +16 (P outside), not −16.",
+      "8 drops the −8 constant from the sum."
+    ],
+    "sol": "Power of P = S₁ = 2²+4²−6·2+4·4−8 = 4+16−12+16−8 = 16 (&gt;0 ⇒ P outside)."
+  },
+  {
+    "id": 52,
+    "lec": "L-6",
+    "blk": "Pair of tangents",
+    "topic": "SS₁=T²",
+    "t": 60,
+    "q": "The combined equation of the pair of tangents from (x₁,y₁) to a circle S=0 is:",
+    "opts": [
+      "SS₁=T<sup>2</sup>",
+      "S+S₁=T",
+      "S₁=T<sup>2</sup>",
+      "SS₁=T"
+    ],
+    "ans": 0,
+    "why": [
+      "The pair of tangents is SS₁=T² — correct.",
+      "S+S₁=T has no such meaning.",
+      "S₁=T² omits the factor S (S₁ is just a number).",
+      "SS₁=T (not squared) is dimensionally inconsistent."
+    ],
+    "sol": "The pair of tangents from (x₁,y₁) is SS₁=T², with S the circle, S₁=S(x₁,y₁) and T the chord-of-contact form."
+  },
+  {
+    "id": 53,
+    "lec": "L-6",
+    "blk": "Two circles",
+    "topic": "Tangents when touching externally",
+    "t": 60,
+    "q": "Two circles touch each other externally. The number of common tangents is:",
+    "opts": [
+      "3",
+      "4",
+      "2",
+      "1"
+    ],
+    "ans": 0,
+    "why": [
+      "d=r₁+r₂ (external touch) ⇒ 3 common tangents — correct.",
+      "4 tangents occur when the circles are apart (d&gt;r₁+r₂).",
+      "2 tangents occur when the circles intersect at two points.",
+      "1 tangent is for internal touch (d=|r₁−r₂|)."
+    ],
+    "sol": "External touch (d=r₁+r₂): two direct tangents plus the common tangent at the contact point = 3."
+  },
+  {
+    "id": 54,
+    "lec": "L-6",
+    "blk": "Two circles",
+    "topic": "Tangents when apart",
+    "t": 60,
+    "q": "If d=C₁C₂&gt;r₁+r₂, the number of common tangents to the two circles is:",
+    "opts": [
+      "4",
+      "3",
+      "2",
+      "0"
+    ],
+    "ans": 0,
+    "why": [
+      "Circles apart ⇒ 4 common tangents (2 direct, 2 transverse) — correct.",
+      "3 is for external touch (d=r₁+r₂).",
+      "2 is for intersecting circles.",
+      "0 is for one circle lying inside the other."
+    ],
+    "sol": "d&gt;r₁+r₂ ⇒ circles lie outside each other ⇒ 4 common tangents (2 direct + 2 transverse)."
+  },
+  {
+    "id": 55,
+    "lec": "L-6",
+    "blk": "Solved Example-2",
+    "topic": "Circle touching a given circle",
+    "t": 90,
+    "q": "A circle with centre (4,3) touches x<sup>2</sup>+y<sup>2</sup>=1. Its radius is:",
+    "opts": [
+      "4 or 6",
+      "5 or 6",
+      "3 or 5",
+      "4 only"
+    ],
+    "ans": 0,
+    "why": [
+      "d=5; external r=5−1=4, internal r=5+1=6 — correct.",
+      "5 is d itself, not a radius; the radii are 5∓1.",
+      "3 or 5 mis-adds; the given radius is 1, so 5∓1=4 or 6.",
+      "Both touch cases are valid; internal touch r=6 must be included."
+    ],
+    "sol": "C₁(0,0) r₁=1, C₁C₂=√(16+9)=5. External touch: r=5−1=4; internal touch: r=5+1=6."
+  },
+  {
+    "id": 56,
+    "lec": "L-6",
+    "blk": "Common chord",
+    "topic": "Radical axis",
+    "t": 60,
+    "q": "The common chord of two circles S=0 and S′=0 (unit x<sup>2</sup>,y<sup>2</sup> coefficients) is:",
+    "opts": [
+      "S−S′=0",
+      "S+S′=0",
+      "S·S′=0",
+      "S−S′=1"
+    ],
+    "ans": 0,
+    "why": [
+      "Subtracting cancels the quadratic part ⇒ S−S′=0 is the common chord — correct.",
+      "S+S′=0 is a member of the family, not the radical axis.",
+      "S·S′=0 is the pair of circles, not a line.",
+      "The radical axis is homogeneous S−S′=0, not equal to 1."
+    ],
+    "sol": "Subtracting the equations (equal x²,y² coefficients) cancels the quadratic part: S−S′=0 is the common chord (radical axis)."
+  },
+  {
+    "id": 57,
+    "lec": "L-6",
+    "blk": "Solved Example-4",
+    "topic": "Two circles intersect",
+    "t": 90,
+    "q": "The circles (x−1)<sup>2</sup>+(y−3)<sup>2</sup>=r<sup>2</sup> and x<sup>2</sup>+y<sup>2</sup>−8x+2y+8=0 intersect in two distinct points for:",
+    "opts": [
+      "2&lt;r&lt;8",
+      "r&gt;2",
+      "r&lt;8",
+      "r&gt;8"
+    ],
+    "ans": 0,
+    "why": [
+      "C₂(4,−1), r₂=3, d=5; |r−3|&lt;5&lt;r+3 ⇒ 2&lt;r&lt;8 — correct.",
+      "r&gt;2 alone ignores the upper bound r&lt;8.",
+      "r&lt;8 alone ignores the lower bound r&gt;2.",
+      "r&gt;8 gives one circle containing the other (no intersection)."
+    ],
+    "sol": "C₂(4,−1), r₂=√(16+1−8)=3; d=√(9+16)=5. Two intersections ⇔ |r−3|&lt;5&lt;r+3 ⇒ r&lt;8 and r&gt;2 ⇒ 2&lt;r&lt;8."
+  },
+  {
+    "id": 58,
+    "lec": "L-6",
+    "blk": "Solved Example-1",
+    "topic": "External-touch relation",
+    "t": 90,
+    "q": "If x<sup>2</sup>+y<sup>2</sup>+c<sup>2</sup>=2ax and x<sup>2</sup>+y<sup>2</sup>+c<sup>2</sup>−2by=0 touch externally, then:",
+    "opts": [
+      "1/a<sup>2</sup>+1/b<sup>2</sup>=1/c<sup>2</sup>",
+      "1/a<sup>2</sup>+1/b<sup>2</sup>=1/c",
+      "a<sup>2</sup>+b<sup>2</sup>=c<sup>2</sup>",
+      "1/a+1/b=1/c"
+    ],
+    "ans": 0,
+    "why": [
+      "a²b²=c²(a²+b²) ⇒ 1/a²+1/b²=1/c² — correct.",
+      "Dividing a²b²=c²(a²+b²) by a²b²c² gives 1/c², not 1/c.",
+      "a²+b²=c² ignores the c² factor multiplying both terms.",
+      "The relation is in reciprocals of squares, not plain reciprocals."
+    ],
+    "sol": "C₁(a,0) r₁=√(a²−c²), C₂(0,b) r₂=√(b²−c²). External touch ⇒ √(a²+b²)=r₁+r₂; squaring twice ⇒ a²b²=c²(a²+b²) ⇒ 1/a²+1/b²=1/c²."
+  },
+  {
+    "id": 59,
+    "lec": "L-6",
+    "blk": "Solved Example-3",
+    "topic": "Locus, internal touch",
+    "t": 90,
+    "q": "The locus of the centre of a variable circle that touches x<sup>2</sup>+y<sup>2</sup>=4 internally and passes through (1,0) is:",
+    "opts": [
+      "12x<sup>2</sup>+16y<sup>2</sup>−12x−9=0",
+      "12x<sup>2</sup>+16y<sup>2</sup>−12x+9=0",
+      "12x<sup>2</sup>+16y<sup>2</sup>+12x−9=0",
+      "x<sup>2</sup>+y<sup>2</sup>−12x−9=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Squaring twice ⇒ 12x²+16y²−12x−9=0 — correct.",
+      "Moving 9 across gives −9, not +9.",
+      "The linear term is −12x (from 2h on the right), not +12x.",
+      "The x² and y² coefficients differ (an ellipse-type locus), not a plain circle."
+    ],
+    "sol": "C₂(h,k), r₂=√((h−1)²+k²); internal touch √(h²+k²)=2−r₂. Square twice: 3+2h=4√(h²+k²) ⇒ 9+12h+4h²=16(h²+k²) ⇒ 12x²+16y²−12x−9=0."
+  },
+  {
+    "id": 60,
+    "lec": "L-6",
+    "blk": "Two circles",
+    "topic": "Contact divides C₁C₂",
+    "t": 60,
+    "q": "Two circles of radii r₁ and r₂ touch externally. Their point of contact divides C₁C₂:",
+    "opts": [
+      "internally in the ratio r₁:r₂",
+      "externally in the ratio r₁:r₂",
+      "internally in the ratio r₂:r₁",
+      "in the ratio 1:1"
+    ],
+    "ans": 0,
+    "why": [
+      "For external touch the contact point divides C₁C₂ internally in r₁:r₂ — correct.",
+      "External division applies to the direct common tangents' meeting point, not the contact.",
+      "Measured from C₁ the ratio is r₁:r₂, not r₂:r₁.",
+      "1:1 holds only when r₁=r₂."
+    ],
+    "sol": "The contact point lies between the centres at distance r₁ from C₁ and r₂ from C₂ ⇒ it divides C₁C₂ internally in the ratio r₁:r₂."
+  },
+  {
+    "id": 61,
+    "lec": "L-6",
+    "blk": "Common tangents",
+    "topic": "Direct tangent length",
+    "t": 60,
+    "q": "For two circles d apart with radii r₁,r₂, the length of a direct (external) common tangent is:",
+    "opts": [
+      "√(d<sup>2</sup>−(r₁−r₂)<sup>2</sup>)",
+      "√(d<sup>2</sup>−(r₁+r₂)<sup>2</sup>)",
+      "√(d<sup>2</sup>+(r₁−r₂)<sup>2</sup>)",
+      "√((r₁−r₂)<sup>2</sup>−d<sup>2</sup>)"
+    ],
+    "ans": 0,
+    "why": [
+      "Direct common tangent length = √(d²−(r₁−r₂)²) — correct.",
+      "√(d²−(r₁+r₂)²) is the transverse (internal) common tangent length.",
+      "The sign under the root is minus, not plus.",
+      "The order is reversed; d²&gt;(r₁−r₂)² for a real tangent."
+    ],
+    "sol": "Projecting the centre line, the direct common tangent length is L_ext=√(d²−(r₁−r₂)²); the transverse is √(d²−(r₁+r₂)²)."
+  },
+  {
+    "id": 62,
+    "lec": "L-6",
+    "blk": "Solved Example",
+    "topic": "Pair of tangents factorises",
+    "t": 90,
+    "q": "The pair of tangents from (3,2) to x<sup>2</sup>+y<sup>2</sup>+4x+6y+8=0 splits into the two lines:",
+    "opts": [
+      "2x−y−4=0 and x−2y+1=0",
+      "2x+y−4=0 and x+2y+1=0",
+      "x−y−4=0 and 2x−y+1=0",
+      "2x−y−4=0 and x−2y−1=0"
+    ],
+    "ans": 0,
+    "why": [
+      "SS₁=T² factors as (2x−y−4)(x−2y+1)=0 — correct.",
+      "The signs of the y-terms are wrong in this pair.",
+      "These coefficients do not match the SS₁=T² expansion.",
+      "The constant of the second factor is +1, not −1."
+    ],
+    "sol": "S₁=9+4+12+12+8=45, T=5x+5y+20. SS₁=T² ⇒ 2x²+2y²−5xy−2x+7y−4=0 ⇒ (2x−y−4)(x−2y+1)=0."
+  },
+  {
+    "id": 63,
+    "lec": "L-7",
+    "blk": "Orthogonality",
+    "topic": "Orthogonality condition",
+    "t": 90,
+    "q": "Two circles x<sup>2</sup>+y<sup>2</sup>+2g₁x+2f₁y+c₁=0 and x<sup>2</sup>+y<sup>2</sup>+2g₂x+2f₂y+c₂=0 cut orthogonally if and only if:",
+    "opts": [
+      "2g₁g₂+2f₁f₂=c₁+c₂",
+      "g₁g₂+f₁f₂=c₁+c₂",
+      "2g₁g₂+2f₁f₂=c₁c₂",
+      "g₁g₂+f₁f₂=c₁c₂"
+    ],
+    "ans": 0,
+    "why": [
+      "Orthogonal ⇔ 2g₁g₂+2f₁f₂=c₁+c₂ — correct.",
+      "The factor 2 is required on both left-hand terms.",
+      "The right-hand side is the sum c₁+c₂, not the product.",
+      "Both the factor 2 and the sum are wrong here."
+    ],
+    "sol": "Two circles cut orthogonally ⇔ d²=r₁²+r₂² ⇒ 2g₁g₂+2f₁f₂=c₁+c₂."
+  },
+  {
+    "id": 64,
+    "lec": "L-7",
+    "blk": "Family of circles",
+    "topic": "S+λL form",
+    "t": 90,
+    "q": "The family of circles through the intersection of a circle S=0 and a line L=0 is:",
+    "opts": [
+      "S+λL=0",
+      "S+λL<sup>2</sup>=0",
+      "SL+λ=0",
+      "S·L=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Any circle through the S=0 ∩ L=0 points is S+λL=0 — correct.",
+      "L is linear; L² would raise the degree above 2.",
+      "SL+λ is not a degree-2 circle form.",
+      "S·L=0 is the pair {circle, line}, not a family of circles."
+    ],
+    "sol": "Any circle through the intersection of S=0 and L=0 is S+λL=0 for a parameter λ."
+  },
+  {
+    "id": 65,
+    "lec": "L-7",
+    "blk": "Solved Example-1",
+    "topic": "Orthogonality for k",
+    "t": 90,
+    "q": "If 2x<sup>2</sup>+2y<sup>2</sup>−3x+6y+k=0 and x<sup>2</sup>+y<sup>2</sup>−4x+10y+16=0 cut orthogonally, then k=",
+    "opts": [
+      "4",
+      "−4",
+      "8",
+      "2"
+    ],
+    "ans": 0,
+    "why": [
+      "3+15=k/2+16 ⇒ k=4 — correct.",
+      "Sign slip; 18=k/2+16 gives k=+4, not −4.",
+      "8 forgets to halve the first circle, doubling the terms.",
+      "2 drops a term in the orthogonality sum."
+    ],
+    "sol": "First with unit coeffs: g₁=−3/4, f₁=3/2, c₁=k/2; second g₂=−2, f₂=5, c₂=16. 2g₁g₂+2f₁f₂=c₁+c₂ ⇒ 3+15=k/2+16 ⇒ k=4."
+  },
+  {
+    "id": 66,
+    "lec": "L-7",
+    "blk": "Angle of intersection",
+    "topic": "cosθ formula",
+    "t": 90,
+    "q": "The angle θ between two circles (radii r₁,r₂, centres distance d apart) satisfies:",
+    "opts": [
+      "cosθ=|(r₁<sup>2</sup>+r₂<sup>2</sup>−d<sup>2</sup>)/(2r₁r₂)|",
+      "cosθ=|(r₁<sup>2</sup>+r₂<sup>2</sup>−d<sup>2</sup>)/(r₁r₂)|",
+      "cosθ=|(d<sup>2</sup>−r₁<sup>2</sup>−r₂<sup>2</sup>)/(2r₁+r₂)|",
+      "cosθ=|(r₁<sup>2</sup>+r₂<sup>2</sup>+d<sup>2</sup>)/(2r₁r₂)|"
+    ],
+    "ans": 0,
+    "why": [
+      "cosθ=|(r₁²+r₂²−d²)/(2r₁r₂)| by the cosine rule — correct.",
+      "The factor 2 is missing from the denominator.",
+      "The denominator must be the product 2r₁r₂, not a sum.",
+      "The numerator subtracts d² (cosine rule); +d² is wrong."
+    ],
+    "sol": "By the cosine rule for the angle between radii at an intersection, cosθ=|(r₁²+r₂²−d²)/(2r₁r₂)|; θ=90° ⇒ d²=r₁²+r₂²."
+  },
+  {
+    "id": 67,
+    "lec": "L-7",
+    "blk": "Solved Example-4",
+    "topic": "Smallest circle through chord",
+    "t": 90,
+    "q": "The smallest circle through the intersection of x+y=1 and x<sup>2</sup>+y<sup>2</sup>=9 is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>−x−y−8=0",
+      "x<sup>2</sup>+y<sup>2</sup>+x+y−8=0",
+      "x<sup>2</sup>+y<sup>2</sup>−x−y−9=0",
+      "x<sup>2</sup>+y<sup>2</sup>−x−y+8=0"
+    ],
+    "ans": 0,
+    "why": [
+      "λ=−1 ⇒ x²+y²−x−y−8=0 — correct.",
+      "λ=−1 gives −x−y, so +x+y is the wrong sign.",
+      "The constant becomes −9−(−1)=−8, not −9.",
+      "The constant is −8, not +8."
+    ],
+    "sol": "Family x²+y²−9+λ(x+y−1)=0; smallest ⇒ centre (−λ/2,−λ/2) lies on the chord x+y=1 ⇒ −λ=1 ⇒ λ=−1 ⇒ x²+y²−x−y−8=0."
+  },
+  {
+    "id": 68,
+    "lec": "L-7",
+    "blk": "Solved Example-5",
+    "topic": "Circle touching at a point",
+    "t": 90,
+    "q": "The circle through (1,1) touching x<sup>2</sup>+y<sup>2</sup>+4x−6y−3=0 at (2,3) is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>+x−6y+3=0",
+      "x<sup>2</sup>+y<sup>2</sup>−x−6y+3=0",
+      "x<sup>2</sup>+y<sup>2</sup>+x+6y+3=0",
+      "x<sup>2</sup>+y<sup>2</sup>+x−6y−3=0"
+    ],
+    "ans": 0,
+    "why": [
+      "λ=5 ⇒ x²+y²+x−6y+3=0 — correct.",
+      "Expanding (x−2)²+5(x−2) gives +x, not −x.",
+      "The y-term is −6y from (y−3)², so +6y is wrong.",
+      "After λ=5 the constant is +3, not −3."
+    ],
+    "sol": "Tangent to the given circle at (2,3): x−2=0. Family [(x−2)²+(y−3)²]+λ(x−2)=0 through (1,1): 1+4+λ(−1)=0 ⇒ λ=5 ⇒ x²+y²+x−6y+3=0."
+  },
+  {
+    "id": 69,
+    "lec": "L-7",
+    "blk": "Solved Example-2",
+    "topic": "Smallest orthogonal circle",
+    "t": 180,
+    "q": "The smallest circle cutting x<sup>2</sup>+y<sup>2</sup>=1 and x<sup>2</sup>+y<sup>2</sup>+8x+8y−33=0 orthogonally is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>−4x−4y+1=0",
+      "x<sup>2</sup>+y<sup>2</sup>+4x+4y+1=0",
+      "x<sup>2</sup>+y<sup>2</sup>−4x−4y−1=0",
+      "x<sup>2</sup>+y<sup>2</sup>−2x−2y+1=0"
+    ],
+    "ans": 0,
+    "why": [
+      "c=1, g+f=−4, minimised at g=f=−2 ⇒ x²+y²−4x−4y+1=0 — correct.",
+      "The centre is (2,2) ⇒ −4x−4y; +4x+4y is the reflected wrong centre.",
+      "Orthogonality with the unit circle forces c=+1, not −1.",
+      "Linear terms are −4x (2g=−4), not −2x."
+    ],
+    "sol": "Orthogonal to x²+y²=1 ⇒ c=1; to the second ⇒ 8g+8f=−32 ⇒ g+f=−4. r²=2(g+2)²+7 is minimal at g=f=−2 ⇒ x²+y²−4x−4y+1=0."
+  },
+  {
+    "id": 70,
+    "lec": "L-7",
+    "blk": "Family of two circles",
+    "topic": "Excluded λ",
+    "t": 60,
+    "q": "In the family S+λS′=0 of circles through the intersection of two circles, which value of λ is excluded?",
+    "opts": [
+      "λ=−1",
+      "λ=0",
+      "λ=1",
+      "none (any λ)"
+    ],
+    "ans": 0,
+    "why": [
+      "λ=−1 cancels the x²,y² terms, giving the radical axis (a line), so λ≠−1 — correct.",
+      "λ=0 just returns S=0, a valid member.",
+      "λ=1 gives a legitimate circle.",
+      "λ=−1 must be excluded, so not any λ is allowed."
+    ],
+    "sol": "S+λS′=0 has x²-coefficient 1+λ; λ=−1 removes the quadratic terms, leaving a line (the common chord), so λ≠−1."
+  },
+  {
+    "id": 71,
+    "lec": "L-7",
+    "blk": "Solved Example",
+    "topic": "Circle through a point & intersection",
+    "t": 90,
+    "q": "The circle through (1,1) and the intersection of x<sup>2</sup>+y<sup>2</sup>+13x−3y=0 and 2x<sup>2</sup>+2y<sup>2</sup>+4x−7y−25=0 is:",
+    "opts": [
+      "4x<sup>2</sup>+4y<sup>2</sup>+30x−13y−25=0",
+      "x<sup>2</sup>+y<sup>2</sup>+30x−13y−25=0",
+      "4x<sup>2</sup>+4y<sup>2</sup>−30x+13y−25=0",
+      "4x<sup>2</sup>+4y<sup>2</sup>+30x−13y+25=0"
+    ],
+    "ans": 0,
+    "why": [
+      "λ=1/2 ⇒ 4x²+4y²+30x−13y−25=0 — correct.",
+      "The leading coefficient 4 must be kept after combining; dividing loses it.",
+      "The linear terms come out +30x and −13y, not −30x and +13y.",
+      "The constant is −25 (from −λ·25), not +25."
+    ],
+    "sol": "Family (x²+y²+13x−3y)+λ(2x²+2y²+4x−7y−25)=0 through (1,1): 12+λ(−24)=0 ⇒ λ=1/2 ⇒ 4x²+4y²+30x−13y−25=0."
+  },
+  {
+    "id": 72,
+    "lec": "L-7",
+    "blk": "Solved Example-3",
+    "topic": "Fixed points of a family",
+    "t": 90,
+    "q": "The family x<sup>2</sup>+y<sup>2</sup>−2x−2ay−8=0 (a∈R) passes through the fixed points:",
+    "opts": [
+      "(4,0) and (−2,0)",
+      "(2,0) and (−4,0)",
+      "(4,0) and (2,0)",
+      "(0,4) and (0,−2)"
+    ],
+    "ans": 0,
+    "why": [
+      "y=0 ⇒ x²−2x−8=0 ⇒ (x−4)(x+2)=0 ⇒ (4,0),(−2,0) — correct.",
+      "Sign error factoring; the roots are 4 and −2, not 2 and −4.",
+      "−2 is a root, not +2; the product of roots is −8.",
+      "The fixed points are on the x-axis (y=0), not the y-axis."
+    ],
+    "sol": "Write as (x²+y²−2x−8)−2a(y)=0; the a-independent points satisfy y=0 and x²−2x−8=0 ⇒ (x−4)(x+2)=0 ⇒ (4,0),(−2,0)."
+  },
+  {
+    "id": 73,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (21 Jan S1)",
+    "topic": "Condition for a circle",
+    "t": 180,
+    "q": "With λ₁=4, λ₂=−4 fixed by a vector condition, K<sup>2</sup>x<sup>2</sup>+(K<sup>2</sup>−5K+λ₁)xy+(3K+λ₂/2)y<sup>2</sup>−8x+12y+λ₂=0 represents a circle. The value of K is:",
+    "opts": [
+      "1",
+      "2",
+      "4",
+      "3"
+    ],
+    "ans": 0,
+    "why": [
+      "K²=3K−2 (equal x²,y² coeffs) gives K=1,2; K²−5K+4=0 (no xy) gives K=1,4; common K=1 — correct.",
+      "K=2 satisfies the coefficient-equality but not K²−5K+4=0.",
+      "K=4 satisfies the xy=0 condition but not the coefficient equality.",
+      "K=3 satisfies neither circle condition."
+    ],
+    "sol": "Circle ⇒ coeff x² = coeff y²: K²=3K+λ₂/2=3K−2 ⇒ K=1 or 2. And coeff xy = 0: K²−5K+λ₁=K²−5K+4=0 ⇒ K=1 or 4. The common value is K=1.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 74,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (21 Jan S1)",
+    "topic": "Locus of tangent intersection",
+    "t": 180,
+    "q": "Tangent pairs touch x<sup>2</sup>+y<sup>2</sup>−4x−6y−3=0 at A and B with centre O and ∠AOB=π/3. The locus of the intersection of the tangents is:",
+    "opts": [
+      "3(x<sup>2</sup>+y<sup>2</sup>)−12x−18y−25=0",
+      "3(x<sup>2</sup>+y<sup>2</sup>)−12x−18y+25=0",
+      "(x<sup>2</sup>+y<sup>2</sup>)−12x−18y−25=0",
+      "3(x<sup>2</sup>+y<sup>2</sup>)−6x−9y−25=0"
+    ],
+    "ans": 0,
+    "why": [
+      "OT=8/√3 ⇒ (x−2)²+(y−3)²=64/3 ⇒ 3(x²+y²)−12x−18y−25=0 — correct.",
+      "The expanded constant is −25, not +25.",
+      "The factor 3 (from 64/3) must multiply x²+y².",
+      "Linear terms are −12x,−18y (from 3·2·centre), not halved."
+    ],
+    "sol": "O(2,3), r=√(4+9+3)=4. ∠AOB=60° ⇒ ∠AOT=30°, OT=r/cos30°=8/√3. Locus (x−2)²+(y−3)²=64/3 ⇒ 3(x²+y²)−12x−18y−25=0.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 75,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (28 Jan S1)",
+    "topic": "Farthest chord",
+    "t": 180,
+    "q": "C₂ is the circle on the chord y=x of a circle (diameter 10, x≥0, through O) as diameter. The chord of C₂ through (2,3) farthest from its centre is x+ay+b=0. Then a−b=",
+    "opts": [
+      "−2",
+      "2",
+      "0",
+      "−1"
+    ],
+    "ans": 0,
+    "why": [
+      "C₂: x²+y²−5x−5y=0; farthest chord through (2,3) is x−y+1=0 ⇒ a=−1,b=1 ⇒ a−b=−2 — correct.",
+      "Sign slip; a−b=−1−1=−2, not +2.",
+      "a and b are −1 and 1, not equal, so a−b≠0.",
+      "a−b combines to −2, not −1."
+    ],
+    "sol": "C₁ (x≥0, through O) has centre (5,0); y=x meets it again at (5,5); C₂ on O(0,0)–(5,5): x²+y²−5x−5y=0. Farthest chord through (2,3)=chord bisected there (T=S₁): x−y+1=0 ⇒ a=−1, b=1 ⇒ a−b=−2.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 76,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (24 Jan S1)",
+    "topic": "Locus & modulus sum",
+    "t": 180,
+    "q": "For S={z∈ℂ : |z−6i|=|z−2i| and |(z−8+2i)/(z+2i)|=3/5}, the sum Σ|z|<sup>2</sup> over S is:",
+    "opts": [
+      "385",
+      "305",
+      "80",
+      "170"
+    ],
+    "ans": 0,
+    "why": [
+      "y=4, x=8 or 17 ⇒ |z|²=80+305=385 — correct.",
+      "305 is only the x=17 term.",
+      "80 is only the x=8 term.",
+      "170 doubles 85 by mistake."
+    ],
+    "sol": "First condition ⇒ equidistant from 6i,2i ⇒ Im z=4. Second ⇒ 25[(x−8)²+(y+2)²]=9[x²+(y+2)²] at y=4 ⇒ x²−25x+136=0 ⇒ x=8,17. |z|²=x²+16 ⇒ (64+16)+(289+16)=385.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 77,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (28 Jan S2)",
+    "topic": "Locus of intersection",
+    "t": 90,
+    "q": "On x<sup>2</sup>+y<sup>2</sup>=4 with A(2,0), B(−2,0), P(2cosα,2sinα), Q(2cosβ,2sinβ) and α−β=π/2, the locus of the intersection of AQ and BP is:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>−4y−4=0",
+      "x<sup>2</sup>+y<sup>2</sup>−4x−4=0",
+      "x<sup>2</sup>+y<sup>2</sup>+4y−4=0",
+      "x<sup>2</sup>+y<sup>2</sup>−4y+4=0"
+    ],
+    "ans": 0,
+    "why": [
+      "The configuration gives x²+y²−4y−4=0 (checked at α=π/3) — correct.",
+      "The symmetry is about the y-axis ⇒ a −4y term, not −4x.",
+      "The sign of the y-term is −4y (centre above), not +4y.",
+      "The constant is −4 (from the radius), not +4."
+    ],
+    "sol": "BP has slope tan(α/2), AQ has slope −cot(β/2); with β=α−π/2 the intersection traces x²+y²−4y−4=0 (verified: α=π/3 gives (√3+1,√3+1) on it).",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 78,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (24 Jan S1)",
+    "topic": "Centroid-locus radius",
+    "t": 180,
+    "q": "A circle of radius 4 passes through O(0,0), A(−√3·a,0) and B(0,−√2·b). The radius of the locus of the centroid of △OAB is:",
+    "opts": [
+      "8/3",
+      "4/3",
+      "16/9",
+      "3/8"
+    ],
+    "ans": 0,
+    "why": [
+      "Centroid locus h²+k²=64/9 ⇒ radius 8/3 — correct.",
+      "4/3 halves the radius incorrectly.",
+      "16/9 is an intermediate value, not the radius.",
+      "3/8 inverts the answer."
+    ],
+    "sol": "Through O ⇒ 3a²/4+b²/2=16. Centroid (h,k): a²=3h², b²=9k²/2 ⇒ 9(h²+k²)/4=16 ⇒ h²+k²=64/9 ⇒ radius 8/3.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 79,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (23 Jan S2)",
+    "topic": "Circle through intersections",
+    "t": 180,
+    "q": "The intersection points of x<sup>2</sup>+2y<sup>2</sup>−6x−12y+23=0 and 4x<sup>2</sup>+2y<sup>2</sup>−20x−12y+35=0 lie on a circle of radius r and centre (a,b). Then ab+18r<sup>2</sup>=",
+    "opts": [
+      "55",
+      "47",
+      "8",
+      "23"
+    ],
+    "ans": 0,
+    "why": [
+      "ab=8 and 18r²=47 ⇒ ab+18r²=55 — correct.",
+      "47 is only the 18r² term; the product ab=8 must be added.",
+      "8 is only the product ab; the 18r²=47 term is missing.",
+      "23 mis-reads the r² scaling, so ab+18r² is wrong."
+    ],
+    "sol": "Take S₁+λS₂ with equal x²,y² coeffs: 1+4λ=2+2λ ⇒ λ=1/2 ⇒ x²+y²−(16/3)x−6y+13.5=0. Centre (8/3,3), r²=64/9+9−13.5=23.5/9 ⇒ ab=8, 18r²=47 ⇒ ab+18r²=55.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 80,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (21 Jan S2)",
+    "topic": "Reflection locus",
+    "t": 180,
+    "q": "P lies on x<sup>2</sup>+y<sup>2</sup>=4, Q on 5x+y+2=0, and x−y+1=0 is the perpendicular bisector of PQ. Then 13×(sum of abscissae of all such P) equals:",
+    "opts": [
+      "2",
+      "0",
+      "13",
+      "26"
+    ],
+    "ans": 0,
+    "why": [
+      "Reflected locus X+5Y−2=0 meets the circle with abscissae summing to 2/13 ⇒ 13×(2/13)=2 — correct.",
+      "0 would need symmetric abscissae; they sum to 2/13.",
+      "13 is the multiplier, not the result.",
+      "26 doubles the answer."
+    ],
+    "sol": "P is Q reflected in x−y+1=0; reflecting 5x+y+2=0 gives the locus X+5Y−2=0. With X²+Y²=4: 26Y²−20Y=0 ⇒ X=2 and −24/13, sum=2/13 ⇒ 13×(2/13)=2.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 81,
+    "lec": "SB",
+    "blk": "JEE Main 2026 (22 Jan S1)",
+    "topic": "Intersection range product",
+    "t": 180,
+    "q": "The set of r for which (x+1)<sup>2</sup>+(y+4)<sup>2</sup>=r<sup>2</sup> and x<sup>2</sup>+y<sup>2</sup>−4x−2y−4=0 intersect at two distinct points is (α,β). Then αβ=",
+    "opts": [
+      "25",
+      "34",
+      "9",
+      "16"
+    ],
+    "ans": 0,
+    "why": [
+      "α=√34−3, β=√34+3 ⇒ αβ=34−9=25 — correct.",
+      "34 is d², not the product.",
+      "9=3² is only part of the difference of squares.",
+      "16 mis-subtracts; 34−9=25, not 16."
+    ],
+    "sol": "Second circle: centre (2,1), r₂=3; first: centre (−1,−4); d=√(9+25)=√34. Two intersections ⇔ √34−3&lt;r&lt;√34+3 ⇒ αβ=(√34−3)(√34+3)=34−9=25.",
+    "src": "JEE Main 2026"
+  },
+  {
+    "id": 82,
+    "lec": "SB",
+    "blk": "JEE Main 2025 (24 Jan S1)",
+    "topic": "Image circle & arc",
+    "t": 180,
+    "q": "C is the image of x<sup>2</sup>+y<sup>2</sup>−2x+4y−4=0 in 2x−3y+5=0. A is on C with OA parallel to the x-axis; B(α,β), β&lt;4, on C with arc AB one-sixth of the perimeter. Then β−√3·α=",
+    "opts": [
+      "4",
+      "2",
+      "−4",
+      "1"
+    ],
+    "ans": 0,
+    "why": [
+      "O(−3,4), r=3, A(0,4), B(−3/2,4−3√3/2) ⇒ β−√3α=4 — correct.",
+      "2 mis-evaluates the trig terms.",
+      "Sign slip; the √3α terms cancel to +4, not −4.",
+      "1 drops a term in evaluating β−√3α."
+    ],
+    "sol": "Reflect centre (1,−2) in 2x−3y+5=0 ⇒ O(−3,4), r=3. A=O+(3,0)=(0,4). Arc=perimeter/6 ⇒ 60° ⇒ B=(−3/2,4−3√3/2). β−√3α=(4−3√3/2)−√3(−3/2)=4.",
+    "src": "JEE Main 2025"
+  },
+  {
+    "id": 83,
+    "lec": "SB",
+    "blk": "JEE Main 2025 (7 Apr S1)",
+    "topic": "Contact point of touching circles",
+    "t": 180,
+    "q": "C₁ is in the third quadrant, radius 3, touching both axes; C₂ has centre (1,3) and touches C₁ externally at (α,β). If (β−α)<sup>2</sup>=m/n in lowest terms, then m+n=",
+    "opts": [
+      "22",
+      "13",
+      "9",
+      "25"
+    ],
+    "ans": 0,
+    "why": [
+      "(β−α)²=9/13 ⇒ m=9, n=13 ⇒ m+n=22 — correct.",
+      "13 is the denominator n only; m=9 must be added.",
+      "9 is the numerator m only; n=13 must be added.",
+      "25 mis-adds m and n; 9+13=22, not 25."
+    ],
+    "sol": "C₁ centre (−3,−3), r₁=3; d=√(16+36)=2√13, r₂=2√13−3. Contact divides C₁C₂ internally r₁:r₂ ⇒ α=6/√13−3, β=9/√13−3 ⇒ β−α=3/√13 ⇒ (β−α)²=9/13 ⇒ m+n=22.",
+    "src": "JEE Main 2025"
+  },
+  {
+    "id": 84,
+    "lec": "SB",
+    "blk": "JEE Main 2025 (3 Apr S2)",
+    "topic": "Concyclic points",
+    "t": 180,
+    "q": "(4,6), (−1,5), (0,0), (k,3k) are concyclic on a circle of radius r. Then 10k+r<sup>2</sup>=",
+    "opts": [
+      "35",
+      "22",
+      "13",
+      "33"
+    ],
+    "ans": 0,
+    "why": [
+      "k=11/5 and r²=13 ⇒ 10k+r²=22+13=35 — correct.",
+      "22 is only the 10k term; r²=13 must be added.",
+      "13 is only r²; the 10k=22 term is missing.",
+      "33 mis-adds the two parts; 22+13=35, not 33."
+    ],
+    "sol": "Through O ⇒ c=0. Fit (4,6),(−1,5): x²+y²−4x−6y=0, r²=13. Through (k,3k): 10k²−22k=0 ⇒ k=11/5 ⇒ 10k+r²=22+13=35.",
+    "src": "JEE Main 2025"
+  },
+  {
+    "id": 85,
+    "lec": "SB",
+    "blk": "JEE Main 2025 (2 Apr S1)",
+    "topic": "Two tangent circles",
+    "t": 180,
+    "q": "Two circles pass through (−9,4) and touch the lines x+y=3 and x−y=3. The absolute difference between the squares of their radii is:",
+    "opts": [
+      "768",
+      "800",
+      "32",
+      "416"
+    ],
+    "ans": 0,
+    "why": [
+      "r²=32 and 800 ⇒ |800−32|=768 — correct.",
+      "800 is only one radius squared.",
+      "32 is only the other radius squared.",
+      "416 is the average, not the difference."
+    ],
+    "sol": "The lines meet at (3,0) and are ⊥; the centre lies on a bisector y=0: |h−3|/√2=r and (h+9)²+16=r² ⇒ h²+42h+185=0 ⇒ h=−5,−37 ⇒ r²=(h−3)²/2=32 and 800 ⇒ |800−32|=768.",
+    "src": "JEE Main 2025"
+  },
+  {
+    "id": 86,
+    "lec": "SB",
+    "blk": "JEE Main 2025 (23 Jan S1)",
+    "topic": "Vectors on an arc",
+    "t": 180,
+    "q": "Arc AC subtends a right angle at centre O; B divides arc AC with arc AB:arc BC=1:5, and OC=α·OA+β·OB. Then α+√2(√3−1)β=",
+    "opts": [
+      "2−√3",
+      "√3−2",
+      "2+√3",
+      "−√3"
+    ],
+    "ans": 0,
+    "why": [
+      "α=−(2+√3), √2(√3−1)β=4 ⇒ α+4=2−√3 — correct.",
+      "Sign error on the whole expression.",
+      "Forgot the +4 reduces −(2+√3) to 2−√3.",
+      "Dropped the α contribution."
+    ],
+    "sol": "arc AC=90° split 1:5 ⇒ arc AB=15°. With OA=(1,0), OC=(0,1), B=(cos15°,sin15°): β=1/sin15°=√6+√2, α=−cot15°=−(2+√3). √2(√3−1)(√6+√2)=4 ⇒ α+4=−(2+√3)+4=2−√3.",
+    "src": "JEE Main 2025"
+  },
+  {
+    "id": 87,
+    "lec": "SB",
+    "blk": "JEE Main 2025 (28 Jan S1)",
+    "topic": "Touch x-axis, y-intercept",
+    "t": 180,
+    "q": "A circle x<sup>2</sup>+y<sup>2</sup>−αx+βy+γ=0 touches the x-axis at (a,0), a&gt;0, lies below the x-axis, and cuts intercept b on the y-axis. Then (2a, b<sup>2</sup>)=",
+    "opts": [
+      "(α, β<sup>2</sup>−4γ)",
+      "(α/2, β<sup>2</sup>−4γ)",
+      "(2α, β<sup>2</sup>−γ)",
+      "(α, β<sup>2</sup>−γ)"
+    ],
+    "ans": 0,
+    "why": [
+      "2a=α and b²=β²−4γ — correct.",
+      "Contact abscissa is α/2=a ⇒ 2a=α, not α/2.",
+      "2a=α (not 2α); and b²=β²−4γ keeps the 4.",
+      "The y-intercept squared is β²−4γ, not β²−γ."
+    ],
+    "sol": "Centre (α/2,−β/2); the contact on the x-axis is at α/2=a ⇒ 2a=α; touches x-axis ⇒ γ=α²/4. y-intercept b=2√(β²/4−γ) ⇒ b²=β²−4γ.",
+    "src": "JEE Main 2025"
+  },
+  {
+    "id": 88,
+    "lec": "SB",
+    "blk": "JEE Main 2024 (9 Apr S1)",
+    "topic": "Limit-defined centre",
+    "t": 90,
+    "q": "A circle through (2,0) has centre (h,k), where (h,k)=lim_{c→1} of the intersection of 3x+5y−1=0 and (2+c)x+5c<sup>2</sup>y=1. The circle is:",
+    "opts": [
+      "25x<sup>2</sup>+25y<sup>2</sup>−20x+2y−60=0",
+      "25x<sup>2</sup>+25y<sup>2</sup>+20x−2y−60=0",
+      "x<sup>2</sup>+y<sup>2</sup>−20x+2y−60=0",
+      "25x<sup>2</sup>+25y<sup>2</sup>−20x+2y+60=0"
+    ],
+    "ans": 0,
+    "why": [
+      "Centre (2/5,−1/25) through (2,0) ⇒ 25x²+25y²−20x+2y−60=0 — correct.",
+      "Centre signs give −20x,+2y from (2/5,−1/25), not +20x,−2y.",
+      "The leading coefficient 25 clears the fractions; it is not 1.",
+      "Passing through (2,0) fixes the constant at −60, not +60."
+    ],
+    "sol": "Subtracting the lines and dividing by (c−1): x+5(c+1)y=0; solving with 3x+5y=1 and letting c→1 gives centre (2/5,−1/25). Through (2,0): r²=(8/5)²+(1/25)² ⇒ 25x²+25y²−20x+2y−60=0.",
+    "src": "JEE Main 2024"
+  },
+  {
+    "id": 89,
+    "lec": "SB",
+    "blk": "JEE Main 2024 (8 Apr S1)",
+    "topic": "External touch, section",
+    "t": 180,
+    "q": "C₁:(x−α)<sup>2</sup>+(y−β)<sup>2</sup>=r₁<sup>2</sup> and C₂:(x−8)<sup>2</sup>+(y−15/2)<sup>2</sup>=r₂<sup>2</sup> touch externally at (6,6), which divides C₁C₂ internally 2:1. Then (α+β)+4(r₁<sup>2</sup>+r₂<sup>2</sup>)=",
+    "opts": [
+      "130",
+      "5",
+      "125",
+      "105"
+    ],
+    "ans": 0,
+    "why": [
+      "α+β=5 and 4(r₁²+r₂²)=125 ⇒ total 130 — correct.",
+      "5 is only α+β; the radius term 125 must be added.",
+      "125 is only the radius term; α+β=5 must be added.",
+      "105 mis-adds the two parts; 5+125=130, not 105."
+    ],
+    "sol": "(6,6)=(2·C₂+1·C₁)/3 ⇒ C₁(2,3). r₁=dist C₁(2,3)–(6,6)=5; r₂=dist C₂(8,15/2)–(6,6)=5/2. α+β=5, 4(25+25/4)=125 ⇒ (α+β)+4(r₁²+r₂²)=130.",
+    "src": "JEE Main 2024"
+  },
+  {
+    "id": 90,
+    "lec": "SB",
+    "blk": "JEE Advanced 2024 (P1)",
+    "topic": "Tangent line, diameter",
+    "t": 180,
+    "q": "y=2x touches a circle centred at (0,α), α&gt;0, radius r, at A₁, with A₁B₁ a diameter and α+r=5+√5. Matching P:α, Q:r, R:A₁, S:B₁ to {(1)(−2,4),(2)√5,(3)(−2,6),(4)5,(5)(2,4)} gives:",
+    "opts": [
+      "P→4, Q→2, R→5, S→3",
+      "P→2, Q→4, R→3, S→5",
+      "P→4, Q→2, R→3, S→5",
+      "P→5, Q→2, R→4, S→3"
+    ],
+    "ans": 0,
+    "why": [
+      "α=5(→4), r=√5(→2), A₁=(2,4)(→5), B₁=(−2,6)(→3) — correct.",
+      "α=5 matches (4) not (2); r=√5 matches (2) not (4).",
+      "A₁=(2,4) is list item (5), not (3).",
+      "α=5 matches (4), not (5)."
+    ],
+    "sol": "Distance from (0,α) to 2x−y=0 is α/√5=r, so α(1+1/√5)=5+√5 ⇒ α=5, r=√5. Foot of ⊥ from (0,5): A₁=(2,4); B₁=2·centre−A₁=(−2,6). P→4, Q→2, R→5, S→3.",
+    "src": "JEE Advanced 2024"
+  },
+  {
+    "id": 91,
+    "lec": "SB",
+    "blk": "JEE Advanced 2023 (P2)",
+    "topic": "Radical axis of tangents",
+    "t": 180,
+    "q": "C₁ (radius 1 at O), C₂ (radius r at A(4,1), 1&lt;r&lt;3). The midpoints of the two direct-common-tangent chords are joined; the line meets the x-axis at B with AB=√5. Then r<sup>2</sup>=",
+    "opts": [
+      "2",
+      "5",
+      "3",
+      "4"
+    ],
+    "ans": 0,
+    "why": [
+      "Midpoints lie on the radical axis; B=((18−r²)/8,0), AB²=5 ⇒ r²=2 — correct.",
+      "5 is the value of AB², not r²; solving onward gives r²=2.",
+      "3 mis-solves the equation (14+r²)/8=2.",
+      "4 is the upper bound on r, not r²."
+    ],
+    "sol": "Each tangent-chord midpoint has equal power to both circles ⇒ lies on the radical axis 8x+2y+(r²−18)=0 ⇒ B=((18−r²)/8,0). AB²=(4−(18−r²)/8)²+1=5 ⇒ (14+r²)/8=2 ⇒ r²=2.",
+    "src": "JEE Advanced 2023"
+  },
+  {
+    "id": 92,
+    "lec": "SB",
+    "blk": "JEE Advanced 2020 (P2)",
+    "topic": "Circumcentre of OPQ",
+    "t": 180,
+    "q": "O is the centre of x<sup>2</sup>+y<sup>2</sup>=r<sup>2</sup>; PQ is the chord 2x+4y=5. If the circumcentre of △OPQ lies on x+2y=4, then r=",
+    "opts": [
+      "2",
+      "4",
+      "√5/2",
+      "√2"
+    ],
+    "ans": 0,
+    "why": [
+      "Circumcentre (r²/5,2r²/5) on x+2y=4 ⇒ r²=4 ⇒ r=2 — correct.",
+      "4 is the value of r², not r; the radius is √4=2.",
+      "√5/2 is the lower bound on r, not the answer.",
+      "√2 mis-solves the linear condition."
+    ],
+    "sol": "The circumcircle of OPQ passes through O ⇒ c=0; its common chord with x²+y²=r² is PQ, so the circumcentre is (r²/5,2r²/5). On x+2y=4: r²/5+4r²/5=4 ⇒ r²=4 ⇒ r=2.",
+    "src": "JEE Advanced 2020"
+  },
+  {
+    "id": 93,
+    "lec": "SB",
+    "blk": "JEE Advanced 2019 (P1)",
+    "topic": "Chord midpoint & slope",
+    "t": 180,
+    "q": "y=mx+1 meets (x−3)<sup>2</sup>+(y+2)<sup>2</sup>=25 at P,Q; the midpoint of PQ has x-coordinate −3/5. The interval containing m is:",
+    "opts": [
+      "2≤m&lt;4",
+      "0&lt;m&lt;2",
+      "m&gt;4",
+      "−2&lt;m&lt;2"
+    ],
+    "ans": 0,
+    "why": [
+      "m=2 or 3, both lying in 2≤m&lt;4 — correct.",
+      "The roots 2,3 are not in (0,2).",
+      "m&gt;4 excludes both roots.",
+      "Both roots exceed 2, so neither lies in (−2,2)."
+    ],
+    "sol": "For midpoint M, CM⊥chord. With M_x=−3/5: −2+18/(5m)=−3m/5+1 ⇒ 3m²−15m+18=0 ⇒ m=2 or 3, both in 2≤m&lt;4.",
+    "src": "JEE Advanced 2019"
+  },
+  {
+    "id": 94,
+    "lec": "SB",
+    "blk": "JEE Advanced 2018 (P2)",
+    "topic": "Locus & point test",
+    "t": 90,
+    "q": "T passes through P(−2,7), Q(2,−5). Circles S₁ (tangent to T at P) and S₂ (tangent at Q) touch each other at M; E₁ is the locus of M. Which is TRUE?",
+    "opts": [
+      "(0,3/2) does not lie on E₁",
+      "P(−2,7) lies on E₁",
+      "(1/2,1) lies on E₁",
+      "E₁ has radius 2√5"
+    ],
+    "ans": 0,
+    "why": [
+      "E₁: x²+(y−1)²=40; (0,3/2) gives 1/4≠40 ⇒ not on E₁ — correct.",
+      "P is an endpoint excluded from the open locus E₁, so it is not on E₁.",
+      "(1/2,1) gives 1/4+0≠40, so it is not on E₁ either.",
+      "E₁ has radius √40=2√10, not 2√5."
+    ],
+    "sol": "E₁ is the circle on PQ as diameter (minus P,Q): centre (0,1), radius 2√10, i.e. x²+(y−1)²=40. Test (0,3/2): 0+(1/2)²=1/4≠40 ⇒ (0,3/2) does not lie on E₁.",
+    "src": "JEE Advanced 2018"
+  },
+  {
+    "id": 95,
+    "lec": "SB",
+    "blk": "JEE Advanced 2018 (P2)",
+    "topic": "Pole of a chord",
+    "t": 180,
+    "q": "For x<sup>2</sup>+y<sup>2</sup>=4, chords E₁E₂ (∥ x-axis), F₁F₂ (∥ y-axis), G₁G₂ (slope −1) pass through (1,1); E₃,F₃,G₃ are the poles (intersections of tangents at the ends). These three points lie on:",
+    "opts": [
+      "x+y=4",
+      "x+y=2",
+      "x−y=4",
+      "x<sup>2</sup>+y<sup>2</sup>=4"
+    ],
+    "ans": 0,
+    "why": [
+      "Poles (0,4),(4,0),(2,2) all satisfy x+y=4 — correct.",
+      "x+y=2 is the chord G₁G₂, not the pole locus.",
+      "The poles satisfy x+y=4, not x−y=4.",
+      "The poles are collinear on a line, not on the circle."
+    ],
+    "sol": "Pole of chord Lx+My=N of x²+y²=4 is (4L/N,4M/N). y=1→(0,4); x=1→(4,0); x+y=2→(2,2). All satisfy x+y=4.",
+    "src": "JEE Advanced 2018"
+  },
+  {
+    "id": 96,
+    "lec": "SB",
+    "blk": "JEE Advanced 2018 (P2)",
+    "topic": "Midpoint of tangent intercept",
+    "t": 180,
+    "q": "P is on x<sup>2</sup>+y<sup>2</sup>=4 with both coordinates positive; the tangent at P meets the axes at M and N. The midpoint of MN lies on:",
+    "opts": [
+      "x<sup>2</sup>+y<sup>2</sup>=x<sup>2</sup>y<sup>2</sup>",
+      "x<sup>2</sup>+y<sup>2</sup>=4",
+      "1/x<sup>2</sup>−1/y<sup>2</sup>=1",
+      "x<sup>2</sup>y<sup>2</sup>=4"
+    ],
+    "ans": 0,
+    "why": [
+      "Midpoint (1/cosθ,1/sinθ) ⇒ 1/x²+1/y²=1 ⇒ x²+y²=x²y² — correct.",
+      "x²+y²=4 is the original circle, not the midpoint locus.",
+      "It is a sum 1/x²+1/y²=1, not a difference.",
+      "The relation is x²+y²=x²y², not x²y²=4."
+    ],
+    "sol": "P=(2cosθ,2sinθ); tangent x cosθ+y sinθ=2 ⇒ M(2/cosθ,0), N(0,2/sinθ); midpoint (1/cosθ,1/sinθ) ⇒ 1/x²+1/y²=1 ⇒ x²+y²=x²y².",
+    "src": "JEE Advanced 2018"
+  },
+  {
+    "id": 97,
+    "lec": "SB",
+    "blk": "JEE Advanced 2022 (P2)",
+    "topic": "Ring of touching circles",
+    "t": 90,
+    "q": "A circle G has radius R; n equal circles of radius r each touch G externally and touch their two neighbours (cyclically). The relation between n, r and R is:",
+    "opts": [
+      "sin(π/n)=r/(R+r)",
+      "sin(π/n)=r/R",
+      "cos(π/n)=r/(R+r)",
+      "sin(2π/n)=r/(R+r)"
+    ],
+    "ans": 0,
+    "why": [
+      "Centres lie on a circle radius R+r, spacing 2r subtends 2π/n ⇒ (R+r)sin(π/n)=r — correct.",
+      "The centres lie at radius R+r, not R, from the centre of G.",
+      "The half-chord uses sine of the half-angle, not cosine.",
+      "The half-angle is π/n inside the sine; 2π/n is the full gap angle."
+    ],
+    "sol": "The n small centres lie on a circle of radius R+r, equally spaced; neighbouring centres are 2r apart ⇒ 2(R+r)sin(π/n)=2r ⇒ sin(π/n)=r/(R+r).",
+    "src": "JEE Advanced 2022"
+  }
+];
+
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter " + CH_TAG + " mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("pTime").textContent = "0:00";
+
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
+    }
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
+  });
+  showQ(0);
+  updateProgress();
+  show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const b = $("pb" + id); if (b) b.classList.add("ans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length, left = pool.length - n;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
+}
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0, slow = 0;
+  pool.forEach(id => {
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
+    else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? DONE_TITLE : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
+  examStop();
+  show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

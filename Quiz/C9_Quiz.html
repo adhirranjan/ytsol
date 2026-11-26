@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C-9 Hydrogen — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>C-9 · Hydrogen</h1>
+    <p id="heroSub">Lectures L-1 to L-4 + Strong Box · 54 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">54 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the chapter is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
+    </div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · C-9 Hydrogen · mastery quiz built from lectures L-1 to L-4 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-9 HYDROGEN — lecture units
+   ============================================================ */
+const LECTURES = [
+  {"key":"L-1","name":"L-1 · Position, Isotopes &amp; Preparation of H<sub>2</sub>","desc":"Anomalous position of hydrogen (alkali-metal vs halogen resemblance), isotopes protium/deuterium/tritium, laboratory &amp; commercial preparation and properties of dihydrogen."},
+  {"key":"L-2","name":"L-2 · Forms of Hydrogen &amp; Hydrides","desc":"Ortho/para, nascent, occluded and atomic hydrogen; classification of hydrides — ionic/saline, covalent (electron-deficient/precise/rich), metallic/interstitial and complex."},
+  {"key":"L-3","name":"L-3 · Water — Properties &amp; Hardness","desc":"Structure and properties of water, hard &amp; soft water, temporary &amp; permanent hardness and its removal (boiling, Clark's, washing soda, Calgon, ion-exchange)."},
+  {"key":"L-4","name":"L-4 · Heavy Water &amp; Hydrogen Peroxide","desc":"Heavy water D<sub>2</sub>O, structure/preparation/redox chemistry of H<sub>2</sub>O<sub>2</sub>, and volume/normality strength calculations."},
+  {"key":"SB","name":"Strong Box · Previous Year Questions","desc":"JEE Main 2022–2024 objective questions on hydrogen — isotopes, hydrides, hardness, H<sub>2</sub>O<sub>2</sub> redox and strength (every answer independently re-derived)."},
+];
+
+const QUIZ = [
+  {id:1, lec:"L-1", blk:"Position of hydrogen", topic:"Alkali-metal resemblance", t:60,
+    q:"Which property shows that hydrogen resembles the <b>alkali metals</b>?",
+    opts:["It has one electron in its outermost shell (1s<sup>1</sup>) and can lose it to form H<sup>+</sup> with a +1 state","It is one electron short of the nearest noble gas and can form H<sup>-</sup>","It exists as a diatomic molecule H<sub>2</sub>","Its ionisation enthalpy is close to that of the halogens"],
+    ans:0,
+    why:["Correct: like Li 2s<sup>1</sup> and Na 3s<sup>1</sup>, H has a single 1s<sup>1</sup> electron, is electropositive and forms the +1 ion H<sup>+</sup>.","This is a <b>halogen</b> resemblance — gaining an electron to reach the He configuration and forming the hydride H<sup>-</sup>.","Being diatomic is a <b>halogen</b> (non-metal) trait, not an alkali-metal one; alkali metals are monatomic solids.","A high ionisation enthalpy close to the halogens is the opposite of alkali-metal behaviour, which have very low ionisation enthalpy."],
+    sol:"Alkali metals have an ns<sup>1</sup> outer electron, are electropositive and form M<sup>+</sup>. Hydrogen (1s<sup>1</sup>) behaves the same way, forming H<sup>+</sup> in the +1 state, so this is the alkali-metal likeness. The other options describe halogen-like behaviour."},
+  {id:2, lec:"L-1", blk:"Anomalous position", topic:"Why placed separately", t:60,
+    q:"Why is hydrogen placed separately in the periodic table rather than fixed in group 1 or group 17?",
+    opts:["It is less electropositive than alkali metals and less electronegative than halogens, and its oxide (water) is neutral","It is more electropositive than caesium","Its oxide is strongly basic, like Na<sub>2</sub>O","It is incapable of forming covalent bonds"],
+    ans:0,
+    why:["Correct: H sits between the two families in character, has no inner shell, and water is neutral (alkali oxides are basic, halogen oxides acidic) — so it fits neither group fully.","False: caesium is the most electropositive element; hydrogen is far less electropositive than any alkali metal.","False: water is <b>neutral</b> to litmus, not basic like the alkali-metal oxides.","False: hydrogen readily forms covalent compounds such as CH<sub>4</sub>, NH<sub>3</sub> and H<sub>2</sub>O."],
+    sol:"Hydrogen resembles both alkali metals (1s<sup>1</sup>, H<sup>+</sup>) and halogens (one electron short of He, H<sup>-</sup>, diatomic) yet is less electropositive than the former and less electronegative than the latter; its oxide water is neutral. Having only one proton and one electron with no inner shell, it belongs to neither group, so it is placed on its own."},
+  {id:3, lec:"L-1", blk:"Isotopes", topic:"Radioactive isotope", t:60,
+    q:"Which isotope of hydrogen is radioactive and is used as a radioactive tracer?",
+    opts:["Tritium (<sup>3</sup><sub>1</sub>H)","Protium (<sup>1</sup><sub>1</sub>H)","Deuterium (<sup>2</sup><sub>1</sub>H)","All three are radioactive"],
+    ans:0,
+    why:["Correct: tritium has 2 neutrons, emits &beta;-rays and has t<sub>1/2</sub> &asymp; 12.3 yr, so it is the only radioactive hydrogen isotope and serves as a tracer.","Protium (0 neutrons, 99.985% abundance) is stable and non-radioactive.","Deuterium (1 neutron) is stable and non-radioactive; it is used in heavy water, not as a radioactive tracer.","False: only tritium is radioactive; protium and deuterium are both stable."],
+    sol:"Of the three isotopes only tritium (<sup>3</sup><sub>1</sub>H, 2 neutrons) is unstable: it undergoes &beta;-decay with a half-life of about 12.3 years. Because its radiation is detectable in trace amounts it is used as a radioactive tracer. Protium and deuterium are both stable."},
+  {id:4, lec:"L-1", blk:"Preparation from water", topic:"Reactivity ladder", t:60,
+    q:"Which set of metals liberates dihydrogen from <b>cold</b> water?",
+    opts:["Na, K, Ca","Zn, Mg, Al","Fe, Sn, Ni","Cu, Ag, Au"],
+    ans:0,
+    why:["Correct: the most active metals (Na, K, Ca) react with cold water, e.g. 2Na + 2H<sub>2</sub>O &rarr; 2NaOH + H<sub>2</sub>.","Zn, Mg and Al are less active; they need <b>boiling</b> water or steam, not cold water.","Fe, Sn and Ni react only with <b>red-hot steam</b> (e.g. 3Fe + 4H<sub>2</sub>O &rarr; Fe<sub>3</sub>O<sub>4</sub> + 4H<sub>2</sub>).","Cu, Ag and Au lie below hydrogen in the activity series and do <b>not</b> react with water at all."],
+    sol:"Reactivity with water falls down the ladder: very active metals (Na, K, Ca) react with cold water; Zn, Mg, Al need boiling water or steam; Fe, Sn, Ni need red-hot steam; Cu, Ag, Au, Hg, Pt do not react. Hence only Na, K, Ca liberate H<sub>2</sub> from cold water."},
+  {id:5, lec:"L-1", blk:"Laboratory preparation", topic:"Standard lab method", t:60,
+    q:"The usual simple <b>laboratory</b> preparation of dihydrogen uses:",
+    opts:["Zn + dilute H<sub>2</sub>SO<sub>4</sub> &rarr; ZnSO<sub>4</sub> + H<sub>2</sub>","Electrolysis of warm Ba(OH)<sub>2</sub> between nickel electrodes","Cu + dilute HCl","Heating NaH"],
+    ans:0,
+    why:["Correct: granulated zinc with dilute sulphuric acid is the standard bench preparation, H<sub>2</sub> being collected over water.","True preparation but of <b>very pure</b> (&gt;99.95%) H<sub>2</sub>, not the simple lab method asked for — a correct-looking trap.","Cu lies below hydrogen in the electrochemical series, so it does not displace H<sub>2</sub> from dilute acid.","Heating the ionic hydride NaH does not conveniently give H<sub>2</sub>; it is not a preparation route."],
+    sol:"The standard laboratory method is the action of dilute sulphuric acid on zinc: Zn + dil. H<sub>2</sub>SO<sub>4</sub> &rarr; ZnSO<sub>4</sub> + H<sub>2</sub>, collected over water. Electrolysis of warm Ba(OH)<sub>2</sub> between Ni/Pt electrodes also gives H<sub>2</sub> but very pure, so it answers a different question. Copper is too unreactive to displace H<sub>2</sub>."},
+  {id:6, lec:"L-1", blk:"Preparation from alkali", topic:"Amphoteric metals", t:60,
+    q:"Zinc reacts with hot concentrated NaOH to liberate H<sub>2</sub> because zinc is:",
+    opts:["an amphoteric metal","a noble metal","below hydrogen in the electrochemical series","an alkali metal"],
+    ans:0,
+    why:["Correct: amphoteric metals (Zn, Al) dissolve in hot alkali: Zn + 2NaOH &rarr; Na<sub>2</sub>ZnO<sub>2</sub> + H<sub>2</sub>.","A noble metal (Au, Pt) is unreactive and would not react with alkali to give H<sub>2</sub>.","Zinc lies <b>above</b> hydrogen in the series; being below it would prevent H<sub>2</sub> evolution.","Zinc is a transition metal, not an alkali metal; alkali metals react with water, not by dissolving in NaOH as zincate."],
+    sol:"Amphoteric metals such as Zn and Al react with hot aqueous alkali forming the corresponding oxoanion and releasing hydrogen: Zn + 2NaOH &rarr; Na<sub>2</sub>ZnO<sub>2</sub> (sodium zincate) + H<sub>2</sub>. The amphoteric nature of the oxide/metal is what allows this reaction with a base."},
+  {id:7, lec:"L-1", blk:"Properties of H2", topic:"Drying hydrogen", t:60,
+    q:"Concentrated H<sub>2</sub>SO<sub>4</sub> is <b>not</b> used to dry dihydrogen because:",
+    opts:["absorption of the moisture is strongly exothermic and the heat can ignite the hydrogen","H<sub>2</sub>SO<sub>4</sub> reacts with H<sub>2</sub> to give H<sub>2</sub>S","H<sub>2</sub> dissolves in conc. H<sub>2</sub>SO<sub>4</sub>","conc. H<sub>2</sub>SO<sub>4</sub> cannot absorb water vapour"],
+    ans:0,
+    why:["Correct: conc. H<sub>2</sub>SO<sub>4</sub> taking up moisture releases a large amount of heat, which can set the combustible H<sub>2</sub> on fire — so it is unsafe as a drying agent for H<sub>2</sub>.","False: conc. H<sub>2</sub>SO<sub>4</sub> does not reduce to H<sub>2</sub>S on contact with dry H<sub>2</sub> under these conditions.","False: H<sub>2</sub> is only very slightly soluble; solubility is not the reason it is avoided.","False: conc. H<sub>2</sub>SO<sub>4</sub> is in fact an excellent drying agent — that very avidity for water is the problem here."],
+    sol:"Conc. H<sub>2</sub>SO<sub>4</sub> is strongly hygroscopic; its absorption of water is highly exothermic. The heat liberated while drying moist hydrogen can raise the temperature enough to ignite the flammable gas. For safety, H<sub>2</sub> is dried with agents that do not release dangerous heat."},
+  {id:8, lec:"L-1", blk:"Electrolysis of water", topic:"Selective discharge", t:60,
+    q:"Water is electrolysed in presence of a little H<sub>2</sub>SO<sub>4</sub> or KOH, yet neither SO<sub>4</sub><sup>2-</sup> nor K<sup>+</sup> is discharged. Why?",
+    opts:["SO<sub>4</sub><sup>2-</sup> and K<sup>+</sup> have higher discharge potentials than OH<sup>-</sup> and H<sup>+</sup>, so OH<sup>-</sup>/H<sup>+</sup> are discharged preferentially","SO<sub>4</sub><sup>2-</sup> and K<sup>+</sup> are too large to reach the electrodes","they precipitate as an insoluble salt before reaching the electrodes","the acid and alkali are consumed and regenerated, so their ions never move"],
+    ans:0,
+    why:["Correct: at the anode OH<sup>-</sup> has a lower discharge potential than SO<sub>4</sub><sup>2-</sup> (giving O<sub>2</sub>); at the cathode H<sup>+</sup> is discharged in preference to K<sup>+</sup> (giving H<sub>2</sub>).","False: ion size is not the controlling factor; discharge is governed by discharge (electrode) potential.","False: no precipitate forms — SO<sub>4</sub><sup>2-</sup> and K<sup>+</sup> stay in solution throughout.","The acid/alkali does merely raise conductivity, but the reason these ions are not discharged is the selective-discharge potential, not a lack of motion."],
+    sol:"Discharge at an electrode goes to the ion with the lower discharge potential. At the cathode H<sup>+</sup> is discharged in preference to K<sup>+</sup> &rarr; H<sub>2</sub>; at the anode OH<sup>-</sup> is discharged in preference to SO<sub>4</sub><sup>2-</sup> &rarr; O<sub>2</sub>. The added acid or alkali only increases conductivity, so only H<sub>2</sub> and O<sub>2</sub> are evolved."},
+  {id:9, lec:"L-2", blk:"Ortho &amp; para hydrogen", topic:"Room-temperature ratio", t:60,
+    q:"At room temperature ordinary dihydrogen is a mixture of ortho and para hydrogen in the ratio:",
+    opts:["3 : 1 (ortho : para)","1 : 1","1 : 3","2 : 1"],
+    ans:0,
+    why:["Correct: at ordinary temperatures ortho and para forms coexist in a 3:1 ratio (ortho predominating).","A 1:1 mixture is not reached at room temperature; the ortho form is three times as abundant.","1:3 reverses the ratio — para is the minor, not the major, form at room temperature.","2:1 is not the equilibrium composition; the correct ordinary-temperature ratio is 3:1."],
+    sol:"Ortho (parallel nuclear spins) and para (antiparallel spins) hydrogen interconvert with temperature. At room temperature the equilibrium mixture is about 75% ortho and 25% para, i.e. a 3:1 ortho:para ratio; the para fraction rises only at low temperature."},
+  {id:10, lec:"L-2", blk:"Ortho &amp; para hydrogen", topic:"Nuclear spin values", t:90,
+    q:"The total nuclear spins of ortho- and para-hydrogen are respectively:",
+    opts:["1 and 0","0 and 1","1 and 1","(1/2) and (1/2)"],
+    ans:0,
+    why:["Correct: each proton has spin (1/2); ortho (parallel) gives (1/2) + (1/2) = 1, para (antiparallel) gives (1/2) - (1/2) = 0.","Reversed: ortho (parallel spins) is 1, not 0; para (antiparallel) is 0, not 1.","Both cannot be 1 — antiparallel spins in para hydrogen cancel to give 0.","These are the individual proton spins, not the combined nuclear spins of the molecules."],
+    sol:"Each proton has spin (1/2). In ortho-hydrogen the two proton spins are parallel and add: (1/2) + (1/2) = 1. In para-hydrogen they are antiparallel and subtract: (1/2) - (1/2) = 0. Hence ortho spin = 1 and para spin = 0."},
+  {id:11, lec:"L-2", blk:"Nascent hydrogen", topic:"Enhanced reactivity", t:60,
+    q:"Nascent hydrogen is a stronger reducing agent than ordinary H<sub>2</sub> because:",
+    opts:["it is freshly generated high-energy atomic [H] that reacts before pairing into stable H<sub>2</sub>","it is at a much higher pressure than ordinary H<sub>2</sub>","it carries a negative charge like the hydride ion","it is a heavier isotope of hydrogen"],
+    ans:0,
+    why:["Correct: &lsquo;newly born&rsquo; hydrogen exists momentarily as reactive atoms/high-energy species (e.g. Zn + H<sub>2</sub>SO<sub>4</sub> &rarr; ZnSO<sub>4</sub> + 2[H]) before combining to H<sub>2</sub>, so it reduces more readily.","False: its reactivity is not due to pressure; ordinary H<sub>2</sub> at high pressure is still far less reactive.","False: nascent hydrogen is not the hydride ion H<sup>-</sup>; it is neutral atomic/activated hydrogen.","False: it is the same element, not a heavier isotope; mass is irrelevant to its reactivity."],
+    sol:"Nascent (newly born) hydrogen is produced in situ, for example Zn + dil. H<sub>2</sub>SO<sub>4</sub> &rarr; ZnSO<sub>4</sub> + 2[H]. In that instant it is present as reactive atoms before they pair into the stable, low-energy H<sub>2</sub> molecule, so it can reduce substances (KClO<sub>3</sub> &rarr; KCl, AsCl<sub>3</sub> &rarr; AsH<sub>3</sub>) that molecular H<sub>2</sub> cannot."},
+  {id:12, lec:"L-2", blk:"Ionic hydrides", topic:"Thermal stability order", t:60,
+    q:"The correct order of <b>decreasing thermal stability</b> of the alkali-metal (saline) hydrides is:",
+    opts:["LiH &gt; NaH &gt; KH &gt; RbH &gt; CsH","CsH &gt; RbH &gt; KH &gt; NaH &gt; LiH","NaH &gt; LiH &gt; KH &gt; CsH &gt; RbH","All five have the same thermal stability"],
+    ans:0,
+    why:["Correct: thermal stability falls down the group as the M-H bond weakens, so LiH is the most stable and CsH the least.","This is the order of <b>increasing</b> ionic character (reverse of stability), a classic trap — it is wrong for thermal stability.","No such irregular order exists; stability decreases smoothly down the group.","False: the hydrides differ markedly in stability; they are not equal."],
+    sol:"Down group 1 the metal ion gets larger and the lattice/M-H bond weaker, so thermal stability decreases: LiH &gt; NaH &gt; KH &gt; RbH &gt; CsH. Note ionic character runs the opposite way (CsH most ionic), which is why the reversed order is a tempting distractor."},
+  {id:13, lec:"L-2", blk:"Covalent hydrides", topic:"Electron-deficient classification", t:60,
+    q:"The hydride B<sub>2</sub>H<sub>6</sub> (diborane) is classified as:",
+    opts:["an electron-deficient covalent hydride","an electron-precise covalent hydride","an electron-rich covalent hydride","an ionic (saline) hydride"],
+    ans:0,
+    why:["Correct: diborane has fewer valence electrons than needed for normal 2-centre-2-electron bonds, so it uses 3-centre-2-electron B-H-B bridges — it is electron-deficient.","Electron-precise means exactly enough electrons (e.g. CH<sub>4</sub>); diborane has a shortfall, so this is wrong.","Electron-rich means extra lone pairs (NH<sub>3</sub>, H<sub>2</sub>O, HF); diborane has no lone pairs on boron, so it is not electron-rich.","B<sub>2</sub>H<sub>6</sub> is molecular and covalent, not an ionic hydride of a group 1/2 metal."],
+    sol:"Boron brings only three valence electrons, so B<sub>2</sub>H<sub>6</sub> does not have enough electrons for eight normal B-H bonds. It bonds through two 3-centre-2-electron B-H-B bridges, the hallmark of an electron-deficient hydride."},
+  {id:14, lec:"L-2", blk:"Covalent hydrides", topic:"Meaning of electron-rich", t:60,
+    q:"Hydrides such as NH<sub>3</sub>, H<sub>2</sub>O and HF are called &lsquo;electron-rich&rsquo; because they have:",
+    opts:["one or more extra lone pairs of electrons on the central atom","more covalent bonds than they need","a shortage of electrons for normal bonding","a metallic lattice holding hydrogen"],
+    ans:0,
+    why:["Correct: &lsquo;electron-rich&rsquo; means the central atom carries lone pairs beyond its bonding needs (N one, O two, F three), which makes these hydrides good Lewis bases.","False: it refers to extra <b>lone pairs</b>, not extra bonds; the number of bonds is normal.","False: a shortage of electrons describes electron-<b>deficient</b> hydrides like B<sub>2</sub>H<sub>6</sub>, the opposite case.","False: a metallic lattice describes interstitial (metallic) hydrides, not molecular electron-rich ones."],
+    sol:"In NH<sub>3</sub>, H<sub>2</sub>O and HF the central atom has lone pairs left over after bonding (electron-rich). This is different from electron-precise (CH<sub>4</sub>, exactly enough) and electron-deficient (B<sub>2</sub>H<sub>6</sub>, too few). The extra lone pairs make them donors / Lewis bases."},
+  {id:15, lec:"L-2", blk:"Metallic hydrides", topic:"Non-stoichiometry", t:60,
+    q:"Non-stoichiometric hydrides such as LaH<sub>2.87</sub> and TiH<sub>1.8</sub> are examples of:",
+    opts:["metallic / interstitial hydrides of d- and f-block metals","ionic (saline) hydrides of s-block metals","covalent molecular hydrides","complex hydrides such as LiAlH<sub>4</sub>"],
+    ans:0,
+    why:["Correct: d- and f-block metals absorb hydrogen into lattice interstices, often in variable (non-stoichiometric) ratios like LaH<sub>2.87</sub>.","Ionic hydrides (NaH, CaH<sub>2</sub>) have fixed whole-number formulae, not fractional compositions.","Covalent molecular hydrides have definite formulae (CH<sub>4</sub>, NH<sub>3</sub>) and are not non-stoichiometric.","Complex hydrides (LiAlH<sub>4</sub>, NaBH<sub>4</sub>) are stoichiometric compounds, not interstitial lattices."],
+    sol:"Transition (d) and inner-transition (f) metals take hydrogen into the holes of their metal lattice, giving hard, conducting, often non-stoichiometric solids such as LaH<sub>2.87</sub>, TiH<sub>1.8</sub> and PdH<sub>0.7</sub>. Variable composition is the signature of these metallic/interstitial hydrides."},
+  {id:16, lec:"L-2", blk:"Complex hydrides", topic:"Reducing agents", t:60,
+    q:"LiAlH<sub>4</sub> and NaBH<sub>4</sub> are examples of:",
+    opts:["complex hydrides, widely used as reducing agents","ionic (saline) hydrides","electron-precise molecular hydrides","interstitial (metallic) hydrides"],
+    ans:0,
+    why:["Correct: these contain complex anions (AlH<sub>4</sub><sup>-</sup>, BH<sub>4</sub><sup>-</sup>) and are versatile reducing agents in the lab.","A saline hydride is a simple M<sup>+</sup>H<sup>-</sup> solid (NaH, CaH<sub>2</sub>); these have a covalent complex anion, so they are not simple saline hydrides.","Electron-precise hydrides are neutral molecules like CH<sub>4</sub>; LiAlH<sub>4</sub>/NaBH<sub>4</sub> are salts of complex hydride anions.","Interstitial hydrides are non-stoichiometric metal-lattice hydrides, quite unlike these defined compounds."],
+    sol:"LiAlH<sub>4</sub> (lithium aluminium hydride) and NaBH<sub>4</sub> (sodium borohydride) are complex hydrides built around the tetrahedral AlH<sub>4</sub><sup>-</sup> and BH<sub>4</sub><sup>-</sup> anions. They are among the most useful reducing agents in organic and inorganic chemistry."},
+  {id:17, lec:"L-3", blk:"Properties of water", topic:"Maximum density", t:60,
+    q:"Water has its maximum density at a temperature of:",
+    opts:["4 &deg;C (277 K)","0 &deg;C","25 &deg;C","100 &deg;C"],
+    ans:0,
+    why:["Correct: on warming ice-cold water from 0&deg;C the open H-bonded structure collapses and density rises, peaking at 4&deg;C before thermal expansion takes over.","At 0&deg;C water is about to freeze; its density is lower than at 4&deg;C because of the partly open H-bonded network.","By 25&deg;C normal thermal expansion has already lowered the density below the 4&deg;C maximum.","At 100&deg;C water is at its boiling point and least dense of these options."],
+    sol:"Liquid water is anomalous: between 0 and 4&deg;C the open ice-like hydrogen-bonded clusters keep breaking down and molecules pack closer, so density rises; above 4&deg;C ordinary thermal expansion dominates and density falls. The maximum density therefore occurs at 4&deg;C (277 K)."},
+  {id:18, lec:"L-3", blk:"Structure of water/ice", topic:"Why ice floats", t:60,
+    q:"Ice floats on liquid water because:",
+    opts:["it has an open, cage-like hydrogen-bonded lattice with vacant spaces, making it less dense than water","it is chemically different from liquid water","the O-H covalent bonds become much stronger on freezing","it traps large amounts of dissolved air"],
+    ans:0,
+    why:["Correct: each O is H-bonded tetrahedrally to four H, giving an open hexagonal cage with empty space, so ice is less dense and floats.","False: ice is the same substance (H<sub>2</sub>O); only the arrangement of molecules differs.","False: the covalent O-H bonds are unchanged; it is the longer <b>hydrogen</b> bonds that create the open structure.","False: trapped air is negligible; the low density comes from the open H-bonded lattice itself."],
+    sol:"In ice every oxygen is hydrogen-bonded to four others in a tetrahedral, cage-like hexagonal lattice containing vacant spaces. This open structure makes ice less dense than liquid water, so it floats. On melting the H-bonds partly collapse, molecules fill the holes and density rises (peaking at 4&deg;C)."},
+  {id:19, lec:"L-3", blk:"Structure of water", topic:"Hybridisation and bond angle", t:60,
+    q:"In the water molecule the oxygen atom is sp<sup>3</sup> hybridised and the H-O-H bond angle is:",
+    opts:["104.5&deg;","109.5&deg;","120&deg;","90&deg;"],
+    ans:0,
+    why:["Correct: two bond pairs and two lone pairs give sp<sup>3</sup> geometry, but lone-pair repulsion compresses the angle from the ideal to 104.5&deg;.","109.5&deg; is the ideal tetrahedral angle; the two lone pairs push it below this value.","120&deg; corresponds to sp<sup>2</sup> (trigonal planar) geometry, which water does not have.","90&deg; would imply unhybridised p-orbital bonding; experimentally the angle is 104.5&deg;."],
+    sol:"Oxygen in H<sub>2</sub>O has four electron domains (2 bond pairs + 2 lone pairs) &rarr; sp<sup>3</sup> hybridisation, which predicts ~109.5&deg;. The stronger lone-pair/lone-pair repulsion squeezes the bond angle down to the observed 104.5&deg;, giving a bent (V-shaped) molecule."},
+  {id:20, lec:"L-3", blk:"Hardness of water", topic:"Cause of temporary hardness", t:60,
+    q:"Temporary hardness of water is caused by the presence of:",
+    opts:["bicarbonates of calcium and magnesium","sulphates of calcium and magnesium","chlorides of calcium and magnesium","nitrates of sodium and potassium"],
+    ans:0,
+    why:["Correct: dissolved Ca(HCO<sub>3</sub>)<sub>2</sub> and Mg(HCO<sub>3</sub>)<sub>2</sub> cause temporary hardness, removable simply by boiling.","Sulphates of Ca/Mg cause <b>permanent</b> hardness, which boiling cannot remove.","Chlorides of Ca/Mg also cause <b>permanent</b> hardness, not temporary.","Na and K salts are soluble and do not make water hard at all; hardness is due to Ca<sup>2+</sup>/Mg<sup>2+</sup>."],
+    sol:"Temporary hardness comes from the bicarbonates Ca(HCO<sub>3</sub>)<sub>2</sub> and Mg(HCO<sub>3</sub>)<sub>2</sub>; it is called temporary because boiling decomposes them to insoluble CaCO<sub>3</sub>/Mg(OH)<sub>2</sub>. Sulphates and chlorides of Ca/Mg give permanent hardness, and Na/K salts do not cause hardness."},
+  {id:21, lec:"L-3", blk:"Softening of water", topic:"Clark's process", t:60,
+    q:"Clark's process removes temporary hardness by adding a <b>calculated</b> amount of:",
+    opts:["slaked lime, Ca(OH)<sub>2</sub>","washing soda, Na<sub>2</sub>CO<sub>3</sub>","sodium chloride brine, NaCl","hydrochloric acid, HCl"],
+    ans:0,
+    why:["Correct: calculated Ca(OH)<sub>2</sub> converts bicarbonate to insoluble CaCO<sub>3</sub>: Ca(HCO<sub>3</sub>)<sub>2</sub> + Ca(OH)<sub>2</sub> &rarr; 2CaCO<sub>3</sub> + 2H<sub>2</sub>O; excess lime would add fresh hardness.","Washing soda removes <b>permanent</b> hardness; it is not the reagent of Clark's process.","NaCl brine is used to regenerate a spent zeolite (permutit), not in Clark's process.","HCl does not soften water; it would merely acidify it and leave Ca<sup>2+</sup>/Mg<sup>2+</sup> in solution."],
+    sol:"In Clark's process a measured amount of slaked lime is added: Ca(HCO<sub>3</sub>)<sub>2</sub> + Ca(OH)<sub>2</sub> &rarr; 2CaCO<sub>3</sub> + 2H<sub>2</sub>O (and Mg(HCO<sub>3</sub>)<sub>2</sub> is similarly precipitated). Only the calculated quantity is used, because excess Ca(OH)<sub>2</sub> would itself introduce fresh artificial hardness."},
+  {id:22, lec:"L-3", blk:"Softening of water", topic:"Permanent hardness removal", t:60,
+    q:"Which method <b>cannot</b> remove the permanent hardness of water?",
+    opts:["Boiling the water","Adding washing soda (Na<sub>2</sub>CO<sub>3</sub>)","Treatment with Calgon","Passing it through an ion-exchange resin"],
+    ans:0,
+    why:["Correct: boiling only decomposes bicarbonates (temporary hardness); the sulphates/chlorides causing permanent hardness are unaffected.","Washing soda precipitates Ca<sup>2+</sup>/Mg<sup>2+</sup> as carbonates (CaCl<sub>2</sub> + Na<sub>2</sub>CO<sub>3</sub> &rarr; CaCO<sub>3</sub> + 2NaCl), removing permanent hardness.","Calgon (sodium hexametaphosphate) sequesters Ca<sup>2+</sup>/Mg<sup>2+</sup> into a soluble complex, removing permanent hardness.","Ion-exchange resins swap out all Ca<sup>2+</sup>/Mg<sup>2+</sup> (and anions), giving demineralised water, so they remove permanent hardness."],
+    sol:"Permanent hardness is due to Ca/Mg sulphates and chlorides, which boiling cannot precipitate. It must be removed chemically: washing soda, Calgon, permutit (Na-zeolite) or, most effectively, ion-exchange resins. Boiling removes only temporary (bicarbonate) hardness, so it is the odd method out."},
+  {id:23, lec:"L-3", blk:"Hardness numerical", topic:"Clark / CaO requirement", t:90,
+    q:"What mass of CaO is needed to remove the hardness of 1000 L of water containing 1.62 g of Ca(HCO<sub>3</sub>)<sub>2</sub> per litre? (M = 162 g/mol, CaO = 56 g/mol)",
+    opts:["560 g","162 g","1620 g","56 g"],
+    ans:0,
+    why:["Correct: 1.62 g/L = 0.01 mol/L &rArr; 10 mol in 1000 L; 1 mol CaO per mol bicarbonate &rArr; 10 &times; 56 = 560 g.","162 g ignores the volume and the CaO molar mass; it is just the molar mass of the bicarbonate.","1620 g is the total mass of bicarbonate (1.62 &times; 1000), not the CaO required.","56 g is the mass of only 1 mol CaO; here 10 mol are needed."],
+    sol:"Moles of bicarbonate = 1.62/162 = 0.01 mol/L; in 1000 L = 10 mol. CaO + H<sub>2</sub>O &rarr; Ca(OH)<sub>2</sub>, and Ca(HCO<sub>3</sub>)<sub>2</sub> + Ca(OH)<sub>2</sub> &rarr; 2CaCO<sub>3</sub> + 2H<sub>2</sub>O, so 1 mol CaO is needed per mol bicarbonate. Mass CaO = 10 &times; 56 = 560 g."},
+  {id:24, lec:"L-3", blk:"Hardness numerical", topic:"Temporary hardness in ppm", t:90,
+    q:"100 mL of tap water with Ca(HCO<sub>3</sub>)<sub>2</sub> needs 30 mL of N/50 HCl (methyl orange) for neutralisation. The temporary hardness, as ppm of CaCO<sub>3</sub>, is:",
+    opts:["300 ppm","30 ppm","600 ppm","150 ppm"],
+    ans:0,
+    why:["Correct: meq HCl = (1/50) &times; 30 = 0.6 &rArr; 0.6 &times; 50 = 30 mg CaCO<sub>3</sub> in 100 g water &rArr; (0.030/100) &times; 10<sup>6</sup> = 300 ppm.","30 is the <b>mass</b> of CaCO<sub>3</sub> in mg, not the ppm value; it must be scaled to 10<sup>6</sup> parts.","600 wrongly uses the milli-equivalents (0.6) or a factor-of-two error in the equivalent mass.","150 corresponds to halving the correct result, e.g. by mistakenly using 15 mL of acid."],
+    sol:"meq of HCl = (1/50) &times; 30 = 0.6 meq = meq of CaCO<sub>3</sub>. Mass CaCO<sub>3</sub> = 0.6 &times; 50 (eq. mass) = 30 mg = 0.030 g in 100 g (=100 mL) of water. ppm = (0.030/100) &times; 10<sup>6</sup> = 300 parts CaCO<sub>3</sub> per million parts of water."},
+  {id:25, lec:"L-4", blk:"Heavy water", topic:"Preparation", t:60,
+    q:"Heavy water (D<sub>2</sub>O) is obtained from ordinary water chiefly by:",
+    opts:["prolonged electrolysis of water, which enriches the residual liquid in D<sub>2</sub>O","direct combination of D<sub>2</sub> and O<sub>2</sub> only inside a reactor","simply condensing atmospheric moisture","gently warming ordinary ice"],
+    ans:0,
+    why:["Correct: ordinary H<sub>2</sub>O is electrolysed faster than D<sub>2</sub>O, so prolonged electrolysis leaves the residue progressively enriched in heavy water.","False: D<sub>2</sub>O is concentrated from ordinary water, not manufactured by burning scarce D<sub>2</sub> gas.","False: atmospheric moisture is ordinary water with only trace D<sub>2</sub>O; condensing it does not separate heavy water.","False: warming ice gives ordinary water; it does not enrich the deuterium content."],
+    sol:"Because the lighter H<sub>2</sub>O is decomposed preferentially during electrolysis, the liquid left behind becomes richer and richer in D<sub>2</sub>O. Prolonged electrolysis (or repeated fractional distillation) of water is therefore the standard way to concentrate heavy water."},
+  {id:26, lec:"L-4", blk:"Heavy water", topic:"Use in reactors", t:60,
+    q:"The best-known use of heavy water in a nuclear reactor is as a:",
+    opts:["neutron moderator","nuclear fuel","source of tritium","bleaching agent"],
+    ans:0,
+    why:["Correct: D<sub>2</sub>O slows (moderates) fast neutrons without absorbing many, sustaining the chain reaction.","False: heavy water is not a fuel; the fissile fuel is uranium/plutonium.","False: D<sub>2</sub>O supplies <b>deuterium</b>, not tritium; tritium is a separate radioactive isotope.","False: bleaching is a property of H<sub>2</sub>O<sub>2</sub>/chlorine, not of heavy water."],
+    sol:"Heavy water is an excellent neutron moderator: it slows down fast neutrons to thermal energies (so they can cause further fission) while absorbing very few of them. This is its principal use in nuclear reactors; it also serves as a source of deuterium and as a tracer."},
+  {id:27, lec:"L-4", blk:"Heavy water", topic:"Physical constants", t:60,
+    q:"Compared with ordinary water, the physical constants (melting point, boiling point, density) of D<sub>2</sub>O are:",
+    opts:["all higher than those of H<sub>2</sub>O","all lower than those of H<sub>2</sub>O","identical to those of H<sub>2</sub>O","higher melting point but lower boiling point"],
+    ans:0,
+    why:["Correct: the heavier deuterium gives stronger intermolecular forces, so D<sub>2</sub>O has higher mp (3.8&deg;C), bp (101.4&deg;C) and density (1.10 g/mL).","False: the greater mass raises, not lowers, these constants.","False: isotopic substitution changes physical properties; D<sub>2</sub>O is measurably different from H<sub>2</sub>O.","False: both melting and boiling points of D<sub>2</sub>O are higher, not split in opposite directions."],
+    sol:"Replacing H by the heavier D strengthens the intermolecular (and H-bond) interactions, so every bulk physical constant of D<sub>2</sub>O is higher than for H<sub>2</sub>O: mp 3.8&deg;C, bp 101.4&deg;C, density about 1.10 g/mL at room temperature."},
+  {id:28, lec:"L-4", blk:"H2O2 structure", topic:"Molecular shape", t:60,
+    q:"The structure of hydrogen peroxide (H<sub>2</sub>O<sub>2</sub>) is best described as:",
+    opts:["non-planar, open-book (skew) shape","planar and linear","trigonal planar","tetrahedral"],
+    ans:0,
+    why:["Correct: the two O-H bonds lie in different planes about the O-O axis, giving a skew, open-book structure (gas-phase dihedral 111.5&deg;).","False: H<sub>2</sub>O<sub>2</sub> is neither planar nor linear; the two halves are twisted out of plane.","False: trigonal planar requires three groups around one centre; each O here has only one H and one O.","False: the molecule is not tetrahedral overall, though each oxygen is sp<sup>3</sup> hybridised."],
+    sol:"H<sub>2</sub>O<sub>2</sub> is non-planar: the two O-H bonds are on different sides of the O-O bond, like a half-open book. In the gas phase the dihedral angle is 111.5&deg; (O-O-H 94.8&deg;); each oxygen is sp<sup>3</sup> hybridised. This skew geometry is a standard JEE fact."},
+  {id:29, lec:"L-4", blk:"H2O2 structure", topic:"Oxidation state of O", t:60,
+    q:"The oxidation state of oxygen in hydrogen peroxide is:",
+    opts:["-1","-2","0","+2"],
+    ans:0,
+    why:["Correct: in the O-O peroxide linkage each O bonds to one H (+1) and one O (0), giving oxygen the -1 state.","-2 is the usual oxide state (as in H<sub>2</sub>O), but the O-O bond in peroxide raises it to -1.","0 is the oxidation state of free O<sub>2</sub>, not of combined oxygen in H<sub>2</sub>O<sub>2</sub>.","+2 occurs only in OF<sub>2</sub> (bonded to the more electronegative fluorine), not in H<sub>2</sub>O<sub>2</sub>."],
+    sol:"In H<sub>2</sub>O<sub>2</sub> the two oxygens are joined by an O-O bond (no charge between like atoms) and each also bonds to one hydrogen (+1). Balancing, each oxygen is -1. This intermediate value (between 0 in O<sub>2</sub> and -2 in H<sub>2</sub>O) is why H<sub>2</sub>O<sub>2</sub> can be both oxidised and reduced."},
+  {id:30, lec:"L-4", blk:"H2O2 redox", topic:"Dual redox behaviour", t:60,
+    q:"Hydrogen peroxide is able to act as:",
+    opts:["both an oxidising and a reducing agent","only an oxidising agent","only a reducing agent","neither an oxidising nor a reducing agent"],
+    ans:0,
+    why:["Correct: with the intermediate O(-1), H<sub>2</sub>O<sub>2</sub> can be reduced to O<sub>2</sub>(-2) (oxidiser) or oxidised to O<sub>2</sub>(0) (reducer), in both acidic and alkaline media.","False: it is not only oxidising; towards strong oxidisers (e.g. KMnO<sub>4</sub>, Cl<sub>2</sub>) it acts as a reducing agent.","False: it is not only reducing; towards many substrates (PbS, Fe<sup>2+</sup>) it is a strong oxidiser.","False: it is redox-active in both directions, not inert."],
+    sol:"Oxygen in H<sub>2</sub>O<sub>2</sub> is at the intermediate -1 state, so it can go either way: gaining electrons (reduced to H<sub>2</sub>O, O: -1 &rarr; -2) makes H<sub>2</sub>O<sub>2</sub> an oxidiser, while losing electrons (oxidised to O<sub>2</sub>, O: -1 &rarr; 0) makes it a reducer. It shows both behaviours, in acidic and alkaline media alike."},
+  {id:31, lec:"L-4", blk:"H2O2 strength", topic:"Volume strength relation", t:90,
+    q:"For a hydrogen peroxide solution, the volume strength is related to normality by:",
+    opts:["Volume strength = 5.6 &times; Normality","Volume strength = 11.2 &times; Normality","Volume strength = Normality / 5.6","Volume strength = 5.6 &times; Molarity"],
+    ans:0,
+    why:["Correct: Vol strength = 5.6 &times; N (equivalently 11.2 &times; M, since N = 2M for H<sub>2</sub>O<sub>2</sub>).","11.2 is the factor for <b>Molarity</b>, not Normality; using it with N doubles the answer.","Dividing by 5.6 inverts the relation; volume strength is 5.6 times N, not one-fifth of it.","5.6 is the Normality factor; the Molarity factor is 11.2, so pairing 5.6 with M is wrong."],
+    sol:"The master relations are Volume strength = 5.6 &times; Normality = 11.2 &times; Molarity (because N = 2M for H<sub>2</sub>O<sub>2</sub>, equivalent mass = 34/2 = 17). Hence the correct normality relation uses the factor 5.6."},
+  {id:32, lec:"L-4", blk:"H2O2 strength", topic:"10-volume g/L", t:90,
+    q:"The strength (in g/L) of a &lsquo;10 volume&rsquo; H<sub>2</sub>O<sub>2</sub> solution is (68 g H<sub>2</sub>O<sub>2</sub> &rarr; 22.4 L O<sub>2</sub> at NTP):",
+    opts:["30.36 g/L","68 g/L","10 g/L","17 g/L"],
+    ans:0,
+    why:["Correct: 1 L gives 10 L O<sub>2</sub> &rArr; mass = (68/22.4) &times; 10 = 30.36 g/L.","68 g/L is the mass that would give a full 22.4 L of O<sub>2</sub>, i.e. a ~22.4 volume solution, not 10 volume.","10 g/L just copies the volume-strength number; it is not the actual mass concentration.","17 g/L is the equivalent mass of H<sub>2</sub>O<sub>2</sub>, not the strength of this solution."],
+    sol:"&lsquo;10 volume&rsquo; means 1 L of solution liberates 10 L O<sub>2</sub> at NTP. From 2H<sub>2</sub>O<sub>2</sub> &rarr; 2H<sub>2</sub>O + O<sub>2</sub>, 68 g H<sub>2</sub>O<sub>2</sub> gives 22.4 L O<sub>2</sub>. Mass giving 10 L = (68/22.4) &times; 10 = 30.36 g. So strength = 30.36 g/L (check: 5.6 &times; N = 5.6 &times; 1.79 &asymp; 10)."},
+  {id:33, lec:"L-4", blk:"H2O2 numerical", topic:"Iodometric titration", t:90,
+    q:"25 mL of an H<sub>2</sub>O<sub>2</sub> solution liberated iodine from excess acidified KI, which needed 20 mL of 0.1 N Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>. The normality of the H<sub>2</sub>O<sub>2</sub> is:",
+    opts:["0.08 N","0.8 N","0.125 N","0.04 N"],
+    ans:0,
+    why:["Correct: meq Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> = 20 &times; 0.1 = 2 = meq H<sub>2</sub>O<sub>2</sub> &rArr; N = 2/25 = 0.08 N.","0.8 N is ten times too high — it drops the /25 volume term.","0.125 N wrongly divides 2 meq by 16 (or inverts a ratio), not by the 25 mL taken.","0.04 N halves the correct value, e.g. by using 10 mL of thiosulphate instead of 20 mL."],
+    sol:"Equivalents are conserved: meq Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> = 20 &times; 0.1 = 2 meq = meq I<sub>2</sub> = meq H<sub>2</sub>O<sub>2</sub>. Therefore N(H<sub>2</sub>O<sub>2</sub>) = 2/25 = 0.08 N (strength = 0.08 &times; 17 = 1.36 g/L; volume strength = 5.6 &times; 0.08 = 0.448 volume)."},
+  {id:34, lec:"SB", blk:"PYQ · JEE Main 2024 (1 Feb)", topic:"Assertion-Reason: PH3 vs NH3", t:90,
+    q:"<b>A:</b> PH<sub>3</sub> has a lower boiling point than NH<sub>3</sub>. <b>R:</b> In the liquid state NH<sub>3</sub> is associated by van der Waals forces but PH<sub>3</sub> by hydrogen bonding.",
+    opts:["Both A and R are true and R is the correct explanation of A","Both A and R are true but R is NOT the correct explanation of A","A is true but R is false","A is false but R is true"],
+    ans:2,
+    why:["Wrong: R is false, so A and R cannot both be true — R has the bonding exactly reversed.","Wrong: this needs both true; R is actually false here.","Correct: A is true (PH<sub>3</sub> bp &asymp; -88&deg;C is below NH<sub>3</sub> bp &asymp; -33&deg;C), but R is false — it is NH<sub>3</sub> that is hydrogen-bonded and PH<sub>3</sub> that has only van der Waals forces.","Wrong: A is true, not false, so this option fails on A."],
+    sol:"A is TRUE: PH<sub>3</sub> boils near -88&deg;C, lower than NH<sub>3</sub> at -33&deg;C. R is FALSE because it is reversed: NH<sub>3</sub> forms hydrogen bonds (N is small and electronegative), giving it the higher boiling point, while PH<sub>3</sub> has only weak van der Waals forces. So A true, R false."},
+  {id:35, lec:"SB", blk:"PYQ · JEE Main 2023 (10 Apr)", topic:"Water-gas temperatures", t:90,
+    q:"For commercial H<sub>2</sub>: C(s) + H<sub>2</sub>O(g) &rarr;(T<sub>1</sub>) CO + H<sub>2</sub>, and CO(g) + H<sub>2</sub>O(g) &rarr;(T<sub>2</sub>, cat.) CO<sub>2</sub> + H<sub>2</sub>. The relation between T<sub>1</sub> and T<sub>2</sub> is:",
+    opts:["T<sub>1</sub> &gt; T<sub>2</sub>","T<sub>1</sub> &lt; T<sub>2</sub>","T<sub>1</sub> = T<sub>2</sub>","T<sub>1</sub> &asymp; 2T<sub>2</sub>"],
+    ans:0,
+    why:["Correct: water-gas formation is strongly endothermic (needs ~1270 K) while the exothermic shift runs at a lower ~673 K, so T<sub>1</sub> &gt; T<sub>2</sub>.","Wrong: the shift reaction is run cooler, not hotter, than water-gas formation.","Wrong: the two steps are deliberately run at different temperatures.","Wrong: there is no fixed factor-of-two relationship; only T<sub>1</sub> &gt; T<sub>2</sub> is stated."],
+    sol:"Making water gas, C + H<sub>2</sub>O &rarr; CO + H<sub>2</sub>, is strongly endothermic and needs a high temperature T<sub>1</sub> &asymp; 1270 K. The water-gas shift, CO + H<sub>2</sub>O &rarr; CO<sub>2</sub> + H<sub>2</sub>, is exothermic and favoured at a lower temperature T<sub>2</sub> &asymp; 673 K over a catalyst. Hence T<sub>1</sub> &gt; T<sub>2</sub>."},
+  {id:36, lec:"SB", blk:"PYQ · JEE Main 2023 (1 Feb)", topic:"Assertion-Reason: H2 as fuel", t:90,
+    q:"<b>A:</b> Hydrogen is an environment-friendly fuel. <b>R:</b> The atomic number of hydrogen is 1 and it is a very light element.",
+    opts:["Both A and R are true and R is the correct explanation of A","Both A and R are true but R is NOT the correct explanation of A","A is true but R is false","A is false but R is true"],
+    ans:1,
+    why:["Wrong: although both statements are true, R is not the reason A is true.","Correct: A is true (burning H<sub>2</sub> gives only water) and R is true (Z = 1, lightest element), but being light is not <b>why</b> it is clean — the clean-fuel reason is that combustion yields only water.","Wrong: R is a true statement, not false.","Wrong: A is true, not false."],
+    sol:"A is TRUE: 2H<sub>2</sub> + O<sub>2</sub> &rarr; 2H<sub>2</sub>O produces only water, no pollutants. R is also TRUE: hydrogen has Z = 1 and is the lightest element. But its low atomic number/light weight is not the cause of its clean-fuel status; the real reason is the water-only combustion product. So both true, R not the correct explanation."},
+  {id:37, lec:"SB", blk:"PYQ · JEE Main 2023 (10 Apr)", topic:"Assertion-Reason: isotope properties", t:90,
+    q:"<b>A:</b> The physical properties of the isotopes of hydrogen are different. <b>R:</b> The mass difference between the isotopes of hydrogen is very large.",
+    opts:["Both A and R are true and R is the correct explanation of A","Both A and R are true but R is NOT the correct explanation of A","A is true but R is false","A is false but R is true"],
+    ans:0,
+    why:["Correct: A is true (D and T differ physically from H), R is true (D is 2&times; and T is 3&times; the mass of H — the largest relative isotopic mass difference of any element), and that large mass difference is exactly why their physical properties differ.","Wrong: R here <b>is</b> the correct explanation, so this option is incorrect.","Wrong: R is a true statement.","Wrong: A is a true statement."],
+    sol:"Physical properties (bp, density, rate-related behaviour) of H, D and T do differ. Deuterium has twice and tritium three times the mass of protium, the largest relative mass difference among any element's isotopes. Because physical properties depend on mass, this large mass difference directly explains the differing physical properties: both true, R explains A."},
+  {id:38, lec:"SB", blk:"PYQ · JEE Main 2023 (13 Apr)", topic:"Permutit vs resin softening", t:90,
+    q:"<b>I:</b> The permutit process is more efficient than the synthetic-resin method for softening water. <b>II:</b> The synthetic-resin method results in the formation of soluble sodium salts.",
+    opts:["Both statements are correct","Both statements are incorrect","Statement I is correct but Statement II is incorrect","Statement I is incorrect but Statement II is correct"],
+    ans:1,
+    why:["Wrong: both statements are incorrect, so this is not the answer.","Correct: Statement I is false (the ion-exchange resin method is the more efficient one, giving demineralised water) and Statement II is false (it is the <b>permutit</b>/Na-zeolite process that leaves sodium salts, while the resin method gives pure water).","Wrong: Statement I is not correct.","Wrong: Statement II is not correct."],
+    sol:"Statement I is FALSE: the synthetic ion-exchange resin method removes all cations and anions, giving fully demineralised water, and is more efficient than permutit. Statement II is FALSE: it is the permutit (Na-zeolite) process that releases Na<sup>+</sup>/soluble sodium salts; the resin method yields pure water. Hence both statements are incorrect."},
+  {id:39, lec:"SB", blk:"PYQ · JEE Main 2023 (13 Apr)", topic:"Assertion-Reason: isotope rates", t:90,
+    q:"<b>A:</b> Isotopes of hydrogen have almost the same chemical properties but differ in their rates of reaction. <b>R:</b> Isotopes of hydrogen have different enthalpies of bond dissociation.",
+    opts:["Both A and R are true and R is the correct explanation of A","Both A and R are true but R is NOT the correct explanation of A","A is true but R is false","A is false but R is true"],
+    ans:0,
+    why:["Correct: A is true (same chemistry; deuterium reacts more slowly — the kinetic isotope effect), R is true (the D-D bond is stronger than H-H), and the different bond-dissociation enthalpy is precisely what changes the reaction rate.","Wrong: R here is the correct explanation of A.","Wrong: R is a true statement.","Wrong: A is a true statement."],
+    sol:"Isotopes share electronic configuration, so chemistry is essentially the same, but reaction rates differ (D reacts slower than H). R is true: the D-D bond dissociation enthalpy is higher than H-H. A stronger bond is harder to break, lowering the rate, so the different bond-dissociation enthalpies explain the different rates: both true, R explains A."},
+  {id:40, lec:"SB", blk:"PYQ · JEE Main 2023 (30 Jan)", topic:"50-volume strength", t:90,
+    q:"The strength of a &lsquo;50 volume&rsquo; H<sub>2</sub>O<sub>2</sub> solution, to the nearest integer, is (M = 34 g/mol, molar volume at STP = 22.7 L):",
+    opts:["150 g/L","75 g/L","300 g/L","170 g/L"],
+    ans:0,
+    why:["Correct: 1 L gives 50 L O<sub>2</sub> &rArr; mass = (68/22.7) &times; 50 = 149.8 &asymp; 150 g/L.","75 g/L corresponds to a 25-volume solution, half of this one.","300 g/L is double the correct value (e.g. forgetting the factor in 2H<sub>2</sub>O<sub>2</sub> &rarr; O<sub>2</sub>).","170 g/L comes from wrongly using 22.4 together with an equivalent-mass slip; the correct figure is ~150."],
+    sol:"&lsquo;50 volume&rsquo; &rArr; 1 L liberates 50 L O<sub>2</sub> at STP. From 2H<sub>2</sub>O<sub>2</sub> &rarr; 2H<sub>2</sub>O + O<sub>2</sub>, 68 g H<sub>2</sub>O<sub>2</sub> gives 22.7 L O<sub>2</sub>. Mass = (68/22.7) &times; 50 = 149.8 g/L &asymp; 150 g/L."},
+  {id:41, lec:"SB", blk:"PYQ · JEE Main 2023 (31 Jan)", topic:"H2O2 as reducing agent", t:90,
+    q:"In which reaction does H<sub>2</sub>O<sub>2</sub> act as a <b>reducing</b> agent?",
+    opts:["2NaOCl + H<sub>2</sub>O<sub>2</sub> &rarr; 2NaCl + H<sub>2</sub>O + O<sub>2</sub>","2Fe<sup>2+</sup> + 2H<sup>+</sup> + H<sub>2</sub>O<sub>2</sub> &rarr; 2Fe<sup>3+</sup> + 2H<sub>2</sub>O","Mn<sup>2+</sup> + H<sub>2</sub>O<sub>2</sub> &rarr; MnO<sub>2</sub> + 2H<sup>+</sup>","Na<sub>2</sub>S + 4H<sub>2</sub>O<sub>2</sub> &rarr; Na<sub>2</sub>SO<sub>4</sub> + 4H<sub>2</sub>O"],
+    ans:0,
+    why:["Correct: here H<sub>2</sub>O<sub>2</sub> is oxidised (O: -1 &rarr; 0, releasing O<sub>2</sub>) while OCl<sup>-</sup> is reduced (Cl: +1 &rarr; -1) — so H<sub>2</sub>O<sub>2</sub> is the reducing agent.","Here Fe<sup>2+</sup> is oxidised to Fe<sup>3+</sup> and H<sub>2</sub>O<sub>2</sub> is reduced to water, so H<sub>2</sub>O<sub>2</sub> is the oxidiser, not reducer.","Mn<sup>2+</sup> is oxidised to MnO<sub>2</sub>; H<sub>2</sub>O<sub>2</sub> is reduced, so it acts as an oxidising agent here.","Sulphide is oxidised to sulphate; H<sub>2</sub>O<sub>2</sub> is reduced, so again it is the oxidiser."],
+    sol:"A reducing agent is itself oxidised. Only in the NaOCl reaction is H<sub>2</sub>O<sub>2</sub> oxidised (O goes -1 &rarr; 0, evolving O<sub>2</sub>) while the partner OCl<sup>-</sup> is reduced (Cl +1 &rarr; -1). In the Fe<sup>2+</sup>, Mn<sup>2+</sup> and S<sup>2-</sup> reactions the partner is oxidised and H<sub>2</sub>O<sub>2</sub> is reduced, so there it is an oxidiser."},
+  {id:42, lec:"SB", blk:"PYQ · JEE Main 2023 (12 Apr)", topic:"Matching hydride types", t:90,
+    q:"Match the hydride type with its example: A Electron-deficient, B Electron-rich, C Electron-precise, D Saline; I MgH<sub>2</sub>, II HF, III B<sub>2</sub>H<sub>6</sub>, IV CH<sub>4</sub>.",
+    opts:["A-III, B-II, C-IV, D-I","A-II, B-III, C-I, D-IV","A-III, B-IV, C-II, D-I","A-I, B-II, C-IV, D-III"],
+    ans:0,
+    why:["Correct: electron-deficient = B<sub>2</sub>H<sub>6</sub> (III), electron-rich = HF (II), electron-precise = CH<sub>4</sub> (IV), saline = MgH<sub>2</sub> (I).","Wrong: it swaps B<sub>2</sub>H<sub>6</sub> and HF and mis-assigns CH<sub>4</sub>/MgH<sub>2</sub>.","Wrong: HF (electron-rich) is put as electron-precise and CH<sub>4</sub> as electron-rich.","Wrong: MgH<sub>2</sub> (saline) is wrongly called electron-deficient and B<sub>2</sub>H<sub>6</sub> saline."],
+    sol:"Electron-deficient = B<sub>2</sub>H<sub>6</sub> (3c-2e bridges) &rarr; III. Electron-rich (extra lone pairs) = HF &rarr; II. Electron-precise (exactly enough electrons) = CH<sub>4</sub> &rarr; IV. Saline/ionic = MgH<sub>2</sub> &rarr; I. So A-III, B-II, C-IV, D-I."},
+  {id:43, lec:"SB", blk:"PYQ · JEE Main 2023 (24 Jan)", topic:"H2O2 as reducing agent (HOCl)", t:90,
+    q:"In which reaction does H<sub>2</sub>O<sub>2</sub> act as a <b>reducing</b> agent?",
+    opts:["PbS + 4H<sub>2</sub>O<sub>2</sub> &rarr; PbSO<sub>4</sub> + 4H<sub>2</sub>O","2Fe<sup>2+</sup> + H<sub>2</sub>O<sub>2</sub> &rarr; 2Fe<sup>3+</sup> + 2OH<sup>-</sup>","HOCl + H<sub>2</sub>O<sub>2</sub> &rarr; H<sub>3</sub>O<sup>+</sup> + Cl<sup>-</sup> + O<sub>2</sub>","Mn<sup>2+</sup> + H<sub>2</sub>O<sub>2</sub> &rarr; Mn<sup>4+</sup> + 2OH<sup>-</sup>"],
+    ans:2,
+    why:["Here S<sup>2-</sup> is oxidised to sulphate and H<sub>2</sub>O<sub>2</sub> is reduced, so H<sub>2</sub>O<sub>2</sub> is the oxidiser, not reducer.","Fe<sup>2+</sup> is oxidised to Fe<sup>3+</sup>; H<sub>2</sub>O<sub>2</sub> is reduced, so it acts as an oxidising agent here.","Correct: H<sub>2</sub>O<sub>2</sub> is oxidised (O: -1 &rarr; 0, evolving O<sub>2</sub>) while Cl is reduced (+1 &rarr; -1), so H<sub>2</sub>O<sub>2</sub> is the reducing agent.","Mn<sup>2+</sup> is oxidised to Mn<sup>4+</sup>; H<sub>2</sub>O<sub>2</sub> is reduced, so it is the oxidiser."],
+    sol:"Reducing agent &rArr; H<sub>2</sub>O<sub>2</sub> is itself oxidised to O<sub>2</sub>. Only the HOCl reaction evolves O<sub>2</sub> (O: -1 &rarr; 0) while chlorine is reduced from +1 to -1. In the PbS, Fe<sup>2+</sup> and Mn<sup>2+</sup> reactions the partner is oxidised and H<sub>2</sub>O<sub>2</sub> is reduced, so there it is an oxidiser."},
+  {id:44, lec:"SB", blk:"PYQ · JEE Main 2023 (1 Feb)", topic:"Deuterated H2O2 preparation", t:90,
+    q:"The starting material for the convenient laboratory preparation of deuterated hydrogen peroxide (D<sub>2</sub>O<sub>2</sub>) is:",
+    opts:["K<sub>2</sub>S<sub>2</sub>O<sub>8</sub>","2-ethylanthraquinol","BaO<sub>2</sub>","BaO"],
+    ans:0,
+    why:["Correct: hydrolysis of peroxodisulphate gives peroxide — K<sub>2</sub>S<sub>2</sub>O<sub>8</sub> + 2D<sub>2</sub>O &rarr; 2KDSO<sub>4</sub> + D<sub>2</sub>O<sub>2</sub> — the convenient route to D<sub>2</sub>O<sub>2</sub>.","2-ethylanthraquinol is the <b>industrial</b> auto-oxidation process for ordinary H<sub>2</sub>O<sub>2</sub>, not the convenient lab prep of the deuterated compound.","BaO<sub>2</sub> + acid does give ordinary H<sub>2</sub>O<sub>2</sub>, but it is not the convenient route to deuterated D<sub>2</sub>O<sub>2</sub> — a correct-looking trap.","BaO does not yield peroxide directly; it is not a starting material for D<sub>2</sub>O<sub>2</sub>."],
+    sol:"Deuterated hydrogen peroxide is conveniently made by hydrolysing a peroxodisulphate with heavy water: K<sub>2</sub>S<sub>2</sub>O<sub>8</sub> + 2D<sub>2</sub>O &rarr; 2KDSO<sub>4</sub> + D<sub>2</sub>O<sub>2</sub>. The anthraquinol route is industrial, and while BaO<sub>2</sub> + acid gives ordinary H<sub>2</sub>O<sub>2</sub>, the peroxodisulphate is the answer here."},
+  {id:45, lec:"SB", blk:"PYQ · JEE Main 2023 (25 Jan)", topic:"Meaning of 25-volume", t:90,
+    q:"A &lsquo;25 volume&rsquo; hydrogen peroxide solution means that:",
+    opts:["1 L of the solution contains about 75 g of H<sub>2</sub>O<sub>2</sub>","1 L of the solution contains 250 g of H<sub>2</sub>O<sub>2</sub>","100 mL of the solution contains 25 g of H<sub>2</sub>O<sub>2</sub>","1 L of the solution contains 25 g of H<sub>2</sub>O<sub>2</sub>"],
+    ans:0,
+    why:["Correct: M = 25/11.2 = 2.23 mol/L &rArr; g/L = 2.23 &times; 34 &asymp; 75.9 g/L.","250 g/L overstates it tenfold; it would need a much higher volume strength.","25 g per 100 mL (=250 g/L) is far too concentrated for a 25-volume solution.","25 g/L is far too dilute; that is close to a 10-volume solution, not 25."],
+    sol:"Volume strength relates to molarity by Vol = 11.2 &times; M, so M = 25/11.2 = 2.23 mol/L. Mass concentration = 2.23 &times; 34 &asymp; 75.9 g/L. Hence 1 L of &lsquo;25 volume&rsquo; H<sub>2</sub>O<sub>2</sub> contains about 75 g of H<sub>2</sub>O<sub>2</sub>."},
+  {id:46, lec:"SB", blk:"PYQ · JEE Main 2023 (31 Jan)", topic:"Uses of H2O2", t:90,
+    q:"<b>I:</b> H<sub>2</sub>O<sub>2</sub> is used in the synthesis of cephalosporin. <b>II:</b> H<sub>2</sub>O<sub>2</sub> is used to restore aerobic conditions to sewage wastes.",
+    opts:["Both statements are correct","Both statements are incorrect","Statement I is correct but Statement II is incorrect","Statement I is incorrect but Statement II is correct"],
+    ans:0,
+    why:["Correct: both are documented uses of H<sub>2</sub>O<sub>2</sub> — in pharmaceutical (cephalosporin) synthesis and in restoring aerobic conditions to sewage/effluent.","Wrong: neither statement is incorrect; both describe real applications.","Wrong: Statement II is also correct.","Wrong: Statement I is also correct."],
+    sol:"Both statements describe genuine, textbook uses of hydrogen peroxide: it is used in the manufacture of the antibiotic cephalosporin and, as an oxygen source, to restore aerobic conditions in sewage/waste-water treatment. Hence both statements are correct."},
+  {id:47, lec:"SB", blk:"PYQ · JEE Main 2022 (24 Jun)", topic:"H2 as a by-product", t:90,
+    q:"In the industrial production of which compound is molecular hydrogen obtained as a by-product?",
+    opts:["NaOH","Na<sub>2</sub>CO<sub>3</sub>","Na metal","NaHCO<sub>3</sub>"],
+    ans:0,
+    why:["Correct: in the chlor-alkali process, electrolysis of brine gives NaOH with H<sub>2</sub> at the cathode and Cl<sub>2</sub> at the anode.","Na<sub>2</sub>CO<sub>3</sub> is made by the Solvay process, which gives no hydrogen.","Na metal is produced by electrolysis of molten NaCl (Down's process), liberating Cl<sub>2</sub>, not H<sub>2</sub>.","NaHCO<sub>3</sub> is an intermediate of the Solvay process and does not yield H<sub>2</sub>."],
+    sol:"The chlor-alkali process electrolyses aqueous NaCl (brine): at the cathode 2H<sub>2</sub>O + 2e<sup>-</sup> &rarr; H<sub>2</sub> + 2OH<sup>-</sup>, at the anode 2Cl<sup>-</sup> &rarr; Cl<sub>2</sub>. The main product is NaOH, with H<sub>2</sub> and Cl<sub>2</sub> as by-products. So H<sub>2</sub> is a by-product of NaOH manufacture."},
+  {id:48, lec:"SB", blk:"PYQ · JEE Main 2022 (27 Jul)", topic:"H2O2 oxidiser &amp; density", t:90,
+    q:"<b>I:</b> H<sub>2</sub>O<sub>2</sub> can act as an oxidising agent in both acidic and basic conditions. <b>II:</b> The density of H<sub>2</sub>O<sub>2</sub> at 298 K is lower than that of D<sub>2</sub>O.",
+    opts:["Both statements are correct","Both statements are incorrect","Statement I is correct but Statement II is incorrect","Statement I is incorrect but Statement II is correct"],
+    ans:2,
+    why:["Wrong: Statement II is false, so both cannot be correct.","Wrong: Statement I is true, so both cannot be incorrect.","Correct: Statement I is true (H<sub>2</sub>O<sub>2</sub> oxidises in acidic and basic media), but Statement II is false — &rho;(H<sub>2</sub>O<sub>2</sub>) &asymp; 1.44 g/mL is <b>higher</b> than &rho;(D<sub>2</sub>O) &asymp; 1.10 g/mL.","Wrong: Statement I is correct, not incorrect."],
+    sol:"Statement I is TRUE: hydrogen peroxide acts as an oxidising agent in both acidic and alkaline media. Statement II is FALSE: the density of H<sub>2</sub>O<sub>2</sub> (about 1.44 g/mL at 298 K) is higher, not lower, than that of D<sub>2</sub>O (about 1.10 g/mL). So I is true and II is false."},
+  {id:49, lec:"SB", blk:"PYQ · JEE Main 2022 (26 Jul)", topic:"Stabilising H2O2", t:90,
+    q:"Which of the following is used to prevent the decomposition of H<sub>2</sub>O<sub>2</sub>?",
+    opts:["Urea","Formaldehyde","Formic acid","Ethanol"],
+    ans:0,
+    why:["Correct: urea is a negative catalyst (stabiliser) added, along with dilute acid, to slow the decomposition of H<sub>2</sub>O<sub>2</sub>.","Formaldehyde is not used as a stabiliser for H<sub>2</sub>O<sub>2</sub>.","Formic acid is a reducing agent and would react with H<sub>2</sub>O<sub>2</sub>, not stabilise it.","Ethanol is not a recognised stabiliser for hydrogen peroxide."],
+    sol:"H<sub>2</sub>O<sub>2</sub> decomposes readily, so it is stored with negative catalysts (stabilisers) such as urea, phosphoric acid or acetanilide, in wax-lined dark bottles away from light and dust. Of the options, urea is the stabiliser."},
+  {id:50, lec:"SB", blk:"PYQ · JEE Main 2022 (24 Jun)", topic:"Largest use of H2", t:90,
+    q:"The highest industrial consumption of molecular hydrogen is to produce a compound of which element?",
+    opts:["Nitrogen","Carbon","Oxygen","Chlorine"],
+    ans:0,
+    why:["Correct: the single largest use of H<sub>2</sub> is the Haber process, N<sub>2</sub> + 3H<sub>2</sub> &rarr; 2NH<sub>3</sub>, giving a nitrogen compound.","Hydrogenation and methanol use carbon-based substrates but consume far less H<sub>2</sub> than ammonia synthesis.","Making water/oxygen compounds is not the dominant industrial use of hydrogen.","HCl production uses some H<sub>2</sub> but nowhere near the amount used for ammonia."],
+    sol:"By far the largest industrial use of hydrogen is ammonia synthesis via the Haber process, N<sub>2</sub> + 3H<sub>2</sub> &rarr; 2NH<sub>3</sub>. Ammonia is a compound of nitrogen, so the element is nitrogen."},
+  {id:51, lec:"SB", blk:"PYQ · JEE Main 2022 (26 Jun)", topic:"Boiling off temporary hardness", t:90,
+    q:"On boiling, calcium hydrogen carbonate and magnesium hydrogen carbonate in hard water are converted respectively to:",
+    opts:["CaCO<sub>3</sub> and Mg(OH)<sub>2</sub>","CaCO<sub>3</sub> and MgCO<sub>3</sub>","Ca(OH)<sub>2</sub> and MgCO<sub>3</sub>","Ca(OH)<sub>2</sub> and Mg(OH)<sub>2</sub>"],
+    ans:0,
+    why:["Correct: Ca(HCO<sub>3</sub>)<sub>2</sub> &rarr; CaCO<sub>3</sub>&darr;, while Mg(HCO<sub>3</sub>)<sub>2</sub> &rarr; Mg(OH)<sub>2</sub>&darr; because MgCO<sub>3</sub> is too soluble and decomposes further.","MgCO<sub>3</sub> is too soluble to be the final magnesium product; it goes on to Mg(OH)<sub>2</sub>.","Ca gives the carbonate, not the hydroxide, so Ca(OH)<sub>2</sub> is wrong for calcium.","Calcium bicarbonate yields CaCO<sub>3</sub>, not Ca(OH)<sub>2</sub>, so this pairing is wrong."],
+    sol:"Boiling decomposes the bicarbonates: Ca(HCO<sub>3</sub>)<sub>2</sub> &rarr; CaCO<sub>3</sub>&darr; + H<sub>2</sub>O + CO<sub>2</sub>. Magnesium carbonate is appreciably soluble and decomposes on, so Mg(HCO<sub>3</sub>)<sub>2</sub> &rarr; Mg(OH)<sub>2</sub>&darr; + 2CO<sub>2</sub>. The products are therefore CaCO<sub>3</sub> and Mg(OH)<sub>2</sub>."},
+  {id:52, lec:"SB", blk:"PYQ · JEE Main 2022 (28 Jun)", topic:"Dihydrogen + CuO", t:90,
+    q:"Dihydrogen reacts with heated CuO to give:",
+    opts:["Cu(s)","Cu(OH)<sub>2</sub>","Cu<sub>2</sub>O","CuH<sub>2</sub>"],
+    ans:0,
+    why:["Correct: H<sub>2</sub> is a reducing agent: CuO + H<sub>2</sub> &rarr; Cu + H<sub>2</sub>O, reducing copper to the metal.","Cu(OH)<sub>2</sub> would need water/base; dry H<sub>2</sub> over hot CuO gives the metal, not the hydroxide.","Cu<sub>2</sub>O is only a partial reduction; with H<sub>2</sub> the reduction goes all the way to Cu.","CuH<sub>2</sub> is not formed; copper does not make a stable binary hydride under these conditions."],
+    sol:"Hydrogen reduces metal oxides of less reactive metals: CuO + H<sub>2</sub> &rarr; Cu + H<sub>2</sub>O on heating. Copper(II) oxide is reduced all the way to copper metal, with H<sub>2</sub> oxidised to water. The product is Cu(s)."},
+  {id:53, lec:"SB", blk:"PYQ · JEE Main 2022 (28 Jun)", topic:"What isotopes differ in", t:90,
+    q:"Protium, deuterium and tritium have nearly the same chemical properties but different physical properties. They differ in:",
+    opts:["atomic mass","number of protons","atomic number","electronic configuration"],
+    ans:0,
+    why:["Correct: all three have Z = 1 and 1s<sup>1</sup>; only the neutron count — hence the atomic mass — differs.","All three have exactly one proton, so they do not differ in the number of protons.","Atomic number equals the proton number (1) for all three, so it is the same.","All three share the 1s<sup>1</sup> configuration, which is why their chemistry is nearly identical."],
+    sol:"The three isotopes have the same atomic number (Z = 1), the same one proton and the same 1s<sup>1</sup> configuration, giving nearly identical chemistry. They differ only in the number of neutrons (0, 1, 2), hence in mass number / atomic mass, which is why their physical properties differ."},
+  {id:54, lec:"SB", blk:"PYQ · JEE Main 2022 (25 Jul)", topic:"High-purity dihydrogen", t:90,
+    q:"High-purity (&gt;99.95%) dihydrogen is obtained by:",
+    opts:["electrolysis of warm aqueous Ba(OH)<sub>2</sub> between nickel electrodes","reaction of zinc with aqueous alkali","electrolysis of acidified water using platinum electrodes","reaction of zinc with dilute acid"],
+    ans:0,
+    why:["Correct: electrolysing warm barium hydroxide solution between Ni (or Pt) electrodes gives very pure (&gt;99.95%) H<sub>2</sub>.","Zn + alkali gives ordinary-purity H<sub>2</sub>, not the &gt;99.95% grade.","Electrolysis of acidified water with Pt gives fairly pure H<sub>2</sub> but the standard answer for &gt;99.95% is the warm Ba(OH)<sub>2</sub>/Ni method.","Zn + dilute acid is the ordinary lab preparation, giving H<sub>2</sub> that still contains impurities."],
+    sol:"Very pure dihydrogen (&gt;99.95%) is prepared by electrolysing warm aqueous barium hydroxide between nickel electrodes. The metal-displacement methods (Zn + acid or Zn + alkali) give less pure gas, so the electrolytic Ba(OH)<sub>2</sub> route is the answer."},
+];
+
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter " + CH_TAG + " mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("pTime").textContent = "0:00";
+
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
+    }
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
+  });
+  showQ(0);
+  updateProgress();
+  show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const b = $("pb" + id); if (b) b.classList.add("ans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length, left = pool.length - n;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
+}
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0, slow = 0;
+  pool.forEach(id => {
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
+    else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? DONE_TITLE : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
+  examStop();
+  show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

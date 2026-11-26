@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C-8 Redox Reaction — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>C-8 · Redox Reaction</h1>
+    <p id="heroSub">Lectures L-1 to L-6 + Strong Box · 90 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">90 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the chapter is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
+    </div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · C-8 Redox Reaction · mastery quiz built from lectures L-1 to L-6 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   C-8 REDOX REACTION — lecture units
+   ============================================================ */
+const LECTURES = [
+  {key:"L-1", name:"L-1 · Oxidation–Reduction (Classical) & Oxidation Number",
+   desc:"classical definitions, oxidation number vs valency, O.N. rules, computing O.N. in molecules & ions, fractional (average) oxidation numbers"},
+  {key:"L-2", name:"L-2 · Electronic Concept, Oxidant/Reductant & Types of Redox",
+   desc:"loss/gain of electrons, identifying oxidant & reductant, combination, decomposition, displacement, disproportionation & comproportionation"},
+  {key:"L-3", name:"L-3 · Balancing — Oxidation-Number Method",
+   desc:"equalising total increase & decrease in O.N., acidic vs basic medium, net-change balancing when no acid/base is present"},
+  {key:"L-4", name:"L-4 · Balancing — Ion-Electron (Half-Reaction) Method",
+   desc:"splitting into half-reactions, adding electrons, H<sup>+</sup>/OH<sup>−</sup> and H<sub>2</sub>O balance, combining the halves"},
+  {key:"L-5", name:"L-5 · Equivalent Weight, Disproportionation & n-factor",
+   desc:"E = M/(n-factor), n-factor of oxidants & reductants, the disproportionation n-factor, reaction-dependent equivalent weight, normality"},
+  {key:"L-6", name:"L-6 · Redox Titrations, Stoichiometry & Electrode Potential",
+   desc:"KMnO<sub>4</sub>/K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>/iodometric titrations, indicators, N<sub>1</sub>V<sub>1</sub>=N<sub>2</sub>V<sub>2</sub> stoichiometry, SHE, the electrochemical series"},
+  {key:"SB",  name:"Strong Box · Previous Year Questions",
+   desc:"curated single-answer JEE Main 2023–2026 & JEE Advanced previous-year questions on O.N., disproportionation, permanganate/dichromate redox & titration stoichiometry"}
+];
+
+/* ============================================================
+   QUESTION BANK — ans = index into opts (before shuffling)
+   t is auto-set by the timer rule (= / ⇒ steps in sol).
+   ============================================================ */
+const QUIZ = [
+
+/* ---------------- L-1 (15) ---------------- */
+{id:1, lec:"L-1", blk:"Oxidation number — concept", topic:"Definition of O.N.", t:60,
+ q:"The oxidation number of an atom in a species is best described as:",
+ opts:[
+  "the real or apparent charge the atom carries — positive if it donates electrons, negative if it accepts them",
+  "always equal to the valency of the atom, and never negative",
+  "the number of covalent bonds the atom forms, regardless of their polarity",
+  "the number of lone pairs on the atom"],
+ ans:0,
+ why:[
+  "Correct. O.N. is the charge an atom appears to have once every shared pair is given to the more electronegative partner.",
+  "Valency (combining capacity) is non-negative; O.N. is signed and can be negative (e.g. S is −2 in H<sub>2</sub>S).",
+  "That is simply the covalency; a non-polar bond contributes zero to O.N., so bond count alone cannot give it.",
+  "Lone pairs do not set the oxidation number — the electronegativity-based charge assignment does."],
+ sol:"<b>Oxidation number</b> = the signed charge (real or apparent) an atom carries in a species. It is <b>+</b> if the atom has lost/donated electrons and <b>−</b> if it has gained/accepted them, found by assigning each bonding pair to the more electronegative atom."},
+
+{id:2, lec:"L-1", blk:"Oxidation number — concept", topic:"O.N. vs valency", t:60,
+ q:"Which statement correctly contrasts valency with oxidation number?",
+ opts:[
+  "Valency is a combining capacity that is always ≥ 0; oxidation number is signed and may be +, −, zero or fractional",
+  "Both are always positive integers and are numerically equal in every compound",
+  "Oxidation number is always ≥ 0 while valency may be negative",
+  "Valency may be fractional while oxidation number is always a whole number"],
+ ans:0,
+ why:[
+  "Correct. Carbon has valency 4 everywhere, yet its O.N. runs from −4 (CH<sub>4</sub>) through 0 to +4 (CO<sub>2</sub>).",
+  "They are frequently unequal — in CO<sub>2</sub> carbon's valency is 4 but its O.N. is +4 only by coincidence; in CH<sub>4</sub> valency 4 but O.N. −4.",
+  "The reverse is true: valency is always ≥ 0, O.N. can be negative.",
+  "It is O.N. (an average) that can be fractional, e.g. +8/3 for Fe in Fe<sub>3</sub>O<sub>4</sub>; valency stays a whole number."],
+ sol:"<b>Valency</b> = combining capacity, always a non-negative (usually fixed) integer. <b>O.N.</b> = signed charge that may be +, −, zero, integral or fractional. The same valency can go with many oxidation numbers."},
+
+{id:3, lec:"L-1", blk:"Computing O.N.", topic:"S in H₂SO₃", t:90,
+ q:"The oxidation number of sulphur in H<sub>2</sub>SO<sub>3</sub> is:",
+ opts:["+4","+6","+2","−2"],
+ ans:0,
+ why:[
+  "Correct. 2(+1) + x + 3(−2) = 0 ⇒ x = +4.",
+  "+6 is sulphur in SO<sub>4</sub><sup>2−</sup>/H<sub>2</sub>SO<sub>4</sub>; here there are only 3 oxygens, giving +4.",
+  "+2 is the average S in thiosulphate Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>, not here.",
+  "−2 is sulphur in a sulphide (H<sub>2</sub>S), the opposite extreme."],
+ sol:"Let S = x. 2(+1) + x + 3(−2) = 0 ⇒ 2 + x − 6 = 0 ⇒ x = +4."},
+
+{id:4, lec:"L-1", blk:"Computing O.N.", topic:"S in Na₂S₂O₃", t:90,
+ q:"The (average) oxidation number of sulphur in sodium thiosulphate Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> is:",
+ opts:["+2","+2.5","+6","+4"],
+ ans:0,
+ why:[
+  "Correct. 2(+1) + 2x + 3(−2) = 0 ⇒ 2x = +4 ⇒ x = +2 (an average).",
+  "+2.5 is the average S in tetrathionate S<sub>4</sub>O<sub>6</sub><sup>2−</sup>, not thiosulphate.",
+  "+6 would treat all oxygens as in sulphate while ignoring the second S and the two Na.",
+  "+4 is S in sulphite SO<sub>3</sub><sup>2−</sup>; the extra sulphur lowers the average to +2."],
+ sol:"Let S = x. 2(+1) + 2x + 3(−2) = 0 ⇒ 2 + 2x − 6 = 0 ⇒ 2x = 4 ⇒ x = +2 (average of one S at +5 and one at −1 in the structure)."},
+
+{id:5, lec:"L-1", blk:"Computing O.N.", topic:"S in peroxodisulphate", t:90,
+ q:"In peroxodisulphate S<sub>2</sub>O<sub>8</sub><sup>2−</sup>, which contains one –O–O– peroxide link, the oxidation number of sulphur is:",
+ opts:["+6","+7","+5","+4"],
+ ans:0,
+ why:[
+  "Correct. Two O of the peroxide link are −1 and the other six are −2: 2x + 6(−2) + 2(−1) = −2 ⇒ x = +6.",
+  "+7 is the classic trap — it results from wrongly taking every oxygen as −2 and forgetting the peroxide link.",
+  "+5 does not satisfy the charge balance once the peroxide O are counted at −1.",
+  "+4 is far too low; it would require extra negative oxygen contributions that are not present."],
+ sol:"One peroxide link ⇒ 2 O at −1, remaining 6 O at −2. 2x + 6(−2) + 2(−1) = −2 ⇒ 2x − 12 − 2 = −2 ⇒ 2x = 12 ⇒ x = +6."},
+
+{id:6, lec:"L-1", blk:"Computing O.N.", topic:"Cr in CrO₅", t:90,
+ q:"In the blue butterfly peroxide CrO<sub>5</sub> (four peroxo O at −1 and one oxo O at −2), the oxidation number of chromium is:",
+ opts:["+6","+10","+5","+2"],
+ ans:0,
+ why:[
+  "Correct. x + 4(−1) + 1(−2) = 0 ⇒ x = +6, the usual maximum for chromium.",
+  "+10 is the trap from treating all five oxygens as −2 (x = +10), which exceeds chromium's group limit.",
+  "+5 is Cr in the tetraperoxo K<sub>3</sub>CrO<sub>8</sub>, a different peroxo structure.",
+  "+2 is far below; chromium in CrO<sub>5</sub> is in its high +6 state."],
+ sol:"CrO<sub>5</sub> = CrO(O<sub>2</sub>)<sub>2</sub>: four peroxo O at −1, one oxo O at −2. x + 4(−1) + (−2) = 0 ⇒ x − 6 = 0 ⇒ x = +6."},
+
+{id:7, lec:"L-1", blk:"Computing O.N.", topic:"Fe in Fe₃O₄", t:90,
+ q:"The oxidation number of iron in magnetite Fe<sub>3</sub>O<sub>4</sub> is:",
+ opts:["+8/3 (≈ +2.67)","+2","+3","+2.5"],
+ ans:0,
+ why:[
+  "Correct. 3x + 4(−2) = 0 ⇒ 3x = 8 ⇒ x = +8/3, the average of one Fe²⁺ and two Fe³⁺.",
+  "+2 ignores the two Fe³⁺ present; it is only part of the mixture.",
+  "+3 ignores the single Fe²⁺ present; it too is only part of the mixture.",
+  "+2.5 is the Fe<sub>3</sub>O<sub>4</sub> error of splitting as if two ions, not three."],
+ sol:"Let Fe = x. 3x + 4(−2) = 0 ⇒ 3x = 8 ⇒ x = +8/3 ≈ +2.67. Physically Fe<sub>3</sub>O<sub>4</sub> = FeO·Fe<sub>2</sub>O<sub>3</sub> (one Fe²⁺, two Fe³⁺)."},
+
+{id:8, lec:"L-1", blk:"Computing O.N.", topic:"C in formic acid", t:90,
+ q:"The oxidation number of carbon in formic acid HCOOH is:",
+ opts:["+2","0","+4","−2"],
+ ans:0,
+ why:[
+  "Correct. x + 2(+1) + 2(−2) = 0 ⇒ x = +2.",
+  "0 is carbon in formaldehyde CH<sub>2</sub>O, which has one fewer oxygen.",
+  "+4 is carbon in CO<sub>2</sub>, a further oxidation of formic acid.",
+  "−2 is carbon in methanol CH<sub>3</sub>OH, a reduced form."],
+ sol:"HCOOH has 2 H and 2 O. x + 2(+1) + 2(−2) = 0 ⇒ x + 2 − 4 = 0 ⇒ x = +2."},
+
+{id:9, lec:"L-1", blk:"O.N. of oxygen", topic:"Oxygen = +2", t:90,
+ q:"In which species does oxygen have an oxidation number of <b>+2</b>?",
+ opts:["OF<sub>2</sub>","H<sub>2</sub>O<sub>2</sub>","KO<sub>2</sub>","Na<sub>2</sub>O"],
+ ans:0,
+ why:[
+  "Correct. Fluorine is more electronegative than oxygen, so in OF<sub>2</sub>: x + 2(−1) = 0 ⇒ x = +2.",
+  "In a peroxide the O–O link puts oxygen at −1, not +2.",
+  "In a superoxide KO<sub>2</sub> oxygen is at −(1/2), its unusual fractional value.",
+  "Na<sub>2</sub>O is a normal oxide: oxygen is −2 there."],
+ sol:"Oxygen is positive only when bonded to the more electronegative fluorine. OF<sub>2</sub>: x + 2(−1) = 0 ⇒ x = +2. (Peroxide −1, superoxide −(1/2), normal oxide −2.)"},
+
+{id:10, lec:"L-1", blk:"Computing O.N.", topic:"Cl in ClO₃⁻", t:90,
+ q:"The oxidation number of chlorine in the chlorate ion ClO<sub>3</sub><sup>−</sup> is:",
+ opts:["+5","+3","+7","+1"],
+ ans:0,
+ why:[
+  "Correct. x + 3(−2) = −1 ⇒ x = +5.",
+  "+3 is chlorine in chlorite ClO<sub>2</sub><sup>−</sup>, one oxygen fewer.",
+  "+7 is chlorine in perchlorate ClO<sub>4</sub><sup>−</sup>, one oxygen more.",
+  "+1 is chlorine in hypochlorite ClO<sup>−</sup>."],
+ sol:"Let Cl = x. x + 3(−2) = −1 (the ion charge) ⇒ x − 6 = −1 ⇒ x = +5."},
+
+{id:11, lec:"L-1", blk:"O.N. rules", topic:"Free element", t:60,
+ q:"The oxidation number of phosphorus in P<sub>4</sub> and of oxygen in O<sub>2</sub> is, respectively:",
+ opts:["0 and 0","+3 and −2","+5 and 0","−3 and −2"],
+ ans:0,
+ why:[
+  "Correct. An element in its free (elemental) state always has oxidation number 0.",
+  "+3/−2 are O.N. values P and O take in compounds, not in the free elements.",
+  "+5 is P in phosphate; a free element is never positive.",
+  "−3/−2 are the O.N. of P and O in compounds such as phosphides and oxides, not the free elements."],
+ sol:"Rule: any element in the free (uncombined) state has O.N. = 0. Both P<sub>4</sub> and O<sub>2</sub> are elements, so each atom is 0."},
+
+{id:12, lec:"L-1", blk:"Computing O.N.", topic:"Br in BrF₃", t:90,
+ q:"The oxidation number of bromine in BrF<sub>3</sub> is:",
+ opts:["+3","−3","+1","+5"],
+ ans:0,
+ why:[
+  "Correct. Fluorine is always −1, so x + 3(−1) = 0 ⇒ x = +3.",
+  "−3 would require bromine to be more electronegative than fluorine, which it is not.",
+  "+1 would need only one fluorine; there are three.",
+  "+5 is bromine in BrF<sub>5</sub>, which has five fluorines, not three."],
+ sol:"Fluorine is the most electronegative element, always −1. x + 3(−1) = 0 ⇒ x = +3."},
+
+{id:13, lec:"L-1", blk:"Fractional O.N.", topic:"Meaning of +8/3", t:60,
+ q:"The fractional oxidation number +8/3 for iron in Fe<sub>3</sub>O<sub>4</sub> means that:",
+ opts:[
+  "it is an average — the solid actually contains one Fe²⁺ and two Fe³⁺",
+  "every iron atom carries a real charge of exactly +8/3",
+  "iron forms a bond of order 8/3 in the oxide",
+  "the formula is wrong, because an oxidation number can never be fractional"],
+ ans:0,
+ why:[
+  "Correct. A fractional O.N. is always an average over atoms in different real states.",
+  "No atom carries a literal +8/3 charge; the value is a bookkeeping average.",
+  "Bond order is unrelated to oxidation number; +8/3 is not a bond order.",
+  "Fractional (average) oxidation numbers are perfectly valid, e.g. S at +2.5 in S<sub>4</sub>O<sub>6</sub><sup>2−</sup>."],
+ sol:"A fractional O.N. is the <b>average</b> of integer states. Fe<sub>3</sub>O<sub>4</sub> = FeO·Fe<sub>2</sub>O<sub>3</sub>: (1×2 + 2×3)/3 = 8/3."},
+
+{id:14, lec:"L-1", blk:"Computing O.N.", topic:"S in Na₂S₄O₆", t:90,
+ q:"The average oxidation number of sulphur in sodium tetrathionate Na<sub>2</sub>S<sub>4</sub>O<sub>6</sub> is:",
+ opts:["+2.5","+2","+6","+5"],
+ ans:0,
+ why:[
+  "Correct. 2(+1) + 4x + 6(−2) = 0 ⇒ 4x = +10 ⇒ x = +2.5.",
+  "+2 is the average S in thiosulphate S<sub>2</sub>O<sub>3</sub><sup>2−</sup>, not tetrathionate.",
+  "+6 is S in sulphate; the four-sulphur chain averages far lower.",
+  "+5 would ignore the two low-oxidation-state (0) terminal sulphurs that pull the average to +2.5."],
+ sol:"Let S = x. 2(+1) + 4x + 6(−2) = 0 ⇒ 2 + 4x − 12 = 0 ⇒ 4x = 10 ⇒ x = +2.5 (two S at 0 and two S at +5)."},
+
+{id:15, lec:"L-1", blk:"O.N. rules", topic:"Maximum O.N.", t:60,
+ q:"For a representative (main-group) element, the maximum oxidation number it can usually show equals:",
+ opts:[
+  "its group number (fluorine and oxygen being the notable exceptions)",
+  "always +8, regardless of the element",
+  "its period number",
+  "its group number minus 8"],
+ ans:0,
+ why:[
+  "Correct. Maximum O.N. = group number; F and O never reach it because of their high electronegativity.",
+  "+8 is only the ceiling for group-18/8 elements, not a universal maximum.",
+  "The period number sets the valence shell, not the maximum oxidation number.",
+  "Group number − 8 gives the <b>minimum</b> (most negative) oxidation number, not the maximum."],
+ sol:"Rule: max O.N. = group number (exceptions F, O); min O.N. = group number − 8. e.g. S (group 16/VIA): max +6, min −2."},
+
+/* ---------------- L-2 (12) ---------------- */
+{id:16, lec:"L-2", blk:"Electronic concept", topic:"Oxidation = loss of e⁻", t:60,
+ q:"On the electronic concept, oxidation is defined as:",
+ opts:[
+  "loss of electrons, which raises the oxidation number",
+  "gain of electrons, which lowers the oxidation number",
+  "gain of protons by the species",
+  "loss of neutrons from the nucleus"],
+ ans:0,
+ why:[
+  "Correct. LEO: Loss of Electrons = Oxidation; the species becomes more positive.",
+  "That is the definition of reduction, not oxidation.",
+  "Redox is about electron transfer, not proton gain.",
+  "Nuclear particles play no part in oxidation; it is an electron-transfer process."],
+ sol:"Oxidation = <b>loss of electrons</b> (species becomes more positive, O.N. increases): Na → Na⁺ + e⁻; Fe²⁺ → Fe³⁺ + e⁻. (LEO says GER.)"},
+
+{id:17, lec:"L-2", blk:"Oxidant & reductant", topic:"Oxidising agent", t:60,
+ q:"During a redox reaction an oxidising agent:",
+ opts:[
+  "accepts electrons and is itself reduced",
+  "loses electrons and is itself oxidised",
+  "neither gains nor loses electrons",
+  "always supplies hydrogen to the other reactant"],
+ ans:0,
+ why:[
+  "Correct. The oxidant takes electrons from the other species, so its own O.N. falls (it is reduced).",
+  "Losing electrons / being oxidised describes the reducing agent.",
+  "An oxidant must take part in the electron transfer; it cannot be a spectator.",
+  "Supplying hydrogen is the classical mark of a reducing agent, not an oxidant."],
+ sol:"Oxidising agent = electron <b>acceptor</b>; it oxidises the other species and is <b>itself reduced</b> (its O.N. decreases)."},
+
+{id:18, lec:"L-2", blk:"Oxidant & reductant", topic:"Identify oxidant/reductant", t:90,
+ q:"In 10H⁺ + 4Zn + NO<sub>3</sub><sup>−</sup> → 4Zn²⁺ + NH<sub>4</sub><sup>+</sup> + 3H<sub>2</sub>O, the oxidant and reductant are:",
+ opts:[
+  "NO<sub>3</sub><sup>−</sup> is the oxidant (N: +5 → −3), Zn is the reductant (0 → +2)",
+  "Zn is the oxidant and NO<sub>3</sub><sup>−</sup> is the reductant",
+  "H⁺ is the oxidant and Zn the reductant",
+  "both Zn and NO<sub>3</sub><sup>−</sup> are oxidised"],
+ ans:0,
+ why:[
+  "Correct. Nitrogen is reduced +5 → −3 (so NO<sub>3</sub><sup>−</sup> is the oxidant) while Zn is oxidised 0 → +2 (reductant).",
+  "Reversed: Zn is oxidised (reductant); the nitrate is reduced (oxidant).",
+  "H⁺ here only balances the medium; its O.N. (+1) is unchanged, so it is not the oxidant.",
+  "Only Zn is oxidised; nitrogen is reduced, so they cannot both be oxidised."],
+ sol:"Zn: 0 → +2 (loses e⁻) = oxidised ⇒ <b>reductant</b>. N: +5 (NO<sub>3</sub><sup>−</sup>) → −3 (NH<sub>4</sub><sup>+</sup>) = reduced ⇒ NO<sub>3</sub><sup>−</sup> is the <b>oxidant</b>."},
+
+{id:19, lec:"L-2", blk:"Disproportionation", topic:"Which cannot disproportionate", t:60,
+ q:"Which oxoanion of chlorine CANNOT undergo disproportionation?",
+ opts:["ClO<sub>4</sub><sup>−</sup>","ClO<sup>−</sup>","ClO<sub>2</sub><sup>−</sup>","ClO<sub>3</sub><sup>−</sup>"],
+ ans:0,
+ why:[
+  "Correct. In ClO<sub>4</sub><sup>−</sup> chlorine is +7, its highest state, so it can only be reduced — never both.",
+  "In ClO<sup>−</sup> chlorine is +1 (intermediate), so it can disproportionate.",
+  "In ClO<sub>2</sub><sup>−</sup> chlorine is +3 (intermediate), so it can disproportionate.",
+  "In ClO<sub>3</sub><sup>−</sup> chlorine is +5 (intermediate), so it can disproportionate."],
+ sol:"Disproportionation needs an <b>intermediate</b> O.N. Cl is +7 (maximum) in ClO<sub>4</sub><sup>−</sup> ⇒ it can only be reduced, so it cannot disproportionate. The +1, +3, +5 species all can."},
+
+{id:20, lec:"L-2", blk:"Disproportionation", topic:"Halogen that cannot disproportionate", t:60,
+ q:"Among the halogen molecules, which one cannot disproportionate in alkali?",
+ opts:["F<sub>2</sub>","Cl<sub>2</sub>","Br<sub>2</sub>","I<sub>2</sub>"],
+ ans:0,
+ why:[
+  "Correct. Fluorine has no positive oxidation state, so it cannot be oxidised and cannot disproportionate.",
+  "Cl<sub>2</sub> goes 0 → −1 and 0 → +1, a genuine disproportionation.",
+  "Br<sub>2</sub> likewise disproportionates (0 → −1 and 0 → +1/+5).",
+  "I<sub>2</sub> likewise disproportionates to I⁻ and IO<sub>3</sub><sup>−</sup>."],
+ sol:"F is the most electronegative element and shows no positive O.N.; disproportionation needs both a higher and a lower state. So F<sub>2</sub> cannot, but Cl<sub>2</sub>, Br<sub>2</sub>, I<sub>2</sub> can."},
+
+{id:21, lec:"L-2", blk:"Types of redox", topic:"Classifying a reaction", t:60,
+ q:"2NO<sub>2</sub> + 2OH⁻ → NO<sub>2</sub><sup>−</sup> + NO<sub>3</sub><sup>−</sup> + H<sub>2</sub>O is an example of:",
+ opts:["disproportionation","combination","decomposition","metal displacement"],
+ ans:0,
+ why:[
+  "Correct. N in NO<sub>2</sub> is +4 and is simultaneously reduced to +3 (NO<sub>2</sub><sup>−</sup>) and oxidised to +5 (NO<sub>3</sub><sup>−</sup>).",
+  "Combination means two species unite into one product; here one species splits into two states.",
+  "Decomposition gives at least one element in free form; no free element appears here.",
+  "No metal is displaced from a compound, so it is not a displacement reaction."],
+ sol:"N (+4) in NO<sub>2</sub> goes to +3 in NO<sub>2</sub><sup>−</sup> (reduced) and +5 in NO<sub>3</sub><sup>−</sup> (oxidised): one element both oxidised and reduced ⇒ disproportionation."},
+
+{id:22, lec:"L-2", blk:"Disproportionation", topic:"Requirement", t:60,
+ q:"Disproportionation of an element is possible only when, in the reactant, that element is in:",
+ opts:[
+  "an intermediate oxidation state, so it can be both further oxidised and reduced",
+  "its highest possible oxidation state",
+  "its lowest possible oxidation state",
+  "the zero oxidation state, and only then"],
+ ans:0,
+ why:[
+  "Correct. Only an intermediate state leaves room to go both up and down.",
+  "At the highest state the element can only be reduced, so it cannot disproportionate.",
+  "At the lowest state the element can only be oxidised, so it cannot disproportionate.",
+  "Zero can work (as in Cl<sub>2</sub>) only because it is intermediate there — zero is not itself the requirement."],
+ sol:"Disproportionation = same element simultaneously oxidised and reduced. This needs an <b>intermediate</b> O.N. (a higher and a lower state both reachable); highest-state and lowest-state species cannot."},
+
+{id:23, lec:"L-2", blk:"Oxidant & reductant", topic:"Species acting as both", t:60,
+ q:"Which pair can act BOTH as an oxidising agent and as a reducing agent?",
+ opts:[
+  "H<sub>2</sub>O<sub>2</sub> and SO<sub>2</sub>",
+  "KMnO<sub>4</sub> and K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>",
+  "F<sub>2</sub> and conc. HNO<sub>3</sub>",
+  "Na and Zn"],
+ ans:0,
+ why:[
+  "Correct. In H<sub>2</sub>O<sub>2</sub> oxygen is −1 and in SO<sub>2</sub> sulphur is +4 — both intermediate, so each can be oxidised or reduced.",
+  "Mn is +7 and Cr is +6 (their maxima) — these can only be reduced, so they act only as oxidants.",
+  "F<sub>2</sub> and conc. HNO<sub>3</sub> are strong oxidants only; they do not act as reducing agents.",
+  "Na and Zn are reactive metals in state 0 — they can only be oxidised, so only as reductants."],
+ sol:"A species acts as both when its element sits in an <b>intermediate</b> state. O is −1 in H<sub>2</sub>O<sub>2</sub> and S is +4 in SO<sub>2</sub>, so both can go up or down ⇒ dual behaviour."},
+
+{id:24, lec:"L-2", blk:"Displacement", topic:"Noble metal", t:60,
+ q:"Which metal does NOT liberate H<sub>2</sub> even from dilute mineral acids, because it lies below hydrogen in the electrochemical series?",
+ opts:["Ag","Zn","Fe","Mg"],
+ ans:0,
+ why:[
+  "Correct. Silver lies below hydrogen (positive E°), so it cannot displace H<sub>2</sub> from acids.",
+  "Zinc lies above hydrogen and readily liberates H<sub>2</sub> from dilute acid.",
+  "Iron lies above hydrogen and liberates H<sub>2</sub> from dilute acid.",
+  "Magnesium is well above hydrogen and vigorously liberates H<sub>2</sub>."],
+ sol:"Only metals <b>above</b> H<sub>2</sub> in the series (more negative E°) displace H<sub>2</sub> from dilute acid. Ag (and Au, Cu) lie below H and cannot."},
+
+{id:25, lec:"L-2", blk:"Displacement", topic:"Halogen displacement", t:60,
+ q:"Cl<sub>2</sub> + 2KBr → 2KCl + Br<sub>2</sub> proceeds because:",
+ opts:[
+  "chlorine is a stronger oxidant than bromine, so it displaces Br⁻",
+  "bromine is a stronger oxidant than chlorine",
+  "potassium is displaced from its compound",
+  "it is not a redox reaction at all"],
+ ans:0,
+ why:[
+  "Correct. Cl<sub>2</sub> (higher reduction potential) oxidises Br⁻ to Br<sub>2</sub> and is itself reduced to Cl⁻.",
+  "The reverse of the truth: if Br<sub>2</sub> were the stronger oxidant the reaction would not go this way.",
+  "Potassium stays as K⁺ throughout; it is the halide that is oxidised.",
+  "Chlorine is reduced and bromide oxidised, so it is certainly a redox reaction."],
+ sol:"Oxidising power F<sub>2</sub> &gt; Cl<sub>2</sub> &gt; Br<sub>2</sub> &gt; I<sub>2</sub>. Chlorine, the stronger oxidant, takes electrons from Br⁻: Cl<sub>2</sub> + 2Br⁻ → 2Cl⁻ + Br<sub>2</sub>."},
+
+{id:26, lec:"L-2", blk:"Types of redox", topic:"Decomposition that is not redox", t:60,
+ q:"Which decomposition is NOT a redox reaction?",
+ opts:[
+  "CaCO<sub>3</sub> → CaO + CO<sub>2</sub>",
+  "2H<sub>2</sub>O → 2H<sub>2</sub> + O<sub>2</sub>",
+  "2NaH → 2Na + H<sub>2</sub>",
+  "2KClO<sub>3</sub> → 2KCl + 3O<sub>2</sub>"],
+ ans:0,
+ why:[
+  "Correct. In CaCO<sub>3</sub> → CaO + CO<sub>2</sub> every element keeps its O.N. (Ca +2, C +4, O −2), so no redox.",
+  "Water decomposition changes H (+1 → 0) and O (−2 → 0): a redox reaction.",
+  "NaH decomposition changes H (−1 → 0) and Na (+1 → 0): a redox reaction.",
+  "In KClO<sub>3</sub> decomposition chlorine goes +5 → −1 and oxygen −2 → 0: a redox reaction."],
+ sol:"Not every decomposition is redox. In CaCO<sub>3</sub> → CaO + CO<sub>2</sub>, Ca stays +2, C stays +4, O stays −2 ⇒ no change in any O.N."},
+
+{id:27, lec:"L-2", blk:"Comproportionation", topic:"Reverse of disproportionation", t:60,
+ q:"2MnO<sub>4</sub><sup>−</sup> + 3Mn²⁺ + 2H<sub>2</sub>O → 5MnO<sub>2</sub> + 4H⁺ is best classed as:",
+ opts:[
+  "comproportionation (the reverse of disproportionation)",
+  "disproportionation",
+  "a simple combination reaction",
+  "a non-redox metathesis"],
+ ans:0,
+ why:[
+  "Correct. Two different states (Mn +7 and Mn +2) converge to one intermediate state (Mn +4).",
+  "Disproportionation is the opposite — one state splitting into two; here two states merge into one.",
+  "Combination unites species without this converging-states electron transfer pattern.",
+  "Oxidation numbers change (both +7 and +2 → +4), so it is redox, not a metathesis."],
+ sol:"Mn +7 (MnO<sub>4</sub><sup>−</sup>) is reduced and Mn +2 is oxidised, both ending at +4 (MnO<sub>2</sub>). Two states → one intermediate = <b>comproportionation</b>, the reverse of disproportionation."},
+
+/* ---------------- L-3 (10) ---------------- */
+{id:28, lec:"L-3", blk:"Oxidation-number method", topic:"Balancing O in acid", t:60,
+ q:"In the oxidation-number method, after equalising the total increase and decrease in O.N., oxygen in <b>acidic</b> medium is balanced by:",
+ opts:[
+  "adding H<sub>2</sub>O to the oxygen-deficient side, then H⁺ to balance hydrogen",
+  "adding O<sub>2</sub> gas to the deficient side",
+  "adding OH⁻ to both sides first",
+  "adding electrons to each side"],
+ ans:0,
+ why:[
+  "Correct. In acid: H<sub>2</sub>O supplies the missing oxygen, then H⁺ fixes the hydrogen count.",
+  "Free O<sub>2</sub> is never introduced to balance oxygen in ionic equations.",
+  "OH⁻ is used in basic medium, not in acidic balancing.",
+  "Electrons are not added in the oxidation-number method; that is the ion-electron method."],
+ sol:"Acidic medium: balance O by adding H<sub>2</sub>O on the O-deficient side, then add H⁺ to balance H. (Basic: add H<sub>2</sub>O to the H-deficient side and an equal number of OH⁻ on the other side.)"},
+
+{id:29, lec:"L-3", blk:"Acidic balancing", topic:"MnO₄⁻ + Fe²⁺", t:60,
+ q:"Balancing MnO<sub>4</sub><sup>−</sup> + Fe²⁺ → Mn²⁺ + Fe³⁺ in acidic medium, the coefficient of H⁺ is:",
+ opts:["8","5","4","16"],
+ ans:0,
+ why:[
+  "Correct. MnO<sub>4</sub><sup>−</sup> + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H<sub>2</sub>O needs 8 H⁺.",
+  "5 is the coefficient of Fe²⁺/Fe³⁺, not of H⁺.",
+  "4 is the number of water molecules formed, not the H⁺.",
+  "16 arises only if the whole equation is wrongly doubled."],
+ sol:"Mn +7 → +2 (↓5); Fe +2 → +3 (↑1) ⇒ 5 Fe. Four O leave as 4 H<sub>2</sub>O ⇒ 8 H⁺: MnO<sub>4</sub><sup>−</sup> + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H<sub>2</sub>O."},
+
+{id:30, lec:"L-3", blk:"Net-change balancing", topic:"Fe₂O₃ + C", t:60,
+ q:"Balancing Fe<sub>2</sub>O<sub>3</sub> + C → Fe + CO, the coefficient of carbon is:",
+ opts:["3","2","1","6"],
+ ans:0,
+ why:[
+  "Correct. Fe<sub>2</sub>O<sub>3</sub> + 3C → 2Fe + 3CO balances increase (6) and decrease (6).",
+  "2 would under-supply reducing carbon; the total increase could not then match 6.",
+  "1 leaves the iron reduction badly unbalanced.",
+  "6 doubles the carbon unnecessarily and unbalances the equation."],
+ sol:"C: 0 → +2 (↑2 each); Fe: +3 → 0 (↓3 each, ↓6 for 2 Fe). Match 6 ↓ with 6 ↑ ⇒ 3 C: Fe<sub>2</sub>O<sub>3</sub> + 3C → 2Fe + 3CO."},
+
+{id:31, lec:"L-3", blk:"Acidic balancing", topic:"Zn + HNO₃ → NO₂", t:60,
+ q:"Balancing Zn + HNO<sub>3</sub> → Zn(NO<sub>3</sub>)<sub>2</sub> + NO<sub>2</sub> + H<sub>2</sub>O, the coefficient of HNO<sub>3</sub> is:",
+ opts:["4","2","8","10"],
+ ans:0,
+ why:[
+  "Correct. Zn + 4HNO<sub>3</sub> → Zn(NO<sub>3</sub>)<sub>2</sub> + 2NO<sub>2</sub> + 2H<sub>2</sub>O: 2 nitrate spectators + 2 reduced N = 4.",
+  "2 counts only the reduced nitrogen (the 2 NO<sub>2</sub>) and omits the 2 spectator nitrate ions.",
+  "8 over-counts the acid needed; mass balance fails.",
+  "10 is the dilute-acid case giving different reduction products, not NO<sub>2</sub>."],
+ sol:"Zn: 0 → +2 (↑2); N(reduced): +5 → +4 (↓1) ⇒ 2 NO<sub>2</sub>. Plus the 2 NO<sub>3</sub><sup>−</sup> that stay in Zn(NO<sub>3</sub>)<sub>2</sub> ⇒ total 4 HNO<sub>3</sub>: Zn + 4HNO<sub>3</sub> → Zn(NO<sub>3</sub>)<sub>2</sub> + 2NO<sub>2</sub> + 2H<sub>2</sub>O."},
+
+{id:32, lec:"L-3", blk:"Net-change balancing", topic:"FeS₂ + O₂", t:90,
+ q:"In 4FeS<sub>2</sub> + 11O<sub>2</sub> → 2Fe<sub>2</sub>O<sub>3</sub> + 8SO<sub>2</sub>, the net increase in oxidation number per FeS<sub>2</sub> unit (Fe +2→+3 and 2S −1→+4) is:",
+ opts:["11","4","8","5"],
+ ans:0,
+ why:[
+  "Correct. Fe ↑1 plus 2 S each ↑5 (=↑10) gives a net ↑11 per FeS<sub>2</sub>.",
+  "4 is the decrease per O<sub>2</sub> (0 → −2 for 2 O), not the FeS<sub>2</sub> increase.",
+  "8 is the sulphur-only contribution miscounted; the correct S total is 10, plus Fe's 1.",
+  "5 is the increase of a single sulphur atom, not of the whole FeS<sub>2</sub> unit."],
+ sol:"Fe: +2 → +3 (↑1). Each S: −1 → +4 (↑5), two S ⇒ ↑10. Net ↑11 per FeS<sub>2</sub>. O<sub>2</sub>: ↓4. LCM(11,4)=44 ⇒ 4FeS<sub>2</sub> + 11O<sub>2</sub> → 2Fe<sub>2</sub>O<sub>3</sub> + 8SO<sub>2</sub>."},
+
+{id:33, lec:"L-3", blk:"Net-change balancing", topic:"Benzene combustion", t:60,
+ q:"Balancing C<sub>6</sub>H<sub>6</sub> + O<sub>2</sub> → CO<sub>2</sub> + H<sub>2</sub>O, the coefficient of O<sub>2</sub> is:",
+ opts:["15","12","6","9"],
+ ans:0,
+ why:[
+  "Correct. 2C<sub>6</sub>H<sub>6</sub> + 15O<sub>2</sub> → 12CO<sub>2</sub> + 6H<sub>2</sub>O balances all atoms.",
+  "12 is the coefficient of CO<sub>2</sub>, not of O<sub>2</sub>.",
+  "6 is the water coefficient, not the O<sub>2</sub>.",
+  "9 would leave oxygen unbalanced on the product side."],
+ sol:"C: −1 → +4 (↑5 each, ↑30 for C<sub>6</sub>); O: 0 → −2 (↓2 each). 30 ÷ 2 = 15 O atoms per molecule, ×2 to clear ⇒ 2C<sub>6</sub>H<sub>6</sub> + 15O<sub>2</sub> → 12CO<sub>2</sub> + 6H<sub>2</sub>O."},
+
+{id:34, lec:"L-3", blk:"Basic balancing", topic:"Basic-medium rule", t:60,
+ q:"In the oxidation-number method, to balance an equation in <b>basic</b> medium you:",
+ opts:[
+  "add H<sub>2</sub>O to the hydrogen-deficient side and an equal number of OH⁻ to the other side",
+  "add H⁺ to balance the hydrogen",
+  "add O<sub>2</sub> gas to balance oxygen",
+  "ignore water entirely and balance only the metals"],
+ ans:0,
+ why:[
+  "Correct. OH⁻ and H<sub>2</sub>O together carry the hydrogen and oxygen balance in base.",
+  "Free H⁺ cannot exist in a basic medium, so it is not used there.",
+  "Molecular O<sub>2</sub> is never introduced to balance oxygen in ionic equations.",
+  "Water is essential to the hydrogen/oxygen balance and cannot be ignored."],
+ sol:"Basic medium: add H<sub>2</sub>O to the H-deficient side and an equal number of OH⁻ on the other side (no free H⁺ in base)."},
+
+{id:35, lec:"L-3", blk:"Acidic balancing", topic:"Cr₂O₇²⁻ + Fe²⁺", t:60,
+ q:"Balancing Fe²⁺ + Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + H⁺ → Fe³⁺ + Cr³⁺ + H<sub>2</sub>O in acid, the coefficient of H⁺ is:",
+ opts:["14","7","6","8"],
+ ans:0,
+ why:[
+  "Correct. 6Fe²⁺ + Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 14H⁺ → 6Fe³⁺ + 2Cr³⁺ + 7H<sub>2</sub>O needs 14 H⁺.",
+  "7 is the number of water molecules, not of H⁺.",
+  "6 is the Fe coefficient (and the electron count), not of H⁺.",
+  "8 is the H⁺ for a permanganate half-reaction, not for dichromate."],
+ sol:"2 Cr: +6 → +3 (↓6); Fe: +2 → +3 (↑1) ⇒ 6 Fe. Seven O leave as 7 H<sub>2</sub>O ⇒ 14 H⁺: 6Fe²⁺ + Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 14H⁺ → 6Fe³⁺ + 2Cr³⁺ + 7H<sub>2</sub>O."},
+
+{id:36, lec:"L-3", blk:"Basic balancing", topic:"MnO₄⁻ + Br⁻ (basic)", t:60,
+ q:"Balancing MnO<sub>4</sub><sup>−</sup> + Br⁻ → MnO<sub>2</sub> + BrO<sub>3</sub><sup>−</sup> in basic medium, the coefficient of MnO<sub>4</sub><sup>−</sup> is:",
+ opts:["2","1","3","6"],
+ ans:0,
+ why:[
+  "Correct. 2MnO<sub>4</sub><sup>−</sup> + Br⁻ + H<sub>2</sub>O → 2MnO<sub>2</sub> + BrO<sub>3</sub><sup>−</sup> + 2OH⁻ balances ↓6 against ↑6.",
+  "1 leaves the 6-electron oxidation of bromide only half-matched (↓3 vs ↑6).",
+  "3 over-counts manganese; the increase/decrease would no longer balance.",
+  "6 is the electron total, not the MnO<sub>4</sub><sup>−</sup> coefficient."],
+ sol:"Mn: +7 → +4 (↓3); Br: −1 → +5 (↑6). LCM ⇒ 2 Mn (↓6) vs 1 Br (↑6): 2MnO<sub>4</sub><sup>−</sup> + Br⁻ + H<sub>2</sub>O → 2MnO<sub>2</sub> + BrO<sub>3</sub><sup>−</sup> + 2OH⁻."},
+
+{id:37, lec:"L-3", blk:"Oxidation-number method", topic:"Core principle", t:60,
+ q:"The central requirement of the oxidation-number method of balancing is that:",
+ opts:[
+  "the total increase in oxidation number must equal the total decrease",
+  "the number of molecules on each side must be equal",
+  "mass alone must balance, while charge is ignored",
+  "oxygen must always be balanced before the redox atoms"],
+ ans:0,
+ why:[
+  "Correct. Electrons are conserved, so total ↑ in O.N. = total ↓ in O.N.",
+  "Molecule counts need not match; only atoms and charge must balance.",
+  "Both mass and charge must balance in a correct redox equation.",
+  "The O.N. increase/decrease match comes first; oxygen is balanced afterward with water."],
+ sol:"Electrons lost = electrons gained, i.e. the total <b>increase</b> in oxidation number equals the total <b>decrease</b>. Multiply oxidant and reductant to make these equal, then balance atoms and charge."},
+
+/* ---------------- L-4 (10) ---------------- */
+{id:38, lec:"L-4", blk:"Ion-electron method", topic:"Role of electrons", t:60,
+ q:"In the ion-electron (half-reaction) method, electrons are added to a half-reaction in order to:",
+ opts:[
+  "balance the change in oxidation number before the two halves are combined",
+  "balance the oxygen atoms in that half",
+  "balance the hydrogen atoms in that half",
+  "convert an acidic medium into a basic one"],
+ ans:0,
+ why:[
+  "Correct. The electrons account for the O.N. change so the two halves can be scaled to cancel.",
+  "Oxygen is balanced with H<sub>2</sub>O, not with electrons.",
+  "Hydrogen is balanced with H⁺ (acid) or H<sub>2</sub>O/OH⁻ (base), not electrons.",
+  "The medium is set by the problem; electrons do not change it."],
+ sol:"Each half-reaction gets electrons equal to the O.N. change of its redox atom. The two halves are then multiplied so the electrons cancel on adding."},
+
+{id:39, lec:"L-4", blk:"Half-reactions", topic:"MnO₄⁻ acidic", t:60,
+ q:"The correctly balanced acidic-medium reduction half-reaction for permanganate to Mn²⁺ is:",
+ opts:[
+  "MnO<sub>4</sub><sup>−</sup> + 8H⁺ + 5e⁻ → Mn²⁺ + 4H<sub>2</sub>O",
+  "MnO<sub>4</sub><sup>−</sup> + 4H⁺ + 3e⁻ → Mn²⁺ + 2H<sub>2</sub>O",
+  "MnO<sub>4</sub><sup>−</sup> + 8H⁺ + 3e⁻ → Mn²⁺ + 4H<sub>2</sub>O",
+  "MnO<sub>4</sub><sup>−</sup> + e⁻ → MnO<sub>4</sub><sup>2−</sup>"],
+ ans:0,
+ why:[
+  "Correct. Mn +7 → +2 is a 5-electron change; 4 O leave as 4 H<sub>2</sub>O needing 8 H⁺.",
+  "This gives MnO<sub>2</sub> with a 3-electron change — the neutral/faint-base product, not Mn²⁺.",
+  "The hydrogen/oxygen are right but 3 electrons do not match a +7 → +2 (5-electron) change.",
+  "This is the strongly basic one-electron reduction to manganate, not to Mn²⁺."],
+ sol:"Mn: +7 → +2 ⇒ 5e⁻. Balance 4 O with 4 H<sub>2</sub>O ⇒ 8 H⁺ on the left: MnO<sub>4</sub><sup>−</sup> + 8H⁺ + 5e⁻ → Mn²⁺ + 4H<sub>2</sub>O."},
+
+{id:40, lec:"L-4", blk:"Half-reactions", topic:"Cr₂O₇²⁻ electrons", t:60,
+ q:"The number of electrons n in the acidic reduction half-reaction Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 14H⁺ + ne⁻ → 2Cr³⁺ + 7H<sub>2</sub>O is:",
+ opts:["6","3","2","12"],
+ ans:0,
+ why:[
+  "Correct. Each Cr goes +6 → +3 (3e⁻), and there are 2 Cr ⇒ 6e⁻.",
+  "3 is the change per chromium atom; there are two chromiums.",
+  "2 is the charge on the dichromate ion, not the electron count.",
+  "12 doubles the correct value."],
+ sol:"2 Cr: +6 → +3, each gaining 3e⁻ ⇒ 2 × 3 = 6 electrons: Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H<sub>2</sub>O."},
+
+{id:41, lec:"L-4", blk:"Acidic balancing", topic:"MnO₄⁻ + SO₃²⁻", t:60,
+ q:"Balancing MnO<sub>4</sub><sup>−</sup> + SO<sub>3</sub><sup>2−</sup> → Mn²⁺ + SO<sub>4</sub><sup>2−</sup> in acid, the coefficient of SO<sub>3</sub><sup>2−</sup> is:",
+ opts:["5","2","3","6"],
+ ans:0,
+ why:[
+  "Correct. 2MnO<sub>4</sub><sup>−</sup> + 5SO<sub>3</sub><sup>2−</sup> + 6H⁺ → 2Mn²⁺ + 5SO<sub>4</sub><sup>2−</sup> + 3H<sub>2</sub>O (10 e⁻ each side).",
+  "2 is the MnO<sub>4</sub><sup>−</sup> coefficient, not that of sulphite.",
+  "3 is the water coefficient, not that of sulphite.",
+  "6 is the number of H⁺, not the sulphite coefficient."],
+ sol:"Red: MnO<sub>4</sub><sup>−</sup> + 8H⁺ + 5e⁻ → Mn²⁺ + 4H<sub>2</sub>O (×2). Oxid: SO<sub>3</sub><sup>2−</sup> + H<sub>2</sub>O → SO<sub>4</sub><sup>2−</sup> + 2H⁺ + 2e⁻ (×5). Add ⇒ 2MnO<sub>4</sub><sup>−</sup> + 5SO<sub>3</sub><sup>2−</sup> + 6H⁺ → 2Mn²⁺ + 5SO<sub>4</sub><sup>2−</sup> + 3H<sub>2</sub>O."},
+
+{id:42, lec:"L-4", blk:"Acidic balancing", topic:"Br₂ + H₂O₂", t:60,
+ q:"In the acidic balancing of Br<sub>2</sub> + H<sub>2</sub>O<sub>2</sub> → BrO<sub>3</sub><sup>−</sup> + H<sub>2</sub>O, hydrogen peroxide is the reducing agent. Its coefficient is:",
+ opts:["5","2","10","1"],
+ ans:0,
+ why:[
+  "Correct. Br<sub>2</sub> → 2BrO<sub>3</sub><sup>−</sup> releases 10 e⁻; each H<sub>2</sub>O<sub>2</sub> takes 2 e⁻ ⇒ 5 of them.",
+  "2 would accept only 4 electrons, far short of the 10 released.",
+  "10 is the electron total, not the number of H<sub>2</sub>O<sub>2</sub> molecules.",
+  "1 would accept only 2 electrons, nowhere near the 10 needed."],
+ sol:"Oxid: Br<sub>2</sub> + 6H<sub>2</sub>O → 2BrO<sub>3</sub><sup>−</sup> + 12H⁺ + 10e⁻. Red: H<sub>2</sub>O<sub>2</sub> + 2H⁺ + 2e⁻ → 2H<sub>2</sub>O (×5). Add & cancel ⇒ Br<sub>2</sub> + 5H<sub>2</sub>O<sub>2</sub> → 2BrO<sub>3</sub><sup>−</sup> + 4H<sub>2</sub>O + 2H⁺."},
+
+{id:43, lec:"L-4", blk:"Basic balancing", topic:"Zn + NO₃⁻ (basic)", t:60,
+ q:"Balancing Zn + NO<sub>3</sub><sup>−</sup> → Zn²⁺ + NH<sub>4</sub><sup>+</sup> in basic medium, the coefficient of OH⁻ in the products is:",
+ opts:["10","7","8","4"],
+ ans:0,
+ why:[
+  "Correct. 4Zn + NO<sub>3</sub><sup>−</sup> + 7H<sub>2</sub>O → 4Zn²⁺ + NH<sub>4</sub><sup>+</sup> + 10OH⁻ balances mass and charge.",
+  "7 is the number of water molecules on the left, not the OH⁻ on the right.",
+  "8 is the electron count (N +5 → −3), not the OH⁻ coefficient.",
+  "4 is the zinc coefficient, not the OH⁻."],
+ sol:"Oxid: Zn → Zn²⁺ + 2e⁻ (×4). Red: NO<sub>3</sub><sup>−</sup> + 7H<sub>2</sub>O + 8e⁻ → NH<sub>4</sub><sup>+</sup> + 10OH⁻ (N +5 → −3, 8e⁻). Add ⇒ 4Zn + NO<sub>3</sub><sup>−</sup> + 7H<sub>2</sub>O → 4Zn²⁺ + NH<sub>4</sub><sup>+</sup> + 10OH⁻."},
+
+{id:44, lec:"L-4", blk:"Basic balancing", topic:"Charge balance in base", t:60,
+ q:"When balancing a half-reaction in basic medium by the ion-electron method, charge is balanced by adding:",
+ opts:["OH⁻ ions","H⁺ ions","O<sub>2</sub> molecules","extra electrons to both sides"],
+ ans:0,
+ why:[
+  "Correct. In base OH⁻ carries the charge balance (with H<sub>2</sub>O for atoms).",
+  "Free H⁺ cannot exist in a basic solution, so it is not used for charge balance there.",
+  "Molecular O<sub>2</sub> is not introduced to balance charge.",
+  "Electrons balance the O.N. change, not the overall ionic charge in the medium."],
+ sol:"Basic medium ⇒ balance charge with <b>OH⁻</b> and atoms with H<sub>2</sub>O. (Acidic medium uses H⁺ instead.)"},
+
+{id:45, lec:"L-4", blk:"Half-reactions", topic:"Oxalate half-reaction", t:60,
+ q:"The oxidation half-reaction when oxalate acts as a reductant is:",
+ opts:[
+  "C<sub>2</sub>O<sub>4</sub><sup>2−</sup> → 2CO<sub>2</sub> + 2e⁻",
+  "C<sub>2</sub>O<sub>4</sub><sup>2−</sup> + 2e⁻ → 2CO<sub>2</sub>",
+  "C<sub>2</sub>O<sub>4</sub><sup>2−</sup> → 2CO<sub>2</sub> + e⁻",
+  "2CO<sub>2</sub> → C<sub>2</sub>O<sub>4</sub><sup>2−</sup> + 2e⁻"],
+ ans:0,
+ why:[
+  "Correct. C goes +3 → +4; two carbons lose 2 e⁻ in all, released as products.",
+  "Electrons on the left would make it a reduction; oxalate is being oxidised.",
+  "Only 1 electron is wrong — two carbons each losing 1 e⁻ give 2 electrons.",
+  "This is written backwards (it reduces CO<sub>2</sub>), the opposite of oxalate oxidation."],
+ sol:"Each C: +3 → +4 (lose 1 e⁻); two carbons ⇒ 2 e⁻ lost: C<sub>2</sub>O<sub>4</sub><sup>2−</sup> → 2CO<sub>2</sub> + 2e⁻ (n-factor 2)."},
+
+{id:46, lec:"L-4", blk:"Half-reactions", topic:"MnO₄⁻ neutral", t:60,
+ q:"In neutral or faintly basic medium, permanganate is reduced to MnO<sub>2</sub>. The number of electrons gained per MnO<sub>4</sub><sup>−</sup> is:",
+ opts:["3","5","1","2"],
+ ans:0,
+ why:[
+  "Correct. Mn +7 → +4 is a 3-electron change.",
+  "5 is the acidic-medium reduction to Mn²⁺ (+7 → +2).",
+  "1 is the strongly basic reduction to manganate MnO<sub>4</sub><sup>2−</sup> (+7 → +6).",
+  "2 does not correspond to any standard permanganate reduction product."],
+ sol:"Neutral/faint base: MnO<sub>4</sub><sup>−</sup> + 2H<sub>2</sub>O + 3e⁻ → MnO<sub>2</sub> + 4OH⁻ (Mn +7 → +4 ⇒ 3 electrons)."},
+
+{id:47, lec:"L-4", blk:"Basic balancing", topic:"Cr(OH)₃ + IO₃⁻", t:60,
+ q:"Balancing Cr(OH)<sub>3</sub> + IO<sub>3</sub><sup>−</sup> → CrO<sub>4</sub><sup>2−</sup> + I⁻ in basic medium, the coefficient of Cr(OH)<sub>3</sub> is:",
+ opts:["2","1","3","6"],
+ ans:0,
+ why:[
+  "Correct. 2Cr(OH)<sub>3</sub> + IO<sub>3</sub><sup>−</sup> + 4OH⁻ → 2CrO<sub>4</sub><sup>2−</sup> + I⁻ + 5H<sub>2</sub>O (↑6 vs ↓6).",
+  "1 leaves the oxidation only half the size of the 6-electron iodate reduction.",
+  "3 over-counts chromium and unbalances the electron totals.",
+  "6 is the electron count, not the Cr(OH)<sub>3</sub> coefficient."],
+ sol:"Oxid: Cr +3 → +6 (↑3, ×2). Red: I +5 → −1 (↓6, ×1). Balance ⇒ 2Cr(OH)<sub>3</sub> + IO<sub>3</sub><sup>−</sup> + 4OH⁻ → 2CrO<sub>4</sub><sup>2−</sup> + I⁻ + 5H<sub>2</sub>O."},
+
+/* ---------------- L-5 (12) ---------------- */
+{id:48, lec:"L-5", blk:"Equivalent weight", topic:"Definition", t:90,
+ q:"The equivalent weight of an oxidant or reductant in a redox reaction equals:",
+ opts:[
+  "molar mass ÷ (number of electrons gained or lost per formula unit)",
+  "molar mass × number of electrons transferred",
+  "molar mass ÷ the molecular valency",
+  "molar mass ÷ the number of atoms in the formula"],
+ ans:0,
+ why:[
+  "Correct. The n-factor (electrons transferred) divides the molar mass to give E.",
+  "Multiplying would make E larger than M, which is never the case for n-factor &gt; 1.",
+  "Valency is not the redox n-factor; the electrons transferred set E.",
+  "Atom count is unrelated to the equivalent weight."],
+ sol:"E = (molar mass)/(n-factor), where n-factor(redox) = electrons gained or lost per formula unit = (change in O.N.) × (number of atoms changing)."},
+
+{id:49, lec:"L-5", blk:"Equivalent weight", topic:"KMnO₄ acidic", t:90,
+ q:"The equivalent weight of KMnO<sub>4</sub> (molar mass M) acting as an oxidant in acidic medium is:",
+ opts:["M/5","M/3","M/1","M/6"],
+ ans:0,
+ why:[
+  "Correct. Mn +7 → +2 is a 5-electron change ⇒ E = M/5.",
+  "M/3 is the neutral/faint-base case (+7 → +4, MnO<sub>2</sub>).",
+  "M/1 is the strongly basic case (+7 → +6, manganate).",
+  "M/6 is the equivalent weight of K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>, not KMnO<sub>4</sub>."],
+ sol:"Acidic: Mn +7 → +2 ⇒ n-factor 5 ⇒ E(KMnO<sub>4</sub>) = M/5."},
+
+{id:50, lec:"L-5", blk:"Equivalent weight", topic:"K₂Cr₂O₇", t:90,
+ q:"The equivalent weight of K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> (molar mass M) in acidic medium is:",
+ opts:["M/6","M/3","M/2","M/5"],
+ ans:0,
+ why:[
+  "Correct. Two Cr each +6 → +3 ⇒ 6 electrons ⇒ E = M/6.",
+  "M/3 counts only one chromium's 3-electron change.",
+  "M/2 does not match the 6-electron dichromate reduction.",
+  "M/5 is the acidic equivalent weight of KMnO<sub>4</sub>, not dichromate."],
+ sol:"2 Cr: +6 → +3, total 6 e⁻ ⇒ n-factor 6 ⇒ E(K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>) = M/6."},
+
+{id:51, lec:"L-5", blk:"Equivalent weight", topic:"Oxalic acid", t:90,
+ q:"As a reductant (C<sub>2</sub>O<sub>4</sub><sup>2−</sup> → 2CO<sub>2</sub> + 2e⁻), the equivalent weight of oxalic acid H<sub>2</sub>C<sub>2</sub>O<sub>4</sub> (molar mass M) is:",
+ opts:["M/2","M/1","M/4","M/6"],
+ ans:0,
+ why:[
+  "Correct. Two carbons each +3 → +4 release 2 e⁻ in all ⇒ E = M/2.",
+  "M/1 would need a 1-electron change; oxalate loses 2 electrons.",
+  "M/4 over-counts the electrons; only 2 are released per oxalate.",
+  "M/6 is unrelated to the 2-electron oxalate oxidation."],
+ sol:"C<sub>2</sub>O<sub>4</sub><sup>2−</sup> → 2CO<sub>2</sub> + 2e⁻ ⇒ n-factor 2 ⇒ E(oxalic acid) = M/2."},
+
+{id:52, lec:"L-5", blk:"Disproportionation n-factor", topic:"Formula", t:90,
+ q:"For a species that disproportionates, losing n₁ electrons and gaining n₂ electrons per molecule, the n-factor is:",
+ opts:["(n₁ × n₂)/(n₁ + n₂)","n₁ + n₂","n₁ − n₂","(n₁ + n₂)/(n₁ × n₂)"],
+ ans:0,
+ why:[
+  "Correct. The disproportionation n-factor is the harmonic-type combination (n₁n₂)/(n₁+n₂).",
+  "n₁ + n₂ double-counts; the molecule splits between the two paths, not summing them.",
+  "n₁ − n₂ can even go negative and has no physical meaning here.",
+  "This is the reciprocal of the correct expression."],
+ sol:"n-factor = (n₁ × n₂)/(n₁ + n₂), where n₁ = electrons lost and n₂ = electrons gained per molecule in the disproportionation."},
+
+{id:53, lec:"L-5", blk:"Disproportionation n-factor", topic:"H₃PO₂", t:90,
+ q:"In 3H<sub>3</sub>PO<sub>2</sub> → PH<sub>3</sub> + 2H<sub>3</sub>PO<sub>3</sub>, phosphorus goes +1 → −3 (gain 4e⁻) and +1 → +3 (lose 2e⁻). The n-factor of H<sub>3</sub>PO<sub>2</sub> is:",
+ opts:["4/3","6","2","8"],
+ ans:0,
+ why:[
+  "Correct. (n₁ × n₂)/(n₁ + n₂) = (2 × 4)/(2 + 4) = 8/6 = 4/3.",
+  "6 is n₁ + n₂ (the wrong, additive combination).",
+  "2 is only the electrons lost (n₁), not the combined n-factor.",
+  "8 is the product n₁ × n₂ before dividing by the sum."],
+ sol:"n₁ = 2 (loss), n₂ = 4 (gain). n-factor = (n₁n₂)/(n₁+n₂) = (2×4)/6 = 8/6 = 4/3 ⇒ E(H<sub>3</sub>PO<sub>2</sub>) = M/(4/3) = 3M/4."},
+
+{id:54, lec:"L-5", blk:"Equivalent weight", topic:"Reaction-dependent E", t:90,
+ q:"The equivalent weight of H<sub>3</sub>PO<sub>4</sub> (molar mass M) when it reacts with NaOH to give Na<sub>2</sub>HPO<sub>4</sub> is:",
+ opts:["M/2","M/3","M/1","M/6"],
+ ans:0,
+ why:[
+  "Correct. Only two of the three acidic hydrogens are replaced ⇒ n = 2 ⇒ E = M/2.",
+  "M/3 is for complete neutralisation to Na<sub>3</sub>PO<sub>4</sub> (all three H replaced).",
+  "M/1 would replace only one hydrogen (to NaH<sub>2</sub>PO<sub>4</sub>).",
+  "M/6 has no basis here; phosphoric acid has only three replaceable H."],
+ sol:"Equivalent weight depends on the reaction. To Na<sub>2</sub>HPO<sub>4</sub>, 2 H replaced ⇒ n = 2 ⇒ E = M/2. (To Na<sub>3</sub>PO<sub>4</sub> it would be M/3.)"},
+
+{id:55, lec:"L-5", blk:"Equivalent weight", topic:"KBrO₃ → Br₂", t:90,
+ q:"When KBrO<sub>3</sub> (molar mass M) is reduced to Br<sub>2</sub>, its equivalent weight is:",
+ opts:["M/5","M/6","M/10","M/2"],
+ ans:0,
+ why:[
+  "Correct. Br goes +5 → 0, a 5-electron change per Br ⇒ E(KBrO<sub>3</sub>) = M/5.",
+  "M/6 is the reduction all the way to Br⁻ (+5 → −1), not to Br<sub>2</sub>.",
+  "M/10 is the equivalent weight of Br<sub>2</sub> itself (2 Br, 10 e⁻), not of KBrO<sub>3</sub>.",
+  "M/2 does not match a 5-electron change."],
+ sol:"Br: +5 → 0 ⇒ 5 e⁻ per Br ⇒ n-factor 5 ⇒ E(KBrO<sub>3</sub>) = M/5."},
+
+{id:56, lec:"L-5", blk:"Equivalent weight", topic:"KBrO₃ → KBr", t:90,
+ q:"When KBrO<sub>3</sub> (molar mass M) is reduced all the way to KBr, its equivalent weight is:",
+ opts:["M/6","M/5","M/1","M/3"],
+ ans:0,
+ why:[
+  "Correct. Br goes +5 → −1, a 6-electron change ⇒ E = M/6.",
+  "M/5 is the reduction only to Br<sub>2</sub> (+5 → 0).",
+  "M/1 would need a single-electron change; this is a 6-electron reduction.",
+  "M/3 does not match the +5 → −1 change."],
+ sol:"Br: +5 → −1 ⇒ 6 e⁻ ⇒ n-factor 6 ⇒ E(KBrO<sub>3</sub>) = M/6."},
+
+{id:57, lec:"L-5", blk:"Equivalent weight", topic:"As₂O₃ → As₂O₅", t:90,
+ q:"For the oxidation As<sub>2</sub>O<sub>3</sub> → As<sub>2</sub>O<sub>5</sub> (molar mass of As<sub>2</sub>O<sub>3</sub> = M), the equivalent weight of As<sub>2</sub>O<sub>3</sub> is:",
+ opts:["M/4","M/2","M/8","M/5"],
+ ans:0,
+ why:[
+  "Correct. Two As each +3 → +5 lose 2 e⁻, so 4 e⁻ in all ⇒ E = M/4.",
+  "M/2 counts only one arsenic's change.",
+  "M/8 doubles the correct electron count.",
+  "M/5 is unrelated to this 4-electron oxidation."],
+ sol:"2 As: +3 → +5, each ↑2 ⇒ total 4 e⁻ ⇒ n-factor 4 ⇒ E(As<sub>2</sub>O<sub>3</sub>) = M/4."},
+
+{id:58, lec:"L-5", blk:"Normality", topic:"N vs M", t:90,
+ q:"The normality of a solution is related to its molarity by:",
+ opts:["N = M × n-factor","N = M ÷ n-factor","N = M + n-factor","N = M, always"],
+ ans:0,
+ why:[
+  "Correct. Normality = molarity times the n-factor (equivalents per mole).",
+  "Dividing would understate the equivalents; N is M scaled up by n-factor.",
+  "Addition mixes incompatible quantities and is dimensionally wrong.",
+  "N equals M only when the n-factor is 1."],
+ sol:"N = M × n-factor. At the equivalence point N<sub>1</sub>V<sub>1</sub> = N<sub>2</sub>V<sub>2</sub> and Strength = Normality × Eq. wt."},
+
+{id:59, lec:"L-5", blk:"Equivalent weight", topic:"KMnO₄ → Mn₂O₃", t:90,
+ q:"If KMnO<sub>4</sub> (molar mass M) is reduced to Mn<sub>2</sub>O<sub>3</sub>, the equivalent weight of KMnO<sub>4</sub> is:",
+ opts:["M/4","M/5","M/8","M/3"],
+ ans:0,
+ why:[
+  "Correct. Mn goes +7 → +3, a 4-electron change per Mn ⇒ E(KMnO<sub>4</sub>) = M/4.",
+  "M/5 is the acidic reduction to Mn²⁺ (+7 → +2).",
+  "M/8 is the equivalent weight of the product Mn<sub>2</sub>O<sub>3</sub> (2 Mn, 8 e⁻), not of KMnO<sub>4</sub>.",
+  "M/3 is the reduction to MnO<sub>2</sub> (+7 → +4), not to Mn<sub>2</sub>O<sub>3</sub>."],
+ sol:"Mn: +7 → +3 ⇒ 4 e⁻ per Mn ⇒ n-factor 4 ⇒ E(KMnO<sub>4</sub>) = M/4. (Product E(Mn<sub>2</sub>O<sub>3</sub>) = M/8 for 2 Mn.)"},
+
+/* ---------------- L-6 (14) ---------------- */
+{id:60, lec:"L-6", blk:"Indicators", topic:"KMnO₄ self-indicator", t:60,
+ q:"KMnO<sub>4</sub> is called a 'self-indicator' in permanganate titrations because:",
+ opts:[
+  "its own persistent pink colour marks the end point, so no added indicator is needed",
+  "it sharply changes the pH at the end point",
+  "it forms a blue complex with starch",
+  "it is reduced by an added diphenylamine indicator"],
+ ans:0,
+ why:[
+  "Correct. One excess drop of MnO<sub>4</sub><sup>−</sup> leaves a lasting pink that signals the end point.",
+  "The end point is colour-based, not a pH jump; KMnO<sub>4</sub> is not an acid-base indicator.",
+  "Starch-iodine blue belongs to iodometry, not to permanganate self-indication.",
+  "Diphenylamine is the indicator for dichromate titrations, not for permanganate."],
+ sol:"KMnO<sub>4</sub> is deeply coloured; at the end point the first unreacted drop gives a persistent pink, so it acts as its own indicator."},
+
+{id:61, lec:"L-6", blk:"Indicators", topic:"No HCl with KMnO₄", t:60,
+ q:"Permanganate titrations are never carried out in hydrochloric acid because:",
+ opts:[
+  "MnO<sub>4</sub><sup>−</sup> oxidises Cl⁻ to Cl<sub>2</sub>, consuming extra permanganate and giving a false high reading",
+  "HCl reduces Mn²⁺ to manganese metal",
+  "HCl precipitates MnO<sub>2</sub> prematurely",
+  "Cl⁻ catalyses decomposition of the oxalate being titrated"],
+ ans:0,
+ why:[
+  "Correct. Permanganate oxidises chloride, so some MnO<sub>4</sub><sup>−</sup> is wasted and the titre reads high.",
+  "Mn²⁺ is not reduced to the metal by HCl; the real problem is oxidation of Cl⁻.",
+  "No premature MnO<sub>2</sub> precipitation is involved; chloride oxidation is the issue.",
+  "Chloride does not catalyse oxalate breakdown; it is itself oxidised by permanganate."],
+ sol:"MnO<sub>4</sub><sup>−</sup> oxidises Cl⁻ to Cl<sub>2</sub>, consuming extra oxidant and giving a falsely high reading. Dilute H<sub>2</sub>SO<sub>4</sub> is used instead."},
+
+{id:62, lec:"L-6", blk:"Indicators", topic:"Starch in iodometry", t:60,
+ q:"In iodometric/iodimetric titrations the indicator, which turns blue with I<sub>2</sub>, is:",
+ opts:["starch","diphenylamine","phenolphthalein","methyl orange"],
+ ans:0,
+ why:[
+  "Correct. Starch forms an intense blue complex with iodine, marking the end point.",
+  "Diphenylamine is a redox indicator for dichromate, not for iodine.",
+  "Phenolphthalein is an acid-base indicator (colourless/pink), unrelated to I<sub>2</sub>.",
+  "Methyl orange is an acid-base indicator, not an iodine indicator."],
+ sol:"Starch gives a deep blue with I<sub>2</sub>; its disappearance (or appearance) marks the iodometric/iodimetric end point."},
+
+{id:63, lec:"L-6", blk:"Stoichiometry", topic:"Titration relation", t:90,
+ q:"At the equivalence point of a redox titration, the simplest relation to use is:",
+ opts:[
+  "N₁V₁ = N₂V₂, where normality N = molarity × n-factor",
+  "M₁V₁ = M₂V₂, regardless of n-factor",
+  "N₁V₁ = N₂V₂, where N = molarity ÷ n-factor",
+  "V₁/V₂ = n₁ × n₂"],
+ ans:0,
+ why:[
+  "Correct. Equal equivalents at the end point ⇒ N₁V₁ = N₂V₂ with N = M × n-factor.",
+  "Equating molarities ignores the differing n-factors and generally fails.",
+  "Normality is M × n-factor, not M ÷ n-factor.",
+  "This ratio is not a valid titration relation."],
+ sol:"Equivalents are equal at the end point: N<sub>1</sub>V<sub>1</sub> = N<sub>2</sub>V<sub>2</sub>, with N = M × n-factor. (Equivalently M<sub>1</sub>V<sub>1</sub>/n<sub>1</sub> = M<sub>2</sub>V<sub>2</sub>/n<sub>2</sub> by mole ratio.)"},
+
+{id:64, lec:"L-6", blk:"Stoichiometry", topic:"K₂Cr₂O₇ mass", t:90,
+ q:"How many grams of K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> (M = 294) are needed to oxidise 20.0 g of FeSO<sub>4</sub> (M = 152) to Fe³⁺ in acidic solution? (1 mol Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> ≡ 6 mol Fe²⁺)",
+ opts:["6.45 g","38.7 g","1.08 g","12.9 g"],
+ ans:0,
+ why:[
+  "Correct. 20/152 = 0.1316 mol Fe²⁺ ⇒ /6 = 0.0219 mol K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> × 294 = 6.45 g.",
+  "38.7 g ignores the 6 : 1 ratio and uses 1 mol dichromate per mol Fe²⁺.",
+  "1.08 g divides by the ratio twice or mishandles the molar masses.",
+  "12.9 g is the result of doubling the correct 6.45 g."],
+ sol:"Moles Fe²⁺ = 20/152 = 0.1316. Moles K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> = 0.1316/6 = 0.02193. Mass = 0.02193 × 294 = 6.45 g."},
+
+{id:65, lec:"L-6", blk:"Stoichiometry", topic:"Oxalate purity", t:180,
+ q:"1.80 g of an impure oxalate is dissolved to 250 mL; 20 mL of this needs 30 mL of M/50 KMnO<sub>4</sub> in acid. The percentage purity (as C<sub>2</sub>O<sub>4</sub><sup>2−</sup>, M = 88) is about:",
+ opts:["91.7 %","75.0 %","100 %","45.8 %"],
+ ans:0,
+ why:[
+  "Correct. The derivation gives 1.65 g pure oxalate in 1.80 g ⇒ 91.7 %.",
+  "75.0 % results from mishandling the 20 mL aliquot scaling to 250 mL.",
+  "100 % would need 1.80 g pure, but only 1.65 g is found.",
+  "45.8 % comes from forgetting the n-factor of KMnO<sub>4</sub> (dividing by 5 twice)."],
+ sol:"N(KMnO<sub>4</sub>) = (1/50)(5) = 0.1 N; equivalents = 0.1 × 30 = 3 meq ⇒ N(oxalate) = 3/20 = 0.15 ⇒ M = 0.075. Mass = 0.075 × 0.250 × 88 = 1.65 g ⇒ % = 1.65/1.80 × 100 = 91.7 %."},
+
+{id:66, lec:"L-6", blk:"Electrochemical series", topic:"More negative E°", t:90,
+ q:"In the electrochemical series (standard reduction potentials), a more negative E° value indicates:",
+ opts:[
+  "a stronger reducing agent / a more reactive metal",
+  "a stronger oxidising agent",
+  "a less reactive metal",
+  "an inability to take part in any redox reaction"],
+ ans:0,
+ why:[
+  "Correct. The more negative the E°, the more readily the species is oxidised (stronger reductant, more active metal).",
+  "Stronger oxidising agents sit at the more <b>positive</b> end of the series.",
+  "More negative E° means a more reactive (not less reactive) metal.",
+  "Such species are highly reactive reductants, not redox-inactive."],
+ sol:"More −ve E° ⇒ easier to oxidise ⇒ stronger reducing agent / more active metal (Li, K, Ca at the top). More +ve E° ⇒ stronger oxidant (F<sub>2</sub>, Cl<sub>2</sub>, Au at the bottom)."},
+
+{id:67, lec:"L-6", blk:"Electrode potential", topic:"Cell potential", t:90,
+ q:"The standard cell potential is correctly given by:",
+ opts:[
+  "E°cell = E°(cathode) − E°(anode), using reduction potentials",
+  "E°cell = E°(cathode) + E°(anode), using reduction potentials",
+  "E°cell = E°(anode) − E°(cathode), using reduction potentials",
+  "E°cell = E°(cathode) × E°(anode)"],
+ ans:0,
+ why:[
+  "Correct. Using reduction potentials, E°cell = E°cathode − E°anode (equivalently E°ox,anode + E°red,cathode).",
+  "Adding two reduction potentials double-counts; one electrode is being oxidised.",
+  "This has the sign reversed and would give a negative value for a spontaneous cell.",
+  "Cell potentials are not multiplied; they combine additively with correct signs."],
+ sol:"E°cell = E°(oxidation, anode) + E°(reduction, cathode) = E°(cathode) − E°(anode) in reduction-potential terms, since E°(ox) = −E°(red)."},
+
+{id:68, lec:"L-6", blk:"Electrochemical series", topic:"Liberating H₂", t:60,
+ q:"Which metals can liberate H<sub>2</sub> gas from a dilute acid?",
+ opts:[
+  "metals lying above hydrogen in the electrochemical series (e.g. Zn, Fe, Mg)",
+  "metals lying below hydrogen (e.g. Cu, Ag)",
+  "only the noble metals Au and Pt",
+  "no metal can liberate H<sub>2</sub> from a dilute acid"],
+ ans:0,
+ why:[
+  "Correct. Metals with more negative E° than H⁺/H<sub>2</sub> displace H<sub>2</sub> from dilute acid.",
+  "Metals below hydrogen (Cu, Ag) have positive E° and cannot liberate H<sub>2</sub>.",
+  "Noble metals are exactly those that do NOT liberate H<sub>2</sub>.",
+  "Active metals above hydrogen certainly do liberate H<sub>2</sub>."],
+ sol:"A metal above H<sub>2</sub> in the series (E° more negative than 0) is oxidised by H⁺, releasing H<sub>2</sub>: e.g. Zn + 2H⁺ → Zn²⁺ + H<sub>2</sub>."},
+
+{id:69, lec:"L-6", blk:"Electrode potential", topic:"SHE", t:60,
+ q:"The standard hydrogen electrode (SHE) is assigned an electrode potential of:",
+ opts:["0.000 V (by convention)","+1.000 V","−0.76 V","+0.34 V"],
+ ans:0,
+ why:[
+  "Correct. The SHE is the reference, defined as exactly 0.000 V.",
+  "+1.000 V is an arbitrary value, not the defined reference.",
+  "−0.76 V is the Zn²⁺/Zn reduction potential, not the SHE.",
+  "+0.34 V is the Cu²⁺/Cu reduction potential, not the SHE."],
+ sol:"Absolute electrode potentials cannot be measured, so the SHE is the reference, assigned E° = 0.000 V; all other values are quoted against it."},
+
+{id:70, lec:"L-6", blk:"Indicators", topic:"Dichromate indicator", t:60,
+ q:"Unlike KMnO<sub>4</sub>, K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> is not a self-indicator; a suitable internal indicator for dichromate titrations is:",
+ opts:["diphenylamine","starch","phenolphthalein","methyl red"],
+ ans:0,
+ why:[
+  "Correct. Diphenylamine is the usual internal redox indicator for dichromate titrations.",
+  "Starch is used with iodine (iodometry), not for dichromate.",
+  "Phenolphthalein is an acid-base indicator, not a redox one.",
+  "Methyl red is an acid-base indicator, unsuitable for a redox end point."],
+ sol:"K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> needs an internal indicator — <b>diphenylamine</b> (or external K<sub>3</sub>[Fe(CN)<sub>6</sub>]) — since it is not self-indicating."},
+
+{id:71, lec:"L-6", blk:"Electrochemical series", topic:"Halogen oxidising power", t:60,
+ q:"From the electrochemical series, the order of oxidising power of the halogens is:",
+ opts:[
+  "F<sub>2</sub> &gt; Cl<sub>2</sub> &gt; Br<sub>2</sub> &gt; I<sub>2</sub>",
+  "I<sub>2</sub> &gt; Br<sub>2</sub> &gt; Cl<sub>2</sub> &gt; F<sub>2</sub>",
+  "Cl<sub>2</sub> &gt; F<sub>2</sub> &gt; Br<sub>2</sub> &gt; I<sub>2</sub>",
+  "Br<sub>2</sub> &gt; Cl<sub>2</sub> &gt; I<sub>2</sub> &gt; F<sub>2</sub>"],
+ ans:0,
+ why:[
+  "Correct. F<sub>2</sub> has the highest reduction potential, so oxidising power falls F<sub>2</sub> &gt; Cl<sub>2</sub> &gt; Br<sub>2</sub> &gt; I<sub>2</sub>.",
+  "This is the exact reverse; I<sub>2</sub> is the weakest oxidant.",
+  "Cl<sub>2</sub> does not exceed F<sub>2</sub>; fluorine is the strongest oxidant.",
+  "Br<sub>2</sub> is not the strongest; fluorine leads the order."],
+ sol:"Reduction potentials fall F<sub>2</sub> (+2.87) &gt; Cl<sub>2</sub> (+1.36) &gt; Br<sub>2</sub> &gt; I<sub>2</sub>, so oxidising power follows the same order."},
+
+{id:72, lec:"L-6", blk:"Electrochemical series", topic:"Displacement rule", t:60,
+ q:"A metal placed higher in the electrochemical series will:",
+ opts:[
+  "displace a metal lower in the series from a solution of its salt",
+  "be displaced by a metal lower in the series",
+  "never take part in a displacement reaction",
+  "displace only non-metals, never metals"],
+ ans:0,
+ why:[
+  "Correct. The more active (higher) metal reduces the ion of the less active (lower) one.",
+  "Reversed: the higher metal is the one that does the displacing, not the one displaced.",
+  "Higher metals are the most reactive and readily displace others.",
+  "Metal displacement of metals (e.g. Zn displacing Cu) is exactly what happens."],
+ sol:"A metal higher (more negative E°) displaces a lower metal from its salt solution, e.g. Zn + CuSO<sub>4</sub> → ZnSO<sub>4</sub> + Cu."},
+
+{id:73, lec:"L-6", blk:"Stoichiometry", topic:"Permanganate-oxalate electrons", t:90,
+ q:"In 2MnO<sub>4</sub><sup>−</sup> + 5C<sub>2</sub>O<sub>4</sub><sup>2−</sup> + 16H⁺ → 2Mn²⁺ + 10CO<sub>2</sub> + 8H<sub>2</sub>O, the number of electrons transferred (for the coefficients shown) is:",
+ opts:["10","5","2","16"],
+ ans:0,
+ why:[
+  "Correct. 2 Mn each gain 5 e⁻ (= 10), matching 5 oxalate each losing 2 e⁻ (= 10).",
+  "5 is the oxalate coefficient, not the electron total.",
+  "2 is the MnO<sub>4</sub><sup>−</sup> coefficient, not the electron total.",
+  "16 is the number of H⁺, not the electrons transferred."],
+ sol:"Reduction: 2 MnO<sub>4</sub><sup>−</sup> × 5 e⁻ = 10 e⁻. Oxidation: 5 C<sub>2</sub>O<sub>4</sub><sup>2−</sup> × 2 e⁻ = 10 e⁻. Electrons transferred = 10."},
+
+/* ---------------- SB (17) ---------------- */
+{id:74, lec:"SB", blk:"Pattern of the Strong Box", topic:"CrO₅ (sum X+Y+Z)", t:180,
+ q:"In the blue peroxide CrO<sub>5</sub> (= CrO(O<sub>2</sub>)<sub>2</sub>): X = number of peroxo O<sub>2</sub><sup>2−</sup> units, Y = total O atoms, Z = oxidation state of Cr. Find X + Y + Z. (JEE Main 2026)",
+ opts:["13","11","15","10"],
+ ans:0,
+ why:[
+  "Correct. X = 2 peroxo units, Y = 5 oxygens, Z = +6 ⇒ 2 + 5 + 6 = 13.",
+  "11 uses the wrong Cr state (+4 instead of +6).",
+  "15 over-counts the oxygen atoms or the peroxo units.",
+  "10 drops one of the three contributions."],
+ sol:"CrO<sub>5</sub> = CrO(O<sub>2</sub>)<sub>2</sub>: X = 2 peroxo units, Y = 5 O atoms, Z = +6 (four peroxo O at −1, one oxo O at −2). X + Y + Z = 2 + 5 + 6 = 13."},
+
+{id:75, lec:"SB", blk:"Pattern of the Strong Box", topic:"KI + KMnO₄ (basic) titre", t:180,
+ q:"500 mL of 1.2 M KI is mixed with 500 mL of 0.2 M KMnO<sub>4</sub> in basic medium; the liberated I<sub>2</sub> is titrated with 0.1 M Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>. The volume of Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> consumed is: (JEE Main 2026)",
+ opts:["3 L","1.5 L","6 L","0.3 L"],
+ ans:0,
+ why:[
+  "Correct. 0.1 mol KMnO<sub>4</sub> × 3 e⁻ = 0.3 mol e⁻ ⇒ 0.15 mol I<sub>2</sub> ⇒ 0.3 mol thiosulphate ⇒ 3 L.",
+  "1.5 L halves the thiosulphate (forgets the 2 : 1 ratio with I<sub>2</sub>).",
+  "6 L uses the acidic 5-electron change for MnO<sub>4</sub><sup>−</sup> instead of the basic 3-electron one.",
+  "0.3 L misplaces a decimal in V = moles/molarity."],
+ sol:"Basic: MnO<sub>4</sub><sup>−</sup> + 2H<sub>2</sub>O + 3e⁻ → MnO<sub>2</sub> + 4OH⁻. Moles KMnO<sub>4</sub> = 0.1 ⇒ 0.3 mol e⁻ ⇒ 0.3 mol I⁻ oxidised ⇒ 0.15 mol I<sub>2</sub>. I<sub>2</sub> + 2S<sub>2</sub>O<sub>3</sub><sup>2−</sup>: moles S<sub>2</sub>O<sub>3</sub><sup>2−</sup> = 0.3 ⇒ V = 0.3/0.1 = 3 L."},
+
+{id:76, lec:"SB", blk:"Pattern of the Strong Box", topic:"MnO₄²⁻ disproportionation", t:90,
+ q:"In acidic medium MnO<sub>4</sub><sup>2−</sup> disproportionates to: (JEE Main 2026)",
+ opts:["MnO<sub>4</sub><sup>−</sup> and MnO<sub>2</sub>","Mn<sub>2</sub>O<sub>7</sub> and MnO<sub>2</sub>","MnO<sub>4</sub><sup>−</sup> and MnO","Mn<sub>2</sub>O<sub>7</sub> and MnO"],
+ ans:0,
+ why:[
+  "Correct. Mn +6 goes up to +7 (MnO<sub>4</sub><sup>−</sup>) and down to +4 (MnO<sub>2</sub>).",
+  "Mn<sub>2</sub>O<sub>7</sub> (Mn +7) is not the manganate disproportionation product; MnO<sub>4</sub><sup>−</sup> is.",
+  "MnO would require Mn +2, too deep a reduction for this disproportionation.",
+  "Both products are wrong: neither Mn<sub>2</sub>O<sub>7</sub> nor MnO forms here."],
+ sol:"3MnO<sub>4</sub><sup>2−</sup> + 4H⁺ → 2MnO<sub>4</sub><sup>−</sup> (+7) + MnO<sub>2</sub> (+4) + 2H<sub>2</sub>O: Mn +6 disproportionates to +7 and +4."},
+
+{id:77, lec:"SB", blk:"Pattern of the Strong Box", topic:"Chromate ⇌ dichromate", t:90,
+ q:"K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> --(KOH)→ A --(H<sub>2</sub>SO<sub>4</sub>)→ B + K<sub>2</sub>SO<sub>4</sub>. A and B are: (JEE Main 2025)",
+ opts:[
+  "A = K<sub>2</sub>CrO<sub>4</sub> (yellow), B = K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> (orange)",
+  "A = K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>, B = K<sub>2</sub>CrO<sub>4</sub>",
+  "A = CrO<sub>3</sub>, B = K<sub>2</sub>CrO<sub>4</sub>",
+  "A = K<sub>2</sub>CrO<sub>4</sub>, B = CrO<sub>3</sub>"],
+ ans:0,
+ why:[
+  "Correct. Base converts dichromate to yellow chromate (A); acid reconverts it to orange dichromate (B).",
+  "Reversed: base gives chromate first, so A is K<sub>2</sub>CrO<sub>4</sub>, not dichromate.",
+  "CrO<sub>3</sub> forms only with very concentrated acid, not as A from KOH.",
+  "B is dichromate (acid side), not CrO<sub>3</sub>."],
+ sol:"Dichromate + base → chromate: A = K<sub>2</sub>CrO<sub>4</sub>. Chromate + acid → dichromate: B = K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>. No change in Cr oxidation state (+6)."},
+
+{id:78, lec:"SB", blk:"Pattern of the Strong Box", topic:"KMnO₄ preparation step", t:90,
+ q:"In preparing KMnO<sub>4</sub> from MnO<sub>2</sub>, the first step (fusion with KOH and an oxidant) gives: (JEE Main 2025)",
+ opts:["K<sub>2</sub>MnO<sub>4</sub> (green manganate)","KMnO<sub>4</sub> directly","MnCl<sub>2</sub>","Mn<sub>2</sub>O<sub>3</sub>"],
+ ans:0,
+ why:[
+  "Correct. MnO<sub>2</sub> is first oxidised to the green manganate K<sub>2</sub>MnO<sub>4</sub> (Mn +6).",
+  "KMnO<sub>4</sub> forms only in the second step, by oxidising the manganate.",
+  "MnCl<sub>2</sub> is a reduced Mn(II) species, not a product of alkaline oxidation.",
+  "Mn<sub>2</sub>O<sub>3</sub> is not formed in this alkaline-fusion route."],
+ sol:"Step 1: 2MnO<sub>2</sub> + 4KOH + O<sub>2</sub> → 2K<sub>2</sub>MnO<sub>4</sub> + 2H<sub>2</sub>O (green manganate, Mn +6). Step 2 oxidises it to KMnO<sub>4</sub>."},
+
+{id:79, lec:"SB", blk:"Pattern of the Strong Box", topic:"Halogen disproportionation", t:90,
+ q:"Among F<sub>2</sub>, Cl<sub>2</sub>, Br<sub>2</sub> and I<sub>2</sub>, those that can undergo disproportionation are: (JEE Main 2025)",
+ opts:["Cl<sub>2</sub>, Br<sub>2</sub> and I<sub>2</sub>","all four","F<sub>2</sub> only","F<sub>2</sub> and Cl<sub>2</sub> only"],
+ ans:0,
+ why:[
+  "Correct. Each of Cl<sub>2</sub>, Br<sub>2</sub>, I<sub>2</sub> goes 0 → −1 and 0 → +1; F<sub>2</sub> cannot.",
+  "F<sub>2</sub> has no positive oxidation state, so 'all four' is wrong.",
+  "F<sub>2</sub> is precisely the one that cannot disproportionate.",
+  "F<sub>2</sub> cannot disproportionate, so this pairing is wrong."],
+ sol:"Disproportionation needs a positive and a negative state. F shows no positive O.N., so only Cl<sub>2</sub>, Br<sub>2</sub>, I<sub>2</sub> disproportionate (0 → −1 and 0 → +1)."},
+
+{id:80, lec:"SB", blk:"Pattern of the Strong Box", topic:"Species not disproportionating", t:90,
+ q:"The species which does NOT undergo disproportionation is: (JEE Main 2025)",
+ opts:["ClO<sub>4</sub><sup>−</sup>","ClO<sup>−</sup>","ClO<sub>2</sub><sup>−</sup>","ClO<sub>3</sub><sup>−</sup>"],
+ ans:0,
+ why:[
+  "Correct. Cl is +7 (maximum) in ClO<sub>4</sub><sup>−</sup>, so it can only be reduced.",
+  "ClO<sup>−</sup> (Cl +1) is intermediate and disproportionates.",
+  "ClO<sub>2</sub><sup>−</sup> (Cl +3) is intermediate and disproportionates.",
+  "ClO<sub>3</sub><sup>−</sup> (Cl +5) is intermediate and disproportionates."],
+ sol:"Disproportionation needs an intermediate O.N. Cl is at its highest (+7) in ClO<sub>4</sub><sup>−</sup>, so it cannot disproportionate; the +1/+3/+5 species all can."},
+
+{id:81, lec:"SB", blk:"Pattern of the Strong Box", topic:"z in MnO₄⁻ + I⁻ (basic)", t:90,
+ q:"For the balanced 2MnO<sub>4</sub><sup>−</sup> + 6I⁻ + cH<sub>2</sub>O → 3I<sub>2</sub> + 2MnO<sub>2</sub> + zOH⁻ (basic), the value of z is: (JEE Main 2024)",
+ opts:["8","6","4","2"],
+ ans:0,
+ why:[
+  "Correct. Charge balance: left −2 − 6 = −8, so z = 8 (OH⁻ on the right).",
+  "6 would leave the left and right charges unequal.",
+  "4 is the water coefficient c, not the OH⁻ count.",
+  "2 is the MnO<sub>4</sub><sup>−</sup> coefficient, not z."],
+ sol:"Mn +7 → +4 (2 Mn ⇒ 6 e⁻); 6 I⁻ → 3 I<sub>2</sub> (6 e⁻). Charge: (−2 −6) must equal −z ⇒ z = 8: 2MnO<sub>4</sub><sup>−</sup> + 6I⁻ + 4H<sub>2</sub>O → 3I<sub>2</sub> + 2MnO<sub>2</sub> + 8OH⁻."},
+
+{id:82, lec:"SB", blk:"Pattern of the Strong Box", topic:"Cl₂ + cold dilute OH⁻", t:90,
+ q:"In aCl<sub>2</sub> + bOH⁻ → cClO<sup>−</sup> + dCl⁻ + eH<sub>2</sub>O (cold dilute alkali), the values of a, b, c, d are: (JEE Main 2024)",
+ opts:["1, 2, 1, 1","1, 2, 2, 2","2, 4, 1, 1","3, 6, 1, 5"],
+ ans:0,
+ why:[
+  "Correct. Cl<sub>2</sub> + 2OH⁻ → ClO⁻ + Cl⁻ + H<sub>2</sub>O gives a = 1, b = 2, c = 1, d = 1.",
+  "Doubling c and d breaks the chlorine balance (only one Cl<sub>2</sub> is used).",
+  "a = 2 would need 2 Cl<sub>2</sub>, which overcounts the products shown.",
+  "3, 6, 1, 5 is the hot concentrated case giving ClO<sub>3</sub><sup>−</sup>, not ClO<sup>−</sup>."],
+ sol:"Cold dilute alkali: Cl<sub>2</sub> + 2OH⁻ → ClO⁻ + Cl⁻ + H<sub>2</sub>O (Cl 0 → +1 and 0 → −1). a = 1, b = 2, c = 1, d = 1."},
+
+{id:83, lec:"SB", blk:"Pattern of the Strong Box", topic:"Count of disproportionating species", t:90,
+ q:"The number of species among H<sub>2</sub>O<sub>2</sub>, ClO<sub>3</sub><sup>−</sup>, P<sub>4</sub>, Cl<sub>2</sub>, Ag, Cu⁺, F<sub>2</sub>, NO<sub>2</sub>, K⁺ that can undergo disproportionation is: (JEE Main 2024)",
+ opts:["6","5","7","4"],
+ ans:0,
+ why:[
+  "Correct. H<sub>2</sub>O<sub>2</sub>, ClO<sub>3</sub><sup>−</sup>, P<sub>4</sub>, Cl<sub>2</sub>, Cu⁺, NO<sub>2</sub> (6) disproportionate.",
+  "5 drops one valid species (such as NO<sub>2</sub>).",
+  "7 wrongly counts one of Ag, F<sub>2</sub> or K⁺.",
+  "4 omits two of the six genuine disproportionating species."],
+ sol:"Intermediate-state species disproportionate: H<sub>2</sub>O<sub>2</sub>, ClO<sub>3</sub><sup>−</sup>, P<sub>4</sub>, Cl<sub>2</sub>, Cu⁺, NO<sub>2</sub> = 6. Ag (metal), F<sub>2</sub> (no +ve state), K⁺ (fixed +1) cannot."},
+
+{id:84, lec:"SB", blk:"Pattern of the Strong Box", topic:"Magnetic moment difference", t:180,
+ q:"KMnO<sub>4</sub> is titrated with oxalic acid in acidic medium. The difference in spin-only magnetic moment (BM) between KMnO<sub>4</sub> and the manganese product is nearest to: (JEE Main 2024)",
+ opts:["6","0","5","4"],
+ ans:0,
+ why:[
+  "Correct. Mn⁷⁺ (d⁰) μ = 0; Mn²⁺ (d⁵) μ = √35 = 5.92 ⇒ difference ≈ 6.",
+  "0 ignores the product Mn²⁺, which has five unpaired electrons.",
+  "5 is the number of unpaired electrons, not the magnetic moment difference.",
+  "4 would correspond to four unpaired electrons, but Mn²⁺ has five."],
+ sol:"KMnO<sub>4</sub>: Mn⁷⁺ d⁰ ⇒ μ = 0. Product Mn²⁺ d⁵ ⇒ μ = √(5×7) = √35 = 5.92 BM. Difference = 5.92 − 0 ≈ 6."},
+
+{id:85, lec:"SB", blk:"Pattern of the Strong Box", topic:"H⁺ for MnO₄⁻–oxalate", t:90,
+ q:"The number of moles of H⁺ required by 1 mol MnO<sub>4</sub><sup>−</sup> to oxidise oxalate to CO<sub>2</sub> in acidic medium is: (JEE Main 2024)",
+ opts:["8","5","16","4"],
+ ans:0,
+ why:[
+  "Correct. MnO<sub>4</sub><sup>−</sup> + 8H⁺ + 5e⁻ → Mn²⁺ + 4H<sub>2</sub>O needs 8 H⁺ per MnO<sub>4</sub><sup>−</sup>.",
+  "5 is the electron count, not the H⁺ required.",
+  "16 is the H⁺ for 2 MnO<sub>4</sub><sup>−</sup>, not for 1.",
+  "4 is the number of water molecules formed, not the H⁺."],
+ sol:"MnO<sub>4</sub><sup>−</sup> + 8H⁺ + 5e⁻ → Mn²⁺ + 4H<sub>2</sub>O: one MnO<sub>4</sub><sup>−</sup> consumes 8 H⁺."},
+
+{id:86, lec:"SB", blk:"Pattern of the Strong Box", topic:"KMnO₄ molarity from oxalic", t:180,
+ q:"Exactly 2 mL of KMnO<sub>4</sub> reaches the end point with 20 mL of 2 M oxalic acid in acidic medium. The molarity of the KMnO<sub>4</sub> is: (JEE Main 2024)",
+ opts:["8 M","4 M","16 M","40 M"],
+ ans:0,
+ why:[
+  "Correct. Equivalents: (2×2)(20) = (M×5)(2) ⇒ M = 8.",
+  "4 M omits a factor of 2 in the oxalic-acid normality.",
+  "16 M doubles the correct value.",
+  "40 M is the normality of KMnO<sub>4</sub>, before dividing by the n-factor 5."],
+ sol:"N(oxalic) = 2 × 2 = 4; meq = 4 × 20 = 80. KMnO<sub>4</sub>: N × 2 = 80 ⇒ N = 40 ⇒ M = 40/5 = 8 M."},
+
+{id:87, lec:"SB", blk:"Pattern of the Strong Box", topic:"Oxidising-power order", t:90,
+ q:"Given reduction potentials ClO<sub>4</sub><sup>−</sup> 1.19 V, IO<sub>4</sub><sup>−</sup> 1.65 V, BrO<sub>4</sub><sup>−</sup> 1.74 V, the correct order of oxidising power is: (JEE Main 2024)",
+ opts:[
+  "BrO<sub>4</sub><sup>−</sup> &gt; IO<sub>4</sub><sup>−</sup> &gt; ClO<sub>4</sub><sup>−</sup>",
+  "ClO<sub>4</sub><sup>−</sup> &gt; IO<sub>4</sub><sup>−</sup> &gt; BrO<sub>4</sub><sup>−</sup>",
+  "IO<sub>4</sub><sup>−</sup> &gt; BrO<sub>4</sub><sup>−</sup> &gt; ClO<sub>4</sub><sup>−</sup>",
+  "ClO<sub>4</sub><sup>−</sup> &gt; BrO<sub>4</sub><sup>−</sup> &gt; IO<sub>4</sub><sup>−</sup>"],
+ ans:0,
+ why:[
+  "Correct. Higher reduction potential ⇒ stronger oxidant: 1.74 &gt; 1.65 &gt; 1.19.",
+  "This reverses the trend; ClO<sub>4</sub><sup>−</sup> has the lowest potential.",
+  "IO<sub>4</sub><sup>−</sup> (1.65) is below BrO<sub>4</sub><sup>−</sup> (1.74), so this order is wrong.",
+  "ClO<sub>4</sub><sup>−</sup> is the weakest oxidant, so it cannot lead the order."],
+ sol:"Oxidising power rises with reduction potential: BrO<sub>4</sub><sup>−</sup> (1.74) &gt; IO<sub>4</sub><sup>−</sup> (1.65) &gt; ClO<sub>4</sub><sup>−</sup> (1.19)."},
+
+{id:88, lec:"SB", blk:"Pattern of the Strong Box", topic:"Cr₂O₇²⁻ + Fe²⁺ (sum)", t:180,
+ q:"For Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + XH⁺ + 6Fe²⁺ → YCr³⁺ + 6Fe³⁺ + ZH<sub>2</sub>O, the value of X + Y + Z is: (JEE Main 2023)",
+ opts:["23","21","25","20"],
+ ans:0,
+ why:[
+  "Correct. X = 14, Y = 2, Z = 7 ⇒ 14 + 2 + 7 = 23.",
+  "21 uses Z = 5 or Y = 0, both wrong.",
+  "25 over-counts one of the coefficients.",
+  "20 under-counts the hydrogen or water coefficient."],
+ sol:"Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 14H⁺ + 6Fe²⁺ → 2Cr³⁺ + 6Fe³⁺ + 7H<sub>2</sub>O ⇒ X = 14, Y = 2, Z = 7 ⇒ sum = 23."},
+
+{id:89, lec:"SB", blk:"Pattern of the Strong Box", topic:"x in IO₃⁻ + I⁻", t:180,
+ q:"In 2IO<sub>3</sub><sup>−</sup> + xI⁻ + 12H⁺ → 6I<sub>2</sub> + 6H<sub>2</sub>O, the value of x is: (JEE Main 2023)",
+ opts:["10","6","12","5"],
+ ans:0,
+ why:[
+  "Correct. Iodine balance: 2 + x = 12 ⇒ x = 10 (charge and O also check).",
+  "6 leaves the iodine atoms unbalanced (2 + 6 = 8 ≠ 12).",
+  "12 over-supplies iodide; the iodine count would exceed 12.",
+  "5 badly under-counts the iodide needed."],
+ sol:"I balance: left 2 + x = right 12 (= 6 I<sub>2</sub>) ⇒ x = 10. Charge: −2 − 10 + 12 = 0 ✓; O: 6 = 6 ✓."},
+
+{id:90, lec:"SB", blk:"Pattern of the Strong Box", topic:"Weakest reducing alkali metal", t:90,
+ q:"Which alkali metal is the WEAKEST reducing agent: Li, Na, K, Rb? (JEE Main 2023)",
+ opts:["Na","Li","K","Rb"],
+ ans:0,
+ why:[
+  "Correct. Na has the least negative E° (−2.71 V), so it is the weakest reducing agent.",
+  "Li has the most negative E° (−3.04 V) — the strongest reducing agent, not the weakest.",
+  "K (−2.93 V) is more negative than Na, so it is a stronger reductant.",
+  "Rb (−2.98 V) is more negative than Na, so it is a stronger reductant."],
+ sol:"Reducing power ∝ (−ve) E°. E°: Li −3.04, Rb −2.98, K −2.93, Na −2.71. Least negative = weakest reductant = Na."}
+
+];
+
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter " + CH_TAG + " mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("pTime").textContent = "0:00";
+
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
+    }
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
+  });
+  showQ(0);
+  updateProgress();
+  show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const b = $("pb" + id); if (b) b.classList.add("ans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length, left = pool.length - n;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
+}
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0, slow = 0;
+  pool.forEach(id => {
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
+    else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? DONE_TITLE : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
+  examStop();
+  show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

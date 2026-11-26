@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C-8 Redox Reaction — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+  <nav class="toc">
+    <h3>Chapter C-8</h3>
+    <a class="top" href="#top">↑ Overview &amp; Key Formulas</a>
+    <a href="#l1">L-1 · Oxidation–Reduction &amp; Oxidation Number</a>
+    <a href="#l2">L-2 · Electronic Concept &amp; Types of Redox</a>
+    <a href="#l3">L-3 · Balancing — Oxidation-Number Method</a>
+    <a href="#l4">L-4 · Balancing — Ion-Electron Method</a>
+    <a href="#l5">L-5 · Equivalent Weight, Disproportionation &amp; n-factor</a>
+    <a href="#l6">L-6 · Redox Titrations &amp; Electrode Potential</a>
+    <a href="#strongbox">Strong Box · Previous Year Qs</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD · JEE Chemistry · Revision Notes</p>
+      <h1>C-8 · Redox Reaction</h1>
+      <p>Lectures L-1 to L-6 · classical &amp; electronic concepts of oxidation–reduction, oxidation number &amp; its rules, oxidant/reductant, types of redox (combination, decomposition, displacement, disproportionation), balancing by the oxidation-number and ion-electron methods, equivalent weight &amp; n-factor, redox titrations (KMnO₄, K₂Cr₂O₇, iodimetric/iodometric), stoichiometry of redox in solution, electrode potential &amp; the electrochemical series.</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- MEMORIZE -->
+    <section class="lec" id="card">
+      <div class="lec-head"><span class="lec-tag">★ MEMORIZE</span><h2>Key Definitions, Rules &amp; Formulas</h2></div>
+
+      <h3 class="sub">Oxidation, reduction &amp; the agents</h3>
+      <div class="twrap"><table>
+        <tr><th>Term</th><th>Classical</th><th>Electronic</th><th>Oxidation number</th></tr>
+        <tr><td>Oxidation</td><td>add O / electronegative radical; remove H / electropositive radical</td><td><b>loss of e⁻</b></td><td>O.N. <b>increases</b></td></tr>
+        <tr><td>Reduction</td><td>add H; remove O</td><td><b>gain of e⁻</b></td><td>O.N. <b>decreases</b></td></tr>
+        <tr><td>Oxidising agent (oxidant)</td><td>supplies O / removes H</td><td><b>accepts</b> e⁻ (itself reduced)</td><td>O.N. decreases</td></tr>
+        <tr><td>Reducing agent (reductant)</td><td>supplies H / removes O</td><td><b>loses</b> e⁻ (itself oxidised)</td><td>O.N. increases</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">★ Core idea</span>Oxidation and reduction are <b>reciprocal</b> — they always occur together. The oxidant is reduced; the reductant is oxidised. <b>LEO says GER</b>: Loss of Electrons = Oxidation, Gain of Electrons = Reduction.</div>
+
+      <h3 class="sub">Rules for assigning oxidation number (O.N.)</h3>
+      <ul>
+        <li>Free element = <b>0</b> (H₂, N₂, P₄, O₂, metals).</li>
+        <li>H = <b>+1</b> (−1 in metal hydrides, NaH). Alkali metals = +1, alkaline-earth = +2, F always <b>−1</b>.</li>
+        <li>O = <b>−2</b> usually; <b>−1</b> in peroxides (–O–O–), <b>+2</b> in OF₂, <b>−(1/2)</b> in superoxides (KO₂).</li>
+        <li>Sum of O.N. in a neutral molecule = 0; in an ion = charge on the ion.</li>
+        <li>O.N. may be integral, fractional (average, e.g. Fe in Fe₃O₄ = +8/3), zero or negative. Max O.N. = group number (F, O are exceptions); min O.N. = group − 8.</li>
+        <li>Special: in CrO₅ (butterfly, 4 peroxo O at −1, one O at −2) Cr = <b>+6</b>; in S₂O₈²⁻ (one peroxide link) S = +6; in Na₂S₂ (persulphide) S = −1.</li>
+      </ul>
+
+      <h3 class="sub">Types of redox reaction</h3>
+      <div class="twrap"><table>
+        <tr><th>Type</th><th>Example</th></tr>
+        <tr><td>Combination</td><td>C + O₂ → CO₂ ; 3Mg + N₂ → Mg₃N₂</td></tr>
+        <tr><td>Decomposition</td><td>2H₂O → 2H₂ + O₂ ; 2NaH → 2Na + H₂</td></tr>
+        <tr><td>Displacement (metal / non-metal)</td><td>Zn + CuSO₄ → ZnSO₄ + Cu ; Cl₂ + 2KBr → 2KCl + Br₂</td></tr>
+        <tr><td><b>Disproportionation</b></td><td>same element both oxidised &amp; reduced: 2H₂O₂ → 2H₂O + O₂ ; 3ClO⁻ → 2Cl⁻ + ClO₃⁻</td></tr>
+        <tr><td>Comproportionation</td><td>reverse of disproportionation: 2MnO₄⁻ + 3Mn²⁺ + 2H₂O → 5MnO₂ + 4H⁺</td></tr>
+      </table></div>
+      <div class="call tip"><span class="h">💡 Disproportionation needs an intermediate O.N.</span>Only an element in an <b>intermediate</b> state can disproportionate. <b>ClO₄⁻ (Cl = +7, highest) cannot</b>; ClO⁻, ClO₂⁻, ClO₃⁻ can. <b>F₂ cannot</b> (no positive state); Cl₂, Br₂, I₂ can.</div>
+
+      <h3 class="sub">n-factor, equivalent weight &amp; redox titration</h3>
+      <div class="formula"><span class="lbl">equivalent weight</span>E = (molar mass) / (n-factor) ; n-factor(redox) = electrons gained or lost by one formula unit = (change in O.N.) × (no. of atoms)</div>
+      <div class="formula"><span class="lbl">for a disproportionating species</span>n-factor = (n₁ × n₂)/(n₁ + n₂) , where n₁ = e⁻ lost, n₂ = e⁻ gained per molecule</div>
+      <div class="formula"><span class="lbl">titration equations</span>molarity: M₁V₁/n₁ = M₂V₂/n₂ · normality: N₁V₁ = N₂V₂ (N = M × n-factor) · Strength = Normality × Eq. wt.</div>
+      <div class="twrap"><table>
+        <tr><th>Oxidant (acidic)</th><th>Half-reaction</th><th>n-factor · Eq. wt.</th></tr>
+        <tr><td>MnO₄⁻ (acidic)</td><td>MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O</td><td>5 · M/5</td></tr>
+        <tr><td>MnO₄⁻ (neutral/faint base)</td><td>MnO₄⁻ + 4H⁺ + 3e⁻ → MnO₂ + 2H₂O</td><td>3 · M/3</td></tr>
+        <tr><td>MnO₄⁻ (strong base)</td><td>MnO₄⁻ + e⁻ → MnO₄²⁻</td><td>1 · M/1</td></tr>
+        <tr><td>Cr₂O₇²⁻ (acidic)</td><td>Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O</td><td>6 · M/6</td></tr>
+        <tr><td>C₂O₄²⁻ (reductant)</td><td>C₂O₄²⁻ → 2CO₂ + 2e⁻</td><td>2 · M/2</td></tr>
+      </table></div>
+      <div class="call tip"><span class="h">💡 Indicators</span>KMnO₄ is a <b>self-indicator</b> (persistent pink at end point). K₂Cr₂O₇ needs an internal indicator (diphenylamine) or external (K₃[Fe(CN)₆]). <b>Starch</b> → blue with I₂ in iodometric/iodimetric titrations. Permanganate titrations are never done in HCl (Cl⁻ is oxidised to Cl₂).</div>
+
+      <h3 class="sub">Electrode potential &amp; electrochemical series</h3>
+      <div class="formula"><span class="lbl">cell &amp; sign convention</span>E°cell = E°(oxidation, anode) + E°(reduction, cathode) · E°(oxidation) = −E°(reduction) · SHE assigned 0.000 V</div>
+      <ul>
+        <li>In the electrochemical series (reduction potentials): <b>more −ve E°</b> = stronger reducing agent, more active metal (top: Li, K, Ca…). <b>More +ve E°</b> = stronger oxidising agent (bottom: F₂, Cl₂, Au…).</li>
+        <li>A metal higher in the series displaces one lower from solution; metals above H₂ liberate H₂ from dilute acid.</li>
+      </ul>
+      <div class="call star"><span class="h">★ Golden workflow</span>Most redox numericals reduce to: (1) assign O.N. → find what is oxidised/reduced; (2) write &amp; balance half-reactions (mass <b>and</b> charge); (3) apply <b>M₁V₁/n₁ = M₂V₂/n₂</b> or mole-ratio. Always balance in <b>both mass and charge</b>.</div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Oxidation–Reduction (Classical) &amp; Oxidation Number</h2></div>
+      <h3 class="sub">Classical definitions</h3>
+      <ul>
+        <li><b>Oxidation</b> = addition of oxygen or any electronegative radical, OR removal of hydrogen or any electropositive radical. e.g. C + O₂ → CO₂ ; 2FeCl₂ + Cl₂ → 2FeCl₃ ; H₂S + Br₂ → 2HBr + S ; 2KI + H₂O₂ → 2KOH + I₂.</li>
+        <li><b>Reduction</b> = addition of hydrogen / electropositive radical, OR removal of oxygen / electronegative radical. e.g. 2HgCl₂ + SnCl₂ → Hg₂Cl₂ + SnCl₄ ; CuO + H₂ → Cu + H₂O ; 2FeCl₃ + H₂ → 2FeCl₂ + 2HCl.</li>
+        <li><b>Redox is reciprocal:</b> if one substance is oxidised the other is reduced simultaneously. An oxidant, after oxidising the other, is itself reduced; a reductant is itself oxidised.</li>
+      </ul>
+      <h3 class="sub">Oxidation number &amp; oxidation state</h3>
+      <ul>
+        <li><b>Oxidation number</b> = the charge (real or apparent) an atom carries in a species; positive if the atom donates electrons, negative if it accepts. e.g. in FeCl₃, Fe gives up 3e⁻ → O.N. of Fe = +3, each Cl = −1.</li>
+        <li><b>Oxidation state</b> = oxidation number per atom (in KMnO₄, Mn is in the +7 state).</li>
+      </ul>
+      <div class="formula"><span class="lbl">valency vs oxidation number</span>valency = combining capacity (always ≥ 0, usually a fixed integer) ; O.N. = signed charge (may be +, −, zero, integral or fractional)</div>
+      <div class="det-block det">
+        <div class="dh">Rules used to compute O.N. (full list)</div>
+        (1) free state → 0. (2) H = +1 (−1 in metal hydrides); group-1 metals +1, group-2 +2; O = −2 (−1 peroxide, +2 OF₂, −(1/2) superoxide); F always −1; halogens −1 in halides; S = −2 in sulphides. (3) Σ O.N. in a molecule = 0. (4) Σ O.N. in a polyatomic ion = net charge. (5) O.N. may be a +/− integer or fraction (an element in two different states gives a fractional average). (6) max O.N. = group number (F, O excepted); (7) min O.N. = group − 8 (metals excepted). (8) transition &amp; p-block elements show variable O.N. (9) in amalgams &amp; metal carbonyls the metal O.N. is 0. (10) in FeSO₄·NO (brown-ring), NO is +1 and Fe is +1. (11) in persulphides (Na₂S₂) S = −1. (12) in CrO₅ (butterfly) Cr = +6. (13) in K₃CrO₈ Cr = +5 (tetraperoxo complex).
+      </div>
+      <div class="call trap"><span class="h">⚠ Trap</span>Fractional O.N. is an <b>average</b>. In Fe₃O₄ the "+8/3" means a mixture of Fe²⁺ and 2 Fe³⁺; in Na₂S₄O₆ the "+2.5" averages two S at 0 and two S at +5.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Oxidation number of sulphur in (i) H₂S (ii) H₂SO₃ (iii) SO₄²⁻ (iv) Na₂S₂O₃ (v) S₂O₇²⁻.</div>
+        <div class="s">Take H = +1, O = −2, Na = +1 and let S = x; set the O.N. sum equal to the charge.</div>
+        <div class="s">(i) 2(+1) + x = 0 → x = <b>−2</b>. (ii) 2(+1) + x + 3(−2) = 0 → x = <b>+4</b>. (iii) x + 4(−2) = −2 → x = <b>+6</b>.</div>
+        <div class="s">(iv) 2(+1) + 2x + 3(−2) = 0 → 2x = 4 → x = <b>+2</b> (average). (v) 2x + 7(−2) = −2 → 2x = 12 → x = <b>+6</b>.</div>
+        <div class="ans">(i) −2 · (ii) +4 · (iii) +6 · (iv) +2 · (v) +6</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">O.N. of the underlined atom: (i) <u>Cl</u>O₃⁻ (ii) <u>Br</u>F₃ (iii) <u>C</u>H₄ (iv) <u>C</u>₆H₁₂O₆ (v) Na₂<u>B</u>₄O₇ (vi) <u>N</u>₂H₄ (vii) Na₄[<u>Fe</u>(CN)₆].</div>
+        <div class="s">(i) x + 3(−2) = −1 → x = <b>+5</b>. (ii) x + 3(−1) = 0 → x = <b>+3</b>. (iii) x + 4(+1) = 0 → x = <b>−4</b>.</div>
+        <div class="s">(iv) 6x + 12(+1) + 6(−2) = 0 → 6x = 0 → x = <b>0</b>. (v) 2(+1) + 4x + 7(−2) = 0 → 4x = 12 → x = <b>+3</b>. (vi) 2x + 4(+1) = 0 → x = <b>−2</b>. (vii) 4(+1) + x + 6(−1) = 0 → x = <b>+2</b>.</div>
+        <div class="ans">+5 · +3 · −4 · 0 · +3 · −2 · +2</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">O.N. of (i) Fe in Fe₃O₄ (ii) S in Na₂S₄O₆ (iii) Pb in Pb₃O₄.</div>
+        <div class="s">(i) 3x + 4(−2) = 0 → 3x = 8 → x = <b>+8/3 ≈ +2.67</b> (one Fe²⁺, two Fe³⁺).</div>
+        <div class="s">(ii) 2(+1) + 4x + 6(−2) = 0 → 4x = 10 → x = <b>+2.5</b> (average). (iii) 3x + 4(−2) = 0 → x = <b>+8/3 ≈ +2.67</b> (two Pb²⁺, one Pb⁴⁺).</div>
+        <div class="ans">(i) +8/3 · (ii) +2.5 · (iii) +8/3</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">O.N. of sulphur in S₂O₈²⁻ (peroxodisulphate).</div>
+        <div class="s">One –O–O– peroxide link (2 O at −1); the other 6 O are −2. Let S = x: 2x + 6(−2) + 2(−1) = −2.</div>
+        <div class="s">2x − 12 − 2 = −2 → 2x = 12 → x = <b>+6</b>. (Ignoring the peroxide would wrongly give +7.)</div>
+        <div class="ans">S = +6</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">O.N. of carbon in (i) C₂H₂ (ii) CO₂ (iii) C₂H₆ (iv) CH₃OH (v) HCOOH (vi) CH₂O.</div>
+        <div class="s">Take H = +1, O = −2, C = x. (i) 2x + 2(+1) = 0 → x = <b>−1</b>. (ii) x + 2(−2) = 0 → x = <b>+4</b>. (iii) 2x + 6(+1) = 0 → x = <b>−3</b>.</div>
+        <div class="s">(iv) x + 4(+1) + (−2) = 0 → x = <b>−2</b>. (v) x + 2(+1) + 2(−2) = 0 → x = <b>+2</b>. (vi) x + 2(+1) + (−2) = 0 → x = <b>0</b>.</div>
+        <div class="ans">−1 · +4 · −3 · −2 · +2 · 0</div>
+      </div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Electronic Concept, Oxidant/Reductant &amp; Types of Redox</h2></div>
+      <h3 class="sub">Electronic concept</h3>
+      <ul>
+        <li><b>Oxidation = loss of electrons</b> (species becomes more positive): Na → Na⁺ + e⁻ ; Fe²⁺ → Fe³⁺ + e⁻ ; 2Cl⁻ → Cl₂ + 2e⁻.</li>
+        <li><b>Reduction = gain of electrons</b> (more negative): Cl₂ + 2e⁻ → 2Cl⁻ ; Fe³⁺ + e⁻ → Fe²⁺ ; S + 2e⁻ → S²⁻.</li>
+        <li><b>Oxidising agent</b> accepts electrons (Sn⁴⁺, F₂); <b>reducing agent</b> loses electrons (Hg⁺, Fe²⁺, 2Cl⁻).</li>
+      </ul>
+      <div class="twrap"><table>
+        <tr><th>Term</th><th>Electron change</th><th>O.N. change</th></tr>
+        <tr><td>Oxidation / substance oxidised / reducing agent</td><td>loses e⁻</td><td>increases</td></tr>
+        <tr><td>Reduction / substance reduced / oxidising agent</td><td>gains e⁻</td><td>decreases</td></tr>
+      </table></div>
+      <div class="call tip"><span class="h">💡 Important agents</span>Common <b>oxidants:</b> O₂, O₃, H₂O₂, Cl₂, conc. HNO₃, conc. H₂SO₄, KMnO₄, K₂Cr₂O₇. Common <b>reductants:</b> H₂, C, CO, HBr/HI, H₂S, SO₂, SnCl₂, metals. H₂O₂ and SO₂ act as <b>both</b>.</div>
+      <h3 class="sub">Types of redox reaction</h3>
+      <ul>
+        <li><b>Combination</b> — elements/compounds unite with O.N. change: CH₄ + 2O₂ → CO₂ + 2H₂O ; 3Mg + N₂ → Mg₃N₂ ; H₂ + Cl₂ → 2HCl.</li>
+        <li><b>Decomposition</b> — reverse of combination; at least one product in elemental form: 2H₂O → 2H₂ + O₂ ; 2NaH → 2Na + H₂. (Note: 2KClO₃ → 2KCl + 3O₂ changes O but K is unchanged; <b>not every decomposition is redox</b>, e.g. CaCO₃ → CaO + CO₂ is not.)</li>
+        <li><b>Displacement</b> — metal displacement (stronger reductant displaces weaker: Zn + CuSO₄ → ZnSO₄ + Cu) and non-metal displacement (reactivity F &gt; Cl &gt; Br &gt; I: Cl₂ + 2KBr → 2KCl + Br₂; active metals displace H₂ from water/acid, reactivity Fe &lt; Zn &lt; Mg).</li>
+        <li><b>Disproportionation</b> — one element in an intermediate state is simultaneously oxidised and reduced (see Memorize card).</li>
+      </ul>
+      <div class="call trap"><span class="h">⚠ Noble metals</span>Ag and Au do <b>not</b> displace H₂ even from mineral acids (they lie below H in the series).</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Which of ClO⁻, ClO₂⁻, ClO₃⁻, ClO₄⁻ do NOT show disproportionation, and why?</div>
+        <div class="s">Cl can take −1, +1, +3, +5, +7. Disproportionation needs an <b>intermediate</b> O.N. (can be both oxidised and reduced).</div>
+        <div class="s">ClO⁻ (+1), ClO₂⁻ (+3), ClO₃⁻ (+5) are intermediate → all disproportionate. In ClO₄⁻ Cl is +7 (highest) — it can only be reduced.</div>
+        <div class="ans">ClO₄⁻ does not disproportionate (Cl is at its maximum O.N. +7, cannot be oxidised).</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Classify: (i) N₂ + O₂ → 2NO ; (ii) 2Pb(NO₃)₂ → 2PbO + 2NO₂ + (1/2)O₂ ; (iii) NaH + H₂O → NaOH + H₂ ; (iv) 2NO₂ + 2OH⁻ → NO₂⁻ + NO₃⁻ + H₂O.</div>
+        <div class="s">(i) two elements combine → combination redox. (ii) one compound breaks up → decomposition redox.</div>
+        <div class="s">(iii) H goes −1 (in NaH) and +1 (in H₂O) → H₂ (0): same element oxidised &amp; reduced → disproportionation. (iv) N goes +4 → +3 and +5 → disproportionation.</div>
+        <div class="ans">(i) Combination · (ii) Decomposition · (iii) Disproportionation · (iv) Disproportionation</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Identify oxidant &amp; reductant: (a) 10H⁺ + 4Zn + NO₃⁻ → 4Zn²⁺ + NH₄⁺ + 3H₂O ; (b) I₂ + H₂S → 2HI + S.</div>
+        <div class="s">(a) Zn: 0 → +2 (loses e⁻) = oxidised → <b>reductant</b>. N: +5 (NO₃⁻) → −3 (NH₄⁺) = reduced → NO₃⁻ is the <b>oxidant</b>.</div>
+        <div class="s">(b) I₂: 0 → −1 (HI) = reduced → <b>oxidant</b>. S: −2 (H₂S) → 0 = oxidised → H₂S is the <b>reductant</b>.</div>
+        <div class="ans">(a) reductant Zn, oxidant NO₃⁻ · (b) oxidant I₂, reductant H₂S</div>
+      </div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Balancing Redox Reactions — Oxidation-Number Method</h2></div>
+      <h3 class="sub">Steps</h3>
+      <ul>
+        <li>(1) Identify atoms whose O.N. changes; find the increase/decrease <b>per atom</b> × number of atoms. (2) Multiply the oxidant &amp; reductant by integers so <b>total increase = total decrease</b>. (3) Balance all atoms other than H and O. (4) Balance O by adding H₂O; (5) then balance H.</li>
+        <li><b>Acidic medium:</b> balance O with H₂O on the O-deficient side, then add H⁺ to balance H. <b>Basic medium:</b> add H₂O to the H-deficient side and an equal number of OH⁻ on the other side.</li>
+      </ul>
+      <div class="formula"><span class="lbl">worked (basic): MnO₄⁻ + Br⁻ → MnO₂ + BrO₃⁻</span>Mn: +7→+4 (↓3) ; Br: −1→+5 (↑6). LCM balance → 2MnO₄⁻ + Br⁻ → 2MnO₂ + BrO₃⁻ → add H₂O/OH⁻ → <b>2MnO₄⁻ + Br⁻ + H₂O → 2MnO₂ + BrO₃⁻ + 2OH⁻</b></div>
+      <div class="call tip"><span class="h">💡 No acid/base present</span>For FeS₂ + O₂ → Fe₂O₃ + SO₂, O cannot be balanced with H₂O. Use net O.N. change: in FeS₂, Fe(+2→+3, ↑1) and 2S(−1→+4, ↑10) → net ↑11; O₂(0→−2, ↓4). Balance 11 vs 4 → <b>4FeS₂ + 11O₂ → 2Fe₂O₃ + 8SO₂</b>.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">Balance by oxidation-number method: (i) MnO₄⁻ + Fe²⁺ → Mn²⁺ + Fe³⁺ (acidic) ; (ii) Cr(OH)₃ + IO₃⁻ → I⁻ + CrO₄²⁻ (basic).</div>
+        <div class="s">(i) Mn +7→+2 (↓5); Fe +2→+3 (↑1). Multiply Fe by 5: MnO₄⁻ + 5Fe²⁺ → Mn²⁺ + 5Fe³⁺. Balance charge/atoms with H⁺ &amp; H₂O: <b>MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O</b>.</div>
+        <div class="s">(ii) Cr +3→+6 (↑3); I +5→−1 (↓6). Multiply Cr(OH)₃ by 2, IO₃⁻ by 1; balance in base with OH⁻/H₂O: <b>2Cr(OH)₃ + IO₃⁻ + 4OH⁻ → I⁻ + 2CrO₄²⁻ + 5H₂O</b>.</div>
+        <div class="ans">(i) MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O · (ii) 2Cr(OH)₃ + IO₃⁻ + 4OH⁻ → I⁻ + 2CrO₄²⁻ + 5H₂O</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3</span>
+        <div class="q">Balance: (i) Fe₂O₃ + C → Fe + CO ; (ii) Fe²⁺ + Cr₂O₇²⁻ + H⁺ → Fe³⁺ + Cr³⁺ + H₂O ; (iii) Zn + HNO₃ → Zn(NO₃)₂ + NO₂ + H₂O ; (iv) C₆H₆ + O₂ → CO₂ + H₂O.</div>
+        <div class="s">(i) C: 0→+2 (↑2); Fe: +3→0 (↓3). Balance 3C vs Fe₂O₃: <b>Fe₂O₃ + 3C → 2Fe + 3CO</b>.</div>
+        <div class="s">(ii) Cr: +6→+3 (↓3 per Cr, ↓6 for 2 Cr); Fe: +2→+3 (↑1). Multiply Fe by 6: <b>6Fe²⁺ + Cr₂O₇²⁻ + 14H⁺ → 6Fe³⁺ + 2Cr³⁺ + 7H₂O</b>.</div>
+        <div class="s">(iii) N(oxidised to NO₂): +5→+4 (↓1); Zn: 0→+2 (↑2). After balancing the redox and the spectator nitrate: <b>Zn + 4HNO₃ → Zn(NO₃)₂ + 2NO₂ + 2H₂O</b>.</div>
+        <div class="s">(iv) C: −1→+4 (↑5 per C, ↑30 for C₆); O: 0→−2 (↓2 per O). Balance 30 vs O: <b>2C₆H₆ + 15O₂ → 12CO₂ + 6H₂O</b>.</div>
+        <div class="ans">(i) Fe₂O₃+3C→2Fe+3CO · (ii) 6Fe²⁺+Cr₂O₇²⁻+14H⁺→6Fe³⁺+2Cr³⁺+7H₂O · (iii) Zn+4HNO₃→Zn(NO₃)₂+2NO₂+2H₂O · (iv) 2C₆H₆+15O₂→12CO₂+6H₂O</div>
+      </div>
+    </section>
+
+    <!-- L4 -->
+    <section class="lec" id="l4">
+      <div class="lec-head"><span class="lec-tag">L-4</span><h2>Balancing Redox Reactions — Ion-Electron (Half-Reaction) Method</h2></div>
+      <h3 class="sub">Steps</h3>
+      <ul>
+        <li>(1) Find atoms whose O.N. changes; split into an <b>oxidation</b> and a <b>reduction</b> half-reaction. (2) Balance atoms other than H &amp; O in each half. (3) Add electrons to balance the O.N. change. (4) Balance charge: add <b>H⁺</b> (acidic) or <b>OH⁻</b> (basic). (5) Balance H &amp; O with H₂O. (6) Multiply the halves so electrons cancel; add.</li>
+      </ul>
+      <div class="formula"><span class="lbl">model: Cr₂O₇²⁻ + Fe²⁺ + H⁺ → Cr³⁺ + Fe³⁺ + H₂O</span>Fe²⁺ → Fe³⁺ + e⁻ (×6) · Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O → <b>Cr₂O₇²⁻ + 6Fe²⁺ + 14H⁺ → 2Cr³⁺ + 6Fe³⁺ + 7H₂O</b></div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">Balance by ion-electron method: (a) Cr₂O₇²⁻ + C₂H₄O → C₂H₄O₂ + Cr³⁺ (acidic) ; (b) Zn + NO₃⁻ → Zn²⁺ + NH₄⁺ (basic).</div>
+        <div class="s">(a) Oxidation: C₂H₄O + H₂O → C₂H₄O₂ + 2e⁻ + 2H⁺ (C −1→0, ×3). Reduction: Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O. Add: <b>3C₂H₄O + Cr₂O₇²⁻ + 8H⁺ → 3C₂H₄O₂ + 2Cr³⁺ + 4H₂O</b>.</div>
+        <div class="s">(b) Oxidation: Zn → Zn²⁺ + 2e⁻ (×4). Reduction: NO₃⁻ + 7H₂O + 8e⁻ → NH₄⁺ + 10OH⁻ (N +5→−3). Add: <b>4Zn + NO₃⁻ + 7H₂O → 4Zn²⁺ + NH₄⁺ + 10OH⁻</b>.</div>
+        <div class="ans">(a) 3C₂H₄O + Cr₂O₇²⁻ + 8H⁺ → 3C₂H₄O₂ + 2Cr³⁺ + 4H₂O · (b) 4Zn + NO₃⁻ + 7H₂O → 4Zn²⁺ + NH₄⁺ + 10OH⁻</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">Balance: (a) Cr(OH)₃ + IO₃⁻ → I⁻ + CrO₄²⁻ (basic) ; (b) MnO₄⁻ + SO₃²⁻ → Mn²⁺ + SO₄²⁻ (acidic) ; (c) Br₂ + H₂O₂ → BrO₃⁻ + H₂O (acidic).</div>
+        <div class="s">(a) Oxid: Cr(OH)₃ + 5OH⁻ → CrO₄²⁻ + 4H₂O + 3e⁻ (×2). Red: IO₃⁻ + 3H₂O + 6e⁻ → I⁻ + 6OH⁻. Add: <b>2Cr(OH)₃ + IO₃⁻ + 4OH⁻ → 2CrO₄²⁻ + I⁻ + 5H₂O</b>.</div>
+        <div class="s">(b) Red: MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O (×2). Oxid: SO₃²⁻ + H₂O → SO₄²⁻ + 2H⁺ + 2e⁻ (×5). Add: <b>2MnO₄⁻ + 5SO₃²⁻ + 6H⁺ → 2Mn²⁺ + 5SO₄²⁻ + 3H₂O</b>.</div>
+        <div class="s">(c) Oxid: Br₂ + 6H₂O → 2BrO₃⁻ + 12H⁺ + 10e⁻. Red: H₂O₂ + 2H⁺ + 2e⁻ → 2H₂O (×5). Add &amp; cancel: <b>Br₂ + 5H₂O₂ → 2BrO₃⁻ + 4H₂O + 2H⁺</b>.</div>
+        <div class="ans">(a) 2Cr(OH)₃ + IO₃⁻ + 4OH⁻ → 2CrO₄²⁻ + I⁻ + 5H₂O · (b) 2MnO₄⁻ + 5SO₃²⁻ + 6H⁺ → 2Mn²⁺ + 5SO₄²⁻ + 3H₂O · (c) Br₂ + 5H₂O₂ → 2BrO₃⁻ + 4H₂O + 2H⁺</div>
+      </div>
+    </section>
+
+    <!-- L5 -->
+    <section class="lec" id="l5">
+      <div class="lec-head"><span class="lec-tag">L-5</span><h2>Equivalent Weight, Disproportionation &amp; n-factor</h2></div>
+      <h3 class="sub">Equivalent weight of oxidants &amp; reductants</h3>
+      <ul>
+        <li><b>Eq. wt. = molar mass / (electrons gained or lost)</b> = molar mass / (change in O.N. of the element).</li>
+        <li>MnO₄⁻ (acidic, +7→+2): Eq. wt. of KMnO₄ = M/5. Cr₂O₇²⁻ (+6→+3, 6e⁻ for 2 Cr): Eq. wt. of K₂Cr₂O₇ = M/6. Oxalic acid (C₂O₄²⁻ → 2CO₂ + 2e⁻): Eq. wt. of H₂C₂O₄·2H₂O = M/2.</li>
+      </ul>
+      <h3 class="sub">Disproportionation, comproportionation &amp; n-factor</h3>
+      <ul>
+        <li><b>Disproportionation</b> — one species both oxidised &amp; reduced: 2H₂O₂ → 2H₂O + O₂ ; 4KClO₃ → 3KClO₄ + KCl ; 3Cl₂ + 6NaOH(hot) → 5NaCl + NaClO₃ + 3H₂O.</li>
+        <li>Chlorine (−1 to +7): ClO⁻, ClO₂⁻, ClO₃⁻ disproportionate (3ClO⁻ → 2Cl⁻ + ClO₃⁻ ; 6ClO₂⁻ → 4ClO₃⁻ + 2Cl⁻ ; 4ClO₃⁻ → Cl⁻ + 3ClO₄⁻); ClO₄⁻ cannot (+7, highest).</li>
+        <li><b>Comproportionation</b> is the reverse: 10Br⁻ + 2BrO₃⁻ + 12H⁺ → 6Br₂ + 6H₂O.</li>
+      </ul>
+      <div class="formula"><span class="lbl">n-factor for a disproportionating species</span>n-factor = (n₁ × n₂)/(n₁ + n₂). e.g. 3H₃PO₂ → PH₃ + 2H₃PO₃: n₁ = 2 (loss), n₂ = 4 (gain) → n-factor = 8/6 = 4/3 → Eq. wt. of H₃PO₂ = M/(4/3) = 3M/4</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5</span>
+        <div class="q">Equivalent mass of the reactant/product in: (i) As₂O₃→As₂O₅ (ii) KBrO₃→Br₂ (iii) KBrO₃→KBr (iv) KMnO₄→Mn₂O₃ (v) N₂O→NO₂ (vi) FeSO₄→Fe₂(SO₄)₃.</div>
+        <div class="s">(i) 2 As: +3→+5, 4e⁻ → E = M/4 for both As₂O₃ and As₂O₅. (ii) Br +5→0, 5e⁻ per Br → E(KBrO₃) = M/5, E(Br₂) = M/10 (10e⁻ for 2 Br).</div>
+        <div class="s">(iii) Br +5→−1, 6e⁻ → E(KBrO₃) = M/6, E(KBr) = M/6. (iv) Mn +7→+3, 4e⁻ per Mn → E(KMnO₄) = M/4, E(Mn₂O₃) = M/8 (8e⁻ for 2 Mn).</div>
+        <div class="s">(v) N +1→+4, 3e⁻ per N (6e⁻ for N₂) → E(N₂O) = M/6, E(NO₂) = M/3. (vi) Fe +2→+3, 1e⁻ → E(FeSO₄) = M/1, E(Fe₂(SO₄)₃) = M/2.</div>
+        <div class="ans">(i) M/4, M/4 · (ii) M/5, M/10 · (iii) M/6, M/6 · (iv) M/4, M/8 · (v) M/6, M/3 · (vi) M, M/2</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5</span>
+        <div class="q">Equivalent weight of H₃PO₄ (molar mass M) in (a) H₃PO₄ + 3NaOH → Na₃PO₄ + 3H₂O ; (b) H₃PO₄ + 2NaOH → Na₂HPO₄ + 2H₂O.</div>
+        <div class="s">n-factor of an acid = number of replaceable H⁺. (a) all three H replaced → n = 3 → E = <b>M/3</b>.</div>
+        <div class="s">(b) only two H replaced → n = 2 → E = <b>M/2</b>. (Equivalent weight is not fixed — it depends on the reaction.)</div>
+        <div class="ans">(a) M/3 · (b) M/2</div>
+      </div>
+    </section>
+
+    <!-- L6 -->
+    <section class="lec" id="l6">
+      <div class="lec-head"><span class="lec-tag">L-6</span><h2>Redox Titrations, Stoichiometry &amp; Electrode Potential</h2></div>
+      <h3 class="sub">Redox titrations &amp; indicators</h3>
+      <ul>
+        <li><b>Permanganate titration</b> (acidic): reductants (FeSO₄, Mohr's salt, H₂O₂, oxalic acid/oxalates) are titrated against KMnO₄, which is its own <b>self-indicator</b> (persistent pink end point). MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O ; 2MnO₄⁻ + 5C₂O₄²⁻ + 16H⁺ → 2Mn²⁺ + 10CO₂ + 8H₂O.</li>
+        <li><b>Dichromate titration</b> (acidic): same reductants against K₂Cr₂O₇ (not a self-indicator → internal indicator diphenylamine, or external K₃[Fe(CN)₆]): 6Fe²⁺ + Cr₂O₇²⁻ + 14H⁺ → 2Cr³⁺ + 6Fe³⁺ + 7H₂O.</li>
+        <li><b>Iodimetric/iodometric</b>: I₂ as oxidant with <b>starch</b> indicator (blue with I₂): I₂ + 2S₂O₃²⁻ → 2I⁻ + S₄O₆²⁻.</li>
+      </ul>
+      <div class="call trap"><span class="h">⚠ Never use HCl in KMnO₄ titrations</span>HCl is oxidised to Cl₂ by MnO₄⁻, giving a false (high) reading. Use dilute H₂SO₄.</div>
+      <div class="formula"><span class="lbl">stoichiometry of redox in solution</span>molarity equation M₁V₁/n₁ = M₂V₂/n₂ · normality equation N₁V₁ = N₂V₂ · Strength (g/L) = Normality × Eq. wt.</div>
+      <h3 class="sub">Electrode potential &amp; electrochemical series</h3>
+      <ul>
+        <li>A metal dipped in its ion solution sets up an <b>electrode potential</b>. Absolute value is unmeasurable → measured vs the <b>SHE (0.000 V)</b>. By IUPAC, tabulated values are <b>reduction</b> potentials; E°(oxidation) = −E°(reduction).</li>
+        <li>E°cell = E°(oxidation, anode) + E°(reduction, cathode). For the Zn|Zn²⁺ ‖ H⁺|H₂ cell, E°cell = 0.76 V → E°ox(Zn) = +0.76 V, so E°(Zn²⁺/Zn) = −0.76 V.</li>
+        <li><b>Electrochemical series</b> (reduction potentials): top (Li −3.05, K −2.93, Ca, Na, Mg, Al, Zn −0.76, Fe −0.44 …) = strong reductants/active metals; bottom (Cu +0.34, I₂, Ag +0.80, Br₂, Cl₂ +1.36, Au, F₂ +2.87) = strong oxidants.</li>
+        <li>Uses: metals above H₂ liberate H₂ from dilute acid; a metal higher in the series displaces one lower; oxidising power of non-metals rises down the series (F₂ &gt; Cl₂ &gt; Br₂ &gt; I₂).</li>
+      </ul>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-6</span>
+        <div class="q">How many grams of K₂Cr₂O₇ are needed to oxidise 20.0 g of Fe²⁺ (as FeSO₄) to Fe³⁺ in acidic solution?</div>
+        <div class="s">Balanced: Cr₂O₇²⁻ + 6Fe²⁺ + 14H⁺ → 2Cr³⁺ + 6Fe³⁺ + 7H₂O → 1 mol K₂Cr₂O₇ ≡ 6 mol FeSO₄.</div>
+        <div class="s">M(K₂Cr₂O₇) = 294, M(FeSO₄) = 152. So 6 × 152 = 912 g FeSO₄ needs 294 g; 20 g needs 294 × 20 / 912.</div>
+        <div class="ans">= 6.45 g K₂Cr₂O₇</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-6</span>
+        <div class="q">1.80 g of impure oxalate dissolved to 250 mL; 20 mL of this required 30 mL of M/50 KMnO₄. Find the % purity.</div>
+        <div class="s">2MnO₄⁻ + 5C₂O₄²⁻ + 16H⁺ → 2Mn²⁺ + 10CO₂ + 8H₂O. Equivalents equal: N(KMnO₄)V = N(oxalate)V → (1/50 × 5)(30) = M₂ × 2 × 20 → M₂ = 0.075 M.</div>
+        <div class="s">Mass C₂O₄²⁻ = 0.075 × 88 = 6.6 g/L → in 250 mL = 6.6 × 0.250 = 1.65 g. % purity = 1.65/1.80 × 100.</div>
+        <div class="ans">≈ 91.7 %</div>
+      </div>
+    </section>
+
+    <!-- STRONG BOX -->
+    <section class="lec" id="strongbox">
+      <div class="lec-head"><span class="lec-tag">★ STRONG BOX</span><h2>Previous Year Questions (JEE Main &amp; Advanced)</h2></div>
+      <div class="call star"><span class="h">★ How to use</span>The complete <b>Previous Year Questions</b> set from the C-8 Strong Box — 70 JEE Main/Advanced questions. Every answer below was <b>re-derived independently</b>; the book's answer key was not transcribed. (The chapter's Level-7 to Level-10 practice drills are a separate question bank and are not reproduced here.)</div>
+      <div class="exhead det">Worked previous-year questions</div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (21 Jan S1) · Level-6</span>
+        <div class="q">NaCl + K₂Cr₂O₇ + H₂SO₄ → A + KHSO₄ + NaHSO₄ + H₂O ; A + NaOH → B + NaCl + H₂O ; B + H₂SO₄ + H₂O₂ → C + Na₂SO₄ + H₂O. In product C, X = number of O₂²⁻ units, Y = total O atoms, Z = oxidation state of Cr. Find X + Y + Z.</div>
+        <div class="s">A = CrO₂Cl₂ (chromyl chloride); B = Na₂CrO₄; C = <b>CrO₅</b> = CrO(O₂)₂ (blue chromium peroxide).</div>
+        <div class="s">In CrO₅: peroxo units X = 2 ; total O atoms Y = 5 ; Cr oxidation state Z = +6. So X + Y + Z = 2 + 5 + 6.</div>
+        <div class="ans">X + Y + Z = 13</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (28 Jan S1) · Level-6</span>
+        <div class="q">500 mL of 1.2 M KI mixed with 500 mL of 0.2 M KMnO₄ in basic medium. The liberated I₂ is titrated with 0.1 M Na₂S₂O₃. Volume (in L) of Na₂S₂O₃ consumed?</div>
+        <div class="s">Basic medium: MnO₄⁻ + 2H₂O + 3e⁻ → MnO₂ + 4OH⁻ (3e⁻). Moles KMnO₄ = 0.1 → 0.3 mol e⁻. I⁻ → (1/2)I₂ + e⁻, so 0.3 mol I⁻ oxidised → 0.15 mol I₂.</div>
+        <div class="s">I₂ + 2S₂O₃²⁻ → 2I⁻ + S₄O₆²⁻ → moles S₂O₃²⁻ = 2 × 0.15 = 0.3 mol → V = 0.3 / 0.1.</div>
+        <div class="ans">3 L</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (24 Jan S1) · Level-4</span>
+        <div class="q">X and Y are the number of electrons involved in the oxidation of I⁻ to I₂ and S²⁻ to S respectively. Find X + Y.</div>
+        <div class="s">2I⁻ → I₂ + 2e⁻ → X = 2. S²⁻ → S + 2e⁻ → Y = 2.</div>
+        <div class="ans">X + Y = 4</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (21 Jan S1) · Level-3</span>
+        <div class="q">MnO₄²⁻, in acidic medium, disproportionates to: (a) Mn₂O₇ &amp; MnO₂ (b) MnO₄⁻ &amp; MnO (c) MnO₄⁻ &amp; MnO₂ (d) Mn₂O₇ &amp; MnO.</div>
+        <div class="s">3MnO₄²⁻ + 4H⁺ → 2MnO₄⁻ (+7) + MnO₂ (+4) + 2H₂O. Mn +6 goes to +7 and +4.</div>
+        <div class="ans">(c) MnO₄⁻ and MnO₂</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (23 Jan S2) · Level-5</span>
+        <div class="q">K₂Cr₂O₇ --(KOH, −H₂O)→ A --(H₂SO₄, −H₂O)→ B + K₂SO₄. A and B are:</div>
+        <div class="s">Dichromate + base → chromate: A = K₂CrO₄ (yellow). Chromate + acid → dichromate: B = K₂Cr₂O₇ (orange).</div>
+        <div class="ans">(c) K₂CrO₄ and K₂Cr₂O₇</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (24 Jan S1) · Level-5</span>
+        <div class="q">Preparation of KMnO₄ from MnO₂ is a two-step process; the 1st step (reaction with KOH and KNO₃) produces:</div>
+        <div class="s">2MnO₂ + 4KOH + O₂ (or KNO₃ as oxidant) → 2K₂MnO₄ + 2H₂O. The green manganate K₂MnO₄ forms first.</div>
+        <div class="ans">(d) K₂MnO₄</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (28 Jan S1) · Level-4</span>
+        <div class="q">Which oxidations are carried out by both K₂Cr₂O₇ and KMnO₄ in acidic medium? (A) I⁻→I₂ (B) S²⁻→S (C) Fe²⁺→Fe³⁺ (D) I⁻→IO₃⁻ (E) S₂O₃²⁻→SO₄²⁻.</div>
+        <div class="s">In acidic medium both oxidants convert I⁻→I₂ (not IO₃⁻), S²⁻→S and Fe²⁺→Fe³⁺. So A, B and C.</div>
+        <div class="ans">(d) A, B and C only</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (28 Jan S1) · Level-4</span>
+        <div class="q">Statement I: oxalic acid vs KMnO₄ needs heating to ~60 °C initially, but FAS vs KMnO₄ needs no heating. Statement II: in oxalic–KMnO₄, Mn²⁺ formed at high T auto-catalyses; in FAS–KMnO₄ heating would let air oxidise Fe²⁺→Fe³⁺ (error). Choose.</div>
+        <div class="s">Both statements are factually correct and the second explains the practice in each titration.</div>
+        <div class="ans">(d) Both Statement I and Statement II are true</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (8 April S1) · Level-4</span>
+        <div class="q">Thiosulphate: 2S₂O₃²⁻ + I₂ → S₄O₆²⁻ + 2I⁻ ; S₂O₃²⁻ + 5Br₂ + 5H₂O → 2SO₄²⁻ + 4Br⁻ + 10H⁺. What justifies the dual behaviour?</div>
+        <div class="s">With weaker I₂, S₂O₃²⁻ is oxidised only to tetrathionate (S +2.5); with stronger Br₂ it is oxidised fully to sulphate (S +6).</div>
+        <div class="ans">(a) Bromine is a stronger oxidant than iodine</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (8 April S1) · Level-4</span>
+        <div class="q">Fe(III) catalyses the iodide–persulphate reaction, in which: (A) Fe³⁺ oxidises I⁻ (B) Fe³⁺ oxidises persulphate (C) Fe²⁺ reduces I⁻ (D) Fe²⁺ reduces persulphate.</div>
+        <div class="s">Cycle: 2Fe³⁺ + 2I⁻ → 2Fe²⁺ + I₂ (A), then 2Fe²⁺ + S₂O₈²⁻ → 2Fe³⁺ + 2SO₄²⁻ (D).</div>
+        <div class="ans">(d) A and D only</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2025 (Paper-1) · Level-4</span>
+        <div class="q">One product from the reaction of permanganate ion with iodide ion in neutral aqueous medium is:</div>
+        <div class="s">Neutral medium: 2MnO₄⁻ + I⁻ + H₂O → 2MnO₂ + IO₃⁻ + 2OH⁻. Iodide is oxidised to iodate.</div>
+        <div class="ans">(b) IO₃⁻</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (8 April S1) · Level-2</span>
+        <div class="q">Among F₂, Cl₂, Br₂, I₂, which can undergo disproportionation?</div>
+        <div class="s">F has no positive oxidation state, so F₂ cannot disproportionate. Cl₂, Br₂, I₂ each go 0 → −1 and +1.</div>
+        <div class="ans">(d) Cl₂, Br₂ and I₂</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (8 April S2) · Level-2</span>
+        <div class="q">Statement I: fusion of MnO₂ with KOH + an oxidant gives dark-green K₂MnO₄. Statement II: manganate on electrolytic oxidation in alkaline medium gives permanganate. Choose.</div>
+        <div class="s">Both are standard facts of KMnO₄ manufacture (MnO₂ → K₂MnO₄ → KMnO₄).</div>
+        <div class="ans">(d) Both Statement I and Statement II are true</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (22 Jan S2) · Level-1</span>
+        <div class="q">The species which does NOT undergo disproportionation is: (a) ClO₃⁻ (b) ClO⁻ (c) ClO₂⁻ (d) ClO₄⁻.</div>
+        <div class="s">Disproportionation needs an intermediate O.N. In ClO₄⁻ Cl is +7 (highest) → cannot be oxidised further.</div>
+        <div class="ans">(d) ClO₄⁻</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (30 Jan S1) · Level-6</span>
+        <div class="q">2MnO₄⁻ + bI⁻ + cH₂O → xI₂ + yMnO₂ + zOH⁻. Balanced with integer coefficients, find z.</div>
+        <div class="s">Mn +7→+4 (2 Mn → 6e⁻); I⁻ → (1/2)I₂ gives 6I⁻ → 3I₂ (6e⁻). Charge balance: (−2 −6) = −z → z = 8; O and H check (c = 4).</div>
+        <div class="ans">z = 8 (2MnO₄⁻ + 6I⁻ + 4H₂O → 3I₂ + 2MnO₂ + 8OH⁻)</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (01 Feb S2) · Level-6</span>
+        <div class="q">For MnO₄⁻ + H⁺ + H₂C₂O₄ ⇌ Mn²⁺ + H₂O + CO₂, E°(MnO₄⁻/Mn²⁺) = +1.51 V, E°(CO₂/H₂C₂O₄) = −0.49 V. If K_eq = 10ˣ, find x.</div>
+        <div class="s">Balanced reaction transfers n = 10 e⁻. E°cell = 1.51 − (−0.49) = 2.00 V.</div>
+        <div class="s">log K = nE°/0.0591 = (10 × 2.00)/0.0591 = 20/0.0591 ≈ 338.</div>
+        <div class="ans">x ≈ 338</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (6 Apr S1) · Level-6</span>
+        <div class="q">Difference in spin-only magnetic moment of KMnO₄ and the Mn product formed when KMnO₄ is titrated against oxalic acid in acidic medium (nearest integer BM)?</div>
+        <div class="s">KMnO₄: Mn⁷⁺ (d⁰) → μ = 0. Product Mn²⁺ (d⁵) → μ = √(5×7) = √35 = 5.92 BM. Difference = 5.92 − 0 ≈ 6.</div>
+        <div class="ans">6 BM</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (29 Jan S1) · Level-4</span>
+        <div class="q">aCl₂ + bOH⁻ → cClO⁻ + dCl⁻ + eH₂O. Values of a, b, c, d in the balanced reaction?</div>
+        <div class="s">Cold dilute alkali: Cl₂ + 2OH⁻ → ClO⁻ + Cl⁻ + H₂O. So a = 1, b = 2, c = 1, d = 1.</div>
+        <div class="ans">(a) 1, 2, 1 and 1</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (30 Jan S2) · Level-4</span>
+        <div class="q">Number of species from H₂O₂, ClO₃⁻, P₄, Cl₂, Ag, Cu⁺, F₂, NO₂, K⁺ that can undergo disproportionation.</div>
+        <div class="s">Disproportionate (intermediate O.N.): H₂O₂, ClO₃⁻, P₄, Cl₂, Cu⁺, NO₂ (2NO₂+H₂O→HNO₃+HNO₂). Ag (metal), F₂ (no +ve state), K⁺ (fixed +1) cannot.</div>
+        <div class="ans">6</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (31 Jan S2) · Level-4</span>
+        <div class="q">Statement I: S₈ solid disproportionates in alkali to S²⁻ and S₂O₃²⁻. Statement II: ClO₄⁻ can disproportionate under acidic conditions. Choose.</div>
+        <div class="s">S₈ (S = 0, intermediate) does disproportionate → I correct. ClO₄⁻ has Cl at +7 (max) → cannot disproportionate → II incorrect.</div>
+        <div class="ans">(a) Statement I is correct but Statement II is incorrect</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (6 Apr S2) · Level-4</span>
+        <div class="q">Number of ions from Sn⁴⁺, Sn²⁺, Pb²⁺, Tl³⁺, Pb⁴⁺, Tl⁺ expected to behave as oxidising agents.</div>
+        <div class="s">An oxidant must be able to be reduced (in its higher/maximum state). Sn⁴⁺, Pb⁴⁺ and Tl³⁺ are in their highest common states (inert-pair makes +4/+1 vs +3) → reduced only → oxidants. Sn²⁺, Pb²⁺, Tl⁺ are lower states.</div>
+        <div class="ans">(a) 3</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2024 (Paper-1) · Level-4</span>
+        <div class="q">At room temperature, disproportionation of in-situ generated nitrous acid (HNO₂) gives the species:</div>
+        <div class="s">3HNO₂ → HNO₃ + 2NO + H₂O. In water this gives H₃O⁺, NO₃⁻ and NO (N: +3 → +5 and +2).</div>
+        <div class="ans">(a) H₃O⁺, NO₃⁻ and NO</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (27 Jan S2) · Level-3</span>
+        <div class="q">1 mol PbS is oxidised by X mol O₃ to give Y mol O₂. Find X + Y.</div>
+        <div class="s">PbS + 4O₃ → PbSO₄ + 4O₂. So X = 4, Y = 4.</div>
+        <div class="ans">X + Y = 8</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (31 Jan S2) · Level-3</span>
+        <div class="q">Number of moles of H⁺ required by 1 mol MnO₄⁻ to oxidise oxalate ion to CO₂.</div>
+        <div class="s">MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O. One MnO₄⁻ needs 8 H⁺.</div>
+        <div class="ans">8</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (4 Apr S1) · Level-3</span>
+        <div class="q">Only 2 mL of KMnO₄ (unknown M) reaches the end point for 20 mL of 2 M oxalic acid in acidic medium. Find the molarity of KMnO₄.</div>
+        <div class="s">N₁V₁ = N₂V₂. Oxalic acid: N = 2 × 2 = 4 → equivalents = 4 × 20 = 80 meq. KMnO₄: N × 2 = 80 → N = 40 → M = 40/5.</div>
+        <div class="ans">8 M</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (30 Jan S2) · Level-2</span>
+        <div class="q">Reduction potentials: ClO₄⁻ 1.19 V, IO₄⁻ 1.65 V, BrO₄⁻ 1.74 V. Correct order of oxidising power?</div>
+        <div class="s">Higher reduction potential → stronger oxidant. Order: BrO₄⁻ (1.74) &gt; IO₄⁻ (1.65) &gt; ClO₄⁻ (1.19).</div>
+        <div class="ans">(b) BrO₄⁻ &gt; IO₄⁻ &gt; ClO₄⁻</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (31 Jan S2) · Level-2</span>
+        <div class="q">In the reaction of K₂Cr₂O₇, KCl and conc. H₂SO₄, the oxidation state of chromium in the product is +___.</div>
+        <div class="s">Product is chromyl chloride CrO₂Cl₂. Cr: x + 2(−2) + 2(−1) = 0 → x = +6.</div>
+        <div class="ans">+6</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (01 Feb S1) · Level-2</span>
+        <div class="q">Which are disproportionation reactions? (1) Cu⁺→Cu²⁺+Cu (2) 3MnO₄²⁻+4H⁺→2MnO₄⁻+MnO₂+2H₂O (3) 2KMnO₄→K₂MnO₄+MnO₂+O₂ (4) 2MnO₄⁻+3Mn²⁺+2H₂O→5MnO₂+4H⁺.</div>
+        <div class="s">(1) Cu⁺ → Cu²⁺ &amp; Cu⁰ ✓. (2) Mn⁶⁺ → Mn⁷⁺ &amp; Mn⁴⁺ ✓. (3) also involves O (not pure disproportionation). (4) comproportionation (Mn⁷⁺ + Mn²⁺ → Mn⁴⁺).</div>
+        <div class="ans">(a) 1, 2</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (01 Feb S1) · Level-2</span>
+        <div class="q">In acidic medium Cr₂O₇²⁻ + XH⁺ + Ye⁻ → 2A + ZH₂O. X, Y, Z and A respectively?</div>
+        <div class="s">Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O. So X = 14, Y = 6, Z = 7, A = Cr³⁺.</div>
+        <div class="ans">(d) 14, 6, 7 and Cr³⁺</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (27 Jan S2) · Level-1</span>
+        <div class="q">Which cannot function as an oxidising agent? (a) N³⁻ (b) SO₄²⁻ (c) BrO₃⁻ (d) MnO₄⁻.</div>
+        <div class="s">An oxidant must be reducible. N in N³⁻ is at its minimum (−3) → can only be oxidised, never reduced.</div>
+        <div class="ans">(a) N³⁻</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (29 Jan S1) · Level-1</span>
+        <div class="q">In alkaline medium MnO₄⁻ oxidises I⁻ to:</div>
+        <div class="s">In neutral/alkaline medium iodide is oxidised to iodate (not I₂).</div>
+        <div class="ans">(d) IO₃⁻</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (6 Apr S2) · Level-1</span>
+        <div class="q">Match: A: N₂+O₂→2NO ; B: 2Pb(NO₃)₂→2PbO+4NO₂+O₂ ; C: 2Na+2H₂O→2NaOH+H₂ ; D: 2NO₂+2OH⁻→NO₂⁻+NO₃⁻+H₂O — with (I) decomposition, (II) displacement, (III) disproportionation, (IV) combination.</div>
+        <div class="s">A = combination (IV); B = decomposition (I); C = displacement (II); D = disproportionation (III).</div>
+        <div class="ans">(c) A-IV, B-I, C-II, D-III</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (25 Jan S2) · Level-4</span>
+        <div class="q">Which metal is the weakest reducing agent: K, Rb, Na, Li?</div>
+        <div class="s">Reducing power ∝ −ve E°. E°: Li −3.04, Rb −2.98, K −2.93, Na −2.71. Least negative = weakest reductant = Na.</div>
+        <div class="ans">(c) Na</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (30 Jan S1) · Level-4</span>
+        <div class="q">In SO₃²⁻ analysis with dilute H₂SO₄, SO₂ is evolved which turns acidified K₂Cr₂O₇ solution:</div>
+        <div class="s">SO₂ reduces orange Cr₂O₇²⁻ to green Cr³⁺ (and is itself oxidised to SO₄²⁻).</div>
+        <div class="ans">(c) Green</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (13 April S2) · Level-4</span>
+        <div class="q">Cr₂O₇²⁻ + XH⁺ + 6Fe²⁺ → YCr³⁺ + 6Fe³⁺ + ZH₂O. Find X + Y + Z.</div>
+        <div class="s">Cr₂O₇²⁻ + 14H⁺ + 6Fe²⁺ → 2Cr³⁺ + 6Fe³⁺ + 7H₂O → X = 14, Y = 2, Z = 7.</div>
+        <div class="ans">X + Y + Z = 23</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2023 (Paper-1) · Level-4</span>
+        <div class="q">Metal halide --(aq NaOH)→ white ppt P + filtrate Q ; P --(aq H₂SO₄, excess PbO₂, heat)→ X (coloured species in solution) ; Q --(MnO(OH)₂, conc. H₂SO₄, warm)→ Y (gives blue colour with KI–starch paper). Identify X and Y.</div>
+        <div class="s">The metal halide is MnCl₂: with NaOH → white Mn(OH)₂ (P) + NaCl filtrate (Q). P oxidised by PbO₂/H₂SO₄ → purple permanganate, X = HMnO₄ / MnO₄⁻ (Mn, +7).</div>
+        <div class="s">The chloride in Q, warmed with MnO(OH)₂ / conc. H₂SO₄, liberates Cl₂, Y = Cl₂, which gives the blue KI–starch test.</div>
+        <div class="ans">X = acidified permanganate (HMnO₄ / MnO₄⁻, Mn +7, purple) · Y = Cl₂</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (06 Apr S1) · Level-3</span>
+        <div class="q">For 2Au(CN)₂⁻ + Zn → 2Au + Zn(CN)₄²⁻, which are correct? (A) Redox (B) Displacement (C) Decomposition (D) Combination.</div>
+        <div class="s">Zn: 0 → +2 (oxidised), Au: +1 → 0 (reduced) → redox (A). Zn displaces Au from its complex → displacement (B).</div>
+        <div class="ans">(c) A and B only</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (06 April S2) · Level-3</span>
+        <div class="q">In the reaction of permanganate with thiosulphate the oxidation state of Mn changes by 3. Which medium favours this?</div>
+        <div class="s">A change of 3 means Mn⁷⁺ → Mn⁴⁺ (MnO₄⁻ → MnO₂), which occurs in neutral and faintly alkaline media (in acidic it goes to Mn²⁺, change 5).</div>
+        <div class="ans">(c) Both aqueous neutral and faintly alkaline</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (08 April S1) · Level-3</span>
+        <div class="q">2IO₃⁻ + xI⁻ + 12H⁺ → 6I₂ + 6H₂O. Find x.</div>
+        <div class="s">I balance: left 2 + x, right 12 → x = 10. Charge: −2 −10 +12 = 0 = right (0) ✓; O: 6 = 6 ✓.</div>
+        <div class="ans">(c) 10</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (08 April S2) · Level-3</span>
+        <div class="q">Statement I: in redox titration, indicators are sensitive to change in pH. Statement II: in acid–base titration, indicators are sensitive to change in oxidation potential. Choose.</div>
+        <div class="s">The two are swapped: redox indicators respond to oxidation potential, acid–base indicators respond to pH. Both statements are wrong.</div>
+        <div class="ans">(b) Both Statement I and Statement II are incorrect</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (10 April S1) · Level-3</span>
+        <div class="q">Statement I: K₂Cr₂O₇ is preferred as a primary standard over Na₂Cr₂O₇. Statement II: K₂Cr₂O₇ has higher solubility in water than Na₂Cr₂O₇. Choose.</div>
+        <div class="s">K₂Cr₂O₇ is non-hygroscopic → a good primary standard (I true). But Na₂Cr₂O₇ is the more soluble/hygroscopic salt (II false).</div>
+        <div class="ans">(c) Statement I is true but Statement II is false</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (10 April S2) · Level-3</span>
+        <div class="q">In alkaline medium, reduction of permanganate anion involves a gain of ___ electrons.</div>
+        <div class="s">In (strongly) alkaline medium MnO₄⁻ + e⁻ → MnO₄²⁻ (Mn +7 → +6) — a one-electron change.</div>
+        <div class="ans">1</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (13 April S1) · Level-3</span>
+        <div class="q">KMnO₄ is titrated with FAS in dilute H₂SO₄. Number of H₂O molecules produced per 2 molecules of KMnO₄?</div>
+        <div class="s">MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O. For 2 MnO₄⁻ → 8 H₂O.</div>
+        <div class="ans">8</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (15 April S1) · Level-3</span>
+        <div class="q">Total change in the oxidation state of manganese in the reaction of KMnO₄ with KI in acidic medium.</div>
+        <div class="s">Acidic medium: Mn +7 (MnO₄⁻) → +2 (Mn²⁺). Change = 5.</div>
+        <div class="ans">5</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2023 (Paper-2) · Level-3</span>
+        <div class="q">5 mol H₂S reacts completely with acidified KMnO₄. Moles of water produced = x, moles of electrons involved = y. Find x + y.</div>
+        <div class="s">2MnO₄⁻ + 5H₂S + 6H⁺ → 2Mn²⁺ + 5S + 8H₂O. For 5 mol H₂S: water x = 8. Electrons: 5 S(−2→0) × 2 = 10 = y.</div>
+        <div class="ans">x + y = 18</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (30 Jan S1) · Level-2</span>
+        <div class="q">Number of electrons involved in the reduction of permanganate to manganese dioxide in acidic medium.</div>
+        <div class="s">MnO₄⁻ + 4H⁺ + 3e⁻ → MnO₂ + 2H₂O (Mn +7 → +4).</div>
+        <div class="ans">3</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (30 Jan S2) · Level-2</span>
+        <div class="q">KMnO₄ oxidises I⁻ in acidic and in neutral/faintly alkaline solution, respectively, to:</div>
+        <div class="s">Acidic → I₂ ; neutral/faintly alkaline → IO₃⁻.</div>
+        <div class="ans">(a) I₂ and IO₃⁻</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (27 Jun S1) · Level-6</span>
+        <div class="q">Acidified KMnO₄ oxidises oxalic acid. Spin-only magnetic moment of the manganese product (nearest integer BM)?</div>
+        <div class="s">Product Mn²⁺ (d⁵): μ = √(5 × 7) = √35 = 5.92 BM ≈ 6.</div>
+        <div class="ans">6 BM</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (28 Jun S1) · Level-5</span>
+        <div class="q">2.0 g sample containing MnO₂ treated with HCl liberates Cl₂; Cl₂ passed into KI; liberated I₂ needs 60.0 mL of 0.1 M Na₂S₂O₃. % MnO₂ (nearest integer)? [Mn = 55]</div>
+        <div class="s">Moles Na₂S₂O₃ = 0.006 → moles I₂ = 0.003 → moles Cl₂ = 0.003 → moles MnO₂ = 0.003.</div>
+        <div class="s">Mass MnO₂ = 0.003 × 87 = 0.261 g → % = 0.261/2.0 × 100 = 13.05.</div>
+        <div class="ans">13 %</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (27 July S1) · Level-5</span>
+        <div class="q">20 mL of 0.02 M K₂Cr₂O₇ titrates 10 mL of Fe²⁺ in acidic medium. Molarity of Fe²⁺ is ___ × 10⁻² M.</div>
+        <div class="s">Cr₂O₇²⁻ + 6Fe²⁺ + 14H⁺ → 2Cr³⁺ + 6Fe³⁺ + 7H₂O. Moles Cr₂O₇²⁻ = 4×10⁻⁴ → Fe²⁺ = 6 × 4×10⁻⁴ = 2.4×10⁻³.</div>
+        <div class="s">M(Fe²⁺) = 2.4×10⁻³ / 0.010 = 0.24 M = 24 × 10⁻².</div>
+        <div class="ans">24</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (24 Jun S2) · Level-4</span>
+        <div class="q">Mn(VI) disproportionates in acidic solution. The difference in oxidation states of the two ions it forms is:</div>
+        <div class="s">3MnO₄²⁻ + 4H⁺ → 2MnO₄⁻ (+7) + MnO₂ (+4) + 2H₂O. Difference = 7 − 4 = 3.</div>
+        <div class="ans">3</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (29 Jun S1) · Level-4</span>
+        <div class="q">Which reaction shows the reducing ability of H₂O₂ in basic medium?</div>
+        <div class="s">H₂O₂ acts as reductant when it is oxidised (O⁻¹ → O₂). In basic medium 2MnO₄⁻ + 3H₂O₂ → 2MnO₂ + 3O₂ + 2OH⁻ + 2H₂O — MnO₄⁻ reduced to MnO₂, H₂O₂ → O₂.</div>
+        <div class="ans">(c) 2MnO₄⁻ + 3H₂O₂ → 2MnO₂ + 3O₂ + 2H₂O (basic)</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (26 Jul S1) · Level-4</span>
+        <div class="q">The dark-purple colour of KMnO₄ disappears on titration with oxalic acid in acidic medium. The overall change in the oxidation number of Mn is:</div>
+        <div class="s">Mn +7 (MnO₄⁻) → +2 (Mn²⁺). Change = 5.</div>
+        <div class="ans">(a) 5</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (26 Jul S2) · Level-4</span>
+        <div class="q">Products obtained from H₂O₂ and acidified potassium permanganate are:</div>
+        <div class="s">2MnO₄⁻ + 5H₂O₂ + 6H⁺ → 2Mn²⁺ + 5O₂ + 8H₂O. Products: Mn²⁺, H₂O and O₂.</div>
+        <div class="ans">(d) Mn²⁺, H₂O, O₂ only</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (27 Jul S2) · Level-4</span>
+        <div class="q">Oxidation state of manganese in the product from KMnO₄ and H₂O₂ in basic medium is:</div>
+        <div class="s">In basic medium MnO₄⁻ → MnO₂, so Mn is +4.</div>
+        <div class="ans">+4 (MnO₂)</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (28 July S2) · Level-4</span>
+        <div class="q">Assertion A: permanganate titrations are not performed in the presence of HCl. Reason R: Cl₂ is formed by the oxidation of HCl. Choose.</div>
+        <div class="s">Both true: MnO₄⁻ oxidises Cl⁻ to Cl₂, consuming extra permanganate — and R is exactly why the titration is avoided in HCl.</div>
+        <div class="ans">(a) Both A and R are true and R is the correct explanation of A</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (28 Jun S2) · Level-3</span>
+        <div class="q">0.01 M KMnO₄ is added from a 50 mL burette (initial reading 0) to 20.0 mL of 0.05 M Mohr's salt. Volume of KMnO₄ left in the burette after the end point?</div>
+        <div class="s">Moles Fe²⁺ = 0.020 × 0.05 = 1×10⁻³. MnO₄⁻ + 5Fe²⁺ → ... → moles MnO₄⁻ = 1×10⁻³/5 = 2×10⁻⁴.</div>
+        <div class="s">Volume used = 2×10⁻⁴ / 0.01 = 0.02 L = 20 mL → left = 50 − 20.</div>
+        <div class="ans">30 mL</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (26 Jul S1) · Level-3</span>
+        <div class="q">Which reaction is NOT an example of disproportionation? (a) 2H₂O₂→2H₂O+O₂ (b) 2NO₂+H₂O→HNO₃+HNO₂ (c) MnO₄⁻+4H⁺+3e⁻→MnO₂+2H₂O (d) 3MnO₄²⁻+4H⁺→2MnO₄⁻+MnO₂+2H₂O.</div>
+        <div class="s">(c) is a single reduction half-reaction (electrons appear) — no element is simultaneously oxidised and reduced. The others are genuine disproportionations.</div>
+        <div class="ans">(c)</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (27 July S1) · Level-3</span>
+        <div class="q">In the titration of KMnO₄ with oxalic acid in acidic medium, the change in oxidation number of carbon at the end point is:</div>
+        <div class="s">C in C₂O₄²⁻ is +3; in CO₂ it is +4. Change = 1.</div>
+        <div class="ans">1</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (27 Jul S2) · Level-3</span>
+        <div class="q">In neutral or alkaline solution, MnO₄⁻ oxidises thiosulphate to:</div>
+        <div class="s">S₂O₃²⁻ is oxidised all the way to sulphate: S₂O₃²⁻ → SO₄²⁻.</div>
+        <div class="ans">(d) SO₄²⁻</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (25 Jul S1) · Level-2</span>
+        <div class="q">The reaction of H₂O₂ with KMnO₄ in acidic medium leads mainly to the formation of:</div>
+        <div class="s">MnO₄⁻ is reduced to Mn²⁺ in acidic medium.</div>
+        <div class="ans">(a) Mn²⁺</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (28 July S2) · Level-2</span>
+        <div class="q">On reaction with a stronger oxidiser like KIO₄, H₂O₂ is oxidised with evolution of O₂. The oxidation number of I in KIO₄ changes to:</div>
+        <div class="s">I in KIO₄ is +7; it is reduced to IO₃⁻ (+5).</div>
+        <div class="ans">+5</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (26 Jun S2) · Level-1</span>
+        <div class="q">Which is an example of a disproportionation reaction? (a) 3MnO₄²⁻+4H⁺→2MnO₄⁻+MnO₂+2H₂O (b) MnO₄⁻+4H⁺+3e⁻→MnO₂+2H₂O (c) comproportionation (d) 8MnO₄⁻+3S₂O₃²⁻...</div>
+        <div class="s">In (a) Mn⁶⁺ is simultaneously oxidised to Mn⁷⁺ and reduced to Mn⁴⁺ → disproportionation.</div>
+        <div class="ans">(a)</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (29 Jun S1) · Level-1</span>
+        <div class="q">An acidified manganate solution disproportionates. The spin-only magnetic moment of the product with Mn in the higher oxidation state is ___ BM.</div>
+        <div class="s">3MnO₄²⁻ + 4H⁺ → 2MnO₄⁻ + MnO₂ + 2H₂O. Higher-state product = MnO₄⁻ (Mn⁷⁺, d⁰) → μ = 0.</div>
+        <div class="ans">0 BM</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (29 Jul S1) · Level-1</span>
+        <div class="q">In neutral or faintly alkaline medium KMnO₄ oxidises thiosulphate almost quantitatively to sulphate. The overall change in the oxidation state of manganese is:</div>
+        <div class="s">Neutral/faintly alkaline: Mn⁷⁺ (MnO₄⁻) → Mn⁴⁺ (MnO₂). Change = 3.</div>
+        <div class="ans">(d) 3</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2021 (Paper-2) · Level-6</span>
+        <div class="q">5.6 g iron sample dissolved in cold dilute HCl → 250 mL. Titration of 25.0 mL needs 12.5 mL of 0.03 M KMnO₄ (reacts only with Fe²⁺). Moles of Fe²⁺ in 250 mL = x × 10⁻². Find x. [Fe = 56]</div>
+        <div class="s">Moles KMnO₄ (25 mL) = 0.0125 × 0.03 = 3.75×10⁻⁴ → Fe²⁺ (25 mL) = 5 × 3.75×10⁻⁴ = 1.875×10⁻³.</div>
+        <div class="s">In 250 mL = ×10 = 1.875×10⁻² mol → x = 1.875.</div>
+        <div class="ans">x ≈ 1.88 (1.875)</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2021 (Paper-2) · Level-6</span>
+        <div class="q">(Same passage.) The amount of iron in the 5.6 g sample is y % by weight. Find y.</div>
+        <div class="s">Mass Fe = 1.875×10⁻² × 56 = 1.05 g → y = 1.05/5.6 × 100 = 18.75.</div>
+        <div class="ans">y ≈ 18.75 %</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2020 (Paper-1) · Level-3</span>
+        <div class="q">Al reacts with H₂SO₄ → Al₂(SO₄)₃ + H₂. Volume of H₂ (L) at 300 K, 1 atm from 5.4 g Al and 50.0 mL of 5.0 M H₂SO₄? [Al = 27, R = 0.082]</div>
+        <div class="s">Moles Al = 0.2, H₂SO₄ = 0.25. 2Al + 3H₂SO₄ → Al₂(SO₄)₃ + 3H₂; Al needs 0.3 mol acid → H₂SO₄ limiting → H₂ = 0.25 mol.</div>
+        <div class="s">V = nRT/P = 0.25 × 0.082 × 300 / 1.</div>
+        <div class="ans">6.15 L</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2020 (Paper-1) · Level-2</span>
+        <div class="q">5.00 mL of 0.10 M oxalic acid is titrated against NaOH (phenolphthalein). NaOH volumes for 5 runs: 12.5, 10.5, 9.0, 9.0, 9.0 mL. Molarity of NaOH?</div>
+        <div class="s">Concordant reading = 9.0 mL. H₂C₂O₄ + 2NaOH → Na₂C₂O₄ + 2H₂O → moles NaOH = 2 × (0.005 × 0.10) = 1×10⁻³.</div>
+        <div class="s">M(NaOH) = 1×10⁻³ / 0.009.</div>
+        <div class="ans">0.111 M</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Adv 2020 (Paper-2) · Level-2</span>
+        <div class="q">In the reaction between stoichiometric quantities of KMnO₄ and KI in weakly basic solution, how many moles of I₂ are released for 4 moles of KMnO₄?</div>
+        <div class="s">Weakly basic: MnO₄⁻ + 2H₂O + 3e⁻ → MnO₂ + 4OH⁻. 4 KMnO₄ gain 12 e⁻. I⁻ → (1/2)I₂ + e⁻ → 12 e⁻ give 6 I₂.</div>
+        <div class="ans">6 moles I₂</div>
+      </div>
+    </section>
+
+    <div class="foot">ICAD · C-8 Redox Reaction · Revision Notes (L-1 to L-6 + Strong Box) · Quick + Detailed views · theory, module Solved Examples and the complete Strong Box set of 70 JEE Main &amp; Advanced previous-year questions. Every objective/worked answer was re-derived independently; the book's answer key was not transcribed.</div>
+  </div>
+</div>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

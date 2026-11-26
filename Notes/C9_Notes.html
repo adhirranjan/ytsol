@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C-9 Hydrogen — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+  <nav class="toc">
+    <h3>Chapter C-9</h3>
+    <a class="top" href="#top">↑ Overview &amp; Key Formulas</a>
+    <a href="#l1">L-1 · Position, Isotopes &amp; Preparation of H<sub>2</sub></a>
+    <a href="#l2">L-2 · Forms of Hydrogen &amp; Hydrides</a>
+    <a href="#l3">L-3 · Water — Properties &amp; Hardness</a>
+    <a href="#l4">L-4 · Heavy Water &amp; Hydrogen Peroxide</a>
+    <a href="#strongbox">Strong Box · Previous Year Qs</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD · JEE Chemistry · Revision Notes</p>
+      <h1>C-9 · Hydrogen</h1>
+      <p>Lectures L-1 to L-4 · position of hydrogen (alkali-metal vs halogen resemblance, anomalous placement) · isotopes (protium/deuterium/tritium) · preparation &amp; properties of dihydrogen · forms of hydrogen &amp; hydrides (ionic / covalent / metallic / complex) · water, hard &amp; soft water, temporary &amp; permanent hardness and its removal · heavy water · hydrogen peroxide (structure, redox, strength / volume) · hydrogen as a fuel</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- MEMORIZE -->
+    <section class="lec" id="constants">
+      <div class="lec-head"><span class="lec-tag">★ MEMORIZE</span><h2>Key Facts, Reactions &amp; Formulas</h2></div>
+      <div class="twrap"><table>
+        <tr><th>Topic</th><th>Must-remember</th></tr>
+        <tr><td>Position of H</td><td>Anomalous — resembles <b>alkali metals</b> (1s<sup>1</sup>, forms H<sup>+</sup>, +1 state, electropositive, reducing) <b>and halogens</b> (1 e<sup>-</sup> short of inert gas He, forms H<sup>-</sup>, -1 state, diatomic H<sub>2</sub>, non-metal). Placed separately — fits neither group fully.</td></tr>
+        <tr><td>Isotopes</td><td><b>Protium</b> <sup>1</sup><sub>1</sub>H (0 n, 99.985%, stable) · <b>Deuterium</b> <sup>2</sup><sub>1</sub>H = D (1 n, 0.0156%, stable) · <b>Tritium</b> <sup>3</sup><sub>1</sub>H = T (2 n, ~10<sup>-15</sup>%, radioactive β, t<sub>1/2</sub> ≈ 12.3 yr). All have Z = 1, 1s<sup>1</sup>; differ only in <b>mass number / neutrons</b>.</td></tr>
+        <tr><td>Water gas / syngas (Bosch)</td><td><b>C(s) + H<sub>2</sub>O(g) → CO + H<sub>2</sub></b> (water gas, 1270 K, endothermic). Shift: <b>CO + H<sub>2</sub>O → CO<sub>2</sub> + H<sub>2</sub></b> (673 K, FeCrO<sub>4</sub>); CO<sub>2</sub> scrubbed out leaves H<sub>2</sub>.</td></tr>
+        <tr><td>Lab prep of H<sub>2</sub></td><td>Zn + dil. H<sub>2</sub>SO<sub>4</sub> → ZnSO<sub>4</sub> + H<sub>2</sub>. Very pure H<sub>2</sub> (&gt;99.95%): <b>electrolysis of warm Ba(OH)<sub>2</sub> between Ni/Pt electrodes</b>.</td></tr>
+        <tr><td>Hydrides</td><td><b>Ionic/saline</b> (gp 1,2 except Be, Mg; high mp, conduct in melt; stability LiH&gt;NaH&gt;KH&gt;RbH&gt;CsH) · <b>Covalent/molecular</b> (p-block: electron-deficient B<sub>2</sub>H<sub>6</sub>, electron-precise CH<sub>4</sub>, electron-rich NH<sub>3</sub>/H<sub>2</sub>O/HF) · <b>Metallic/interstitial</b> (d, f block; non-stoichiometric e.g. LaH<sub>2.87</sub>) · <b>Complex</b> (LiAlH<sub>4</sub>, NaBH<sub>4</sub>).</td></tr>
+        <tr><td>Water molecule</td><td>sp<sup>3</sup> O, <b>bent</b>, bond angle <b>104.5°</b>, dipole <b>1.84 D</b>. Max density at <b>4 °C (277 K)</b>; ice is <b>less dense</b> than water (open cage-like H-bonded hexagonal lattice) → ice floats.</td></tr>
+        <tr><td>Hardness of water</td><td><b>Temporary</b> = Ca/Mg <b>bicarbonates</b>; removed by boiling (Ca(HCO<sub>3</sub>)<sub>2</sub>→CaCO<sub>3</sub>↓, Mg(HCO<sub>3</sub>)<sub>2</sub>→Mg(OH)<sub>2</sub>↓) or <b>Clark's</b> Ca(OH)<sub>2</sub>. <b>Permanent</b> = Ca/Mg <b>sulphates/chlorides</b>; removed by washing soda Na<sub>2</sub>CO<sub>3</sub>, <b>permutit</b> (Na-zeolite), <b>Calgon</b> Na<sub>2</sub>[Na<sub>4</sub>(PO<sub>3</sub>)<sub>6</sub>], <b>ion-exchange resins</b>.</td></tr>
+        <tr><td>H<sub>2</sub>O<sub>2</sub> structure</td><td><b>Non-planar, open-book</b>. Gas phase: dihedral 111.5°, O-O-H 94.8°, O-O 147.5 pm, O-H 95.0 pm. Solid (110 K): dihedral 90.2°. O is sp<sup>3</sup>; O oxidation state = <b>-1</b>.</td></tr>
+        <tr><td>H<sub>2</sub>O<sub>2</sub> redox</td><td>Acts as <b>oxidising AND reducing</b> agent, and <b>bleaching</b> agent (via nascent [O]: H<sub>2</sub>O<sub>2</sub> → H<sub>2</sub>O + [O]). Weakly <b>acidic</b>. Decomposes: 2H<sub>2</sub>O<sub>2</sub> → 2H<sub>2</sub>O + O<sub>2</sub>.</td></tr>
+        <tr><td>H<sub>2</sub>O<sub>2</sub> strength</td><td><b>Volume strength</b> = volumes of O<sub>2</sub> at NTP that 1 volume of H<sub>2</sub>O<sub>2</sub> gives on heating. <b>Vol strength = 5.6 × Normality = 11.2 × Molarity.</b> "10 volume" = 3.035% = 30.35 g/L = 1.785 N. Equivalent mass of H<sub>2</sub>O<sub>2</sub> = 34/2 = 17.</td></tr>
+        <tr><td>Heavy water D<sub>2</sub>O</td><td>Deuterium oxide; made by <b>prolonged electrolysis</b> of H<sub>2</sub>O. Higher physical constants than H<sub>2</sub>O. Uses: <b>neutron moderator</b>, source of deuterium, tracer.</td></tr>
+        <tr><td>H<sub>2</sub> as a fuel</td><td>Burns to <b>water only</b> (2H<sub>2</sub>+O<sub>2</sub>→2H<sub>2</sub>O, ΔH = -285.9 kJ/mol) — clean, highest calorific value per gram; used in <b>fuel cells</b> (basis of the "hydrogen economy").</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">★ Golden rule</span>Every H<sub>2</sub>O<sub>2</sub> numerical reduces to one chain: <b>10 mL of "x volume" → x·(10/1000) L of O<sub>2</sub> at NTP</b>, and 68 g H<sub>2</sub>O<sub>2</sub> gives 22.4 L O<sub>2</sub> (22.7 L at STP). From there get mass, g/L, %, N or M. Remember <b>Vol = 5.6 N = 11.2 M</b>.</div>
+      <div class="call tip"><span class="h">💡 Reactivity ladder</span>Metal + water: very active (Na, K, Ca) react with <b>cold</b> water; Zn, Mg, Al need <b>boiling</b> water/steam; Fe, Sn, Ni need <b>red-hot steam</b>; Cu, Ag, Au, Hg, Pt do not react. Metals <b>above</b> H in the electrochemical series liberate H<sub>2</sub> from dilute acids; those below do not.</div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Position, Isotopes &amp; Preparation of Dihydrogen</h2></div>
+      <h3 class="sub">Position of hydrogen in the periodic table</h3>
+      <p>Hydrogen is the <b>first element</b>; its position is debatable because it resembles both the alkali metals and the halogens, yet differs from both.</p>
+      <div class="twrap"><table>
+        <tr><th>Resembles alkali metals</th><th>Resembles halogens</th></tr>
+        <tr><td>1 electron in outermost shell (1s<sup>1</sup>, like Li 2s<sup>1</sup>, Na 3s<sup>1</sup>)</td><td>1 electron short of nearest inert gas (He); like F 2s<sup>2</sup>2p<sup>5</sup></td></tr>
+        <tr><td>Electropositive; loses e<sup>-</sup> to form H<sup>+</sup>; <b>+1</b> oxidation state (H<sup>+</sup>Cl<sup>-</sup>)</td><td>Can gain e<sup>-</sup> to form H<sup>-</sup> (hydride); <b>-1</b> oxidation state</td></tr>
+        <tr><td>Combines with non-metals to form oxides, halides, sulphides; strong reducing agent (Fe<sub>2</sub>O<sub>3</sub>+4H<sub>2</sub>→3Fe+4H<sub>2</sub>O); liberated at cathode on electrolysis of HCl; forms metallic hydrides with Na, Ca</td><td>Diatomic (H<sub>2</sub>), typical non-metal; ionisation enthalpy close to halogens (much higher than alkali metals); liberated at anode on electrolysis of fused NaH; forms covalent compounds (CH<sub>4</sub>, NH<sub>3</sub>); replacement reactions like halogens</td></tr>
+      </table></div>
+      <div class="call tip"><span class="h">💡 Why anomalous</span>H is <b>less electropositive than alkali metals and less electronegative than halogens</b>. It has only 1 proton + 1 electron (no inner shell, no unshared pair in H<sub>2</sub>), its oxide (water) is <b>neutral</b> (alkali oxides basic, halogen oxides acidic), and H<sup>+</sup> is extremely small — it never exists free but as hydronium H<sub>3</sub>O<sup>+</sup> (hydrated as [H<sub>9</sub>O<sub>4</sub>]<sup>+</sup>). So it is placed separately.</div>
+      <h3 class="sub">Isotopes of hydrogen</h3>
+      <div class="twrap"><table>
+        <tr><th>Property</th><th>Protium <sup>1</sup><sub>1</sub>H</th><th>Deuterium <sup>2</sup><sub>1</sub>H (D)</th><th>Tritium <sup>3</sup><sub>1</sub>H (T)</th></tr>
+        <tr><td>Protons / Neutrons / Electrons</td><td>1 / 0 / 1</td><td>1 / 1 / 1</td><td>1 / 2 / 1</td></tr>
+        <tr><td>Mass number</td><td>1</td><td>2</td><td>3</td></tr>
+        <tr><td>Molecular form</td><td>H<sub>2</sub></td><td>D<sub>2</sub></td><td>T<sub>2</sub></td></tr>
+        <tr><td>Relative abundance</td><td>99.985%</td><td>0.0156%</td><td>~1 × 10<sup>-15</sup>%</td></tr>
+        <tr><td>Stability</td><td>Stable, non-radioactive</td><td>Stable, non-radioactive</td><td>Radioactive (β-rays), t<sub>1/2</sub> ≈ 12.3 yr</td></tr>
+      </table></div>
+      <div class="call trap"><span class="h">⚠ Trap</span>All three isotopes have the <b>same electronic configuration (1s<sup>1</sup>)</b> and <b>same chemical properties</b>; they differ only in <b>mass</b> (hence in physical properties and in reaction <b>rates</b> — kinetic isotope effect). Tritium is widely used as a <b>radioactive tracer</b>.</div>
+      <h3 class="sub">Preparation of dihydrogen</h3>
+      <ul>
+        <li><b>From water:</b> cold water + Na/K/Ca (2Na+2H<sub>2</sub>O→2NaOH+H<sub>2</sub>); boiling water + Zn/Mg/Al; steam + Fe/Sn/Ni (3Fe+4H<sub>2</sub>O →(1023–1073 K) Fe<sub>3</sub>O<sub>4</sub>+4H<sub>2</sub>). High-purity H<sub>2</sub> by <b>electrolysis of acidified/alkaline water</b> (H<sub>2</sub> at cathode, O<sub>2</sub> at anode).</li>
+        <li><b>From alkalies:</b> amphoteric metals react with hot NaOH — Zn+2NaOH →(Δ) Na<sub>2</sub>ZnO<sub>2</sub>+H<sub>2</sub>; 2Al+2NaOH+2H<sub>2</sub>O →(Δ) 2NaAlO<sub>2</sub>+3H<sub>2</sub>.</li>
+        <li><b>From acids:</b> metals above H in the electrochemical series (Zn, Fe, Mg) + dil. HCl/H<sub>2</sub>SO<sub>4</sub> → H<sub>2</sub>. <b>Lab method:</b> Zn + dil. H<sub>2</sub>SO<sub>4</sub> → ZnSO<sub>4</sub> + H<sub>2</sub> (Woulfe bottle, collected over water on a beehive shelf).</li>
+      </ul>
+      <li class="det"><b>Commercial sources:</b> Bosch process / coal gasification — C(s)+H<sub>2</sub>O(g) →(1270 K, Ni) CO+H<sub>2</sub> (water gas/syngas); water-gas shift CO+H<sub>2</sub>O →(673 K, FeCrO<sub>4</sub>) CO<sub>2</sub>+2H<sub>2</sub>. Steam reforming of hydrocarbons/natural gas: CH<sub>4</sub>+H<sub>2</sub>O →(1270 K, Ni) CO+3H<sub>2</sub>. Lane's process (steam over hot Fe, alternating oxidation/reduction stages).</li>
+      <div class="det-block det">
+        <div class="dh">Industrial split &amp; by-products</div>
+        About 77% of industrial H<sub>2</sub> comes from petrochemicals, 18% from coal, 4% from electrolysis, 1% from other sources. It is also a <b>by-product</b> of the chlor-alkali process (electrolysis of brine): at cathode 2H<sub>2</sub>O+2e<sup>-</sup>→H<sub>2</sub>+2OH<sup>-</sup>, at anode 2Cl<sup>-</sup>→Cl<sub>2</sub>+2e<sup>-</sup>; overall 2NaCl+2H<sub>2</sub>O→Cl<sub>2</sub>+H<sub>2</sub>+2NaOH.
+      </div>
+      <h3 class="sub">Properties &amp; uses of dihydrogen</h3>
+      <ul>
+        <li><b>Physical:</b> colourless, tasteless, odourless; lightest substance (1 L at NTP weighs 0.0899 g, density ≈ 1/14 of air); slightly soluble (non-polar); liquefies at low T / high P.</li>
+        <li><b>Chemical:</b> neutral to litmus; highly combustible (2H<sub>2</sub>+O<sub>2</sub>→2H<sub>2</sub>O, ΔH = -285.9 kJ/mol) but not a supporter of combustion. With metals → ionic hydrides (H is -1): 2Na+H<sub>2</sub>→2NaH; with halogens → HX (reactivity F<sub>2</sub>&gt;Cl<sub>2</sub>&gt;Br<sub>2</sub>&gt;I<sub>2</sub>); with N<sub>2</sub> → NH<sub>3</sub> (Haber, Fe+Mo); reduces metal oxides/ions (CuO+H<sub>2</sub>→Cu+H<sub>2</sub>O); <b>hydrogenation</b> of oils (Ni, 473 K) → vanaspati.</li>
+        <li><b>Uses:</b> refining fuels, reducing agent for ore treatment, manufacture of NH<sub>3</sub>/urea/HCl/HNO<sub>3</sub>/methanol, hydro-cracking; clean <b>fuel</b> and fuel-cell feedstock.</li>
+      </ul>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Which isotope of hydrogen is used as a tracer in organic reactions?</div>
+        <div class="s">A tracer must be detectable; only the radioactive isotope qualifies.</div>
+        <div class="ans">Tritium (<sup>3</sup>H) — a radioactive tracer</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Concentrated H<sub>2</sub>SO<sub>4</sub> cannot be used for drying H<sub>2</sub>. Why?</div>
+        <div class="s">Conc. H<sub>2</sub>SO<sub>4</sub> absorbing moisture from moist H<sub>2</sub> is strongly exothermic.</div>
+        <div class="s">The heat liberated can ignite the hydrogen (catches fire), so it is unsafe as a drying agent for H<sub>2</sub>.</div>
+        <div class="ans">The absorption of H<sub>2</sub>O by conc. H<sub>2</sub>SO<sub>4</sub> releases enough heat to set the hydrogen on fire</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1</span>
+        <div class="q">Electrolysis of water for making H<sub>2</sub> is carried out in presence of acid (H<sub>2</sub>SO<sub>4</sub>) or alkali (KOH), yet no SO<sub>4</sub><sup>2-</sup> or K<sup>+</sup> is discharged. Why?</div>
+        <div class="s">Discharge depends on the discharge potential of each ion at the electrode.</div>
+        <div class="s">At the anode, SO<sub>4</sub><sup>2-</sup> has a <b>higher</b> discharge potential than OH<sup>-</sup>, so OH<sup>-</sup> is preferentially discharged → O<sub>2</sub>. At the cathode, K<sup>+</sup> has a higher discharge potential than H<sup>+</sup>, so H<sup>+</sup> is preferentially discharged → H<sub>2</sub>.</div>
+        <div class="ans">Only H<sub>2</sub> (cathode) and O<sub>2</sub> (anode) are evolved; the acid/alkali merely raises conductivity</div>
+      </div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Forms of Hydrogen &amp; Hydrides</h2></div>
+      <h3 class="sub">Allotropic / special forms of hydrogen</h3>
+      <ul>
+        <li><b>Ortho &amp; para hydrogen:</b> depending on whether the two nuclear (proton) spins are parallel (<b>ortho</b>) or antiparallel (<b>para</b>). Ordinary hydrogen is a 3:1 ortho:para mixture at room temperature.</li>
+        <li><b>Nascent hydrogen:</b> freshly produced "newly born" H (e.g. Zn+H<sub>2</sub>SO<sub>4</sub>→ZnSO<sub>4</sub>+2[H]); more reactive than ordinary H<sub>2</sub> — reduces KClO<sub>3</sub>→KCl, AsCl<sub>3</sub>→AsH<sub>3</sub>.</li>
+        <li><b>Adsorbed / occluded hydrogen:</b> metals (Pd, Pt, Au, Fe, Ni) adsorb large volumes (1 vol Pd adsorbs ~935 vol H<sub>2</sub>) — released on heating (occlusion, Graham).</li>
+        <li><b>Active &amp; atomic hydrogen:</b> ordinary H<sub>2</sub> under silent electric discharge (&gt;30 000 V) → active hydrogen; through a tungsten arc → <b>atomic hydrogen</b> (life ~0.3 s, strongly reducing).</li>
+      </ul>
+      <h3 class="sub">Hydrides — classification</h3>
+      <p>Binary compounds of H with other elements. Type depends on the electronegativity / bonding of the partner element.</p>
+      <div class="twrap"><table>
+        <tr><th>Type</th><th>Formed by</th><th>Key points &amp; examples</th></tr>
+        <tr><td>Ionic / saline</td><td>Groups 1 &amp; 2 (except Be, Mg)</td><td>Crystalline solids, high mp/bp, denser than parent metal, conduct in molten state (H<sup>-</sup>→anode). Thermal stability: <b>LiH &gt; NaH &gt; KH &gt; RbH &gt; CsH</b>. Prep: 2Na+H<sub>2</sub>→2NaH; Ca+H<sub>2</sub>→CaH<sub>2</sub>.</td></tr>
+        <tr><td>Covalent / molecular</td><td>p-block &amp; some s-block</td><td>Discrete molecules held by van der Waals forces (+ H-bonding) → low mp/bp, non-conducting. Sub-types: <b>electron-deficient</b> (B<sub>2</sub>H<sub>6</sub>, AlH<sub>3</sub>), <b>electron-precise</b> (CH<sub>4</sub>, SiH<sub>4</sub>, GeH<sub>4</sub>), <b>electron-rich</b> (NH<sub>3</sub>, H<sub>2</sub>O, HF — lone pairs).</td></tr>
+        <tr><td>Metallic / interstitial</td><td>d- and f-block</td><td>H in the interstices of the metal lattice; often <b>non-stoichiometric</b> (LaH<sub>2.87</sub>, TiH<sub>1.8</sub>, PdH<sub>0.7</sub>); hard, metallic lustre, conducting, magnetic.</td></tr>
+        <tr><td>Complex / polymeric</td><td>Groups 1, 2, 13</td><td>LiAlH<sub>4</sub>, NaBH<sub>4</sub>, Li[AlH<sub>4</sub>] — versatile reducing agents. Polymeric: (BeH<sub>2</sub>)<sub>n</sub>, (AlH<sub>3</sub>)<sub>n</sub> (3-centre-2-electron H bridges).</td></tr>
+      </table></div>
+      <div class="call tip"><span class="h">💡 Trends in covalent hydrides</span>Thermal stability falls with metallic character of the central atom: NH<sub>3</sub>&gt;PH<sub>3</sub>&gt;AsH<sub>3</sub>&gt;SbH<sub>3</sub>&gt;BiH<sub>3</sub>, and CH<sub>4</sub>&lt;NH<sub>3</sub>&lt;H<sub>2</sub>O&lt;HF. Lewis-base (lone-pair) character: NH<sub>3</sub>&gt;H<sub>2</sub>O&gt;HF (period 2) and NH<sub>3</sub>&gt;PH<sub>3</sub>&gt;AsH<sub>3</sub>&gt;SbH<sub>3</sub> (group 15).</div>
+      <div class="call trap"><span class="h">⚠ Trap</span>"Electron-rich" means <b>extra lone pairs</b> (NH<sub>3</sub>, H<sub>2</sub>O, HF), <b>not</b> extra bonds. "Electron-deficient" (B<sub>2</sub>H<sub>6</sub>) has <b>fewer</b> electrons than needed for normal 2-centre bonds. "Electron-precise" (CH<sub>4</sub>) has exactly enough.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Classify as ionic, covalent, metallic or polymeric: (i) BeH<sub>2</sub> (ii) CaH<sub>2</sub> (iii) RbH (iv) GeH<sub>4</sub> (v) TiH<sub>2</sub>.</div>
+        <div class="s">Group 1/2 (except Be, Mg) → ionic; Be → polymeric; p-block → covalent; d-block → metallic.</div>
+        <div class="ans">(i) BeH<sub>2</sub> polymeric (BeH<sub>2</sub>)<sub>n</sub> · (ii) CaH<sub>2</sub> ionic · (iii) RbH ionic · (iv) GeH<sub>4</sub> covalent/molecular · (v) TiH<sub>2</sub> metallic/interstitial</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Among LiH, NaH, KH, RbH, CsH, the correct order of <b>increasing</b> ionic character is?</div>
+        <div class="s">Ionic character increases with electropositivity of the metal, which increases down group 1.</div>
+        <div class="ans">LiH &lt; NaH &lt; KH &lt; RbH &lt; CsH</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Arrange H<sub>2</sub>, D<sub>2</sub> and T<sub>2</sub> in decreasing order of (i) boiling point, (ii) heat of fusion.</div>
+        <div class="s">Heavier isotopologues have stronger van der Waals forces, so higher boiling point and heat of fusion.</div>
+        <div class="ans">(i) T<sub>2</sub> &gt; D<sub>2</sub> &gt; H<sub>2</sub> · (ii) T<sub>2</sub> &gt; D<sub>2</sub> &gt; H<sub>2</sub></div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Find the nuclear spin of (i) ortho-hydrogen and (ii) para-hydrogen.</div>
+        <div class="s">Each proton has spin (1/2). Ortho = spins parallel (add); para = spins antiparallel (subtract).</div>
+        <div class="s">(i) Ortho: (1/2) + (1/2) = 1. (ii) Para: (1/2) − (1/2) = 0.</div>
+        <div class="ans">(i) Ortho nuclear spin = 1 · (ii) Para nuclear spin = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">What is the hybrid state of the oxygen atom in H<sub>2</sub>O and the shape of the molecule?</div>
+        <div class="s">O has 2 bond pairs + 2 lone pairs = 4 electron domains → sp<sup>3</sup>; two lone pairs compress the angle to 104.5°.</div>
+        <div class="ans">O is sp<sup>3</sup> hybridised; H<sub>2</sub>O is <b>bent / V-shaped</b></div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2</span>
+        <div class="q">Which has higher density — water or ice?</div>
+        <div class="s">Ice has an open cage-like H-bonded lattice with vacant spaces; on melting these collapse and molecules pack closer.</div>
+        <div class="ans">Water (density max at 4 °C); ice is less dense and floats</div>
+      </div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Water — Properties, Hardness &amp; Softening</h2></div>
+      <h3 class="sub">Properties of pure water</h3>
+      <ul>
+        <li><b>Physical:</b> colourless, tasteless, odourless; freezes at 0 °C, boils at 100 °C; max density 1.00 g cm<sup>-3</sup> at <b>4 °C</b>; polar, V-shaped, bond angle 104.5°; high dielectric constant (78.39) → excellent solvent for polar/ionic substances; poor conductor; strongly <b>associated</b> through H-bonding (high specific heat, latent heats).</li>
+        <li><b>Neutral &amp; amphoteric:</b> pH = 7, [H<sup>+</sup>] = [OH<sup>-</sup>] = 10<sup>-7</sup> M at 25 °C. Acts as an <b>acid with NH<sub>3</sub></b> (H<sub>2</sub>O+NH<sub>3</sub>⇌NH<sub>4</sub><sup>+</sup>+OH<sup>-</sup>) and a <b>base with H<sub>2</sub>S</b> (H<sub>2</sub>O+H<sub>2</sub>S⇌H<sub>3</sub>O<sup>+</sup>+HS<sup>-</sup>). Auto-ionisation: 2H<sub>2</sub>O⇌H<sub>3</sub>O<sup>+</sup>+OH<sup>-</sup>.</li>
+      </ul>
+      <li class="det"><b>Reactions:</b> with active metals → H<sub>2</sub>; with acidic oxides → oxoacids (SO<sub>3</sub>+H<sub>2</sub>O→H<sub>2</sub>SO<sub>4</sub>, N<sub>2</sub>O<sub>5</sub>+H<sub>2</sub>O→2HNO<sub>3</sub>); with basic oxides → alkalies (CaO+H<sub>2</sub>O→Ca(OH)<sub>2</sub>); with hydrides/carbides/nitrides/phosphides → H<sub>2</sub>/C<sub>2</sub>H<sub>2</sub>/NH<sub>3</sub>/PH<sub>3</sub>; hydrolysis of salts and non-metal halides (PCl<sub>5</sub>+4H<sub>2</sub>O→H<sub>3</sub>PO<sub>4</sub>+5HCl); forms hydrates (CuSO<sub>4</sub>·5H<sub>2</sub>O).</li>
+      <div class="call tip"><span class="h">💡 Why ice floats</span>Each O is tetrahedrally bonded to 4 H (2 covalent + 2 H-bonds). The H-bonds are longer than covalent bonds, giving an <b>open cage structure with vacant spaces</b> → ice is less dense. On melting (0→4 °C) H-bonds break, molecules fill the holes, density <b>rises</b>, peaking at 4 °C. This keeps lakes liquid below a floating ice layer, protecting aquatic life.</div>
+      <h3 class="sub">Hard &amp; soft water</h3>
+      <p><b>Soft water</b> lathers readily with soap; <b>hard water</b> forms an insoluble scum first because Ca<sup>2+</sup>/Mg<sup>2+</sup> precipitate the soap (e.g. Ca<sup>2+</sup> + 2C<sub>17</sub>H<sub>35</sub>COO<sup>-</sup> → (C<sub>17</sub>H<sub>35</sub>COO)<sub>2</sub>Ca↓), wasting soap.</p>
+      <div class="twrap"><table>
+        <tr><th>Type of hardness</th><th>Cause</th><th>Removal</th></tr>
+        <tr><td>Temporary</td><td>Bicarbonates of Ca &amp; Mg: Ca(HCO<sub>3</sub>)<sub>2</sub>, Mg(HCO<sub>3</sub>)<sub>2</sub></td><td><b>Boiling:</b> Ca(HCO<sub>3</sub>)<sub>2</sub>→CaCO<sub>3</sub>↓+H<sub>2</sub>O+CO<sub>2</sub>; Mg(HCO<sub>3</sub>)<sub>2</sub>→Mg(OH)<sub>2</sub>↓+2CO<sub>2</sub>. <b>Clark's process</b> (calculated Ca(OH)<sub>2</sub>): Ca(HCO<sub>3</sub>)<sub>2</sub>+Ca(OH)<sub>2</sub>→2CaCO<sub>3</sub>↓+2H<sub>2</sub>O.</td></tr>
+        <tr><td>Permanent</td><td>Sulphates &amp; chlorides of Ca &amp; Mg</td><td>Cannot be boiled off. Use <b>water softeners</b>: washing soda (Na<sub>2</sub>CO<sub>3</sub>), <b>permutit</b> (Na-zeolite, Na<sub>2</sub>Al<sub>2</sub>Si<sub>2</sub>O<sub>8</sub>·xH<sub>2</sub>O), <b>Calgon</b> Na<sub>2</sub>[Na<sub>4</sub>(PO<sub>3</sub>)<sub>6</sub>], <b>ion-exchange resins</b>.</td></tr>
+      </table></div>
+      <div class="det-block det">
+        <div class="dh">Water softeners in detail</div>
+        <b>Washing soda:</b> CaCl<sub>2</sub>+Na<sub>2</sub>CO<sub>3</sub>→CaCO<sub>3</sub>↓+2NaCl (removes both kinds). <b>Permutit (Na-zeolite):</b> Na<sub>2</sub>Al<sub>2</sub>Si<sub>2</sub>O<sub>8</sub>·xH<sub>2</sub>O + Ca<sup>2+</sup> → CaAl<sub>2</sub>Si<sub>2</sub>O<sub>8</sub>·xH<sub>2</sub>O + 2Na<sup>+</sup>; regenerated with 1% NaCl brine. <b>Calgon:</b> 2CaSO<sub>4</sub>+Na<sub>2</sub>[Na<sub>4</sub>(PO<sub>3</sub>)<sub>6</sub>]→Na<sub>2</sub>[Ca<sub>2</sub>(PO<sub>3</sub>)<sub>6</sub>]+2Na<sub>2</sub>SO<sub>4</sub> (boiler water). <b>Ion-exchange resins:</b> a cation exchanger (−SO<sub>3</sub>H / −COOH) plus an anion exchanger (amine-based) removes <b>all</b> soluble minerals → fully demineralised water (most efficient).
+      </div>
+      <div class="call trap"><span class="h">⚠ Trap</span>Add only the <b>calculated</b> amount of Ca(OH)<sub>2</sub> in Clark's process — excess slaked lime itself introduces <b>fresh (artificial) hardness</b>.</div>
+      <p class="det" style="font-size:.82rem;color:var(--muted)">(The scanned L-3 pages carry theory only; their worked problems appear in the Strong Box below.)</p>
+    </section>
+
+    <!-- L4 -->
+    <section class="lec" id="l4">
+      <div class="lec-head"><span class="lec-tag">L-4</span><h2>Heavy Water &amp; Hydrogen Peroxide</h2></div>
+      <h3 class="sub">Heavy water (D<sub>2</sub>O)</h3>
+      <ul>
+        <li>Chemically <b>deuterium oxide</b>; ordinary water contains traces of D<sub>2</sub>O. <b>Prepared</b> by prolonged electrolysis or fractional distillation of H<sub>2</sub>O (H<sub>2</sub>O electrolyses faster, enriching the residue in D<sub>2</sub>O).</li>
+        <li>Colourless, tasteless, odourless; all physical constants are <b>higher</b> than those of ordinary water.</li>
+        <li><b>Chemistry mirrors water</b> with D in place of H: with Na → NaOD+D<sub>2</sub>; with SO<sub>3</sub> → D<sub>2</sub>SO<sub>4</sub>; with CaC<sub>2</sub> → Ca(OD)<sub>2</sub>+DC≡CD; with Mg<sub>3</sub>N<sub>2</sub> → Mg(OD)<sub>2</sub>+ND<sub>3</sub>. Exchange with protic compounds (NaOH+D<sub>2</sub>O→NaOD+HDO).</li>
+        <li><b>Uses:</b> neutron <b>moderator</b> in nuclear reactors, preparation of deuterium, tracer compound.</li>
+      </ul>
+      <h3 class="sub">Hydrogen peroxide (H<sub>2</sub>O<sub>2</sub>)</h3>
+      <ul>
+        <li><b>Structure:</b> non-planar, <b>open-book</b>. Gas phase dihedral 111.5° (O-O-H 94.8°, O-O 147.5 pm, O-H 95.0 pm); solid (110 K) dihedral 90.2° due to H-bonding. O is sp<sup>3</sup>; oxidation state of O = <b>-1</b>.</li>
+        <li><b>Preparation:</b> Na<sub>2</sub>O<sub>2</sub>+H<sub>2</sub>SO<sub>4</sub> →(ice-cold) Na<sub>2</sub>SO<sub>4</sub>+H<sub>2</sub>O<sub>2</sub>; BaO<sub>2</sub>·8H<sub>2</sub>O+H<sub>2</sub>SO<sub>4</sub> →(ice-cold) BaSO<sub>4</sub>+H<sub>2</sub>O<sub>2</sub>+8H<sub>2</sub>O; <b>Mark's (Merck) process</b> BaO<sub>2</sub>+CO<sub>2</sub>+H<sub>2</sub>O→BaCO<sub>3</sub>↓+H<sub>2</sub>O<sub>2</sub>. Convenient lab prep of (deuterated) peroxide uses peroxodisulphate K<sub>2</sub>S<sub>2</sub>O<sub>8</sub>.</li>
+        <li><b>Chemical properties:</b> decomposes 2H<sub>2</sub>O<sub>2</sub>→2H<sub>2</sub>O+O<sub>2</sub>; weakly <b>acidic</b> (H<sub>2</sub>O<sub>2</sub>+2NaOH→Na<sub>2</sub>O<sub>2</sub>+2H<sub>2</sub>O); strong <b>oxidising</b> agent in both acidic and alkaline media (provides nascent [O]); also a <b>reducing</b> agent toward stronger oxidisers; <b>bleaches</b> via H<sub>2</sub>O<sub>2</sub>→H<sub>2</sub>O+[O].</li>
+        <li><b>Uses:</b> antiseptic/germicide ("perhydrol"), restoring old paintings, lab oxidant, "antichlor" to remove traces of Cl<sub>2</sub>/hypochlorite.</li>
+      </ul>
+      <h3 class="sub">Strength of H<sub>2</sub>O<sub>2</sub></h3>
+      <div class="formula"><span class="lbl">percentage &amp; volume strength</span>% strength = g of H<sub>2</sub>O<sub>2</sub> per 100 mL · Volume strength = litres of O<sub>2</sub> at NTP that 1 L of the solution gives on heating</div>
+      <div class="formula"><span class="lbl">master relations</span>Volume strength = 5.6 × Normality = 11.2 × Molarity ; Eq. mass of H<sub>2</sub>O<sub>2</sub> = 34/2 = 17 ; 68 g H<sub>2</sub>O<sub>2</sub> → 22.4 L O<sub>2</sub> (NTP)</div>
+      <div class="call tip"><span class="h">💡 "10 volume"</span>"10 volume" H<sub>2</sub>O<sub>2</sub> gives 10 volumes of O<sub>2</sub> per volume of solution. It equals <b>3.035% = 30.35 g/L = 1.785 N = 0.893 M</b>. Example: 10 mL of a "20 volume" solution liberates 10 × 20 = 200 mL O<sub>2</sub> at NTP.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">Calculate the strength (g/L) and normality of a 10 volume solution of H<sub>2</sub>O<sub>2</sub>.</div>
+        <div class="s">"10 volume" ⇒ 1 L gives 10 L O<sub>2</sub> at NTP. From 2H<sub>2</sub>O<sub>2</sub>→2H<sub>2</sub>O+O<sub>2</sub>: 68 g H<sub>2</sub>O<sub>2</sub> → 22.4 L O<sub>2</sub>.</div>
+        <div class="s">Mass giving 10 L O<sub>2</sub> = (68/22.4) × 10 = 30.357 g ⇒ strength = 30.357 g/L.</div>
+        <div class="s">Normality = strength / eq. mass = 30.357 / 17 = 1.79 N.</div>
+        <div class="ans">Strength ≈ 30.36 g/L; Normality ≈ 1.79 N (vol strength = 5.6 × 1.79 ≈ 10 ✓)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">Calculate the volume strength of a solution containing 30.36 g/L of H<sub>2</sub>O<sub>2</sub>.</div>
+        <div class="s">68 g H<sub>2</sub>O<sub>2</sub> → 22.4 L O<sub>2</sub> at NTP, so 30.36 g → (22.4/68) × 30.36 = 10 L O<sub>2</sub>.</div>
+        <div class="s">1 L of the solution therefore releases 10 L O<sub>2</sub>.</div>
+        <div class="ans">Volume strength = 10 volume</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">30 mL of H<sub>2</sub>O<sub>2</sub>, after acidification, needs 30 mL of N/10 KMnO<sub>4</sub> for complete oxidation. Find the % and volume strength.</div>
+        <div class="s">N<sub>1</sub>V<sub>1</sub> = N<sub>2</sub>V<sub>2</sub> ⇒ N<sub>1</sub> × 30 = (1/10) × 30 ⇒ N<sub>1</sub> = 0.1 N.</div>
+        <div class="s">Strength = N × eq. mass = 0.1 × 17 = 1.7 g/L ⇒ % = (1.7/1000) × 100 = 0.17%.</div>
+        <div class="s">Volume strength = 5.6 × N = 5.6 × 0.1 = 0.56 volume.</div>
+        <div class="ans">0.1 N · 0.17% · 0.56 volume</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-4</span>
+        <div class="q">0.5 L each of three H<sub>2</sub>O<sub>2</sub> samples labelled 10 vol, 15 vol and 20 vol are mixed, then diluted with an equal volume of water. Find the strength of the resultant solution.</div>
+        <div class="s">Normality = (vol strength)/5.6. For 500 mL each: N<sub>1</sub>V<sub>1</sub>+N<sub>2</sub>V<sub>2</sub>+N<sub>3</sub>V<sub>3</sub> = (10+15+20)/5.6 × 500 = (45 × 500)/5.6 meq.</div>
+        <div class="s">Total volume after dilution = 1500 + 1500 = 3000 mL ⇒ N<sub>4</sub> = (45 × 500)/(5.6 × 3000) = 1.339 N.</div>
+        <div class="s">Volume strength = 5.6 × 1.339 = 7.5 (equivalently: mean 15 vol, halved on doubling the volume).</div>
+        <div class="ans">Resultant ≈ 1.34 N ≡ 7.5 volume</div>
+      </div>
+    </section>
+
+    <!-- STRONG BOX -->
+    <section class="lec" id="strongbox">
+      <div class="lec-head"><span class="lec-tag">★ STRONG BOX</span><h2>High-Yield Numericals &amp; Previous-Year Questions</h2></div>
+      <p class="det" style="color:var(--muted);font-size:.85rem">Every objective answer below was re-derived from first principles. Where the exact letter of an option is quoted it is the independently verified correct one.</p>
+
+      <div class="exhead det">Calculation problems (Level-7)</div>
+      <div class="example det">
+        <span class="tag">Strong Box · Level-7</span>
+        <div class="q">What mass of CaO is required to remove the hardness of 1000 L of water containing 1.62 g of calcium bicarbonate per litre?</div>
+        <div class="s">M(Ca(HCO<sub>3</sub>)<sub>2</sub>) = 40 + 2(1+12+48) = 162 g/mol ⇒ 1.62 g/L = 0.01 mol/L; in 1000 L = 10 mol.</div>
+        <div class="s">Clark: Ca(HCO<sub>3</sub>)<sub>2</sub> + Ca(OH)<sub>2</sub> → 2CaCO<sub>3</sub> + 2H<sub>2</sub>O, and CaO + H<sub>2</sub>O → Ca(OH)<sub>2</sub>, so 1 mol bicarbonate needs 1 mol CaO.</div>
+        <div class="s">Mass CaO = 10 mol × 56 g/mol = 560 g.</div>
+        <div class="ans">560 g CaO</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · Level-7</span>
+        <div class="q">100 mL of tap water containing Ca(HCO<sub>3</sub>)<sub>2</sub> was titrated with N/50 HCl (methyl orange). 30 mL of HCl was required. Find the temporary hardness as parts of CaCO<sub>3</sub> per 10<sup>6</sup> parts of water.</div>
+        <div class="s">Ca(HCO<sub>3</sub>)<sub>2</sub> + 2HCl → CaCl<sub>2</sub> + 2H<sub>2</sub>O + 2CO<sub>2</sub>; equivalents of HCl = equivalents of CaCO<sub>3</sub>.</div>
+        <div class="s">meq HCl = (1/50) × 30 = 0.6 meq ⇒ mass CaCO<sub>3</sub> = 0.6 × 50 = 30 mg = 0.030 g in 100 g of water.</div>
+        <div class="s">ppm = (0.030/100) × 10<sup>6</sup> = 300.</div>
+        <div class="ans">300 ppm (300 parts CaCO<sub>3</sub> per 10<sup>6</sup> parts of water)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · Level-7</span>
+        <div class="q">25 mL of an H<sub>2</sub>O<sub>2</sub> solution was added to excess acidified KI; the liberated iodine needed 20 mL of 0.1 N Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub>. Find its normality, percentage and volume strength.</div>
+        <div class="s">meq Na<sub>2</sub>S<sub>2</sub>O<sub>3</sub> = 20 × 0.1 = 2 meq = meq I<sub>2</sub> = meq H<sub>2</sub>O<sub>2</sub>.</div>
+        <div class="s">N(H<sub>2</sub>O<sub>2</sub>) = 2/25 = 0.08 N ⇒ strength = 0.08 × 17 = 1.36 g/L ⇒ % = 0.136%.</div>
+        <div class="s">Volume strength = 5.6 × 0.08 = 0.448 volume.</div>
+        <div class="ans">0.08 N · 0.136% · 0.448 volume</div>
+      </div>
+
+      <div class="exhead det">Previous Year Questions (JEE Main)</div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (1 Feb, Sh-1)</span>
+        <div class="q">Assertion A: PH<sub>3</sub> has a lower boiling point than NH<sub>3</sub>. Reason R: In the liquid state NH<sub>3</sub> is associated by van der Waals forces, but PH<sub>3</sub> by hydrogen bonding. Choose the correct option.</div>
+        <div class="s">A is TRUE (PH<sub>3</sub> bp ≈ -88 °C &lt; NH<sub>3</sub> bp ≈ -33 °C).</div>
+        <div class="s">R is FALSE — it is reversed: NH<sub>3</sub> is H-bonded (hence higher bp), PH<sub>3</sub> only has weak van der Waals forces.</div>
+        <div class="ans">(d) A is correct but R is not correct (A true, R false)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (10 Apr, Sh-1)</span>
+        <div class="q">Commercial H<sub>2</sub>: C(s)+H<sub>2</sub>O(g) →(T<sub>1</sub>) CO+H<sub>2</sub>, and CO(g)+H<sub>2</sub>O(g) →(T<sub>2</sub>, cat.) CO<sub>2</sub>+H<sub>2</sub>. How are T<sub>1</sub>, T<sub>2</sub> related?</div>
+        <div class="s">Water-gas formation is strongly endothermic ⇒ needs high T (~1270 K). The exothermic water-gas shift is run at lower T (~673 K) over a catalyst.</div>
+        <div class="ans">(d) T<sub>1</sub> &gt; T<sub>2</sub></div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (1 Feb, Sh-1)</span>
+        <div class="q">Assertion A: Hydrogen is an environment-friendly fuel. Reason R: Atomic number of hydrogen is 1 and it is a very light element.</div>
+        <div class="s">A TRUE (burns to water only — clean). R TRUE (Z = 1, lightest).</div>
+        <div class="s">But being light/Z = 1 is not <b>why</b> it is clean — the clean-fuel reason is that combustion yields only water.</div>
+        <div class="ans">(b) Both A and R are true but R is NOT the correct explanation of A</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (10 Apr, Sh-2)</span>
+        <div class="q">Assertion A: Physical properties of the isotopes of hydrogen are different. Reason R: The mass difference between the isotopes of hydrogen is very large.</div>
+        <div class="s">A TRUE. R TRUE — D is 2× and T is 3× the mass of H, the largest relative mass difference of any element's isotopes, which is exactly why their physical properties differ.</div>
+        <div class="ans">(a) Both A and R are true and R is the correct explanation of A</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (13 Apr, Sh-1)</span>
+        <div class="q">Statement I: Permutit process is more efficient than the synthetic-resin method for softening water. Statement II: The synthetic-resin method results in the formation of soluble sodium salts.</div>
+        <div class="s">Statement I FALSE — the ion-exchange (synthetic-resin) method removes <b>all</b> ions (demineralised water) and is the more efficient one.</div>
+        <div class="s">Statement II FALSE — it is the <b>permutit</b> (Na-zeolite) process that leaves sodium salts; the resin method gives pure water.</div>
+        <div class="ans">(a) Both statements I and II are incorrect</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (13 Apr, Sh-2)</span>
+        <div class="q">Assertion A: Isotopes of hydrogen have almost the same chemical properties but differ in their rates of reaction. Reason R: Isotopes of hydrogen have different enthalpies of bond dissociation.</div>
+        <div class="s">A TRUE (same chemistry; D reacts slower — kinetic isotope effect). R TRUE (D–D bond is stronger than H–H).</div>
+        <div class="s">The different bond-dissociation enthalpy is precisely what changes the reaction rate, so R explains A.</div>
+        <div class="ans">(b) Both A and R are correct and R is the correct explanation of A</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (30 Jan, Sh-2)</span>
+        <div class="q">The strength of a "50 volume" solution of H<sub>2</sub>O<sub>2</sub> is ___ g/L (nearest integer). (M = 34 g/mol, molar volume at STP = 22.7 L.)</div>
+        <div class="s">50 volume ⇒ 1 L gives 50 L O<sub>2</sub>. From 2H<sub>2</sub>O<sub>2</sub>→2H<sub>2</sub>O+O<sub>2</sub>: 68 g H<sub>2</sub>O<sub>2</sub> → 22.7 L O<sub>2</sub>.</div>
+        <div class="s">Mass = (68/22.7) × 50 = 149.8 g/L ≈ 150.</div>
+        <div class="ans">150 g/L</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (31 Jan, Sh-1)</span>
+        <div class="q">H<sub>2</sub>O<sub>2</sub> acts as a <b>reducing</b> agent in: (a) 2NaOCl+H<sub>2</sub>O<sub>2</sub>→2NaCl+H<sub>2</sub>O+O<sub>2</sub> (b) 2Fe<sup>2+</sup>+2H<sup>+</sup>+H<sub>2</sub>O<sub>2</sub>→2Fe<sup>3+</sup>+2H<sub>2</sub>O (c) Mn<sup>2+</sup>+H<sub>2</sub>O<sub>2</sub>→MnO<sub>2</sub>+... (d) Na<sub>2</sub>S+4H<sub>2</sub>O<sub>2</sub>→Na<sub>2</sub>SO<sub>4</sub>+4H<sub>2</sub>O.</div>
+        <div class="s">Reducing agent ⇒ H<sub>2</sub>O<sub>2</sub> itself is oxidised (O: -1→0, releasing O<sub>2</sub>). Only (a) releases O<sub>2</sub> while Cl goes +1→-1 (OCl<sup>-</sup> reduced).</div>
+        <div class="s">In (b), (c), (d) the partner is oxidised and H<sub>2</sub>O<sub>2</sub> is reduced (O: -1→-2) ⇒ H<sub>2</sub>O<sub>2</sub> is the oxidiser there.</div>
+        <div class="ans">(a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (12 Apr, Sh-1)</span>
+        <div class="q">Match the hydride type with an example: A Electron-deficient, B Electron-rich, C Electron-precise, D Saline; with I MgH<sub>2</sub>, II HF, III B<sub>2</sub>H<sub>6</sub>, IV CH<sub>4</sub>.</div>
+        <div class="s">Electron-deficient = B<sub>2</sub>H<sub>6</sub> (III); electron-rich (lone pairs) = HF (II); electron-precise = CH<sub>4</sub> (IV); saline/ionic = MgH<sub>2</sub> (I).</div>
+        <div class="ans">(a) A-III, B-II, C-IV, D-I</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (24 Jan, Sh-2)</span>
+        <div class="q">In which reaction does H<sub>2</sub>O<sub>2</sub> act as a <b>reducing</b> agent? (a) PbS+4H<sub>2</sub>O<sub>2</sub>→PbSO<sub>4</sub>+4H<sub>2</sub>O (b) 2Fe<sup>2+</sup>+H<sub>2</sub>O<sub>2</sub>→2Fe<sup>3+</sup>+2OH<sup>-</sup> (c) HOCl+H<sub>2</sub>O<sub>2</sub>→H<sub>3</sub>O<sup>+</sup>+Cl<sup>-</sup>+O<sub>2</sub> (d) Mn<sup>2+</sup>+H<sub>2</sub>O<sub>2</sub>→Mn<sup>4+</sup>+2OH<sup>-</sup>.</div>
+        <div class="s">Reducing ⇒ H<sub>2</sub>O<sub>2</sub> oxidised to O<sub>2</sub>. Only (c) evolves O<sub>2</sub> while Cl is reduced (+1→-1).</div>
+        <div class="ans">(c)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (1 Feb, Sh-2)</span>
+        <div class="q">The starting material for the convenient laboratory preparation of deuterated hydrogen peroxide (D<sub>2</sub>O<sub>2</sub>) is: (a) K<sub>2</sub>S<sub>2</sub>O<sub>8</sub> (b) 2-ethylanthraquinol (c) BaO<sub>2</sub> (d) BaO.</div>
+        <div class="s">Hydrolysis of peroxodisulphate gives peroxide: K<sub>2</sub>S<sub>2</sub>O<sub>8</sub>+2D<sub>2</sub>O→2KDSO<sub>4</sub>+D<sub>2</sub>O<sub>2</sub>. (2-ethylanthraquinol is the <b>industrial</b> auto-oxidation route.)</div>
+        <div class="ans">(a) K<sub>2</sub>S<sub>2</sub>O<sub>8</sub></div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (25 Jan, Sh-1)</span>
+        <div class="q">"25 volume" hydrogen peroxide means: (a) 1 L contains 250 g (b) 1 L contains 75 g (c) 100 mL contains 25 g (d) 1 L contains 25 g of H<sub>2</sub>O<sub>2</sub>.</div>
+        <div class="s">Molarity = (vol strength)/11.2 = 25/11.2 = 2.23 M ⇒ g/L = 2.23 × 34 ≈ 75.9 g/L.</div>
+        <div class="ans">(b) 1 L of the solution contains about 75 g of H<sub>2</sub>O<sub>2</sub></div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2023 (31 Jan, Sh-2)</span>
+        <div class="q">Statement I: H<sub>2</sub>O<sub>2</sub> is used in the synthesis of cephalosporin. Statement II: H<sub>2</sub>O<sub>2</sub> is used to restore aerobic conditions to sewage wastes.</div>
+        <div class="s">Both are standard documented uses of H<sub>2</sub>O<sub>2</sub> (pharmaceutical synthesis and effluent treatment).</div>
+        <div class="ans">(b) Both Statement I and Statement II are correct</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (24 Jun, Sh-2)</span>
+        <div class="q">In the industrial production of which compound is molecular hydrogen obtained as a by-product? (a) Na<sub>2</sub>CO<sub>3</sub> (b) NaOH (c) Na metal (d) NaHCO<sub>3</sub>.</div>
+        <div class="s">Chlor-alkali: electrolysis of brine gives NaOH at/near the cathode with H<sub>2</sub> (and Cl<sub>2</sub> at the anode) as by-products.</div>
+        <div class="ans">(b) NaOH</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (27 Jul, Sh-1)</span>
+        <div class="q">Statement I: H<sub>2</sub>O<sub>2</sub> can act as an oxidising agent in both acidic and basic conditions. Statement II: Density of H<sub>2</sub>O<sub>2</sub> at 298 K is lower than that of D<sub>2</sub>O.</div>
+        <div class="s">Statement I TRUE. Statement II FALSE — ρ(H<sub>2</sub>O<sub>2</sub>) ≈ 1.44 g/mL is <b>higher</b> than ρ(D<sub>2</sub>O) ≈ 1.10 g/mL.</div>
+        <div class="ans">(c) Statement I is true but Statement II is false</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (26 Jul, Sh-1)</span>
+        <div class="q">Which can be used to prevent the decomposition of H<sub>2</sub>O<sub>2</sub>? (a) Urea (b) Formaldehyde (c) Formic acid (d) Ethanol.</div>
+        <div class="s">H<sub>2</sub>O<sub>2</sub> is stabilised by negative catalysts such as urea, phosphoric acid and acetanilide (stored in wax-lined dark bottles).</div>
+        <div class="ans">(a) Urea</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (24 Jun, Sh-1)</span>
+        <div class="q">The highest industrial consumption of molecular hydrogen is to produce a compound of which element? (a) Carbon (b) Oxygen (c) Chlorine (d) Nitrogen.</div>
+        <div class="s">The single largest use of H<sub>2</sub> is the Haber process making ammonia (NH<sub>3</sub>) — a nitrogen compound.</div>
+        <div class="ans">(d) Nitrogen</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (26 Jun, Sh-2)</span>
+        <div class="q">Boiling removes temporary hardness by converting calcium hydrogen carbonate and magnesium hydrogen carbonate to: (a) CaCO<sub>3</sub> and Mg(OH)<sub>2</sub> (b) CaCO<sub>3</sub> and MgCO<sub>3</sub> (c) Ca(OH)<sub>2</sub> and MgCO<sub>3</sub> (d) Ca(OH)<sub>2</sub> and Mg(OH)<sub>2</sub>.</div>
+        <div class="s">Ca(HCO<sub>3</sub>)<sub>2</sub>→CaCO<sub>3</sub>↓; Mg(HCO<sub>3</sub>)<sub>2</sub>→Mg(OH)<sub>2</sub>↓ (MgCO<sub>3</sub> is too soluble, so it goes to the hydroxide).</div>
+        <div class="ans">(a) CaCO<sub>3</sub> and Mg(OH)<sub>2</sub></div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (28 Jun, Sh-1)</span>
+        <div class="q">Dihydrogen reacts with CuO to give: (a) Cu(OH)<sub>2</sub> (b) Cu(s) (c) Cu<sub>2</sub>O (d) CuH<sub>2</sub>.</div>
+        <div class="s">H<sub>2</sub> is a reducing agent: CuO + H<sub>2</sub> →(Δ) Cu + H<sub>2</sub>O.</div>
+        <div class="ans">(b) Cu(s)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (28 Jun, Sh-2)</span>
+        <div class="q">Protium, deuterium and tritium have nearly the same chemical properties but different physical properties. They differ in: (a) number of protons (b) atomic number (c) electronic configuration (d) atomic mass.</div>
+        <div class="s">All have 1 proton, Z = 1 and 1s<sup>1</sup>; only the neutron count — hence the mass number — changes.</div>
+        <div class="ans">(d) Atomic mass</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2022 (25 Jul, Sh-2)</span>
+        <div class="q">High-purity (&gt;99.95%) dihydrogen is obtained by: (a) reaction of zinc with aqueous alkali (b) electrolysis of warm aqueous Ba(OH)<sub>2</sub> between nickel electrodes (c) electrolysis of acidified water using platinum (d) reaction of zinc with dilute acid.</div>
+        <div class="s">Very pure H<sub>2</sub> is made by electrolysing warm barium hydroxide solution with Ni (or Pt) electrodes.</div>
+        <div class="ans">(b) Electrolysis of warm aqueous Ba(OH)<sub>2</sub> between nickel electrodes</div>
+      </div>
+    </section>
+
+    <div class="foot">ICAD · C-9 Hydrogen · Revision Notes (L-1 to L-4 + Strong Box) · Quick + Detailed views · worked examples from the module's Solved Examples and the Strong Box previous-year set (JEE Main 2022–2024). Every objective answer was re-derived independently; option letters shown are the verified correct ones.</div>
+  </div>
+</div>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

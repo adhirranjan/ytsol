@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-14 Elasticity — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+
+  <nav class="toc">
+    <h3>Chapter P-14</h3>
+    <a class="top" href="#top">&#9733; Memorize &amp; Formula Sheet</a>
+    <a href="#l1">L-1 &middot; Elastic Behaviour, Stress &amp; Strain</a>
+    <a href="#l2">L-2 &middot; Elastic Limit, Hooke&#39;s Law, Young&#39;s Modulus &amp; Elongation</a>
+    <a href="#l3">L-3 &middot; Elastic Potential Energy &amp; Interatomic Force Constant</a>
+    <a href="#l4">L-4 &middot; Rigidity, Bulk Modulus, Poisson&#39;s Ratio &amp; Moduli Relations</a>
+    <a href="#strongbox">&#9733; Strong Box (PYQs)</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD &middot; JEE Physics &middot; Revision Notes</p>
+      <h1>P-14 &middot; Elasticity</h1>
+      <p>Lectures L-1 to L-4 + Strong Box &middot; Stress and strain and their types, Hooke&#39;s law and the three elastic moduli (Young&#39;s Y, bulk K, rigidity &eta;), compressibility and Poisson&#39;s ratio, the stress&ndash;strain curve, elastic potential energy and work done in stretching, elongation under self-weight, composite and series/parallel wires, thermal stress and the inter-relations among the moduli</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- KEY FACTS -->
+    <section class="lec" id="keyfacts">
+      <div class="lec-head"><span class="lec-tag">&#9733; MEMORIZE</span><h2>Key Facts &amp; Formula Sheet</h2></div>
+      <div class="twrap"><table>
+        <tr><th>Quantity / Idea</th><th>Result</th></tr>
+        <tr><td>Stress</td><td>restoring force per unit area, <code>&sigma; = F/A</code>, unit N/m&sup2; = Pa, dimensions <code>[M&#8201;L&#8315;&#185;T&#8315;&sup2;]</code> (same as pressure). <b>Normal</b> stress &perp; to the face (tensile = pulls apart, compressive = squeezes), <b>shearing / tangential</b> stress parallel to the face, <b>volumetric / hydrostatic</b> stress = pressure acting from all sides <code>P = F/A</code>.</td></tr>
+        <tr><td>Strain</td><td>fractional deformation, <b>dimensionless</b>. <b>Longitudinal</b> <code>&epsilon; = &Delta;L/L</code> (tensile or compressive), <b>volumetric</b> <code>&epsilon;&#7525; = &Delta;V/V</code>, <b>shear</b> <code>&gamma; = &phi; &asymp; tan&phi; = &Delta;x/L</code> (angle of shear).</td></tr>
+        <tr><td>Hooke&#39;s law</td><td>within the elastic limit <code>stress &prop; strain</code>, so <code>stress = (modulus) &times; strain</code>. The constant of proportionality is the <b>modulus of elasticity</b>.</td></tr>
+        <tr><td>Young&#39;s modulus Y</td><td><code>Y = longitudinal stress / longitudinal strain = (F/A)/(&Delta;L/L) = FL/(A&middot;&Delta;L)</code>. Measures axial stiffness; higher Y = stiffer. For a hanging wire <code>Y = MgL/(&pi;r&sup2;&middot;&Delta;L)</code>.</td></tr>
+        <tr><td>Bulk modulus K (B)</td><td><code>K = &minus;volume stress / volume strain = &minus;P/(&Delta;V/V) = &minus;&Delta;P/(&Delta;V/V)</code>. The minus sign makes K positive (pressure up &rarr; volume down). Applies to solids, liquids and gases.</td></tr>
+        <tr><td>Rigidity / shear modulus &eta; (G)</td><td><code>&eta; = shearing stress / shearing strain = (F/A)/&phi; = F/(A&phi;)</code>. Resistance to change of <b>shape</b> at constant volume; only solids have it.</td></tr>
+        <tr><td>Compressibility</td><td><code>C = 1/K</code> &mdash; the reciprocal of bulk modulus; a highly compressible material has a small K and a large C.</td></tr>
+        <tr><td>Poisson&#39;s ratio &sigma; (&nu;)</td><td><code>&sigma; = &minus;lateral strain / longitudinal strain = &minus;(&Delta;r/r)/(&Delta;L/L)</code>, dimensionless. <b>Theoretical range &minus;1 to +0.5</b>; &sigma; = 0.5 means volume is conserved during stretch. Most metals &asymp; 0.25&ndash;0.35.</td></tr>
+        <tr><td>Stress&ndash;strain curve</td><td><b>Proportional limit</b> (P): stress &prop; strain, Hooke&#39;s law holds &nbsp;&middot;&nbsp; <b>Elastic limit</b> (E): max stress with full recovery &nbsp;&middot;&nbsp; <b>Yield point</b>: plastic flow begins &nbsp;&middot;&nbsp; <b>Breaking / ultimate stress</b>: fracture. Area under the curve = energy per unit volume; a wider plastic region &rArr; more <b>ductile</b>, a narrow one &rArr; more <b>brittle</b>. The slope of the linear part is Y.</td></tr>
+        <tr><td>Elastic PE per unit volume</td><td><code>u = (1/2) &times; stress &times; strain = (1/2)Y&epsilon;&sup2; = &sigma;&sup2;/(2Y)</code>. Total stored energy <code>U = u &times; volume = (AY/2L)&middot;&Delta;L&sup2;</code>.</td></tr>
+        <tr><td>Work done in stretching a wire</td><td><code>W = (1/2) &times; load &times; extension = (1/2)F&middot;&Delta;L = (AY/2L)&middot;&Delta;L&sup2;</code> &mdash; the extra factor (1/2) is because the force builds up from 0 to F.</td></tr>
+        <tr><td>Elongation under self-weight</td><td>a wire of mass m, length L hanging from one end: <code>&Delta;L = mgL/(2AY) = &rho;gL&sup2;/(2Y)</code> (tension varies linearly, so the average pull is mg/2).</td></tr>
+        <tr><td>Thermal stress</td><td>a rod clamped so it cannot expand/contract on a temperature change &Delta;&theta; develops <code>stress = Y&middot;&alpha;&middot;&Delta;&theta;</code> and force <code>F = YA&alpha;&Delta;&theta;</code>, <b>independent of length and area for the stress</b>.</td></tr>
+        <tr><td>Moduli inter-relations</td><td><code>Y = 3K(1 &minus; 2&sigma;)</code> &nbsp;&middot;&nbsp; <code>Y = 2&eta;(1 + &sigma;)</code> &nbsp;&middot;&nbsp; <code>9/Y = 1/K + 3/&eta;</code> (equivalently <code>Y = 9K&eta;/(3K + &eta;)</code>) &nbsp;&middot;&nbsp; <code>&sigma; = (3K &minus; 2&eta;)/(6K + 2&eta;)</code></td></tr>
+        <tr><td>Wires in series</td><td>same tension (force) through each; extensions add. Effective <code>k = k&#8321;k&#8322;/(k&#8321;+k&#8322;)</code> with <code>k = YA/L</code> for each piece (rod behaves as a spring).</td></tr>
+        <tr><td>Wires in parallel</td><td>same extension in each; loads add. The stiffer / thicker wire carries the larger share of the load.</td></tr>
+        <tr><td>Interatomic force constant</td><td><code>k = Y&middot;r&#8320;</code>, where r&#8320; is the equilibrium interatomic spacing. Links the macroscopic Y to the microscopic bond stiffness <code>f = k&middot;&Delta;r</code>.</td></tr>
+        <tr><td>Breaking of a wire</td><td>maximum load <code>F&#7504; = &sigma;&#7504;&middot;A</code>. The greatest length that can hang under its own weight before snapping is <code>L&#7504; = &sigma;&#7504;/(&rho;g)</code> &mdash; independent of the cross-section.</td></tr>
+      </table></div>
+      <div class="call star"><span class="h">&#9733; Core idea</span>Elasticity is one statement &mdash; <b>stress = modulus &times; strain</b> &mdash; written for three kinds of deformation. Change of <b>length</b> uses Young&#39;s modulus Y, change of <b>volume</b> uses bulk modulus K, change of <b>shape</b> uses the rigidity modulus &eta;. Pick the deformation first, then the matching modulus, and almost every numerical collapses to <code>&Delta;L = FL/AY</code> or <code>&Delta;V = PV/K</code> or <code>&phi; = F/A&eta;</code>.</div>
+      <div class="call tip"><span class="h">&#128161; Method that never fails</span>For any loaded wire write <code>&Delta;L = FL/(AY)</code> and read off the proportionalities: at fixed material and load, <code>&Delta;L &prop; L/A &prop; L/r&sup2;</code>. Ratio questions (two wires, composite wires, same load or same extension) are then one line &mdash; cancel Y, F and &pi; and keep only the lengths and radii.</div>
+      <div class="call trap"><span class="h">&#9888; Three traps that cost marks</span><b>(a)</b> Bulk modulus and Poisson&#39;s ratio carry a <b>minus sign</b> in their definitions &mdash; drop it and K or &sigma; comes out negative. <b>(b)</b> Work done in stretching is <code>(1/2)F&middot;&Delta;L</code>, <b>not</b> <code>F&middot;&Delta;L</code> &mdash; the force rises from zero. <b>(c)</b> Shear strain is an <b>angle</b> (radian), tensile strain is a length ratio &mdash; never equate &phi; with &Delta;L/L of the same body.</div>
+    </section>
+
+    <!-- L-1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Elastic Behaviour of Solids, Stress and Strain</h2></div>
+
+      <h3 class="sub">Elastic behaviour and basic definitions</h3>
+      <ul>
+        <li>When a solid is deformed, its atoms shift from their regular lattice sites and the interatomic distances change. On removing the force, the interatomic forces pull the atoms back, restoring the original shape &mdash; this is <b>elastic behaviour</b> (model: balls joined by springs).</li>
+        <li><b>Deforming force</b> &mdash; a force that changes the relative positions of the molecules (length, volume or shape) without moving the body as a whole. For a body in equilibrium under two equal opposite forces, the force on any section is <code>T = F</code>.</li>
+        <li><b>Elasticity</b>: the property of regaining original shape and size after the deforming force is removed. A <b>perfectly elastic body</b> recovers completely and instantly (an idealisation; rubber and some metals come close).</li>
+        <li><b>Plasticity</b>: permanent deformation that is not recovered. A <b>perfectly plastic body</b> retains its new shape indefinitely (clay-like idealisation). Real materials show a mixture of both.</li>
+        <li><b>Cause of elasticity</b>: interatomic / intermolecular bonds act as the restoring force. Stronger bonds, regular crystal structure, higher particle density and higher purity tend to raise elasticity; temperature and strain rate also affect it.</li>
+      </ul>
+      <li class="det">For a body of mass m pulled by force F at one end, the tension at a section a distance x from the free end is <code>T = (m/L)x &middot; (F/m) = Fx/L</code>: T = 0 at the free end (x = 0), T = F/2 at the middle, T = F at the pulled end.</li>
+
+      <h3 class="sub">Stress and its types</h3>
+      <ul>
+        <li><b>Stress</b> &sigma; = restoring force per unit area of the deformed cross-section, <code>&sigma; = F/A</code> (more precisely the limit &Delta;F/&Delta;A). SI unit N/m&sup2; (Pa). Numerically it equals the applied force per unit area in equilibrium.</li>
+        <li><b>Normal stress</b>: force &perp; to the surface. <b>Tensile</b> (elongates, pulls the two parts apart) and <b>compressive</b> (shortens, pushes them together).</li>
+        <li><b>Shearing / tangential stress</b>: force parallel to the surface, <code>&tau; = F&#7511;/A</code> &mdash; changes shape, not volume.</li>
+        <li><b>Volumetric stress</b>: uniform force from all directions (pressure), <code>P = F/A</code> &mdash; changes volume, not shape.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Stress</span>&sigma; = F/A  &nbsp;&middot;&nbsp;  normal &sigma; = F&#8345;/A  &nbsp;&middot;&nbsp;  shear &tau; = F&#7511;/A  &nbsp;&middot;&nbsp;  volume P = F/A</div>
+
+      <h3 class="sub">Strain and its types</h3>
+      <ul>
+        <li><b>Strain</b> = change in configuration / original configuration; it is a pure number. For a rubber band stretched from 10 cm to 12 cm, &epsilon; = 2/10 = 0.2 (20%).</li>
+        <li><b>Longitudinal strain</b> <code>&epsilon; = &Delta;L/L</code> &mdash; tensile (elongation) or compressive (shortening).</li>
+        <li><b>Volume strain</b> <code>&epsilon;&#7525; = &Delta;V/V</code> &mdash; from uniform normal stress (pressure) on all faces.</li>
+        <li><b>Shear strain</b> <code>&gamma; = &theta; = &Delta;L/L = tan&phi;</code> &mdash; the angle through which a face is tilted when one face is held fixed and the opposite face slides.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Strain</span>longitudinal &epsilon; = &Delta;L/L  &nbsp;&middot;&nbsp;  volume &epsilon;&#7525; = &Delta;V/V  &nbsp;&middot;&nbsp;  shear &gamma; = &phi; &asymp; tan&phi; = &Delta;x/L</div>
+      <div class="call tip"><span class="h">&#128161; Note</span>Tensile and compressive stress produce <b>longitudinal</b> strain; pressure from all sides produces <b>volume</b> strain; a force parallel to a face produces <b>shear</b> strain. Matching the stress type to the strain type is the whole of this lecture.</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 &middot; L-1</span>
+        <div class="q">A load of 4.0 kg is suspended from a ceiling through a steel wire of radius 2.0 mm. Find the tensile stress developed in the wire when equilibrium is achieved. Take g = 3.1&pi; m/s&sup2;.</div>
+        <div class="s">Tension equals the weight: F = mg = 4.0 &times; 3.1&pi; = 12.4&pi; N.</div>
+        <div class="s">Area of cross-section: A = &pi;r&sup2; = &pi;(2.0 &times; 10&#8315;&sup3;)&sup2; = 4.0&pi; &times; 10&#8315;&#8310; m&sup2;.</div>
+        <div class="s">Tensile stress &sigma; = F/A = 12.4&pi; / (4.0&pi; &times; 10&#8315;&#8310;) = 3.1 / 10&#8315;&#8310; = 3.1 &times; 10&#8310; N/m&sup2;.</div>
+        <div class="ans">&sigma; = 3.1 &times; 10&#8310; N/m&sup2;</div>
+        <div class="s">⚡ JEE trick: choosing g = 3.1&pi; cancels the &pi; in the area, leaving clean arithmetic &mdash; a hint that the examiner wants you to simplify before substituting numbers.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 &middot; L-1</span>
+        <div class="q">A bar of cross-section A is subjected to equal and opposite tensile forces F at its ends. Consider a plane section whose normal makes angle &theta; with the axis of the bar. (a) tensile stress on this plane, (b) shearing stress on this plane, (c) &theta; for maximum tensile stress, (d) &theta; for maximum shearing stress.</div>
+        <div class="s">The inclined section has larger area A&prime; = A/cos&theta;; resolve F into a normal component F&#8345; = F&middot;cos&theta; and a tangential component F&#7511; = F&middot;sin&theta;.</div>
+        <div class="s">(a) Tensile stress = F&#8345;/A&prime; = (F cos&theta;)/(A/cos&theta;) = (F/A)cos&sup2;&theta;.</div>
+        <div class="s">(b) Shearing stress = F&#7511;/A&prime; = (F sin&theta;)/(A/cos&theta;) = (F/A)sin&theta;cos&theta; = (F/2A)sin2&theta;.</div>
+        <div class="s">(c) Tensile stress (F/A)cos&sup2;&theta; is maximum when cos&theta; = 1, i.e. &theta; = 0&deg; (section &perp; to the axis).</div>
+        <div class="s">(d) Shearing stress (F/2A)sin2&theta; is maximum when sin2&theta; = 1, i.e. 2&theta; = 90&deg; &rArr; &theta; = 45&deg;.</div>
+        <div class="ans">(a) (F/A)cos&sup2;&theta; &nbsp; (b) (F/2A)sin2&theta; &nbsp; (c) &theta; = 0&deg; &nbsp; (d) &theta; = 45&deg;</div>
+        <div class="s">⚡ JEE trick: a bar pulled axially fails along a 45&deg; plane because that is where the shear stress peaks &mdash; the reason ductile metals neck and slip at 45&deg;.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 3 &middot; L-1</span>
+        <div class="q">The formula for volumetric strain is: (a) &epsilon; = &Delta;L/L (b) &epsilon; = &Delta;V/V (c) &epsilon; = &Delta;P/P (d) None of these.</div>
+        <div class="s">Volumetric (volume) strain is the change in volume per unit original volume.</div>
+        <div class="s">&epsilon;&#7525; = (change in volume)/(original volume) = &Delta;V/V.</div>
+        <div class="ans">(b) &epsilon; = &Delta;V/V</div>
+        <div class="s">⚡ JEE trick: &Delta;L/L is longitudinal strain and &Delta;P/P is a pressure ratio, not a strain &mdash; only &Delta;V/V is dimensionless and tied to a volume change.</div>
+      </div>
+    </section>
+
+    <!-- L-2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Elastic Limit, Hooke&#39;s Law, Young&#39;s Modulus and Elongation</h2></div>
+
+      <h3 class="sub">Elastic limit and Hooke&#39;s law</h3>
+      <ul>
+        <li><b>Elastic limit</b>: the maximum stress a material can bear and still return to its original shape. Below it the body is elastic; beyond it it enters the <b>plastic</b> region and keeps a permanent deformation.</li>
+        <li><b>Hooke&#39;s law</b>: for small deformations stress &prop; strain, so <code>&sigma; = Y&middot;&epsilon;</code>, and the modulus of elasticity <code>Y = stress/strain</code>. Y is a measure of stiffness (higher Y = stiffer); in some books it is written E.</li>
+        <li>The three elastic moduli are Young&#39;s modulus (axial), shear modulus (shape) and bulk modulus (volume).</li>
+      </ul>
+      <div class="formula"><span class="lbl">Hooke&#39;s law</span>&sigma; = Y&middot;&epsilon;  &rArr;  Y = stress / strain</div>
+
+      <h3 class="sub">Young&#39;s modulus</h3>
+      <ul>
+        <li><b>Young&#39;s modulus</b> = longitudinal stress / longitudinal strain. For a wire of length L, area A, extension &Delta;L under force F: <code>Y = (F/A)/(&Delta;L/L) = FL/(A&middot;&Delta;L)</code>.</li>
+        <li>For a mass M hung from a wire of radius r: <code>Y = MgL/(&pi;r&sup2;&middot;&Delta;L)</code>, so the extension is <code>&Delta;L = FL/(AY)</code>.</li>
+        <li><b>Rod as a spring</b>: a rod behaves like a spring of stiffness <code>k = YA/L</code>, since <code>F = (YA/L)&middot;&Delta;L &rArr; F &prop; &Delta;L</code>. For two rods in series <code>k = k&#8321;k&#8322;/(k&#8321;+k&#8322;)</code> with <code>k&#7522; = Y&#7522;A&#7522;/L&#7522;</code>.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Young&#39;s modulus</span>Y = FL/(A&middot;&Delta;L)  &nbsp;&middot;&nbsp;  &Delta;L = FL/(AY)  &nbsp;&middot;&nbsp;  rod-spring k = YA/L</div>
+      <div class="call star"><span class="h">&#9733; Remember</span>Steel has a high Y (stiff, deforms little under load &mdash; used in bridges and cables); rubber has a low Y (flexible &mdash; used in tyres and shock absorbers). A perfectly rigid body is the Y &rarr; &infin; limit.</div>
+
+      <h3 class="sub">Composite bars, stress&ndash;strain curve, self-weight and breaking</h3>
+      <ul>
+        <li><b>Composite bar</b> (e.g. a copper rod inside a steel tube, ends rigidly joined): both parts have the <b>same strain</b> (&Delta;L&#8321; = &Delta;L&#8322;), the loads add <code>A&#8321;f&#8321; + A&#8322;f&#8322; = F</code>, and the stress in each goes as its Young&#39;s modulus: <code>f&#8321; = Y&#8321;F/(A&#8321;Y&#8321; + A&#8322;Y&#8322;)</code>, <code>f&#8322; = Y&#8322;F/(A&#8321;Y&#8321; + A&#8322;Y&#8322;)</code>.</li>
+        <li><b>Stress&ndash;strain diagram</b>: linear up to the <b>proportional limit</b> (slope = Y), elastic up to the <b>elastic limit</b>, then yield, plastic flow and finally the <b>breaking / fracture</b> point. A larger plastic region &rArr; more ductile; a short one &rArr; more brittle.</li>
+        <li><b>Elongation due to own weight</b>: tension rises linearly from 0 at the bottom to mg at the top, so the effective load is mg/2 and <code>&Delta;L = mgL/(2AY)</code>.</li>
+        <li><b>Breaking of a wire</b>: maximum force <code>F&#7504; = &sigma;&#7504;&middot;A</code>; the greatest self-supporting length is <code>L&#7504; = &sigma;&#7504;/(&rho;g)</code>, independent of cross-section.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Key L-2 results</span>composite: f = YF/(A&#8321;Y&#8321;+A&#8322;Y&#8322;)  &nbsp;&middot;&nbsp;  self-weight &Delta;L = mgL/(2AY)  &nbsp;&middot;&nbsp;  breaking length L = &sigma;&#7504;/(&rho;g)</div>
+      <div class="call tip"><span class="h">&#128161; Note</span>Series wires &rarr; same force, extensions add (use k = YA/L and k = k&#8321;k&#8322;/(k&#8321;+k&#8322;)). Composite / parallel bars &rarr; same extension, loads add. Deciding &ldquo;same force&rdquo; vs &ldquo;same extension&rdquo; first fixes the whole problem.</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 &middot; L-2</span>
+        <div class="q">A load of 4.0 kg is suspended from a ceiling through a steel wire of length 20 m and radius 2.0 mm. The length increases by 0.031 mm as equilibrium is achieved. Find Young&#39;s modulus of steel. Take g = 3.1&pi; m/s&sup2;.</div>
+        <div class="s">Longitudinal stress &sigma; = F/A = (4.0 &times; 3.1&pi;)/(&pi;(2.0 &times; 10&#8315;&sup3;)&sup2;) = 3.1 &times; 10&#8310; N/m&sup2;.</div>
+        <div class="s">Longitudinal strain &epsilon; = &Delta;L/L = (0.031 &times; 10&#8315;&sup3;)/20 = 1.55 &times; 10&#8315;&#8310;.</div>
+        <div class="s">Y = &sigma;/&epsilon; = (3.1 &times; 10&#8310;)/(1.55 &times; 10&#8315;&#8310;) = 2.0 &times; 10&#185;&#185; N/m&sup2;.</div>
+        <div class="ans">Y = 2.0 &times; 10&#185;&#185; N/m&sup2;</div>
+        <div class="s">⚡ JEE trick: 2 &times; 10&#185;&#185; Pa is the standard value for steel &mdash; worth memorising as a sanity check on any steel-wire answer.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 &middot; L-2</span>
+        <div class="q">Determine the elongation of a steel bar 1 m long and 1.5 cm&sup2; cross-section when subjected to a pull of 1.5 &times; 10&#8308; N. Take Y = 2 &times; 10&#185;&#185; N/m&sup2;.</div>
+        <div class="s">From Y = (F/A)/(&Delta;L/L), the extension is &Delta;L = FL/(AY).</div>
+        <div class="s">A = 1.5 cm&sup2; = 1.5 &times; 10&#8315;&#8308; m&sup2;.</div>
+        <div class="s">&Delta;L = (1.5 &times; 10&#8308; &times; 1.0)/(1.5 &times; 10&#8315;&#8308; &times; 2.0 &times; 10&#185;&#185;) = (1.5 &times; 10&#8308;)/(3.0 &times; 10&#8311;) = 0.5 &times; 10&#8315;&sup3; m.</div>
+        <div class="ans">&Delta;L = 0.5 &times; 10&#8315;&sup3; m = 0.5 mm</div>
+        <div class="s">⚡ JEE trick: keep &Delta;L = FL/AY as one unit-consistent block &mdash; convert cm&sup2; to m&sup2; first and the powers of ten line up cleanly.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 3 &middot; L-2</span>
+        <div class="q">A copper wire of length 2 m and a steel wire of length 1 m, both of diameter 2.0 mm, are connected end to end. When stretched by a load the net elongation is 0.8 mm. Obtain the load applied. Y_copper = 1.1 &times; 10&#185;&#185;, Y_steel = 2.0 &times; 10&#185;&#185; N/m&sup2;.</div>
+        <div class="s">Each wire acts as a spring of stiffness k = YA/L, with A = &pi;(1.0 &times; 10&#8315;&sup3;)&sup2; = &pi; &times; 10&#8315;&#8310; m&sup2; (d = 2 mm &rArr; r = 1 mm).</div>
+        <div class="s">k&#8321; (copper) = Y&#8321;A/L&#8321; = (1.1 &times; 10&#185;&#185; &times; &pi; &times; 10&#8315;&#8310;)/2 = 1.73 &times; 10&#8309; N/m.</div>
+        <div class="s">k&#8322; (steel) = Y&#8322;A/L&#8322; = (2.0 &times; 10&#185;&#185; &times; &pi; &times; 10&#8315;&#8310;)/1 = 6.28 &times; 10&#8309; N/m.</div>
+        <div class="s">Series combination: k = k&#8321;k&#8322;/(k&#8321;+k&#8322;) = (1.73 &times; 6.28 &times; 10&#185;&#8304;)/((1.73 + 6.28) &times; 10&#8309;) = 1.36 &times; 10&#8309; N/m.</div>
+        <div class="s">Load W = k&middot;&Delta;L = 1.36 &times; 10&#8309; &times; 0.8 &times; 10&#8315;&sup3; = 108.8 N.</div>
+        <div class="ans">W = 108.8 N</div>
+        <div class="s">⚡ JEE trick: treating each wire as a spring and combining in series bypasses sharing the elongation between the two pieces by hand.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 4 &middot; L-2</span>
+        <div class="q">A copper rod 25 mm in diameter is encased in a steel tube of 30 mm inner and 35 mm external diameter. The ends are rigidly attached. The composite bar is 500 mm long and is subjected to an axial pull of 30 kN. Find the stresses induced in the rod and tube. Y_steel = 2 &times; 10&#8309; N/mm&sup2;, Y_copper = 1 &times; 10&#8309; N/mm&sup2;.</div>
+        <div class="s">Convert: Y&#8321; (copper) = 1 &times; 10&#185;&#185; N/m&sup2;, Y&#8322; (steel) = 2 &times; 10&#185;&#185; N/m&sup2;, F = 3 &times; 10&#8308; N.</div>
+        <div class="s">Areas: A&#8321; = &pi;(0.0125)&sup2; = 4.91 &times; 10&#8315;&#8308; m&sup2;; A&#8322; = &pi;[(0.0175)&sup2; &minus; (0.015)&sup2;] = 2.55 &times; 10&#8315;&#8308; m&sup2;.</div>
+        <div class="s">Denominator A&#8321;Y&#8321; + A&#8322;Y&#8322; = 4.91&times;10&#8315;&#8308;&middot;10&#185;&#185; + 2.55&times;10&#8315;&#8308;&middot;2&times;10&#185;&#185; = 1.00 &times; 10&#8312; N.</div>
+        <div class="s">Copper: f&#8321; = Y&#8321;F/(A&#8321;Y&#8321;+A&#8322;Y&#8322;) = (10&#185;&#185; &times; 3&times;10&#8308;)/(1.00&times;10&#8312;) = 2.996 &times; 10&#8311; N/m&sup2;.</div>
+        <div class="s">Steel: f&#8322; = Y&#8322;F/(A&#8321;Y&#8321;+A&#8322;Y&#8322;) = (2&times;10&#185;&#185; &times; 3&times;10&#8308;)/(1.00&times;10&#8312;) = 5.991 &times; 10&#8311; N/m&sup2;.</div>
+        <div class="ans">f_copper = 2.996 &times; 10&#8311; N/m&sup2;, f_steel = 5.991 &times; 10&#8311; N/m&sup2;</div>
+        <div class="s">⚡ JEE trick: because both parts share the strain, the stress ratio equals the modulus ratio, f&#8322;/f&#8321; = Y&#8322;/Y&#8321; = 2 &mdash; a one-line internal check.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 5 &middot; L-2</span>
+        <div class="q">The stress&ndash;strain graphs for materials A and B (same scale) are shown. (a) which has greater Young&#39;s modulus? (b) which is more ductile? (c) which is more brittle? (d) which is the stronger material?</div>
+        <div class="s">(a) Young&#39;s modulus is the slope of the linear part. Curve A is steeper &rArr; A has the greater Young&#39;s modulus.</div>
+        <div class="s">(b) A larger plastic region means more ductility. The plastic region of A is larger &rArr; A is more ductile.</div>
+        <div class="s">(c) Less ductile means more brittle &rArr; B is more brittle.</div>
+        <div class="s">(d) The one withstanding the greater breaking stress is stronger. A&#39;s breaking strength is higher &rArr; A is stronger.</div>
+        <div class="ans">(a) A &nbsp; (b) A &nbsp; (c) B &nbsp; (d) A</div>
+        <div class="s">⚡ JEE trick: read the graph in three features &mdash; slope = Y, length of plastic plateau = ductility, height of the peak = strength.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 6 &middot; L-2</span>
+        <div class="q">Find the change in length of a wire of mass 1 kg hanging from a rigid support. The length of the wire is 1 m and the area of cross-section is 1.5 cm&sup2;. Take Y = 2 &times; 10&#185;&#185; N/m&sup2;.</div>
+        <div class="s">For a wire extending under its own weight, &Delta;L = mgL/(2AY) (effective load = mg/2 because tension varies linearly).</div>
+        <div class="s">A = 1.5 cm&sup2; = 1.5 &times; 10&#8315;&#8308; m&sup2;.</div>
+        <div class="s">&Delta;L = (1 &times; 10 &times; 1)/(2 &times; 1.5 &times; 10&#8315;&#8308; &times; 2 &times; 10&#185;&#185;) = 10/(6 &times; 10&#8311;) = 1.67 &times; 10&#8315;&#8311; m.</div>
+        <div class="ans">&Delta;L = 1.67 &times; 10&#8315;&#8311; m</div>
+        <div class="s">⚡ JEE trick: the factor 2 in the denominator is the signature of a self-weight problem &mdash; forgetting it doubles the answer.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 7 &middot; L-2</span>
+        <div class="q">If the elastic limit of copper is 1.5 &times; 10&#8312; N/m&sup2;, determine the minimum diameter a copper wire can have under a load of 10.0 kg if its elastic limit is not to be exceeded.</div>
+        <div class="s">At the limit F/A_min = &sigma;&#7504;, with A_min = &pi;d&sup2;_min/4, so d_min = &radic;(4F/&pi;&sigma;&#7504;).</div>
+        <div class="s">F = mg = 10 &times; 9.8 = 98 N.</div>
+        <div class="s">d_min = &radic;[(4 &times; 10 &times; 9.8)/(3.14 &times; 1.5 &times; 10&#8312;)] = &radic;(392/4.71 &times; 10&#8312;) = &radic;(8.32 &times; 10&#8315;&#8311;) = 9.1 &times; 10&#8315;&#8308; m.</div>
+        <div class="ans">d_min = 9.1 &times; 10&#8315;&#8308; m = 0.91 mm</div>
+        <div class="s">⚡ JEE trick: &ldquo;minimum diameter / maximum load&rdquo; means setting the stress exactly at the limiting stress &mdash; the inequality becomes an equality.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 8 &middot; L-2</span>
+        <div class="q">Find the greatest length of steel wire that can hang vertically without breaking. Breaking stress of steel = 8.0 &times; 10&#8312; N/m&sup2;, density of steel = 8 &times; 10&sup3; kg/m&sup3;, g = 10 m/s&sup2;.</div>
+        <div class="s">The wire breaks when its own weight produces the breaking stress: &sigma;&#7504; = (weight)/A = (A&middot;L&middot;&rho;)g/A = &rho;gL.</div>
+        <div class="s">So the greatest length is L = &sigma;&#7504;/(&rho;g).</div>
+        <div class="s">L = (8.0 &times; 10&#8312;)/(8 &times; 10&sup3; &times; 10) = (8.0 &times; 10&#8312;)/(8 &times; 10&#8308;) = 10&#8308; m.</div>
+        <div class="ans">L = 10&#8308; m (10 km)</div>
+        <div class="s">⚡ JEE trick: the area cancels &mdash; the maximum self-supporting length depends only on breaking stress and density, never on the wire&#39;s thickness.</div>
+      </div>
+    </section>
+
+    <!-- L-3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Elastic Potential Energy and Interatomic Force Constant</h2></div>
+
+      <h3 class="sub">Energy stored in a deformed body</h3>
+      <ul>
+        <li>Stretching a wire stores <b>elastic potential energy</b> equal to the work done against the restoring force. With F = (AY/L)x, the work to extend from 0 to &Delta;L is <code>W = &int;(AY/L)x&middot;dx = (AY/2L)&middot;&Delta;L&sup2;</code>.</li>
+        <li>Rewriting with stress and strain: <code>U = (1/2) &times; stress &times; strain &times; volume</code>, and the <b>energy density</b> (energy per unit volume) is <code>u = (1/2)&middot;stress&middot;strain = (1/2)Y&epsilon;&sup2; = &sigma;&sup2;/(2Y)</code>.</li>
+        <li>Equivalently the work done in stretching a wire is <code>W = (1/2) &times; load &times; extension</code> &mdash; the factor (1/2) because the load rises from zero to its final value.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Elastic PE</span>U = (AY/2L)&middot;&Delta;L&sup2; = (1/2)&middot;stress&middot;strain&middot;volume  &nbsp;&middot;&nbsp;  u = (1/2)Y&epsilon;&sup2; = &sigma;&sup2;/(2Y)</div>
+      <div class="formula"><span class="lbl">Work in stretching</span>W = (1/2) &times; F &times; &Delta;L</div>
+
+      <h3 class="sub">Interatomic force constant</h3>
+      <ul>
+        <li>Atoms behave like springs: the interatomic force is proportional to the change in spacing, <code>f = k&middot;&Delta;r</code>, where k is the <b>interatomic force constant</b> and &Delta;r the change in interatomic distance.</li>
+        <li>Linking to the macroscopic wire (equilibrium spacing r&#8320;, each chain of atoms contributing) gives <code>k = Y&middot;r&#8320;</code> &mdash; a direct bridge from the bulk Young&#39;s modulus to the stiffness of a single bond.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Interatomic force constant</span>f = k&middot;&Delta;r  &nbsp;&middot;&nbsp;  k = Y&middot;r&#8320;</div>
+      <div class="call star"><span class="h">&#9733; Remember</span>The three equivalent forms of energy density &mdash; <code>(1/2)stress&middot;strain</code>, <code>(1/2)Y&epsilon;&sup2;</code> and <code>&sigma;&sup2;/(2Y)</code> &mdash; let you start from whichever of stress, strain or Y the problem actually gives.</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 &middot; L-3</span>
+        <div class="q">A 40 kg boy whose legs are 4 cm&sup2; in area and 50 cm long falls through a height of 2 m without breaking his leg bones. If the bones can withstand a stress of 0.9 &times; 10&#8312; N/m&sup2;, calculate Young&#39;s modulus for the bone.</div>
+        <div class="s">Loss of PE = elastic energy stored in both legs: mgh = 2 &times; [(1/2) &times; stress &times; strain &times; volume] = &sigma;&sup2;&middot;(A&middot;L)/Y.</div>
+        <div class="s">Here the two legs give the factor 2 and the (1/2) from the energy cancel, so mgh = 2 &times; [&sigma;&sup2;/(2Y)]&middot;(A&middot;L).</div>
+        <div class="s">40 &times; 9.8 &times; 2 = 2 &times; [(0.9 &times; 10&#8312;)&sup2;/Y] &times; (4 &times; 10&#8315;&#8308; &times; 0.50).</div>
+        <div class="s">784 = 2 &times; (8.1 &times; 10&#185;&#8309;/Y) &times; (2 &times; 10&#8315;&#8308;) = (16.2 &times; 10&#185;&#185;)/Y.</div>
+        <div class="s">Y = (16.2 &times; 10&#185;&#185;)/784 = 2.05 &times; 10&#8313; N/m&sup2;.</div>
+        <div class="ans">Y = 2.05 &times; 10&#8313; N/m&sup2;</div>
+        <div class="s">⚡ JEE trick: equate the gravitational PE lost to the elastic energy stored (&sigma;&sup2;/2Y per unit volume) &mdash; the standard &ldquo;impact without fracture&rdquo; model.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 &middot; L-3</span>
+        <div class="q">A steel wire 4.0 m long is stretched through 2.0 mm. The cross-sectional area is 2.0 mm&sup2; and Y = 2.0 &times; 10&#185;&#185; N/m&sup2;. Find (a) the energy density of the wire, (b) the elastic potential energy stored.</div>
+        <div class="s">(a) Strain &epsilon; = &Delta;L/L = (2.0 &times; 10&#8315;&sup3;)/4.0 = 5 &times; 10&#8315;&#8308;; energy density u = (1/2)Y&epsilon;&sup2;.</div>
+        <div class="s">u = (1/2) &times; 2.0 &times; 10&#185;&#185; &times; (5 &times; 10&#8315;&#8308;)&sup2; = (1/2) &times; 2.0 &times; 10&#185;&#185; &times; 2.5 &times; 10&#8315;&#8311; = 2.5 &times; 10&#8308; J/m&sup3;.</div>
+        <div class="s">(b) Volume = A &times; L = (2.0 &times; 10&#8315;&#8310;) &times; 4.0 = 8.0 &times; 10&#8315;&#8310; m&sup3;.</div>
+        <div class="s">U = u &times; volume = 2.5 &times; 10&#8308; &times; 8.0 &times; 10&#8315;&#8310; = 0.20 J.</div>
+        <div class="ans">(a) u = 2.5 &times; 10&#8308; J/m&sup3; &nbsp; (b) U = 0.20 J</div>
+        <div class="s">⚡ JEE trick: compute the energy density first, then multiply by the wire&#39;s volume &mdash; cleaner than plugging into (AY/2L)&Delta;L&sup2; directly.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 3 &middot; L-3</span>
+        <div class="q">If the interatomic distance between the atoms of a material is 10&#8315;&#185;&#8304; m, find the interatomic force constant of the material. Given Young&#39;s modulus of the solid is 1.1 &times; 10&#185;&#185; N/m&sup2;.</div>
+        <div class="s">The force constant is related to the modulus and the equilibrium spacing by k = Y&middot;r&#8320;.</div>
+        <div class="s">k = (1.1 &times; 10&#185;&#185;) &times; (10&#8315;&#185;&#8304;) = 11 N/m.</div>
+        <div class="ans">k = 11 N/m</div>
+        <div class="s">⚡ JEE trick: k = Yr&#8320; turns a macroscopic modulus into a single-bond spring constant &mdash; of the order of a few N/m, as expected for atomic bonds.</div>
+      </div>
+    </section>
+
+    <!-- L-4 -->
+    <section class="lec" id="l4">
+      <div class="lec-head"><span class="lec-tag">L-4</span><h2>Modulus of Rigidity, Bulk Modulus, Poisson&#39;s Ratio and Moduli Relations</h2></div>
+
+      <h3 class="sub">Modulus of rigidity (shear modulus)</h3>
+      <ul>
+        <li>When a tangential force acts on a face while the opposite face is fixed, the body is <b>sheared</b> (shape changes, volume does not). The shear strain is the angle &phi; (= KK&prime;/KN = tan&phi; &asymp; &phi;).</li>
+        <li><b>Modulus of rigidity</b> &eta; = shearing stress / shearing strain = <code>(F/A)/&phi; = F/(A&phi;)</code>. Higher &eta; = stiffer against shape change; only solids have a non-zero &eta;.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Rigidity modulus</span>&eta; = (F/A)/&phi; = F/(A&phi;)</div>
+
+      <h3 class="sub">Bulk modulus and compressibility</h3>
+      <ul>
+        <li><b>Bulk modulus</b> K = &minus;(volume stress)/(volume strain) = <code>&minus;P/(&Delta;V/V) = &minus;&Delta;P/(&Delta;V/V)</code>. The minus sign keeps K positive (increasing pressure decreases volume). A higher K means the material is less compressible.</li>
+        <li><b>Compressibility</b> is the reciprocal of the bulk modulus, <code>C = 1/K</code> &mdash; a measure of how easily the volume changes per unit pressure. Gases are highly compressible (small K, large C); solids and liquids are not.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Bulk modulus</span>K = &minus;&Delta;P/(&Delta;V/V)  &nbsp;&middot;&nbsp;  compressibility C = 1/K  &nbsp;&middot;&nbsp;  &Delta;P = K&middot;(&minus;&Delta;V/V)</div>
+
+      <h3 class="sub">Poisson&#39;s ratio</h3>
+      <ul>
+        <li>When a rod is stretched along its length it <b>contracts laterally</b> (and expands laterally when compressed). <b>Poisson&#39;s ratio</b> &sigma; = &minus;(lateral strain)/(longitudinal strain) = <code>&minus;(&Delta;r/r)/(&Delta;L/L)</code>.</li>
+        <li>It is <b>dimensionless</b> and theoretically lies between <b>&minus;1 and +0.5</b>. &sigma; = +0.5 means the volume stays constant during deformation; &sigma; = &minus;1 means the material contracts completely in the lateral direction when stretched.</li>
+      </ul>
+      <div class="formula"><span class="lbl">Poisson&#39;s ratio</span>&sigma; = &minus;(&Delta;r/r)/(&Delta;L/L)  &nbsp;&middot;&nbsp;  range: &minus;1 &le; &sigma; &le; 0.5</div>
+
+      <h3 class="sub">Relations among Y, K, &eta; and &sigma;</h3>
+      <ul>
+        <li>The four elastic constants are not independent; for an isotropic solid any two fix the rest:</li>
+      </ul>
+      <div class="formula"><span class="lbl">Moduli inter-relations</span>Y = 3K(1 &minus; 2&sigma;)  &nbsp;&middot;&nbsp;  Y = 2&eta;(1 + &sigma;)  &nbsp;&middot;&nbsp;  9/Y = 1/K + 3/&eta;  &nbsp;(so Y = 9K&eta;/(3K + &eta;))  &nbsp;&middot;&nbsp;  &sigma; = (Y/2&eta;) &minus; 1</div>
+      <div class="call trap"><span class="h">&#9888; Book misprint</span>On page 296 the module first prints the Young&ndash;rigidity relation as <code>Y = 2G(1 + 2&sigma;)</code> and then immediately as <code>Y = 2G(1 + &sigma;)</code>. The correct relation is <code>Y = 2&eta;(1 + &sigma;)</code> &mdash; the &ldquo;2&sigma;&rdquo; in the first line is a typo; the derivation (which leads to &sigma; = Y/2&eta; &minus; 1) uses the correct <code>Y = 2&eta;(1 + &sigma;)</code>.</div>
+      <div class="call star"><span class="h">&#9733; Remember</span>From <code>Y = 3K(1 &minus; 2&sigma;)</code>, &sigma; &rarr; 0.5 forces Y &rarr; 0 against shear-free compression, and from <code>Y = 2&eta;(1 + &sigma;)</code>, &sigma; = &minus;1 forces Y &rarr; 0 &mdash; exactly the &minus;1 to +0.5 limits of Poisson&#39;s ratio.</div>
+
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example 1 &middot; L-4</span>
+        <div class="q">A rubber cube of 5 cm side has one face fixed rigidly while its opposite face is sheared by 3 mm parallel to the fixed face by a tangential force of 15 N. Calculate the modulus of rigidity (in N/m&sup2;).</div>
+        <div class="s">Shear strain &phi; = displacement/height = (3 &times; 10&#8315;&sup3;)/(0.05) = 0.06 rad.</div>
+        <div class="s">Area of the sheared face A = (0.05)&sup2; = 2.5 &times; 10&#8315;&sup3; m&sup2;.</div>
+        <div class="s">&eta; = F/(A&phi;) = 15/(2.5 &times; 10&#8315;&sup3; &times; 0.06) = 15/(1.5 &times; 10&#8315;&#8308;) = 10&#8309; N/m&sup2;.</div>
+        <div class="ans">&eta; = 10&#8309; N/m&sup2;</div>
+        <div class="s">⚡ JEE trick: shear strain is a pure angle (displacement &divide; the perpendicular distance to the fixed face) &mdash; never divide by the length along the force.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 2 &middot; L-4</span>
+        <div class="q">The bulk modulus of water is 2.3 &times; 10&#8313; N/m&sup2;. (a) Find its compressibility in atm&#8315;&#185;. (b) How much pressure in atmospheres is needed to compress a sample of water by 0.1%?</div>
+        <div class="s">Express K in atm: K = (2.3 &times; 10&#8313;)/(1.01 &times; 10&#8309;) = 2.27 &times; 10&#8308; atm.</div>
+        <div class="s">(a) Compressibility C = 1/K = 1/(2.27 &times; 10&#8308;) = 4.4 &times; 10&#8315;&#8309; atm&#8315;&#185;.</div>
+        <div class="s">(b) Volume strain &minus;&Delta;V/V = 0.1% = 1.0 &times; 10&#8315;&sup3;; required pressure &Delta;P = K &times; (&minus;&Delta;V/V).</div>
+        <div class="s">&Delta;P = (2.27 &times; 10&#8308;) &times; (1.0 &times; 10&#8315;&sup3;) = 22.7 atm.</div>
+        <div class="ans">(a) C = 4.4 &times; 10&#8315;&#8309; atm&#8315;&#185; &nbsp; (b) &Delta;P = 22.7 atm</div>
+        <div class="s">⚡ JEE trick: converting K into atm first makes both parts fall out instantly &mdash; compressibility is just its reciprocal.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 3 &middot; L-4</span>
+        <div class="q">One end of a nylon rope of length 4.5 m and diameter 6 mm is fixed to a tree-limb. A monkey weighing 100 N jumps to catch the free end and stays there. Find the elongation of the rope and the corresponding change in diameter. Y_nylon = 4.8 &times; 10&#185;&#185; N/m&sup2;, Poisson&#39;s ratio of nylon = 0.2.</div>
+        <div class="s">Area A = &pi;r&sup2; = &pi;(3 &times; 10&#8315;&sup3;)&sup2; = &pi; &times; 9 &times; 10&#8315;&#8310; = 2.83 &times; 10&#8315;&#8309; m&sup2;.</div>
+        <div class="s">Elongation &Delta;L = TL/(AY) = (100 &times; 4.5)/(2.83 &times; 10&#8315;&#8309; &times; 4.8 &times; 10&#185;&#185;) = 450/(1.36 &times; 10&#8311;) = 3.32 &times; 10&#8315;&#8309; m.</div>
+        <div class="s">Poisson&#39;s ratio: &sigma; = (&Delta;d/d)/(&Delta;L/L) = (&Delta;d &middot; L)/(&Delta;L &middot; d), so &Delta;d = &sigma;&middot;&Delta;L&middot;d/L.</div>
+        <div class="s">&Delta;d = (0.2 &times; 3.32 &times; 10&#8315;&#8309; &times; 6 &times; 10&#8315;&sup3;)/4.5 = (3.98 &times; 10&#8315;&#8312;)/4.5 = 8.8 &times; 10&#8315;&#8313; m.</div>
+        <div class="ans">&Delta;L = 3.32 &times; 10&#8315;&#8309; m, &Delta;d = 8.8 &times; 10&#8315;&#8313; m (diameter decreases)</div>
+        <div class="call trap"><span class="h">&#9888; Book misprint</span>The module prints the elongation as 3.32 &times; 10&#8315;&#8310; m. Re-working &Delta;L = TL/(AY) = 450/(1.36 &times; 10&#8311;) gives <b>3.32 &times; 10&#8315;&#8309; m</b> &mdash; a factor-of-ten slip. The book&#39;s own next line (&Delta;d = 8.8 &times; 10&#8315;&#8313; m) is in fact consistent with the correct 10&#8315;&#8309; elongation, confirming the typo is only in the elongation exponent.</div>
+        <div class="s">⚡ JEE trick: lateral contraction &Delta;d = &sigma;&middot;&Delta;L&middot;d/L follows straight from the Poisson definition &mdash; keep the longitudinal strain &Delta;L/L as one block.</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example 4 &middot; L-4</span>
+        <div class="q">If the shear modulus and bulk modulus of a material are 0.5 &times; 10&#185;&#185; N/m&sup2; and 0.6 &times; 10&#185;&#185; N/m&sup2; respectively, find the Young&#39;s modulus of that material.</div>
+        <div class="s">Use the relation Y = 9K&eta;/(&eta; + 3K) (equivalently 9/Y = 1/K + 3/&eta;), with &eta; = 0.5 &times; 10&#185;&#185;, K = 0.6 &times; 10&#185;&#185;.</div>
+        <div class="s">Numerator 9K&eta; = 9 &times; (0.6 &times; 10&#185;&#185;)(0.5 &times; 10&#185;&#185;) = 2.7 &times; 10&sup2;&sup2;.</div>
+        <div class="s">Denominator &eta; + 3K = 0.5 &times; 10&#185;&#185; + 1.8 &times; 10&#185;&#185; = 2.3 &times; 10&#185;&#185;.</div>
+        <div class="s">Y = (2.7 &times; 10&sup2;&sup2;)/(2.3 &times; 10&#185;&#185;) = 1.2 &times; 10&#185;&#185; N/m&sup2;.</div>
+        <div class="ans">Y = 1.2 &times; 10&#185;&#185; N/m&sup2;</div>
+        <div class="s">⚡ JEE trick: whenever both &eta; and K are given, Y = 9K&eta;/(3K + &eta;) is the one-step route &mdash; no need to find &sigma; first.</div>
+      </div>
+    </section>
+
+    <!-- STRONG BOX -->
+    <section class="lec" id="strongbox">
+      <div class="lec-head"><span class="lec-tag">&#9733; STRONG BOX</span><h2>Previous Year Questions (PYQs)</h2></div>
+      <p style="color:var(--muted);font-size:.9rem;margin-top:0">The complete 17-question PYQ set from the chapter&#39;s Strong Box. Every answer is re-derived below; where the printed option is defended, the working is shown in full.</p>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 1 &middot; JEE Advanced 2020 Paper 2</span>
+        <div class="q">A cubical solid aluminium block has an edge length of 1 m on the surface of the earth. It is kept on the floor of a 5 km deep ocean. Taking the average density of water and the acceleration due to gravity to be 10&sup3; kg/m&sup3; and 10 m/s&sup2; respectively, the change in the edge length of the block (in mm) is ____ (bulk modulus of aluminium = 7 &times; 10&#185;&#8304; N/m&sup2;).</div>
+        <div class="s">Pressure at depth h: P = &rho;gh = 10&sup3; &times; 10 &times; 5000 = 5 &times; 10&#8311; Pa.</div>
+        <div class="s">Volume strain: &Delta;V/V = P/K = (5 &times; 10&#8311;)/(7 &times; 10&#185;&#8304;) = 7.14 &times; 10&#8315;&#8308;.</div>
+        <div class="s">For a cube, linear strain = (1/3) volume strain: &Delta;a/a = (1/3)(7.14 &times; 10&#8315;&#8308;) = 2.38 &times; 10&#8315;&#8308;.</div>
+        <div class="s">&Delta;a = 2.38 &times; 10&#8315;&#8308; &times; 1 m = 2.38 &times; 10&#8315;&#8308; m = 0.238 mm &asymp; 0.24 mm.</div>
+        <div class="ans">&Delta;a &asymp; 0.24 mm (contraction)</div>
+        <div class="s">⚡ JEE trick: for a cube under hydrostatic pressure, the edge (linear) strain is one-third of the volume strain &mdash; apply &Delta;a/a = (1/3)(P/K).</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 2 &middot; JEE Advanced 2013 Paper 1</span>
+        <div class="q">One end of a horizontal thick copper wire of length 2L and radius 2R is welded to an end of another horizontal thin copper wire of length L and radius R. When the arrangement is stretched by applying forces at two ends, the ratio of the elongation in the thin wire to that in the thick wire is: (a) 0.25 (b) 0.50 (c) 2.00 (d) 4.00</div>
+        <div class="s">The wires are in series, so the same force F passes through both. Elongation &Delta;L = FL/(AY) with the same Y (both copper).</div>
+        <div class="s">Thin wire: length L, area A = &pi;R&sup2; &rArr; &Delta;L_thin = FL/(&pi;R&sup2;Y).</div>
+        <div class="s">Thick wire: length 2L, area &pi;(2R)&sup2; = 4&pi;R&sup2; &rArr; &Delta;L_thick = F(2L)/(4&pi;R&sup2;Y) = FL/(2&pi;R&sup2;Y).</div>
+        <div class="s">Ratio = &Delta;L_thin/&Delta;L_thick = [FL/(&pi;R&sup2;Y)] &divide; [FL/(2&pi;R&sup2;Y)] = 2.</div>
+        <div class="ans">(c) 2.00</div>
+        <div class="s">⚡ JEE trick: with the same force, &Delta;L &prop; L/R&sup2; &mdash; the thin wire&#39;s half the length but one-quarter the area wins by a net factor of 2.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 3 &middot; JEE Main 2026 Shift 1</span>
+        <div class="q">Two wires A and B made of different materials of lengths 60 cm and 54 cm, and areas of cross-section 3.0 &times; 10&#8315;&#8309; m&sup2; and 4.5 &times; 10&#8315;&#8309; m&sup2; respectively, are stretched by the same magnitude under a given load. The ratio of the Young&#39;s modulus of A to that of B is x : 3. The value of x is ___ : (a) 2 (b) 1 (c) 4 (d) 5</div>
+        <div class="s">Same load F and same elongation &Delta;L: from &Delta;L = FL/(AY), equal &Delta;L gives L_A/(A_A Y_A) = L_B/(A_B Y_B).</div>
+        <div class="s">So Y_A/Y_B = (L_A &middot; A_B)/(A_A &middot; L_B) = (60 &times; 4.5 &times; 10&#8315;&#8309;)/(3.0 &times; 10&#8315;&#8309; &times; 54).</div>
+        <div class="s">= (60 &times; 4.5)/(3.0 &times; 54) = 270/162 = 5/3.</div>
+        <div class="s">Hence Y_A : Y_B = 5 : 3, so x = 5.</div>
+        <div class="ans">(d) 5</div>
+        <div class="s">⚡ JEE trick: &ldquo;same elongation, same load&rdquo; collapses to Y &prop; L/A &mdash; just cross-multiply the lengths and areas.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 4 &middot; JEE Main 2026 Shift 1</span>
+        <div class="q">The strain&ndash;stress plot for materials A, B, C and D is shown (strain on the y-axis, stress on the x-axis). Which material has the largest Young&#39;s modulus? (a) D (b) B (c) C (d) A</div>
+        <div class="s">Young&#39;s modulus Y = stress/strain. On a strain-vs-stress plot the slope is strain/stress = 1/Y.</div>
+        <div class="s">So the line with the <b>smallest slope</b> (the one closest to the stress / x-axis) has the <b>largest</b> Young&#39;s modulus.</div>
+        <div class="s">In the figure the lines from steepest to flattest are A, B, D, C; curve C lies closest to the stress axis.</div>
+        <div class="ans">(c) C</div>
+        <div class="s">⚡ JEE trick: beware the swapped axes &mdash; on a normal stress-vs-strain graph the steepest line has the largest Y, but with strain on the vertical axis it is the <b>flattest</b> line.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 5 &middot; JEE Main 2025 Shift 2</span>
+        <div class="q">A massless spring gets elongated by amount x&#8321; under a tension of 5 N. Its elongation is x&#8322; under a tension of 7 N. For the elongation of (5x&#8321; &minus; 2x&#8322;), the tension in the spring will be: (a) 39 N (b) 15 N (c) 11 N (d) 20 N</div>
+        <div class="s">For a spring F = kx, so x&#8321; = 5/k and x&#8322; = 7/k.</div>
+        <div class="s">5x&#8321; &minus; 2x&#8322; = 5(5/k) &minus; 2(7/k) = (25 &minus; 14)/k = 11/k.</div>
+        <div class="s">Tension for this elongation: F = k &times; (11/k) = 11 N.</div>
+        <div class="ans">(c) 11 N</div>
+        <div class="s">⚡ JEE trick: elongation is linear in tension, so any linear combination a&middot;x&#8321; + b&middot;x&#8322; corresponds to tension a&middot;(5) + b&middot;(7) &mdash; here 5&times;5 &minus; 2&times;7 = 11 N.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 6 &middot; JEE Main 2025 Shift 2</span>
+        <div class="q">The volume contraction of a solid copper cube of edge length 10 cm, when subjected to a hydraulic pressure of 7 &times; 10&#8310; Pa, would be ___ mm&sup3;. (Bulk modulus of copper = 1.4 &times; 10&#185;&#185; N/m&sup2;.)</div>
+        <div class="s">Volume strain: &Delta;V/V = P/K = (7 &times; 10&#8310;)/(1.4 &times; 10&#185;&#185;) = 5 &times; 10&#8315;&#8309;.</div>
+        <div class="s">Volume of cube: V = (0.10)&sup3; = 10&#8315;&sup3; m&sup3; = 10&#8310; mm&sup3;.</div>
+        <div class="s">&Delta;V = V &times; (P/K) = 10&#8310; mm&sup3; &times; 5 &times; 10&#8315;&#8309; = 50 mm&sup3; (= 5 &times; 10&#8315;&#8312; m&sup3;).</div>
+        <div class="ans">&Delta;V = 50 mm&sup3; (= 5 &times; 10&#8315;&#8312; m&sup3;)</div>
+        <div class="s">⚡ JEE trick: work the volume strain P/K first, then multiply by the volume in the units the answer is asked for (here 10&#8310; mm&sup3;).</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 7 &middot; JEE Main 2024 Shift 2</span>
+        <div class="q">A wire of cross-sectional area A, modulus of elasticity 2 &times; 10&#185;&#185; N/m&sup2; and length 2 m is stretched between two vertical rigid supports. When a mass of 2 kg is suspended at the middle it sags lower from its original position making angle &theta; = 1/100 radian at the supports. The value of A is ___ &times; 10&#8315;&#8308; m&sup2; (x &laquo; L, g = 10 m/s&sup2;).</div>
+        <div class="s">At the middle, two tensions balance the weight: 2T sin&theta; = mg, so T = mg/(2sin&theta;) &asymp; mg/(2&theta;) = (2 &times; 10)/(2 &times; 0.01) = 1000 N.</div>
+        <div class="s">Each half (length L = 1 m) stretches from L to L/cos&theta;, so strain = (sec&theta; &minus; 1) &asymp; &theta;&sup2;/2 = (0.01)&sup2;/2 = 5 &times; 10&#8315;&#8309;.</div>
+        <div class="s">Also T = (stress)A = Y&middot;(strain)&middot;A, so 1000 = (2 &times; 10&#185;&#185;)(5 &times; 10&#8315;&#8309;)A = 10&#8311;&middot;A.</div>
+        <div class="s">A = 1000/10&#8311; = 10&#8315;&#8308; m&sup2;.</div>
+        <div class="ans">A = 1 &times; 10&#8315;&#8308; m&sup2; (value = 1)</div>
+        <div class="s">⚡ JEE trick: a sagging horizontal wire has small-angle strain &theta;&sup2;/2, while the tension comes from mg/(2&theta;) &mdash; two different uses of the same small &theta;.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 8 &middot; JEE Main 2024 Shift 2</span>
+        <div class="q">Two blocks of mass 2 kg and 4 kg are connected by a metal wire going over a smooth pulley. The radius of the wire is 4.0 &times; 10&#8315;&#8309; m and Young&#39;s modulus of the metal is 2.0 &times; 10&#185;&#185; N/m&sup2;. The longitudinal strain developed in the wire is 1/(&alpha;&pi;). The value of &alpha; is ___ (g = 10 m/s&sup2;).</div>
+        <div class="s">Atwood acceleration: a = (m&#8322; &minus; m&#8321;)g/(m&#8321; + m&#8322;) = (4 &minus; 2)(10)/6 = 10/3 m/s&sup2;.</div>
+        <div class="s">Wire tension: T = m&#8321;(g + a) = 2(10 + 10/3) = 2 &times; 40/3 = 80/3 N (check: m&#8322;(g &minus; a) = 4 &times; 20/3 = 80/3 &#10003;).</div>
+        <div class="s">Area A = &pi;r&sup2; = &pi;(4 &times; 10&#8315;&#8309;)&sup2; = 16&pi; &times; 10&#8315;&#185;&#8304; m&sup2;.</div>
+        <div class="s">Strain = T/(AY) = (80/3)/(16&pi; &times; 10&#8315;&#185;&#8304; &times; 2 &times; 10&#185;&#185;) = (80/3)/(320&pi;) = 1/(12&pi;).</div>
+        <div class="s">Comparing with 1/(&alpha;&pi;): &alpha; = 12.</div>
+        <div class="ans">&alpha; = 12</div>
+        <div class="s">⚡ JEE trick: find the Atwood tension first (not just mg), then strain = T/AY &mdash; the &pi; from the circular area is what leaves the clean 1/(12&pi;).</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 9 &middot; JEE Main 2024 Shift 1</span>
+        <div class="q">Each of three blocks P, Q and R has a mass of 3 kg. Each of the wires A and B has cross-sectional area 0.005 cm&sup2; and Young&#39;s modulus 2 &times; 10&#185;&#185; N/m&sup2;. Neglecting friction, the longitudinal strain on wire B is ___ &times; 10&#8315;&#8308; (g = 10 m/s&sup2;). [P and Q on a table joined by wire A; wire B runs over a pulley to a hanging block R.]</div>
+        <div class="s">The whole system (P + Q on the table, R hanging) accelerates: a = m_R&middot;g/(m_P + m_Q + m_R) = (3 &times; 10)/9 = 10/3 m/s&sup2;.</div>
+        <div class="s">Wire B carries only the hanging block R: for R, m_R&middot;g &minus; T_B = m_R&middot;a &rArr; T_B = m_R(g &minus; a) = 3(10 &minus; 10/3) = 20 N.</div>
+        <div class="s">Area A = 0.005 cm&sup2; = 5 &times; 10&#8315;&#8311; m&sup2;.</div>
+        <div class="s">Strain = T_B/(A&middot;Y) = 20/(5 &times; 10&#8315;&#8311; &times; 2 &times; 10&#185;&#185;) = 20/(10&#8309;) = 2 &times; 10&#8315;&#8308;.</div>
+        <div class="ans">Strain on B = 2 &times; 10&#8315;&#8308; (value = 2)</div>
+        <div class="s">⚡ JEE trick: the tension in B is set by the hanging block alone (m_R(g &minus; a)), not by the whole weight &mdash; find a first, then the local tension.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 10 &middot; JEE Main 2024 Shift 1</span>
+        <div class="q">The density and breaking stress of a wire are 6 &times; 10&#8308; kg/m&sup3; and 1.2 &times; 10&#8312; N/m&sup2; respectively. The wire is suspended from a rigid support on a planet where the acceleration due to gravity is one-third of its value on the earth&#39;s surface. The maximum length of the wire that can be hung without breaking is ___ m (g = 10 m/s&sup2;).</div>
+        <div class="s">A hanging wire breaks when its own weight gives the breaking stress: &sigma;&#7504; = &rho; L g&prime;, so L = &sigma;&#7504;/(&rho; g&prime;).</div>
+        <div class="s">Planet gravity: g&prime; = g/3 = 10/3 m/s&sup2;.</div>
+        <div class="s">L = (1.2 &times; 10&#8312;)/(6 &times; 10&#8308; &times; 10/3) = (1.2 &times; 10&#8312;)/(2 &times; 10&#8309;) = 600 m.</div>
+        <div class="ans">L = 600 m</div>
+        <div class="s">⚡ JEE trick: maximum self-supporting length L = &sigma;&#7504;/(&rho;g) &mdash; weaker gravity (g/3) lets the wire hang three times longer.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 11 &middot; JEE Main 2024 Shift 2</span>
+        <div class="q">Two metallic wires P and Q have the same volume and are made of the same material. Their areas of cross-section are in the ratio 4 : 1. A force F&#8321; applied to P produces an extension &Delta;l; the force required to produce the same extension in Q is F&#8322;. The value of F&#8321;/F&#8322; is ___.</div>
+        <div class="s">Same volume V = A&middot;L, so L &prop; 1/A. With A_P : A_Q = 4 : 1, L_P : L_Q = 1 : 4, i.e. L_Q = 4L_P.</div>
+        <div class="s">Extension &Delta;l = FL/(AY). For P: &Delta;l = F&#8321;L_P/(A_P Y). For Q: &Delta;l = F&#8322;L_Q/(A_Q Y).</div>
+        <div class="s">Equal &Delta;l: F&#8321;L_P/A_P = F&#8322;L_Q/A_Q &rArr; F&#8321;/F&#8322; = (L_Q/A_Q)(A_P/L_P) = (4L_P/A_P)(A_P/L_P) &times; (A_P/A_Q)&#8315;&#185;&hellip;</div>
+        <div class="s">Substitute A_P = 4A_Q, L_Q = 4L_P: F&#8321;/F&#8322; = (L_Q&middot;A_P)/(A_Q&middot;L_P) = (4L_P &middot; 4A_Q)/(A_Q &middot; L_P) = 16.</div>
+        <div class="ans">F&#8321;/F&#8322; = 16</div>
+        <div class="s">⚡ JEE trick: at fixed volume the extension for a given force scales as L/A = (V/A)/A = V/A&sup2;, so the force needed scales as A&sup2; &mdash; (4)&sup2; = 16.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 12 &middot; JEE Main 2024 Shift 2</span>
+        <div class="q">One end of a metal wire is fixed to a ceiling and a load of 2 kg hangs from the other end. A similar wire is attached to the bottom of the load and another load of 1 kg hangs from this lower wire. The ratio of the longitudinal strain of the upper wire to that of the lower wire is (A = 0.005 cm&sup2;, Y = 2 &times; 10&#185;&#185; N/m&sup2;, g = 10 m/s&sup2;).</div>
+        <div class="s">Upper wire carries both loads: T_upper = (2 + 1)g = 3 &times; 10 = 30 N.</div>
+        <div class="s">Lower wire carries only the 1 kg load: T_lower = 1 &times; 10 = 10 N.</div>
+        <div class="s">Same area and same Y, so strain = T/(AY) &rArr; strain ratio = T_upper/T_lower = 30/10 = 3.</div>
+        <div class="ans">Ratio = 3 : 1</div>
+        <div class="s">⚡ JEE trick: identical wires share the same A and Y, so the strain ratio is just the tension ratio &mdash; the data A and Y never need substituting.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 13 &middot; JEE Main 2024 Shift 2</span>
+        <div class="q">A wire of length L and radius r is clamped at one end. If its other end is pulled by a force F, its length increases by l. If the radius of the wire and the applied force are both reduced to half of their original values keeping the original length constant, the increase in length will become: (a) 3 times (b) 3/2 times (c) 4 times (d) 2 times</div>
+        <div class="s">Extension l = FL/(&pi;r&sup2;Y).</div>
+        <div class="s">New force F&prime; = F/2, new radius r&prime; = r/2, so new area = &pi;(r/2)&sup2; = &pi;r&sup2;/4.</div>
+        <div class="s">New extension l&prime; = (F/2)L/(&pi;r&sup2;/4 &middot; Y) = (F/2)(4)L/(&pi;r&sup2;Y) = 2&middot;FL/(&pi;r&sup2;Y) = 2l.</div>
+        <div class="ans">(d) 2 times</div>
+        <div class="s">⚡ JEE trick: halving the force halves l, but halving the radius quarters the area and quadruples l &mdash; net factor 4 &times; (1/2) = 2.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 14 &middot; JEE Main 2024 Shift 1</span>
+        <div class="q">An elastic spring under a tension of 3 N has a length a. Its length is b under a tension of 2 N. For its length (3a &minus; 2b), the value of the tension will be ___ N.</div>
+        <div class="s">A spring of natural length L&#8320; and constant k: length = L&#8320; + F/k. So a = L&#8320; + 3/k and b = L&#8320; + 2/k.</div>
+        <div class="s">3a &minus; 2b = 3(L&#8320; + 3/k) &minus; 2(L&#8320; + 2/k) = L&#8320; + 9/k &minus; 4/k = L&#8320; + 5/k.</div>
+        <div class="s">This matches length = L&#8320; + F/k with F/k = 5/k, so F = 5 N.</div>
+        <div class="ans">Tension = 5 N</div>
+        <div class="s">⚡ JEE trick: keep the natural length explicit (length = L&#8320; + F/k) &mdash; the combination 3a &minus; 2b is chosen so the L&#8320; survives with coefficient 1, leaving a genuine spring length.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 15 &middot; JEE Main 2023 Shift 1</span>
+        <div class="q">A thin rod of length 1 m and area of cross-section 3 &times; 10&#8315;&#8310; m&sup2; is suspended vertically from one end. The rod is cooled from 210&deg;C to 160&deg;C. After cooling, a mass M is attached at the lower end so that the length of the rod again becomes 1 m. Young&#39;s modulus and coefficient of linear expansion are 2 &times; 10&#185;&#185; N/m&sup2; and 2 &times; 10&#8315;&#8309; K&#8315;&#185;. The value of M is ___ kg (g = 10 m/s&sup2;).</div>
+        <div class="s">Cooling by &Delta;&theta; = 50 contracts the rod by &alpha;&middot;&Delta;&theta;&middot;L; the mass M must stretch it back by the same amount, so thermal strain = elastic strain.</div>
+        <div class="s">&alpha;&Delta;&theta; = (Mg/A)/Y &rArr; Mg = Y&middot;&alpha;&middot;&Delta;&theta;&middot;A.</div>
+        <div class="s">Mg = (2 &times; 10&#185;&#185;)(2 &times; 10&#8315;&#8309;)(50)(3 &times; 10&#8315;&#8310;) = (4 &times; 10&#8310;)(50)(3 &times; 10&#8315;&#8310;) = 600 N.</div>
+        <div class="s">M = 600/g = 600/10 = 60 kg.</div>
+        <div class="ans">M = 60 kg</div>
+        <div class="s">⚡ JEE trick: equate thermal strain &alpha;&Delta;&theta; to the elastic strain Mg/(AY) &mdash; the length cancels, so the 1 m is only there to confirm the rod returns to its original length.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 16 &middot; JEE Main 2023 Shift 1</span>
+        <div class="q">Two wires each of radius 0.2 cm and negligible mass, one of steel (1.6 m, upper) and one of brass (1 m, lower), are loaded as shown: a 2 kg block between them and a 1.14 kg block at the bottom. The elongation of the steel wire is ___ &times; 10&#8315;&#8310; m. (Y_steel = 2 &times; 10&#185;&#185; N/m&sup2;, g = 10 m/s&sup2;.)</div>
+        <div class="s">The steel wire carries the total load below it: (2 + 1.14) = 3.14 kg &rArr; T = 3.14 &times; 10 = 31.4 N = 10&pi; N.</div>
+        <div class="s">Area A = &pi;r&sup2; = &pi;(0.2 &times; 10&#8315;&sup2;)&sup2; = &pi; &times; 4 &times; 10&#8315;&#8310; m&sup2;.</div>
+        <div class="s">&Delta;L = TL/(AY) = (10&pi; &times; 1.6)/(&pi; &times; 4 &times; 10&#8315;&#8310; &times; 2 &times; 10&#185;&#185;) = 16&pi;/(8&pi; &times; 10&#8309;) = 2 &times; 10&#8315;&#8309; m.</div>
+        <div class="s">So &Delta;L = 2 &times; 10&#8315;&#8309; m = 20 &times; 10&#8315;&#8310; m.</div>
+        <div class="ans">&Delta;L(steel) = 20 &times; 10&#8315;&#8310; m</div>
+        <div class="s">⚡ JEE trick: the 31.4 N load is 10&pi; N, so the &pi; from the area cancels &mdash; the examiner picked 3.14 kg deliberately to clean up the arithmetic.</div>
+      </div>
+
+      <div class="example det">
+        <span class="tag">Strong Box &middot; PYQ 17 &middot; JEE Main 2023 Shift 2</span>
+        <div class="q">Young&#39;s moduli of the materials of wires A and B are in the ratio 1 : 4, while their areas of cross-section are in the ratio 1 : 3. If the same load is applied to both wires (same length), the elongations produced in A and B will be in the ratio: (a) 12 : 1 (b) 1 : 36 (c) 36 : 1 (d) 1 : 12</div>
+        <div class="s">Elongation &Delta;L = FL/(AY) with the same F and L, so &Delta;L &prop; 1/(AY).</div>
+        <div class="s">&Delta;L_A/&Delta;L_B = (A_B Y_B)/(A_A Y_A) = (A_B/A_A)(Y_B/Y_A).</div>
+        <div class="s">A_A : A_B = 1 : 3 &rArr; A_B/A_A = 3; Y_A : Y_B = 1 : 4 &rArr; Y_B/Y_A = 4.</div>
+        <div class="s">&Delta;L_A/&Delta;L_B = 3 &times; 4 = 12, i.e. 12 : 1.</div>
+        <div class="ans">(a) 12 : 1</div>
+        <div class="s">⚡ JEE trick: for the same load and length, elongation &prop; 1/(AY) &mdash; the softer (smaller Y) and thinner (smaller A) wire A stretches 12 times more.</div>
+      </div>
+    </section>
+
+    <div class="foot">ICAD &middot; P-14 Elasticity &middot; Revision Notes (L-1 to L-4 + Strong Box) &middot; Quick + Detailed views. Built from the module&#39;s theory, worked examples and Strong Box PYQs; the Suggested Problems / Level-1&#8230;11 banks and Quick Recap are excluded by design. Every answer re-derived independently &mdash; book misprints are flagged inline with &#9888;.</div>
+  </div>
+</div>
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

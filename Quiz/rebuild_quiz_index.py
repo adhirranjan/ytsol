@@ -5,13 +5,13 @@ Q = r"E:/Adhir/AdWinUser/Desktop/icad-dps/ICAD/BooksScanned/Quiz"
 GROUPS = [
  ("Chemistry · Volume 1", ["C1","C2","C3"]),
  ("Chemistry · Volume 2", ["C4","C5","C6"]),
- ("Chemistry · Volume 3", ["C7"]),
+ ("Chemistry · Volume 3", ["C7","C8","C9"]),
  ("Mathematics · Volume 1", ["M1","M2","M3","M4","M5A","M5B","M5C","M6","M7"]),
  ("Mathematics · Volume 2", ["M8A","M8B","M8C","M8D","M9","M10","M11","M12"]),
- ("Mathematics · Volume 3", ["M13"]),
+ ("Mathematics · Volume 3", ["M13","M14A","M14B","M15"]),
  ("Physics · Volume 1", ["P1","P2","P3","P4","P5"]),
  ("Physics · Volume 2", ["P6","P7","P8","P9","P10"]),
- ("Physics · Volume 3", ["P11","P12","P13"]),
+ ("Physics · Volume 3", ["P11","P12","P13","P14","P15"]),
 ]
 
 def parse(code):

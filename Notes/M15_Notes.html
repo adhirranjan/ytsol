@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-15 Circle — JEE Revision Notes</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --trap:#e5484d; --trap-bg:#2a1416; --tip:#25b06b; --tip-bg:#10281b;
+    --star:#e8a33d; --star-bg:#2c2210; --chip:#243049; --detail-bg:#141d33;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --trap:#c8383c; --trap-bg:#fdeaeb; --tip:#128a4f; --tip-bg:#e6f6ec;
+      --star:#b9791a; --star-bg:#fdf4e3; --chip:#eef2fa; --detail-bg:#f0f4fc; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px 1fr}
+  .toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--line)}
+  .toc h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+  .toc a{display:block;color:var(--muted);text-decoration:none;font-size:.86rem;padding:5px 10px;border-radius:7px}
+  .toc a:hover{background:var(--card);color:var(--ink)}
+  .toc a.top{color:var(--brand2);font-weight:700}
+  .main{padding:26px 26px 80px;min-width:0}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.7rem}
+  header.hero p{margin:4px 0;opacity:.9;font-size:.9rem}
+  .modebar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;padding:11px 2px;margin-bottom:6px;flex-wrap:wrap}
+  .modelbl{font-size:.82rem;color:var(--muted);font-weight:700}
+  .modebtn{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:6px 15px;font-size:.85rem;font-weight:700;cursor:pointer}
+  .modebtn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .modehint{font-size:.78rem;color:var(--muted);width:100%;margin-top:2px}
+  section.lec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0;scroll-margin-top:56px}
+  .lec-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .lec-tag{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:3px 10px;font-size:.8rem;white-space:nowrap}
+  .lec-head h2{margin:0;font-size:1.2rem}
+  h3.sub{font-size:1rem;color:var(--brand2);margin:16px 0 6px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  b,strong{color:var(--ink)}
+  .k{color:var(--brand2);font-weight:700}
+  code{background:var(--chip);padding:1px 6px;border-radius:5px;font-size:.92em;font-family:"SFMono-Regular",Consolas,monospace}
+  .formula{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:8px;
+    padding:11px 15px;margin:10px 0;font-family:"SFMono-Regular",Consolas,monospace;font-size:.95rem;overflow-x:auto}
+  .formula .lbl{font-family:inherit;color:var(--muted);font-size:.8rem;display:block;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .call{border-radius:9px;padding:10px 14px;margin:10px 0;font-size:.9rem;border-left:4px solid}
+  .call.trap{background:var(--trap-bg);border-color:var(--trap)}
+  .call.tip{background:var(--tip-bg);border-color:var(--tip)}
+  .call.star{background:var(--star-bg);border-color:var(--star)}
+  .call .h{font-weight:800;margin-right:6px}
+  .call.trap .h{color:var(--trap)} .call.tip .h{color:var(--tip)} .call.star .h{color:var(--star)}
+  .twrap{overflow-x:auto;margin:10px 0}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--brand2);font-weight:700}
+  td:first-child{color:var(--muted)}
+  .det{display:none}
+  body.detailed .det{display:block}
+  span.det,li.det{display:none}
+  body.detailed span.det{display:inline}
+  body.detailed li.det{display:list-item}
+  .det-block{background:var(--detail-bg);border:1px dashed var(--line);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .det-block .dh{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);margin-bottom:5px}
+  .example{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:9px;padding:12px 15px;margin:12px 0}
+  .example .tag{font-weight:800;color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+  .example .q{font-weight:600;margin:5px 0 9px}
+  .example .s{margin:5px 0;padding-left:17px;position:relative;font-size:.9rem}
+  .example .s:before{content:"▸";position:absolute;left:0;color:var(--accent)}
+  .example .ans{margin-top:9px;font-weight:700;color:var(--accent);font-size:.92rem}
+  .exhead{font-size:.9rem;font-weight:700;color:var(--brand2);margin:16px 0 2px}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:30px}
+  @media (max-width:820px){ .layout{grid-template-columns:1fr} .toc{display:none} .main{padding:18px 14px 60px} }
+  @media print{
+    .toc,.modebar{display:none}
+    .layout{grid-template-columns:1fr;max-width:100%}
+    body{background:#fff;color:#000}
+    .det{display:block!important} span.det{display:inline!important} li.det{display:list-item!important}
+    section.lec{break-inside:avoid;border:1px solid #ccc}
+    header.hero{background:#12706a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body class="detailed">
+<div class="layout">
+  <nav class="toc">
+    <h3>Chapter M-15</h3>
+    <a class="top" href="#top">↑ Overview &amp; Formula Card</a>
+    <a href="#l1">L-1 · Equation of a Circle — Standard, General, Diametric &amp; Parametric Forms</a>
+    <a href="#l2">L-2 · Circle Under Various Conditions &amp; Intercepts</a>
+    <a href="#l3">L-3 · Position of a Point, Line–Circle Intersection &amp; Tangents</a>
+    <a href="#l4">L-4 · Director Circle</a>
+    <a href="#l5">L-5 · Normal, Length of Tangent, Power of a Point &amp; Chord of Contact</a>
+    <a href="#l6">L-6 · Pair of Tangents, Two Circles, Common Tangents &amp; Common Chord</a>
+    <a href="#l7">L-7 · Family of Circles, Angle of Intersection &amp; Orthogonality</a>
+    <a href="#strongbox">Strong Box · Previous Year Qs</a>
+  </nav>
+
+  <div class="main" id="top">
+    <header class="hero">
+      <p>ICAD · JEE Mathematics · Revision Notes</p>
+      <h1>M-15 · Circle</h1>
+      <p>Lectures L-1 to L-7 · the circle as a locus — its standard, general, diametric and parametric equations; conditions for touching the axes and the intercepts it cuts; position of a point and of a line (secant / tangent); tangent, normal, chord of contact, chord bisected at a point and the pair of tangents; director circle, length of tangent and power of a point; two circles — their relative position, common tangents and common chord; and the family of circles, angle of intersection and orthogonality.</p>
+    </header>
+
+    <div class="modebar">
+      <span class="modelbl">View:</span>
+      <button class="modebtn" data-mode="quick" onclick="setMode('quick')">⚡ Quick Revision</button>
+      <button class="modebtn active" data-mode="detailed" onclick="setMode('detailed')">📖 Detailed</button>
+      <button class="modebtn" onclick="window.print()" style="margin-left:auto">🖨 Print / PDF</button>
+      <div class="modehint" id="modehint">Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.</div>
+    </div>
+
+    <!-- FORMULA CARD -->
+    <section class="lec" id="card">
+      <div class="lec-head"><span class="lec-tag">★ MEMORIZE</span><h2>The whole chapter on one card</h2></div>
+      <div class="call star"><span class="h">★ The one habit</span>Put every circle in the form <b>S = x² + y² + 2gx + 2fy + c = 0</b>: then the centre is <b>(−g, −f)</b>, the radius is <b>√(g² + f² − c)</b>, and three machines do the rest. Write <b>S₁</b> = value of S at a point (sign tells inside/on/outside and equals the square of the tangent length); write <b>T</b> = the "replace-one-factor" form (xx₁ + yy₁ + g(x+x₁) + f(y+y₁) + c) — <b>T = 0</b> is the tangent / chord of contact and <b>T = S₁</b> is the chord bisected at (x₁,y₁). Learn S, S₁, T and the chapter is three templates.</div>
+      <div class="formula"><span class="lbl">standard form — centre C(h,k), radius r</span>(x − h)² + (y − k)² = r²   ·   centre origin: x² + y² = r²   ·   point circle (r = 0): (x − h)² + (y − k)² = 0</div>
+      <div class="formula"><span class="lbl">general form</span>x² + y² + 2gx + 2fy + c = 0   ·   centre (−g, −f)   ·   radius √(g² + f² − c)   ·   real circle ⇔ g² + f² − c &gt; 0</div>
+      <div class="formula"><span class="lbl">2nd-degree eqn ax² + 2hxy + by² + 2gx + 2fy + c = 0 is a circle ⇔</span>a = b ≠ 0 (equal x², y² coefficients)  AND  h = 0 (no xy term)</div>
+      <div class="formula"><span class="lbl">diameter form — endpoints (x₁,y₁), (x₂,y₂)</span>(x − x₁)(x − x₂) + (y − y₁)(y − y₂) = 0  (smallest circle through the two points)</div>
+      <div class="formula"><span class="lbl">parametric form</span>x² + y² = a² : (a cosθ, a sinθ)   ·   (x−h)² + (y−k)² = a² : x = h + a cosθ, y = k + a sinθ,  θ ∈ [0, 2π)</div>
+      <div class="formula"><span class="lbl">position of P(x₁,y₁) — with S₁ = x₁² + y₁² + 2gx₁ + 2fy₁ + c</span>S₁ &gt; 0 outside · S₁ = 0 on · S₁ &lt; 0 inside   ·   min / max distance to circle = |CP − r| / (CP + r)</div>
+      <div class="formula"><span class="lbl">line y = mx + c vs circle x² + y² = a² (p = ⊥ distance from centre)</span>p &lt; a secant · p = a tangent · p &gt; a misses   ·   tangency: c² = a²(1 + m²)   ·   tangent line: y = mx ± a√(1 + m²)</div>
+      <div class="formula"><span class="lbl">length of tangent &amp; power of a point from P(x₁,y₁)</span>length = √S₁   ·   power = S₁ = PA·PB along any secant (signed)   ·   chord cut on a line = 2√(a² − p²)</div>
+      <div class="formula"><span class="lbl">tangent at a point / slope form / from an external point</span>at (x₁,y₁): T = 0   ·   to x²+y²=a²: xx₁ + yy₁ = a² or x cosθ + y sinθ = a   ·   pair of tangents from (x₁,y₁): <b>SS₁ = T²</b></div>
+      <div class="formula"><span class="lbl">normal · chord of contact · chord bisected at a point</span>normal at (x₁,y₁) passes through the centre: (x−x₁)/(x₁+g) = (y−y₁)/(y₁+f)   ·   chord of contact: T = 0   ·   chord bisected at (x₁,y₁): <b>T = S₁</b></div>
+      <div class="formula"><span class="lbl">director circle — locus of ⊥ pairs of tangents</span>for x² + y² = a² it is x² + y² = 2a²  (concentric, radius √2·a)   ·   for (x−h)²+(y−k)²=a² : (x−h)²+(y−k)²=2a²</div>
+      <div class="formula"><span class="lbl">family of circles</span>through S = 0 ∩ line L = 0 : S + λL = 0   ·   through S = 0 ∩ S′ = 0 : S + λS′ = 0 (λ ≠ −1)   ·   through two points as diameter + λL</div>
+      <div class="formula"><span class="lbl">angle of intersection θ of two circles &amp; orthogonality</span>cos θ = |(r₁² + r₂² − d²)/(2r₁r₂)|   ·   <b>orthogonal ⇔ 2g₁g₂ + 2f₁f₂ = c₁ + c₂</b>  (θ = 90°)</div>
+      <div class="formula"><span class="lbl">radical axis / common chord · radical centre</span>S₁ − S₂ = 0 ⇒ 2(g₁−g₂)x + 2(f₁−f₂)y + (c₁−c₂) = 0   ·   radical centre = common point of three radical axes</div>
+      <div class="formula"><span class="lbl">two circles — relative position by d = C₁C₂ (r₁ ≥ r₂)</span>d &gt; r₁+r₂ : apart, 4 tangents · d = r₁+r₂ : touch externally, 3 · |r₁−r₂| &lt; d &lt; r₁+r₂ : cut, 2 · d = r₁−r₂ : touch internally, 1 · d &lt; r₁−r₂ : one inside, 0</div>
+      <div class="call tip"><span class="h">💡 Fast recognisers</span>Touches x-axis ⇒ g² = c; touches y-axis ⇒ f² = c; touches both ⇒ g² = f² = c (centre (±a, ±a), r = |a|). x-intercept length = 2√(g² − c), y-intercept = 2√(f² − c). The <b>chord bisected at a point is the farthest chord from the centre</b> through that point (shortest chord). From a point on the <b>director circle</b> the two tangents are perpendicular.</div>
+      <div class="call trap"><span class="h">⚠ Three slips that cost marks</span>(1) Before reading off a centre or radius, make the <b>coefficient of x² and y² equal to 1</b> — divide the whole equation first, or √(g²+f²−c) is wrong. (2) <b>T = 0</b> (tangent / chord of contact) and <b>T = S₁</b> (bisected chord) use the <b>same T</b> but different right-hand sides — don't swap them. (3) Orthogonality is <b>2g₁g₂ + 2f₁f₂ = c₁ + c₂</b>, not g₁g₂ + f₁f₂; keep the factor 2.</div>
+    </section>
+
+    <!-- L1 -->
+    <section class="lec" id="l1">
+      <div class="lec-head"><span class="lec-tag">L-1</span><h2>Equation of a Circle — Standard, General, Diametric &amp; Parametric Forms</h2></div>
+      <h3 class="sub">Definition &amp; standard equation</h3>
+      <ul>
+        <li>A <span class="k">circle</span> is the locus of a point moving in a plane so that its distance from a fixed point (the <b>centre</b>) is a constant (the <b>radius</b> r).</li>
+        <li>For centre C(h,k): CP = r ⇒ <b>(x − h)² + (y − k)² = r²</b>. Centre at origin ⇒ x² + y² = r². Radius 0 ⇒ <b>point circle</b>. Same centre, different radii ⇒ <b>concentric</b> circles.</li>
+      </ul>
+      <h3 class="sub">Diameter form &amp; general form</h3>
+      <div class="formula"><span class="lbl">diameter endpoints (x₁,y₁),(x₂,y₂) — uses ∠APB = 90°</span>(x − x₁)(x − x₂) + (y − y₁)(y − y₂) = 0  (circle of least radius through the two points)</div>
+      <div class="formula"><span class="lbl">general equation</span>x² + y² + 2gx + 2fy + c = 0  ⇒  centre (−g, −f) = (−(1/2)·coeff x, −(1/2)·coeff y),  radius √(g² + f² − c)</div>
+      <ul>
+        <li>g² + f² − c &gt; 0 real circle · = 0 point circle · &lt; 0 imaginary (no real points). A 2nd-degree equation is a circle only when <b>coeff x² = coeff y² ≠ 0</b> and <b>coeff xy = 0</b>.</li>
+      </ul>
+      <h3 class="sub">Parametric form</h3>
+      <div class="formula"><span class="lbl">any point on the circle</span>x² + y² = a² : (a cosθ, a sinθ)   ·   (x−h)²+(y−k)²=a² : (h + a cosθ, k + a sinθ),  θ ∈ [0, 2π)</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1 (theory)</span>
+        <div class="q">Find the circle with centre (2, 3) touching the line x + y − 1 = 0.</div>
+        <div class="s">Radius = ⊥ distance of centre from the tangent = |2 + 3 − 1| / √(1² + 1²) = 4/√2 = 2√2.</div>
+        <div class="ans">(x − 2)² + (y − 3)² = 8</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1 (theory)</span>
+        <div class="q">Find the circle whose diameters are 2x − 3y + 12 = 0 and x + 4y − 5 = 0 and whose area is 154 sq units.</div>
+        <div class="s">Diameters meet at the centre: solving gives (−3, 2). Area = πr² = 154 ⇒ (22/7)r² = 154 ⇒ r² = 49, r = 7.</div>
+        <div class="ans">(x + 3)² + (y − 2)² = 49</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-1 (theory)</span>
+        <div class="q">Find the locus of the point of intersection of the lines x cosθ + y sinθ = a and x sinθ − y cosθ = b.</div>
+        <div class="s">Square and add to eliminate θ: (x cosθ + y sinθ)² + (x sinθ − y cosθ)² = a² + b² ⇒ x²(cos²+sin²) + y²(sin²+cos²) = a² + b².</div>
+        <div class="ans">x² + y² = a² + b²  (a circle)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-1 · L-1 (Solved)</span>
+        <div class="q">Find the equations of the circles of radius 5 that touch the line 3x + 4y − 11 = 0 at the point P(1, 2).</div>
+        <div class="s">The centre lies on the normal at P (perpendicular to the tangent), at distance 5 either side. Slope of tangent = −3/4 ⇒ slope CP = 4/3, so tanθ = 4/3 (cosθ = 3/5, sinθ = 4/5).</div>
+        <div class="s">C = (1 ± 5·(3/5), 2 ± 5·(4/5)) = (1 ± 3, 2 ± 4) = (4, 6) or (−2, −2).</div>
+        <div class="ans">(x − 4)² + (y − 6)² = 25  or  (x + 2)² + (y + 2)² = 25</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-2 · L-1 (Solved)</span>
+        <div class="q">The abscissae of P, Q are the roots of x² + 2ax − b² = 0 and the ordinates are the roots of x² + 2px − q² = 0. Find the circle on PQ as diameter.</div>
+        <div class="s">x₁ + x₂ = −2a, x₁x₂ = −b²; y₁ + y₂ = −2p, y₁y₂ = −q². Diameter form expands to x² + y² − x(x₁+x₂) − y(y₁+y₂) + x₁x₂ + y₁y₂ = 0.</div>
+        <div class="ans">x² + y² + 2ax + 2py − b² − q² = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-3 · L-1 (Solved)</span>
+        <div class="q">Find the locus of the intersection of tangents to x² + y² = a² at points whose parametric angles differ by 60°.</div>
+        <div class="s">Tangents at P(θ) and Q(θ+60°) meet at R(h,k); ∠POQ = 60° so ∠POR = 30° and OP = OR cos30°, i.e. a = √(h²+k²)·(√3/2).</div>
+        <div class="s">⇒ √(h²+k²) = 2a/√3 ⇒ h² + k² = 4a²/3.</div>
+        <div class="ans">3(x² + y²) = 4a²</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-5 · L-1 (Solved)</span>
+        <div class="q">P is a variable point on the circle x² + y² + 2gx + 2fy + c = 0; CA, CB are the perpendiculars from the centre C onto the axes. Show the locus of the centroid of △PAB is a circle of radius one-third that of the given circle.</div>
+        <div class="s">A(−g, 0), B(0, −f), P(−g + r cosθ, −f + r sinθ). Centroid (h,k): 3h = −2g + r cosθ, 3k = −2f + r sinθ.</div>
+        <div class="s">⇒ (3h + 2g)² + (3k + 2f)² = r² ⇒ (x + 2g/3)² + (y + 2f/3)² = r²/9.</div>
+        <div class="ans">A circle, centre (−2g/3, −2f/3) = centroid of △CAB, radius r/3</div>
+      </div>
+    </section>
+
+    <!-- L2 -->
+    <section class="lec" id="l2">
+      <div class="lec-head"><span class="lec-tag">L-2</span><h2>Equation of a Circle Under Various Conditions &amp; Intercepts</h2></div>
+      <h3 class="sub">Circles touching the axes</h3>
+      <div class="twrap"><table>
+        <tr><th>condition</th><th>centre</th><th>equation</th></tr>
+        <tr><td>touches x-axis</td><td>(α, β), r = |β|</td><td>x² + y² − 2αx − 2βy + α² = 0  (so g² = c)</td></tr>
+        <tr><td>touches y-axis</td><td>(α, β), r = |α|</td><td>x² + y² − 2αx − 2βy + β² = 0  (so f² = c)</td></tr>
+        <tr><td>touches both axes</td><td>(α, α), r = |α|</td><td>x² + y² − 2αx − 2αy + α² = 0  (g² = f² = c)</td></tr>
+        <tr><td>through O, centre on x-axis</td><td>(α, 0)</td><td>x² + y² − 2αx = 0</td></tr>
+        <tr><td>through O, centre on y-axis</td><td>(0, α)</td><td>x² + y² − 2αy = 0</td></tr>
+      </table></div>
+      <h3 class="sub">Intercept made on the axes</h3>
+      <div class="formula"><span class="lbl">for x² + y² + 2gx + 2fy + c = 0</span>x-intercept |AB| = 2√(g² − c)   ·   y-intercept |CD| = 2√(f² − c)   ·   (touches x-axis ⇔ g²=c; both ⇔ c = g² = f²)</div>
+      <h3 class="sub">Circle through three points &amp; circumcircle of a triangle</h3>
+      <ul>
+        <li>x² + y² + 2gx + 2fy + c = 0 has <b>three constants</b> — substitute the three points to get three linear equations in g, f, c.</li>
+        <li>Circumcircle of the triangle formed by lines L₁ = L₂ = L₃ = 0: use L₁L₂ + λL₂L₃ + μL₃L₁ = 0 with coeff x² = coeff y² and coeff xy = 0, or find the three vertices and fit a circle.</li>
+      </ul>
+      <div class="call tip"><span class="h">💡 λ-form for a tangent/axis condition</span>When a circle "touches a line and both axes", take the centre (a, a) and radius a and set the distance from (a,a) to the line equal to a — this gives a quadratic in a (usually two circles).</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2 (theory)</span>
+        <div class="q">Circle through the origin cutting intercepts 3 and 4 on the positive axes.</div>
+        <div class="s">Through O ⇒ c = 0; passes through (3,0) and (0,4). So it is the circle on the segment joining (3,0),(0,4) — right angle at O ⇒ (3,0),(0,4) are ends of a diameter; centre (3/2, 2), r = 5/2.</div>
+        <div class="ans">x² + y² − 3x − 4y = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2 (theory)</span>
+        <div class="q">Circle through (1, −2), (4, −3) with centre on 3x + 4y = 7.</div>
+        <div class="s">x²+y²+2gx+2fy+c=0 through the points: 5 + 2g − 4f + c = 0, 25 + 8g − 6f + c = 0; centre (−g,−f) on line: −3g − 4f = 7.</div>
+        <div class="s">Solving: g = −47/15, f = 3/5, c = 11/3.</div>
+        <div class="ans">15x² + 15y² − 94x + 18y + 55 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-2 (theory)</span>
+        <div class="q">Circumcircle of the triangle formed by x + y = 6, 2x + y = 4 and x + 2y = 5.</div>
+        <div class="s">Vertices: A(7, −1), B(−2, 8), C(1, 2). Fit x²+y²+2gx+2fy+c=0 through them: 50 + 14g − 2f + c = 0, 68 − 4g + 16f + c = 0, 5 + 2g + 4f + c = 0.</div>
+        <div class="s">Solving: g = −17/2, f = −19/2, c = 50.</div>
+        <div class="ans">x² + y² − 17x − 19y + 50 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-1 · L-2 (Solved)</span>
+        <div class="q">Find the possible circles touching both axes and the line 4x + 3y = 6.</div>
+        <div class="s">Touches both axes ⇒ (x − a)² + (y − a)² = a². Distance from (a,a) to 4x + 3y − 6 = 0 equals a: |4a + 3a − 6|/5 = a ⇒ 7a − 6 = ±5a.</div>
+        <div class="s">⇒ a = 3 or a = 1/2.</div>
+        <div class="ans">(x − 1/2)² + (y − 1/2)² = 1/4  or  (x − 3)² + (y − 3)² = 9</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-2 · L-2 (Solved)</span>
+        <div class="q">A variable circle passes through A(a, b) and touches the x-axis. Show that the locus of the other end of the diameter through A is (x − a)² = 4by.</div>
+        <div class="s">Other end B(h,k); centre is midpoint ((h+a)/2, (k+b)/2). Touching the x-axis ⇒ radius = y-coordinate of centre = (k+b)/2.</div>
+        <div class="s">Radius = AB/2: |(k+b)/2| = √((h−a)² + (k−b)²)/2 ⇒ (k+b)² = (h−a)² + (k−b)² ⇒ (h−a)² = 4bk.</div>
+        <div class="ans">(x − a)² = 4by</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-3 · L-2 (Solved)</span>
+        <div class="q">Find the length of the intercepts that x² + y² + 10x − 6y + 9 = 0 makes on the axes.</div>
+        <div class="s">g = 5, f = −3, c = 9. x-intercept = 2√(g² − c) = 2√(25 − 9) = 2·4 = 8.</div>
+        <div class="s">y-intercept = 2√(f² − c) = 2√(9 − 9) = 0 ⇒ the circle touches the y-axis.</div>
+        <div class="ans">x-axis: 8 units; y-axis: 0 (tangent)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-4 · L-2 (Solved)</span>
+        <div class="q">A variable circle cuts intercepts of 2 and 4 on the x- and y-axes. Find the locus of its centre.</div>
+        <div class="s">2√(g² − c) = 2 ⇒ g² − c = 1; 2√(f² − c) = 4 ⇒ f² − c = 4. Subtract: f² − g² = 3.</div>
+        <div class="s">Centre (−g, −f) = (X, Y) ⇒ Y² − X² = 3.</div>
+        <div class="ans">y² − x² = 3</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-5 · L-2 (Solved)</span>
+        <div class="q">Find the circles touching the y-axis at (0, 4) and cutting a chord of length 6 on the x-axis.</div>
+        <div class="s">Touch y-axis at (0,4) ⇒ centre (α, 4), radius |α|. Half the x-chord QM = 3, and CM = 4 (height of centre) ⇒ radius CQ = √(3² + 4²) = 5 = |α|.</div>
+        <div class="s">So α = ±5.</div>
+        <div class="ans">(x − 5)² + (y − 4)² = 25  or  (x + 5)² + (y − 4)² = 25</div>
+      </div>
+    </section>
+
+    <!-- L3 -->
+    <section class="lec" id="l3">
+      <div class="lec-head"><span class="lec-tag">L-3</span><h2>Position of a Point, Line–Circle Intersection &amp; Tangents</h2></div>
+      <h3 class="sub">Position of a point &amp; nearest / farthest distance</h3>
+      <div class="formula"><span class="lbl">S₁ = x₁² + y₁² + 2gx₁ + 2fy₁ + c</span>S₁ &gt; 0 outside · S₁ = 0 on · S₁ &lt; 0 inside   ·   min distance = |CP − r|, max distance = CP + r</div>
+      <h3 class="sub">Line and circle · condition of tangency</h3>
+      <ul>
+        <li>Perpendicular distance p from the centre to the line versus radius r: <b>p &lt; r secant · p = r tangent · p &gt; r misses</b>. Equivalently substitute y = mx + c into x² + y² = a² and use the discriminant.</li>
+      </ul>
+      <div class="formula"><span class="lbl">chord cut off from y = mx + c by x² + y² = a²</span>length = 2√{(a²(1 + m²) − c²)/(1 + m²)}   ·   tangency (zero chord): c² = a²(1 + m²)</div>
+      <h3 class="sub">Different forms of the tangent</h3>
+      <div class="formula"><span class="lbl">point / parametric / slope form</span>at (x₁,y₁): T = 0 ⇒ xx₁ + yy₁ + g(x+x₁) + f(y+y₁) + c = 0   ·   at (a cosθ, a sinθ): x cosθ + y sinθ = a   ·   slope m: y = mx ± a√(1 + m²)</div>
+      <div class="formula"><span class="lbl">tangent of slope m to general circle &amp; from an external point</span>y + f = m(x + g) ± √(g²+f²−c)·√(1+m²)   ·   from (x₁,y₁): m²(x₁²−a²) − 2mx₁y₁ + (y₁²−a²) = 0 (two tangents)</div>
+      <div class="formula"><span class="lbl">angle between the two tangents from (x₁,y₁)</span>tan θ = |(m₁ − m₂)/(1 + m₁m₂)|   ·   point of contact of y = mx ± a√(1+m²): (∓am/√(1+m²), ±a/√(1+m²))</div>
+      <div class="call tip"><span class="h">💡 Reading the picture</span>Two circles <b>touch at (x₁,y₁)</b> ⇔ the tangent (T = 0) to each at that point is the same line. A right angle between the two tangents from P means P lies on the <b>director circle</b> (L-4). From an external point exactly <b>two</b> tangents can be drawn.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3 (theory)</span>
+        <div class="q">Discuss the position of (1, 2) and (6, 0) w.r.t. x² + y² − 4x + 2y − 11 = 0.</div>
+        <div class="s">S₁(1,2) = 1 + 4 − 4 + 4 − 11 = −6 &lt; 0 ⇒ inside. S₁(6,0) = 36 + 0 − 24 + 0 − 11 = 1 &gt; 0 ⇒ outside.</div>
+        <div class="ans">(1, 2) inside; (6, 0) outside</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3 (theory)</span>
+        <div class="q">Shortest and largest distance from (2, −7) to x² + y² − 14x − 10y − 151 = 0.</div>
+        <div class="s">Centre (7, 5), r = √(49 + 25 + 151) = 15. CP = √((7−2)² + (5+7)²) = √(25 + 144) = 13 &lt; r ⇒ P inside.</div>
+        <div class="s">Shortest = r − CP = 2, largest = r + CP = 28.</div>
+        <div class="ans">Shortest 2, largest 28</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-3 (theory)</span>
+        <div class="q">Show that x² + y² − 4x + 6y + 8 = 0 and x² + y² − 10x − 6y + 14 = 0 touch at (3, −1).</div>
+        <div class="s">Tangent (T = 0) to the first at (3,−1): 3x − y − 2(x+3) + 3(y−1) + 8 = 0 ⇒ x + 2y − 1 = 0.</div>
+        <div class="s">Tangent to the second at (3,−1): 3x − y − 5(x+3) − 3(y−1) + 14 = 0 ⇒ −2x − 4y + 2 = 0 ⇒ x + 2y − 1 = 0 — same line.</div>
+        <div class="ans">Common tangent x + 2y − 1 = 0 ⇒ they touch at (3, −1)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-1 · L-3 (Solved)</span>
+        <div class="q">Find the values of α for which (α − 1, α + 1) lies in the larger segment of x² + y² − x − y − 6 = 0 cut by the chord x + y − 2 = 0.</div>
+        <div class="s">Point inside the circle: S(α−1, α+1) &lt; 0 ⇒ (α−1)² + (α+1)² − (α−1) − (α+1) − 6 &lt; 0 ⇒ 2α² − 8 &lt; 0 ⇒ −2 &lt; α &lt; 2.</div>
+        <div class="s">Larger segment = same side of the chord as the centre C(1/2, 1/2): L(C) = 1/2 + 1/2 − 2 &lt; 0, so need L(α−1, α+1) &lt; 0 ⇒ 2α − 2 &lt; 0 ⇒ α &lt; 1.</div>
+        <div class="ans">−1 &lt; α &lt; 1</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-2 · L-3 (Solved)</span>
+        <div class="q">Find the points on x² + y² − 2x + 4y − 20 = 0 farthest and nearest to (−5, 6).</div>
+        <div class="s">Centre C(1, −2), r = √(1 + 4 + 20) = 5; CP = √((1+5)² + (−2−6)²) = 10. Nearest A = C + (r/CP)(P − C) = (1,−2) + (5/10)(−6, 8) = (−2, 2).</div>
+        <div class="s">C is the midpoint of the nearest A and farthest B ⇒ B = 2C − A = (4, −6).</div>
+        <div class="ans">Nearest (−2, 2), farthest (4, −6)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-3 · L-3 (Solved)</span>
+        <div class="q">Range of m for which y = mx + 2 cuts x² + y² = 1 in two distinct or coincident points.</div>
+        <div class="s">Centre (0,0), r = 1. Distance to the line = |2|/√(1 + m²) ≤ 1 ⇒ 2 ≤ √(1 + m²) ⇒ 1 + m² ≥ 4 ⇒ m² ≥ 3.</div>
+        <div class="ans">m ∈ (−∞, −√3] ∪ [√3, ∞)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-4 · L-3 (Solved)</span>
+        <div class="q">Tangents to x² + y² − 6x + 4y = 12 parallel to 4x + 3y + 5 = 0.</div>
+        <div class="s">Centre (3, −2), r = 5, so (x−3)² + (y+2)² = 25. Slope = −4/3; tangent of slope m: y − b = m(x − a) ± r√(1+m²).</div>
+        <div class="s">y + 2 = −(4/3)(x − 3) ± 5√(1 + 16/9) ⇒ 4x + 3y + 19 = 0 and 4x + 3y − 31 = 0.</div>
+        <div class="ans">4x + 3y + 19 = 0  and  4x + 3y − 31 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-5 · L-3 (Solved)</span>
+        <div class="q">Prove that y = m(x − 1) + 3√(1 + m²) − 2 touches x² + y² − 2x + 4y − 4 = 0 for every real m.</div>
+        <div class="s">Circle is (x − 1)² + (y + 2)² = 3². Any tangent of slope m to X² + Y² = 3² is Y = mX ± 3√(1 + m²); shift X = x − 1, Y = y + 2.</div>
+        <div class="s">⇒ y + 2 = m(x − 1) + 3√(1 + m²), i.e. the given line — a tangent for all m.</div>
+        <div class="ans">Tangent for all m</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-6 · L-3 (Solved)</span>
+        <div class="q">Tangents from P to x² + y² = 16 make angles θ₁, θ₂ with the x-axis. Find the locus of P if tan θ₁ − tan θ₂ = c.</div>
+        <div class="s">Tangent y = mx + 4√(1+m²) through P(h,k): (k − mh)² = 16(1 + m²) ⇒ (h² − 16)m² − 2hk·m + (k² − 16) = 0, roots m₁ = tanθ₁, m₂ = tanθ₂.</div>
+        <div class="s">(m₁ − m₂)² = (m₁+m₂)² − 4m₁m₂ = [2hk/(h²−16)]² − 4(k²−16)/(h²−16) = c²; replace (h,k)→(x,y).</div>
+        <div class="ans">4x²y² − 4(y² − 16)(x² − 16) = c²(x² − 16)²</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-7 · L-3 (Solved)</span>
+        <div class="q">If a &gt; 2b &gt; 0, find the positive m for which y = mx − b√(1 + m²) is a common tangent to x² + y² = b² and (x − a)² + y² = b².</div>
+        <div class="s">It touches x² + y² = b² for all m. For the second (centre (a,0)): |ma − b√(1+m²)|/√(1+m²) = b ⇒ ma − b√(1+m²) = +b√(1+m²) (the −b root gives m = 0, rejected).</div>
+        <div class="s">ma = 2b√(1 + m²) ⇒ m²(a² − 4b²) = 4b² ⇒ m = 2b/√(a² − 4b²).</div>
+        <div class="ans">m = 2b / √(a² − 4b²)</div>
+      </div>
+    </section>
+
+    <!-- L4 -->
+    <section class="lec" id="l4">
+      <div class="lec-head"><span class="lec-tag">L-4</span><h2>Director Circle</h2></div>
+      <h3 class="sub">The locus of perpendicular tangents</h3>
+      <ul>
+        <li>The <span class="k">director circle</span> is the locus of the point from which the two tangents to a circle are <b>perpendicular</b>. If P(h,k) sees the circle under a right angle, then OP² = 2·(radius)².</li>
+      </ul>
+      <div class="formula"><span class="lbl">director circle</span>for x² + y² = a² : x² + y² = 2a²   ·   for (x−h)²+(y−k)²=a² : (x−h)² + (y−k)² = 2a²   ·   for x²+y²+2gx+2fy+c=0 : (x+g)²+(y+f)² = 2(g²+f²−c)</div>
+      <div class="call tip"><span class="h">💡 Why √2</span>Tangents from P touch at Q, R; OQPR is a square of side a (radius), so OP = a√2. The director circle is concentric with radius <b>√2 × r</b>.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example-1 · L-4 (Solved)</span>
+        <div class="q">Two tangents are drawn from a point on x² + y² = 50 to x² + y² = 25. Find the angle between them.</div>
+        <div class="s">x² + y² = 50 = 2·25 is exactly the director circle of x² + y² = 25.</div>
+        <div class="ans">90°</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-2 · L-4 (Solved)</span>
+        <div class="q">Find the range of a such that the angle θ between the pair of tangents from (a, 0) to x² + y² = 4 satisfies π/2 &lt; θ &lt; π.</div>
+        <div class="s">Centre (0,0), r = 2. θ = 90° on the director circle x² + y² = 8 ⇒ |a| = 2√2; θ increases past 90° as P moves inside the director circle but stays outside the circle (|a| &gt; 2).</div>
+        <div class="s">So 2 &lt; |a| &lt; 2√2.</div>
+        <div class="ans">a ∈ (−2√2, −2) ∪ (2, 2√2)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-3 · L-4 (Solved)</span>
+        <div class="q">Find the length of the chord of contact from a point on the director circle of x² + y² + 2ax − 2by + a² − b² = 0.</div>
+        <div class="s">Circle S₁: (x + a)² + (y − b)² = 2b²; its director circle S₂: (x + a)² + (y − b)² = 4b². From P on S₂ the tangents are ⊥, so PQCR is a square and the chord of contact QR = diagonal = radius of the director circle.</div>
+        <div class="ans">QR = CP = 2b</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-4 · L-4 (Solved)</span>
+        <div class="q">Find the locus of the centres of x² + y² − 2ax − 2by + 2 = 0 for which the tangents from the origin are orthogonal.</div>
+        <div class="s">Circle = (x − a)² + (y − b)² = a² + b² − 2; its director circle is (x − a)² + (y − b)² = 2(a² + b² − 2). Tangents from O orthogonal ⇒ O lies on the director circle.</div>
+        <div class="s">a² + b² = 2(a² + b² − 2) ⇒ a² + b² = 4; centre (a,b) ⇒ x² + y² = 4.</div>
+        <div class="ans">x² + y² = 4</div>
+      </div>
+    </section>
+
+    <!-- L5 -->
+    <section class="lec" id="l5">
+      <div class="lec-head"><span class="lec-tag">L-5</span><h2>Normal, Length of Tangent, Power of a Point &amp; Chord of Contact</h2></div>
+      <h3 class="sub">Normal to a circle</h3>
+      <ul>
+        <li>The normal at a point is ⊥ to the tangent there and <b>always passes through the centre</b>. So the normal is simply the line through the point and the centre.</li>
+      </ul>
+      <div class="formula"><span class="lbl">normal at (x₁,y₁) to x²+y²+2gx+2fy+c=0</span>(x − x₁)/(x₁ + g) = (y − y₁)/(y₁ + f)   ·   to x²+y²=a² at (a cosθ, a sinθ): y = x tanθ</div>
+      <h3 class="sub">Length of tangent &amp; power of a point</h3>
+      <div class="formula"><span class="lbl">from P(x₁,y₁), S written with unit x²,y² coefficients</span>length of tangent = √S₁   ·   power of P = S₁ = PA·PB (signed) along any secant   ·   P outside / on / inside ⇒ S₁ &gt; / = / &lt; 0</div>
+      <h3 class="sub">Chord of contact &amp; chord bisected at a point</h3>
+      <div class="formula"><span class="lbl">T = xx₁ + yy₁ + g(x+x₁) + f(y+y₁) + c</span>chord of contact of tangents from (x₁,y₁): <b>T = 0</b>   ·   chord bisected (midpoint) at (x₁,y₁): <b>T = S₁</b></div>
+      <div class="call tip"><span class="h">💡 For a point on the chord of contact picture</span>From external P with tangent length L and radius r: area of PACB = r·L, length of chord of contact AB = 2rL/√(r²+L²), and the angle between the tangents is 2·tan⁻¹(r/L). The chord bisected at (x₁,y₁) is the <b>shortest</b> chord through that point (farthest from the centre).</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5 (theory)</span>
+        <div class="q">Normal to x² + y² − 5x + 2y − 48 = 0 at (5, 6).</div>
+        <div class="s">(x − 5)/(5 − 5/2) = (y − 6)/(6 + 1) ⇒ (x − 5)/(5/2) = (y − 6)/7 ⇒ 7(x − 5) = (5/2)(y − 6).</div>
+        <div class="ans">14x − 5y − 40 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5 (theory)</span>
+        <div class="q">Length of the tangent from (3, −4) to 2x² + 2y² − 7x − 9y − 13 = 0.</div>
+        <div class="s">Make coefficients 1: S = x² + y² − (7/2)x − (9/2)y − 13/2. S₁ = 9 + 16 − (21/2) + 18 − 13/2 = 43 − 17 = 26.</div>
+        <div class="ans">√26</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-5 (theory)</span>
+        <div class="q">Power of (2, 4) w.r.t. x² + y² − 6x + 4y − 8 = 0, and the chord bisected at (−2, 4) of x² + y² − 6x + 10y − 9 = 0.</div>
+        <div class="s">Power = S₁(2,4) = 4 + 16 − 12 + 16 − 8 = 16. Bisected chord uses T = S₁: −2x + 4y − 3(x−2) + 5(y+4) − 9 = (4 + 16 + 12 + 40 − 9).</div>
+        <div class="s">⇒ −5x + 9y − 46 + ... ⇒ 5x − 9y + 46 = 0.</div>
+        <div class="ans">Power = 16; bisected chord 5x − 9y + 46 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-1 · L-5 (Solved)</span>
+        <div class="q">Normals to x² + y² − 8x − 2y + 12 = 0 at the points whose ordinate is −1.</div>
+        <div class="s">Put y = −1: x² − 8x + 15 = 0 ⇒ x = 3 or 5. Points P(5, −1), Q(3, −1); centre (4, 1).</div>
+        <div class="s">Normal = line through point and centre. At P: 2x + y − 9 = 0. At Q: 2x − y − 7 = 0.</div>
+        <div class="ans">2x + y − 9 = 0  and  2x − y − 7 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-2 · L-5 (Solved)</span>
+        <div class="q">If the chord of contact of tangents from a point on x² + y² = a² to x² + y² = b² touches x² + y² = c², prove a, b, c are in GP.</div>
+        <div class="s">Point (h,k) with h² + k² = a². Chord of contact to x² + y² = b²: hx + ky = b². It touches x² + y² = c² ⇒ b²/√(h²+k²) = c.</div>
+        <div class="s">b²/a = c ⇒ b² = ac.</div>
+        <div class="ans">b² = ac ⇒ a, b, c in GP</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-3 · L-5 (Solved)</span>
+        <div class="q">x − 2y + 1 = 0 meets x² + y² = 25 at P, Q. Find where the tangents at P and Q meet.</div>
+        <div class="s">Let the meeting point be R(h,k). Then PQ is the chord of contact from R: hx + ky = 25. This is the same line as x − 2y + 1 = 0.</div>
+        <div class="s">⇒ h/1 = k/(−2) = 25/1 ⇒ h = −25, k = 50.</div>
+        <div class="ans">(−25, 50)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-4 · L-5 (Solved)</span>
+        <div class="q">Tangents are drawn to x² + y² = 1 from any point on 2x + y − 4 = 0. Prove the chords of contact pass through a fixed point and find it.</div>
+        <div class="s">Variable point P(t, 4 − 2t). Chord of contact: tx + (4 − 2t)y = 1 ⇒ (4y − 1) + t(x − 2y) = 0.</div>
+        <div class="s">Independent of t ⇒ 4y − 1 = 0 and x − 2y = 0 ⇒ fixed point (1/2, 1/4).</div>
+        <div class="ans">(1/2, 1/4)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-5 · L-5 (Solved)</span>
+        <div class="q">Shortest chord of x² + y² − 2x − 4y − 4 = 0 through (2, 3).</div>
+        <div class="s">Shortest chord through a point = the chord bisected at that point. Using T = S₁ at (2,3): 2x + 3y − (x+2) − 2(y+3) − 4 = (4 + 9 − 4 − 12 − 4).</div>
+        <div class="s">⇒ x + y − 12 = −7 ⇒ x + y − 5 = 0.</div>
+        <div class="ans">x + y − 5 = 0</div>
+      </div>
+    </section>
+
+    <!-- L6 -->
+    <section class="lec" id="l6">
+      <div class="lec-head"><span class="lec-tag">L-6</span><h2>Pair of Tangents, Two Circles, Common Tangents &amp; Common Chord</h2></div>
+      <h3 class="sub">Pair of tangents from an external point</h3>
+      <div class="formula"><span class="lbl">combined equation of the two tangents from (x₁,y₁)</span><b>SS₁ = T²</b>   where  S = x²+y²+2gx+2fy+c,  S₁ = S(x₁,y₁),  T = xx₁+yy₁+g(x+x₁)+f(y+y₁)+c</div>
+      <h3 class="sub">Two circles — relative position</h3>
+      <div class="twrap"><table>
+        <tr><th>d = C₁C₂ (take r₁ ≥ r₂)</th><th>configuration</th><th>common tangents</th></tr>
+        <tr><td>d &gt; r₁ + r₂</td><td>apart (outside each other)</td><td>4 (2 direct, 2 transverse)</td></tr>
+        <tr><td>d = r₁ + r₂</td><td>touch externally</td><td>3</td></tr>
+        <tr><td>|r₁ − r₂| &lt; d &lt; r₁ + r₂</td><td>intersect at 2 points</td><td>2 (direct only)</td></tr>
+        <tr><td>d = |r₁ − r₂|</td><td>touch internally</td><td>1</td></tr>
+        <tr><td>d &lt; |r₁ − r₂|</td><td>one inside the other</td><td>0</td></tr>
+      </table></div>
+      <h3 class="sub">Common tangents, common chord &amp; its length</h3>
+      <div class="formula"><span class="lbl">external / internal division &amp; tangent lengths</span>direct tangents meet at D dividing C₁C₂ externally r₁:r₂; transverse meet at T dividing it internally r₁:r₂   ·   L_ext = √(d² − (r₁−r₂)²),  L_int = √(d² − (r₁+r₂)²)</div>
+      <div class="formula"><span class="lbl">common chord of S = 0 and S′ = 0</span>S − S′ = 0 ⇒ 2(g−g′)x + 2(f−f′)y + (c − c′) = 0   ·   its length = 2√(r₁² − p₁²), p₁ = ⊥ from C₁ to the chord</div>
+      <div class="call tip"><span class="h">💡 When two circles touch</span>If the common chord has length 0 the circles touch, and S − S′ = 0 is the <b>common tangent</b> at the point of contact. The point of contact divides C₁C₂ internally (external touch) or externally (internal touch) in the ratio r₁ : r₂.</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-6 (theory)</span>
+        <div class="q">Pair of tangents from (3, 2) to x² + y² + 4x + 6y + 8 = 0.</div>
+        <div class="s">S₁ = 9 + 4 + 12 + 12 + 8 = 45; T = 3x + 2y + 2(x+3) + 3(y+2) + 8 = 5x + 5y + 20. SS₁ = T²: 45·S = (5x+5y+20)².</div>
+        <div class="s">⇒ 2x² + 2y² − 5xy − 2x + 7y − 4 = 0 ⇒ (2x − y − 4)(x − 2y + 1) = 0.</div>
+        <div class="ans">2x − y − 4 = 0  and  x − 2y + 1 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-6 (theory)</span>
+        <div class="q">All common tangents and the tangent lengths for x² + y² − 2x − 6y + 9 = 0 and x² + y² + 6x − 2y + 1 = 0.</div>
+        <div class="s">C₁(1,3) r₁=1, C₂(−3,1) r₂=3, d = √(16+4) = 2√5 &gt; r₁+r₂ ⇒ 4 tangents. Direct tangents through D (divides C₁C₂ externally 1:3): y = 4 and y = (4/3)x.</div>
+        <div class="s">Transverse through T (internally 1:3): x = 0 and 3x + 4y − 10 = 0. L_ext = √(20 − 4) = 4, L_int = √(20 − 16) = 2.</div>
+        <div class="ans">Direct y = 4, y = 4x/3; transverse x = 0, 3x + 4y − 10 = 0; L_ext = 4, L_int = 2</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-1 · L-6 (Solved)</span>
+        <div class="q">If x² + y² + c² = 2ax and x² + y² + c² − 2by = 0 touch externally, prove 1/a² + 1/b² = 1/c².</div>
+        <div class="s">C₁(a,0) r₁ = √(a²−c²), C₂(0,b) r₂ = √(b²−c²). External touch: √(a²+b²) = √(a²−c²) + √(b²−c²).</div>
+        <div class="s">Square twice: c² = √((a²−c²)(b²−c²)) ⇒ c⁴ = a²b² − c²(a²+b²) + c⁴ ⇒ a²b² = c²(a²+b²).</div>
+        <div class="ans">1/a² + 1/b² = 1/c²</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-2 · L-6 (Solved)</span>
+        <div class="q">Find the circle with centre (4, 3) touching x² + y² = 1.</div>
+        <div class="s">Given circle C₁(0,0), r₁ = 1; C₁C₂ = √(16+9) = 5. External touch: r₂ = 5 − 1 = 4; internal touch: r₂ = 5 + 1 = 6.</div>
+        <div class="ans">(x − 4)² + (y − 3)² = 16  or  (x − 4)² + (y − 3)² = 36</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-3 · L-6 (Solved)</span>
+        <div class="q">Locus of the centre of a variable circle that touches x² + y² = 4 internally and passes through (1, 0).</div>
+        <div class="s">C₁(0,0) r₁ = 2; centre C₂(h,k), r₂ = √((h−1)²+k²). Internal touch: C₁C₂ = r₁ − r₂ ⇒ √(h²+k²) = 2 − √((h−1)²+k²).</div>
+        <div class="s">Square twice: 3 + 2h = 4√(h²+k²) ⇒ 9 + 4h² + 12h = 16(h²+k²).</div>
+        <div class="ans">12x² + 16y² − 12x = 9</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-4 · L-6 (Solved)</span>
+        <div class="q">For which r do (x − 1)² + (y − 3)² = r² and x² + y² − 8x + 2y + 8 = 0 intersect in two distinct points?</div>
+        <div class="s">C₁(1,3) r₁ = r; C₂(4,−1) r₂ = √(16+1−8) = 3; d = C₁C₂ = √(9+16) = 5. Intersect ⇔ |r − 3| &lt; 5 &lt; r + 3.</div>
+        <div class="s">5 &lt; r + 3 ⇒ r &gt; 2; |r − 3| &lt; 5 ⇒ r &lt; 8.</div>
+        <div class="ans">2 &lt; r &lt; 8</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-5 · L-6 (Solved)</span>
+        <div class="q">Tangents are drawn to x² + y² = 12 at the points where it meets x² + y² − 5x + 3y − 2 = 0. Find where the tangents meet and the length of the common chord.</div>
+        <div class="s">Common chord S₁ − S₂ = 0: 5x − 3y − 10 = 0. This is the chord of contact from the meeting point P(h,k): hx + ky = 12. Compare h/5 = k/(−3) = 12/10 ⇒ P(6, −18/5).</div>
+        <div class="s">For C₁(0,0) r = √12: ⊥ from O to 5x − 3y − 10 = 0 is 10/√34, so chord = 2√(12 − 100/34) = 2√(154/17).</div>
+        <div class="ans">P(6, −18/5); common chord = 2√(154/17)</div>
+      </div>
+    </section>
+
+    <!-- L7 -->
+    <section class="lec" id="l7">
+      <div class="lec-head"><span class="lec-tag">L-7</span><h2>Family of Circles, Angle of Intersection &amp; Orthogonality</h2></div>
+      <h3 class="sub">Family of circles</h3>
+      <div class="formula"><span class="lbl">through the intersection of ...</span>circle S = 0 and line L = 0 : <b>S + λL = 0</b>   ·   two circles S = 0, S′ = 0 : <b>S + λS′ = 0</b> (λ ≠ −1)   ·   two points as diameter: (x−x₁)(x−x₂)+(y−y₁)(y−y₂) + λ·(line through them) = 0</div>
+      <ul>
+        <li>Family circumscribing a triangle (sides L₁,L₂,L₃): L₁L₂ + λL₂L₃ + μL₃L₁ = 0 with coeff x² = coeff y², coeff xy = 0.</li>
+        <li>To pick the required member, use an extra condition (a point, smallest radius, centre on a line, tangency).</li>
+      </ul>
+      <h3 class="sub">Angle of intersection &amp; orthogonality</h3>
+      <div class="formula"><span class="lbl">angle θ between two circles (r₁, r₂ radii, d = distance of centres)</span>cos θ = |(r₁² + r₂² − d²)/(2 r₁ r₂)|   ·   <b>orthogonal (θ = 90°) ⇔ 2g₁g₂ + 2f₁f₂ = c₁ + c₂</b></div>
+      <div class="call tip"><span class="h">💡 When circles cut at 90°</span>Orthogonality says each tangent at the intersection passes through the other circle's centre, so d² = r₁² + r₂². A circle cutting a given circle orthogonally and passing through a point gives two linear conditions on (g, f, c).</div>
+      <div class="exhead det">Worked examples from the module</div>
+      <div class="example det">
+        <span class="tag">Book Example · L-7 (theory)</span>
+        <div class="q">Circle through (1, 1) and the intersection of x² + y² + 13x − 3y = 0 and 2x² + 2y² + 4x − 7y − 25 = 0.</div>
+        <div class="s">Family: (x²+y²+13x−3y) + λ(2x²+2y²+4x−7y−25) = 0. Through (1,1): (1+1+13−3) + λ(2+2+4−7−25) = 0 ⇒ 12 + λ(−24) = 0 ⇒ λ = 1/2.</div>
+        <div class="ans">4x² + 4y² + 30x − 13y − 25 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example · L-7 (theory)</span>
+        <div class="q">Circle through the origin with centre on y = x, cutting x² + y² − 4x − 6y + 10 = 0 orthogonally.</div>
+        <div class="s">S: x²+y²+2gx+2fy+c=0, through O ⇒ c = 0; centre (−g,−f) on y = x ⇒ g = f. Orthogonal: 2g(−2) + 2f(−3) = 0 + 10 ⇒ −4g − 6f = 10 ⇒ with g = f, −10g = 10 ⇒ g = f = −1.</div>
+        <div class="ans">x² + y² − x − y = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-1 · L-7 (Solved)</span>
+        <div class="q">If 2x² + 2y² − 3x + 6y + k = 0 and x² + y² − 4x + 10y + 16 = 0 cut orthogonally, find k.</div>
+        <div class="s">First with unit coefficients: g₁ = −3/4, f₁ = 3/2, c₁ = k/2; second: g₂ = −2, f₂ = 5, c₂ = 16. Orthogonal: 2g₁g₂ + 2f₁f₂ = c₁ + c₂.</div>
+        <div class="s">2(−3/4)(−2) + 2(3/2)(5) = k/2 + 16 ⇒ 3 + 15 = k/2 + 16 ⇒ k = 4.</div>
+        <div class="ans">k = 4</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-2 · L-7 (Solved)</span>
+        <div class="q">Find the smallest circle cutting x² + y² = 1 and x² + y² + 8x + 8y − 33 = 0 orthogonally.</div>
+        <div class="s">S: x²+y²+2gx+2fy+c=0. Orthogonal to first: 0 = −1 + c ⇒ c = 1. Orthogonal to second: 8g + 8f = −33 + 1 = −32 ⇒ g + f = −4 ⇒ f = −4 − g.</div>
+        <div class="s">r² = g² + f² − 1 = 2g² + 8g + 15 = 2(g + 2)² + 7, minimised at g = −2 ⇒ f = −2.</div>
+        <div class="ans">x² + y² − 4x − 4y + 1 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-3 · L-7 (Solved)</span>
+        <div class="q">Prove x² + y² − 2x − 2ay − 8 = 0 (a ∈ R) is a family passing through two fixed points on the x-axis.</div>
+        <div class="s">Write as (x² + y² − 2x − 8) − 2a·(y) = 0, i.e. S + λL form with circle x²+y²−2x−8=0 and line y = 0.</div>
+        <div class="s">On y = 0: x² − 2x − 8 = 0 ⇒ (x − 4)(x + 2) = 0 ⇒ fixed points (4, 0), (−2, 0).</div>
+        <div class="ans">Through (4, 0) and (−2, 0)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-4 · L-7 (Solved)</span>
+        <div class="q">Smallest circle through the intersection of x + y = 1 and x² + y² = 9.</div>
+        <div class="s">Family x² + y² − 9 + λ(x + y − 1) = 0; centre (−λ/2, −λ/2). Smallest ⇒ A, B (ends of the common chord) are the diameter, so the centre lies on x + y = 1: −λ/2 − λ/2 − 1 = 0 ⇒ λ = −1.</div>
+        <div class="s">⇒ x² + y² − 9 − (x + y − 1) = 0.</div>
+        <div class="ans">x² + y² − x − y − 8 = 0</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Book Example-5 · L-7 (Solved)</span>
+        <div class="q">Circle through (1, 1) touching x² + y² + 4x − 6y − 3 = 0 at (2, 3).</div>
+        <div class="s">Tangent to the given circle at (2,3): 2x + 3y + 2(x+2) − 3(y+3) − 3 = 0 ⇒ x − 2 = 0. Family touching this line at (2,3): [(x−2)² + (y−3)²] + λ(x − 2) = 0.</div>
+        <div class="s">Through (1,1): 1 + 4 + λ(−1) = 0 ⇒ λ = 5 ⇒ (x−2)² + (y−3)² + 5(x−2) = 0.</div>
+        <div class="ans">x² + y² + x − 6y + 3 = 0</div>
+      </div>
+    </section>
+
+    <!-- STRONG BOX -->
+    <section class="lec" id="strongbox">
+      <div class="lec-head"><span class="lec-tag">★ STRONG BOX</span><h2>Previous Year Questions — re-derived</h2></div>
+      <div class="call star"><span class="h">★ Why this box matters</span>These are the actual JEE questions ICAD collected for the Circle chapter (JEE Main / Advanced, 2018–2026). Every answer below is worked independently and lands on exactly one of the printed options; the option letter is given.</div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (21 Jan Shift-1)</span>
+        <div class="q">Vectors c, d satisfy |c + d| = √29 and c×(2î+3ĵ+4k̂) = (2î+3ĵ+4k̂)×d. If λ₁ &gt; λ₂ are the possible values of (c+d)·(−7î+2ĵ+3k̂), find K for which K²x² + (K²−5K+λ₁)xy + (3K+λ₂/2)y² − 8x + 12y + λ₂ = 0 is a circle.</div>
+        <div class="s">The cross-product condition gives (c+d)×v = 0, so c+d = ±v with v = (2,3,4); |c+d| = √29 fixes the sign, and (c+d)·(−7,2,3) = ±4 ⇒ λ₁ = 4, λ₂ = −4.</div>
+        <div class="s">Circle ⇒ coeff x² = coeff y² and coeff xy = 0: K² = 3K − 2 ⇒ K = 1 or 2; K² − 5K + 4 = 0 ⇒ K = 1 or 4. Common value K = 1.</div>
+        <div class="ans">K = 1 → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (21 Jan Shift-1)</span>
+        <div class="q">PQ and MN touch x² + y² − 4x − 6y − 3 = 0 at A and B; O is the centre and ∠AOB = π/3. Find the locus of the intersection of PQ and MN.</div>
+        <div class="s">Centre O(2,3), r = √(4+9+3) = 4. For the external point T, ∠AOB = 60° ⇒ ∠AOT = 30° and OT = OA/cos30° = 4/(√3/2) = 8/√3.</div>
+        <div class="s">Locus: (x−2)² + (y−3)² = 64/3 ⇒ 3(x²+y²) − 12x − 18y − 25 = 0.</div>
+        <div class="ans">3(x² + y²) − 12x − 18y − 25 = 0 → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (28 Jan Shift-1)</span>
+        <div class="q">y = x is a chord of C₁ (diameter 10) in the half-plane x ≥ 0 through the origin. C₂ is drawn on this chord as diameter. The chord of C₂ through (2,3) farthest from the centre of C₂ is x + ay + b = 0. Find a − b.</div>
+        <div class="s">C₁ lies in x ≥ 0 and passes through O(0,0) on the y-axis, so O is its left-most point ⇒ centre (5,0). Line y = x meets (x−5)²+y²=25 again at (5,5); chord O(0,0)–P(5,5) is the diameter of C₂ ⇒ C₂: x² + y² − 5x − 5y = 0.</div>
+        <div class="s">Farthest chord through (2,3) is the chord bisected there, T = S₁: −0.5x + 0.5y − 12.5 = −12 ⇒ x − y + 1 = 0 ⇒ a = −1, b = 1.</div>
+        <div class="ans">a − b = −2 → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (24 Jan Shift-1)</span>
+        <div class="q">S = { z ∈ ℂ : |z − 6i|/|z − 2i| = 1 and |(z − 8 + 2i)/(z + 2i)| = 3/5 }. Find Σ|z|².</div>
+        <div class="s">First condition: equidistant from 6i and 2i ⇒ Im z = 4 (y = 4). Second: 25[(x−8)²+(y+2)²] = 9[x²+(y+2)²]; put y = 4: 16x² − 400x + 2176 = 0 ⇒ x² − 25x + 136 = 0 ⇒ x = 8 or 17.</div>
+        <div class="s">|z|² = x² + 16 ⇒ (64+16) + (289+16) = 80 + 305 = 385.</div>
+        <div class="ans">385 → (a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (28 Jan Shift-2)</span>
+        <div class="q">x² + y² = 4 meets the x-axis at A(2,0), B(−2,0). P(2cosα, 2sinα), 0 &lt; α &lt; π/2 and Q(2cosβ, 2sinβ) with α − β = π/2. Find the locus of the intersection of AQ and BP.</div>
+        <div class="s">Line BP (slope tan(α/2)): y = tan(α/2)(x+2); line AQ (slope −cot(β/2)): y = −cot(β/2)(x−2). Eliminate using β = α − π/2.</div>
+        <div class="s">This is the AP·BQ configuration with a = 2, 2γ = π/2 (tan γ = 1): x² + y² − 2·2·y·1 = 4 (verified at α=π/3, intersection (√3+1, √3+1)).</div>
+        <div class="ans">x² + y² − 4y − 4 = 0 → (b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (24 Jan Shift-1)</span>
+        <div class="q">A circle of radius 4 passes through O(0,0), A(−√3 a, 0) and B(0, −√2 b). Find the radius of the locus of the centroid of △OAB.</div>
+        <div class="s">Circle through O ⇒ c = 0; g = √3 a/2, f = √2 b/2, so g²/... r² = 3a²/4 + b²/2 = 16. Centroid (h,k): h = −√3 a/3, k = −√2 b/3 ⇒ a² = 3h², b² = 9k²/2.</div>
+        <div class="s">Substitute: 9h²/4 + 9k²/4 = 16 ⇒ h² + k² = 64/9 ⇒ radius = 8/3.</div>
+        <div class="ans">8/3 → (a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (23 Jan Shift-2)</span>
+        <div class="q">The intersection points of x² + 2y² − 6x − 12y + 23 = 0 and 4x² + 2y² − 20x − 12y + 35 = 0 lie on a circle of radius r, centre (a,b). Find ab + 18r².</div>
+        <div class="s">Combine S₁ + λS₂ with coeff x² = coeff y²: 1 + 4λ = 2 + 2λ ⇒ λ = 1/2, giving 3x² + 3y² − 16x − 18y + 40.5 = 0 ⇒ x² + y² − (16/3)x − 6y + 13.5 = 0.</div>
+        <div class="s">Centre (8/3, 3), r² = 64/9 + 9 − 13.5 = 23.5/9. ab = 8, 18r² = 47.</div>
+        <div class="ans">ab + 18r² = 55 → (b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (21 Jan Shift-2)</span>
+        <div class="q">P is on x² + y² = 4, Q is on 5x + y + 2 = 0 and x − y + 1 = 0 is the perpendicular bisector of PQ. Find 13 × (sum of abscissae of all such P).</div>
+        <div class="s">P is the reflection of Q in x − y + 1 = 0; reflecting the line 5x + y + 2 = 0 gives the locus of P: X + 5Y − 2 = 0. Intersect with X² + Y² = 4: 26Y² − 20Y = 0 ⇒ Y = 0 or 10/13.</div>
+        <div class="s">Abscissae X = 2 and −24/13; sum = 2/13; 13 × (2/13) = 2.</div>
+        <div class="ans">2</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2026 (22 Jan Shift-1)</span>
+        <div class="q">The set of r for which (x+1)² + (y+4)² = r² and x² + y² − 4x − 2y − 4 = 0 intersect at two distinct points is (α, β). Find αβ.</div>
+        <div class="s">Second circle: centre (2,1), r₂ = 3; first: centre (−1,−4), radius r; d = √(9+25) = √34. Two intersections ⇔ |r − 3| &lt; √34 &lt; r + 3 ⇒ √34 − 3 &lt; r &lt; √34 + 3.</div>
+        <div class="s">αβ = (√34 − 3)(√34 + 3) = 34 − 9 = 25.</div>
+        <div class="ans">25 → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (24 Jan Shift-1)</span>
+        <div class="q">C is the image of x² + y² − 2x + 4y − 4 = 0 in 2x − 3y + 5 = 0. A is on C with OA parallel to the x-axis (A right of centre). B(α,β), β &lt; 4, on C with arc AB = (1/6) of the perimeter. Find β − √3 α.</div>
+        <div class="s">Reflecting the centre (1,−2) in 2x − 3y + 5 = 0 gives O(−3, 4), r = 3. A = O + (3,0) = (0,4). Arc = (1/6)·perimeter ⇒ central angle 60°.</div>
+        <div class="s">B = (−3 + 3cos60°, 4 − 3sin60°) = (−3/2, 4 − 3√3/2) (take β &lt; 4). β − √3α = 4 − 3√3/2 + 3√3/2 = 4.</div>
+        <div class="ans">4 → (b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (7 Apr Shift-1)</span>
+        <div class="q">C₁ is in the third quadrant, radius 3, touching both axes. C₂ has centre (1,3) and touches C₁ externally at (α,β). If (β − α)² = m/n with gcd(m,n) = 1, find m + n.</div>
+        <div class="s">C₁ centre (−3,−3), r₁ = 3; d = √(16+36) = 2√13, r₂ = 2√13 − 3. Contact point divides C₁C₂ internally r₁:r₂ ⇒ α = 6/√13 − 3, β = 9/√13 − 3.</div>
+        <div class="s">β − α = 3/√13 ⇒ (β − α)² = 9/13 ⇒ m = 9, n = 13.</div>
+        <div class="ans">m + n = 22 → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (3 Apr Shift-2)</span>
+        <div class="q">(4,6), (−1,5), (0,0), (k,3k) are concyclic on a circle of radius r. Find 10k + r².</div>
+        <div class="s">Through O ⇒ c = 0. Through (4,6): 2g + 3f = −13; through (−1,5): g = 5f + 13 ⇒ f = −3, g = −2. Circle x² + y² − 4x − 6y = 0, r² = 13.</div>
+        <div class="s">Through (k,3k): 10k² − 22k = 0 ⇒ k = 11/5. 10k + r² = 22 + 13 = 35.</div>
+        <div class="ans">35 → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (2 Apr Shift-1)</span>
+        <div class="q">Find the absolute difference between the squares of the radii of the two circles through (−9, 4) and touching the lines x + y = 3 and x − y = 3.</div>
+        <div class="s">The lines meet at (3,0) and are perpendicular; a circle touching both has its centre on a bisector. Centre on y = 0: |h − 3|/√2 = r and (h+9)² + 16 = r² ⇒ h² + 42h + 185 = 0 ⇒ h = −5 or −37.</div>
+        <div class="s">r² = (h − 3)²/2 ⇒ 32 and 800 (the bisector x = 3 gives no real circle). |800 − 32| = 768.</div>
+        <div class="ans">768</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (23 Jan Shift-1)</span>
+        <div class="q">Arc AC subtends a right angle at centre O. B on arc AC divides it so that arc AB : arc BC = 1 : 5, and OC = α·OA + β·OB. Find α + √2(√3 − 1)β.</div>
+        <div class="s">arc AC = 90° split 1:5 ⇒ arc AB = 15°. Take OA = (1,0), OC = (0,1), B = (cos15°, sin15°). (0,1) = α(1,0) + β(cos15°, sin15°) ⇒ β = 1/sin15° = √6 + √2, α = −cot15° = −(2 + √3).</div>
+        <div class="s">√2(√3−1)(√6+√2) = (√3−1)(2√3+2) = 2(3−1) = 4, so α + 4 = −(2+√3) + 4 = 2 − √3.</div>
+        <div class="ans">2 − √3 → (c)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2025 (28 Jan Shift-1)</span>
+        <div class="q">A circle touches the x-axis at (a,0), a &gt; 0, cuts an intercept b on the y-axis, equation x² + y² − αx + βy + γ = 0, and lies below the x-axis. Find (2a, b²).</div>
+        <div class="s">Centre (α/2, −β/2); point of contact on x-axis at x = α/2 = a ⇒ 2a = α. Touches x-axis ⇒ g² = c ⇒ α²/4 = γ.</div>
+        <div class="s">y-intercept length b = 2√(β²/4 − γ) ⇒ b² = β² − 4γ.</div>
+        <div class="ans">(2a, b²) = (α, β² − 4γ) → (a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (9 Apr Shift-1)</span>
+        <div class="q">A circle through (2,0) has centre (h,k), where (x_c, y_c) is the intersection of 3x + 5y − 1 = 0 and (2+c)x + 5c²y = 1, and h = lim_{c→1} x_c, k = lim_{c→1} y_c. Find the circle.</div>
+        <div class="s">Subtracting the lines and dividing by (c−1): x + 5(c+1)y = 0. Solving with 3x + 5y = 1 and letting c → 1 gives centre (2/5, −1/25).</div>
+        <div class="s">Through (2,0): r² = (8/5)² + (1/25)² = 1601/625, giving 25x² + 25y² − 20x + 2y − 60 = 0.</div>
+        <div class="ans">25x² + 25y² − 20x + 2y − 60 = 0 → (b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Main 2024 (8 Apr Shift-1)</span>
+        <div class="q">C₁:(x−α)²+(y−β)²=r₁² and C₂:(x−8)²+(y−15/2)²=r₂² touch externally at (6,6), which divides C₁C₂ internally 2:1. Find (α+β) + 4(r₁²+r₂²).</div>
+        <div class="s">(6,6) = (2·C₂ + 1·C₁)/3 ⇒ α = 2, β = 3. r₁ = dist C₁(2,3)–(6,6) = 5; r₂ = dist C₂(8,15/2)–(6,6) = 5/2.</div>
+        <div class="s">α + β = 5; 4(25 + 25/4) = 100 + 25 = 125 ⇒ total 130.</div>
+        <div class="ans">130 → (b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2024 (Paper-1)</span>
+        <div class="q">y = 2x touches a circle with centre (0,α), α &gt; 0, radius r at A₁; A₁B₁ is a diameter; α + r = 5 + √5. Match P:α, Q:r, R:A₁, S:B₁ to List-II {(1)(−2,4), (2)√5, (3)(−2,6), (4)5, (5)(2,4)}.</div>
+        <div class="s">Distance from (0,α) to 2x − y = 0 is α/√5 = r, so α(1 + 1/√5) = 5 + √5 ⇒ α = 5, r = √5. Foot of ⊥ from (0,5): A₁ = (2,4); B₁ = 2·centre − A₁ = (−2,6).</div>
+        <div class="s">P→4, Q→2, R→5, S→3.</div>
+        <div class="ans">P→(4), Q→(2), R→(5), S→(3) → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2023 (Paper-2)</span>
+        <div class="q">C₁ radius 1 at origin, C₂ radius r at A(4,1), 1 &lt; r &lt; 3. The two direct common tangents touch C₁,C₂ at P,Q and S,T. Midpoints of PQ and ST are joined; the line meets the x-axis at B with AB = √5. Find r².</div>
+        <div class="s">The midpoint of each common-tangent segment has equal power to both circles, so both midpoints lie on the radical axis S₁ − S₂ = 0: 8x + 2y + (r² − 18) = 0. It meets y = 0 at B = ((18 − r²)/8, 0).</div>
+        <div class="s">AB² = (4 − (18−r²)/8)² + 1 = 5 ⇒ (14 + r²)/8 = 2 ⇒ r² = 2.</div>
+        <div class="ans">r² = 2</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2020 (Paper-2)</span>
+        <div class="q">O is the centre of x² + y² = r², r &gt; √5/2. PQ is the chord 2x + 4y = 5. If the circumcentre of △OPQ lies on x + 2y = 4, find r.</div>
+        <div class="s">The circumcircle of OPQ passes through O ⇒ c = 0; its common chord with x² + y² = r² is PQ, so 2gx + 2fy + r² ∝ 2x + 4y − 5 ⇒ circumcentre (r²/5, 2r²/5).</div>
+        <div class="s">On x + 2y = 4: r²/5 + 4r²/5 = 4 ⇒ r² = 4.</div>
+        <div class="ans">r = 2</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2019 (Paper-1)</span>
+        <div class="q">y = mx + 1 meets (x−3)²+(y+2)²=25 at P,Q; the midpoint of PQ has x-coordinate −3/5. Which interval contains m?</div>
+        <div class="s">Centre C(3,−2); for the midpoint M, CM ⊥ chord. With M_x = −3/5 and M on both the chord and the ⊥ from C: −2 + 18/(5m) = −3m/5 + 1 ⇒ 3m² − 15m + 18 = 0 ⇒ m = 2 or 3.</div>
+        <div class="s">Both roots lie in 2 ≤ m &lt; 4.</div>
+        <div class="ans">2 ≤ m &lt; 4 → (b)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2018 (Paper-2)</span>
+        <div class="q">T through P(−2,7), Q(2,−5). F₁ = pairs of circles (S₁,S₂) with T tangent to S₁ at P, to S₂ at Q, touching each other at M. E₁ = locus of M. F₂ = segments of E₁ through R(1,1); E₂ = their midpoints. Which statements are TRUE?</div>
+        <div class="s">E₁ is the circle on PQ as diameter (minus P,Q): centre (0,1), radius 2√10, i.e. x² + (y−1)² = 40. E₂ is the circle on the segment [centre of E₁, R] as diameter: (x−1/2)² + (y−1)² = 1/4.</div>
+        <div class="s">(0,3/2): 0 + 1/4 ≠ 40 ⇒ not on E₁ ⇒ (c) TRUE. (−2,7) = P is excluded ⇒ (b) false. (4/5,7/5) satisfies E₂ ⇒ in E₂, so (d) false; (1/2,1) is the centre of E₂, not on it.</div>
+        <div class="ans">(C) is true: (0, 3/2) ∉ E₁</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2018 (Paper-2)</span>
+        <div class="q">S: x² + y² = 4. E₁E₂ (∥ x-axis), F₁F₂ (∥ y-axis), G₁G₂ (slope −1) are chords through P₀(1,1); E₃,F₃,G₃ are the intersections of the tangents at the ends. On which curve do E₃, F₃, G₃ lie?</div>
+        <div class="s">Pole of a chord Lx + My = N of x² + y² = 4 is (4L/N, 4M/N). Chord y = 1 → E₃(0,4); chord x = 1 → F₃(4,0); chord x + y = 2 → G₃(2,2).</div>
+        <div class="s">All three satisfy x + y = 4.</div>
+        <div class="ans">x + y = 4 → (a)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2018 (Paper-2)</span>
+        <div class="q">P on x² + y² = 4 with both coordinates positive; the tangent at P meets the axes at M, N. On which curve does the midpoint of MN lie?</div>
+        <div class="s">P = (2cosθ, 2sinθ), tangent x cosθ + y sinθ = 2 ⇒ M(2/cosθ, 0), N(0, 2/sinθ); midpoint (1/cosθ, 1/sinθ).</div>
+        <div class="s">cosθ = 1/x, sinθ = 1/y ⇒ 1/x² + 1/y² = 1 ⇒ x² + y² = x²y².</div>
+        <div class="ans">x² + y² = x²y² → (d)</div>
+      </div>
+      <div class="example det">
+        <span class="tag">Strong Box · PYQ · JEE Advanced 2022 (Paper-2)</span>
+        <div class="q">G is a circle of radius R; G₁,…,Gₙ have equal radius r, each touching G externally and each touching its neighbour (Gₙ touches G₁). Which statements are TRUE?</div>
+        <div class="s">The n centres lie on a circle of radius R + r, equally spaced, with consecutive distance 2r ⇒ (R + r)sin(π/n) = r, i.e. sin(π/n) = r/(R + r).</div>
+        <div class="s">n = 8: r = 0.620R ⇒ (√2−1)r = 0.26R &lt; R (TRUE). n = 12: r = 0.349R ⇒ √2(√3+1)r = 1.35R &gt; R (TRUE). n = 5: r = 1.43R &gt; R; n = 4: (√2−1)r = R (not &lt; R).</div>
+        <div class="ans">(B) and (C) are true</div>
+      </div>
+    </section>
+
+    <div class="foot">ICAD · M-15 Circle · Revision Notes (L-1 to L-7 + Strong Box) · Quick + Detailed views · worked examples from the module's own Solved Examples and the Previous Year Questions set (book pp. 120–197). ICAD answer keys are unreliable, so every objective answer here was re-derived independently.</div>
+  </div>
+</div>
+
+<script>
+function setMode(m){
+  document.body.classList.toggle('detailed', m==='detailed');
+  document.querySelectorAll('.modebtn[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+  var hint=document.getElementById('modehint');
+  hint.innerHTML = (m==='detailed')
+    ? 'Detailed mode: derivations, extra facts &amp; <b>book worked examples</b> shown. Switch to <b>Quick</b> for a fast last-minute skim.'
+    : 'Quick mode: high-yield formulas, traps &amp; must-remember facts. Switch to <b>Detailed</b> for derivations &amp; worked examples.';
+  try{ localStorage.setItem('c1_notes_mode', m); }catch(e){}
+}
+(function(){
+  var m='detailed';
+  try{ var s = localStorage.getItem('c1_notes_mode'); if(s) m = s; }catch(e){}
+  setMode(m);
+})();
+</script>
+</body>
+</html>

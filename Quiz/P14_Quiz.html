@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P-14 Elasticity — JEE Mastery Quiz</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --card2:#1e2739; --ink:#e8edf7; --muted:#9aa7bd;
+    --line:#2a3550; --brand:#5b8cff; --brand2:#7aa2ff; --accent:#25b06b;
+    --formula-bg:#12233a; --formula-line:#3a6ea5;
+    --bad:#e5484d; --bad-bg:#2a1416; --good:#25b06b; --good-bg:#10281b;
+    --warn:#e8a33d; --warn-bg:#2c2210; --chip:#243049; --sel:#1d2f55;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#eef1f7; --card:#ffffff; --card2:#f5f7fb; --ink:#141a27; --muted:#5c6880;
+      --line:#dde3ee; --brand:#2f6bff; --brand2:#2f6bff; --accent:#128a4f;
+      --formula-bg:#eaf1fb; --formula-line:#2f6bff;
+      --bad:#c8383c; --bad-bg:#fdeaeb; --good:#128a4f; --good-bg:#e6f6ec;
+      --warn:#b9791a; --warn-bg:#fdf4e3; --chip:#eef2fa; --sel:#e2ecff; }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 18px 90px}
+  header.hero{background:linear-gradient(135deg,#1a2a52,#12706a);border-radius:16px;padding:24px 26px;color:#eafff9}
+  header.hero h1{margin:.1rem 0;font-size:1.65rem}
+  header.hero p{margin:4px 0;opacity:.92;font-size:.9rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;padding:11px 2px;margin:14px 0 8px;flex-wrap:wrap}
+  .pill{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 13px;font-size:.8rem;font-weight:700;color:var(--muted)}
+  .pill b{color:var(--ink)}
+  .prog{flex:1 1 160px;height:8px;background:var(--chip);border-radius:999px;overflow:hidden;min-width:120px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+
+  .btn{background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:999px;
+    padding:9px 20px;font-size:.9rem;font-weight:700;cursor:pointer}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn.go{background:var(--accent);border-color:var(--accent)}
+  .btn.sm{padding:5px 14px;font-size:.8rem}
+  .btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+
+  /* lecture picker */
+  .lecpick{display:block;border:1px solid var(--line);background:var(--card2);border-radius:11px;
+    padding:11px 14px;margin:8px 0;cursor:pointer;display:flex;gap:11px;align-items:flex-start}
+  .lecpick:hover{border-color:var(--brand)}
+  .lecpick.on{background:var(--sel);border-color:var(--brand)}
+  .lecpick input{margin-top:6px;accent-color:var(--brand);flex:none;width:16px;height:16px}
+  .lecpick .nm{font-weight:700;font-size:.95rem}
+  .lecpick .ds{font-size:.82rem;color:var(--muted)}
+  .lecpick .ct{margin-left:auto;flex:none;font-size:.78rem;font-weight:800;color:var(--brand2);
+    background:var(--chip);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;scroll-margin-top:70px}
+  .q.unans{border-color:var(--warn)}
+  /* exam lock */
+  .lock{position:fixed;inset:0;z-index:9999;background:rgba(8,4,6,.975);display:flex;align-items:center;justify-content:center;padding:24px}
+  .lock.hide{display:none}
+  .lockbox{max-width:580px;text-align:center;background:var(--bad-bg);border:2px solid var(--bad);border-radius:14px;padding:30px 26px}
+  .lockicon{font-size:2.8rem;line-height:1}
+  .lockbox h2{margin:10px 0 10px;color:var(--bad);font-size:1.35rem}
+  .lockbox p{margin:0 0 12px;color:var(--ink);font-size:1rem;line-height:1.55}
+  .lockbox .locksub{color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .qhead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+  .qnum{font-weight:800;color:#fff;background:var(--brand);border-radius:7px;padding:2px 9px;font-size:.76rem}
+  .qlec{font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .qtopic{font-size:.76rem;color:var(--muted)}
+  .qtext{font-weight:600;margin:2px 0 12px;font-size:1rem}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);
+    border-radius:10px;padding:9px 13px;margin:7px 0;cursor:pointer;font-size:.93rem}
+  .opt:hover{border-color:var(--brand)}
+  .opt.picked{background:var(--sel);border-color:var(--brand)}
+  .opt input{margin-top:5px;accent-color:var(--brand);flex:none}
+  .opt .lt{font-weight:800;color:var(--muted);flex:none;width:1.1em}
+  .opt.picked .lt{color:var(--brand2)}
+  .sechead{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--brand2);border-bottom:1px solid var(--line);padding:14px 0 6px;margin-top:20px}
+
+  .banner{border-radius:14px;padding:18px 20px;margin:16px 0;border:1px solid var(--line);background:var(--card)}
+  .banner h2{margin:0 0 6px;font-size:1.2rem}
+  .banner.ok{background:var(--good-bg);border-color:var(--good)}
+  .banner.mix{background:var(--warn-bg);border-color:var(--warn)}
+  .banner .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .score{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+
+  .rv{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .rv.left{border-left-color:var(--warn)}
+  .tagbad{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--bad);border-radius:6px;padding:2px 8px}
+  .tagleft{background:var(--warn)}
+  .orow{border:1px solid var(--line);border-radius:10px;padding:9px 13px;margin:7px 0;font-size:.92rem;background:var(--card2)}
+  .orow.correct{background:var(--good-bg);border-color:var(--good)}
+  .orow.yours{background:var(--bad-bg);border-color:var(--bad)}
+  .orow .mark{font-weight:800;margin-right:6px}
+  .orow.correct .mark{color:var(--good)} .orow.yours .mark{color:var(--bad)}
+  .orow .txt{font-weight:600}
+  .orow .why{display:block;margin-top:4px;font-size:.87rem;color:var(--muted);font-weight:400}
+  .orow.correct .why,.orow.yours .why{color:var(--ink);opacity:.88}
+  .sol{background:var(--formula-bg);border-left:4px solid var(--formula-line);border-radius:9px;padding:11px 15px;margin:11px 0 0;font-size:.9rem}
+  .sol .h{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--brand2);display:block;margin-bottom:4px}
+  .yourans{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+
+  .done{text-align:center;padding:40px 20px}
+  .done .big{font-size:3rem}
+  .hist{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.85rem}
+  .hist th,.hist td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+  .hist th{background:var(--card2);color:var(--brand2)}
+  .foot{text-align:center;color:var(--muted);font-size:.8rem;margin-top:34px}
+  .hide{display:none}
+  sub,sup{line-height:0}
+  /* v2: palette · single-question view · soft timer */
+  .pal{display:flex;flex-wrap:wrap;gap:10px 18px;margin:10px 0 4px}
+  .pgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .plab{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-right:3px}
+  .pb{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:.8rem;cursor:pointer}
+  .pb:hover{border-color:var(--brand)}
+  .pb.ans{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+  .pb.cur{outline:2px solid var(--brand);outline-offset:1px;color:var(--ink)}
+  .pb.over{box-shadow:inset 0 -3px 0 var(--bad)}
+  .clock{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:800;font-size:.82rem;border-radius:999px;padding:2px 11px;background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+  .clock.warn,.q.warn{border-color:var(--warn)} .clock.warn{color:var(--warn);background:var(--warn-bg)}
+  .clock.over,.q.over{border-color:var(--bad)} .clock.over{color:var(--bad);background:var(--bad-bg)}
+  .nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:6px 0 14px;flex-wrap:wrap}
+  .nav .mid{font-size:.78rem;color:var(--muted)}
+  .slowrow{font-size:.88rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .tover{color:var(--bad);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p>ICAD · JEE Mathematics · Chapter Mastery Quiz</p>
+    <h1>P-14 · Elasticity</h1>
+    <p id="heroSub">Lectures L-1 to L-4 + Strong Box · 54 questions · pick the lectures you want, then loop until every answer is right.</p>
+  </header>
+
+  <!-- ================= INTRO ================= -->
+  <div id="scr-intro">
+    <div class="banner">
+      <h2>1 · Choose the lectures to be quizzed on</h2>
+      <div style="font-size:.88rem;color:var(--muted)">All lectures are selected by default — that quizzes the whole chapter.</div>
+      <div id="lecPicker" style="margin-top:10px"></div>
+      <div class="row">
+        <button class="btn ghost sm" onclick="setAllLectures(true)">Select all</button>
+        <button class="btn ghost sm" onclick="setAllLectures(false)">Clear all</button>
+        <span class="pill" id="selCount">54 questions selected</span>
+      </div>
+    </div>
+    <div class="banner mix">
+      <h2>2 · How the loop works</h2>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:.92rem">
+        <li>Answer every question in the round and hit <b>Submit</b>.</li>
+        <li>You then go to the <b>review</b> — this step is <b>compulsory</b>, there is no skip.</li>
+        <li>The review shows every question you got <b>wrong</b> or <b>left blank</b>, with why the right option is right <i>and</i> why each wrong option is wrong.</li>
+        <li>You are then <b>re-quizzed on exactly those questions</b>, options reshuffled.</li>
+        <li>This repeats until <b>every selected question is correct</b>.</li>
+        <li>Every question carries a <b>soft time budget</b> (1:00 recall &middot; 1:30 standard &middot; 3:00 calculation). The clock turns amber at 75% and red when over, but <b>never cuts you off</b> &mdash; slow-but-correct answers are flagged in the review.</li>
+        <li>When the chapter is mastered a <b>result page is downloaded</b> automatically (rounds, timings, every missed question with its working) &mdash; keep it in <code>Quiz/Results/</code>.</li>
+      </ol>
+      <div class="row"><button class="btn go" id="startBtn" onclick="startQuiz()">Start Quiz →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div id="scr-quiz" class="hide">
+    <div class="bar">
+      <span class="pill">Round <b id="pRound">1</b></span>
+      <span class="pill">Q <b id="pCur">1</b>/<b id="pCount">0</b></span>
+      <span class="pill">Answered <b id="pAns">0</b>/<b id="pTot">0</b></span>
+      <div class="prog"><i id="pBar"></i></div>
+      <span class="pill">Mastered <b id="pMast">0</b>/<b id="pSel">0</b></span>
+      <span class="pill">&#9201; Round <b id="pTime">0:00</b></span>
+    </div>
+    <div class="pal" id="palette"></div>
+    <div id="qcard"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prevBtn" onclick="showQ(cur-1)">&larr; Previous</button>
+      <span class="mid">&larr; &rarr; keys move between questions &middot; 1&ndash;4 picks an option &middot; the clock is a soft budget, it never cuts you off</span>
+      <button class="btn" id="nextBtn" onclick="showQ(cur+1)">Next &rarr;</button>
+    </div>
+    <div class="banner mix" id="submitBox">
+      <h2>Finished?</h2>
+      <div style="font-size:.92rem" id="submitHint"></div>
+      <div class="row"><button class="btn go" onclick="submitRound()">Submit answers</button></div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMITTED (review is compulsory) ================= -->
+  <div id="scr-sub" class="hide">
+    <div class="banner mix">
+      <h2 id="subTitle">Round 1 submitted</h2>
+      <div class="score" id="subScore">—</div>
+      <div id="subDetail" style="font-size:.93rem;margin-top:4px"></div>
+      <div style="margin-top:14px;font-weight:700">Next step: the review. Work through it before the questions come back.</div>
+      <div class="row"><button class="btn go" id="subBtn" onclick="showReview()">Review the missed questions →</button></div>
+    </div>
+  </div>
+
+  <!-- ================= REVIEW ================= -->
+  <div id="scr-review" class="hide">
+    <div class="banner mix">
+      <h2>Review · Round <span id="rvRound">1</span></h2>
+      <div style="font-size:.93rem" id="rvHead"></div>
+    </div>
+    <div id="rvlist"></div>
+    <div class="banner mix">
+      <h2>Ready to try again?</h2>
+      <div style="font-size:.92rem">Only the questions above come back, with the options reshuffled.</div>
+      <div class="row"><button class="btn go" id="rvBtn" onclick="nextRound()">Re-quiz these questions →</button> <button class="btn ghost" onclick="downloadResult()">&#128229; Download result so far</button></div>
+    </div>
+  </div>
+
+  <!-- ================= DONE ================= -->
+  <div id="scr-done" class="hide">
+    <div class="banner ok done">
+      <div class="big">🏆</div>
+      <h2 id="dnTitle">Mastered</h2>
+      <div style="font-size:.95rem" id="dnLine"></div>
+      <div class="hist" id="dnHist"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn go" onclick="downloadResult()">&#128229; Download result page</button>
+        <button class="btn" onclick="backToIntro()">Choose different lectures</button>
+        <button class="btn ghost" onclick="backToIntro()">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">ICAD · P-14 Elasticity · mastery quiz built from lectures L-1 to L-4 (theory + solved examples) and the chapter Strong Box · every answer re-derived, not transcribed.</div>
+</div>
+
+<div id="lockOverlay" class="lock hide">
+  <div class="lockbox">
+    <div class="lockicon" id="lockIcon">&#9888;</div>
+    <h2 id="lockTitle">You left the quiz</h2>
+    <p id="lockMsg"></p>
+    <p class="locksub" id="lockSub"></p>
+    <button class="btn go" onclick="resumeQuiz()">Return to the quiz</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   P-14 ELASTICITY — lecture units
+   ============================================================ */
+const LECTURES = [
+  {"key": "L-1", "name": "L-1 · Elastic Behaviour, Stress & Strain", "desc": "Elasticity vs plasticity, deforming force, the three types of stress (normal/tensile, shearing, volumetric) and strain (longitudinal, volume, shear), and resolving stress on an inclined plane."},
+  {"key": "L-2", "name": "L-2 · Elastic Limit, Hooke's Law, Young's Modulus & Elongation", "desc": "Elastic limit, Hooke's law, Young's modulus Y = FL/(A·ΔL), the rod-as-spring k = YA/L, series & composite wires, the stress–strain curve, self-weight elongation and breaking length."},
+  {"key": "L-3", "name": "L-3 · Elastic Potential Energy & Interatomic Force Constant", "desc": "Energy stored in a stretched wire, energy density u = (1/2)·stress·strain = (1/2)Yε² = stress²/(2Y), work = (1/2)F·ΔL, and the interatomic force constant k = Y·r₀."},
+  {"key": "L-4", "name": "L-4 · Rigidity, Bulk Modulus, Poisson's Ratio & Moduli Relations", "desc": "Modulus of rigidity η = F/(Aφ), bulk modulus K and compressibility, Poisson's ratio σ (range −1 to 0.5), and the inter-relations Y = 3K(1 − 2σ) = 2η(1 + σ), 9/Y = 1/K + 3/η."},
+  {"key": "SB", "name": "Strong Box · Previous Year Questions", "desc": "The complete 17-PYQ set from the chapter's Strong Box — JEE Main & Advanced problems on moduli, series/parallel & composite wires, bulk compression, self-weight, thermal stress and Poisson's ratio."},
+];
+const QUIZ = [
+  {"id": 1, "lec": "L-1", "blk": "Elastic behaviour", "topic": "Elasticity vs plasticity", "t": 60, "q": "The property by which a body regains its original shape and size after the deforming force is removed is called", "opts": ["elasticity", "plasticity", "rigidity", "ductility"], "ans": 0, "why": ["Correct — recovery of the original configuration on removing the force is the definition of elasticity.", "Plasticity is the opposite: a permanent deformation that is NOT recovered.", "Rigidity is resistance to a change of shape, not the recovery of the original shape.", "Ductility is the ability to be drawn into wires (a large plastic region), not elastic recovery."], "sol": "<b>Elasticity</b> is the ability of a body to recover its original shape and size once the deforming force is removed; a perfectly elastic body recovers completely and instantly, while a perfectly plastic body keeps the deformation."},
+  {"id": 2, "lec": "L-1", "blk": "Stress", "topic": "Units & dimensions of stress", "t": 60, "q": "Stress has the same SI unit and dimensional formula as", "opts": ["pressure", "force", "energy", "strain"], "ans": 0, "why": ["Correct — stress = F/A has unit N/m² (Pa) and dimensions [M L⁻¹ T⁻²], identical to pressure.", "Force has unit N and dimensions [M L T⁻²]; stress is force per unit area, not force.", "Energy has unit J and dimensions [M L² T⁻²] — different from stress.", "Strain is a pure ratio, so it is dimensionless and has no unit, unlike stress."], "sol": "Stress = restoring force per unit area = F/A, unit N/m² (Pa), dimensions [M L⁻¹ T⁻²] — exactly the dimensions of pressure."},
+  {"id": 3, "lec": "L-1", "blk": "Stress types", "topic": "Effect of shearing stress", "t": 60, "q": "A tangential (shearing) stress applied to one face of a body produces a change in its", "opts": ["shape, at constant volume", "volume, at constant shape", "mass", "density only"], "ans": 0, "why": ["Correct — a force parallel to a face slides the layers and changes shape while the volume stays the same.", "Volume change comes from hydrostatic (volumetric) stress acting from all sides, not from a tangential force.", "Stress rearranges atoms; it does not change the amount of matter, so mass is unchanged.", "A pure shear changes shape without changing volume, so density is essentially unchanged."], "sol": "Shearing (tangential) stress τ = F<sub>t</sub>/A acts parallel to the surface and changes the <b>shape</b> at constant volume; normal stress changes length and hydrostatic pressure changes volume."},
+  {"id": 4, "lec": "L-1", "blk": "Stress numeric", "topic": "Tensile stress in a loaded wire", "t": 90, "q": "A 4.0 kg load hangs from a steel wire of radius 2.0 mm (take g = 3.1π m/s²). The tensile stress in the wire is", "opts": ["3.1 × 10⁶ N/m²", "3.1 × 10⁵ N/m²", "1.24 × 10⁷ N/m²", "9.8 × 10⁶ N/m²"], "ans": 0, "why": ["Correct — F/A = 12.4π/(4π × 10⁻⁶) = 3.1 × 10⁶ N/m².", "Off by a factor of ten — this drops one power in the area 4π × 10⁻⁶ m².", "This is the force 12.4π N divided by πr² without the 10⁻⁶ from (2 mm)² — a unit slip on the radius.", "Using g = 9.8 instead of the given g = 3.1π spoils the clean cancellation of π."], "sol": "Tension F = mg = 4.0 × 3.1π = 12.4π N; area A = πr² = π(2.0 × 10⁻³)² = 4π × 10⁻⁶ m²; stress = F/A = 12.4π/(4π × 10⁻⁶) = 3.1 × 10⁶ N/m². Choosing g = 3.1π cancels the π."},
+  {"id": 5, "lec": "L-1", "blk": "Inclined plane", "topic": "Angle of maximum shear stress", "t": 90, "q": "A bar of area A is pulled by equal and opposite axial tensile forces F. On a plane whose normal makes angle θ with the axis, the shearing stress is maximum when θ equals", "opts": ["45°", "0°", "90°", "30°"], "ans": 0, "why": ["Correct — shear stress (F/2A)sin2θ peaks when sin2θ = 1, i.e. 2θ = 90° so θ = 45°.", "At θ = 0° the plane is perpendicular to the axis and the shear stress is zero (tensile stress is maximum there).", "At θ = 90° the plane is parallel to the axis; sin2θ = 0, so the shearing stress vanishes.", "θ = 30° gives sin60° ≈ 0.87 of the maximum, not the peak."], "sol": "On the inclined plane A′ = A/cosθ; the tangential force is F sinθ, so shear stress = (F sinθ)/(A/cosθ) = (F/2A)sin2θ, maximum when sin2θ = 1 ⇒ 2θ = 90° ⇒ θ = 45°. Ductile bars neck and slip along this 45° plane."},
+  {"id": 6, "lec": "L-1", "blk": "Strain types", "topic": "Nature of shear strain", "t": 60, "q": "Shear strain is measured as", "opts": ["the angle (in radian) through which a face is tilted", "the ratio ΔL/L of the body's length", "the change in volume per unit volume", "the ratio of stress to modulus"], "ans": 0, "why": ["Correct — shear strain is the angle of tilt φ ≈ tanφ = Δx/L when one face slides relative to the fixed face.", "ΔL/L is longitudinal strain, a length ratio, not the angular shear strain.", "ΔV/V is volumetric strain, produced by pressure from all sides, not by a tangential force.", "Stress/modulus is just strain in general; shear strain specifically is the shear angle φ."], "sol": "Shear strain γ = φ ≈ tanφ = Δx/L is the <b>angle</b> (radian) through which a face tilts; it is distinct from longitudinal strain ΔL/L and from volume strain ΔV/V."},
+  {"id": 7, "lec": "L-1", "blk": "Strain numeric", "topic": "Longitudinal strain of a stretched band", "t": 90, "q": "A rubber band of natural length 10 cm is stretched to 12 cm. The longitudinal strain is", "opts": ["0.2", "0.02", "2.0", "0.12"], "ans": 0, "why": ["Correct — strain = ΔL/L = (12 − 10)/10 = 0.2 (20%).", "This divides by 100 cm instead of 10 cm — a place-value error.", "This is ΔL (2 cm) itself, not the ratio ΔL/L.", "This is the final length ratio 12/... no — it uses ΔL/final-length or a miscount; strain uses the original length 10 cm."], "sol": "Longitudinal strain ε = ΔL/L = (12 − 10)/10 = 2/10 = 0.2, i.e. 20%. Strain is dimensionless and is always measured against the <b>original</b> length."},
+  {"id": 8, "lec": "L-1", "blk": "Volume strain", "topic": "Formula for volumetric strain", "t": 60, "q": "The volumetric strain of a body is given by", "opts": ["ΔV/V", "ΔL/L", "ΔP/P", "Δx/L"], "ans": 0, "why": ["Correct — volume strain is the change in volume per unit original volume, ΔV/V, and is dimensionless.", "ΔL/L is longitudinal strain, tied to a change of length, not volume.", "ΔP/P is a pressure ratio, not a strain, and is not tied to any deformation of the body.", "Δx/L is the shear (angular) strain of a sheared face, not volume strain."], "sol": "Volumetric strain = (change in volume)/(original volume) = ΔV/V. Only this is dimensionless and tied to a volume change; ΔL/L is longitudinal and ΔP/P is not a strain at all."},
+  {"id": 9, "lec": "L-2", "blk": "Hooke's law", "topic": "Statement of Hooke's law", "t": 60, "q": "Within the elastic limit, Hooke's law states that", "opts": ["stress ∝ strain", "stress ∝ (strain)²", "strain ∝ (stress)²", "stress is independent of strain"], "ans": 0, "why": ["Correct — within the elastic limit stress is directly proportional to strain, the constant being the modulus of elasticity.", "The proportionality is linear, not quadratic; stress ∝ strain, not strain-squared.", "This inverts and squares the true linear law; strain ∝ stress linearly within the elastic limit.", "Stress and strain rise together in proportion; they are not independent."], "sol": "Hooke's law: for small deformations <b>stress ∝ strain</b>, so stress = (modulus) × strain, the constant of proportionality being the modulus of elasticity."},
+  {"id": 10, "lec": "L-2", "blk": "Young's modulus", "topic": "Definition of Young's modulus", "t": 90, "q": "For a wire of length L and area A stretched by ΔL under force F, Young's modulus is", "opts": ["FL/(A·ΔL)", "F·ΔL/(A·L)", "A·ΔL/(F·L)", "F·A/(L·ΔL)"], "ans": 0, "why": ["Correct — Y = (F/A)/(ΔL/L) = FL/(A·ΔL).", "This swaps L and ΔL in the numerator/denominator, inverting the strain.", "This is the reciprocal 1/Y (a compliance), not Young's modulus.", "This misplaces the lengths entirely and is dimensionally wrong for a modulus."], "sol": "Y = longitudinal stress / longitudinal strain = (F/A)/(ΔL/L) = FL/(A·ΔL); equivalently the extension is ΔL = FL/(AY)."},
+  {"id": 11, "lec": "L-2", "blk": "Young's modulus numeric", "topic": "Young's modulus of steel", "t": 90, "q": "A 4.0 kg load on a 20 m steel wire of radius 2.0 mm (g = 3.1π m/s²) stretches it by 0.31 mm. Young's modulus of steel is", "opts": ["2.0 × 10¹¹ N/m²", "2.0 × 10⁹ N/m²", "2.0 × 10¹³ N/m²", "1.0 × 10¹¹ N/m²"], "ans": 0, "why": ["Correct — stress 3.1 × 10⁶ divided by strain 1.55 × 10⁻⁵ gives 2.0 × 10¹¹ N/m², the standard value for steel.", "Too small by 100 — this is the modulus of a soft material, not steel.", "Too large by 100 — exceeds any real solid; a power-of-ten slip in the strain.", "Halving the true value — this would use twice the correct strain."], "sol": "Stress = F/A = 3.1 × 10⁶ N/m²; strain = ΔL/L = (0.31 × 10⁻³)/20 = 1.55 × 10⁻⁵; Y = stress/strain = (3.1 × 10⁶)/(1.55 × 10⁻⁵) = 2.0 × 10¹¹ N/m². (2 × 10¹¹ Pa is the textbook value for steel — a built-in sanity check.)"},
+  {"id": 12, "lec": "L-2", "blk": "Elongation numeric", "topic": "Elongation of a steel bar", "t": 90, "q": "A steel bar of length 1 m and cross-section 1.5 cm² carries an axial pull of 1.5 × 10⁴ N (Y = 2 × 10¹¹ N/m²). Its elongation is", "opts": ["0.5 mm", "5 mm", "0.05 mm", "0.5 cm"], "ans": 0, "why": ["Correct — ΔL = FL/(AY) = 0.5 × 10⁻³ m = 0.5 mm.", "Ten times too large — forgetting to convert 1.5 cm² to 1.5 × 10⁻⁴ m² leaves this error.", "Ten times too small — an extra power of ten in the area.", "This is 5 mm written as 0.5 cm; the correct magnitude is 0.5 mm = 0.05 cm."], "sol": "ΔL = FL/(AY); A = 1.5 cm² = 1.5 × 10⁻⁴ m²; ΔL = (1.5 × 10⁴ × 1)/(1.5 × 10⁻⁴ × 2 × 10¹¹) = (1.5 × 10⁴)/(3.0 × 10⁷) = 0.5 × 10⁻³ m = 0.5 mm."},
+  {"id": 13, "lec": "L-2", "blk": "Rod as a spring", "topic": "Force constant of a rod", "t": 90, "q": "A uniform rod of Young's modulus Y, cross-section A and length L behaves like a spring of force constant", "opts": ["YA/L", "YL/A", "AL/Y", "Y/(AL)"], "ans": 0, "why": ["Correct — from F = (YA/L)ΔL the stiffness is k = YA/L.", "This inverts the length dependence; a longer rod is softer, so k must fall with L.", "Dimensionally this is not a force constant and gives the wrong length and area dependence.", "This has Y in the denominator, making a stiffer material give a smaller k — the opposite of reality."], "sol": "Writing ΔL = FL/(AY) as F = (YA/L)ΔL shows the rod is Hookean with stiffness k = YA/L; two rods in series combine as k = k₁k₂/(k₁ + k₂)."},
+  {"id": 14, "lec": "L-2", "blk": "Series wires", "topic": "Load sharing in series wires", "t": 90, "q": "Two wires joined end to end (in series) and carrying a load have", "opts": ["the same tension, and their extensions add", "the same extension, and their tensions add", "equal tension and equal extension", "zero tension in the thinner wire"], "ans": 0, "why": ["Correct — the same force passes through both wires in series, and the total extension is the sum of the two.", "Equal extension with added tensions describes wires in parallel, not in series.", "Only if the wires were identical; in general the extensions differ even though the tension is common.", "The full load tension passes through every section of a series chain, including the thin wire."], "sol": "In series the same force F acts through each wire, so the extensions add: ΔL = ΔL₁ + ΔL₂. Treating each as a spring k = YA/L, the effective stiffness is k = k₁k₂/(k₁ + k₂)."},
+  {"id": 15, "lec": "L-2", "blk": "Stress–strain curve", "topic": "Young's modulus from the graph", "t": 90, "q": "On a stress–strain graph (stress on the y-axis), Young's modulus is represented by", "opts": ["the slope of the straight (proportional) part", "the total area under the curve", "the breaking-point stress", "the length of the plastic region"], "ans": 0, "why": ["Correct — in the linear region stress = Y × strain, so the slope (stress/strain) is Y.", "The area under the curve is the energy stored per unit volume, not the modulus.", "The breaking stress is the material's strength (the peak), not its stiffness.", "The plastic-region length indicates ductility, not Young's modulus."], "sol": "In the proportional region stress = Y × strain, so the <b>slope</b> of the straight part equals Y. Area under the curve = energy density; the peak height = strength; the plastic plateau length = ductility."},
+  {"id": 16, "lec": "L-2", "blk": "Ductile vs brittle", "topic": "Identifying a ductile material", "t": 60, "q": "A material with a long plastic region before fracture is said to be", "opts": ["ductile", "brittle", "perfectly elastic", "perfectly rigid"], "ans": 0, "why": ["Correct — a wide plastic region before breaking means large permanent deformation, i.e. ductility.", "A brittle material fractures with little or no plastic region — the opposite of this.", "A perfectly elastic body recovers fully and has no plastic region at all.", "A perfectly rigid body does not deform, so it has neither elastic nor plastic strain."], "sol": "A wide plastic region before fracture means the material can be drawn out before breaking, so it is <b>ductile</b>; a narrow plastic region (early fracture) means the material is brittle."},
+  {"id": 17, "lec": "L-2", "blk": "Self-weight", "topic": "Elongation under own weight", "t": 90, "q": "A wire of mass m, length L and area A hangs from a rigid support. Its elongation due to its own weight is", "opts": ["mgL/(2AY)", "mgL/(AY)", "2mgL/(AY)", "mgL/(4AY)"], "ans": 0, "why": ["Correct — the tension averages mg/2 over the length, giving ΔL = mgL/(2AY).", "This treats the whole weight mg as acting at the free end, ignoring that tension falls to zero at the bottom.", "This doubles the correct answer — the opposite of the needed factor (1/2).", "This uses a factor (1/4); the linear tension profile gives an average of mg/2, not mg/4."], "sol": "The tension rises linearly from 0 at the free end to mg at the support, so the effective load is mg/2 ⇒ ΔL = (mg/2)L/(AY) = mgL/(2AY)."},
+  {"id": 18, "lec": "L-2", "blk": "Self-weight numeric", "topic": "Extension of a hanging wire", "t": 90, "q": "A 1 kg wire of length 1 m and cross-section 1.5 cm² hangs from a support (Y = 2 × 10¹¹ N/m², g = 10 m/s²). Its extension under its own weight is about", "opts": ["1.67 × 10⁻⁷ m", "3.33 × 10⁻⁷ m", "1.67 × 10⁻⁶ m", "8.3 × 10⁻⁸ m"], "ans": 0, "why": ["Correct — ΔL = mgL/(2AY) = 10/(6 × 10⁷) = 1.67 × 10⁻⁷ m.", "Twice too large — this drops the factor (1/2) and uses the full weight mg.", "Ten times too large — a power-of-ten slip when converting 1.5 cm² to 1.5 × 10⁻⁴ m².", "Half of the correct value — an extra factor (1/2) applied one too many times."], "sol": "ΔL = mgL/(2AY); A = 1.5 cm² = 1.5 × 10⁻⁴ m²; ΔL = (1 × 10 × 1)/(2 × 1.5 × 10⁻⁴ × 2 × 10¹¹) = 10/(6 × 10⁷) = 1.67 × 10⁻⁷ m."},
+  {"id": 19, "lec": "L-2", "blk": "Breaking length", "topic": "Maximum self-supporting length", "t": 90, "q": "The greatest length of a wire (breaking stress σ<sub>b</sub>, density ρ) that can hang vertically without breaking under its own weight is", "opts": ["σ<sub>b</sub>/(ρg)", "ρg/σ<sub>b</sub>", "σ<sub>b</sub>·ρ/g", "σ<sub>b</sub>/(ρg²)"], "ans": 0, "why": ["Correct — the wire breaks when ρgL = σ<sub>b</sub>, giving L = σ<sub>b</sub>/(ρg), independent of cross-section.", "This is the reciprocal and is dimensionally wrong for a length.", "This multiplies by density instead of dividing, giving the wrong dependence.", "This has an extra power of g; the correct result is linear in g."], "sol": "At breaking, the weight stress equals the breaking stress: σ<sub>b</sub> = (ALρ)g/A = ρgL ⇒ L = σ<sub>b</sub>/(ρg). The area cancels, so the maximum length is independent of thickness."},
+  {"id": 20, "lec": "L-2", "blk": "Elastic limit", "topic": "Minimum diameter under a load", "t": 90, "q": "A copper wire (elastic limit 1.5 × 10⁸ N/m²) must support 10.0 kg (g = 9.8 m/s²) without exceeding its elastic limit. Its minimum diameter is about", "opts": ["0.91 mm", "9.1 mm", "0.46 mm", "1.8 mm"], "ans": 0, "why": ["Correct — setting F/A = σ at the limit gives d = √(4F/πσ) ≈ 9.1 × 10⁻⁴ m.", "Ten times too large — a power-of-ten slip in taking the square root.", "This halves the diameter, as if the area (not the diameter) were the quantity under the root.", "This uses roughly four times the limiting area, overestimating the needed diameter."], "sol": "At the limit F/A<sub>min</sub> = σ with A<sub>min</sub> = πd²/4, so d = √(4F/πσ); F = 98 N; d = √(4 × 98/(3.14 × 1.5 × 10⁸)) = √(8.32 × 10⁻⁷) = 9.1 × 10⁻⁴ m = 0.91 mm."},
+  {"id": 21, "lec": "L-3", "blk": "Energy density", "topic": "Elastic energy per unit volume", "t": 90, "q": "The elastic potential energy stored per unit volume of a stretched wire is", "opts": ["(1/2) × stress × strain", "stress × strain", "(1/2) × stress / strain", "stress × (strain)²"], "ans": 0, "why": ["Correct — u = (1/2)·stress·strain = (1/2)Yε² = stress²/(2Y).", "This omits the factor (1/2); the stress builds from zero, so the stored energy is half of stress × strain.", "Dividing stress by strain gives the modulus Y, not an energy density.", "Energy density is linear in strain for fixed stress; this extra factor of strain is wrong."], "sol": "Energy density u = (1/2)·stress·strain, which with stress = Yε can be written u = (1/2)Yε² = stress²/(2Y). The factor (1/2) appears because the restoring force grows from 0 to its final value."},
+  {"id": 22, "lec": "L-3", "blk": "Work done", "topic": "Work to stretch a wire", "t": 60, "q": "The work done in stretching a wire by an extension ΔL under a final load F is", "opts": ["(1/2)F·ΔL", "F·ΔL", "2F·ΔL", "F·(ΔL)²"], "ans": 0, "why": ["Correct — the load rises from 0 to F, so W = (average force)(extension) = (1/2)F·ΔL.", "This is the classic trap: it treats F as constant, but the force grows from zero, so the real work is half of this.", "This doubles the correct work and has no physical basis here.", "Dimensionally this is not an energy (force × length²); work is (1/2)F·ΔL."], "sol": "Because the load increases linearly from 0 to F, the work equals the average force times the extension: W = (1/2)F·ΔL — <b>not</b> F·ΔL."},
+  {"id": 23, "lec": "L-3", "blk": "Energy density numeric", "topic": "Energy density of a stretched wire", "t": 90, "q": "A steel wire (L = 4.0 m, Y = 2.0 × 10¹¹ N/m²) is stretched by 2.0 mm. Its elastic energy density is", "opts": ["2.5 × 10⁴ J/m³", "2.5 × 10⁵ J/m³", "5.0 × 10⁴ J/m³", "1.25 × 10⁴ J/m³"], "ans": 0, "why": ["Correct — u = (1/2)Yε² with ε = 5 × 10⁻⁴ gives 2.5 × 10⁴ J/m³.", "Ten times too large — a power-of-ten slip in squaring the strain 5 × 10⁻⁴.", "Twice too large — this drops the factor (1/2) in (1/2)Yε².", "Half the correct value — an extra factor (1/2) applied once too often."], "sol": "Strain ε = ΔL/L = (2.0 × 10⁻³)/4.0 = 5 × 10⁻⁴; u = (1/2)Yε² = (1/2)(2.0 × 10¹¹)(5 × 10⁻⁴)² = (1/2)(2.0 × 10¹¹)(2.5 × 10⁻⁷) = 2.5 × 10⁴ J/m³."},
+  {"id": 24, "lec": "L-3", "blk": "Total energy numeric", "topic": "Total stored elastic energy", "t": 90, "q": "For that wire (cross-section 2.0 mm², energy density 2.5 × 10⁴ J/m³), the total stored elastic energy is", "opts": ["0.20 J", "0.02 J", "2.0 J", "0.10 J"], "ans": 0, "why": ["Correct — U = u × volume = 2.5 × 10⁴ × 8.0 × 10⁻⁶ = 0.20 J.", "Ten times too small — a power-of-ten error in the volume A × L.", "Ten times too large — treating the area as 2.0 × 10⁻⁵ m² instead of 2.0 × 10⁻⁶ m².", "Half the correct value — an extra factor (1/2), but u already includes it."], "sol": "Volume = A × L = (2.0 × 10⁻⁶)(4.0) = 8.0 × 10⁻⁶ m³; U = u × volume = (2.5 × 10⁴)(8.0 × 10⁻⁶) = 0.20 J."},
+  {"id": 25, "lec": "L-3", "blk": "Interatomic force constant", "topic": "Relation between k and Y", "t": 60, "q": "The interatomic force constant k is related to Young's modulus Y and the equilibrium interatomic spacing r₀ by", "opts": ["k = Y·r₀", "k = Y/r₀", "k = Y·r₀²", "k = Y·r₀/2"], "ans": 0, "why": ["Correct — the single-bond stiffness is k = Y·r₀.", "Dividing by r₀ gives the wrong (inverse) spacing dependence and wrong units.", "The r₀² dependence is dimensionally wrong for a spring constant from Y·length.", "There is no factor (1/2) in the relation k = Y·r₀."], "sol": "Modelling each bond as a spring f = k·Δr and linking it to the bulk wire gives k = Y·r₀ — a bridge from the macroscopic Young's modulus to a single-bond stiffness of order a few N/m."},
+  {"id": 26, "lec": "L-3", "blk": "Interatomic numeric", "topic": "Interatomic force constant value", "t": 90, "q": "If the interatomic spacing is 10⁻¹⁰ m and Y = 1.1 × 10¹¹ N/m², the interatomic force constant is", "opts": ["11 N/m", "1.1 N/m", "110 N/m", "0.11 N/m"], "ans": 0, "why": ["Correct — k = Y·r₀ = (1.1 × 10¹¹)(10⁻¹⁰) = 11 N/m.", "Ten times too small — a power-of-ten slip on r₀ = 10⁻¹⁰ m.", "Ten times too large — treating r₀ as 10⁻⁹ m.", "A hundred times too small — a two-decade error in the exponent."], "sol": "k = Y·r₀ = (1.1 × 10¹¹)(10⁻¹⁰) = 11 N/m — of the order of a few N/m, as expected for an atomic bond."},
+  {"id": 27, "lec": "L-4", "blk": "Rigidity modulus", "topic": "Definition of rigidity modulus", "t": 90, "q": "A body is sheared through angle φ by a tangential stress F/A. Its modulus of rigidity is", "opts": ["F/(Aφ)", "Aφ/F", "Fφ/A", "FA/φ"], "ans": 0, "why": ["Correct — η = shearing stress / shearing strain = (F/A)/φ = F/(Aφ).", "This is the reciprocal (a shear compliance), not the rigidity modulus.", "This multiplies by φ instead of dividing, giving the wrong strain dependence.", "Dimensionally this is a force times area over angle — not a modulus."], "sol": "η = shearing stress / shearing strain = (F/A)/φ = F/(Aφ); higher η means stiffer against a change of shape, and only solids have a non-zero η."},
+  {"id": 28, "lec": "L-4", "blk": "Rigidity numeric", "topic": "Modulus of rigidity of a cube", "t": 90, "q": "A rubber cube of side 5 cm has one face fixed; the opposite face is displaced 3 mm by a tangential force of 15 N. The modulus of rigidity is", "opts": ["1 × 10⁵ N/m²", "1 × 10⁴ N/m²", "1 × 10⁶ N/m²", "5 × 10⁵ N/m²"], "ans": 0, "why": ["Correct — η = F/(Aφ) = 15/(2.5 × 10⁻³ × 0.06) = 10⁵ N/m².", "Ten times too small — a power-of-ten slip in the shear strain φ = 0.06 rad.", "Ten times too large — treating the face area as 2.5 × 10⁻⁴ m² instead of 2.5 × 10⁻³ m².", "This divides the 3 mm displacement by the side-length wrongly, inflating η fivefold."], "sol": "Shear strain φ = (3 × 10⁻³)/0.05 = 0.06 rad; area A = (0.05)² = 2.5 × 10⁻³ m²; η = F/(Aφ) = 15/(2.5 × 10⁻³ × 0.06) = 15/(1.5 × 10⁻⁴) = 10⁵ N/m²."},
+  {"id": 29, "lec": "L-4", "blk": "Bulk modulus", "topic": "Why K carries a minus sign", "t": 60, "q": "The bulk modulus K = −ΔP/(ΔV/V) carries a minus sign because", "opts": ["an increase in pressure decreases the volume, keeping K positive", "volume always increases under pressure", "strain is negative only by convention", "pressure is a vector quantity"], "ans": 0, "why": ["Correct — a pressure rise gives ΔV negative, so the minus sign makes K come out positive.", "Volume decreases under pressure, not increases — this is the opposite of what happens.", "The sign is physical (ΔV is genuinely negative), not a mere bookkeeping convention.", "Pressure is a scalar; its vector nature has nothing to do with the sign of K."], "sol": "Increasing pressure reduces volume, so ΔV is negative ⇒ −ΔV/V is positive, and the minus sign in K = −ΔP/(ΔV/V) keeps K a positive number."},
+  {"id": 30, "lec": "L-4", "blk": "Compressibility", "topic": "Definition of compressibility", "t": 60, "q": "The compressibility of a material is", "opts": ["the reciprocal of its bulk modulus, 1/K", "equal to its bulk modulus, K", "the reciprocal of its Young's modulus, 1/Y", "the product of K and Y"], "ans": 0, "why": ["Correct — compressibility C = 1/K; a highly compressible material has a small K and a large C.", "Compressibility is the inverse of K, not K itself.", "Compressibility is tied to volume change (bulk modulus), not to Young's modulus.", "There is no product K·Y in the definition of compressibility."], "sol": "Compressibility C = 1/K is the reciprocal of the bulk modulus — a measure of how easily the volume changes per unit pressure. Gases (small K) are highly compressible; solids and liquids are not."},
+  {"id": 31, "lec": "L-4", "blk": "Bulk numeric", "topic": "Pressure to compress water", "t": 90, "q": "The bulk modulus of water is 2.3 × 10⁹ N/m² (1 atm = 1.01 × 10⁵ Pa). The pressure needed to compress a water sample by 0.1% is about", "opts": ["22.7 atm", "2.27 atm", "227 atm", "2300 atm"], "ans": 0, "why": ["Correct — ΔP = K(−ΔV/V) = 2.3 × 10⁶ Pa ≈ 22.7 atm.", "Ten times too small — treating the 0.1% strain as 10⁻⁴ instead of 10⁻³.", "Ten times too large — using 1% (10⁻²) instead of 0.1% for the volume strain.", "This forgets to convert pascals to atmospheres and reports ΔP in the wrong unit scale."], "sol": "Volume strain −ΔV/V = 0.1% = 1.0 × 10⁻³; ΔP = K(−ΔV/V) = (2.3 × 10⁹)(1.0 × 10⁻³) = 2.3 × 10⁶ Pa = (2.3 × 10⁶)/(1.01 × 10⁵) ≈ 22.7 atm."},
+  {"id": 32, "lec": "L-4", "blk": "Poisson's ratio", "topic": "Range of Poisson's ratio", "t": 60, "q": "The theoretical range of Poisson's ratio σ for an isotropic material is", "opts": ["−1 to +0.5", "0 to 1", "−0.5 to +1", "0 to +0.5 only"], "ans": 0, "why": ["Correct — σ lies between −1 and +0.5; σ = 0.5 means the volume is conserved during stretch.", "This range is too narrow at the lower end and too wide at the upper end.", "The limits are reversed and mis-scaled; the true bounds are −1 and +0.5.", "Negative Poisson's ratios (auxetic materials) are allowed, down to −1, so 0 is not the lower bound."], "sol": "Poisson's ratio σ = −(lateral strain)/(longitudinal strain) is dimensionless and lies between <b>−1 and +0.5</b>; σ = 0.5 corresponds to a constant-volume (incompressible) stretch."},
+  {"id": 33, "lec": "L-4", "blk": "Poisson numeric", "topic": "Elongation of a nylon rope (book misprint)", "t": 90, "q": "A 100 N weight hangs from a nylon rope (L = 4.5 m, diameter 6 mm, Y = 4.8 × 10¹¹ N/m²). The elongation of the rope is", "opts": ["3.32 × 10⁻⁵ m", "3.32 × 10⁻⁶ m", "3.32 × 10⁻⁴ m", "3.32 × 10⁻⁷ m"], "ans": 0, "why": ["Correct — ΔL = TL/(AY) = 450/(1.36 × 10⁷) = 3.32 × 10⁻⁵ m.", "This is the module's PRINTED value, but it is a factor-of-ten misprint: 450/(1.36 × 10⁷) = 3.32 × 10⁻⁵ m, not 10⁻⁶ (the book's own Δd = 8.8 × 10⁻⁹ m confirms the 10⁻⁵ elongation).", "Ten times too large — an extra power of ten in the numerator TL.", "A hundred times too small — a two-decade slip in the area A = πr²."], "sol": "A = πr² = π(3 × 10⁻³)² = 2.83 × 10⁻⁵ m²; ΔL = TL/(AY) = (100 × 4.5)/(2.83 × 10⁻⁵ × 4.8 × 10¹¹) = 450/(1.36 × 10⁷) = 3.32 × 10⁻⁵ m. <b>The module misprints this as 3.32 × 10⁻⁶ m</b> — a factor-of-ten exponent slip."},
+  {"id": 34, "lec": "L-4", "blk": "Moduli relations", "topic": "Relation between Y, K and σ", "t": 60, "q": "Which relation correctly links Young's modulus Y, bulk modulus K and Poisson's ratio σ?", "opts": ["Y = 3K(1 − 2σ)", "Y = 3K(1 + 2σ)", "Y = 2K(1 − σ)", "Y = K(1 − 2σ)"], "ans": 0, "why": ["Correct — for an isotropic solid Y = 3K(1 − 2σ); as σ → 0.5, Y → 0.", "The sign inside the bracket is wrong; it must be (1 − 2σ), not (1 + 2σ).", "This uses the coefficient 2 and the wrong bracket; the Y–K relation uses 3 and (1 − 2σ).", "The leading factor must be 3, not 1; this drops the 3."], "sol": "For an isotropic solid Y = 3K(1 − 2σ). Setting σ = 0.5 forces Y → 0 (no resistance under shear-free compression), reproducing the upper Poisson limit."},
+  {"id": 35, "lec": "L-4", "blk": "Moduli relations (misprint)", "topic": "Correct Young–rigidity relation", "t": 90, "q": "The module prints the Young–rigidity relation once as Y = 2G(1 + 2σ) and once as Y = 2η(1 + σ). The correct relation is", "opts": ["Y = 2η(1 + σ)", "Y = 2η(1 + 2σ)", "Y = η(1 + σ)", "Y = 2η(1 − σ)"], "ans": 0, "why": ["Correct — the true relation is Y = 2η(1 + σ), which rearranges to σ = Y/(2η) − 1.", "This is the book's TYPO ('1 + 2σ'); it is inconsistent with the derivation σ = Y/(2η) − 1, which needs Y = 2η(1 + σ).", "The leading factor must be 2, not 1; dropping it breaks the σ = −1 limit.", "The sign must be (1 + σ); with (1 − σ) the relation gives the wrong Poisson limits."], "sol": "The correct relation is Y = 2η(1 + σ); rearranging gives σ = Y/(2η) − 1. The <b>Y = 2G(1 + 2σ)</b> form printed on page 296 is a misprint — the '2σ' is a typo."},
+  {"id": 36, "lec": "L-4", "blk": "Moduli numeric", "topic": "Young's modulus from K and η", "t": 90, "q": "A material has shear modulus η = 0.5 × 10¹¹ N/m² and bulk modulus K = 0.6 × 10¹¹ N/m². Its Young's modulus is", "opts": ["1.2 × 10¹¹ N/m²", "2.3 × 10¹¹ N/m²", "0.6 × 10¹¹ N/m²", "2.7 × 10¹¹ N/m²"], "ans": 0, "why": ["Correct — Y = 9Kη/(3K + η) = (2.7 × 10²²)/(2.3 × 10¹¹) = 1.2 × 10¹¹ N/m².", "This is the denominator 3K + η by itself, not the full ratio.", "This simply repeats K; Y must be computed from both K and η.", "This is the numerator 9Kη mis-scaled; it omits the division by (3K + η)."], "sol": "Use 9/Y = 1/K + 3/η, i.e. Y = 9Kη/(3K + η); numerator 9Kη = 9(0.6 × 10¹¹)(0.5 × 10¹¹) = 2.7 × 10²²; denominator 3K + η = 1.8 × 10¹¹ + 0.5 × 10¹¹ = 2.3 × 10¹¹; Y = (2.7 × 10²²)/(2.3 × 10¹¹) = 1.2 × 10¹¹ N/m²."},
+  {"id": 37, "lec": "L-4", "blk": "Rigidity vs bulk", "topic": "Quantity unique to solids", "t": 60, "q": "A property that is non-zero only for solids (not for liquids or gases) is the", "opts": ["modulus of rigidity η", "bulk modulus K", "compressibility C", "mass density ρ"], "ans": 0, "why": ["Correct — only solids resist a change of shape, so only solids have a non-zero rigidity modulus.", "Liquids and gases do have a bulk modulus (they resist a change of volume).", "Compressibility 1/K is defined for liquids and gases too; gases are highly compressible.", "Density is defined for every state of matter, so it is not unique to solids."], "sol": "Only solids resist a change of shape, so only solids have a non-zero modulus of rigidity η = F/(Aφ); liquids and gases possess a bulk modulus but no rigidity."},
+  {"id": 38, "lec": "SB", "blk": "PYQ 1 · JEE Adv 2020", "topic": "Cube on ocean floor (bulk)", "t": 180, "q": "A 1 m aluminium cube is placed on the floor of a 5 km deep ocean (ρ<sub>water</sub> = 10³ kg/m³, g = 10 m/s², bulk modulus = 7 × 10¹⁰ N/m²). The change in its edge length is about", "opts": ["0.24 mm", "0.71 mm", "0.08 mm", "2.4 mm"], "ans": 0, "why": ["Correct — linear strain = (1/3)(P/K) = 2.38 × 10⁻⁴ gives Δa ≈ 0.24 mm.", "This uses the full volume strain (7.14 × 10⁻⁴) for the edge, forgetting the factor (1/3) for a cube.", "This applies an extra (1/3), dividing the edge strain by three once too often.", "Ten times too large — a power-of-ten slip in the pressure P = ρgh = 5 × 10⁷ Pa."], "sol": "Pressure P = ρgh = 10³ × 10 × 5000 = 5 × 10⁷ Pa; volume strain ΔV/V = P/K = (5 × 10⁷)/(7 × 10¹⁰) = 7.14 × 10⁻⁴; for a cube the linear strain Δa/a = (1/3)(ΔV/V) = 2.38 × 10⁻⁴; Δa = 2.38 × 10⁻⁴ m ≈ 0.24 mm (contraction)."},
+  {"id": 39, "lec": "SB", "blk": "PYQ 2 · JEE Adv 2013", "topic": "Thin vs thick series wire ratio", "t": 180, "q": "A thick copper wire (length 2L, radius 2R) is welded to a thin copper wire (length L, radius R) and stretched in series. The ratio of the elongation in the thin wire to that in the thick wire is", "opts": ["2.00", "0.50", "4.00", "0.25"], "ans": 0, "why": ["Correct — with the same force, ΔL ∝ L/R², giving thin : thick = 2.", "This is the inverse (thick : thin), obtained by flipping the ratio.", "This uses only the area factor (4) and ignores that the thick wire is also twice as long.", "This is the inverse of the area-only result, doubly wrong."], "sol": "Series ⇒ same force F; ΔL = FL/(AY) with common Y. Thin: ΔL = FL/(πR²Y); thick: ΔL = F(2L)/(4πR²Y) = FL/(2πR²Y); ratio = [FL/(πR²Y)]/[FL/(2πR²Y)] = 2.00."},
+  {"id": 40, "lec": "SB", "blk": "PYQ 3 · JEE Main 2026", "topic": "Equal stretch, Young's-modulus ratio", "t": 180, "q": "Wires A and B (lengths 60 cm and 54 cm, areas 3.0 × 10⁻⁵ m² and 4.5 × 10⁻⁵ m²) stretch equally under the same load. If Y<sub>A</sub> : Y<sub>B</sub> = x : 3, then x is", "opts": ["5", "2", "4", "1"], "ans": 0, "why": ["Correct — Y ∝ L/A, so Y<sub>A</sub>/Y<sub>B</sub> = (60 × 4.5)/(3.0 × 54) = 5/3, giving x = 5.", "This mishandles the area ratio, yielding too small a value.", "This uses only part of the length/area product and misses the correct 5/3.", "This would make the two moduli nearly equal, contradicting the different L and A."], "sol": "Equal ΔL and equal load ⇒ from ΔL = FL/(AY), L/(AY) is the same for both, so Y ∝ L/A; Y<sub>A</sub>/Y<sub>B</sub> = (L<sub>A</sub>·A<sub>B</sub>)/(A<sub>A</sub>·L<sub>B</sub>) = (60 × 4.5)/(3.0 × 54) = 270/162 = 5/3 ⇒ x = 5."},
+  {"id": 41, "lec": "SB", "blk": "PYQ 4 · JEE Main 2026", "topic": "Largest Y on swapped axes", "t": 90, "q": "On a strain (y-axis) versus stress (x-axis) plot for materials A, B, C and D, the material with the largest Young's modulus is the line that is", "opts": ["flattest (closest to the stress axis)", "steepest (closest to the strain axis)", "exactly vertical", "the longest line"], "ans": 0, "why": ["Correct — with axes swapped the slope is strain/stress = 1/Y, so the flattest line has the largest Y.", "This is the trap: on a normal stress-vs-strain graph the steepest line wins, but here the axes are swapped.", "A vertical line would mean infinite 1/Y, i.e. zero Y — the softest, not the stiffest.", "Line length depends on how far the material is strained, not on its Young's modulus."], "sol": "Y = stress/strain; on a strain-vs-stress plot the slope = strain/stress = 1/Y, so the <b>smallest</b> slope (flattest line, nearest the stress axis) has the <b>largest</b> Y — the axes are swapped from the usual graph."},
+  {"id": 42, "lec": "SB", "blk": "PYQ 5 · JEE Main 2025", "topic": "Spring tension for a linear combination", "t": 180, "q": "A massless spring elongates by x₁ under a tension of 5 N and by x₂ under 7 N. The tension producing an elongation of (5x₁ − 2x₂) is", "opts": ["11 N", "39 N", "15 N", "20 N"], "ans": 0, "why": ["Correct — elongation is linear in tension, so 5(5) − 2(7) = 11 N.", "This adds the tensions (5·5 + 2·7) instead of subtracting, giving 39 N.", "This mishandles the coefficients and lands on an unrelated value.", "This uses 4 × 5 N, ignoring the −2x₂ term entirely."], "sol": "For a spring F = kx ⇒ x₁ = 5/k, x₂ = 7/k; 5x₁ − 2x₂ = (25 − 14)/k = 11/k; the tension for this elongation is F = k(11/k) = 11 N."},
+  {"id": 43, "lec": "SB", "blk": "PYQ 6 · JEE Main 2025", "topic": "Volume contraction of a copper cube", "t": 180, "q": "A copper cube of edge 10 cm under a hydraulic pressure of 7 × 10⁶ Pa (bulk modulus 1.4 × 10¹¹ N/m²) contracts in volume by", "opts": ["50 mm³", "5 mm³", "500 mm³", "25 mm³"], "ans": 0, "why": ["Correct — ΔV = V(P/K) = 10⁶ mm³ × 5 × 10⁻⁵ = 50 mm³.", "Ten times too small — a power-of-ten slip in the volume strain P/K = 5 × 10⁻⁵.", "Ten times too large — treating the volume strain as 5 × 10⁻⁴.", "Half the correct value — an erroneous extra factor (1/2)."], "sol": "Volume strain ΔV/V = P/K = (7 × 10⁶)/(1.4 × 10¹¹) = 5 × 10⁻⁵; volume V = (0.10)³ = 10⁻³ m³ = 10⁶ mm³; ΔV = V(P/K) = 10⁶ × 5 × 10⁻⁵ = 50 mm³."},
+  {"id": 44, "lec": "SB", "blk": "PYQ 7 · JEE Main 2024", "topic": "Area of a sagging wire", "t": 180, "q": "A wire (Y = 2 × 10¹¹ N/m², length 2 m) between two rigid supports sags when a 2 kg mass hangs at its midpoint, making angle θ = 1/100 rad at the supports (g = 10 m/s²). Its cross-sectional area A, in units of 10⁻⁴ m², is", "opts": ["1", "2", "5", "10"], "ans": 0, "why": ["Correct — A = T/(Y·strain) = 1000/(2 × 10¹¹ × 5 × 10⁻⁵) = 10⁻⁴ m², i.e. value 1.", "This doubles A, e.g. by dropping the factor (1/2) in the strain θ²/2.", "This mis-scales the small-angle strain and overestimates A fivefold.", "Ten times too large — a power-of-ten error in the tension or strain."], "sol": "Tension T = mg/(2sinθ) ≈ mg/(2θ) = (2 × 10)/(2 × 0.01) = 1000 N; strain = secθ − 1 ≈ θ²/2 = (0.01)²/2 = 5 × 10⁻⁵; T = Y·strain·A ⇒ A = T/(Y·strain) = 1000/(2 × 10¹¹ × 5 × 10⁻⁵) = 1000/10⁷ = 10⁻⁴ m², so the value is 1."},
+  {"id": 45, "lec": "SB", "blk": "PYQ 8 · JEE Main 2024", "topic": "Atwood-wire strain", "t": 180, "q": "Blocks of 2 kg and 4 kg hang over a smooth pulley from a wire (radius 4.0 × 10⁻⁵ m, Y = 2.0 × 10¹¹ N/m², g = 10 m/s²). The strain in the wire is 1/(απ); α is", "opts": ["12", "6", "3", "24"], "ans": 0, "why": ["Correct — strain = T/(AY) = (80/3)/(320π) = 1/(12π), so α = 12.", "This uses T = mg (static) instead of the Atwood tension 80/3 N, halving α.", "This uses the full 4 kg weight and misses the acceleration correction entirely.", "This doubles α, e.g. by using the wrong Atwood tension."], "sol": "Atwood acceleration a = (4 − 2)(10)/6 = 10/3 m/s²; tension T = 2(10 + 10/3) = 80/3 N; area A = πr² = 16π × 10⁻¹⁰ m²; strain = T/(AY) = (80/3)/(16π × 10⁻¹⁰ × 2 × 10¹¹) = (80/3)/(320π) = 1/(12π); α = 12."},
+  {"id": 46, "lec": "SB", "blk": "PYQ 9 · JEE Main 2024", "topic": "Strain in the hanging-block wire", "t": 180, "q": "Blocks P, Q (on a smooth table, joined by wire A) and a hanging block R, each 3 kg; wires A and B each have area 0.005 cm² and Y = 2 × 10¹¹ N/m² (g = 10 m/s²). Wire B (over a pulley to R) has a longitudinal strain n × 10⁻⁴; n is", "opts": ["2", "3", "1", "5"], "ans": 0, "why": ["Correct — T<sub>B</sub> = m<sub>R</sub>(g − a) = 20 N gives strain = 20/10⁵ = 2 × 10⁻⁴.", "This uses the full weight m<sub>R</sub>g = 30 N, ignoring the system's acceleration.", "This halves the correct tension, perhaps by double-counting the acceleration.", "This overstates the tension by using 50 N, which exceeds m<sub>R</sub>g."], "sol": "System acceleration a = m<sub>R</sub>g/(3m) = 30/9 = 10/3 m/s²; wire B carries only R: T<sub>B</sub> = m<sub>R</sub>(g − a) = 3(10 − 10/3) = 20 N; area A = 0.005 cm² = 5 × 10⁻⁷ m²; strain = T<sub>B</sub>/(AY) = 20/(5 × 10⁻⁷ × 2 × 10¹¹) = 20/10⁵ = 2 × 10⁻⁴, so n = 2."},
+  {"id": 47, "lec": "SB", "blk": "PYQ 10 · JEE Main 2024", "topic": "Breaking length under reduced gravity", "t": 180, "q": "A wire (density 6 × 10⁴ kg/m³, breaking stress 1.2 × 10⁸ N/m²) hangs on a planet where g′ = g/3 (g = 10 m/s²). The maximum length that can hang without breaking is", "opts": ["600 m", "200 m", "1800 m", "100 m"], "ans": 0, "why": ["Correct — L = σ<sub>b</sub>/(ρg′) = (1.2 × 10⁸)/(2 × 10⁵) = 600 m.", "This uses the full g = 10 instead of g′ = g/3, giving one-third of the length.", "This multiplies by 3 twice, overstating the length threefold.", "This mixes up the powers of ten in ρg′, undershooting badly."], "sol": "A hanging wire breaks when σ<sub>b</sub> = ρg′L ⇒ L = σ<sub>b</sub>/(ρg′); g′ = g/3 = 10/3 m/s²; L = (1.2 × 10⁸)/(6 × 10⁴ × 10/3) = (1.2 × 10⁸)/(2 × 10⁵) = 600 m. Weaker gravity lets it hang three times longer."},
+  {"id": 48, "lec": "SB", "blk": "PYQ 11 · JEE Main 2024", "topic": "Same-volume force ratio", "t": 180, "q": "Wires P and Q are of the same material and same volume, with areas in the ratio 4 : 1. A force F₁ on P and a force F₂ on Q produce the same extension. The value of F₁/F₂ is", "opts": ["16", "4", "8", "1/16"], "ans": 0, "why": ["Correct — at fixed volume F ∝ A², so F₁/F₂ = (4/1)² = 16.", "This is just the area ratio; it ignores that the length also changes with A at fixed volume.", "This takes only one power of the area change beyond the ratio, missing the full A² scaling.", "This is the inverse of the true ratio, obtained by flipping P and Q."], "sol": "Same volume V = AL ⇒ L ∝ 1/A, so L<sub>P</sub> : L<sub>Q</sub> = 1 : 4; equal extension ΔL = FL/(AY) ⇒ F ∝ A/L ∝ A²; F₁/F₂ = (A<sub>P</sub>/A<sub>Q</sub>)² = 4² = 16."},
+  {"id": 49, "lec": "SB", "blk": "PYQ 12 · JEE Main 2024", "topic": "Upper vs lower wire strain", "t": 180, "q": "A 2 kg load hangs from a wire fixed to the ceiling; a similar wire below it carries a further 1 kg load. The ratio of the longitudinal strain in the upper wire to that in the lower wire is", "opts": ["3 : 1", "1 : 3", "2 : 1", "1 : 1"], "ans": 0, "why": ["Correct — identical wires give strain ∝ tension, so (30 N)/(10 N) = 3 : 1.", "This inverts the ratio, assigning the larger strain to the lower wire.", "This counts only the 2 kg load on the upper wire, ignoring the 1 kg hanging below it.", "Equal strains would require equal tensions, but the upper wire carries three times the load."], "sol": "Upper wire carries both loads: T<sub>upper</sub> = (2 + 1)g = 30 N; lower wire carries only 1 kg: T<sub>lower</sub> = 10 N; identical A and Y ⇒ strain = T/(AY) ∝ T; ratio = 30/10 = 3 : 1."},
+  {"id": 50, "lec": "SB", "blk": "PYQ 13 · JEE Main 2024", "topic": "Radius and force both halved", "t": 180, "q": "A wire stretches by l under a force F. If both the radius and the force are halved while the length is unchanged, the new extension is", "opts": ["2 times l", "4 times l", "3 times l", "(3/2) times l"], "ans": 0, "why": ["Correct — halving F halves l, halving r quarters the area and quadruples l; net 4 × (1/2) = 2.", "This counts only the area effect (×4) and forgets that the force is also halved.", "This is an incorrect average of the two effects rather than their product.", "This mis-combines the factors, giving neither the force nor the area scaling correctly."], "sol": "Extension l = FL/(πr²Y); with F′ = F/2 and r′ = r/2 the area becomes πr²/4, so l′ = (F/2)L/(πr²/4 · Y) = (F/2)(4)L/(πr²Y) = 2FL/(πr²Y) = 2l."},
+  {"id": 51, "lec": "SB", "blk": "PYQ 14 · JEE Main 2024", "topic": "Spring tension for 3a − 2b", "t": 180, "q": "An elastic spring has length a under a tension of 3 N and length b under a tension of 2 N. The tension corresponding to a length (3a − 2b) is", "opts": ["5 N", "1 N", "7 N", "12 N"], "ans": 0, "why": ["Correct — keeping the natural length explicit, 3a − 2b corresponds to tension 3(3) − 2(2) = 5 N.", "This is the difference of the two tensions (3 − 2), which is not what the combination gives.", "This adds the tensions with the wrong signs (3·3 − 2·... ) and lands on 7.", "This treats the spring as if it had no natural length, over-counting the tension."], "sol": "With length = L₀ + F/k: a = L₀ + 3/k, b = L₀ + 2/k; 3a − 2b = 3(L₀ + 3/k) − 2(L₀ + 2/k) = L₀ + (9 − 4)/k = L₀ + 5/k; this matches length = L₀ + F/k with F = 5 N."},
+  {"id": 52, "lec": "SB", "blk": "PYQ 15 · JEE Main 2023", "topic": "Thermal-stress mass", "t": 180, "q": "A rod (area 3 × 10⁻⁶ m², Y = 2 × 10¹¹ N/m², α = 2 × 10⁻⁵ K⁻¹) is cooled by 50 K; a mass M hung at its lower end restores its original length (g = 10 m/s²). M is", "opts": ["60 kg", "30 kg", "120 kg", "6 kg"], "ans": 0, "why": ["Correct — Mg = YαΔθA = 600 N, so M = 60 kg.", "Half the correct value — this drops a factor of 2 somewhere in YαΔθA.", "Twice too large — an extra factor of 2 in the thermal strain αΔθ.", "Ten times too small — a power-of-ten slip when dividing by g."], "sol": "The mass must stretch the rod by the thermal contraction: αΔθ = Mg/(AY) ⇒ Mg = YαΔθA = (2 × 10¹¹)(2 × 10⁻⁵)(50)(3 × 10⁻⁶) = 600 N; M = 600/10 = 60 kg."},
+  {"id": 53, "lec": "SB", "blk": "PYQ 16 · JEE Main 2023", "topic": "Elongation of a steel wire", "t": 180, "q": "A steel wire (length 1.6 m, radius 0.2 cm, Y = 2 × 10¹¹ N/m²) carries a total hanging load of 3.14 kg below it (g = 10 m/s²). Its elongation, in units of 10⁻⁶ m, is", "opts": ["20", "2", "200", "10"], "ans": 0, "why": ["Correct — ΔL = TL/(AY) = 2 × 10⁻⁵ m = 20 × 10⁻⁶ m.", "Ten times too small — a power-of-ten slip in the area A = 4π × 10⁻⁶ m².", "Ten times too large — treating the radius or load with a wrong power of ten.", "Half the correct value — an erroneous extra factor (1/2)."], "sol": "Load T = 3.14 × 10 = 31.4 N = 10π N; area A = πr² = π(0.2 × 10⁻²)² = 4π × 10⁻⁶ m²; ΔL = TL/(AY) = (10π × 1.6)/(4π × 10⁻⁶ × 2 × 10¹¹) = 16π/(8π × 10⁵) = 2 × 10⁻⁵ m = 20 × 10⁻⁶ m."},
+  {"id": 54, "lec": "SB", "blk": "PYQ 17 · JEE Main 2023", "topic": "Elongation ratio from Y and A", "t": 180, "q": "Young's moduli of wires A and B are in the ratio 1 : 4 and their cross-sectional areas in the ratio 1 : 3. Under the same load and the same length, the ratio of the elongation in A to that in B is", "opts": ["12 : 1", "1 : 12", "36 : 1", "1 : 36"], "ans": 0, "why": ["Correct — ΔL ∝ 1/(AY), so A : B = (A<sub>B</sub>Y<sub>B</sub>)/(A<sub>A</sub>Y<sub>A</sub>) = 3 × 4 = 12 : 1.", "This inverts the ratio, assigning the larger elongation to the stiffer, thicker wire B.", "This multiplies the two ratios instead of combining them correctly, overstating to 36.", "This both inverts and over-multiplies the ratios."], "sol": "ΔL = FL/(AY) with the same F and L ⇒ ΔL ∝ 1/(AY); ΔL<sub>A</sub>/ΔL<sub>B</sub> = (A<sub>B</sub>Y<sub>B</sub>)/(A<sub>A</sub>Y<sub>A</sub>) = (A<sub>B</sub>/A<sub>A</sub>)(Y<sub>B</sub>/Y<sub>A</sub>) = 3 × 4 = 12, i.e. 12 : 1."},
+];
+
+/* ============================================================
+   ENGINE  v2 — one question at a time · soft per-question timer ·
+   downloadable result page.  Identical across chapters.
+   ============================================================ */
+const BY_ID = {}; QUIZ.forEach(q => BY_ID[q.id] = q);
+const LETTERS = ["A","B","C","D","E","F"];
+const DEFAULT_T = 90;                       // seconds, for a question with no t
+const CH_TITLE = document.querySelector("header.hero h1").textContent.trim();
+const CH_TAG   = CH_TITLE.split("·")[0].trim();
+const DONE_TITLE = "Chapter " + CH_TAG + " mastered";
+const FILE_TAG = (decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html?$/i, "") || CH_TAG + "_Quiz").replace(/[^\w-]+/g, "");
+
+let selected = LECTURES.map(l => l.key);   // all lectures on by default
+let selIds   = [];                          // ids in the chosen lectures
+let round = 0, pool = [], order = {}, picked = {};
+let wrongIds = [], leftIds = [], attempts = {}, history = [];
+let cur = 0, spent = {}, roundSecs = 0, totalSecs = 0, log = [];
+let startedAt = null, autoSaved = false;
+
+function $(id){ return document.getElementById(id); }
+function show(scr){
+  ["intro","quiz","sub","review","done"].forEach(s => $("scr-"+s).classList.add("hide"));
+  $("scr-"+scr).classList.remove("hide");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function lecName(key){ const l = LECTURES.find(x => x.key === key); return l ? l.name : key; }
+function countIn(key){ return QUIZ.filter(q => q.lec === key).length; }
+function budget(q){ return q.t || DEFAULT_T; }
+function fmt(s){ s = Math.round(s || 0); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- lecture picker ---------- */
+function renderPicker(){
+  const box = $("lecPicker");
+  box.innerHTML = "";
+  LECTURES.forEach(l => {
+    const on = selected.indexOf(l.key) !== -1;
+    const lab = document.createElement("label");
+    lab.className = "lecpick" + (on ? " on" : "");
+    lab.id = "lp_" + l.key;
+    lab.onclick = function(e){ if (e.target.tagName !== "INPUT") { e.preventDefault(); } toggleLecture(l.key); };
+    lab.innerHTML = '<input type="checkbox" ' + (on ? "checked" : "") + '>' +
+      '<span><span class="nm">' + l.name + '</span><br><span class="ds">' + l.desc + '</span></span>' +
+      '<span class="ct">' + countIn(l.key) + ' Q</span>';
+    box.appendChild(lab);
+  });
+  const n = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).length;
+  $("selCount").textContent = n + " question" + (n === 1 ? "" : "s") + " selected";
+  $("startBtn").disabled = (n === 0);
+}
+function toggleLecture(key){
+  const i = selected.indexOf(key);
+  if (i === -1) selected.push(key); else selected.splice(i, 1);
+  renderPicker();
+}
+function setAllLectures(on){
+  selected = on ? LECTURES.map(l => l.key) : [];
+  renderPicker();
+}
+
+/* ---------- rounds ---------- */
+function startQuiz(){
+  selIds = QUIZ.filter(q => selected.indexOf(q.lec) !== -1).map(q => q.id);
+  if (!selIds.length) return;
+  round = 0; pool = selIds.slice(); attempts = {}; history = []; log = [];
+  totalSecs = 0; startedAt = new Date(); autoSaved = false;
+  $("pSel").textContent = selIds.length;
+  examStart();
+  nextRound();
+}
+function backToIntro(){
+  examStop();
+  round = 0; pool = []; picked = {}; order = {}; spent = {};
+  wrongIds = []; leftIds = []; attempts = {}; history = []; log = [];
+  renderPicker();
+  show("intro");
+}
+
+function nextRound(){
+  round++;
+  pool.forEach(id => { attempts[id] = (attempts[id] || 0) + 1; });
+  renderPool();
+}
+
+function renderPool(){
+  picked = {}; order = {}; spent = {}; roundSecs = 0; cur = 0;
+  pool.forEach(id => { order[id] = shuffle(BY_ID[id].opts.map((_, k) => k)); });
+  $("pRound").textContent = round;
+  $("pCount").textContent = pool.length;
+  $("pTot").textContent = pool.length;
+  $("pMast").textContent = selIds.length - pool.length;
+  $("pSel").textContent = selIds.length;
+  $("pTime").textContent = "0:00";
+
+  // palette: one button per question, grouped by lecture
+  const pal = $("palette");
+  pal.innerHTML = "";
+  let grp = null, curLec = null;
+  pool.forEach((id, i) => {
+    const q = BY_ID[id];
+    if (q.lec !== curLec){
+      curLec = q.lec;
+      grp = document.createElement("div"); grp.className = "pgrp";
+      grp.innerHTML = '<span class="plab">' + q.lec + '</span>';
+      pal.appendChild(grp);
+    }
+    const b = document.createElement("button");
+    b.className = "pb"; b.id = "pb" + id; b.textContent = i + 1;
+    b.title = q.blk + " · " + q.topic;
+    b.onclick = function(){ showQ(i); };
+    grp.appendChild(b);
+  });
+  showQ(0);
+  updateProgress();
+  show("quiz");
+}
+
+function showQ(i){
+  if (i < 0 || i >= pool.length) return;
+  cur = i;
+  const id = pool[i], q = BY_ID[id];
+  let h = '<div class="sechead" style="margin-top:0">' + lecName(q.lec) + '</div>' +
+          '<div class="q" id="q' + id + '">' +
+          '<div class="qhead"><span class="qnum">Q' + (i + 1) + '</span>' +
+          '<span class="qlec">' + q.lec + '</span>' +
+          '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span>';
+  if (attempts[id] > 1) h += '<span class="qtopic">· attempt ' + attempts[id] + '</span>';
+  h += '<span class="clock" id="clock" title="time on this question / soft budget">0:00 / ' + fmt(budget(q)) + '</span>' +
+       '</div><div class="qtext">' + q.q + '</div>';
+  order[id].forEach((orig, k) => {
+    const on = picked[id] === orig;
+    h += '<label class="opt' + (on ? ' picked' : '') + '" id="o' + id + '_' + orig + '" onclick="pick(' + id + ',' + orig + ')">' +
+         '<input type="radio" name="q' + id + '"' + (on ? ' checked' : '') + '>' +
+         '<span class="lt">' + LETTERS[k] + '.</span>' +
+         '<span>' + q.opts[orig] + '</span></label>';
+  });
+  h += '</div>';
+  $("qcard").innerHTML = h;
+  $("pCur").textContent = i + 1;
+  $("prevBtn").disabled = (i === 0);
+  $("nextBtn").disabled = (i === pool.length - 1);
+  pool.forEach(x => { const b = $("pb" + x); if (b) b.classList.toggle("cur", x === id); });
+  paintClock();
+}
+
+function pick(id, orig){
+  dirty = true;
+  picked[id] = orig;
+  BY_ID[id].opts.forEach((_, k) => {
+    const el = $("o" + id + "_" + k);
+    if (el) el.classList.toggle("picked", k === orig);
+  });
+  const b = $("pb" + id); if (b) b.classList.add("ans");
+  updateProgress();
+}
+
+function updateProgress(){
+  const n = Object.keys(picked).length, left = pool.length - n;
+  $("pAns").textContent = n;
+  $("pBar").style.width = (pool.length ? (n / pool.length * 100) : 0) + "%";
+  $("submitHint").innerHTML = left
+    ? "<b>" + left + "</b> question" + (left === 1 ? "" : "s") + " still unanswered — unanswered counts as wrong and comes back in the next round."
+    : "Every question in this round has an answer. Submit to see your score and the review.";
+}
+
+/* ---------- soft timer: counts only while the question screen is up ---------- */
+function timerOn(){
+  return examActive && !examPaused && !$("scr-quiz").classList.contains("hide") && !isAway();
+}
+function tick(){
+  if (!timerOn()) return;
+  const id = pool[cur];
+  if (id === undefined) return;
+  spent[id] = (spent[id] || 0) + 1;
+  roundSecs++; totalSecs++;
+  $("pTime").textContent = fmt(roundSecs);
+  paintClock();
+}
+function paintClock(){
+  const id = pool[cur]; if (id === undefined) return;
+  const s = spent[id] || 0, b = budget(BY_ID[id]);
+  const c = $("clock"), card = $("q" + id), pb = $("pb" + id);
+  if (!c) return;
+  c.textContent = fmt(s) + " / " + fmt(b);
+  const over = s >= b, warn = !over && s >= 0.75 * b;
+  c.classList.toggle("warn", warn); c.classList.toggle("over", over);
+  if (card){ card.classList.toggle("warn", warn); card.classList.toggle("over", over); }
+  if (pb) pb.classList.toggle("over", over);
+}
+setInterval(tick, 1000);
+
+document.addEventListener("keydown", e => {
+  if ($("scr-quiz").classList.contains("hide") || examPaused) return;
+  if (e.key === "ArrowRight"){ showQ(cur + 1); e.preventDefault(); }
+  else if (e.key === "ArrowLeft"){ showQ(cur - 1); e.preventDefault(); }
+  else if (/^[1-6]$/.test(e.key)){
+    const id = pool[cur]; if (id === undefined) return;
+    const orig = order[id][+e.key - 1];
+    if (orig !== undefined) pick(id, orig);
+  }
+});
+
+/* ---------- submit → review is compulsory ---------- */
+function submitRound(){
+  wrongIds = []; leftIds = [];
+  let right = 0, slow = 0;
+  pool.forEach(id => {
+    const q = BY_ID[id], secs = spent[id] || 0, b = budget(q);
+    const has = (id in picked), ok = has && picked[id] === q.ans;
+    if (!has) leftIds.push(id);
+    else if (ok) right++;
+    else wrongIds.push(id);
+    if (ok && secs > b) slow++;
+    log.push({ round: round, id: id, pick: has ? picked[id] : null, ok: ok,
+               secs: secs, budget: b, over: secs > b });
+  });
+
+  const missed = wrongIds.concat(leftIds);
+  history.push({ round: round, asked: pool.length, right: right,
+                 wrong: wrongIds.length, left: leftIds.length, secs: roundSecs, slow: slow });
+  pool = pool.filter(id => missed.indexOf(id) !== -1);
+
+  if (pool.length === 0){ finish(); return; }
+
+  $("subTitle").textContent = "Round " + round + " submitted";
+  $("subScore").textContent = right + " / " + history[history.length - 1].asked + " correct";
+  $("subDetail").innerHTML =
+    "<b>" + wrongIds.length + "</b> answered wrong · <b>" + leftIds.length + "</b> left blank · " +
+    "<b>" + (selIds.length - pool.length) + "/" + selIds.length + "</b> of the selection now mastered.<br>" +
+    "Round time <b>" + fmt(roundSecs) + "</b> · <b>" + slow + "</b> correct answer" + (slow === 1 ? "" : "s") +
+    " ran over the time budget.";
+  $("subBtn").textContent = "Review the " + pool.length + " missed question(s) →";
+  show("sub");
+}
+
+function showReview(){
+  $("rvRound").textContent = round;
+  $("rvHead").innerHTML = "Showing the <b>" + wrongIds.length + " wrong</b> and <b>" +
+    leftIds.length + " unanswered</b> question(s). For each one: why the correct option is correct, and why every other option is wrong.";
+  $("rvBtn").textContent = "Re-quiz these " + pool.length + " question(s) →";
+
+  const list = $("rvlist");
+  list.innerHTML = "";
+
+  // correct but over budget — no solutions, just the flag
+  const slowOnes = log.filter(e => e.round === round && e.ok && e.over);
+  if (slowOnes.length){
+    const d = document.createElement("div");
+    d.className = "banner";
+    let h = '<h2>⏱ Correct, but over time (' + slowOnes.length + ')</h2>' +
+            '<div style="font-size:.88rem;color:var(--muted)">Right answer, slow route. Worth a second look at the ⚡ shortcut before the exam.</div>';
+    slowOnes.forEach(e => {
+      const q = BY_ID[e.id];
+      h += '<div class="slowrow"><span class="qlec">' + q.lec + '</span> ' + q.blk + ' · ' + q.topic +
+           ' — <span class="tover">' + fmt(e.secs) + '</span> of ' + fmt(e.budget) + '</div>';
+    });
+    d.innerHTML = h;
+    list.appendChild(d);
+  }
+
+  wrongIds.concat(leftIds).forEach(id => {
+    const q = BY_ID[id];
+    const wasLeft = leftIds.indexOf(id) !== -1;
+    const secs = spent[id] || 0, b = budget(q);
+    const div = document.createElement("div");
+    div.className = "rv" + (wasLeft ? " left" : "");
+    let h = '<div class="qhead"><span class="tagbad' + (wasLeft ? ' tagleft' : '') + '">' +
+            (wasLeft ? 'Left blank' : 'Wrong') + '</span>' +
+            '<span class="qlec">' + q.lec + '</span>' +
+            '<span class="qtopic">' + q.blk + ' · ' + q.topic + '</span></div>' +
+            '<div class="qtext">' + q.q + '</div>' +
+            '<div class="yourans">Your answer: <b>' +
+            (wasLeft ? "— nothing selected —" : q.opts[picked[id]]) + '</b> · ⏱ ' +
+            (secs > b ? '<span class="tover">' + fmt(secs) + '</span>' : fmt(secs)) + ' of ' + fmt(b) + ' budget</div>';
+    order[id].forEach((orig, k) => {
+      const isAns = (orig === q.ans);
+      const isYours = (!wasLeft && picked[id] === orig);
+      h += '<div class="orow' + (isAns ? " correct" : (isYours ? " yours" : "")) + '">' +
+           '<span class="mark">' + (isAns ? "✓" : (isYours ? "✗" : "·")) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + q.opts[orig] + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (isYours ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK</b>' : '') +
+           '<span class="why">' + q.why[orig] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div>';
+    div.innerHTML = h;
+    list.appendChild(div);
+  });
+  show("review");
+}
+
+function finish(){
+  const names = selected.map(k => k).join(", ");
+  $("dnTitle").textContent = (selected.length === LECTURES.length)
+    ? DONE_TITLE : "Selection mastered";
+  $("dnLine").innerHTML = "All <b>" + selIds.length + "</b> question(s) across <b>" + names +
+    "</b> answered correctly, in <b>" + round + "</b> round(s) and <b>" + fmt(totalSecs) + "</b>.";
+  $("dnHist").innerHTML = historyTable() + '<p style="margin-top:10px">' + summaryLine() +
+    (leaveCount ? ' <b style="color:var(--bad)">Left the quiz ' + leaveCount + ' time(s).</b>' : '') +
+    '</p><p style="margin-top:6px">A result page has been downloaded for later review — keep it in <b>Quiz/Results/</b>.</p>';
+  examStop();
+  show("done");
+  if (!autoSaved){ autoSaved = true; downloadResult(); }
+}
+
+function historyTable(){
+  let t = '<table><tr><th>Round</th><th>Asked</th><th>Correct</th><th>Wrong</th><th>Blank</th><th>Time</th><th>Correct but slow</th></tr>';
+  history.forEach(h => {
+    t += '<tr><td>' + h.round + '</td><td>' + h.asked + '</td><td>' + h.right +
+         '</td><td>' + h.wrong + '</td><td>' + h.left + '</td><td>' + fmt(h.secs) + '</td><td>' + h.slow + '</td></tr>';
+  });
+  return t + '</table>';
+}
+function summaryLine(){
+  const repeats = Object.keys(attempts).filter(k => attempts[k] > 1).length;
+  const overAny = selIds.filter(id => log.some(e => e.id === id && e.over)).length;
+  return repeats + ' of the ' + selIds.length + ' questions needed more than one attempt; ' +
+         overAny + ' went over the time budget at least once.';
+}
+
+/* ============================================================
+   RESULT PAGE — self-contained HTML, downloaded for later review
+   ============================================================ */
+function buildResultHTML(){
+  const now = new Date();
+  const when = now.toLocaleString();
+  const done = pool.length === 0 && history.length > 0;
+  const lecs = selected.map(k => lecName(k)).join(" · ");
+  const idx = {}; selIds.forEach((id, i) => idx[id] = i + 1);
+  const byId = {}; log.forEach(e => { (byId[e.id] = byId[e.id] || []).push(e); });
+
+  let h = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>' + esc(CH_TAG) + ' Quiz Result · ' + esc(when) + '</title>' +
+    '<style>' + document.querySelector("style").textContent +
+    '\n.rs table{width:100%;border-collapse:collapse;font-size:.85rem;margin:8px 0}' +
+    '.rs th,.rs td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}' +
+    '.rs th{background:var(--card2);color:var(--brand2)}' +
+    'tr.miss td{background:var(--bad-bg)} tr.slowq td:first-child{box-shadow:inset 4px 0 0 var(--warn)}' +
+    '.ok{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.ovr{color:var(--warn);font-weight:700}' +
+    '.tag{display:inline-block;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 7px;color:#fff;margin-left:6px}' +
+    '</style></head><body><div class="wrap rs">';
+
+  h += '<header class="hero"><p>ICAD · Chapter Mastery Quiz · result sheet</p><h1>' + CH_TITLE + '</h1>' +
+       '<p>' + esc(when) + ' · ' + (done ? '🏆 mastered' : '⏳ in progress — ' + pool.length + ' question(s) still open') +
+       ' · ' + selIds.length + ' questions · ' + round + ' round(s) · total time ' + fmt(totalSecs) + '</p>' +
+       '<p style="font-size:.82rem">Lectures: ' + lecs + '</p></header>';
+
+  h += '<div class="banner"><h2>Rounds</h2>' + historyTable() + '<p style="margin:8px 0 0;font-size:.9rem">' + summaryLine() +
+       (leaveCount ? ' Left the quiz ' + leaveCount + ' time(s).' : '') + '</p></div>';
+
+  // per-lecture summary
+  h += '<div class="banner"><h2>By lecture</h2><table><tr><th>Lecture</th><th>Q</th><th>Right first time</th><th>Over budget (any round)</th><th>Avg time, 1st attempt</th><th>Total time</th></tr>';
+  selected.forEach(k => {
+    const ids = selIds.filter(id => BY_ID[id].lec === k);
+    if (!ids.length) return;
+    let first = 0, over = 0, firstSecs = 0, tot = 0;
+    ids.forEach(id => {
+      const es = byId[id] || [];
+      if (es.length && es[0].ok) first++;
+      if (es.some(e => e.over)) over++;
+      if (es.length) firstSecs += es[0].secs;
+      es.forEach(e => tot += e.secs);
+    });
+    h += '<tr><td>' + lecName(k) + '</td><td>' + ids.length + '</td><td>' + first + ' / ' + ids.length +
+         ' (' + Math.round(100 * first / ids.length) + '%)</td><td>' + over + '</td><td>' +
+         fmt(ids.length ? firstSecs / ids.length : 0) + '</td><td>' + fmt(tot) + '</td></tr>';
+  });
+  h += '</table></div>';
+
+  // per-question table
+  h += '<div class="banner"><h2>Every question</h2><table><tr><th>#</th><th>Lecture · topic</th><th>Budget</th><th>Round by round</th><th>Status</th></tr>';
+  selIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    const missed = es.some(e => !e.ok), slow = es.some(e => e.ok && e.over);
+    const cells = es.map(e => 'R' + e.round + ' ' + (e.pick === null ? '<span class="bad">— blank</span>' : (e.ok ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>')) +
+                               ' ' + (e.over ? '<span class="ovr">' + fmt(e.secs) + '</span>' : fmt(e.secs))).join(' · ');
+    const last = es[es.length - 1];
+    const status = !es.length ? 'not reached' : (last.ok ? '<span class="ok">mastered</span>' : '<span class="bad">open</span>');
+    h += '<tr class="' + (missed ? 'miss ' : '') + (slow ? 'slowq' : '') + '"><td>' + idx[id] + '</td><td><span class="qlec">' + q.lec +
+         '</span> ' + q.blk + ' · ' + q.topic + '</td><td>' + fmt(budget(q)) + '</td><td>' + (cells || '—') + '</td><td>' + status + '</td></tr>';
+  });
+  h += '</table><p style="font-size:.8rem;color:var(--muted)">Red rows were missed at least once; an amber bar marks a correct answer that ran over its budget.</p></div>';
+
+  // full revision cards for everything missed at least once
+  const missedIds = selIds.filter(id => (byId[id] || []).some(e => !e.ok));
+  h += '<div class="banner mix"><h2>Revision sheet · ' + missedIds.length + ' question(s) missed at least once</h2>' +
+       '<div style="font-size:.9rem">Options are in the book order here. Every option carries its reason, followed by the full working.</div></div>';
+  missedIds.forEach(id => {
+    const q = BY_ID[id], es = byId[id] || [];
+    h += '<div class="rv"><div class="qhead"><span class="qnum">#' + idx[id] + '</span><span class="qlec">' + q.lec + '</span>' +
+         '<span class="qtopic">' + q.blk + ' · ' + q.topic + ' · budget ' + fmt(budget(q)) + '</span></div>' +
+         '<div class="qtext">' + q.q + '</div>' +
+         '<div class="yourans">' + es.map(e => 'Round ' + e.round + ': ' + (e.pick === null ? 'left blank' : (e.ok ? 'correct' : 'wrong')) + ' in ' + fmt(e.secs)).join(' · ') + '</div>';
+    q.opts.forEach((o, k) => {
+      const isAns = (k === q.ans);
+      const yours = es.filter(e => e.pick === k && !e.ok).map(e => 'R' + e.round);
+      h += '<div class="orow' + (isAns ? ' correct' : (yours.length ? ' yours' : '')) + '">' +
+           '<span class="mark">' + (isAns ? '✓' : (yours.length ? '✗' : '·')) + '</span>' +
+           '<span class="txt">' + LETTERS[k] + '. ' + o + '</span>' +
+           (isAns ? ' <b style="color:var(--good);font-size:.8rem">CORRECT</b>' : '') +
+           (yours.length ? ' <b style="color:var(--bad);font-size:.8rem">YOUR PICK ' + yours.join(', ') + '</b>' : '') +
+           '<span class="why">' + q.why[k] + '</span></div>';
+    });
+    h += '<div class="sol"><span class="h">Full working</span>' + q.sol + '</div></div>';
+  });
+
+  h += '<div class="foot">Generated by ' + esc(CH_TAG) + ' mastery quiz · ' + esc(when) +
+       ' · started ' + esc(startedAt ? startedAt.toLocaleString() : '—') + '</div></div></body></html>';
+  return h;
+}
+
+function downloadResult(){
+  if (!history.length && !Object.keys(picked).length){ return; }
+  const html = buildResultHTML();
+  const d = new Date(), p = n => ("0" + n).slice(-2);
+  const stamp = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  const name = "Result_" + FILE_TAG + "_" + stamp + ".html";   // Result_M8A_Quiz_20261104_183045.html
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+/* ============================================================
+   EXAM LOCK — fullscreen + leave detection
+   Always on. Leaving is only scored if they stay away longer than
+   LEAVE_GRACE_MS. First scored leave warns; every one after that
+   clears the current round. Mastered questions are never touched.
+   ============================================================ */
+const LEAVE_GRACE_MS = 5000;   // come back inside this and it never happened
+
+let examActive = false, examPaused = false, strikes = 0, leaveCount = 0;
+let fsOk = false, dirty = false, pendingLeave = null;
+
+function enterFullscreen(){
+  const el = document.documentElement;
+  if (!el.requestFullscreen) return;                 // unsupported: lock still works, minus fullscreen
+  el.requestFullscreen().then(() => { fsOk = true; }).catch(() => {});
+}
+function examStart(){
+  examActive = true; examPaused = false;
+  strikes = 0; leaveCount = 0; fsOk = false; dirty = false;
+  cancelLeave();
+  enterFullscreen();
+}
+function examStop(){
+  examActive = false; examPaused = false; dirty = false;
+  cancelLeave();
+  $("lockOverlay").classList.add("hide");
+  if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+}
+function restartRound(){ picked = {}; renderPool(); }
+
+/* The single source of truth for "they are not sitting the quiz right now".
+   Alt-Tabbing to another app leaves the tab VISIBLE but unfocused, so
+   document.hidden alone is not enough — hasFocus() is what catches it. */
+function isAway(){
+  return document.hidden || !document.hasFocus() || (fsOk && !document.fullscreenElement);
+}
+function reassess(){
+  if (!examActive || examPaused) return;
+  isAway() ? scheduleLeave() : cancelLeave();
+}
+
+/* away → start the clock. One Alt-Tab fires blur + visibilitychange +
+   fullscreenchange together; the pendingLeave guard collapses them into one. */
+function scheduleLeave(){
+  if (!examActive || examPaused || pendingLeave) return;
+  pendingLeave = setTimeout(commitLeave, LEAVE_GRACE_MS);
+}
+function cancelLeave(){
+  if (pendingLeave){ clearTimeout(pendingLeave); pendingLeave = null; }
+}
+function commitLeave(){
+  pendingLeave = null;
+  if (!examActive || examPaused) return;
+  if (!isAway()) return;              // came back without firing an event — no penalty
+  leaveCount++; strikes++;
+  examPaused = true;
+
+  // the round can only be cleared while the question screen is up — not mid-review
+  const onQuiz  = !$("scr-quiz").classList.contains("hide");
+  const penalty = strikes >= 2 && onQuiz;
+  if (penalty) restartRound();
+
+  $("lockIcon").innerHTML  = penalty ? "&#9940;" : "&#9888;";
+  $("lockTitle").textContent = penalty ? "This round has been restarted" : "You left the quiz";
+  $("lockMsg").innerHTML = penalty
+    ? "You left again, so <b>every answer in this round has been cleared</b> and you sit it again. Questions you had already mastered in earlier rounds are untouched."
+    : "This quiz is meant to be sat in one go, without leaving the window. <b>Leave again and this round restarts</b> \u2014 every answer in it is cleared and you sit it again.";
+  $("lockSub").textContent = "Times you have left: " + leaveCount;
+  $("lockOverlay").classList.remove("hide");
+}
+function resumeQuiz(){
+  $("lockOverlay").classList.add("hide");
+  examPaused = false;
+  cancelLeave();
+  enterFullscreen();
+}
+
+window.addEventListener("blur",  reassess);
+window.addEventListener("focus", reassess);
+document.addEventListener("visibilitychange", reassess);
+document.addEventListener("fullscreenchange", reassess);
+window.addEventListener("beforeunload", e => {
+  if (examActive && dirty){ e.preventDefault(); e.returnValue = ""; return ""; }
+});
+
+renderPicker();
+</script>
+</body>
+</html>

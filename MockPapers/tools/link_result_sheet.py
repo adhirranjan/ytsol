@@ -15,12 +15,14 @@ text and are reported. Idempotent: old tag links are removed before relinking.
 Usage: python link_result_sheet.py <result-sheet.html> [...]
 """
 import glob, json, os, re, sys
+from urllib.parse import quote
 from collections import defaultdict
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 BOOKS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 YS = os.path.join(BOOKS, "YouTube_Solutions")
 ANCHORS = os.path.join(YS, "tools", "row_anchors.json")
+SITE = "https://ytsol.vercel.app/YouTube_Solutions/"   # published solution pages
 
 # stem = chapter (+ optional letter) + optional lecture(s) or Strong Box + optional X (exam marker)
 CODE_RE = re.compile(r"^(?P<stem>[A-Z]+\d+[A-Z]?(?:(?:L\d+)+|SB)?X?)V(?P<lvl>Sugg|PYQ|Board|[A-Z]+\d+|\d+)Q(?P<num>\d+)$")
@@ -106,9 +108,10 @@ def link_file(path, by_stem, paths, here_dir):
             problems.append((code, status))
             return f'<span class="tag">{code}</span>'
         stats[status] += 1
-        rel = os.path.relpath(paths[row["page"]], here_dir).replace(os.sep, "/")
+        rel = os.path.relpath(paths[row["page"]], YS).replace(os.sep, "/")
+        href = SITE + quote(rel) + "#" + row["anchor"]
         return (f'<a class="tag-link" target="_blank" rel="noopener" '
-                f'href="{rel}#{row["anchor"]}"><span class="tag">{code}</span></a>')
+                f'href="{href}"><span class="tag">{code}</span></a>')
 
     new = TAG_RE.sub(repl, text)
     if "a.tag-link" not in new:

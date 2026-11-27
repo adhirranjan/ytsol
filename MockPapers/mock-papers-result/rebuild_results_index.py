@@ -1,4 +1,4 @@
-"""Rebuild Results_Index.html from every *-Result-Sheet.html in this folder. Re-run after adding a sheet."""
+"""Rebuild Results_Index.html from every *-Result-Sheet.html under this folder (one subfolder per exam: CAT5/, CAT6/, CAT7/, RT3/, RT4/, RT5/). Re-run after adding a sheet."""
 import re, sys, html
 from pathlib import Path
 
@@ -13,12 +13,14 @@ def strip(s):
 
 def parse(p):
     t = p.read_text(encoding="utf-8")
+    # href relative to this folder, e.g. CAT7/CAT7-Set1-Result-Sheet.html (sheets live in one subfolder per exam)
+    rel = p.relative_to(HERE).as_posix()
     # RT4-Set10-..., a remediation paper RT4-Final-Set-A-..., or the real paper RT4-Exam-... (sorts last)
     m = re.match(r"(\w+?)-(?:Set(\d+)|Final-(?:Set-)?([A-Z])|Exam)-", p.name)
     total = re.search(r"<b>([\d.]+)</b><span class=\"of\">/\s*([\d.]+)", t)
     subs = re.findall(r'subj-score">([\d.]+) <small>/ ([\d.]+)', t)
     sub = re.search(r'<p class="sub">(.*?)</p>', t, re.S)
-    return dict(mtime=p.stat().st_mtime, file=p.name, exam=m[1], set=(0, int(m[2])) if m[2] else (1, m[3]) if m[3] else (2, ""),
+    return dict(mtime=p.stat().st_mtime, file=rel, exam=m[1], set=(0, int(m[2])) if m[2] else (1, m[3]) if m[3] else (2, ""),
                 label=f"Set {m[2]}" if m[2] else f"Final {m[3]}" if m[3] else "Real exam",
                 title=strip(re.search(r"<h1>(.*?)</h1>", t, re.S)[1]),
                 got=float(total[1]), out=float(total[2]), subs=subs,
@@ -29,7 +31,7 @@ def n(x):
     return f"{x:g}"
 
 
-rows = [parse(p) for p in HERE.glob("*-Result-Sheet.html")]
+rows = [parse(p) for p in HERE.glob("**/*-Result-Sheet.html")]   # sheets sit in <EXAM>/ subfolders
 exams = sorted({r["exam"] for r in rows}, key=lambda e: -max(r["mtime"] for r in rows if r["exam"] == e))
 
 out = []

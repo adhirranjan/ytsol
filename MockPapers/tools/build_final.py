@@ -52,7 +52,7 @@ PRIOR = collections.Counter(CHAP(c) for c in ANS)
 def sheet_order(p):
     n = re.search(r"-(?:Set(\d+)|Final-(?:Set-)?([A-H]))-Result", p)   # Final-A or Final-Set-A
     return (1, n.group(2)) if n.group(2) else (0, "%03d" % int(n.group(1)))
-sheets = sorted((p for p in glob.glob(os.path.join(MP, "mock-papers-result", "%s-*-Result-Sheet.html" % EXAM))
+sheets = sorted((p for p in glob.glob(os.path.join(MP, "mock-papers-result", "**", "%s-*-Result-Sheet.html" % EXAM), recursive=True)
                  if re.search(r"-(?:Set\d+|Final-(?:Set-)?[A-H])-Result", p)),    # not the real exam's sheet
                 key=sheet_order)
 MISS = {}                                   # code -> (blank, sheet)
